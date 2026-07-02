@@ -1,0 +1,15 @@
+# Fichiers de donnees utilisateur a ne jamais publier.
+*.csv
+*.tsv
+*.xlsx
+*.xls
+
+# Fichiers systeme locaux.
+.DS_Store
+
+# Dossiers de travail locaux.
+outputs/
+work/
+
+# Exceptions : mappings internes de l'application.
+!app/assets/*.csv

@@ -1,0 +1,45 @@
+table_id;coordinate;code;description
+C_02.00;y_axis_rc_code;10;Total RWA
+C_02.00;y_axis_rc_code;40;TOTAL RWA > Credit Risk
+C_02.00;y_axis_rc_code;50;TOTAL RWA > Credit Risk > SA
+C_02.00;y_axis_rc_code;51;TOTAL RWA > Credit Risk > SA > of which: Art. 124 add-on
+C_02.00;y_axis_rc_code;60;TOTAL RWA > Credit Risk > SA > Exposure classes (excl. securitisation)
+C_02.00;y_axis_rc_code;70;TOTAL RWA > Credit Risk > SA > Central governments & central banks
+C_02.00;y_axis_rc_code;80;TOTAL RWA > Credit Risk > SA > Regional governments & local authorities
+C_02.00;y_axis_rc_code;90;TOTAL RWA > Credit Risk > SA > Public sector entities
+C_02.00;y_axis_rc_code;100;TOTAL RWA > Credit Risk > SA > Multilateral development banks
+C_02.00;y_axis_rc_code;110;TOTAL RWA > Credit Risk > SA > International organisations
+C_02.00;y_axis_rc_code;120;TOTAL RWA > Credit Risk > SA > Institutions
+C_02.00;y_axis_rc_code;130;TOTAL RWA > Credit Risk > SA > Corporates
+C_02.00;y_axis_rc_code;140;TOTAL RWA > Credit Risk > SA > Retail
+C_02.00;y_axis_rc_code;150;TOTAL RWA > Credit Risk > SA > Mortgages on immovable property
+C_02.00;y_axis_rc_code;160;TOTAL RWA > Credit Risk > SA > Defaulted exposures
+C_02.00;y_axis_rc_code;170;TOTAL RWA > Credit Risk > SA > High-risk items
+C_02.00;y_axis_rc_code;180;TOTAL RWA > Credit Risk > SA > Covered bonds
+C_02.00;y_axis_rc_code;190;TOTAL RWA > Credit Risk > SA > Short-term rated institutions & corporates
+C_02.00;y_axis_rc_code;200;TOTAL RWA > Credit Risk > SA > CIUs
+C_02.00;y_axis_rc_code;210;TOTAL RWA > Credit Risk > SA > Equity
+C_02.00;y_axis_rc_code;211;TOTAL RWA > Credit Risk > SA > Other items
+C_02.00;y_axis_rc_code;212;TOTAL RWA > Credit Risk > SA > Other items > of which: Software assets
+C_02.00;y_axis_rc_code;240;TOTAL RWA > Credit Risk > IRB
+C_02.00;y_axis_rc_code;241;TOTAL RWA > Credit Risk > IRB > of which: Art. 164 add-on
+C_02.00;y_axis_rc_code;242;TOTAL RWA > Credit Risk > IRB > of which: Art. 124 add-on
+C_02.00;y_axis_rc_code;250;TOTAL RWA > Credit Risk > IRB > F-IRB
+C_02.00;y_axis_rc_code;260;TOTAL RWA > Credit Risk > IRB > F-IRB > Central governments & central banks
+C_02.00;y_axis_rc_code;270;TOTAL RWA > Credit Risk > IRB > F-IRB > Institutions
+C_02.00;y_axis_rc_code;280;TOTAL RWA > Credit Risk > IRB > F-IRB > Corporates Ð SME
+C_02.00;y_axis_rc_code;290;TOTAL RWA > Credit Risk > IRB > F-IRB > Specialised lending
+C_02.00;y_axis_rc_code;300;TOTAL RWA > Credit Risk > IRB > F-IRB > Corporates Ð Other
+C_02.00;y_axis_rc_code;310;TOTAL RWA > Credit Risk > IRB > A-IRB
+C_02.00;y_axis_rc_code;320;TOTAL RWA > Credit Risk > IRB > A-IRB > Central governments & central banks
+C_02.00;y_axis_rc_code;330;TOTAL RWA > Credit Risk > IRB > A-IRB > Institutions
+C_02.00;y_axis_rc_code;340;TOTAL RWA > Credit Risk > IRB > A-IRB > Corporates Ð SME
+C_02.00;y_axis_rc_code;350;TOTAL RWA > Credit Risk > IRB > A-IRB > Specialised lending
+C_02.00;y_axis_rc_code;360;TOTAL RWA > Credit Risk > IRB > A-IRB > Corporates Ð Other
+C_02.00;y_axis_rc_code;370;TOTAL RWA > Credit Risk > IRB > A-IRB > Retail > Real estate SME
+C_02.00;y_axis_rc_code;380;TOTAL RWA > Credit Risk > IRB > A-IRB > Retail > Real estate non-SME
+C_02.00;y_axis_rc_code;390;TOTAL RWA > Credit Risk > IRB > A-IRB > Retail > Qualifying revolving
+C_02.00;y_axis_rc_code;400;TOTAL RWA > Credit Risk > IRB > A-IRB > Retail > Other SME
+C_02.00;y_axis_rc_code;410;TOTAL RWA > Credit Risk > IRB > A-IRB > Retail > Other non-SME
+C_02.00;y_axis_rc_code;450;TOTAL RWA > Credit Risk > IRB > Other non-credit obligation assets
+C_02.00;y_axis_rc_code;455;TOTAL RWA > Credit Risk > IRB > Other non-credit obligation assets > of which: Software assets
