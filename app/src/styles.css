@@ -498,8 +498,12 @@ table {
 }
 
 .axis-tab-ratio {
+  align-items: start;
   border-top: 1px solid rgba(23, 72, 63, 0.14);
   color: #4c665c;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
   font-size: 0.68rem;
   line-height: 1.18;
   padding-top: 4px;
@@ -508,6 +512,31 @@ table {
 .axis-tab.is-active .axis-tab-ratio {
   border-top-color: rgba(255, 255, 255, 0.22);
   color: #cfe0d8;
+}
+
+.axis-ratio-clear {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.axis-ratio-clear:hover,
+.axis-ratio-clear:focus-visible {
+  background: rgba(23, 72, 63, 0.1);
+  outline: 0;
+}
+
+.axis-tab.is-active .axis-ratio-clear:hover,
+.axis-tab.is-active .axis-ratio-clear:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .table-search-input {
@@ -556,6 +585,55 @@ table {
 .context-menu button:focus-visible {
   background: #eef4f1;
   outline: 0;
+}
+
+.context-submenu {
+  position: relative;
+}
+
+.context-submenu-trigger::after {
+  content: "...";
+  float: right;
+  margin-left: 8px;
+  color: #7b8981;
+}
+
+.context-submenu-panel {
+  position: absolute;
+  top: -4px;
+  left: calc(100% + 5px);
+  z-index: 1001;
+  display: none;
+  width: 360px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid #d8dfda;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(23, 33, 28, 0.16);
+}
+
+.context-submenu-heading {
+  color: #738078;
+  font-size: 0.66rem;
+  line-height: 1.1;
+  padding: 7px 10px 3px;
+  text-transform: none;
+}
+
+.context-submenu:hover .context-submenu-panel,
+.context-submenu:focus-within .context-submenu-panel {
+  display: grid;
+}
+
+.context-submenu-panel button {
+  min-height: 32px;
+  white-space: normal;
+}
+
+.context-menu-tree-item {
+  padding-left: calc(10px + (var(--context-menu-indent, 0) * 14px)) !important;
 }
 
 .benchmark-overlay {
@@ -878,6 +956,29 @@ table {
 
 .tree-label {
   min-width: 0;
+}
+
+.denominator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  border: 1px solid #17483f;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #17483f;
+  font-size: 0.66rem;
+  line-height: 1;
+  padding: 2px 4px 2px 7px;
+}
+
+.denominator-clear {
+  color: #17483f;
+}
+
+.denominator-clear:hover,
+.denominator-clear:focus-visible {
+  background: rgba(23, 72, 63, 0.1);
 }
 
 .metric-table tbody tr.is-ancestor .tree-label {

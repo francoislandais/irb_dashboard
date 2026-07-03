@@ -1,5 +1,5 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-ratio-caption-axis";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-denominator-badge";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -9,6 +9,15 @@ const module2TemplateAxisState = {
   scroll: { left: 0, top: 0 },
   search: ""
 };
+const COMMON_MODULE_2_DENOMINATORS = [
+  {
+    label: "Total risk exposure amount",
+    tableId: "C_02.00",
+    selectedXCode: "0010",
+    selectedYCode: "0010",
+    selectedZCode: ""
+  }
+];
 const MODULE_2_STICKY_PARENT_ROW_HEIGHT = 28;
 let module2StickyFrame = 0;
 let module2ContextMenu = null;
@@ -573,7 +582,7 @@ function renderModule2Table(series, selectedUnit) {
     valueRow.dataset.isVirtual = String(Boolean(seriesRow.isVirtual));
     valueRow.dataset.parentPath = seriesRow.parentPath;
     valueRow.dataset.indentLevel = String(seriesRow.indentLevel ?? 0);
-    valueRow.classList.toggle("is-contribution-base", normalizedPath === contributionBase?.path);
+    valueRow.classList.toggle("is-contribution-base", Boolean(contributionBase?.row) && normalizedPath === contributionBase.path);
     valueRow.classList.toggle("is-contribution-child", isContributionChild);
     if (!seriesRow.isVirtual) {
       valueRow.setAttribute("role", "button");
@@ -585,7 +594,10 @@ function renderModule2Table(series, selectedUnit) {
     description.className = "description-column";
     description.style.setProperty("--indent-level", seriesRow.indentLevel ?? 0);
     description.title = seriesRow.description;
-    description.append(createDescriptionContent(seriesRow, normalizedPath, isParent));
+    description.append(createDescriptionContent(seriesRow, normalizedPath, isParent, {
+      isDenominatorBase: Boolean(contributionBase?.row) && normalizedPath === contributionBase.path,
+      ratioAxis: activeAxis
+    }));
     valueRow.append(description);
 
     const reversedValues = [...seriesRow.values].reverse();
@@ -619,7 +631,7 @@ function getModule2ContributionBase(rows, activeAxis) {
 
   const path = normalizeHierarchyPath(base.path);
   const row = rows.find((item) => normalizeHierarchyPath(item.hierarchyPath) === path);
-  if (!row) {
+  if (!row && base.type !== "common") {
     getActiveModule2Context().contributionBaseByAxis[activeAxis] = null;
     return null;
   }
@@ -629,6 +641,7 @@ function getModule2ContributionBase(rows, activeAxis) {
 
 function isModule2ContributionChild(path, contributionBase) {
   if (!contributionBase?.path) return false;
+  if (contributionBase.type === "common") return true;
   return path.startsWith(`${contributionBase.path} > `);
 }
 
@@ -639,7 +652,7 @@ function getModule2ContributionRatio(value, baseValue) {
 
 function getModule2ContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution) {
   if (contributionBase && isModule2ContributionChild(normalizedPath, contributionBase)) {
-    return contributionBase.row.values;
+    return contributionBase.row?.values ?? getModule2DenominatorValues(contributionBase, activeAxis, seriesRow.code);
   }
 
   if (!propagatedContribution || seriesRow.isVirtual) return null;
@@ -651,10 +664,33 @@ function getModule2ContributionBaseValues(seriesRow, normalizedPath, activeAxis,
   const dates = getBenchmarkReferenceColumns(state?.columns ?? []);
   if (!state || !indexes || dates.length === 0) return null;
 
-  const selections = getModule2SelectionsForAxisCode(getActiveModule2Context(), activeAxis, seriesRow.code);
-  selections[`selected${propagatedContribution.axis.toUpperCase()}Code`] = propagatedContribution.baseCode;
+  const denominatorTableId = propagatedContribution.tableId || tableId;
+  const selections = propagatedContribution.selections
+    ? { ...propagatedContribution.selections }
+    : getModule2SelectionsForAxisCode(getActiveModule2Context(), activeAxis, seriesRow.code);
+  if (!propagatedContribution.selections) {
+    selections[`selected${propagatedContribution.axis.toUpperCase()}Code`] = propagatedContribution.baseCode;
+  }
 
-  const rows = getBenchmarkRows(state, indexes, tableId, selections, state.selectedJst);
+  const rows = getBenchmarkRows(state, indexes, denominatorTableId, selections, state.selectedJst);
+  return dates.map((dateColumn) => ({
+    date: dateColumn.date,
+    label: dateColumn.label,
+    value: rows.length === 0
+      ? null
+      : rows.reduce((total, row) => total + parseBenchmarkNumber(row[dateColumn.index]), 0)
+  }));
+}
+
+function getModule2DenominatorValues(base, activeAxis, axisCode) {
+  const state = latestState;
+  const indexes = getBenchmarkSourceIndexes(state?.columns ?? []);
+  const dates = getBenchmarkReferenceColumns(state?.columns ?? []);
+  if (!state || !indexes || dates.length === 0 || !base?.selections) return [];
+
+  const tableId = base.tableId || getActiveModule2Template()?.tableId || MODULE_2_TARGET.tableId;
+  const rows = getBenchmarkRows(state, indexes, tableId, base.selections, state.selectedJst);
+
   return dates.map((dateColumn) => ({
     date: dateColumn.date,
     label: dateColumn.label,
@@ -669,7 +705,7 @@ function getModule2PropagatedContribution(activeAxis) {
 
   for (const axis of ["y", "x", "z"]) {
     const base = context.contributionBaseByAxis[axis];
-    if (!base?.path || !base.pointCode) continue;
+    if (!base?.path || (!base.pointCode && !base.selections)) continue;
 
     const selectedCode = axis === activeAxis
       ? getSelectedModule2CodeForActiveAxis()
@@ -677,13 +713,16 @@ function getModule2PropagatedContribution(activeAxis) {
     const selectedPath = getModule2AxisCodePath(axis, selectedCode);
     const basePath = normalizeHierarchyPath(base.path);
 
-    if (!selectedPath.startsWith(`${basePath} > `)) continue;
+    if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) continue;
 
     return {
       axis,
       baseCode: base.pointCode,
       basePath,
-      label: String(base.label ?? "").replaceAll(">", "/")
+      label: String(base.label ?? "").replaceAll(">", "/"),
+      selections: base.selections,
+      tableId: base.tableId,
+      type: base.type
     };
   }
 
@@ -739,48 +778,111 @@ function createModule2ContextMenu(row) {
   menu.className = "context-menu";
   menu.setAttribute("role", "menu");
 
+  const ratioBaseOptions = getModule2RatioBaseOptions(row);
+  const commonDenominators = getCommonModule2DenominatorOptions(row);
+  if (row.dataset.pointCode && (ratioBaseOptions.length > 0 || commonDenominators.length > 0)) {
+    menu.append(createContextSubmenu("Display as ratio of", [
+      {
+        items: ratioBaseOptions.map((option) => ({
+          indentLevel: option.indentLevel,
+          label: option.label,
+          title: option.fullLabel,
+          action: () => setModule2ContributionBase(option.row)
+        })),
+        title: "In this template"
+      },
+      {
+        items: commonDenominators.map((option) => ({
+          label: option.label,
+          action: () => setModule2ContributionBaseFromDenominator(option)
+        })),
+        title: "Commonly used denominators"
+      }
+    ]));
+  }
+
   if (row.dataset.pointCode) {
-    menu.append(createContextMenuButton("Sélectionner", () => {
-      selectModule2Row(row.dataset.pointCode, { shouldFocus: true });
-    }));
     menu.append(createContextMenuButton("Benchmark", () => {
       showModule2BenchmarkDialog();
     }));
   }
 
-  const activeContributionBase = getActiveModule2ContributionSetting();
-  const isCurrentContributionBase = activeContributionBase?.path === row.dataset.normalizedPath;
-  if (row.dataset.pointCode && row.dataset.isParent === "true" && !isCurrentContributionBase) {
-    menu.append(createContextMenuButton("Show contribution to selected total", () => {
-      setModule2ContributionBase(row);
-    }));
-  }
-  if (activeContributionBase) {
-    menu.append(createContextMenuButton("Show absolute values", () => {
-      clearModule2ContributionBase();
-    }));
-  }
-
-  if (row.dataset.isParent === "true") {
-    const expandedPaths = getActiveModule2ExpandedPaths();
-    const isExpanded = expandedPaths.has(row.dataset.normalizedPath);
-    menu.append(createContextMenuButton(isExpanded ? "Replier" : "Déplier", () => {
-      toggleModule2Path(row.dataset.normalizedPath);
-    }));
-  }
-
-  menu.append(createContextMenuButton("Copier le libellé", () => {
-    copyModule2Label(row.dataset.hierarchyPath);
-  }));
-
   return menu;
 }
 
-function createContextMenuButton(label, action) {
+function getCommonModule2DenominatorOptions(row) {
+  if (!row.dataset.pointCode) return [];
+
+  return COMMON_MODULE_2_DENOMINATORS.map((denominator) => ({
+    ...denominator,
+    scopePath: row.dataset.normalizedPath
+  }));
+}
+
+function getModule2RatioBaseOptions(row) {
+  const parts = splitHierarchyPath(row.dataset.hierarchyPath);
+  const options = [];
+
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    const path = parts.slice(0, index + 1).join(" > ");
+    const normalizedPath = normalizeHierarchyPath(path);
+    const parentRow = elements.module2Table.querySelector(`tbody tr[data-normalized-path="${CSS.escape(normalizedPath)}"][data-point-code]`);
+    if (!parentRow) continue;
+
+    options.push({
+      fullLabel: path.replaceAll(">", "/"),
+      indentLevel: index,
+      label: parts[index],
+      row: parentRow
+    });
+  }
+
+  return options;
+}
+
+function createContextSubmenu(label, groups) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "context-submenu";
+  wrapper.setAttribute("role", "none");
+
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "context-submenu-trigger";
+  trigger.setAttribute("aria-haspopup", "menu");
+  trigger.textContent = label;
+
+  const submenu = document.createElement("div");
+  submenu.className = "context-submenu-panel";
+  submenu.setAttribute("role", "menu");
+
+  groups.filter((group) => group.items.length > 0).forEach((group) => {
+    const heading = document.createElement("span");
+    heading.className = "context-submenu-heading";
+    heading.textContent = group.title;
+    submenu.append(heading);
+
+    group.items.forEach((item) => {
+      submenu.append(createContextMenuButton(item.label, item.action, {
+        indentLevel: item.indentLevel,
+        title: item.title
+      }));
+    });
+  });
+
+  wrapper.append(trigger, submenu);
+  return wrapper;
+}
+
+function createContextMenuButton(label, action, options = {}) {
   const button = document.createElement("button");
   button.type = "button";
   button.setAttribute("role", "menuitem");
   button.textContent = label;
+  if (options.title) button.title = options.title;
+  if (Number.isFinite(options.indentLevel)) {
+    button.classList.add("context-menu-tree-item");
+    button.style.setProperty("--context-menu-indent", options.indentLevel);
+  }
   button.addEventListener("click", (event) => {
     event.stopPropagation();
     hideModule2ContextMenu();
@@ -805,16 +907,37 @@ function setModule2ContributionBase(row) {
   context.contributionBaseByAxis[context.activeAxis] = {
     label: row.dataset.hierarchyPath,
     path: row.dataset.normalizedPath,
-    pointCode: row.dataset.pointCode
+    pointCode: row.dataset.pointCode,
+    tableId: getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId,
+    type: "axis"
   };
 
   saveModule2ScrollPosition();
   if (latestState) renderAppState(latestState);
 }
 
-function clearModule2ContributionBase() {
+function setModule2ContributionBaseFromDenominator(denominator) {
   const context = getActiveModule2Context();
-  context.contributionBaseByAxis[context.activeAxis] = null;
+  context.contributionBaseByAxis[context.activeAxis] = {
+    label: denominator.label,
+    path: denominator.scopePath,
+    pointCode: "",
+    selections: {
+      selectedXCode: normalizeAxisCode(denominator.selectedXCode, "x"),
+      selectedYCode: normalizeAxisCode(denominator.selectedYCode, "y"),
+      selectedZCode: normalizeAxisCode(denominator.selectedZCode, "z")
+    },
+    tableId: denominator.tableId,
+    type: "common"
+  };
+
+  saveModule2ScrollPosition();
+  if (latestState) renderAppState(latestState);
+}
+
+function clearModule2ContributionBase(axis = getActiveModule2Context().activeAxis) {
+  const context = getActiveModule2Context();
+  context.contributionBaseByAxis[axis] = null;
 
   saveModule2ScrollPosition();
   if (latestState) renderAppState(latestState);
@@ -899,7 +1022,7 @@ function buildModule2Benchmark() {
   const series = (state.jstOptions ?? []).map((jstCode) => {
     const rows = getBenchmarkRows(state, indexes, tableId, selections, jstCode);
     const baseRows = contribution
-      ? getBenchmarkRows(state, indexes, tableId, contribution.selections, jstCode)
+      ? getBenchmarkRows(state, indexes, contribution.tableId || tableId, contribution.selections, jstCode)
       : [];
 
     return {
@@ -938,13 +1061,18 @@ function getModule2SelectionsForAxisCode(context, activeAxis, axisCode) {
 
 function getModule2BenchmarkContributionContext(context, activeAxis) {
   const contribution = getModule2PropagatedContribution(activeAxis);
-  if (!contribution?.baseCode) return null;
+  if (!contribution?.baseCode && !contribution?.selections) return null;
 
-  const selections = getCompleteModule2SelectionsForBenchmark(context, activeAxis);
-  selections[`selected${contribution.axis.toUpperCase()}Code`] = contribution.baseCode;
+  const selections = contribution.selections
+    ? { ...contribution.selections }
+    : getCompleteModule2SelectionsForBenchmark(context, activeAxis);
+  if (!contribution.selections) {
+    selections[`selected${contribution.axis.toUpperCase()}Code`] = contribution.baseCode;
+  }
   return {
     label: contribution.label,
-    selections
+    selections,
+    tableId: contribution.tableId
   };
 }
 
@@ -1290,11 +1418,11 @@ function renderModule2AxisTabs() {
     if (!element) return;
 
     element.title = [captions[axis], ratioCaptions[axis]].filter(Boolean).join("\n");
-    element.replaceChildren(createAxisCaptionLine(captions[axis], ratioCaptions[axis]));
+    element.replaceChildren(createAxisCaptionLine(captions[axis], ratioCaptions[axis], axis));
   });
 }
 
-function createAxisCaptionLine(caption, ratioCaption = "") {
+function createAxisCaptionLine(caption, ratioCaption = "", axis = "") {
   const parts = splitAxisCaption(caption);
   const wrapper = document.createElement("span");
   wrapper.className = "axis-tab-lines";
@@ -1312,11 +1440,27 @@ function createAxisCaptionLine(caption, ratioCaption = "") {
   if (ratioCaption) {
     const ratioLine = document.createElement("span");
     ratioLine.className = "axis-tab-line axis-tab-ratio";
-    ratioLine.textContent = ratioCaption;
+    const ratioText = document.createElement("span");
+    ratioText.textContent = ratioCaption;
+    ratioLine.append(ratioText, createAxisRatioClearButton(axis));
     wrapper.append(ratioLine);
   }
 
   return wrapper;
+}
+
+function createAxisRatioClearButton(axis) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "axis-ratio-clear";
+  button.setAttribute("aria-label", "Remove ratio");
+  button.textContent = "x";
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    clearModule2ContributionBase(axis);
+  });
+  return button;
 }
 
 function splitAxisCaption(caption) {
@@ -1363,19 +1507,22 @@ function getModule2AxisRatioCaptions() {
 function getModule2OwnAxisContribution(axis) {
   const context = getActiveModule2Context();
   const base = context.contributionBaseByAxis[axis];
-  if (!base?.path || !base.pointCode) return null;
+  if (!base?.path || (!base.pointCode && !base.selections)) return null;
 
   const selectedCode = getSelectedModule2CodeForAxis(context, axis);
   const selectedPath = getModule2AxisCodePath(axis, selectedCode);
   const basePath = normalizeHierarchyPath(base.path);
 
-  if (!selectedPath.startsWith(`${basePath} > `)) return null;
+  if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) return null;
 
   return {
     axis,
     baseCode: base.pointCode,
     basePath,
-    label: String(base.label ?? "").replaceAll(">", "/")
+    label: String(base.label ?? "").replaceAll(">", "/"),
+    selections: base.selections,
+    tableId: base.tableId,
+    type: base.type
   };
 }
 
@@ -1452,7 +1599,7 @@ function expandDefaultModule2Paths(rows, parentPaths) {
   context.defaultExpandedPathsInitialized = true;
 }
 
-function createDescriptionContent(seriesRow, normalizedPath, isParent) {
+function createDescriptionContent(seriesRow, normalizedPath, isParent, options = {}) {
   const fragment = document.createDocumentFragment();
   const content = document.createElement("span");
   content.className = "tree-cell-content";
@@ -1482,9 +1629,35 @@ function createDescriptionContent(seriesRow, normalizedPath, isParent) {
   label.textContent = seriesRow.displayDescription || seriesRow.description;
   content.append(label);
 
+  if (options.isDenominatorBase) {
+    content.append(createDenominatorBadge(options.ratioAxis));
+  }
+
   fragment.append(content);
 
   return fragment;
+}
+
+function createDenominatorBadge(axis) {
+  const badge = document.createElement("span");
+  badge.className = "denominator-badge";
+
+  const label = document.createElement("span");
+  label.textContent = "denominator";
+
+  const clearButton = document.createElement("button");
+  clearButton.type = "button";
+  clearButton.className = "axis-ratio-clear denominator-clear";
+  clearButton.setAttribute("aria-label", "Remove denominator");
+  clearButton.textContent = "x";
+  clearButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    clearModule2ContributionBase(axis);
+  });
+
+  badge.append(label, clearButton);
+  return badge;
 }
 
 function createTreeConnectors(parts, normalizedPath, isParent) {

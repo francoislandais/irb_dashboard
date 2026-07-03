@@ -2,7 +2,7 @@ import { parseCsv } from "./data/csvParser.js";
 import { buildDataIndexes } from "./data/dataIndex.js";
 import { loadDimensionMapping } from "./data/dimensionMapping.js";
 import { loadModule2Points } from "./data/module2Config.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260703-ratio-caption-axis";
+import { getUniqueValues } from "./data/timeSeries.js?v=20260703-denominator-badge";
 import {
   clearStoredFileHandle,
   getStoredFileHandle,
@@ -13,7 +13,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js";
 import { createDataStore } from "./data/dataStore.js";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260703-ratio-caption-axis";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260703-denominator-badge";
 
 const store = createDataStore();
 
