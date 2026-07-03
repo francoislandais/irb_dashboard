@@ -427,11 +427,11 @@ table {
 
 .axis-tab {
   display: grid;
-  flex: 0 0 220px;
+  flex: 0 0 300px;
   grid-template-rows: 22px 1fr;
-  width: 220px;
-  max-width: 22	0px;
-  height: 88px;
+  width: 300px;
+  max-width: 300px;
+  height: 120px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -484,11 +484,30 @@ table {
   color: #ffffff;
 }
 
+.axis-tab-lines,
 .axis-tab-line {
   display: block;
   min-width: 0;
   overflow-wrap: anywhere;
   white-space: normal;
+}
+
+.axis-tab-lines {
+  display: grid;
+  gap: 4px;
+}
+
+.axis-tab-ratio {
+  border-top: 1px solid rgba(23, 72, 63, 0.14);
+  color: #4c665c;
+  font-size: 0.68rem;
+  line-height: 1.18;
+  padding-top: 4px;
+}
+
+.axis-tab.is-active .axis-tab-ratio {
+  border-top-color: rgba(255, 255, 255, 0.22);
+  color: #cfe0d8;
 }
 
 .table-search-input {

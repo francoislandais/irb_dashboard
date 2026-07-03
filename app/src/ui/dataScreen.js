@@ -1,5 +1,5 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-contribution-benchmark";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-ratio-caption-axis";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -534,6 +534,7 @@ function renderModule2Table(series, selectedUnit) {
   const tableRows = series.rows.map(normalizeModule2SeriesRow);
   const displayRows = buildModule2DisplayRows(tableRows);
   const contributionBase = getModule2ContributionBase(displayRows, activeAxis);
+  const propagatedContribution = getModule2PropagatedContribution(activeAxis);
   const parentPaths = getParentPaths(tableRows);
   const nodePaths = getExplicitPaths(displayRows);
   const thead = document.createElement("thead");
@@ -560,7 +561,8 @@ function renderModule2Table(series, selectedUnit) {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
-    const isContributionChild = isModule2ContributionChild(normalizedPath, contributionBase);
+    const contributionValues = getModule2ContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution);
+    const isContributionChild = Boolean(contributionValues);
 
     if (!seriesRow.isVirtual) valueRow.dataset.pointCode = seriesRow.code;
     valueRow.dataset.axis = activeAxis;
@@ -587,7 +589,7 @@ function renderModule2Table(series, selectedUnit) {
     valueRow.append(description);
 
     const reversedValues = [...seriesRow.values].reverse();
-    const reversedBaseValues = contributionBase ? [...contributionBase.row.values].reverse() : [];
+    const reversedBaseValues = contributionValues ? [...contributionValues].reverse() : [];
 
     reversedValues.forEach((point, index) => {
       const td = document.createElement("td");
@@ -633,6 +635,83 @@ function isModule2ContributionChild(path, contributionBase) {
 function getModule2ContributionRatio(value, baseValue) {
   if (value === null || baseValue === null || baseValue === 0) return null;
   return value / baseValue;
+}
+
+function getModule2ContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution) {
+  if (contributionBase && isModule2ContributionChild(normalizedPath, contributionBase)) {
+    return contributionBase.row.values;
+  }
+
+  if (!propagatedContribution || seriesRow.isVirtual) return null;
+  if (propagatedContribution.axis === activeAxis) return null;
+
+  const state = latestState;
+  const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
+  const indexes = getBenchmarkSourceIndexes(state?.columns ?? []);
+  const dates = getBenchmarkReferenceColumns(state?.columns ?? []);
+  if (!state || !indexes || dates.length === 0) return null;
+
+  const selections = getModule2SelectionsForAxisCode(getActiveModule2Context(), activeAxis, seriesRow.code);
+  selections[`selected${propagatedContribution.axis.toUpperCase()}Code`] = propagatedContribution.baseCode;
+
+  const rows = getBenchmarkRows(state, indexes, tableId, selections, state.selectedJst);
+  return dates.map((dateColumn) => ({
+    date: dateColumn.date,
+    label: dateColumn.label,
+    value: rows.length === 0
+      ? null
+      : rows.reduce((total, row) => total + parseBenchmarkNumber(row[dateColumn.index]), 0)
+  }));
+}
+
+function getModule2PropagatedContribution(activeAxis) {
+  const context = getActiveModule2Context();
+
+  for (const axis of ["y", "x", "z"]) {
+    const base = context.contributionBaseByAxis[axis];
+    if (!base?.path || !base.pointCode) continue;
+
+    const selectedCode = axis === activeAxis
+      ? getSelectedModule2CodeForActiveAxis()
+      : getSelectedModule2CodeForAxis(context, axis);
+    const selectedPath = getModule2AxisCodePath(axis, selectedCode);
+    const basePath = normalizeHierarchyPath(base.path);
+
+    if (!selectedPath.startsWith(`${basePath} > `)) continue;
+
+    return {
+      axis,
+      baseCode: base.pointCode,
+      basePath,
+      label: String(base.label ?? "").replaceAll(">", "/")
+    };
+  }
+
+  return null;
+}
+
+function getSelectedModule2CodeForAxis(context, axis) {
+  if (axis === "x") return context.selectedXCode;
+  if (axis === "z") return context.selectedZCode;
+  return context.selectedYCode;
+}
+
+function getModule2AxisCodePath(axis, code) {
+  const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
+  if (!code) return "";
+
+  if (axis === "x") {
+    const description = latestState?.dimensionMapping?.find(tableId, "x_axis_rc_code", code)?.description;
+    return normalizeHierarchyPath(splitHierarchyPath(String(description ?? "").replaceAll("/", ">")).join(" > "));
+  }
+
+  const point = latestState?.module2Points?.find((item) => (
+    item.tableId === tableId
+    && item.coordinate === `${axis}_axis_rc_code`
+    && item.code === code
+  ));
+
+  return normalizeHierarchyPath(point?.hierarchyPath || point?.description || "");
 }
 
 function showModule2ContextMenu(row, event) {
@@ -858,23 +937,14 @@ function getModule2SelectionsForAxisCode(context, activeAxis, axisCode) {
 }
 
 function getModule2BenchmarkContributionContext(context, activeAxis) {
-  const base = context.contributionBaseByAxis[activeAxis];
-  if (!base?.path) return null;
+  const contribution = getModule2PropagatedContribution(activeAxis);
+  if (!contribution?.baseCode) return null;
 
-  const selectedCode = getSelectedModule2CodeForActiveAxis();
-  const selectedRow = elements.module2Table.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
-  const selectedPath = selectedRow?.dataset.normalizedPath || "";
-  const basePath = normalizeHierarchyPath(base.path);
-
-  if (!selectedPath.startsWith(`${basePath} > `)) return null;
-
-  const baseCode = base.pointCode
-    || elements.module2Table.querySelector(`tbody tr[data-normalized-path="${CSS.escape(basePath)}"]`)?.dataset.pointCode;
-  if (!baseCode) return null;
-
+  const selections = getCompleteModule2SelectionsForBenchmark(context, activeAxis);
+  selections[`selected${contribution.axis.toUpperCase()}Code`] = contribution.baseCode;
   return {
-    label: String(base.label ?? "").replaceAll(">", "/"),
-    selections: getModule2SelectionsForAxisCode(context, activeAxis, baseCode)
+    label: contribution.label,
+    selections
   };
 }
 
@@ -1202,6 +1272,7 @@ function updateModule2Search(event) {
 
 function renderModule2AxisTabs() {
   const captions = getModule2AxisCaptions();
+  const ratioCaptions = getModule2AxisRatioCaptions();
   const activeAxis = getActiveModule2Axis();
   const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
   const axisOptions = getModule2AxisOptions(latestState ?? { columns: [], rows: [], module2Points: [] }, tableId);
@@ -1218,23 +1289,34 @@ function renderModule2AxisTabs() {
   Object.entries(elements.module2AxisCaptions).forEach(([axis, element]) => {
     if (!element) return;
 
-    element.title = captions[axis] || "";
-    element.replaceChildren(createAxisCaptionLine(captions[axis]));
+    element.title = [captions[axis], ratioCaptions[axis]].filter(Boolean).join("\n");
+    element.replaceChildren(createAxisCaptionLine(captions[axis], ratioCaptions[axis]));
   });
 }
 
-function createAxisCaptionLine(caption) {
+function createAxisCaptionLine(caption, ratioCaption = "") {
   const parts = splitAxisCaption(caption);
+  const wrapper = document.createElement("span");
+  wrapper.className = "axis-tab-lines";
   const line = document.createElement("span");
-  line.className = "axis-tab-line";
+  line.className = "axis-tab-line axis-tab-main";
 
   if (parts.length === 0) {
     line.textContent = "-";
-    return line;
+  } else {
+    line.textContent = parts.join(" - ");
   }
 
-  line.textContent = parts.join(" - ");
-  return line;
+  wrapper.append(line);
+
+  if (ratioCaption) {
+    const ratioLine = document.createElement("span");
+    ratioLine.className = "axis-tab-line axis-tab-ratio";
+    ratioLine.textContent = ratioCaption;
+    wrapper.append(ratioLine);
+  }
+
+  return wrapper;
 }
 
 function splitAxisCaption(caption) {
@@ -1266,6 +1348,34 @@ function getModule2AxisCaptions() {
     x: xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : ""),
     y: yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : ""),
     z: zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : "")
+  };
+}
+
+function getModule2AxisRatioCaptions() {
+  return Object.fromEntries(["template", "x", "y", "z"].map((axis) => {
+    const contribution = ["x", "y", "z"].includes(axis)
+      ? getModule2OwnAxisContribution(axis)
+      : null;
+    return [axis, contribution ? `as % of ${contribution.label}` : ""];
+  }));
+}
+
+function getModule2OwnAxisContribution(axis) {
+  const context = getActiveModule2Context();
+  const base = context.contributionBaseByAxis[axis];
+  if (!base?.path || !base.pointCode) return null;
+
+  const selectedCode = getSelectedModule2CodeForAxis(context, axis);
+  const selectedPath = getModule2AxisCodePath(axis, selectedCode);
+  const basePath = normalizeHierarchyPath(base.path);
+
+  if (!selectedPath.startsWith(`${basePath} > `)) return null;
+
+  return {
+    axis,
+    baseCode: base.pointCode,
+    basePath,
+    label: String(base.label ?? "").replaceAll(">", "/")
   };
 }
 
