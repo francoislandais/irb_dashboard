@@ -1,5 +1,5 @@
 import { getIndexedAxisCodes, getIndexedRowsByTableJst } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-data-index-2";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-data-index-3";
 import { MODULE_2_TEMPLATES, normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -263,13 +263,9 @@ function getPreferredModule2AxisCodes(configuredCodes, availableCodes) {
   if (availableCodes.length === 0) return configuredCodes;
 
   const availableCodeSet = new Set(availableCodes);
-  const configuredCodeSet = new Set(configuredCodes);
   const matchingCodes = configuredCodes.filter((code) => availableCodeSet.has(code));
-  const extraAvailableCodes = availableCodes.filter((code) => !configuredCodeSet.has(code));
 
-  return matchingCodes.length > 0
-    ? [...matchingCodes, ...extraAvailableCodes]
-    : availableCodes;
+  return matchingCodes.length > 0 ? matchingCodes : availableCodes;
 }
 
 function getVisibleModule2Axes(axisOptions) {

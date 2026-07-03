@@ -98,9 +98,7 @@ function getAxisPoints(points, tableId, axis) {
 }
 
 function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, selections, inheritedFormat) {
-  const effectivePoints = getEffectiveAxisPoints(state, indexes, tableId, axis, pointsConfig);
-
-  return effectivePoints.map((point) => {
+  return pointsConfig.map((point) => {
     const matchedRows = getRowsForAxisPoint(state, indexes, tableId, axis, point.code, selections);
     return {
       code: point.code,
@@ -114,39 +112,6 @@ function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axi
       values: buildValues(dateColumns, matchedRows)
     };
   });
-}
-
-function getEffectiveAxisPoints(state, indexes, tableId, axis, pointsConfig) {
-  const configuredCodes = new Set(pointsConfig.map((point) => point.code));
-  const availableCodes = getAvailableAxisCodesFromRows(state, indexes, tableId, axis);
-  const missingPoints = availableCodes
-    .filter((code) => !configuredCodes.has(code))
-    .map((code) => createFallbackAxisPoint(state, tableId, axis, code));
-
-  return [...pointsConfig, ...missingPoints];
-}
-
-function getAvailableAxisCodesFromRows(state, indexes, tableId, axis) {
-  return [...new Set(getRowsForTableJst(state, indexes, tableId)
-    .map((row) => normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis))
-    .filter(Boolean))]
-    .sort((left, right) => left.localeCompare(right, "fr"));
-}
-
-function createFallbackAxisPoint(state, tableId, axis, code) {
-  const coordinate = `${axis}_axis_rc_code`;
-  const description = state.dimensionMapping?.find(tableId, coordinate, code)?.description || `${axis.toUpperCase()} ${code}`;
-  const hierarchy = parseDescriptionHierarchy(description);
-
-  return {
-    code,
-    description,
-    displayDescription: hierarchy.label,
-    format: state.dimensionMapping?.find(tableId, coordinate, code)?.format || "",
-    hierarchyPath: hierarchy.path,
-    indentLevel: hierarchy.level,
-    parentPath: hierarchy.parentPath
-  };
 }
 
 function buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat) {
