@@ -1,3 +1,4 @@
+import { getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js";
 import { normalizeAxisCode } from "./module2Config.js";
 
 const REFERENCE_COLUMN_PATTERN = /^ref_(\d{4})_(\d{2})_(\d{2})$/;
@@ -97,29 +98,10 @@ function getAxisPoints(points, tableId, axis) {
 }
 
 function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, selections, inheritedFormat) {
-  const targetColumn = `${axis}AxisRcCode`;
-  const matchedRowsByCode = new Map();
+  const effectivePoints = getEffectiveAxisPoints(state, indexes, tableId, axis, pointsConfig);
 
-  state.rows.forEach((row) => {
-    if (
-      row[indexes.jstCode] !== state.selectedJst
-      || row[indexes.tableId] !== tableId
-      || !matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, axis)
-      || !matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, axis)
-      || !matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis)
-    ) {
-      return;
-    }
-
-    const code = normalizeAxisCode(row[indexes[targetColumn]], axis);
-    if (!code) return;
-
-    if (!matchedRowsByCode.has(code)) matchedRowsByCode.set(code, []);
-    matchedRowsByCode.get(code).push(row);
-  });
-
-  return pointsConfig.map((point) => {
-    const matchedRows = matchedRowsByCode.get(point.code) ?? [];
+  return effectivePoints.map((point) => {
+    const matchedRows = getRowsForAxisPoint(state, indexes, tableId, axis, point.code, selections);
     return {
       code: point.code,
       description: point.description,
@@ -134,18 +116,45 @@ function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axi
   });
 }
 
+function getEffectiveAxisPoints(state, indexes, tableId, axis, pointsConfig) {
+  const configuredCodes = new Set(pointsConfig.map((point) => point.code));
+  const availableCodes = getAvailableAxisCodesFromRows(state, indexes, tableId, axis);
+  const missingPoints = availableCodes
+    .filter((code) => !configuredCodes.has(code))
+    .map((code) => createFallbackAxisPoint(state, tableId, axis, code));
+
+  return [...pointsConfig, ...missingPoints];
+}
+
+function getAvailableAxisCodesFromRows(state, indexes, tableId, axis) {
+  return [...new Set(getRowsForTableJst(state, indexes, tableId)
+    .map((row) => normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis))
+    .filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, "fr"));
+}
+
+function createFallbackAxisPoint(state, tableId, axis, code) {
+  const coordinate = `${axis}_axis_rc_code`;
+  const description = state.dimensionMapping?.find(tableId, coordinate, code)?.description || `${axis.toUpperCase()} ${code}`;
+  const hierarchy = parseDescriptionHierarchy(description);
+
+  return {
+    code,
+    description,
+    displayDescription: hierarchy.label,
+    format: state.dimensionMapping?.find(tableId, coordinate, code)?.format || "",
+    hierarchyPath: hierarchy.path,
+    indentLevel: hierarchy.level,
+    parentPath: hierarchy.parentPath
+  };
+}
+
 function buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat) {
   const allRowsByXCode = new Map();
   const matchedRowsByXCode = new Map();
+  const tableRows = getRowsForTableJst(state, indexes, tableId);
 
-  state.rows.forEach((row) => {
-    if (
-      row[indexes.jstCode] !== state.selectedJst
-      || row[indexes.tableId] !== tableId
-    ) {
-      return;
-    }
-
+  tableRows.forEach((row) => {
     const xCode = normalizeAxisCode(row[indexes.xAxisRcCode], "x");
     if (!xCode) return;
 
@@ -187,13 +196,7 @@ function buildTemplateSeriesRows(state, indexes, dateColumns, templates, templat
   return templates.map((template) => {
     const tableId = template.tableId;
     const selections = normalizeTemplateSelections(templateSelections[tableId]);
-    const matchedRows = state.rows.filter((row) => (
-      row[indexes.jstCode] === state.selectedJst
-      && row[indexes.tableId] === tableId
-      && matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template")
-      && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template")
-      && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template")
-    ));
+    const matchedRows = getRowsForCompleteSelection(state, indexes, tableId, selections);
     const format = getSelectedFilterFormat(state, tableId, "template", selections);
 
     return {
@@ -216,6 +219,55 @@ function normalizeTemplateSelections(selections = {}) {
     selectedYCode: normalizeAxisCode(selections.selectedYCode || "", "y"),
     selectedZCode: normalizeAxisCode(selections.selectedZCode || "", "z")
   };
+}
+
+function getRowsForAxisPoint(state, indexes, tableId, axis, pointCode, selections) {
+  const pointSelections = {
+    selectedXCode: axis === "x" ? pointCode : selections.selectedXCode,
+    selectedYCode: axis === "y" ? pointCode : selections.selectedYCode,
+    selectedZCode: axis === "z" ? pointCode : selections.selectedZCode
+  };
+
+  if (canUseCompleteCoordinateIndex(pointSelections)) {
+    return getRowsForCompleteSelection(state, indexes, tableId, pointSelections);
+  }
+
+  return getRowsForTableJst(state, indexes, tableId).filter((row) => (
+    matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, axis)
+    && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, axis)
+    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis)
+    && normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === pointCode
+  ));
+}
+
+function getRowsForCompleteSelection(state, indexes, tableId, selections) {
+  if (canUseCompleteCoordinateIndex(selections)) {
+    return getIndexedRowsByCoordinates(state, tableId, selections);
+  }
+
+  return getRowsForTableJst(state, indexes, tableId).filter((row) => (
+    matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template")
+    && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template")
+    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template")
+  ));
+}
+
+function getRowsForTableJst(state, indexes, tableId) {
+  const indexedRows = getIndexedRowsByTableJst(state, tableId);
+  if (indexedRows.length > 0 || state.dataIndexes) return indexedRows;
+
+  return state.rows.filter((row) => (
+    row[indexes.jstCode] === state.selectedJst
+    && row[indexes.tableId] === tableId
+  ));
+}
+
+function canUseCompleteCoordinateIndex(selections) {
+  return Boolean(
+    selections.selectedXCode
+    && selections.selectedYCode
+    && selections.selectedZCode
+  );
 }
 
 function parseDescriptionHierarchy(description) {

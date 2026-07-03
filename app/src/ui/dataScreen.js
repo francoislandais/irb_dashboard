@@ -1,4 +1,5 @@
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-template-axis";
+import { getIndexedAxisCodes, getIndexedRowsByTableJst } from "../data/dataIndex.js";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-data-index-2";
 import { MODULE_2_TEMPLATES, normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -258,12 +259,17 @@ function getModule2AxisOptions(state, tableId) {
 }
 
 function getPreferredModule2AxisCodes(configuredCodes, availableCodes) {
+  if (configuredCodes.length === 0) return [];
   if (availableCodes.length === 0) return configuredCodes;
 
   const availableCodeSet = new Set(availableCodes);
+  const configuredCodeSet = new Set(configuredCodes);
   const matchingCodes = configuredCodes.filter((code) => availableCodeSet.has(code));
+  const extraAvailableCodes = availableCodes.filter((code) => !configuredCodeSet.has(code));
 
-  return matchingCodes.length > 0 ? matchingCodes : availableCodes;
+  return matchingCodes.length > 0
+    ? [...matchingCodes, ...extraAvailableCodes]
+    : availableCodes;
 }
 
 function getVisibleModule2Axes(axisOptions) {
@@ -281,25 +287,91 @@ function ensureModule2TemplateSelections(state, tableId) {
   const yCodes = axisOptions.y.codes;
   const zCodes = axisOptions.z.codes;
   const xCodes = axisOptions.x.codes;
+  let selectionChanged = false;
 
   if (!context.selectedYCode || !yCodes.includes(context.selectedYCode)) {
     context.selectedYCode = yCodes[0] ?? "";
+    selectionChanged = true;
   }
 
   if (!context.selectedXCode || !xCodes.includes(context.selectedXCode)) {
-    context.selectedXCode = xCodes[0] ?? MODULE_2_TARGET.xAxisRcCode;
+    context.selectedXCode = xCodes[0] ?? "";
+    selectionChanged = true;
   }
 
   if (zCodes.length > 0 && (!context.selectedZCode || !zCodes.includes(context.selectedZCode))) {
     context.selectedZCode = zCodes[0] ?? "";
+    selectionChanged = true;
   }
 
-  if (zCodes.length === 0) context.selectedZCode = "";
+  if (zCodes.length === 0 && context.selectedZCode) {
+    context.selectedZCode = "";
+    selectionChanged = true;
+  }
+
+  if (selectionChanged) {
+    ensureModule2SelectionUsesExistingRow(state, tableId, context, axisOptions);
+  }
 
   const visibleAxes = getVisibleModule2Axes(axisOptions);
   if (visibleAxes.length > 0 && !visibleAxes.includes(context.activeAxis)) {
     context.activeAxis = visibleAxes[0];
   }
+}
+
+function ensureModule2SelectionUsesExistingRow(state, tableId, context, axisOptions) {
+  const rows = getModule2RowsForTemplate(state, tableId);
+  if (rows.length === 0 || hasModule2SelectedCombination(rows, state.columns, context)) return;
+
+  const firstRow = rows[0];
+  const indexes = getModule2SourceIndexes(state.columns);
+  if (!indexes) return;
+
+  if (axisOptions.x.codes.length > 0) {
+    context.selectedXCode = normalizeAxisCode(firstRow[indexes.xAxisRcCode], "x");
+  }
+  if (axisOptions.y.codes.length > 0) {
+    context.selectedYCode = normalizeAxisCode(firstRow[indexes.yAxisRcCode], "y");
+  }
+  if (axisOptions.z.codes.length > 0) {
+    context.selectedZCode = normalizeAxisCode(firstRow[indexes.zAxisRcCode], "z");
+  }
+}
+
+function hasModule2SelectedCombination(rows, columns, context) {
+  const indexes = getModule2SourceIndexes(columns);
+  if (!indexes) return true;
+
+  return rows.some((row) => (
+    (!context.selectedXCode || normalizeAxisCode(row[indexes.xAxisRcCode], "x") === context.selectedXCode)
+    && (!context.selectedYCode || normalizeAxisCode(row[indexes.yAxisRcCode], "y") === context.selectedYCode)
+    && (!context.selectedZCode || normalizeAxisCode(row[indexes.zAxisRcCode], "z") === context.selectedZCode)
+  ));
+}
+
+function getModule2RowsForTemplate(state, tableId) {
+  const indexedRows = getIndexedRowsByTableJst(state, tableId);
+  if (indexedRows.length > 0 || state.dataIndexes) return indexedRows;
+
+  const indexes = getModule2SourceIndexes(state.columns);
+  if (!indexes || !state.selectedJst) return [];
+
+  return state.rows.filter((row) => (
+    row[indexes.jstCode] === state.selectedJst
+    && row[indexes.tableId] === tableId
+  ));
+}
+
+function getModule2SourceIndexes(columns) {
+  const indexes = {
+    jstCode: columns.indexOf("jst_code"),
+    tableId: columns.indexOf("table_id"),
+    xAxisRcCode: columns.indexOf("x_axis_rc_code"),
+    yAxisRcCode: columns.indexOf("y_axis_rc_code"),
+    zAxisRcCode: columns.indexOf("z_axis_rc_code")
+  };
+
+  return Object.values(indexes).every((index) => index !== -1) ? indexes : null;
 }
 
 function getConfiguredModule2AxisCodes(state, tableId, axis) {
@@ -313,6 +385,9 @@ function getConfiguredModule2AxisCodes(state, tableId, axis) {
 }
 
 function getAvailableModule2AxisCodes(state, tableId, axis) {
+  const indexedCodes = getIndexedAxisCodes(state, tableId, axis);
+  if (indexedCodes.length > 0 || state.dataIndexes) return indexedCodes;
+
   const columnName = `${axis}_axis_rc_code`;
   const indexes = {
     jstCode: state.columns.indexOf("jst_code"),

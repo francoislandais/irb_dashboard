@@ -3,6 +3,7 @@ const initialState = {
   capabilityNotice: "",
   columns: [],
   datasetLabel: "",
+  dataIndexes: null,
   dimensionMapping: null,
   dimensionMappingError: "",
   error: "",
@@ -37,7 +38,7 @@ export function createDataStore() {
       return () => listeners.delete(listener);
     },
 
-    setData({ file, fileHandle, columns, jstOptions, rows, loadedAt }) {
+    setData({ file, fileHandle, columns, dataIndexes, jstOptions, rows, loadedAt }) {
       const selectedJst = jstOptions.includes(state.selectedJst)
         ? state.selectedJst
         : jstOptions[0] ?? "";
@@ -45,6 +46,7 @@ export function createDataStore() {
       state = {
         ...state,
         columns,
+        dataIndexes,
         error: "",
         fileHandle,
         fileName: file.name,

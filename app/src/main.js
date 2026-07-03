@@ -1,7 +1,8 @@
 import { parseCsv } from "./data/csvParser.js";
+import { buildDataIndexes } from "./data/dataIndex.js";
 import { loadDimensionMapping } from "./data/dimensionMapping.js";
 import { loadModule2Points } from "./data/module2Config.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260703-template-axis";
+import { getUniqueValues } from "./data/timeSeries.js?v=20260703-data-index-2";
 import {
   clearStoredFileHandle,
   getStoredFileHandle,
@@ -12,7 +13,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js";
 import { createDataStore } from "./data/dataStore.js";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260703-template-axis";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260703-data-index-2";
 
 const store = createDataStore();
 
@@ -79,10 +80,12 @@ const actions = {
 async function loadFile(file, handle) {
   const text = await file.text();
   const parsed = parseCsv(text);
+  const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
   store.setData({
     file,
     fileHandle: handle,
     columns: parsed.columns,
+    dataIndexes,
     jstOptions: getUniqueValues(parsed.columns, parsed.rows, "jst_code"),
     rows: parsed.rows,
     loadedAt: new Date()
