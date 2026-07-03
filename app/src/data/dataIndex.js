@@ -8,13 +8,15 @@ export function buildDataIndexes(columns, rows) {
     return {
       axisCodes: new Map(),
       byCoordinates: new Map(),
-      byTableJst: new Map()
+      byTableJst: new Map(),
+      tableIdsByJst: new Map()
     };
   }
 
   const axisCodes = new Map();
   const byCoordinates = new Map();
   const byTableJst = new Map();
+  const tableIdsByJst = new Map();
 
   rows.forEach((row, rowIndex) => {
     const tableId = row[indexes.tableId];
@@ -27,6 +29,7 @@ export function buildDataIndexes(columns, rows) {
 
     pushIndexValue(byTableJst, makeDataKey(tableId, jstCode), rowIndex);
     pushIndexValue(byCoordinates, makeDataKey(tableId, jstCode, xCode, yCode, zCode), rowIndex);
+    addTableId(tableIdsByJst, jstCode, tableId);
     addAxisCode(axisCodes, tableId, jstCode, "x", xCode);
     addAxisCode(axisCodes, tableId, jstCode, "y", yCode);
     addAxisCode(axisCodes, tableId, jstCode, "z", zCode);
@@ -35,7 +38,8 @@ export function buildDataIndexes(columns, rows) {
   return {
     axisCodes,
     byCoordinates,
-    byTableJst
+    byTableJst,
+    tableIdsByJst
   };
 }
 
@@ -62,9 +66,22 @@ export function getIndexedAxisCodes(state, tableId, axis, jstCode = state.select
   return [...codes].sort((left, right) => left.localeCompare(right, "fr"));
 }
 
+export function getIndexedTableIds(state, jstCode = state.selectedJst) {
+  const tableIds = state.dataIndexes?.tableIdsByJst?.get(String(jstCode ?? ""));
+  if (!tableIds) return [];
+
+  return [...tableIds].sort((left, right) => left.localeCompare(right, "fr", { numeric: true }));
+}
+
 function getIndexedRows(state, rowIndexes) {
   if (!rowIndexes) return [];
   return rowIndexes.map((rowIndex) => state.rows[rowIndex]).filter(Boolean);
+}
+
+function addTableId(tableIdsByJst, jstCode, tableId) {
+  const key = String(jstCode ?? "");
+  if (!tableIdsByJst.has(key)) tableIdsByJst.set(key, new Set());
+  tableIdsByJst.get(key).add(tableId);
 }
 
 function addAxisCode(axisCodes, tableId, jstCode, axis, code) {

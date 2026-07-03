@@ -3,20 +3,6 @@ import { parseCsv } from "./csvParser.js";
 const MODULE_2_CONFIG_URL = "./assets/ITS_all_dimension_mapping.csv";
 const CODE_WIDTH = 4;
 
-export const MODULE_2_TEMPLATES = [
-  { tableId: "C_01.00", label: "C_01.00" },
-  { tableId: "C_02.00", label: "C_02.00" },
-  { tableId: "C_03.00", label: "C_03.00" },
-  { tableId: "C_04.00", label: "C_04.00" },
-  { tableId: "C_05.01", label: "C_05.01" },
-  { tableId: "C_05.02", label: "C_05.02" },
-  { tableId: "C_06.01", label: "C_06.01" },
-  { tableId: "C_07.00", label: "C_07.00" },
-  { tableId: "C_08.01", label: "C_08.01" },
-  { tableId: "C_09.01", label: "C_09.01" },
-  { tableId: "C_09.02", label: "C_09.02" }
-];
-
 export async function loadModule2Points() {
   const response = await fetch(MODULE_2_CONFIG_URL, { cache: "no-store" });
   if (!response.ok) {
@@ -42,8 +28,6 @@ export function parseModule2Points(columns, rows) {
     throw new Error("La configuration interne du module 2 n'a pas la structure attendue.");
   }
 
-  const tableIds = new Set(MODULE_2_TEMPLATES.map((template) => template.tableId));
-
   return rows
     .map((row, index) => {
       const description = row[indexes.description];
@@ -64,8 +48,7 @@ export function parseModule2Points(columns, rows) {
       };
     })
     .filter((point) => (
-      tableIds.has(point.tableId)
-      && ["x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code"].includes(point.coordinate)
+      ["x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code"].includes(point.coordinate)
       && point.code
       && point.description
       && point.ignore !== "Y"

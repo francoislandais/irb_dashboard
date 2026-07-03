@@ -42,7 +42,7 @@ export function buildModule2AxisSeries(state, options = {}) {
     };
   }
 
-  if (axis !== "template" && pointsConfig.length === 0) {
+  if (axis !== "template" && axis !== "x" && pointsConfig.length === 0) {
     return {
       dateColumns: [],
       matchCount: 0,

@@ -1,9 +1,9 @@
-import { getIndexedAxisCodes, getIndexedRowsByTableJst } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-data-index-3";
-import { MODULE_2_TEMPLATES, normalizeAxisCode } from "../data/module2Config.js";
+import { getIndexedAxisCodes, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-dynamic-templates";
+import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
-let activeModule2TemplateId = MODULE_2_TEMPLATES[0]?.tableId ?? MODULE_2_TARGET.tableId;
+let activeModule2TemplateId = MODULE_2_TARGET.tableId;
 const module2TemplateContexts = new Map();
 const module2TemplateAxisState = {
   scroll: { left: 0, top: 0 },
@@ -204,11 +204,48 @@ function createModule2TemplateContext() {
 }
 
 function getActiveModule2Template() {
-  return MODULE_2_TEMPLATES.find((template) => template.tableId === activeModule2TemplateId) ?? MODULE_2_TEMPLATES[0];
+  const templates = getModule2Templates(latestState);
+  return templates.find((template) => template.tableId === activeModule2TemplateId) ?? templates[0] ?? {
+    tableId: activeModule2TemplateId || MODULE_2_TARGET.tableId,
+    label: activeModule2TemplateId || MODULE_2_TARGET.tableId
+  };
 }
 
 function getActiveModule2Context() {
   return getModule2ContextForTemplate(activeModule2TemplateId);
+}
+
+function getModule2Templates(state = latestState) {
+  const tableIds = getModule2TableIds(state);
+
+  return tableIds.map((tableId) => ({
+    tableId,
+    label: tableId
+  }));
+}
+
+function getModule2TableIds(state) {
+  if (!state) return [];
+
+  const indexedTableIds = getIndexedTableIds(state);
+  if (indexedTableIds.length > 0 || state.dataIndexes) return indexedTableIds;
+
+  const indexes = getModule2SourceIndexes(state.columns);
+  if (!indexes || !state.selectedJst) return [];
+
+  return [...new Set(state.rows
+    .filter((row) => row[indexes.jstCode] === state.selectedJst)
+    .map((row) => row[indexes.tableId])
+    .filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right, "fr", { numeric: true }));
+}
+
+function ensureActiveModule2Template(state) {
+  const templates = getModule2Templates(state);
+  if (templates.length === 0) return;
+  if (templates.some((template) => template.tableId === activeModule2TemplateId)) return;
+
+  activeModule2TemplateId = templates[0].tableId;
 }
 
 function getModule2ContextForTemplate(tableId) {
@@ -230,6 +267,7 @@ function getActiveModule2ExpandedPaths() {
 }
 
 function getModule2AxisOptions(state, tableId) {
+  const templates = getModule2Templates(state);
   const configuredYCodes = getConfiguredModule2AxisCodes(state, tableId, "y");
   const configuredZCodes = getConfiguredModule2AxisCodes(state, tableId, "z");
   const availableXCodes = getAvailableModule2AxisCodes(state, tableId, "x");
@@ -240,8 +278,8 @@ function getModule2AxisOptions(state, tableId) {
 
   return {
     template: {
-      codes: MODULE_2_TEMPLATES.map((template) => template.tableId),
-      isVisible: MODULE_2_TEMPLATES.length > 1
+      codes: templates.map((template) => template.tableId),
+      isVisible: templates.length > 1
     },
     x: {
       codes: availableXCodes,
@@ -404,8 +442,10 @@ function getAvailableModule2AxisCodes(state, tableId, axis) {
 }
 
 function renderModule2(state) {
+  ensureActiveModule2Template(state);
   const context = getActiveModule2Context();
   const template = getActiveModule2Template();
+  const templates = getModule2Templates(state);
   ensureModule2Selections(state);
   if (context.activeAxis === "template") ensureAllModule2TemplateSelections(state);
   const tableSeries = buildModule2AxisSeries(state, {
@@ -415,7 +455,7 @@ function renderModule2(state) {
     selectedZCode: context.selectedZCode,
     tableId: template?.tableId,
     templateSelections: getModule2TemplateSelections(),
-    templates: MODULE_2_TEMPLATES
+    templates
   });
   elements.module2Table.replaceChildren();
   elements.unitSelect.value = state.selectedUnit;
@@ -432,13 +472,13 @@ function renderModule2(state) {
 }
 
 function ensureAllModule2TemplateSelections(state) {
-  MODULE_2_TEMPLATES.forEach((template) => {
+  getModule2Templates(state).forEach((template) => {
     ensureModule2TemplateSelections(state, template.tableId);
   });
 }
 
-function getModule2TemplateSelections() {
-  return Object.fromEntries(MODULE_2_TEMPLATES.map((template) => {
+function getModule2TemplateSelections(state = latestState) {
+  return Object.fromEntries(getModule2Templates(state).map((template) => {
     const context = getModule2ContextForTemplate(template.tableId);
     return [template.tableId, {
       selectedXCode: context.selectedXCode,
