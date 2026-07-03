@@ -509,6 +509,197 @@ table {
   color: #9ca7a0;
 }
 
+.context-menu {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  min-width: 150px;
+  padding: 4px;
+  border: 1px solid #d8dfda;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(23, 33, 28, 0.16);
+}
+
+.context-menu button {
+  min-height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.76rem;
+  line-height: 1.2;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.context-menu button:hover,
+.context-menu button:focus-visible {
+  background: #eef4f1;
+  outline: 0;
+}
+
+.benchmark-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 33, 28, 0.18);
+  padding: 24px;
+}
+
+.benchmark-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(920px, calc(100vw - 48px));
+  max-height: min(660px, calc(100vh - 48px));
+  border: 1px solid #d8dfda;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 22px 60px rgba(23, 33, 28, 0.24);
+  overflow: hidden;
+}
+
+.benchmark-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #edf1ee;
+  padding: 14px 16px 12px;
+}
+
+.benchmark-header div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.benchmark-header strong {
+  color: #17211c;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.benchmark-header span {
+  max-width: 720px;
+  color: #637168;
+  font-size: 0.76rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.benchmark-header button {
+  min-height: 28px;
+  border: 1px solid #d8dfda;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #334139;
+  font-size: 0.76rem;
+  padding: 0 10px;
+}
+
+.benchmark-body {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 16px 16px;
+  overflow: auto;
+}
+
+.benchmark-chart {
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid #edf1ee;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.benchmark-grid-line {
+  stroke: #edf1ee;
+  stroke-width: 1;
+}
+
+.benchmark-axis-label {
+  fill: #647169;
+  font-size: 11px;
+}
+
+.benchmark-line {
+  opacity: 0.58;
+}
+
+.benchmark-line.is-selected-jst {
+  opacity: 1;
+}
+
+.benchmark-point {
+  cursor: pointer;
+  opacity: 0.72;
+  outline: none;
+}
+
+.benchmark-point:hover,
+.benchmark-point:focus,
+.benchmark-point.is-selected-jst {
+  opacity: 1;
+}
+
+.benchmark-tooltip {
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.benchmark-tooltip rect {
+  fill: #17211c;
+  stroke: rgba(255, 255, 255, 0.22);
+}
+
+.benchmark-tooltip-label {
+  fill: #cbd7d0;
+  font-size: 11px;
+}
+
+.benchmark-tooltip-value {
+  fill: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.benchmark-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: #334139;
+  font-size: 0.75rem;
+}
+
+.benchmark-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.7;
+}
+
+.benchmark-legend span.is-selected-jst {
+  color: #17483f;
+  opacity: 1;
+}
+
+.benchmark-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.benchmark-empty {
+  color: #637168;
+  font-size: 0.82rem;
+}
+
 .metric-table {
   border-collapse: separate;
   border-spacing: 0;
@@ -751,6 +942,10 @@ table {
 
 .metric-table tbody tr.is-selected .tree-toggle {
   color: #ffffff;
+}
+
+.metric-table tbody tr.is-contribution-child > td {
+  color: #17483f;
 }
 
 .table-wrap th,

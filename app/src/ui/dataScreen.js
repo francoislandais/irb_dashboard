@@ -1,5 +1,5 @@
-import { getIndexedAxisCodes, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-dynamic-templates";
+import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-contribution-benchmark";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -11,6 +11,8 @@ const module2TemplateAxisState = {
 };
 const MODULE_2_STICKY_PARENT_ROW_HEIGHT = 28;
 let module2StickyFrame = 0;
+let module2ContextMenu = null;
+let module2BenchmarkDialog = null;
 
 const elements = {
   chooseFileButton: document.querySelector("#choose-file-button"),
@@ -62,7 +64,10 @@ export function wireUi(actions) {
     });
   });
   elements.module2TableWrap?.addEventListener("scroll", scheduleModule2StickyParentsUpdate, { passive: true });
+  elements.module2TableWrap?.addEventListener("scroll", hideModule2ContextMenu, { passive: true });
   elements.module2Table.addEventListener("click", (event) => {
+    hideModule2ContextMenu();
+
     const toggle = event.target.closest("[data-toggle-path]");
     if (toggle) {
       toggleModule2Path(toggle.dataset.togglePath);
@@ -71,6 +76,19 @@ export function wireUi(actions) {
 
     const row = event.target.closest("tbody tr[data-point-code]");
     if (row) selectModule2Row(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
+  });
+  elements.module2Table.addEventListener("contextmenu", (event) => {
+    const row = event.target.closest("tbody tr[data-normalized-path]");
+    if (!row) return;
+
+    event.preventDefault();
+    if (row.dataset.pointCode) {
+      setSelectedModule2CodeForActiveAxis(row.dataset.pointCode);
+      applyModule2Selection();
+      renderModule2AxisTabs();
+      row.focus({ preventScroll: true });
+    }
+    showModule2ContextMenu(row, event);
   });
   elements.module2Table.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -89,6 +107,13 @@ export function wireUi(actions) {
   });
   elements.moduleButtons.forEach((button) => {
     button.addEventListener("click", () => actions.setActiveModule(button.dataset.moduleTarget));
+  });
+  document.addEventListener("click", hideModule2ContextMenu);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      hideModule2ContextMenu();
+      hideModule2BenchmarkDialog();
+    }
   });
 }
 
@@ -196,6 +221,12 @@ function createModule2TemplateContext() {
       x: "",
       y: "",
       z: ""
+    },
+    contributionBaseByAxis: {
+      template: null,
+      x: null,
+      y: null,
+      z: null
     },
     selectedXCode: "",
     selectedYCode: "",
@@ -497,10 +528,12 @@ function formatLoadedAt(date) {
 }
 
 function renderModule2Table(series, selectedUnit) {
+  hideModule2ContextMenu();
   const activeAxis = getActiveModule2Axis();
   const orderedDates = [...series.dateColumns].reverse();
   const tableRows = series.rows.map(normalizeModule2SeriesRow);
   const displayRows = buildModule2DisplayRows(tableRows);
+  const contributionBase = getModule2ContributionBase(displayRows, activeAxis);
   const parentPaths = getParentPaths(tableRows);
   const nodePaths = getExplicitPaths(displayRows);
   const thead = document.createElement("thead");
@@ -527,6 +560,7 @@ function renderModule2Table(series, selectedUnit) {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
+    const isContributionChild = isModule2ContributionChild(normalizedPath, contributionBase);
 
     if (!seriesRow.isVirtual) valueRow.dataset.pointCode = seriesRow.code;
     valueRow.dataset.axis = activeAxis;
@@ -537,6 +571,8 @@ function renderModule2Table(series, selectedUnit) {
     valueRow.dataset.isVirtual = String(Boolean(seriesRow.isVirtual));
     valueRow.dataset.parentPath = seriesRow.parentPath;
     valueRow.dataset.indentLevel = String(seriesRow.indentLevel ?? 0);
+    valueRow.classList.toggle("is-contribution-base", normalizedPath === contributionBase?.path);
+    valueRow.classList.toggle("is-contribution-child", isContributionChild);
     if (!seriesRow.isVirtual) {
       valueRow.setAttribute("role", "button");
       valueRow.tabIndex = 0;
@@ -550,12 +586,20 @@ function renderModule2Table(series, selectedUnit) {
     description.append(createDescriptionContent(seriesRow, normalizedPath, isParent));
     valueRow.append(description);
 
-    [...seriesRow.values].reverse().forEach((point, index) => {
+    const reversedValues = [...seriesRow.values].reverse();
+    const reversedBaseValues = contributionBase ? [...contributionBase.row.values].reverse() : [];
+
+    reversedValues.forEach((point, index) => {
       const td = document.createElement("td");
       td.className = index === 0 ? "latest-column" : "";
+      const contributionValue = isContributionChild
+        ? getModule2ContributionRatio(point.value, reversedBaseValues[index]?.value)
+        : null;
       td.textContent = seriesRow.isVirtual || point.value === null
         ? "-"
-        : formatMetricValue(point.value, selectedUnit, seriesRow.format);
+        : contributionValue === null
+          ? formatMetricValue(point.value, selectedUnit, seriesRow.format)
+          : formatContributionPercentValue(contributionValue);
       valueRow.append(td);
     });
 
@@ -565,6 +609,572 @@ function renderModule2Table(series, selectedUnit) {
   thead.append(headerRow);
   elements.module2Table.append(thead, tbody);
   applyModule2TreeState(parentPaths, nodePaths);
+}
+
+function getModule2ContributionBase(rows, activeAxis) {
+  const base = getActiveModule2Context().contributionBaseByAxis[activeAxis];
+  if (!base?.path) return null;
+
+  const path = normalizeHierarchyPath(base.path);
+  const row = rows.find((item) => normalizeHierarchyPath(item.hierarchyPath) === path);
+  if (!row) {
+    getActiveModule2Context().contributionBaseByAxis[activeAxis] = null;
+    return null;
+  }
+
+  return { ...base, path, row };
+}
+
+function isModule2ContributionChild(path, contributionBase) {
+  if (!contributionBase?.path) return false;
+  return path.startsWith(`${contributionBase.path} > `);
+}
+
+function getModule2ContributionRatio(value, baseValue) {
+  if (value === null || baseValue === null || baseValue === 0) return null;
+  return value / baseValue;
+}
+
+function showModule2ContextMenu(row, event) {
+  hideModule2ContextMenu();
+
+  module2ContextMenu = createModule2ContextMenu(row);
+  document.body.append(module2ContextMenu);
+
+  const { innerWidth, innerHeight } = window;
+  const menuRect = module2ContextMenu.getBoundingClientRect();
+  const left = Math.min(event.clientX, innerWidth - menuRect.width - 8);
+  const top = Math.min(event.clientY, innerHeight - menuRect.height - 8);
+
+  module2ContextMenu.style.left = `${Math.max(8, left)}px`;
+  module2ContextMenu.style.top = `${Math.max(8, top)}px`;
+}
+
+function hideModule2ContextMenu() {
+  module2ContextMenu?.remove();
+  module2ContextMenu = null;
+}
+
+function createModule2ContextMenu(row) {
+  const menu = document.createElement("div");
+  menu.className = "context-menu";
+  menu.setAttribute("role", "menu");
+
+  if (row.dataset.pointCode) {
+    menu.append(createContextMenuButton("Sélectionner", () => {
+      selectModule2Row(row.dataset.pointCode, { shouldFocus: true });
+    }));
+    menu.append(createContextMenuButton("Benchmark", () => {
+      showModule2BenchmarkDialog();
+    }));
+  }
+
+  const activeContributionBase = getActiveModule2ContributionSetting();
+  const isCurrentContributionBase = activeContributionBase?.path === row.dataset.normalizedPath;
+  if (row.dataset.pointCode && row.dataset.isParent === "true" && !isCurrentContributionBase) {
+    menu.append(createContextMenuButton("Show contribution to selected total", () => {
+      setModule2ContributionBase(row);
+    }));
+  }
+  if (activeContributionBase) {
+    menu.append(createContextMenuButton("Show absolute values", () => {
+      clearModule2ContributionBase();
+    }));
+  }
+
+  if (row.dataset.isParent === "true") {
+    const expandedPaths = getActiveModule2ExpandedPaths();
+    const isExpanded = expandedPaths.has(row.dataset.normalizedPath);
+    menu.append(createContextMenuButton(isExpanded ? "Replier" : "Déplier", () => {
+      toggleModule2Path(row.dataset.normalizedPath);
+    }));
+  }
+
+  menu.append(createContextMenuButton("Copier le libellé", () => {
+    copyModule2Label(row.dataset.hierarchyPath);
+  }));
+
+  return menu;
+}
+
+function createContextMenuButton(label, action) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.setAttribute("role", "menuitem");
+  button.textContent = label;
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    hideModule2ContextMenu();
+    action();
+  });
+  return button;
+}
+
+function copyModule2Label(label) {
+  const text = String(label ?? "").replaceAll(">", "/");
+  if (!text || !navigator.clipboard?.writeText) return;
+  navigator.clipboard.writeText(text).catch(() => {});
+}
+
+function getActiveModule2ContributionSetting() {
+  const context = getActiveModule2Context();
+  return context.contributionBaseByAxis[context.activeAxis];
+}
+
+function setModule2ContributionBase(row) {
+  const context = getActiveModule2Context();
+  context.contributionBaseByAxis[context.activeAxis] = {
+    label: row.dataset.hierarchyPath,
+    path: row.dataset.normalizedPath,
+    pointCode: row.dataset.pointCode
+  };
+
+  saveModule2ScrollPosition();
+  if (latestState) renderAppState(latestState);
+}
+
+function clearModule2ContributionBase() {
+  const context = getActiveModule2Context();
+  context.contributionBaseByAxis[context.activeAxis] = null;
+
+  saveModule2ScrollPosition();
+  if (latestState) renderAppState(latestState);
+}
+
+function showModule2BenchmarkDialog() {
+  hideModule2BenchmarkDialog();
+
+  const benchmark = buildModule2Benchmark();
+  module2BenchmarkDialog = createModule2BenchmarkDialog(benchmark);
+  document.body.append(module2BenchmarkDialog);
+}
+
+function hideModule2BenchmarkDialog() {
+  module2BenchmarkDialog?.remove();
+  module2BenchmarkDialog = null;
+}
+
+function createModule2BenchmarkDialog(benchmark) {
+  const overlay = document.createElement("div");
+  overlay.className = "benchmark-overlay";
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) hideModule2BenchmarkDialog();
+  });
+
+  const dialog = document.createElement("section");
+  dialog.className = "benchmark-dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-label", "Benchmark JST");
+
+  const header = document.createElement("header");
+  header.className = "benchmark-header";
+
+  const title = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = "Benchmark JST";
+  const subtitle = document.createElement("span");
+  subtitle.textContent = benchmark.label;
+  title.append(strong, subtitle);
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.textContent = "Fermer";
+  closeButton.addEventListener("click", hideModule2BenchmarkDialog);
+  header.append(title, closeButton);
+
+  const body = document.createElement("div");
+  body.className = "benchmark-body";
+
+  if (benchmark.series.length === 0 || benchmark.dates.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "benchmark-empty";
+    empty.textContent = "Aucune donnée disponible pour ce point.";
+    body.append(empty);
+  } else {
+    body.append(createBenchmarkChart(benchmark));
+    body.append(createBenchmarkLegend(benchmark));
+  }
+
+  dialog.append(header, body);
+  overlay.append(dialog);
+  return overlay;
+}
+
+function buildModule2Benchmark() {
+  const state = latestState;
+  const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
+  const context = getActiveModule2Context();
+  const activeAxis = context.activeAxis;
+  const selections = getCompleteModule2SelectionsForBenchmark(context, activeAxis);
+  const contribution = getModule2BenchmarkContributionContext(context, activeAxis);
+  const indexes = getBenchmarkSourceIndexes(state?.columns ?? []);
+  const dates = getBenchmarkReferenceColumns(state?.columns ?? []);
+  const format = getBenchmarkValueFormat(state, tableId, context, activeAxis);
+  const label = getBenchmarkLabel(state, tableId, context, activeAxis);
+
+  if (!state || !indexes || dates.length === 0) {
+    return { dates: [], format, isContribution: false, label, series: [] };
+  }
+
+  const series = (state.jstOptions ?? []).map((jstCode) => {
+    const rows = getBenchmarkRows(state, indexes, tableId, selections, jstCode);
+    const baseRows = contribution
+      ? getBenchmarkRows(state, indexes, tableId, contribution.selections, jstCode)
+      : [];
+
+    return {
+      jstCode,
+      values: dates.map((dateColumn) => ({
+        date: dateColumn.date,
+        label: dateColumn.label,
+        value: rows.length === 0
+          ? null
+          : getBenchmarkPointValue(rows, baseRows, dateColumn.index, Boolean(contribution))
+      }))
+    };
+  }).filter((item) => item.values.some((point) => point.value !== null));
+
+  return {
+    dates,
+    format,
+    isContribution: Boolean(contribution),
+    label: contribution ? `${label} / ${contribution.label}` : label,
+    series
+  };
+}
+
+function getCompleteModule2SelectionsForBenchmark(context, activeAxis) {
+  const selectedCode = getSelectedModule2CodeForActiveAxis();
+  return getModule2SelectionsForAxisCode(context, activeAxis, selectedCode);
+}
+
+function getModule2SelectionsForAxisCode(context, activeAxis, axisCode) {
+  return {
+    selectedXCode: normalizeAxisCode(activeAxis === "x" ? axisCode : context.selectedXCode, "x"),
+    selectedYCode: normalizeAxisCode(activeAxis === "y" ? axisCode : context.selectedYCode, "y"),
+    selectedZCode: normalizeAxisCode(activeAxis === "z" ? axisCode : context.selectedZCode, "z")
+  };
+}
+
+function getModule2BenchmarkContributionContext(context, activeAxis) {
+  const base = context.contributionBaseByAxis[activeAxis];
+  if (!base?.path) return null;
+
+  const selectedCode = getSelectedModule2CodeForActiveAxis();
+  const selectedRow = elements.module2Table.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
+  const selectedPath = selectedRow?.dataset.normalizedPath || "";
+  const basePath = normalizeHierarchyPath(base.path);
+
+  if (!selectedPath.startsWith(`${basePath} > `)) return null;
+
+  const baseCode = base.pointCode
+    || elements.module2Table.querySelector(`tbody tr[data-normalized-path="${CSS.escape(basePath)}"]`)?.dataset.pointCode;
+  if (!baseCode) return null;
+
+  return {
+    label: String(base.label ?? "").replaceAll(">", "/"),
+    selections: getModule2SelectionsForAxisCode(context, activeAxis, baseCode)
+  };
+}
+
+function getBenchmarkPointValue(rows, baseRows, dateColumnIndex, isContribution) {
+  const value = rows.reduce((total, row) => total + parseBenchmarkNumber(row[dateColumnIndex]), 0);
+  if (!isContribution) return value;
+
+  const baseValue = baseRows.reduce((total, row) => total + parseBenchmarkNumber(row[dateColumnIndex]), 0);
+  if (baseRows.length === 0 || baseValue === 0) return null;
+
+  return value / baseValue;
+}
+
+function getBenchmarkRows(state, indexes, tableId, selections, jstCode) {
+  if (hasCompleteBenchmarkSelection(selections)) {
+    const indexedRows = getIndexedRowsByCoordinates(state, tableId, selections, jstCode);
+    if (indexedRows.length > 0 || state.dataIndexes) return indexedRows;
+  }
+
+  return state.rows.filter((row) => (
+    row[indexes.jstCode] === jstCode
+    && row[indexes.tableId] === tableId
+    && matchesBenchmarkSelection(row, indexes, "x", selections.selectedXCode)
+    && matchesBenchmarkSelection(row, indexes, "y", selections.selectedYCode)
+    && matchesBenchmarkSelection(row, indexes, "z", selections.selectedZCode)
+  ));
+}
+
+function hasCompleteBenchmarkSelection(selections) {
+  return Boolean(selections.selectedXCode && selections.selectedYCode && selections.selectedZCode);
+}
+
+function matchesBenchmarkSelection(row, indexes, axis, selectedCode) {
+  if (!selectedCode) return true;
+  return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === selectedCode;
+}
+
+function getBenchmarkLabel(state, tableId, context, activeAxis) {
+  if (activeAxis === "template") return getActiveModule2Template()?.label || tableId;
+  if (activeAxis === "x") {
+    return state?.dimensionMapping?.find(tableId, "x_axis_rc_code", context.selectedXCode)?.description
+      || `Column ${context.selectedXCode}`;
+  }
+  if (activeAxis === "z") {
+    return state?.module2Points?.find((point) => (
+      point.tableId === tableId
+      && point.coordinate === "z_axis_rc_code"
+      && point.code === context.selectedZCode
+    ))?.description || `Tab ${context.selectedZCode}`;
+  }
+  return state?.module2Points?.find((point) => (
+    point.tableId === tableId
+    && point.coordinate === "y_axis_rc_code"
+    && point.code === context.selectedYCode
+  ))?.description || `Row ${context.selectedYCode}`;
+}
+
+function getBenchmarkValueFormat(state, tableId, context, activeAxis) {
+  const candidates = [
+    { axis: "y", code: context.selectedYCode, coordinate: "y_axis_rc_code" },
+    { axis: "z", code: context.selectedZCode, coordinate: "z_axis_rc_code" },
+    { axis: "x", code: context.selectedXCode, coordinate: "x_axis_rc_code" }
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate.code) continue;
+
+    const configuredFormat = state?.module2Points?.find((point) => (
+      point.tableId === tableId
+      && point.coordinate === candidate.coordinate
+      && point.code === candidate.code
+    ))?.format;
+    if (configuredFormat) return configuredFormat;
+
+    const mappingFormat = state?.dimensionMapping?.find(tableId, candidate.coordinate, candidate.code)?.format;
+    if (mappingFormat) return mappingFormat;
+  }
+
+  return activeAxis === "template" ? "" : "";
+}
+
+function createBenchmarkChart(benchmark) {
+  const selectedJst = latestState?.selectedJst || "";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "benchmark-chart");
+  svg.setAttribute("viewBox", "0 0 760 360");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Graphique benchmark par JST");
+
+  const values = benchmark.series.flatMap((serie) => serie.values.map((point) => point.value).filter((value) => value !== null));
+  const minValue = Math.min(0, ...values);
+  const maxValue = Math.max(0, ...values);
+  const range = maxValue - minValue || 1;
+  const plot = { left: 58, top: 24, width: 660, height: 270 };
+
+  appendBenchmarkGrid(svg, plot);
+  appendBenchmarkAxes(svg, benchmark, plot, minValue, maxValue);
+
+  const tooltip = createBenchmarkTooltip();
+  svg.append(tooltip.group);
+
+  benchmark.series.forEach((serie, index) => {
+    const isSelectedJst = serie.jstCode === selectedJst;
+    const color = getBenchmarkColor(index, isSelectedJst);
+    const points = serie.values
+      .map((point, pointIndex) => {
+        if (point.value === null) return null;
+        const x = plot.left + (benchmark.dates.length <= 1 ? plot.width / 2 : (pointIndex / (benchmark.dates.length - 1)) * plot.width);
+        const y = plot.top + plot.height - (((point.value - minValue) / range) * plot.height);
+        return { x, y, value: point.value, label: point.label };
+      })
+      .filter(Boolean);
+
+    if (points.length === 0) return;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", points.map((point, pointIndex) => `${pointIndex === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" "));
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", color);
+    path.setAttribute("stroke-width", isSelectedJst ? "2.6" : "1.4");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+    path.setAttribute("class", isSelectedJst ? "benchmark-line is-selected-jst" : "benchmark-line");
+    if (!isSelectedJst) path.setAttribute("stroke-dasharray", "4 5");
+    svg.append(path);
+
+    points.forEach((point) => {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", point.x);
+      circle.setAttribute("cy", point.y);
+      circle.setAttribute("r", isSelectedJst ? "4" : "3");
+      circle.setAttribute("fill", color);
+      circle.setAttribute("class", isSelectedJst ? "benchmark-point is-selected-jst" : "benchmark-point");
+      circle.addEventListener("mouseenter", () => {
+        showBenchmarkTooltip(tooltip, point.x, point.y, `${serie.jstCode} - ${point.label}`, formatBenchmarkValue(point.value, benchmark));
+      });
+      circle.addEventListener("focus", () => {
+        showBenchmarkTooltip(tooltip, point.x, point.y, `${serie.jstCode} - ${point.label}`, formatBenchmarkValue(point.value, benchmark));
+      });
+      circle.addEventListener("mouseleave", () => hideBenchmarkTooltip(tooltip));
+      circle.addEventListener("blur", () => hideBenchmarkTooltip(tooltip));
+      circle.setAttribute("tabindex", "0");
+      circle.append(createSvgTitle(`${serie.jstCode} - ${point.label}: ${formatBenchmarkValue(point.value, benchmark)}`));
+      svg.append(circle);
+    });
+  });
+
+  return svg;
+}
+
+function createBenchmarkTooltip() {
+  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  const value = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+  group.setAttribute("class", "benchmark-tooltip");
+  group.setAttribute("opacity", "0");
+  background.setAttribute("rx", "5");
+  background.setAttribute("ry", "5");
+  label.setAttribute("class", "benchmark-tooltip-label");
+  value.setAttribute("class", "benchmark-tooltip-value");
+  group.append(background, label, value);
+
+  return { background, group, label, value };
+}
+
+function showBenchmarkTooltip(tooltip, x, y, label, value) {
+  tooltip.label.textContent = label;
+  tooltip.value.textContent = value;
+
+  const tooltipWidth = 178;
+  const tooltipHeight = 48;
+  const left = Math.min(Math.max(8, x + 12), 760 - tooltipWidth - 8);
+  const top = Math.max(8, y - tooltipHeight - 10);
+
+  tooltip.background.setAttribute("x", left);
+  tooltip.background.setAttribute("y", top);
+  tooltip.background.setAttribute("width", tooltipWidth);
+  tooltip.background.setAttribute("height", tooltipHeight);
+  tooltip.label.setAttribute("x", left + 10);
+  tooltip.label.setAttribute("y", top + 18);
+  tooltip.value.setAttribute("x", left + 10);
+  tooltip.value.setAttribute("y", top + 36);
+  tooltip.group.setAttribute("opacity", "1");
+}
+
+function hideBenchmarkTooltip(tooltip) {
+  tooltip.group.setAttribute("opacity", "0");
+}
+
+function appendBenchmarkGrid(svg, plot) {
+  for (let index = 0; index <= 4; index += 1) {
+    const y = plot.top + ((plot.height / 4) * index);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", plot.left);
+    line.setAttribute("x2", plot.left + plot.width);
+    line.setAttribute("y1", y);
+    line.setAttribute("y2", y);
+    line.setAttribute("class", "benchmark-grid-line");
+    svg.append(line);
+  }
+}
+
+function appendBenchmarkAxes(svg, benchmark, plot, minValue, maxValue) {
+  [maxValue, (maxValue + minValue) / 2, minValue].forEach((value, index) => {
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", plot.left - 10);
+    text.setAttribute("y", plot.top + ((plot.height / 2) * index) + 4);
+    text.setAttribute("text-anchor", "end");
+    text.setAttribute("class", "benchmark-axis-label");
+    text.textContent = formatBenchmarkValue(value, benchmark);
+    svg.append(text);
+  });
+
+  benchmark.dates.forEach((dateColumn, index) => {
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", plot.left + (benchmark.dates.length <= 1 ? plot.width / 2 : (index / (benchmark.dates.length - 1)) * plot.width));
+    text.setAttribute("y", plot.top + plot.height + 32);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("class", "benchmark-axis-label");
+    text.textContent = dateColumn.label;
+    svg.append(text);
+  });
+}
+
+function createBenchmarkLegend(benchmark) {
+  const legend = document.createElement("div");
+  legend.className = "benchmark-legend";
+  const selectedJst = latestState?.selectedJst || "";
+
+  benchmark.series.forEach((serie, index) => {
+    const item = document.createElement("span");
+    const swatch = document.createElement("i");
+    const isSelectedJst = serie.jstCode === selectedJst;
+    swatch.style.background = getBenchmarkColor(index, isSelectedJst);
+    item.classList.toggle("is-selected-jst", isSelectedJst);
+    item.append(swatch, document.createTextNode(serie.jstCode));
+    legend.append(item);
+  });
+
+  return legend;
+}
+
+function formatBenchmarkValue(value, benchmark) {
+  return benchmark.isContribution
+    ? formatContributionPercentValue(value)
+    : formatMetricValue(value, latestState.selectedUnit, benchmark.format);
+}
+
+function createSvgTitle(text) {
+  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+  title.textContent = text;
+  return title;
+}
+
+function getBenchmarkColor(index, isSelectedJst = false) {
+  if (isSelectedJst) return "#17483f";
+
+  const grays = ["#8d9891", "#a1aaa5", "#b5bdb8", "#7c8781"];
+  return grays[index % grays.length];
+}
+
+function getBenchmarkSourceIndexes(columns) {
+  const indexes = {
+    jstCode: columns.indexOf("jst_code"),
+    tableId: columns.indexOf("table_id"),
+    xAxisRcCode: columns.indexOf("x_axis_rc_code"),
+    yAxisRcCode: columns.indexOf("y_axis_rc_code"),
+    zAxisRcCode: columns.indexOf("z_axis_rc_code")
+  };
+
+  return Object.values(indexes).every((index) => index !== -1) ? indexes : null;
+}
+
+function getBenchmarkReferenceColumns(columns) {
+  return columns
+    .map((name, index) => {
+      const match = String(name).match(/^ref_(\d{4})_(\d{2})_(\d{2})$/);
+      if (!match) return null;
+
+      const [, year, month, day] = match;
+      const date = new Date(Number(year), Number(month) - 1, Number(day));
+      return {
+        date,
+        index,
+        label: new Intl.DateTimeFormat("fr-FR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }).format(date)
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.date - right.date);
+}
+
+function parseBenchmarkNumber(value) {
+  const parsed = Number(String(value).replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function createModule2SearchInput() {
@@ -1227,6 +1837,13 @@ function formatPercentValue(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
   }).format(percentValue)} %`;
+}
+
+function formatContributionPercentValue(value) {
+  return `${new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(value * 100)} %`;
 }
 
 function getUnitDefinition(selectedUnit) {
