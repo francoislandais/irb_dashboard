@@ -1,4 +1,4 @@
-import { getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js";
+import { getIndexedAxisCodes, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js";
 import { normalizeAxisCode } from "./module2Config.js";
 
 const REFERENCE_COLUMN_PATTERN = /^ref_(\d{4})_(\d{2})_(\d{2})$/;
@@ -115,29 +115,29 @@ function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axi
 }
 
 function buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat) {
-  const allRowsByXCode = new Map();
   const matchedRowsByXCode = new Map();
   const tableRows = getRowsForTableJst(state, indexes, tableId);
+  const indexedXCodes = getIndexedAxisCodes(state, tableId, "x");
+  const xCodes = indexedXCodes.length > 0 || state.dataIndexes
+    ? indexedXCodes
+    : [...new Set(tableRows.map((row) => normalizeAxisCode(row[indexes.xAxisRcCode], "x")).filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right, "fr"));
+  const rowsToGroup = getRowsForPartialSelection(state, indexes, tableId, {
+    selectedXCode: "",
+    selectedYCode,
+    selectedZCode
+  });
 
-  tableRows.forEach((row) => {
+  rowsToGroup.forEach((row) => {
     const xCode = normalizeAxisCode(row[indexes.xAxisRcCode], "x");
     if (!xCode) return;
 
-    if (!allRowsByXCode.has(xCode)) allRowsByXCode.set(xCode, []);
-    allRowsByXCode.get(xCode).push(row);
-
-    if (
-      (!selectedYCode || normalizeAxisCode(row[indexes.yAxisRcCode], "y") === selectedYCode)
-      && (!selectedZCode || normalizeAxisCode(row[indexes.zAxisRcCode], "z") === selectedZCode)
-    ) {
-      if (!matchedRowsByXCode.has(xCode)) matchedRowsByXCode.set(xCode, []);
-      matchedRowsByXCode.get(xCode).push(row);
-    }
+    if (!matchedRowsByXCode.has(xCode)) matchedRowsByXCode.set(xCode, []);
+    matchedRowsByXCode.get(xCode).push(row);
   });
 
-  return [...allRowsByXCode.entries()]
-    .sort(([leftCode], [rightCode]) => leftCode.localeCompare(rightCode, "fr"))
-    .map(([xCode]) => {
+  return xCodes
+    .map((xCode) => {
       const matchedRows = matchedRowsByXCode.get(xCode) ?? [];
       const mapping = state.dimensionMapping?.find(tableId, "x_axis_rc_code", xCode);
       const description = mapping?.description || `X ${xCode}`;
@@ -197,7 +197,12 @@ function getRowsForAxisPoint(state, indexes, tableId, axis, pointCode, selection
     return getRowsForCompleteSelection(state, indexes, tableId, pointSelections);
   }
 
-  return getRowsForTableJst(state, indexes, tableId).filter((row) => (
+  const indexedRows = getIndexedRowsByAxisPoint(state, tableId, axis, pointCode);
+  const rowsToFilter = indexedRows.length > 0 || state.dataIndexes
+    ? indexedRows
+    : getRowsForTableJst(state, indexes, tableId);
+
+  return rowsToFilter.filter((row) => (
     matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, axis)
     && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, axis)
     && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis)
@@ -210,10 +215,32 @@ function getRowsForCompleteSelection(state, indexes, tableId, selections) {
     return getIndexedRowsByCoordinates(state, tableId, selections);
   }
 
-  return getRowsForTableJst(state, indexes, tableId).filter((row) => (
+  return getRowsForPartialSelection(state, indexes, tableId, selections);
+}
+
+function getRowsForPartialSelection(state, indexes, tableId, selections) {
+  const anchor = getBestPartialSelectionAnchor(state, tableId, selections);
+  const rowsToFilter = anchor
+    ? getIndexedRowsByAxisPoint(state, tableId, anchor.axis, anchor.code)
+    : getRowsForTableJst(state, indexes, tableId);
+
+  if ((anchor && rowsToFilter.length === 0 && state.dataIndexes) || rowsToFilter.length === 0) return [];
+
+  return rowsToFilter.filter((row) => (
     matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template")
     && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template")
     && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template")
+  ));
+}
+
+function getBestPartialSelectionAnchor(state, tableId, selections) {
+  return [
+    { axis: "z", code: selections.selectedZCode },
+    { axis: "y", code: selections.selectedYCode },
+    { axis: "x", code: selections.selectedXCode }
+  ].find((selection) => (
+    selection.code
+    && getIndexedRowsByAxisPoint(state, tableId, selection.axis, selection.code).length > 0
   ));
 }
 

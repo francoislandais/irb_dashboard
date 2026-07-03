@@ -1,5 +1,5 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-denominator-badge";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-axis-point-index";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;

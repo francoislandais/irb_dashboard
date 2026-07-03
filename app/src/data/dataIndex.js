@@ -7,6 +7,7 @@ export function buildDataIndexes(columns, rows) {
   if (!indexes) {
     return {
       axisCodes: new Map(),
+      byAxisPoint: new Map(),
       byCoordinates: new Map(),
       byTableJst: new Map(),
       tableIdsByJst: new Map()
@@ -14,6 +15,7 @@ export function buildDataIndexes(columns, rows) {
   }
 
   const axisCodes = new Map();
+  const byAxisPoint = new Map();
   const byCoordinates = new Map();
   const byTableJst = new Map();
   const tableIdsByJst = new Map();
@@ -29,6 +31,9 @@ export function buildDataIndexes(columns, rows) {
 
     pushIndexValue(byTableJst, makeDataKey(tableId, jstCode), rowIndex);
     pushIndexValue(byCoordinates, makeDataKey(tableId, jstCode, xCode, yCode, zCode), rowIndex);
+    pushAxisPointIndex(byAxisPoint, tableId, jstCode, "x", xCode, rowIndex);
+    pushAxisPointIndex(byAxisPoint, tableId, jstCode, "y", yCode, rowIndex);
+    pushAxisPointIndex(byAxisPoint, tableId, jstCode, "z", zCode, rowIndex);
     addTableId(tableIdsByJst, jstCode, tableId);
     addAxisCode(axisCodes, tableId, jstCode, "x", xCode);
     addAxisCode(axisCodes, tableId, jstCode, "y", yCode);
@@ -37,6 +42,7 @@ export function buildDataIndexes(columns, rows) {
 
   return {
     axisCodes,
+    byAxisPoint,
     byCoordinates,
     byTableJst,
     tableIdsByJst
@@ -54,6 +60,17 @@ export function getIndexedRowsByCoordinates(state, tableId, selections, jstCode 
     normalizeAxisCode(selections.selectedXCode ?? "", "x"),
     normalizeAxisCode(selections.selectedYCode ?? "", "y"),
     normalizeAxisCode(selections.selectedZCode ?? "", "z")
+  ));
+
+  return getIndexedRows(state, rowIndexes);
+}
+
+export function getIndexedRowsByAxisPoint(state, tableId, axis, pointCode, jstCode = state.selectedJst) {
+  const rowIndexes = state.dataIndexes?.byAxisPoint?.get(makeDataKey(
+    tableId,
+    jstCode,
+    axis,
+    normalizeAxisCode(pointCode ?? "", axis)
   ));
 
   return getIndexedRows(state, rowIndexes);
@@ -90,6 +107,11 @@ function addAxisCode(axisCodes, tableId, jstCode, axis, code) {
   const key = makeDataKey(tableId, jstCode, axis);
   if (!axisCodes.has(key)) axisCodes.set(key, new Set());
   axisCodes.get(key).add(code);
+}
+
+function pushAxisPointIndex(index, tableId, jstCode, axis, code, rowIndex) {
+  if (!code) return;
+  pushIndexValue(index, makeDataKey(tableId, jstCode, axis, code), rowIndex);
 }
 
 function pushIndexValue(index, key, value) {
