@@ -485,30 +485,30 @@ C_07.00;y_axis_rc_code;290;Memorandum items/Exposures secured by mortgages on co
 C_07.00;y_axis_rc_code;310;Memorandum items/Exposures secured by mortgages on residential property;;;
 C_07.00;y_axis_rc_code;300;Memorandum items/Exposures in default subject to a risk weight of 100%;;;
 C_07.00;y_axis_rc_code;320;Memorandum items/Exposures in default subject to a risk weight of 150%;;;
-C_08.01;x_axis_rc_code;10;Internal rating scale - pd assigned to the obligor grade or pool;X;;
+C_08.01;x_axis_rc_code;10;Internal rating scale - pd assigned to the obligor grade or pool;X;;%
 C_08.01;x_axis_rc_code;20;Original exposure pre conversion factors;X;;
 C_08.01;x_axis_rc_code;30;Original exposure pre conversion factors/Of which: large financial sector entities and unregulated financial entities;;;
-C_08.01;x_axis_rc_code;40;Credit risk mitigation (crm) techniques with substitution effects on the exposure/Unfunded credit protection/(-) guarantees;;;
-C_08.01;x_axis_rc_code;50;Credit risk mitigation (crm) techniques with substitution effects on the exposure/Unfunded credit protection/(-) credit derivatives;;;
-C_08.01;x_axis_rc_code;60;Credit risk mitigation (crm) techniques with substitution effects on the exposure/(-) other funded credit protection;;;
-C_08.01;x_axis_rc_code;70;Credit risk mitigation (crm) techniques with substitution effects on the exposure/Substitution of the exposure due to crm/(-) total outflows;;;
-C_08.01;x_axis_rc_code;80;Credit risk mitigation (crm) techniques with substitution effects on the exposure/Substitution of the exposure due to crm/Total inflows (+);;;
+C_08.01;x_axis_rc_code;40;CRM with substitution effects on the exposure/Unfunded credit protection/(-) guarantees;;;
+C_08.01;x_axis_rc_code;50;CRM with substitution effects on the exposure/Unfunded credit protection/(-) credit derivatives;;;
+C_08.01;x_axis_rc_code;60;CRM with substitution effects on the exposure/(-) other funded credit protection;;;
+C_08.01;x_axis_rc_code;70;CRM with substitution effects on the exposure/Substitution of the exposure due to crm/(-) total outflows;;;
+C_08.01;x_axis_rc_code;80;CRM with substitution effects on the exposure/Substitution of the exposure due to crm/Total inflows (+);;;
 C_08.01;x_axis_rc_code;90;Exposure after crm substitution effects pre conversion factors;X;;
 C_08.01;x_axis_rc_code;110;Exposure value;X;;
 C_08.01;x_axis_rc_code;140;Exposure value/Of which: large financial sector entities and unregulated financial entities;;;
-C_08.01;x_axis_rc_code;150;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Own estimates of lgd's are used: unfunded credit protection/Guarantees;;;
-C_08.01;x_axis_rc_code;160;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Own estimates of lgd's are used: unfunded credit protection/Credit derivatives;;;
-C_08.01;x_axis_rc_code;170;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection;;;
-C_08.01;x_axis_rc_code;171;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection/Cash on deposit;;;
-C_08.01;x_axis_rc_code;172;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection/Life insurance policies;;;
-C_08.01;x_axis_rc_code;173;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection/Instruments held by a third party;;;
-C_08.01;x_axis_rc_code;180;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Eligible financial collateral;;;
-C_08.01;x_axis_rc_code;190;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Real estate;;;
-C_08.01;x_axis_rc_code;200;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Other physical collateral;;;
-C_08.01;x_axis_rc_code;210;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Receivables;;;
+C_08.01;x_axis_rc_code;150;CRM taken into account in lgd estimates excluding double default treatment/Own estimates of lgd's are used: unfunded credit protection/Guarantees;;;
+C_08.01;x_axis_rc_code;160;CRM taken into account in lgd estimates excluding double default treatment/Own estimates of lgd's are used: unfunded credit protection/Credit derivatives;;;
+C_08.01;x_axis_rc_code;170;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection;;;
+C_08.01;x_axis_rc_code;171;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection/Cash on deposit;;;
+C_08.01;x_axis_rc_code;172;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection/Life insurance policies;;;
+C_08.01;x_axis_rc_code;173;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Own estimates of lgd's are used: other funded credit protection/Instruments held by a third party;;;
+C_08.01;x_axis_rc_code;180;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Eligible financial collateral;;;
+C_08.01;x_axis_rc_code;190;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Real estate;;;
+C_08.01;x_axis_rc_code;200;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Other physical collateral;;;
+C_08.01;x_axis_rc_code;210;CRM taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Receivables;;;
 C_08.01;x_axis_rc_code;220;Subject to double default treatment/Unfunded credit protection;;;
-C_08.01;x_axis_rc_code;230;Exposure weighted average lgd (%);X;;
-C_08.01;x_axis_rc_code;240;Exposure weighted average lgd (%) for large financial sector entities and unregulated financial entities;;;
+C_08.01;x_axis_rc_code;230;Exposure weighted average lgd (%);X;;%
+C_08.01;x_axis_rc_code;240;Exposure weighted average lgd (%) for large financial sector entities and unregulated financial entities;;;%
 C_08.01;x_axis_rc_code;250;Exposure-weighted average maturity value (days);;;
 C_08.01;x_axis_rc_code;255;Risk weighted exposure amount pre supporting factors;;;
 C_08.01;x_axis_rc_code;256;(-)  adjustment to risk-weighted exposure amount due to sme supporting factor;;;

@@ -1,9 +1,13 @@
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260702-format-propagation";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-template-axis";
 import { MODULE_2_TEMPLATES, normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
 let activeModule2TemplateId = MODULE_2_TEMPLATES[0]?.tableId ?? MODULE_2_TARGET.tableId;
 const module2TemplateContexts = new Map();
+const module2TemplateAxisState = {
+  scroll: { left: 0, top: 0 },
+  search: ""
+};
 const MODULE_2_STICKY_PARENT_ROW_HEIGHT = 28;
 let module2StickyFrame = 0;
 
@@ -19,6 +23,7 @@ const elements = {
   moduleViews: [...document.querySelectorAll(".module-view")],
   module2AxisButtons: [...document.querySelectorAll("[data-module-2-axis]")],
   module2AxisCaptions: {
+    template: document.querySelector('[data-axis-caption="template"]'),
     x: document.querySelector('[data-axis-caption="x"]'),
     y: document.querySelector('[data-axis-caption="y"]'),
     z: document.querySelector('[data-axis-caption="z"]')
@@ -26,7 +31,6 @@ const elements = {
   module2Empty: document.querySelector("#module-2-empty"),
   module2Table: document.querySelector("#module-2-table"),
   module2TableWrap: document.querySelector(".metric-table-wrap"),
-  module2TemplateButtons: [...document.querySelectorAll("[data-module-2-template]")],
   previewStatus: document.querySelector("#preview-status"),
   previewTable: document.querySelector("#preview-table"),
   reloadFileButton: document.querySelector("#reload-file-button"),
@@ -53,13 +57,6 @@ export function wireUi(actions) {
     button.addEventListener("click", () => {
       saveModule2ScrollPosition();
       getActiveModule2Context().activeAxis = button.getAttribute("data-module-2-axis") || "y";
-      renderAppState(actions.getState());
-    });
-  });
-  elements.module2TemplateButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      saveModule2ScrollPosition();
-      activeModule2TemplateId = button.getAttribute("data-module-2-template") || activeModule2TemplateId;
       renderAppState(actions.getState());
     });
   });
@@ -188,11 +185,13 @@ function createModule2TemplateContext() {
     defaultExpandedPathsInitialized: false,
     expandedPaths: new Set(),
     scrollByAxis: {
+      template: { left: 0, top: 0 },
       x: { left: 0, top: 0 },
       y: { left: 0, top: 0 },
       z: { left: 0, top: 0 }
     },
     searchByAxis: {
+      template: "",
       x: "",
       y: "",
       z: ""
@@ -208,11 +207,17 @@ function getActiveModule2Template() {
 }
 
 function getActiveModule2Context() {
-  if (!module2TemplateContexts.has(activeModule2TemplateId)) {
-    module2TemplateContexts.set(activeModule2TemplateId, createModule2TemplateContext());
+  return getModule2ContextForTemplate(activeModule2TemplateId);
+}
+
+function getModule2ContextForTemplate(tableId) {
+  const contextKey = tableId || MODULE_2_TARGET.tableId;
+
+  if (!module2TemplateContexts.has(contextKey)) {
+    module2TemplateContexts.set(contextKey, createModule2TemplateContext());
   }
 
-  return module2TemplateContexts.get(activeModule2TemplateId);
+  return module2TemplateContexts.get(contextKey);
 }
 
 function getActiveModule2Axis() {
@@ -223,20 +228,59 @@ function getActiveModule2ExpandedPaths() {
   return getActiveModule2Context().expandedPaths;
 }
 
-function hasActiveModule2ZAxis() {
-  const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
-  return (latestState?.module2Points ?? []).some((point) => (
-    point.tableId === tableId
-    && point.coordinate === "z_axis_rc_code"
-  ));
+function getModule2AxisOptions(state, tableId) {
+  const configuredYCodes = getConfiguredModule2AxisCodes(state, tableId, "y");
+  const configuredZCodes = getConfiguredModule2AxisCodes(state, tableId, "z");
+  const availableXCodes = getAvailableModule2AxisCodes(state, tableId, "x");
+  const availableYCodes = getAvailableModule2AxisCodes(state, tableId, "y");
+  const availableZCodes = getAvailableModule2AxisCodes(state, tableId, "z");
+  const yCodes = getPreferredModule2AxisCodes(configuredYCodes, availableYCodes);
+  const zCodes = getPreferredModule2AxisCodes(configuredZCodes, availableZCodes);
+
+  return {
+    template: {
+      codes: MODULE_2_TEMPLATES.map((template) => template.tableId),
+      isVisible: MODULE_2_TEMPLATES.length > 1
+    },
+    x: {
+      codes: availableXCodes,
+      isVisible: availableXCodes.length > 1
+    },
+    y: {
+      codes: yCodes,
+      isVisible: yCodes.length > 1
+    },
+    z: {
+      codes: zCodes,
+      isVisible: zCodes.length > 1
+    }
+  };
+}
+
+function getPreferredModule2AxisCodes(configuredCodes, availableCodes) {
+  if (availableCodes.length === 0) return configuredCodes;
+
+  const availableCodeSet = new Set(availableCodes);
+  const matchingCodes = configuredCodes.filter((code) => availableCodeSet.has(code));
+
+  return matchingCodes.length > 0 ? matchingCodes : availableCodes;
+}
+
+function getVisibleModule2Axes(axisOptions) {
+  return ["template", "y", "x", "z"].filter((axis) => axisOptions[axis]?.isVisible);
 }
 
 function ensureModule2Selections(state) {
-  const context = getActiveModule2Context();
   const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
-  const yCodes = getConfiguredModule2AxisCodes(state, tableId, "y");
-  const zCodes = getConfiguredModule2AxisCodes(state, tableId, "z");
-  const xCodes = getAvailableModule2AxisCodes(state, "x");
+  ensureModule2TemplateSelections(state, tableId);
+}
+
+function ensureModule2TemplateSelections(state, tableId) {
+  const context = getModule2ContextForTemplate(tableId);
+  const axisOptions = getModule2AxisOptions(state, tableId);
+  const yCodes = axisOptions.y.codes;
+  const zCodes = axisOptions.z.codes;
+  const xCodes = axisOptions.x.codes;
 
   if (!context.selectedYCode || !yCodes.includes(context.selectedYCode)) {
     context.selectedYCode = yCodes[0] ?? "";
@@ -252,8 +296,9 @@ function ensureModule2Selections(state) {
 
   if (zCodes.length === 0) context.selectedZCode = "";
 
-  if (context.activeAxis === "z" && zCodes.length === 0) {
-    context.activeAxis = "y";
+  const visibleAxes = getVisibleModule2Axes(axisOptions);
+  if (visibleAxes.length > 0 && !visibleAxes.includes(context.activeAxis)) {
+    context.activeAxis = visibleAxes[0];
   }
 }
 
@@ -267,8 +312,7 @@ function getConfiguredModule2AxisCodes(state, tableId, axis) {
     .filter(Boolean);
 }
 
-function getAvailableModule2AxisCodes(state, axis) {
-  const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
+function getAvailableModule2AxisCodes(state, tableId, axis) {
   const columnName = `${axis}_axis_rc_code`;
   const indexes = {
     jstCode: state.columns.indexOf("jst_code"),
@@ -292,19 +336,21 @@ function renderModule2(state) {
   const context = getActiveModule2Context();
   const template = getActiveModule2Template();
   ensureModule2Selections(state);
+  if (context.activeAxis === "template") ensureAllModule2TemplateSelections(state);
   const tableSeries = buildModule2AxisSeries(state, {
     axis: context.activeAxis,
     selectedXCode: context.selectedXCode,
     selectedYCode: context.selectedYCode,
     selectedZCode: context.selectedZCode,
-    tableId: template?.tableId
+    tableId: template?.tableId,
+    templateSelections: getModule2TemplateSelections(),
+    templates: MODULE_2_TEMPLATES
   });
   elements.module2Table.replaceChildren();
   elements.unitSelect.value = state.selectedUnit;
 
   elements.module2Empty.hidden = !tableSeries.status;
   elements.module2Empty.textContent = tableSeries.status;
-  renderModule2TemplateTabs();
   renderModule2AxisTabs();
 
   if (tableSeries.rows.length === 0 || tableSeries.dateColumns.length === 0) return;
@@ -312,6 +358,23 @@ function renderModule2(state) {
   renderModule2Table(tableSeries, state.selectedUnit);
   applyModule2Selection();
   restoreModule2ScrollPosition();
+}
+
+function ensureAllModule2TemplateSelections(state) {
+  MODULE_2_TEMPLATES.forEach((template) => {
+    ensureModule2TemplateSelections(state, template.tableId);
+  });
+}
+
+function getModule2TemplateSelections() {
+  return Object.fromEntries(MODULE_2_TEMPLATES.map((template) => {
+    const context = getModule2ContextForTemplate(template.tableId);
+    return [template.tableId, {
+      selectedXCode: context.selectedXCode,
+      selectedYCode: context.selectedYCode,
+      selectedZCode: context.selectedZCode
+    }];
+  }));
 }
 
 function formatLoadedAt(date) {
@@ -393,23 +456,14 @@ function renderModule2Table(series, selectedUnit) {
   applyModule2TreeState(parentPaths, nodePaths);
 }
 
-function renderModule2TemplateTabs() {
-  elements.module2TemplateButtons.forEach((button) => {
-    const isActive = button.getAttribute("data-module-2-template") === activeModule2TemplateId;
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-selected", String(isActive));
-  });
-}
-
 function createModule2SearchInput() {
-  const context = getActiveModule2Context();
   const input = document.createElement("input");
   input.id = "module-2-search";
   input.className = "table-search-input";
   input.type = "search";
   input.placeholder = "search";
   input.setAttribute("aria-label", "Recherche");
-  input.value = context.searchByAxis[context.activeAxis] ?? "";
+  input.value = getActiveModule2SearchRawValue();
   input.addEventListener("input", updateModule2Search);
   input.addEventListener("search", updateModule2Search);
   return input;
@@ -417,19 +471,24 @@ function createModule2SearchInput() {
 
 function updateModule2Search(event) {
   const context = getActiveModule2Context();
-  context.searchByAxis[context.activeAxis] = event.target.value;
+  if (context.activeAxis === "template") {
+    module2TemplateAxisState.search = event.target.value;
+  } else {
+    context.searchByAxis[context.activeAxis] = event.target.value;
+  }
   applyModule2SearchFilter();
 }
 
 function renderModule2AxisTabs() {
   const captions = getModule2AxisCaptions();
   const activeAxis = getActiveModule2Axis();
-  const hasZAxis = hasActiveModule2ZAxis();
+  const tableId = getActiveModule2Template()?.tableId ?? MODULE_2_TARGET.tableId;
+  const axisOptions = getModule2AxisOptions(latestState ?? { columns: [], rows: [], module2Points: [] }, tableId);
 
   elements.module2AxisButtons.forEach((button) => {
     const axis = button.getAttribute("data-module-2-axis");
     const isActive = axis === activeAxis;
-    const isAvailable = axis !== "z" || hasZAxis;
+    const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     button.classList.toggle("is-active", isActive);
     button.hidden = !isAvailable;
     button.setAttribute("aria-selected", String(isActive));
@@ -482,6 +541,7 @@ function getModule2AxisCaptions() {
     ?.description;
 
   return {
+    template: getActiveModule2Template()?.label || activeModule2TemplateId,
     x: xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : ""),
     y: yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : ""),
     z: zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : "")
@@ -490,6 +550,7 @@ function getModule2AxisCaptions() {
 
 function getSelectedModule2CodeForActiveAxis() {
   const context = getActiveModule2Context();
+  if (context.activeAxis === "template") return activeModule2TemplateId;
   if (context.activeAxis === "x") return context.selectedXCode;
   if (context.activeAxis === "z") return context.selectedZCode;
   return context.selectedYCode;
@@ -742,10 +803,16 @@ function applyModule2SearchFilter() {
 }
 
 function getActiveModule2SearchQuery() {
-  const context = getActiveModule2Context();
-  return String(context.searchByAxis[context.activeAxis] ?? "")
+  return getActiveModule2SearchRawValue()
     .trim()
     .toLocaleLowerCase("fr-FR");
+}
+
+function getActiveModule2SearchRawValue() {
+  const context = getActiveModule2Context();
+  return String(context.activeAxis === "template"
+    ? module2TemplateAxisState.search
+    : context.searchByAxis[context.activeAxis] ?? "");
 }
 
 function createModule2SearchText(seriesRow) {
@@ -843,10 +910,14 @@ function getExplicitPathsFromRenderedRows(rows) {
 function selectModule2Row(pointCode, options = {}) {
   const { shouldFocus = false } = options;
   const context = getActiveModule2Context();
+  const activeAxis = context.activeAxis;
 
-  if (context.activeAxis === "y") {
+  if (activeAxis === "template") {
+    activeModule2TemplateId = pointCode || activeModule2TemplateId;
+    getActiveModule2Context().activeAxis = "template";
+  } else if (activeAxis === "y") {
     context.selectedYCode = pointCode || context.selectedYCode;
-  } else if (context.activeAxis === "z") {
+  } else if (activeAxis === "z") {
     context.selectedZCode = pointCode || context.selectedZCode;
   } else {
     context.selectedXCode = pointCode || context.selectedXCode;
@@ -964,7 +1035,10 @@ function moveModule2Selection(direction) {
 function setSelectedModule2CodeForActiveAxis(pointCode) {
   const context = getActiveModule2Context();
 
-  if (context.activeAxis === "y") {
+  if (context.activeAxis === "template") {
+    activeModule2TemplateId = pointCode || activeModule2TemplateId;
+    getActiveModule2Context().activeAxis = "template";
+  } else if (context.activeAxis === "y") {
     context.selectedYCode = pointCode;
   } else if (context.activeAxis === "z") {
     context.selectedZCode = pointCode;
@@ -991,6 +1065,14 @@ function saveModule2ScrollPosition() {
   if (!elements.module2TableWrap) return;
 
   const context = getActiveModule2Context();
+  if (context.activeAxis === "template") {
+    module2TemplateAxisState.scroll = {
+      left: elements.module2TableWrap.scrollLeft,
+      top: elements.module2TableWrap.scrollTop
+    };
+    return;
+  }
+
   context.scrollByAxis[context.activeAxis] = {
     left: elements.module2TableWrap.scrollLeft,
     top: elements.module2TableWrap.scrollTop
@@ -1001,7 +1083,9 @@ function restoreModule2ScrollPosition() {
   if (!elements.module2TableWrap) return;
 
   const context = getActiveModule2Context();
-  const position = context.scrollByAxis[context.activeAxis] ?? { left: 0, top: 0 };
+  const position = context.activeAxis === "template"
+    ? module2TemplateAxisState.scroll
+    : context.scrollByAxis[context.activeAxis] ?? { left: 0, top: 0 };
   elements.module2TableWrap.scrollLeft = position.left;
   elements.module2TableWrap.scrollTop = position.top;
   scheduleModule2StickyParentsUpdate();

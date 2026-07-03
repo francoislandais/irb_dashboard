@@ -416,40 +416,54 @@ table {
 }
 
 .axis-tabs {
+  --axis-tabs-offset-left: 20px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  margin-left: var(--axis-tabs-offset-left);
   min-width: 0;
   overflow: hidden;
 }
 
 .axis-tab {
   display: grid;
-  grid-template-rows: 13px 1fr;
-  width: 420px;
+  flex: 0 0 220px;
+  grid-template-rows: 22px 1fr;
+  width: 220px;
+  max-width: 22	0px;
   height: 88px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
-  color: var(--muted);
+  color: var(--ink);
   cursor: pointer;
   font: inherit;
   min-width: 0;
-  padding: 5px 9px 7px;
+  overflow: hidden;
+  padding: 0;
   text-align: left;
 }
 
+.axis-tab[hidden] {
+  display: none;
+}
+
 .axis-tab.is-active {
-  border-color: #8eb19f;
-  background: #eef4f1;
-  color: var(--primary-dark);
+  border-color: #17483f;
+  background: #17483f;
+  color: #ffffff;
 }
 
 .axis-tab-title {
-  color: inherit;
+  align-items: center;
+  background: #17483f;
+  border-bottom: 1px solid #ffffff;
+  color: #ffffff;
+  display: flex;
   font-size: 0.68rem;
   font-weight: 400;
   line-height: 1.1;
+  padding: 0 9px;
   text-transform: none;
 }
 
@@ -457,22 +471,24 @@ table {
   display: block;
   min-width: 0;
   overflow: hidden;
+  background: #ffffff;
   color: var(--ink);
   font-size: 0.72rem;
   font-weight: 400;
   line-height: 1.22;
+  padding: 6px 9px 7px;
 }
 
 .axis-tab.is-active .axis-tab-value {
-  color: var(--primary-dark);
+  background: #17483f;
+  color: #ffffff;
 }
 
 .axis-tab-line {
   display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .table-search-input {

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260702-axis-tabs-plain">
+    <link rel="stylesheet" href="./src/styles.css?v=20260703-template-axis">
   </head>
   <body>
     <div class="app-shell">
@@ -102,43 +102,11 @@
           <article class="metric-panel">
             <div id="module-2-empty" class="notice" hidden></div>
 
-            <div class="template-tabs" role="tablist" aria-label="Template du tableau">
-              <button class="template-tab is-active" type="button" role="tab" aria-selected="true" data-module-2-template="C_01.00">
-                C_01.00
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_02.00">
-                C_02.00
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_03.00">
-                C_03.00
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_04.00">
-                C_04.00
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_05.01">
-                C_05.01
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_05.02">
-                C_05.02
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_06.01">
-                C_06.01
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_07.00">
-                C_07.00
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_08.01">
-                C_08.01
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_09.01">
-                C_09.01
-              </button>
-              <button class="template-tab" type="button" role="tab" aria-selected="false" data-module-2-template="C_09.02">
-                C_09.02
-              </button>
-            </div>
-
             <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
+              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-module-2-axis="template">
+                <span class="axis-tab-title">template</span>
+                <span class="axis-tab-value" data-axis-caption="template">-</span>
+              </button>
               <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-module-2-axis="y">
                 <span class="axis-tab-title">row</span>
                 <span class="axis-tab-value" data-axis-caption="y">-</span>
@@ -161,6 +129,6 @@
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
-    <script type="module" src="./src/main.js?v=20260702-axis-tabs-plain"></script>
+    <script type="module" src="./src/main.js?v=20260703-template-axis"></script>
   </body>
 </html>

@@ -24,7 +24,7 @@ export function buildModule2Series(state) {
 }
 
 export function buildModule2AxisSeries(state, options = {}) {
-  const axis = ["x", "y", "z"].includes(options.axis) ? options.axis : "y";
+  const axis = ["template", "x", "y", "z"].includes(options.axis) ? options.axis : "y";
   const tableId = options.tableId || MODULE_2_TARGET.tableId;
   const selectedXCode = normalizeAxisCode(options.selectedXCode || MODULE_2_TARGET.xAxisRcCode, "x");
   const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
@@ -41,7 +41,7 @@ export function buildModule2AxisSeries(state, options = {}) {
     };
   }
 
-  if (pointsConfig.length === 0) {
+  if (axis !== "template" && pointsConfig.length === 0) {
     return {
       dateColumns: [],
       matchCount: 0,
@@ -60,14 +60,17 @@ export function buildModule2AxisSeries(state, options = {}) {
   }
 
   const dateColumns = getReferenceColumns(state.columns);
-  const inheritedFormat = getSelectedFilterFormat(state, tableId, axis, {
+  const selections = {
     selectedXCode,
     selectedYCode,
     selectedZCode
-  });
-  const rowSeries = axis === "x"
-    ? buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat)
-    : buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, {
+  };
+  const inheritedFormat = getSelectedFilterFormat(state, tableId, axis, selections);
+  const rowSeries = axis === "template"
+    ? buildTemplateSeriesRows(state, indexes, dateColumns, options.templates ?? [], options.templateSelections ?? {})
+    : axis === "x"
+      ? buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat)
+      : buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, {
       selectedXCode,
       selectedYCode,
       selectedZCode
@@ -164,19 +167,69 @@ function buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCod
       const matchedRows = matchedRowsByXCode.get(xCode) ?? [];
       const mapping = state.dimensionMapping?.find(tableId, "x_axis_rc_code", xCode);
       const description = mapping?.description || `X ${xCode}`;
+      const hierarchy = parseDescriptionHierarchy(description);
 
       return {
         code: xCode,
         description,
-        displayDescription: description,
+        displayDescription: hierarchy.label,
         format: mapping?.format || inheritedFormat,
-        hierarchyPath: description,
-        indentLevel: 0,
+        hierarchyPath: hierarchy.path,
+        indentLevel: hierarchy.level,
         matchCount: matchedRows.length,
-        parentPath: "",
+        parentPath: hierarchy.parentPath,
         values: buildValues(dateColumns, matchedRows)
       };
     });
+}
+
+function buildTemplateSeriesRows(state, indexes, dateColumns, templates, templateSelections) {
+  return templates.map((template) => {
+    const tableId = template.tableId;
+    const selections = normalizeTemplateSelections(templateSelections[tableId]);
+    const matchedRows = state.rows.filter((row) => (
+      row[indexes.jstCode] === state.selectedJst
+      && row[indexes.tableId] === tableId
+      && matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template")
+      && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template")
+      && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template")
+    ));
+    const format = getSelectedFilterFormat(state, tableId, "template", selections);
+
+    return {
+      code: tableId,
+      description: template.label || tableId,
+      displayDescription: template.label || tableId,
+      format,
+      hierarchyPath: template.label || tableId,
+      indentLevel: 0,
+      matchCount: matchedRows.length,
+      parentPath: "",
+      values: buildValues(dateColumns, matchedRows)
+    };
+  });
+}
+
+function normalizeTemplateSelections(selections = {}) {
+  return {
+    selectedXCode: normalizeAxisCode(selections.selectedXCode || MODULE_2_TARGET.xAxisRcCode, "x"),
+    selectedYCode: normalizeAxisCode(selections.selectedYCode || "", "y"),
+    selectedZCode: normalizeAxisCode(selections.selectedZCode || "", "z")
+  };
+}
+
+function parseDescriptionHierarchy(description) {
+  const parts = String(description ?? "")
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return {
+    label: parts.at(-1) ?? "",
+    level: Math.max(0, parts.length - 1),
+    parentPath: parts.slice(0, -1).join(" > "),
+    path: parts.join(" > ")
+  };
 }
 
 function getSelectedFilterFormat(state, tableId, activeAxis, selections) {
