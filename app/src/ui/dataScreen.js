@@ -569,6 +569,10 @@ function renderModule2AxisTabs() {
     button.setAttribute("aria-selected", String(isActive));
   });
 
+  renderModule2AxisCaptions(captions);
+}
+
+function renderModule2AxisCaptions(captions = getModule2AxisCaptions()) {
   Object.entries(elements.module2AxisCaptions).forEach(([axis, element]) => {
     if (!element) return;
 
@@ -999,13 +1003,7 @@ function selectModule2Row(pointCode, options = {}) {
   }
   const selectedCode = getSelectedModule2CodeForActiveAxis();
 
-  if (latestState) {
-    saveModule2ScrollPosition();
-    renderAppState(latestState);
-    if (shouldFocus && selectedCode) focusSelectedModule2Row();
-    return;
-  }
-
+  renderModule2AxisCaptions();
   applyModule2Selection();
   if (shouldFocus && selectedCode) focusSelectedModule2Row();
 }
@@ -1103,6 +1101,7 @@ function moveModule2Selection(direction) {
     : Math.min(Math.max(currentIndex + direction, 0), rows.length - 1);
 
   setSelectedModule2CodeForActiveAxis(rows[nextIndex].dataset.pointCode);
+  renderModule2AxisCaptions();
   applyModule2Selection();
   focusSelectedModule2Row();
 }
