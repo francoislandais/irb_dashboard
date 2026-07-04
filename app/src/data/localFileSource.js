@@ -2,6 +2,7 @@ const DB_NAME = "local-csv-app";
 const DB_VERSION = 1;
 const STORE_NAME = "file-handles";
 const HANDLE_KEY = "primary-csv";
+const DATASET_HANDLES_KEY = "dataset-csv-handles";
 
 export function isFileSystemAccessSupported() {
   return "showOpenFilePicker" in window && "indexedDB" in window;
@@ -51,6 +52,39 @@ export async function storeFileHandle(handle) {
   if (!isFileSystemAccessSupported()) return;
   const db = await openDb();
   await putValue(db, HANDLE_KEY, handle);
+  db.close();
+}
+
+export async function storeDatasetFileHandle({ id, fileName, handle }) {
+  if (!isFileSystemAccessSupported() || !id || !handle) return;
+  const db = await openDb();
+  const handles = await getValue(db, DATASET_HANDLES_KEY) ?? [];
+  const nextHandles = [
+    ...handles.filter((entry) => entry.id !== id),
+    {
+      id,
+      fileName,
+      handle,
+      storedAt: new Date().toISOString()
+    }
+  ];
+  await putValue(db, DATASET_HANDLES_KEY, nextHandles);
+  db.close();
+}
+
+export async function getStoredDatasetFileHandles() {
+  if (!isFileSystemAccessSupported()) return [];
+  const db = await openDb();
+  const handles = await getValue(db, DATASET_HANDLES_KEY);
+  db.close();
+  return Array.isArray(handles) ? handles : [];
+}
+
+export async function clearStoredDatasetFileHandle(id) {
+  if (!("indexedDB" in window) || !id) return;
+  const db = await openDb();
+  const handles = await getValue(db, DATASET_HANDLES_KEY) ?? [];
+  await putValue(db, DATASET_HANDLES_KEY, handles.filter((entry) => entry.id !== id));
   db.close();
 }
 

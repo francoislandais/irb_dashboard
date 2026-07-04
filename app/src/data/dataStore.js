@@ -2,7 +2,9 @@ const initialState = {
   activeModule: "module-2",
   capabilityNotice: "",
   columns: [],
+  activeDatasetId: "",
   datasetLabel: "",
+  datasets: [],
   dataIndexes: null,
   dimensionMapping: null,
   dimensionMappingError: "",
@@ -19,6 +21,10 @@ const initialState = {
   selectedJst: "",
   selectedUnit: "millions"
 };
+
+function createDatasetId(source) {
+  return `${source || "dataset"}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export function createDataStore() {
   let state = { ...initialState };
@@ -38,14 +44,33 @@ export function createDataStore() {
       return () => listeners.delete(listener);
     },
 
-    setData({ file, fileHandle, columns, dataIndexes, jstOptions, rows, loadedAt }) {
+    setData({ file, fileHandle, columns, dataIndexes, datasetId, datasetLabel, source, jstOptions, rows, loadedAt }) {
+      const nextDatasetId = datasetId || createDatasetId(source || "local");
+      const nextDataset = {
+        id: nextDatasetId,
+        columns,
+        dataIndexes,
+        fileHandle,
+        fileName: file.name,
+        jstOptions,
+        label: datasetLabel || file.name || "Dataset",
+        loadedAt,
+        rows,
+        source: source || "local"
+      };
+      const datasets = [
+        ...state.datasets.filter((dataset) => dataset.id !== nextDatasetId),
+        nextDataset
+      ];
       const selectedJst = jstOptions.includes(state.selectedJst)
         ? state.selectedJst
         : jstOptions[0] ?? "";
 
       state = {
         ...state,
+        activeDatasetId: nextDatasetId,
         columns,
+        datasets,
         dataIndexes,
         error: "",
         fileHandle,
@@ -56,6 +81,69 @@ export function createDataStore() {
         rows,
         selectedJst
       };
+      emit();
+    },
+
+    setActiveDataset(activeDatasetId) {
+      const dataset = state.datasets.find((candidate) => candidate.id === activeDatasetId);
+      if (!dataset) return;
+
+      const selectedJst = dataset.jstOptions.includes(state.selectedJst)
+        ? state.selectedJst
+        : dataset.jstOptions[0] ?? "";
+
+      state = {
+        ...state,
+        activeDatasetId,
+        columns: dataset.columns,
+        dataIndexes: dataset.dataIndexes,
+        error: "",
+        fileHandle: dataset.fileHandle,
+        fileName: dataset.fileName,
+        jstOptions: dataset.jstOptions,
+        loadedAt: dataset.loadedAt,
+        rememberedFileReady: false,
+        rows: dataset.rows,
+        selectedJst
+      };
+      emit();
+    },
+
+    forgetDataset(datasetId = state.activeDatasetId) {
+      const datasets = state.datasets.filter((dataset) => dataset.id !== datasetId);
+      const nextDataset = datasets[0] ?? null;
+
+      state = nextDataset
+        ? {
+          ...state,
+          activeDatasetId: nextDataset.id,
+          columns: nextDataset.columns,
+          datasets,
+          dataIndexes: nextDataset.dataIndexes,
+          error: "",
+          fileHandle: nextDataset.fileHandle,
+          fileName: nextDataset.fileName,
+          jstOptions: nextDataset.jstOptions,
+          loadedAt: nextDataset.loadedAt,
+          rememberedFileReady: false,
+          rows: nextDataset.rows,
+          selectedJst: nextDataset.jstOptions[0] ?? ""
+        }
+        : {
+          ...state,
+          activeDatasetId: "",
+          columns: [],
+          datasets: [],
+          dataIndexes: null,
+          error: "",
+          fileHandle: null,
+          fileName: "",
+          jstOptions: [],
+          loadedAt: null,
+          rememberedFileReady: false,
+          rows: [],
+          selectedJst: ""
+        };
       emit();
     },
 
@@ -145,7 +233,9 @@ export function createDataStore() {
       state = {
         ...initialState,
         capabilityNotice: state.capabilityNotice,
+        activeDatasetId: "",
         datasetLabel: state.datasetLabel,
+        datasets: [],
         dimensionMapping: state.dimensionMapping,
         dimensionMappingError: state.dimensionMappingError,
         module2Points: state.module2Points,

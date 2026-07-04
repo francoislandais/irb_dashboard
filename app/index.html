@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260704-standalone-export">
+    <link rel="stylesheet" href="./src/styles.css?v=20260704-datasets">
   </head>
   <body>
     <div class="app-shell">
@@ -34,6 +34,15 @@
               <option value="euros">EUR</option>
             </select>
           </label>
+          <div class="dataset-controls" aria-label="Datasets">
+            <label class="field dataset-field">
+              <span>Dataset</span>
+              <select id="dataset-select" disabled>
+                <option value="">Aucun dataset</option>
+              </select>
+            </label>
+            <button id="export-standalone-button" class="topbar-button" type="button" disabled>Exporter</button>
+          </div>
         </section>
       </header>
 
@@ -42,45 +51,6 @@
           <button class="module-link is-active" type="button" data-module-target="module-2">Reporting</button>
           <button class="module-link" type="button" data-module-target="cet-1">CET 1</button>
         </nav>
-
-        <section class="sidebar-data-source" aria-label="Source des données locales">
-          <div>
-            <h2>Source CSV</h2>
-            <p id="file-status">Aucun fichier chargé.</p>
-          </div>
-
-          <button id="choose-file-button" class="sidebar-button primary" type="button">
-            Choisir un CSV
-          </button>
-          <div class="sidebar-actions">
-            <button id="reload-file-button" class="sidebar-button" type="button" disabled>
-              Recharger
-            </button>
-            <button id="forget-file-button" class="sidebar-button danger" type="button" disabled>
-              Oublier
-            </button>
-          </div>
-          <button id="export-standalone-button" class="sidebar-button" type="button" disabled>
-            Exporter HTML portable
-          </button>
-
-          <div id="support-notice" class="sidebar-notice" hidden></div>
-
-          <dl class="sidebar-stats" aria-label="Résumé des données">
-            <div>
-              <dt>Lignes</dt>
-              <dd id="row-count">0</dd>
-            </div>
-            <div>
-              <dt>Colonnes</dt>
-              <dd id="column-count">0</dd>
-            </div>
-            <div>
-              <dt>Fichier</dt>
-              <dd id="file-name">-</dd>
-            </div>
-          </dl>
-        </section>
       </aside>
 
       <main class="main-view">
@@ -117,6 +87,6 @@
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
-    <script type="module" src="./src/main.js?v=20260704-standalone-export"></script>
+    <script type="module" src="./src/main.js?v=20260704-datasets"></script>
   </body>
 </html>

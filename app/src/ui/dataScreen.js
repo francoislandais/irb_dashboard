@@ -1,5 +1,5 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260704-standalone-export";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260704-datasets";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -21,6 +21,7 @@ const COMMON_MODULE_2_DENOMINATORS = [
 ];
 const MODULE_2_STICKY_PARENT_ROW_HEIGHT = 28;
 const TEMPLATE_URL_PARAM = "template";
+const ADD_DATASET_OPTION = "__add_dataset__";
 let module2StickyFrame = 0;
 let module2ContextMenu = null;
 let module2BenchmarkDialog = null;
@@ -29,6 +30,7 @@ const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
+  datasetSelect: document.querySelector("#dataset-select"),
   exportStandaloneButton: document.querySelector("#export-standalone-button"),
   fileName: document.querySelector("#file-name"),
   fileStatus: document.querySelector("#file-status"),
@@ -55,10 +57,18 @@ const elements = {
 
 export function wireUi(actions) {
   elements.sidebarToggle?.addEventListener("click", toggleSidebar);
-  elements.chooseFileButton.addEventListener("click", actions.chooseFile);
-  elements.reloadFileButton.addEventListener("click", actions.reloadFile);
-  elements.forgetFileButton.addEventListener("click", actions.forgetFile);
+  elements.chooseFileButton?.addEventListener("click", actions.chooseFile);
+  elements.reloadFileButton?.addEventListener("click", actions.reloadFile);
+  elements.forgetFileButton?.addEventListener("click", actions.forgetFile);
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
+  elements.datasetSelect?.addEventListener("change", (event) => {
+    if (event.target.value === ADD_DATASET_OPTION) {
+      actions.chooseFile();
+      renderDatasetSelect(actions.getState().datasets, actions.getState().activeDatasetId);
+      return;
+    }
+    actions.setActiveDataset(event.target.value);
+  });
   elements.jstSelect.addEventListener("change", (event) => {
     actions.updateSelectedJst(event.target.value);
   });
@@ -142,31 +152,64 @@ function toggleSidebar() {
 export function renderAppState(state) {
   latestState = state;
   const hasData = state.rows.length > 0 || state.columns.length > 0;
+  const activeDataset = state.datasets.find((dataset) => dataset.id === state.activeDatasetId) ?? null;
 
-  elements.rowCount.textContent = state.rows.length.toLocaleString("fr-FR");
-  elements.columnCount.textContent = state.columns.length.toLocaleString("fr-FR");
-  elements.fileName.textContent = state.fileName || "-";
-  elements.reloadFileButton.disabled = !state.fileHandle;
-  elements.forgetFileButton.disabled = !state.fileHandle && !hasData;
+  if (elements.rowCount) elements.rowCount.textContent = state.rows.length.toLocaleString("fr-FR");
+  if (elements.columnCount) elements.columnCount.textContent = state.columns.length.toLocaleString("fr-FR");
+  if (elements.fileName) elements.fileName.textContent = activeDataset?.label || state.fileName || "-";
+  if (elements.reloadFileButton) elements.reloadFileButton.disabled = !state.fileHandle;
+  if (elements.forgetFileButton) {
+    elements.forgetFileButton.disabled = !hasData || activeDataset?.source === "embedded";
+  }
   if (elements.exportStandaloneButton) elements.exportStandaloneButton.disabled = !hasData;
+  renderDatasetSelect(state.datasets, state.activeDatasetId);
   renderJstSelect(state.jstOptions, state.selectedJst);
   renderActiveModule(state.activeModule);
 
-  if (state.isRestoring) {
-    elements.fileStatus.textContent = "Recherche du dernier fichier utilisé...";
-  } else if (state.rememberedFileReady) {
-    elements.fileStatus.textContent = "Dernier fichier mémorisé. Cliquez sur Recharger pour autoriser sa lecture.";
-  } else if (state.error) {
-    elements.fileStatus.textContent = state.error;
-  } else if (state.fileName) {
-    elements.fileStatus.textContent = `Fichier chargé ${formatLoadedAt(state.loadedAt)}.`;
-  } else {
-    elements.fileStatus.textContent = "Aucun fichier chargé.";
+  if (elements.fileStatus) {
+    if (state.isRestoring) {
+      elements.fileStatus.textContent = "Recherche du dernier fichier utilisé...";
+    } else if (state.rememberedFileReady) {
+      elements.fileStatus.textContent = "Dernier fichier mémorisé. Cliquez sur Recharger pour autoriser sa lecture.";
+    } else if (state.error) {
+      elements.fileStatus.textContent = state.error;
+    } else if (activeDataset?.source === "embedded") {
+      elements.fileStatus.textContent = "Dataset embarqué actif.";
+    } else if (state.fileName) {
+      elements.fileStatus.textContent = `Dataset chargé ${formatLoadedAt(state.loadedAt)}.`;
+    } else {
+      elements.fileStatus.textContent = "Aucun dataset.";
+    }
   }
 
-  elements.supportNotice.hidden = !state.capabilityNotice;
-  elements.supportNotice.textContent = state.capabilityNotice;
+  if (elements.supportNotice) {
+    elements.supportNotice.hidden = !state.capabilityNotice;
+    elements.supportNotice.textContent = state.capabilityNotice;
+  }
   if (state.activeModule === "module-2") renderModule2(state);
+}
+
+function renderDatasetSelect(datasets, activeDatasetId) {
+  if (!elements.datasetSelect) return;
+  elements.datasetSelect.replaceChildren();
+
+  if (datasets.length === 0) {
+    elements.datasetSelect.append(new Option("Add a dataset", ADD_DATASET_OPTION));
+    elements.datasetSelect.disabled = false;
+    return;
+  }
+
+  datasets.forEach((dataset) => {
+    const suffix = dataset.source === "embedded" ? " - embarqué" : "";
+    elements.datasetSelect.append(new Option(
+      `${dataset.label || dataset.fileName || "Dataset"}${suffix}`,
+      dataset.id,
+      false,
+      dataset.id === activeDatasetId
+    ));
+  });
+  elements.datasetSelect.append(new Option("Add a dataset", ADD_DATASET_OPTION));
+  elements.datasetSelect.disabled = false;
 }
 
 function renderJstSelect(jstOptions, selectedJst) {

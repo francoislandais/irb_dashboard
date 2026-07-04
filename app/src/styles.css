@@ -123,8 +123,7 @@ button:disabled {
   padding: 0;
 }
 
-.app-shell.is-sidebar-collapsed .module-list,
-.app-shell.is-sidebar-collapsed .sidebar-data-source {
+.app-shell.is-sidebar-collapsed .module-list {
   display: none;
 }
 
@@ -253,13 +252,50 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 18px;
+  gap: 10px;
   align-items: center;
   min-height: 46px;
   width: 100%;
   padding: 6px 14px;
   background: #17211c;
   color: #ffffff;
+}
+
+.dataset-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.dataset-field {
+  width: 230px;
+}
+
+.topbar-button {
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  background: transparent;
+  color: #ffffff;
+  padding: 0 9px;
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.topbar-button.primary {
+  border-color: #4c9479;
+  background: #2f725d;
+}
+
+.topbar-button.danger {
+  color: #f1b0aa;
+}
+
+.topbar-button:disabled {
+  color: rgba(255, 255, 255, 0.38);
+  border-color: rgba(255, 255, 255, 0.13);
 }
 
 h1,
@@ -302,7 +338,7 @@ p {
 }
 
 .compact-field {
-  width: 190px;
+  width: 170px;
 }
 
 .field input,
@@ -327,6 +363,7 @@ p {
   border-color: rgba(255, 255, 255, 0.28);
   color: #ffffff;
   background: transparent;
+  width: 100%;
 }
 
 .global-bar .field select option {
@@ -1193,8 +1230,13 @@ table {
     flex-direction: column;
   }
 
+  .dataset-controls {
+    flex-wrap: wrap;
+  }
+
   .field,
   .compact-field,
+  .dataset-field,
   .field input,
   .field select {
     width: 100%;

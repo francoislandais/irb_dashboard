@@ -2,18 +2,21 @@ import { parseCsv } from "./data/csvParser.js";
 import { buildDataIndexes } from "./data/dataIndex.js";
 import { loadDimensionMapping } from "./data/dimensionMapping.js";
 import { loadModule2Points } from "./data/module2Config.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260704-standalone-export";
+import { getUniqueValues } from "./data/timeSeries.js?v=20260704-datasets";
 import {
+  clearStoredDatasetFileHandle,
   clearStoredFileHandle,
+  getStoredDatasetFileHandles,
   getStoredFileHandle,
   hasReadPermission,
   isFileSystemAccessSupported,
   openCsvFile,
   readFileFromHandle,
+  storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js";
 import { createDataStore } from "./data/dataStore.js";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260704-standalone-export";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260704-datasets";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -33,6 +36,7 @@ const STANDALONE_MODULE_PATHS = [
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";
 let currentCsvFileName = standaloneData?.fileName ?? "";
+const csvTextByDatasetId = new Map();
 
 const actions = {
   getState() {
@@ -45,12 +49,22 @@ const actions = {
       if (!source) return;
 
       if (source.kind === "persistent") {
+        const datasetId = createDatasetId("local");
         await storeFileHandle(source.handle);
+        await storeDatasetFileHandle({ id: datasetId, fileName: source.file.name, handle: source.handle });
+        await loadFile(source.file, source.handle ?? null, {
+          datasetId,
+          datasetLabel: source.file.name,
+          source: "local"
+        });
       } else {
         await clearStoredFileHandle();
+        await loadFile(source.file, null, {
+          datasetId: createDatasetId("session"),
+          datasetLabel: source.file.name,
+          source: "session"
+        });
       }
-
-      await loadFile(source.file, source.handle ?? null);
     } catch (error) {
       if (isPickerAbort(error)) return;
       store.setError(error);
@@ -58,7 +72,8 @@ const actions = {
   },
 
   async reloadFile() {
-    const handle = store.getState().fileHandle ?? await getStoredFileHandle();
+    const state = store.getState();
+    const handle = state.fileHandle ?? await getStoredFileHandle();
     if (!handle) {
       await actions.chooseFile();
       return;
@@ -66,15 +81,32 @@ const actions = {
 
     try {
       const file = await readFileFromHandle(handle);
-      await loadFile(file, handle);
+      await loadFile(file, handle, {
+        datasetId: state.activeDatasetId || createDatasetId("local"),
+        datasetLabel: state.fileName || file.name,
+        source: "local"
+      });
     } catch (error) {
       store.setError(error);
     }
   },
 
   async forgetFile() {
+    const state = store.getState();
+    if (state.activeDatasetId) {
+      csvTextByDatasetId.delete(state.activeDatasetId);
+      await clearStoredDatasetFileHandle(state.activeDatasetId);
+      await clearStoredFileHandle();
+      store.forgetDataset(state.activeDatasetId);
+      return;
+    }
     await clearStoredFileHandle();
     store.reset();
+  },
+
+  setActiveDataset(datasetId) {
+    store.setActiveDataset(datasetId);
+    updateUrlJstParam(store.getState().selectedJst);
   },
 
   updateDatasetLabel(label) {
@@ -107,22 +139,27 @@ const actions = {
 const initialModule = getUrlModuleParam();
 if (initialModule) store.setActiveModule(initialModule);
 
-async function loadFile(file, handle) {
+async function loadFile(file, handle, options = {}) {
   const text = await file.text();
   currentCsvText = text;
   currentCsvFileName = file.name;
-  await loadCsvText(text, file.name, handle, new Date());
+  await loadCsvText(text, file.name, handle, new Date(), options);
 }
 
-async function loadCsvText(text, fileName, handle, loadedAt) {
+async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const parsed = parseCsv(text);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
   const jstOptions = getUniqueValues(parsed.columns, parsed.rows, "jst_code");
+  const datasetId = options.datasetId || createDatasetId(options.source || "local");
+  csvTextByDatasetId.set(datasetId, text);
   store.setData({
     file: { name: fileName },
     fileHandle: handle,
     columns: parsed.columns,
     dataIndexes,
+    datasetId,
+    datasetLabel: options.datasetLabel || fileName,
+    source: options.source || "local",
     jstOptions,
     rows: parsed.rows,
     loadedAt
@@ -142,7 +179,12 @@ async function loadStandaloneData() {
     standaloneData.csvText,
     currentCsvFileName,
     null,
-    new Date(standaloneData.loadedAt || Date.now())
+    new Date(standaloneData.loadedAt || Date.now()),
+    {
+      datasetId: "embedded",
+      datasetLabel: "Données embarquées",
+      source: "embedded"
+    }
   );
   store.setCapabilityNotice("Version portable : les données sont intégrées dans ce fichier HTML.");
   return true;
@@ -194,16 +236,19 @@ function normalizeJstForUrlMatch(value) {
 }
 
 async function exportStandaloneHtml() {
-  if (!currentCsvText) {
+  const state = store.getState();
+  const csvText = csvTextByDatasetId.get(state.activeDatasetId) || currentCsvText;
+  const csvFileName = state.fileName || currentCsvFileName;
+  if (!csvText) {
     throw new Error("Chargez un CSV avant d'exporter une version portable.");
   }
 
   const bundle = await getStandaloneBundle();
-  const html = buildStandaloneHtml(bundle);
+  const html = buildStandaloneHtml(bundle, { csvText, fileName: csvFileName });
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const link = document.createElement("a");
-  const safeName = currentCsvFileName
-    ? currentCsvFileName.replace(/\.[^.]+$/, "").replace(/[^a-z0-9_-]+/gi, "-")
+  const safeName = csvFileName
+    ? csvFileName.replace(/\.[^.]+$/, "").replace(/[^a-z0-9_-]+/gi, "-")
     : "agora-data";
 
   const downloadUrl = URL.createObjectURL(blob);
@@ -245,11 +290,11 @@ async function fetchAppText(path) {
   return response.text();
 }
 
-function buildStandaloneHtml(bundle) {
+function buildStandaloneHtml(bundle, activeDataset) {
   const appMarkup = extractAppMarkup(bundle.indexHtml);
   const standalonePayload = {
-    csvText: currentCsvText,
-    fileName: currentCsvFileName || "embedded-data.csv",
+    csvText: activeDataset.csvText,
+    fileName: activeDataset.fileName || "embedded-data.csv",
     loadedAt: new Date().toISOString()
   };
 
@@ -346,17 +391,35 @@ async function restoreLastFile() {
   }
 
   const handle = await getStoredFileHandle();
-  if (!handle) return;
+  const storedDatasets = await getStoredDatasetFileHandles();
+  if (!handle && storedDatasets.length === 0) return;
 
   store.setRestoring(true);
   try {
+    for (const entry of storedDatasets) {
+      if (!entry.handle || !(await hasReadPermission(entry.handle))) continue;
+      const file = await readFileFromHandle(entry.handle, { requestPermission: false });
+      await loadFile(file, entry.handle, {
+        datasetId: entry.id,
+        datasetLabel: entry.fileName || file.name,
+        source: "local"
+      });
+    }
+
+    if (store.getState().rows.length > 0) return;
+
+    if (!handle) return;
     if (!(await hasReadPermission(handle))) {
       store.setRememberedFileReady(handle);
       return;
     }
 
     const file = await readFileFromHandle(handle, { requestPermission: false });
-    await loadFile(file, handle);
+    await loadFile(file, handle, {
+      datasetId: createDatasetId("local"),
+      datasetLabel: file.name,
+      source: "local"
+    });
   } catch (error) {
     store.setError(error);
   } finally {
@@ -366,6 +429,10 @@ async function restoreLastFile() {
 
 function isPickerAbort(error) {
   return error?.name === "AbortError";
+}
+
+function createDatasetId(source) {
+  return `${source || "dataset"}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 wireUi(actions);
