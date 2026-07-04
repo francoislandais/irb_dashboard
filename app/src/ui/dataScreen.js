@@ -30,6 +30,16 @@ const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
+  cet1Dashboard: document.querySelector("#cet1-dashboard"),
+  cet1DenominatorContext: document.querySelector("#cet1-denominator-context"),
+  cet1DenominatorValue: document.querySelector("#cet1-denominator-value"),
+  cet1Empty: document.querySelector("#cet1-empty"),
+  cet1NumeratorContext: document.querySelector("#cet1-numerator-context"),
+  cet1NumeratorValue: document.querySelector("#cet1-numerator-value"),
+  cet1RatioChange: document.querySelector("#cet1-ratio-change"),
+  cet1RatioChangeContext: document.querySelector("#cet1-ratio-change-context"),
+  cet1RatioContext: document.querySelector("#cet1-ratio-context"),
+  cet1RatioValue: document.querySelector("#cet1-ratio-value"),
   datasetSelect: document.querySelector("#dataset-select"),
   exportStandaloneButton: document.querySelector("#export-standalone-button"),
   fileName: document.querySelector("#file-name"),
@@ -187,6 +197,7 @@ export function renderAppState(state) {
     elements.supportNotice.textContent = state.capabilityNotice;
   }
   if (state.activeModule === "module-2") renderModule2(state);
+  if (state.activeModule === "cet-1") renderCet1(state);
 }
 
 function renderDatasetSelect(datasets, activeDatasetId) {
@@ -235,6 +246,178 @@ function renderActiveModule(activeModule) {
   elements.moduleViews.forEach((view) => {
     view.classList.toggle("is-visible", view.id === `${activeModule}-view`);
   });
+}
+
+function renderCet1(state) {
+  const snapshot = getCet1RatioSnapshot(state);
+  if (!elements.cet1Empty || !elements.cet1Dashboard) return;
+
+  if (snapshot.status) {
+    elements.cet1Empty.hidden = false;
+    elements.cet1Empty.textContent = snapshot.status;
+    elements.cet1Dashboard.hidden = true;
+    return;
+  }
+
+  elements.cet1Empty.hidden = true;
+  elements.cet1Dashboard.hidden = false;
+  elements.cet1RatioValue.textContent = formatPercentValue(snapshot.ratio.currentValue);
+  elements.cet1RatioContext.textContent = `${snapshot.jstCode} - ${snapshot.currentDateLabel}`;
+  elements.cet1RatioChange.textContent = formatBasisPointChange(snapshot.ratio.changeBasisPoints);
+  elements.cet1RatioChangeContext.textContent = `vs ${snapshot.previousDateLabel}`;
+  elements.cet1NumeratorValue.textContent = formatCet1Amount(snapshot.numerator.currentValue, state.selectedUnit);
+  elements.cet1NumeratorContext.textContent = `C_01.00 - ${snapshot.currentDateLabel}`;
+  elements.cet1DenominatorValue.textContent = formatCet1Amount(snapshot.denominator.currentValue, state.selectedUnit);
+  elements.cet1DenominatorContext.textContent = `C_02.00 - ${snapshot.currentDateLabel}`;
+}
+
+function getCet1RatioSnapshot(state) {
+  const indexes = getCet1RequiredIndexes(state.columns);
+  if (!indexes || !state.selectedJst) {
+    return { status: "Load a CSV and select a JST." };
+  }
+
+  const referenceColumns = getCet1ReferenceColumns(state.columns);
+  const latestReferenceColumn = referenceColumns.at(-1);
+  const previousReferenceColumn = referenceColumns.at(-2);
+  if (!latestReferenceColumn || !previousReferenceColumn) {
+    return { status: "At least two reference dates are required to compute the CET1 movement." };
+  }
+
+  const ratio = getCet1DataPoint(state, indexes, {
+    tableId: "C_03.00",
+    xCode: "0010",
+    yCode: "0010"
+  }, latestReferenceColumn, previousReferenceColumn);
+  const numerator = getCet1DataPoint(state, indexes, {
+    tableId: "C_01.00",
+    yCode: "0020"
+  }, latestReferenceColumn, previousReferenceColumn);
+  const denominator = getCet1DataPoint(state, indexes, {
+    tableId: "C_02.00",
+    xCode: "0010",
+    yCode: "0010"
+  }, latestReferenceColumn, previousReferenceColumn);
+
+  if (!ratio) {
+    return { status: "CET1 capital ratio is not available for the selected JST." };
+  }
+  if (!numerator) {
+    return { status: "Common Equity Tier 1 capital is not available for the selected JST." };
+  }
+  if (!denominator) {
+    return { status: "Total risk exposure amount is not available for the selected JST." };
+  }
+
+  return {
+    currentDateLabel: formatCet1ReferenceDate(latestReferenceColumn.date),
+    jstCode: state.selectedJst,
+    denominator,
+    numerator,
+    previousDateLabel: formatCet1ReferenceDate(previousReferenceColumn.date),
+    ratio: {
+      ...ratio,
+      changeBasisPoints: calculateBasisPointChange(ratio.currentValue, ratio.previousValue)
+    }
+  };
+}
+
+function getCet1DataPoint(state, indexes, coordinates, latestReferenceColumn, previousReferenceColumn) {
+  const matchedRows = state.rows.filter((row) => (
+    row[indexes.jstCode] === state.selectedJst
+    && row[indexes.tableId] === coordinates.tableId
+    && matchesCet1Axis(row, indexes, "x", coordinates.xCode)
+    && matchesCet1Axis(row, indexes, "y", coordinates.yCode)
+    && matchesCet1Axis(row, indexes, "z", coordinates.zCode)
+  ));
+
+  if (matchedRows.length === 0) return null;
+
+  const currentValue = sumCet1Rows(matchedRows, latestReferenceColumn.index);
+  const previousValue = sumCet1Rows(matchedRows, previousReferenceColumn.index);
+  if (currentValue === null || previousValue === null) return null;
+
+  return {
+    currentValue,
+    previousValue
+  };
+}
+
+function matchesCet1Axis(row, indexes, axis, code) {
+  if (!code) return true;
+  const index = indexes[`${axis}AxisRcCode`];
+  if (index === -1 || index === undefined) return false;
+  return normalizeAxisCode(row[index], axis) === normalizeAxisCode(code, axis);
+}
+
+function sumCet1Rows(rows, columnIndex) {
+  const values = rows
+    .map((row) => parseCet1NumericValue(row[columnIndex]))
+    .filter((value) => value !== null);
+
+  if (values.length === 0) return null;
+  return values.reduce((total, value) => total + value, 0);
+}
+
+function getCet1RequiredIndexes(columns) {
+  const indexes = {
+    jstCode: columns.indexOf("jst_code"),
+    tableId: columns.indexOf("table_id"),
+    xAxisRcCode: columns.indexOf("x_axis_rc_code"),
+    yAxisRcCode: columns.indexOf("y_axis_rc_code"),
+    zAxisRcCode: columns.indexOf("z_axis_rc_code")
+  };
+
+  return [indexes.jstCode, indexes.tableId, indexes.xAxisRcCode, indexes.yAxisRcCode]
+    .every((index) => index !== -1)
+    ? indexes
+    : null;
+}
+
+function getCet1ReferenceColumns(columns) {
+  return columns
+    .map((name, index) => {
+      const match = String(name).match(/^ref_(\d{4})_(\d{2})_(\d{2})$/);
+      if (!match) return null;
+
+      const [, year, month, day] = match;
+      return {
+        date: new Date(Number(year), Number(month) - 1, Number(day)),
+        index
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.date - right.date);
+}
+
+function parseCet1NumericValue(value) {
+  const parsed = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function formatCet1ReferenceDate(date) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(date);
+}
+
+function calculateBasisPointChange(currentValue, previousValue) {
+  const valuesLookLikeFractions = Math.abs(currentValue) <= 1 && Math.abs(previousValue) <= 1;
+  return (currentValue - previousValue) * (valuesLookLikeFractions ? 10000 : 100);
+}
+
+function formatBasisPointChange(value) {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0
+  }).format(value)} bp`;
+}
+
+function formatCet1Amount(value, selectedUnit) {
+  return formatMetricValue(value, selectedUnit || "millions");
 }
 
 function createModule2TemplateContext() {
