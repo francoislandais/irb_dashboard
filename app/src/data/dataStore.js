@@ -1,5 +1,5 @@
 const initialState = {
-  activeModule: "data",
+  activeModule: "module-2",
   capabilityNotice: "",
   columns: [],
   datasetLabel: "",

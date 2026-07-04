@@ -1,9 +1,10 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-axis-point-index";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-url-navigation";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
 let activeModule2TemplateId = MODULE_2_TARGET.tableId;
+let hasAppliedUrlTemplate = false;
 const module2TemplateContexts = new Map();
 const module2TemplateAxisState = {
   scroll: { left: 0, top: 0 },
@@ -19,14 +20,15 @@ const COMMON_MODULE_2_DENOMINATORS = [
   }
 ];
 const MODULE_2_STICKY_PARENT_ROW_HEIGHT = 28;
+const TEMPLATE_URL_PARAM = "template";
 let module2StickyFrame = 0;
 let module2ContextMenu = null;
 let module2BenchmarkDialog = null;
 
 const elements = {
+  appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
-  datasetLabel: document.querySelector("#dataset-label"),
   fileName: document.querySelector("#file-name"),
   fileStatus: document.querySelector("#file-status"),
   forgetFileButton: document.querySelector("#forget-file-button"),
@@ -43,21 +45,18 @@ const elements = {
   module2Empty: document.querySelector("#module-2-empty"),
   module2Table: document.querySelector("#module-2-table"),
   module2TableWrap: document.querySelector(".metric-table-wrap"),
-  previewStatus: document.querySelector("#preview-status"),
-  previewTable: document.querySelector("#preview-table"),
   reloadFileButton: document.querySelector("#reload-file-button"),
   rowCount: document.querySelector("#row-count"),
+  sidebarToggle: document.querySelector("#sidebar-toggle"),
   supportNotice: document.querySelector("#support-notice"),
   unitSelect: document.querySelector("#unit-select")
 };
 
 export function wireUi(actions) {
+  elements.sidebarToggle?.addEventListener("click", toggleSidebar);
   elements.chooseFileButton.addEventListener("click", actions.chooseFile);
   elements.reloadFileButton.addEventListener("click", actions.reloadFile);
   elements.forgetFileButton.addEventListener("click", actions.forgetFile);
-  elements.datasetLabel.addEventListener("input", (event) => {
-    actions.updateDatasetLabel(event.target.value);
-  });
   elements.jstSelect.addEventListener("change", (event) => {
     actions.updateSelectedJst(event.target.value);
   });
@@ -126,6 +125,18 @@ export function wireUi(actions) {
   });
 }
 
+function toggleSidebar() {
+  if (!elements.appShell || !elements.sidebarToggle) return;
+
+  const isCollapsed = elements.appShell.classList.toggle("is-sidebar-collapsed");
+  elements.sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
+  elements.sidebarToggle.setAttribute(
+    "aria-label",
+    isCollapsed ? "Afficher la navigation" : "Masquer la navigation"
+  );
+  window.setTimeout(scheduleModule2StickyParentsUpdate, 180);
+}
+
 export function renderAppState(state) {
   latestState = state;
   const hasData = state.rows.length > 0 || state.columns.length > 0;
@@ -152,7 +163,6 @@ export function renderAppState(state) {
 
   elements.supportNotice.hidden = !state.capabilityNotice;
   elements.supportNotice.textContent = state.capabilityNotice;
-  renderPreview(state.columns, state.rows);
   if (state.activeModule === "module-2") renderModule2(state);
 }
 
@@ -179,39 +189,6 @@ function renderActiveModule(activeModule) {
   elements.moduleViews.forEach((view) => {
     view.classList.toggle("is-visible", view.id === `${activeModule}-view`);
   });
-}
-
-function renderPreview(columns, rows) {
-  elements.previewTable.replaceChildren();
-
-  if (columns.length === 0) {
-    elements.previewStatus.textContent = "Les premières lignes apparaîtront ici.";
-    return;
-  }
-
-  elements.previewStatus.textContent = "Aperçu des 20 premières lignes.";
-
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  columns.forEach((column) => {
-    const th = document.createElement("th");
-    th.textContent = column;
-    headerRow.append(th);
-  });
-  thead.append(headerRow);
-
-  const tbody = document.createElement("tbody");
-  rows.slice(0, 20).forEach((row) => {
-    const tr = document.createElement("tr");
-    row.forEach((value) => {
-      const td = document.createElement("td");
-      td.textContent = value;
-      tr.append(td);
-    });
-    tbody.append(tr);
-  });
-
-  elements.previewTable.append(thead, tbody);
 }
 
 function createModule2TemplateContext() {
@@ -283,9 +260,50 @@ function getModule2TableIds(state) {
 function ensureActiveModule2Template(state) {
   const templates = getModule2Templates(state);
   if (templates.length === 0) return;
+
+  if (!hasAppliedUrlTemplate) {
+    hasAppliedUrlTemplate = true;
+    const urlTemplateId = findMatchingModule2TemplateId(templates, getUrlTemplateParam());
+    if (urlTemplateId) {
+      activeModule2TemplateId = urlTemplateId;
+      return;
+    }
+  }
+
   if (templates.some((template) => template.tableId === activeModule2TemplateId)) return;
 
   activeModule2TemplateId = templates[0].tableId;
+  updateUrlTemplateParam(activeModule2TemplateId);
+}
+
+function getUrlTemplateParam() {
+  return new URLSearchParams(window.location.search).get(TEMPLATE_URL_PARAM) ?? "";
+}
+
+function updateUrlTemplateParam(templateId) {
+  const url = new URL(window.location.href);
+  if (templateId) {
+    url.searchParams.set(TEMPLATE_URL_PARAM, templateId);
+  } else {
+    url.searchParams.delete(TEMPLATE_URL_PARAM);
+  }
+  window.history.replaceState({}, "", url);
+}
+
+function findMatchingModule2TemplateId(templates, requestedTemplateId) {
+  if (!requestedTemplateId) return "";
+
+  const exactMatch = templates.find((template) => template.tableId === requestedTemplateId);
+  if (exactMatch) return exactMatch.tableId;
+
+  const normalizedRequestedTemplateId = normalizeUrlTemplateValue(requestedTemplateId);
+  return templates.find((template) => (
+    normalizeUrlTemplateValue(template.tableId) === normalizedRequestedTemplateId
+  ))?.tableId ?? "";
+}
+
+function normalizeUrlTemplateValue(value) {
+  return String(value ?? "").replace(/[\s_.-]+/g, "").toUpperCase();
 }
 
 function getModule2ContextForTemplate(tableId) {
@@ -1918,6 +1936,7 @@ function selectModule2Row(pointCode, options = {}) {
 
   if (activeAxis === "template") {
     activeModule2TemplateId = pointCode || activeModule2TemplateId;
+    updateUrlTemplateParam(activeModule2TemplateId);
     getActiveModule2Context().activeAxis = "template";
   } else if (activeAxis === "y") {
     context.selectedYCode = pointCode || context.selectedYCode;
@@ -2041,6 +2060,7 @@ function setSelectedModule2CodeForActiveAxis(pointCode) {
 
   if (context.activeAxis === "template") {
     activeModule2TemplateId = pointCode || activeModule2TemplateId;
+    updateUrlTemplateParam(activeModule2TemplateId);
     getActiveModule2Context().activeAxis = "template";
   } else if (context.activeAxis === "y") {
     context.selectedYCode = pointCode;

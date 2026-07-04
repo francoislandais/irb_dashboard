@@ -2,7 +2,7 @@ import { parseCsv } from "./data/csvParser.js";
 import { buildDataIndexes } from "./data/dataIndex.js";
 import { loadDimensionMapping } from "./data/dimensionMapping.js";
 import { loadModule2Points } from "./data/module2Config.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260703-axis-point-index";
+import { getUniqueValues } from "./data/timeSeries.js?v=20260703-url-navigation";
 import {
   clearStoredFileHandle,
   getStoredFileHandle,
@@ -13,9 +13,12 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js";
 import { createDataStore } from "./data/dataStore.js";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260703-axis-point-index";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260703-url-navigation";
 
 const store = createDataStore();
+const JST_URL_PARAM = "jst";
+const MODULE_URL_PARAM = "module";
+const MODULE_URL_VALUES = new Set(["module-2", "cet-1"]);
 
 const actions = {
   getState() {
@@ -66,6 +69,7 @@ const actions = {
 
   updateSelectedJst(jstCode) {
     store.setSelectedJst(jstCode);
+    updateUrlJstParam(jstCode);
   },
 
   updateSelectedUnit(unit) {
@@ -74,22 +78,76 @@ const actions = {
 
   setActiveModule(activeModule) {
     store.setActiveModule(activeModule);
+    updateUrlModuleParam(activeModule);
   }
 };
+
+const initialModule = getUrlModuleParam();
+if (initialModule) store.setActiveModule(initialModule);
 
 async function loadFile(file, handle) {
   const text = await file.text();
   const parsed = parseCsv(text);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
+  const jstOptions = getUniqueValues(parsed.columns, parsed.rows, "jst_code");
   store.setData({
     file,
     fileHandle: handle,
     columns: parsed.columns,
     dataIndexes,
-    jstOptions: getUniqueValues(parsed.columns, parsed.rows, "jst_code"),
+    jstOptions,
     rows: parsed.rows,
     loadedAt: new Date()
   });
+
+  const urlJst = getUrlJstParam();
+  const matchedJst = findMatchingJstCode(jstOptions, urlJst);
+  if (matchedJst) store.setSelectedJst(matchedJst);
+}
+
+function getUrlJstParam() {
+  return new URLSearchParams(window.location.search).get(JST_URL_PARAM) ?? "";
+}
+
+function updateUrlJstParam(jstCode) {
+  const url = new URL(window.location.href);
+  if (jstCode) {
+    url.searchParams.set(JST_URL_PARAM, jstCode);
+  } else {
+    url.searchParams.delete(JST_URL_PARAM);
+  }
+  window.history.replaceState({}, "", url);
+}
+
+function getUrlModuleParam() {
+  const module = new URLSearchParams(window.location.search).get(MODULE_URL_PARAM) ?? "";
+  return MODULE_URL_VALUES.has(module) ? module : "";
+}
+
+function updateUrlModuleParam(activeModule) {
+  const url = new URL(window.location.href);
+  if (MODULE_URL_VALUES.has(activeModule)) {
+    url.searchParams.set(MODULE_URL_PARAM, activeModule);
+  } else {
+    url.searchParams.delete(MODULE_URL_PARAM);
+  }
+  window.history.replaceState({}, "", url);
+}
+
+function findMatchingJstCode(jstOptions, requestedJst) {
+  if (!requestedJst) return "";
+
+  const exactMatch = jstOptions.find((jstCode) => jstCode === requestedJst);
+  if (exactMatch) return exactMatch;
+
+  const normalizedRequestedJst = normalizeJstForUrlMatch(requestedJst);
+  return jstOptions.find((jstCode) => (
+    normalizeJstForUrlMatch(jstCode) === normalizedRequestedJst
+  )) ?? "";
+}
+
+function normalizeJstForUrlMatch(value) {
+  return String(value ?? "").replace(/[\s_-]+/g, "").toUpperCase();
 }
 
 async function restoreLastFile() {

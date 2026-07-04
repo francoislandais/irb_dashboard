@@ -4,23 +4,43 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260703-axis-point-index">
+    <link rel="stylesheet" href="./src/styles.css?v=20260703-url-navigation">
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Modules">
+      <header class="app-header">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <div>
-            <strong>Workspace</strong>
-            <span>Modules</span>
-          </div>
+          <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Masquer la navigation" aria-expanded="true">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </button>
+          <strong>Agora Explorer</strong>
         </div>
 
+        <section class="global-bar" aria-label="Paramètres globaux">
+          <label class="field compact-field">
+            <span>JST</span>
+            <select id="jst-select" disabled>
+              <option value="">Chargez un CSV</option>
+            </select>
+          </label>
+          <label class="field compact-field">
+            <span>Unité</span>
+            <select id="unit-select">
+              <option value="millions" selected>Millions EUR</option>
+              <option value="billions">Milliards EUR</option>
+              <option value="thousands">K EUR</option>
+              <option value="euros">EUR</option>
+            </select>
+          </label>
+        </section>
+      </header>
+
+      <aside class="sidebar" aria-label="Modules">
         <nav class="module-list" aria-label="Navigation des modules">
-          <button class="module-link is-active" type="button" data-module-target="data">Données</button>
-          <button class="module-link" type="button" data-module-target="module-2">Module 2</button>
-          <button class="module-link" type="button" disabled>Module 3</button>
+          <button class="module-link is-active" type="button" data-module-target="module-2">Reporting</button>
+          <button class="module-link" type="button" data-module-target="cet-1">CET 1</button>
         </nav>
 
         <section class="sidebar-data-source" aria-label="Source des données locales">
@@ -61,44 +81,7 @@
       </aside>
 
       <main class="main-view">
-        <section class="global-bar sticky-panel" aria-label="Paramètres globaux">
-          <strong>Paramètres</strong>
-          <label class="field compact-field">
-            <span>JST</span>
-            <select id="jst-select" disabled>
-              <option value="">Chargez un CSV</option>
-            </select>
-          </label>
-          <label class="field compact-field">
-            <span>Unité</span>
-            <select id="unit-select">
-              <option value="millions" selected>Millions EUR</option>
-              <option value="billions">Milliards EUR</option>
-              <option value="thousands">K EUR</option>
-              <option value="euros">EUR</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Nom du jeu de données</span>
-            <input id="dataset-label" type="text" placeholder="Ex. Export clients Q2">
-          </label>
-        </section>
-
-        <section id="data-view" class="content-grid module-view is-visible" aria-label="Module données">
-          <article class="preview-panel">
-            <div class="panel-header">
-              <div>
-                <h2>Aperçu</h2>
-                <p id="preview-status">Les premières lignes apparaîtront ici.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table id="preview-table" aria-label="Aperçu du fichier CSV"></table>
-            </div>
-          </article>
-        </section>
-
-        <section id="module-2-view" class="module-view module-2-view" aria-label="Module 2">
+        <section id="module-2-view" class="module-view module-2-view is-visible" aria-label="Reporting">
           <article class="metric-panel">
             <div id="module-2-empty" class="notice" hidden></div>
 
@@ -125,10 +108,12 @@
             </div>
           </article>
         </section>
+
+        <section id="cet-1-view" class="module-view" aria-label="CET 1"></section>
       </main>
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
-    <script type="module" src="./src/main.js?v=20260703-axis-point-index"></script>
+    <script type="module" src="./src/main.js?v=20260703-url-navigation"></script>
   </body>
 </html>
