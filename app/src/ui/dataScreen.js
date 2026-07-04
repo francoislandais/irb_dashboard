@@ -1,5 +1,5 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260703-url-navigation";
+import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260704-standalone-export";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
 let latestState = null;
@@ -29,6 +29,7 @@ const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
+  exportStandaloneButton: document.querySelector("#export-standalone-button"),
   fileName: document.querySelector("#file-name"),
   fileStatus: document.querySelector("#file-status"),
   forgetFileButton: document.querySelector("#forget-file-button"),
@@ -57,6 +58,7 @@ export function wireUi(actions) {
   elements.chooseFileButton.addEventListener("click", actions.chooseFile);
   elements.reloadFileButton.addEventListener("click", actions.reloadFile);
   elements.forgetFileButton.addEventListener("click", actions.forgetFile);
+  elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
   elements.jstSelect.addEventListener("change", (event) => {
     actions.updateSelectedJst(event.target.value);
   });
@@ -146,6 +148,7 @@ export function renderAppState(state) {
   elements.fileName.textContent = state.fileName || "-";
   elements.reloadFileButton.disabled = !state.fileHandle;
   elements.forgetFileButton.disabled = !state.fileHandle && !hasData;
+  if (elements.exportStandaloneButton) elements.exportStandaloneButton.disabled = !hasData;
   renderJstSelect(state.jstOptions, state.selectedJst);
   renderActiveModule(state.activeModule);
 

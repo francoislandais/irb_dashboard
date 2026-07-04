@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260703-url-navigation">
+    <link rel="stylesheet" href="./src/styles.css?v=20260704-standalone-export">
   </head>
   <body>
     <div class="app-shell">
@@ -60,6 +60,9 @@
               Oublier
             </button>
           </div>
+          <button id="export-standalone-button" class="sidebar-button" type="button" disabled>
+            Exporter HTML portable
+          </button>
 
           <div id="support-notice" class="sidebar-notice" hidden></div>
 
@@ -114,6 +117,6 @@
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
-    <script type="module" src="./src/main.js?v=20260703-url-navigation"></script>
+    <script type="module" src="./src/main.js?v=20260704-standalone-export"></script>
   </body>
 </html>
