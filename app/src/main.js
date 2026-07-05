@@ -1,8 +1,8 @@
 import { parseCsv } from "./data/csvParser.js";
 import { buildDataIndexes } from "./data/dataIndex.js";
-import { loadDimensionMapping } from "./data/dimensionMapping.js";
+import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadModule2Points } from "./data/module2Config.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260704-datasets";
+import { getUniqueValues } from "./data/timeSeries.js?v=20260704-cost-risk";
 import {
   clearStoredDatasetFileHandle,
   clearStoredFileHandle,
@@ -14,16 +14,17 @@ import {
   readFileFromHandle,
   storeDatasetFileHandle,
   storeFileHandle
-} from "./data/localFileSource.js";
+} from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260704-datasets";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260705-peers";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
-const MODULE_URL_VALUES = new Set(["module-2", "cet-1"]);
+const MODULE_URL_VALUES = new Set(["module-2", "cet-1", "cost-of-risk"]);
 const STANDALONE_MODULE_PATHS = [
   "src/data/csvParser.js",
+  "src/data/costOfRisk.js",
   "src/data/dataIndex.js",
   "src/data/dataStore.js",
   "src/data/dimensionMapping.js",
@@ -120,6 +121,10 @@ const actions = {
 
   updateSelectedUnit(unit) {
     store.setSelectedUnit(unit);
+  },
+
+  updatePeerJstCodes(peerJstCodes) {
+    store.setPeerJstCodes(peerJstCodes);
   },
 
   setActiveModule(activeModule) {
@@ -265,10 +270,12 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, mappingCsv, moduleEntries] = await Promise.all([
+  const [indexHtml, stylesCss, mappingCsv, highchartsJs, highchartsTreemapJs, moduleEntries] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
+    fetchAppText("vendor/highcharts.js"),
+    fetchAppText("vendor/highcharts-treemap.js"),
     Promise.all(STANDALONE_MODULE_PATHS.map(async (path) => [path, await fetchAppText(path)]))
   ]);
 
@@ -276,6 +283,8 @@ async function getStandaloneBundle() {
     assets: {
       "assets/ITS_all_dimension_mapping.csv": mappingCsv
     },
+    highchartsJs,
+    highchartsTreemapJs,
     indexHtml,
     moduleSources: Object.fromEntries(moduleEntries),
     stylesCss
@@ -310,6 +319,12 @@ ${bundle.stylesCss}
   </head>
   <body>
 ${appMarkup}
+    <script>
+${escapeInlineScriptSource(bundle.highchartsJs ?? "")}
+    </script>
+    <script>
+${escapeInlineScriptSource(bundle.highchartsTreemapJs ?? "")}
+    </script>
     <script>
 window.__AGORA_STANDALONE_DATA__ = ${serializeForInlineScript(standalonePayload)};
 window.__AGORA_STANDALONE_BUNDLE__ = ${serializeForInlineScript(bundle)};
@@ -368,6 +383,10 @@ function serializeForInlineScript(value) {
     .replace(/&/g, "\\u0026")
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
+}
+
+function escapeInlineScriptSource(source) {
+  return String(source).replace(/<\/script/gi, "<\\/script");
 }
 
 function extractAppMarkup(indexHtml) {

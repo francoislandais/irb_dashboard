@@ -16,6 +16,7 @@ const initialState = {
   loadedAt: null,
   module2Points: [],
   module2PointsError: "",
+  peerJstCodes: [],
   rememberedFileReady: false,
   rows: [],
   selectedJst: "",
@@ -24,6 +25,12 @@ const initialState = {
 
 function createDatasetId(source) {
   return `${source || "dataset"}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizePeerJstCodes(peerJstCodes, jstOptions) {
+  const allowed = new Set(jstOptions ?? []);
+  const normalized = (peerJstCodes ?? []).filter((jstCode) => allowed.has(jstCode));
+  return normalized.length > 0 || allowed.size === 0 ? normalized : [...allowed];
 }
 
 export function createDataStore() {
@@ -65,6 +72,9 @@ export function createDataStore() {
       const selectedJst = jstOptions.includes(state.selectedJst)
         ? state.selectedJst
         : jstOptions[0] ?? "";
+      const peerJstCodes = state.activeDatasetId === nextDatasetId
+        ? normalizePeerJstCodes(state.peerJstCodes, jstOptions)
+        : [...jstOptions];
 
       state = {
         ...state,
@@ -77,6 +87,7 @@ export function createDataStore() {
         fileName: file.name,
         jstOptions,
         loadedAt,
+        peerJstCodes,
         rememberedFileReady: false,
         rows,
         selectedJst
@@ -91,6 +102,7 @@ export function createDataStore() {
       const selectedJst = dataset.jstOptions.includes(state.selectedJst)
         ? state.selectedJst
         : dataset.jstOptions[0] ?? "";
+      const peerJstCodes = normalizePeerJstCodes(state.peerJstCodes, dataset.jstOptions);
 
       state = {
         ...state,
@@ -102,6 +114,7 @@ export function createDataStore() {
         fileName: dataset.fileName,
         jstOptions: dataset.jstOptions,
         loadedAt: dataset.loadedAt,
+        peerJstCodes,
         rememberedFileReady: false,
         rows: dataset.rows,
         selectedJst
@@ -125,6 +138,7 @@ export function createDataStore() {
           fileName: nextDataset.fileName,
           jstOptions: nextDataset.jstOptions,
           loadedAt: nextDataset.loadedAt,
+          peerJstCodes: normalizePeerJstCodes(state.peerJstCodes, nextDataset.jstOptions),
           rememberedFileReady: false,
           rows: nextDataset.rows,
           selectedJst: nextDataset.jstOptions[0] ?? ""
@@ -140,6 +154,7 @@ export function createDataStore() {
           fileName: "",
           jstOptions: [],
           loadedAt: null,
+          peerJstCodes: [],
           rememberedFileReady: false,
           rows: [],
           selectedJst: ""
@@ -208,6 +223,14 @@ export function createDataStore() {
 
     setSelectedUnit(selectedUnit) {
       state = { ...state, selectedUnit };
+      emit();
+    },
+
+    setPeerJstCodes(peerJstCodes) {
+      state = {
+        ...state,
+        peerJstCodes: normalizePeerJstCodes(peerJstCodes, state.jstOptions)
+      };
       emit();
     },
 

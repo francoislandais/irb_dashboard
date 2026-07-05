@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260704-datasets">
+    <link rel="stylesheet" href="./src/styles.css?v=20260705-peers">
   </head>
   <body>
     <div class="app-shell">
@@ -34,6 +34,7 @@
               <option value="euros">EUR</option>
             </select>
           </label>
+          <button id="peers-button" class="topbar-button" type="button" disabled>Peers</button>
           <div class="dataset-controls" aria-label="Datasets">
             <label class="field dataset-field">
               <span>Dataset</span>
@@ -50,6 +51,7 @@
         <nav class="module-list" aria-label="Navigation des modules">
           <button class="module-link is-active" type="button" data-module-target="module-2">Reporting</button>
           <button class="module-link" type="button" data-module-target="cet-1">CET 1</button>
+          <button class="module-link" type="button" data-module-target="cost-of-risk">Cost of risk</button>
         </nav>
       </aside>
 
@@ -113,10 +115,105 @@
             </div>
           </article>
         </section>
+
+        <section id="cost-of-risk-view" class="module-view cost-of-risk-view" aria-label="Cost of risk">
+          <article class="cost-of-risk-panel">
+            <div id="cost-of-risk-empty" class="notice" hidden></div>
+            <div id="cost-of-risk-dashboard" class="cost-of-risk-dashboard" hidden>
+              <div class="cost-of-risk-controls">
+                <div class="cost-of-risk-filter-row">
+                  <label class="field cost-of-risk-field">
+                    <span>Accounting type</span>
+                    <select id="cost-of-risk-asset"></select>
+                  </label>
+                  <label class="field cost-of-risk-field">
+                    <span>Counterparty</span>
+                    <select id="cost-of-risk-counterparty"></select>
+                  </label>
+                  <label class="field cost-of-risk-field">
+                    <span>Stage</span>
+                    <select id="cost-of-risk-stage"></select>
+                  </label>
+                </div>
+                <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
+                  <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Contributions</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
+                </div>
+              </div>
+              <div class="cost-of-risk-scroll">
+                <div class="cost-of-risk-tab-panel is-active" data-cost-of-risk-panel="f2-vs-f12">
+                  <h3 class="cost-of-risk-chart-title cost-of-risk-comparison-title">F2 vs F12</h3>
+                  <div class="cost-of-risk-comparison-layout">
+                    <div id="cost-of-risk-f2-f12-chart" class="cost-of-risk-f2-f12-chart" aria-label="F2 versus F12 time series"></div>
+                    <aside class="cost-of-risk-side-definition" aria-label="F12 component selector">
+                      <div class="cost-of-risk-side-definition-title">F12 components</div>
+                      <div id="cost-of-risk-f2-f12-core-definition" class="cost-of-risk-core-definition cost-of-risk-core-definition--compact"></div>
+                    </aside>
+                  </div>
+                  <div id="cost-of-risk-audit" class="cost-of-risk-audit" aria-label="F2 versus F12 audit trail"></div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="contributions" hidden>
+                  <h3 id="cost-of-risk-waterfall-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12 Contribution Breakdown</h3>
+                  <div id="cost-of-risk-waterfall" class="cost-of-risk-waterfall" aria-label="Cost of risk contribution waterfall"></div>
+                  <div class="cost-of-risk-chart-control">
+                    <h3 id="cost-of-risk-chart-title" class="cost-of-risk-chart-title">Time evolution chart</h3>
+                    <label class="field cost-of-risk-smoothing-field cost-of-risk-smoothing-field--inline">
+                      <span>Smoothing <output id="cost-of-risk-smoothing-value">4Q</output></span>
+                      <input id="cost-of-risk-smoothing" type="range" min="1" max="4" step="1" value="4">
+                    </label>
+                  </div>
+                  <div id="cost-of-risk-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="core-definition" hidden>
+                  <div id="cost-of-risk-core-definition" class="cost-of-risk-core-definition" aria-label="Core Definition"></div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="analysis" hidden>
+                  <div class="cost-of-risk-parameter-row cost-of-risk-parameter-row--single">
+                    <label class="field cost-of-risk-field">
+                      <span>X-axis</span>
+                      <select id="cost-of-risk-x-axis"></select>
+                    </label>
+                  </div>
+                  <div id="cost-of-risk-treemap" class="cost-of-risk-treemap" aria-label="Cost of risk contribution treemap"></div>
+                  <div class="cost-of-risk-card-grid">
+                    <div class="cost-of-risk-card">
+                      <div class="cet1-card-label">Numerator</div>
+                      <div id="cost-of-risk-context" class="cet1-card-context">F_12.01 / x_axis 0020</div>
+                      <div id="cost-of-risk-value" class="cet1-metric-value">-</div>
+                    </div>
+                    <div class="cost-of-risk-card">
+                      <div class="cet1-card-label">Denominator</div>
+                      <div id="cost-of-risk-denominator-context" class="cet1-card-context">F_04.04.1 / loans and advances</div>
+                      <div id="cost-of-risk-denominator-value" class="cet1-metric-value">-</div>
+                    </div>
+                    <div class="cost-of-risk-card">
+                      <div class="cet1-card-label">CoR contribution</div>
+                      <div id="cost-of-risk-ratio-context" class="cet1-card-context">basis points</div>
+                      <div id="cost-of-risk-ratio-value" class="cet1-metric-value">-</div>
+                    </div>
+                    <div class="cost-of-risk-card">
+                      <div class="cet1-card-label">F_02 impairment contribution</div>
+                      <div id="cost-of-risk-f02-context" class="cet1-card-context">F_02.00 / y_axis 0460</div>
+                      <div id="cost-of-risk-f02-value" class="cet1-metric-value">-</div>
+                    </div>
+                  </div>
+                  <div class="cost-of-risk-details">
+                    <div class="cet1-card-label">Included Y-axis points</div>
+                    <div id="cost-of-risk-points" class="cost-of-risk-points">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
       </main>
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
-    <script type="module" src="./src/main.js?v=20260704-datasets"></script>
+    <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
+    <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
+    <script type="module" src="./src/main.js?v=20260705-peers"></script>
   </body>
 </html>

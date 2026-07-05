@@ -27,6 +27,7 @@ export function createDimensionMapping(columns, rows) {
   }
 
   const byCoordinate = new Map();
+  const entries = [];
   rows.forEach((row) => {
     const tableId = row[indexes.tableId];
     const coordinate = row[indexes.coordinate];
@@ -36,21 +37,28 @@ export function createDimensionMapping(columns, rows) {
 
     if (!tableId || !coordinate || !sourceCode || !description) return;
 
-    byCoordinate.set(
-      makeMappingKey(tableId, coordinate, sourceCode),
-      {
-        code: normalizeMappingCode(sourceCode, coordinate),
-        coordinate,
-        description,
-        format,
-        tableId
-      }
-    );
+    const entry = {
+      code: normalizeMappingCode(sourceCode, coordinate),
+      coordinate,
+      description,
+      format,
+      tableId
+    };
+
+    entries.push(entry);
+    byCoordinate.set(makeMappingKey(tableId, coordinate, sourceCode), entry);
   });
 
   return {
     find(tableId, coordinate, code) {
       return byCoordinate.get(makeMappingKey(tableId, coordinate, code)) ?? null;
+    },
+
+    list(tableId, coordinate) {
+      return entries.filter((entry) => (
+        entry.tableId === tableId
+        && entry.coordinate === coordinate
+      ));
     },
 
     describePoint({ tableId, xAxisRcCode, yAxisRcCode, zAxisRcCode }) {
