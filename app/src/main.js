@@ -15,12 +15,13 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260705-peers";
+import { createDataStore } from "./data/dataStore.js?v=20260707-dataset-fix";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260707-dataset-fix";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
+const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
 const MODULE_URL_VALUES = new Set(["module-2", "cet-1", "cost-of-risk"]);
 const STANDALONE_MODULE_PATHS = [
   "src/data/csvParser.js",
@@ -31,6 +32,7 @@ const STANDALONE_MODULE_PATHS = [
   "src/data/localFileSource.js",
   "src/data/module2Config.js",
   "src/data/timeSeries.js",
+  "src/ui/costOfRiskStageTransfers.js",
   "src/ui/dataScreen.js",
   "src/main.js"
 ];
@@ -108,6 +110,8 @@ const actions = {
   setActiveDataset(datasetId) {
     store.setActiveDataset(datasetId);
     updateUrlJstParam(store.getState().selectedJst);
+    applyUrlPeerExclusions(store.getState().jstOptions);
+    updateUrlPeerExclusionsParam(store.getState());
   },
 
   updateDatasetLabel(label) {
@@ -125,6 +129,7 @@ const actions = {
 
   updatePeerJstCodes(peerJstCodes) {
     store.setPeerJstCodes(peerJstCodes);
+    updateUrlPeerExclusionsParam(store.getState());
   },
 
   setActiveModule(activeModule) {
@@ -173,6 +178,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const urlJst = getUrlJstParam();
   const matchedJst = findMatchingJstCode(jstOptions, urlJst);
   if (matchedJst) store.setSelectedJst(matchedJst);
+  applyUrlPeerExclusions(jstOptions);
 }
 
 async function loadStandaloneData() {
@@ -220,6 +226,40 @@ function updateUrlModuleParam(activeModule) {
     url.searchParams.set(MODULE_URL_PARAM, activeModule);
   } else {
     url.searchParams.delete(MODULE_URL_PARAM);
+  }
+  window.history.replaceState({}, "", url);
+}
+
+function getUrlPeerExclusionsParam() {
+  return new URLSearchParams(window.location.search)
+    .get(PEERS_EXCLUDED_URL_PARAM)
+    ?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean) ?? [];
+}
+
+function applyUrlPeerExclusions(jstOptions) {
+  const excludedFromUrl = getUrlPeerExclusionsParam();
+  if (excludedFromUrl.length === 0 || jstOptions.length === 0) return;
+
+  const excludedNormalized = new Set(excludedFromUrl.map(normalizeJstForUrlMatch));
+  const peerJstCodes = jstOptions.filter((jstCode) => (
+    !excludedNormalized.has(normalizeJstForUrlMatch(jstCode))
+  ));
+  store.setPeerJstCodes(peerJstCodes.length > 0 ? peerJstCodes : jstOptions);
+  updateUrlPeerExclusionsParam(store.getState());
+}
+
+function updateUrlPeerExclusionsParam(state = store.getState()) {
+  const url = new URL(window.location.href);
+  const jstOptions = state.jstOptions ?? [];
+  const selectedPeers = new Set(state.peerJstCodes?.length ? state.peerJstCodes : jstOptions);
+  const excludedPeers = jstOptions.filter((jstCode) => !selectedPeers.has(jstCode));
+
+  if (excludedPeers.length > 0) {
+    url.searchParams.set(PEERS_EXCLUDED_URL_PARAM, excludedPeers.join(","));
+  } else {
+    url.searchParams.delete(PEERS_EXCLUDED_URL_PARAM);
   }
   window.history.replaceState({}, "", url);
 }
@@ -416,7 +456,13 @@ async function restoreLastFile() {
   store.setRestoring(true);
   try {
     for (const entry of storedDatasets) {
-      if (!entry.handle || !(await hasReadPermission(entry.handle))) continue;
+      if (!entry.handle) continue;
+      if (!(await hasReadPermission(entry.handle))) {
+        if (!store.getState().rememberedFileReady) {
+          store.setRememberedFileReady(entry.handle, entry.fileName || entry.handle.name || "");
+        }
+        continue;
+      }
       const file = await readFileFromHandle(entry.handle, { requestPermission: false });
       await loadFile(file, entry.handle, {
         datasetId: entry.id,
@@ -429,7 +475,7 @@ async function restoreLastFile() {
 
     if (!handle) return;
     if (!(await hasReadPermission(handle))) {
-      store.setRememberedFileReady(handle);
+      store.setRememberedFileReady(handle, handle.name || "");
       return;
     }
 

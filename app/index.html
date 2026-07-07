@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260705-peers">
+    <link rel="stylesheet" href="./src/styles.css?v=20260707-dataset-fix">
   </head>
   <body>
     <div class="app-shell">
@@ -134,10 +134,18 @@
                     <span>Stage</span>
                     <select id="cost-of-risk-stage"></select>
                   </label>
+                  <label class="field cost-of-risk-field">
+                    <span>Display</span>
+                    <select id="cost-of-risk-display-mode">
+                      <option value="ratio" selected>Ratio</option>
+                      <option value="amount">Amount</option>
+                    </select>
+                  </label>
                 </div>
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Contributions</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Stage transfers</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
                 </div>
@@ -165,6 +173,11 @@
                     </label>
                   </div>
                   <div id="cost-of-risk-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-transfers" hidden>
+                  <div id="cost-of-risk-stage-exposure-table" class="cost-of-risk-stage-exposure" aria-label="F04.04.1 gross carrying amount by stage"></div>
+                  <h3 id="cost-of-risk-stage-transfer-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12.02 Stage transfers</h3>
+                  <div id="cost-of-risk-stage-transfer-chart" class="cost-of-risk-waterfall cost-of-risk-stage-transfer-chart" aria-label="F12.02 stage transfer waterfall"></div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="core-definition" hidden>
                   <div id="cost-of-risk-core-definition" class="cost-of-risk-core-definition" aria-label="Core Definition"></div>
@@ -214,6 +227,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260705-peers"></script>
+    <script type="module" src="./src/main.js?v=20260707-dataset-fix"></script>
   </body>
 </html>

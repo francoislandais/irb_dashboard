@@ -196,11 +196,12 @@ export function createDataStore() {
       emit();
     },
 
-    setRememberedFileReady(fileHandle) {
+    setRememberedFileReady(fileHandle, fileName = "") {
       state = {
         ...state,
         error: "",
         fileHandle,
+        fileName: fileName || state.fileName,
         rememberedFileReady: true
       };
       emit();

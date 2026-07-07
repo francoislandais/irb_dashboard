@@ -3,13 +3,50 @@ import { normalizeAxisCode } from "./module2Config.js";
 
 const REFERENCE_COLUMN_PATTERN = /^ref_(\d{4})_(\d{2})_(\d{2})$/;
 export const COST_OF_RISK_TABLE_ID = "F_12.01";
+export const COST_OF_RISK_STAGE_TRANSFER_TABLE_ID = "F_12.02";
+const COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID = "F_04.04.1";
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
 export const COST_OF_RISK_FILTER_ALL = "__all__";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
 const COST_OF_RISK_F02_X_AXIS_CODE = "0010";
 const COST_OF_RISK_F02_Y_AXIS_CODE = "0460";
 const COST_OF_RISK_TOTAL_Y_AXIS_CODE = "0520";
-export const COST_OF_RISK_WATERFALL_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0090", "0110", "0120"];
+export const COST_OF_RISK_WATERFALL_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090", "0110", "0120", "0125"];
+export const COST_OF_RISK_STAGE_TRANSFER_STAGE_OPTIONS = [
+  { label: "Stage 1", value: "1" },
+  { label: "Stage 2", value: "2" },
+  { label: "Stage 3", value: "3" }
+];
+const COST_OF_RISK_STAGE_TRANSFER_MOVEMENTS = {
+  "1": [
+    { code: "0010", sign: -1 },
+    { code: "0020", sign: 1 },
+    { code: "0050", sign: -1 },
+    { code: "0060", sign: 1 }
+  ],
+  "2": [
+    { code: "0010", sign: 1 },
+    { code: "0020", sign: -1 },
+    { code: "0030", sign: -1 },
+    { code: "0040", sign: 1 }
+  ],
+  "3": [
+    { code: "0030", sign: 1 },
+    { code: "0040", sign: -1 },
+    { code: "0050", sign: 1 },
+    { code: "0060", sign: -1 }
+  ]
+};
+const COST_OF_RISK_STAGE_EXPOSURE_X_CODES = [
+  { label: "Stage 1", stage: "Stage 1", xCode: "0015" },
+  { label: "Stage 2", stage: "Stage 2", xCode: "0030" },
+  { label: "Stage 3", stage: "Stage 3", xCode: "0040" }
+];
+const COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS = {
+  "1": "Stage 1",
+  "2": "Stage 2",
+  "3": "Stage 3"
+};
 const ALL_STAGES_LABEL = "all stages + POCI";
 const CACHE_KEY_SEPARATOR = "\u001f";
 const COST_OF_RISK_SERIES_CACHE = new WeakMap();
@@ -472,6 +509,147 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
   };
 }
 
+export function buildCostOfRiskStageTransferWaterfall(state, stage = "3", referenceDate = "", filters = {}) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const selectedStage = COST_OF_RISK_STAGE_TRANSFER_MOVEMENTS[stage] ? stage : "3";
+  const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
+  const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
+  const exposureYSelection = getCostOfRiskStageExposureYSelection(state, filters);
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const selectedReference = referenceColumns[referenceIndex] ?? null;
+
+  if (!indexes || !state.selectedJst || !selectedReference) {
+    return {
+      assetLabel: ySelection.label,
+      points: [],
+      referenceDate: "",
+      stage: selectedStage,
+      status: "No F_12.02 stage transfer data is available."
+    };
+  }
+
+  if (ySelection.codes.length === 0) {
+    return {
+      assetLabel: ySelection.label,
+      points: [],
+      referenceDate: selectedReference.label,
+      stage: selectedStage,
+      status: "No matching F_12.02 Y-axis point is available for the selected filters."
+    };
+  }
+
+  return {
+    assetLabel: ySelection.label,
+    globalVariation: buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, exposureYSelection, selectedStage, referenceIndex),
+    points: COST_OF_RISK_STAGE_TRANSFER_MOVEMENTS[selectedStage].map((movement) => {
+      const rawValue = ySelection.codes.reduce((total, yCode) => {
+        const series = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
+          xCode: movement.code,
+          yCode,
+          zCode: ""
+        }, state.selectedJst);
+        const quarterlySeries = decumulateQuarterlySeries(referenceColumns, series);
+        return total + (quarterlySeries[referenceIndex] ?? 0);
+      }, 0);
+
+      return {
+        code: movement.code,
+        label: xLabels.get(movement.code) ?? movement.code,
+        rawValue,
+        sign: movement.sign,
+        value: rawValue * movement.sign
+      };
+    }),
+    referenceDate: selectedReference.label,
+    stage: selectedStage,
+    status: ""
+  };
+}
+
+export function buildCostOfRiskStageExposureTable(state, filters = {}) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const ySelection = getCostOfRiskStageExposureYSelection(state, filters);
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+
+  if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
+    return {
+      dates: [],
+      label: ySelection.label,
+      rows: [],
+      status: "No F_04.04.1 exposure data is available."
+    };
+  }
+
+  if (ySelection.codes.length === 0) {
+    return {
+      dates: referenceColumns.map((column) => ({ date: column.date, label: column.label })),
+      label: ySelection.label,
+      rows: [],
+      status: "No matching F_04.04.1 Y-axis point is available for the selected filters."
+    };
+  }
+
+  return {
+    activeStage: normalizedFilters.stage,
+    dates: referenceColumns.map((column) => ({ date: column.date, label: column.label })),
+    label: ySelection.label,
+    rows: COST_OF_RISK_STAGE_EXPOSURE_X_CODES
+      .filter((stageDefinition) => !normalizedFilters.stage || stageDefinition.stage === normalizedFilters.stage)
+      .map((stageDefinition) => {
+      const values = createEmptySeries(referenceColumns.length);
+      ySelection.codes.forEach((yCode) => {
+        addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID, {
+          xCode: stageDefinition.xCode,
+          yCode,
+          zCode: ""
+        }, state.selectedJst));
+      });
+
+      return {
+        isActive: normalizedFilters.stage === stageDefinition.stage,
+        label: stageDefinition.label,
+        values,
+        xCode: stageDefinition.xCode
+      };
+    }),
+    status: ""
+  };
+}
+
+function buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, ySelection, stage, referenceIndex) {
+  const stageLabel = COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[stage] ?? "Stage 3";
+  const stageDefinition = COST_OF_RISK_STAGE_EXPOSURE_X_CODES.find((definition) => definition.stage === stageLabel);
+  if (!stageDefinition || !indexes || referenceIndex <= 0 || ySelection.codes.length === 0) {
+    return {
+      label: `${stageLabel} delta`,
+      value: null
+    };
+  }
+
+  const values = createEmptySeries(referenceColumns.length);
+  ySelection.codes.forEach((yCode) => {
+    addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID, {
+      xCode: stageDefinition.xCode,
+      yCode,
+      zCode: ""
+    }, state.selectedJst));
+  });
+
+  const currentValue = values[referenceIndex];
+  const previousValue = values[referenceIndex - 1];
+
+  return {
+    currentValue,
+    label: `${stageLabel} delta`,
+    previousValue,
+    value: Number.isFinite(currentValue) && Number.isFinite(previousValue)
+      ? currentValue - previousValue
+      : null
+  };
+}
+
 function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, referenceDate = "") {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
@@ -552,6 +730,80 @@ export function buildCostOfRiskModel(state, config = COST_OF_RISK_CONFIG) {
 
 function getCostOfRiskYMappings(state) {
   return state.dimensionMapping?.list?.(COST_OF_RISK_TABLE_ID, "y_axis_rc_code") ?? [];
+}
+
+function getCostOfRiskStageTransferYSelection(state, filters = {}) {
+  return getCostOfRiskStageAxisYSelection(state, filters, {
+    tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
+    totalLabel: "Total debt instruments"
+  });
+}
+
+function getCostOfRiskStageExposureYSelection(state, filters = {}) {
+  return getCostOfRiskStageAxisYSelection(state, filters, {
+    tableId: COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID,
+    totalLabel: "Financial assets at amortised cost"
+  });
+}
+
+function getCostOfRiskStageAxisYSelection(state, filters = {}, config) {
+  const descriptors = getCostOfRiskStageAxisYMappings(state, config.tableId)
+    .map(describeCostOfRiskStageAxisYAxisPoint);
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const asset = normalizedFilters.asset;
+  const counterparty = normalizedFilters.counterparty;
+
+  if (!asset && !counterparty) {
+    const total = descriptors.find((descriptor) => descriptor.terminal === config.totalLabel);
+    return {
+      codes: total ? [total.code] : [],
+      label: config.totalLabel
+    };
+  }
+
+  const matchingDescriptors = descriptors.filter((descriptor) => (
+    (!asset || descriptor.asset === asset)
+    && (!counterparty || descriptor.counterparty === counterparty)
+    && isCostOfRiskStageAxisAggregationPoint(descriptor, { asset, counterparty })
+  ));
+
+  return {
+    codes: matchingDescriptors.map((descriptor) => descriptor.code),
+    label: createCostOfRiskStageAxisSelectionLabel({ asset, counterparty })
+  };
+}
+
+function getCostOfRiskStageAxisYMappings(state, tableId) {
+  return state.dimensionMapping?.list?.(tableId, "y_axis_rc_code") ?? [];
+}
+
+function describeCostOfRiskStageAxisYAxisPoint(mapping) {
+  const parts = String(mapping.description ?? "")
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return {
+    asset: parts.find((part) => ASSET_LABELS.includes(part)) ?? "",
+    code: mapping.code,
+    counterparty: findCostOfRiskCounterparty(parts),
+    description: mapping.description,
+    terminal: parts.at(-1) ?? ""
+  };
+}
+
+function isCostOfRiskStageAxisAggregationPoint(descriptor, filters) {
+  if (filters.asset && filters.counterparty) return isCostOfRiskCounterpartyLabel(descriptor.terminal, filters.counterparty);
+  if (filters.asset) return descriptor.terminal === filters.asset;
+  if (filters.counterparty) return isCostOfRiskCounterpartyLabel(descriptor.terminal, filters.counterparty);
+  return descriptor.terminal === "Total debt instruments";
+}
+
+function createCostOfRiskStageAxisSelectionLabel(filters) {
+  return [
+    filters.asset ? formatCostOfRiskAssetLabel(filters.asset) : "All accounting types",
+    filters.counterparty ? formatCostOfRiskCounterpartyLabel(filters.counterparty) : "All counterparties"
+  ].join(" / ");
 }
 
 function describeCostOfRiskYAxisPoint(mapping) {
@@ -798,6 +1050,14 @@ function dedupeCostOfRiskAxisOptions(option, index, options) {
 
 function getCostOfRiskXAxisLabelMap(state) {
   const mappings = state.dimensionMapping?.list?.(COST_OF_RISK_TABLE_ID, "x_axis_rc_code") ?? [];
+  return new Map(mappings.map((mapping) => [
+    mapping.code,
+    getCostOfRiskShortAxisLabel(mapping.description, mapping.code)
+  ]));
+}
+
+function getCostOfRiskStageTransferXAxisLabelMap(state) {
+  const mappings = state.dimensionMapping?.list?.(COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, "x_axis_rc_code") ?? [];
   return new Map(mappings.map((mapping) => [
     mapping.code,
     getCostOfRiskShortAxisLabel(mapping.description, mapping.code)
