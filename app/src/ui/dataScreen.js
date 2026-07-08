@@ -4293,7 +4293,7 @@ function expandDefaultModule2Paths(rows, parentPaths) {
 
   rows.forEach((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
-    if (parentPaths.has(path) && (row.indentLevel ?? 0) < 1) {
+    if (parentPaths.has(path) && (row.indentLevel ?? 0) < 3) {
       expandedPaths.add(path);
     }
   });
@@ -4619,10 +4619,14 @@ function selectModule2Row(pointCode, options = {}) {
   const activeAxis = context.activeAxis;
 
   if (activeAxis === "template") {
-    activeModule2TemplateId = pointCode || activeModule2TemplateId;
-    updateUrlTemplateParam(activeModule2TemplateId);
-    getActiveModule2Context().activeAxis = "template";
-  } else if (activeAxis === "y") {
+
+  activeModule2TemplateId = pointCode || activeModule2TemplateId;
+
+  updateUrlTemplateParam(activeModule2TemplateId);
+
+  getActiveModule2Context().activeAxis = "template";
+
+}else if (activeAxis === "y") {
     context.selectedYCode = pointCode || context.selectedYCode;
   } else if (activeAxis === "z") {
     context.selectedZCode = pointCode || context.selectedZCode;
