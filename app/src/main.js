@@ -26,6 +26,9 @@ const MODULE_URL_VALUES = new Set(["module-2", "cet-1", "cost-of-risk"]);
 const STANDALONE_MODULE_PATHS = [
   "src/data/csvParser.js",
   "src/data/costOfRisk.js",
+  "src/data/core/axisCode.js",
+  "src/data/core/axisColumns.js",
+  "src/data/core/referenceColumns.js",
   "src/data/dataIndex.js",
   "src/data/dataStore.js",
   "src/data/dimensionMapping.js",

@@ -1,9 +1,10 @@
-import { normalizeAxisCode } from "./module2Config.js";
+import { normalizeAxisCode } from "./core/axisCode.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 
 const KEY_SEPARATOR = "\u001f";
 
 export function buildDataIndexes(columns, rows) {
-  const indexes = getDataColumnIndexes(columns);
+  const indexes = getCompleteAxisColumnIndexes(columns);
   if (!indexes) {
     return {
       axisCodes: new Map(),
@@ -121,16 +122,4 @@ function pushIndexValue(index, key, value) {
 
 function makeDataKey(...parts) {
   return parts.map((part) => String(part ?? "")).join(KEY_SEPARATOR);
-}
-
-function getDataColumnIndexes(columns) {
-  const indexes = {
-    jstCode: columns.indexOf("jst_code"),
-    tableId: columns.indexOf("table_id"),
-    xAxisRcCode: columns.indexOf("x_axis_rc_code"),
-    yAxisRcCode: columns.indexOf("y_axis_rc_code"),
-    zAxisRcCode: columns.indexOf("z_axis_rc_code")
-  };
-
-  return Object.values(indexes).every((index) => index !== -1) ? indexes : null;
 }

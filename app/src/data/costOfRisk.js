@@ -1,7 +1,8 @@
 import { getIndexedRowsByCoordinates } from "./dataIndex.js";
-import { normalizeAxisCode } from "./module2Config.js";
+import { normalizeAxisCode } from "./core/axisCode.js";
+import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "./core/axisColumns.js";
+import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
-const REFERENCE_COLUMN_PATTERN = /^ref_(\d{4})_(\d{2})_(\d{2})$/;
 export const COST_OF_RISK_TABLE_ID = "F_12.01";
 export const COST_OF_RISK_STAGE_TRANSFER_TABLE_ID = "F_12.02";
 const COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID = "F_04.04.1";
@@ -1387,44 +1388,3 @@ function matchesAxis(row, indexes, axis, code) {
   return normalizeAxisCode(row[index], axis) === normalizeAxisCode(code, axis);
 }
 
-function getRequiredIndexes(columns) {
-  const indexes = {
-    jstCode: columns.indexOf("jst_code"),
-    tableId: columns.indexOf("table_id"),
-    xAxisRcCode: columns.indexOf("x_axis_rc_code"),
-    yAxisRcCode: columns.indexOf("y_axis_rc_code"),
-    zAxisRcCode: columns.indexOf("z_axis_rc_code")
-  };
-
-  return [indexes.jstCode, indexes.tableId, indexes.xAxisRcCode, indexes.yAxisRcCode]
-    .every((index) => index !== -1)
-    ? indexes
-    : null;
-}
-
-function getReferenceColumns(columns) {
-  return columns
-    .map((name, index) => {
-      const match = String(name).match(REFERENCE_COLUMN_PATTERN);
-      if (!match) return null;
-
-      const [, year, month, day] = match;
-      const date = new Date(Number(year), Number(month) - 1, Number(day));
-      return {
-        date,
-        index,
-        label: new Intl.DateTimeFormat("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric"
-        }).format(date)
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.date - right.date);
-}
-
-function parseNumericValue(value) {
-  const parsed = Number(String(value ?? "").replace(",", "."));
-  return Number.isFinite(parsed) ? parsed : 0;
-}

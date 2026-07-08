@@ -1,7 +1,7 @@
 import { getIndexedAxisCodes, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js";
-import { normalizeAxisCode } from "./module2Config.js";
-
-const REFERENCE_COLUMN_PATTERN = /^ref_(\d{4})_(\d{2})_(\d{2})$/;
+import { normalizeAxisCode } from "./core/axisCode.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
 export const MODULE_2_TARGET = {
   tableId: "C_02.00",
@@ -30,7 +30,7 @@ export function buildModule2AxisSeries(state, options = {}) {
   const selectedXCode = normalizeAxisCode(options.selectedXCode || MODULE_2_TARGET.xAxisRcCode, "x");
   const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
   const selectedZCode = normalizeAxisCode(options.selectedZCode || "", "z");
-  const indexes = getRequiredIndexes(state.columns);
+  const indexes = getCompleteAxisColumnIndexes(state.columns);
   const pointsConfig = getAxisPoints(state.module2Points ?? [], tableId, axis);
 
   if (state.module2PointsError) {
@@ -320,44 +320,3 @@ function buildValues(dateColumns, matchedRows) {
   }));
 }
 
-function getRequiredIndexes(columns) {
-  const indexes = {
-    jstCode: columns.indexOf("jst_code"),
-    tableId: columns.indexOf("table_id"),
-    xAxisRcCode: columns.indexOf("x_axis_rc_code"),
-    yAxisRcCode: columns.indexOf("y_axis_rc_code"),
-    zAxisRcCode: columns.indexOf("z_axis_rc_code")
-  };
-
-  return Object.values(indexes).every((index) => index !== -1) ? indexes : null;
-}
-
-function getReferenceColumns(columns) {
-  return columns
-    .map((name, index) => {
-      const match = name.match(REFERENCE_COLUMN_PATTERN);
-      if (!match) return null;
-
-      const [, year, month, day] = match;
-      return {
-        date: new Date(Number(year), Number(month) - 1, Number(day)),
-        index,
-        name
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.date - right.date);
-}
-
-function parseNumericValue(value) {
-  const parsed = Number(String(value).replace(",", "."));
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function formatReferenceDate(date) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  }).format(date);
-}

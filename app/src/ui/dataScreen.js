@@ -2,7 +2,7 @@ import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTable
 import { COST_OF_RISK_FILTER_ALL, COST_OF_RISK_WATERFALL_X_CODES, COST_OF_RISK_X_AXIS_CODE, buildCostOfRiskF02ImpairmentRatio, buildCostOfRiskF02ImpairmentSeries, buildCostOfRiskF12ContributionSeries, buildCostOfRiskF2VsF12Audit, buildCostOfRiskFilteredSelectionValue, buildCostOfRiskStageExposureTable, buildCostOfRiskStageTransferFlowDiagram, buildCostOfRiskStageTransferWaterfall, buildCostOfRiskWaterfall, getCostOfRiskFilterOptions, getCostOfRiskWaterfallXAxisOptions, getCostOfRiskXAxisOptions } from "../data/costOfRisk.js?v=20260707-stage-flow";
 import { createStageTransferWaterfallData, getStageTransferAxisLabel, getStageTransferDisplayValue, renderCostOfRiskStageExposureTable, renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260707-stage-flow-3";
 import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260704-cost-risk";
-import { normalizeAxisCode } from "../data/module2Config.js";
+import { normalizeAxisCode } from "../data/core/axisCode.js";
 
 let latestState = null;
 
