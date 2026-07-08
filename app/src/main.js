@@ -1,8 +1,8 @@
 import { parseCsv } from "./data/csvParser.js";
 import { buildDataIndexes } from "./data/dataIndex.js";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
-import { loadModule2Points } from "./data/module2Config.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260704-cost-risk";
+import { loadExplorerPoints } from "./data/explorerConfig.js";
+import { getUniqueValues } from "./data/timeSeries.js?v=20260708-explorer-rename";
 import {
   clearStoredDatasetFileHandle,
   clearStoredFileHandle,
@@ -15,25 +15,36 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260707-dataset-fix";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260707-stage-flow-3";
+import { createDataStore } from "./data/dataStore.js?v=20260708-explorer-rename";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260708-view-split";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
-const MODULE_URL_VALUES = new Set(["module-2", "cet-1", "cost-of-risk"]);
+const MODULE_URL_VALUES = new Set(["explorer", "cet-1", "cost-of-risk"]);
 const STANDALONE_MODULE_PATHS = [
   "src/data/csvParser.js",
+  "src/data/cet1.js",
   "src/data/costOfRisk.js",
+  "src/data/core/axisCode.js",
+  "src/data/core/axisColumns.js",
+  "src/data/core/formatting.js",
+  "src/data/core/referenceColumns.js",
   "src/data/dataIndex.js",
   "src/data/dataStore.js",
   "src/data/dimensionMapping.js",
   "src/data/localFileSource.js",
-  "src/data/module2Config.js",
+  "src/data/explorer.js",
+  "src/data/explorerBenchmark.js",
+  "src/data/explorerConfig.js",
   "src/data/timeSeries.js",
+  "src/ui/appState.js",
+  "src/ui/cet1View.js",
   "src/ui/costOfRiskStageTransfers.js",
+  "src/ui/costOfRiskView.js",
   "src/ui/dataScreen.js",
+  "src/ui/explorerView.js",
   "src/main.js"
 ];
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
@@ -504,7 +515,7 @@ wireUi(actions);
 store.subscribe(renderAppState);
 renderAppState(store.getState());
 loadInternalMapping();
-loadModule2Configuration();
+loadExplorerConfiguration();
 if (standaloneData?.csvText) {
   loadStandaloneData();
 } else {
@@ -519,10 +530,10 @@ async function loadInternalMapping() {
   }
 }
 
-async function loadModule2Configuration() {
+async function loadExplorerConfiguration() {
   try {
-    store.setModule2Points(await loadModule2Points());
+    store.setExplorerPoints(await loadExplorerPoints());
   } catch (error) {
-    store.setModule2PointsError(error);
+    store.setExplorerPointsError(error);
   }
 }

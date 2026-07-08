@@ -512,7 +512,7 @@ button:focus-visible {
   padding: 16px;
 }
 
-.module-2-view {
+.explorer-view {
   height: 100%;
   min-height: 0;
   overflow: hidden;

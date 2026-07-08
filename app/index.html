@@ -49,37 +49,37 @@
 
       <aside class="sidebar" aria-label="Modules">
         <nav class="module-list" aria-label="Navigation des modules">
-          <button class="module-link is-active" type="button" data-module-target="module-2">Reporting</button>
+          <button class="module-link is-active" type="button" data-module-target="explorer">Explorer</button>
           <button class="module-link" type="button" data-module-target="cet-1">CET 1</button>
           <button class="module-link" type="button" data-module-target="cost-of-risk">Cost of risk</button>
         </nav>
       </aside>
 
       <main class="main-view">
-        <section id="module-2-view" class="module-view module-2-view is-visible" aria-label="Reporting">
+        <section id="explorer-view" class="module-view explorer-view is-visible" aria-label="Explorer">
           <article class="metric-panel">
-            <div id="module-2-empty" class="notice" hidden></div>
+            <div id="explorer-empty" class="notice" hidden></div>
 
             <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
-              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-module-2-axis="template">
+              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="template">
                 <span class="axis-tab-title">template</span>
                 <span class="axis-tab-value" data-axis-caption="template">-</span>
               </button>
-              <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-module-2-axis="y">
+              <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-explorer-axis="y">
                 <span class="axis-tab-title">row</span>
                 <span class="axis-tab-value" data-axis-caption="y">-</span>
               </button>
-              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-module-2-axis="x">
+              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="x">
                 <span class="axis-tab-title">column</span>
                 <span class="axis-tab-value" data-axis-caption="x">-</span>
               </button>
-              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-module-2-axis="z" hidden>
+              <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="z" hidden>
                 <span class="axis-tab-title">tab</span>
                 <span class="axis-tab-value" data-axis-caption="z">-</span>
               </button>
             </div>
             <div class="metric-table-wrap">
-              <table id="module-2-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
+              <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
             </div>
           </article>
         </section>
@@ -227,6 +227,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260707-stage-flow-3"></script>
+    <script type="module" src="./src/main.js?v=20260708-view-split"></script>
   </body>
 </html>

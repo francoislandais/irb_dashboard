@@ -1,5 +1,5 @@
 const initialState = {
-  activeModule: "module-2",
+  activeModule: "explorer",
   capabilityNotice: "",
   columns: [],
   activeDatasetId: "",
@@ -14,8 +14,8 @@ const initialState = {
   isRestoring: false,
   jstOptions: [],
   loadedAt: null,
-  module2Points: [],
-  module2PointsError: "",
+  explorerPoints: [],
+  explorerPointsError: "",
   peerJstCodes: [],
   rememberedFileReady: false,
   rows: [],
@@ -179,19 +179,19 @@ export function createDataStore() {
       emit();
     },
 
-    setModule2Points(module2Points) {
+    setExplorerPoints(explorerPoints) {
       state = {
         ...state,
-        module2Points,
-        module2PointsError: ""
+        explorerPoints,
+        explorerPointsError: ""
       };
       emit();
     },
 
-    setModule2PointsError(error) {
+    setExplorerPointsError(error) {
       state = {
         ...state,
-        module2PointsError: error?.message ?? "La configuration interne du module 2 n'a pas pu être chargée."
+        explorerPointsError: error?.message ?? "La configuration interne du module Explorer n'a pas pu être chargée."
       };
       emit();
     },
@@ -262,8 +262,8 @@ export function createDataStore() {
         datasets: [],
         dimensionMapping: state.dimensionMapping,
         dimensionMappingError: state.dimensionMappingError,
-        module2Points: state.module2Points,
-        module2PointsError: state.module2PointsError,
+        explorerPoints: state.explorerPoints,
+        explorerPointsError: state.explorerPointsError,
         rememberedFileReady: false,
         selectedJst: "",
         selectedUnit: state.selectedUnit

@@ -1,5 +1,5 @@
 import { parseCsv } from "./csvParser.js";
-import { normalizeAxisCode } from "./module2Config.js";
+import { normalizeAxisCode } from "./core/axisCode.js";
 
 const MAPPING_URL = "./assets/ITS_all_dimension_mapping.csv";
 
