@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
-export const MODULE_2_TARGET = {
+export const EXPLORER_TARGET = {
   tableId: "C_02.00",
   xAxisRcCode: "0010"
 };
@@ -16,29 +16,29 @@ export function getUniqueValues(columns, rows, columnName) {
     .sort((left, right) => left.localeCompare(right, "fr"));
 }
 
-export function buildModule2Series(state) {
-  return buildModule2AxisSeries(state, {
+export function buildExplorerSeries(state) {
+  return buildExplorerAxisSeries(state, {
     axis: "y",
-    selectedXCode: MODULE_2_TARGET.xAxisRcCode,
+    selectedXCode: EXPLORER_TARGET.xAxisRcCode,
     selectedYCode: ""
   });
 }
 
-export function buildModule2AxisSeries(state, options = {}) {
+export function buildExplorerAxisSeries(state, options = {}) {
   const axis = ["template", "x", "y", "z"].includes(options.axis) ? options.axis : "y";
-  const tableId = options.tableId || MODULE_2_TARGET.tableId;
-  const selectedXCode = normalizeAxisCode(options.selectedXCode || MODULE_2_TARGET.xAxisRcCode, "x");
+  const tableId = options.tableId || EXPLORER_TARGET.tableId;
+  const selectedXCode = normalizeAxisCode(options.selectedXCode || EXPLORER_TARGET.xAxisRcCode, "x");
   const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
   const selectedZCode = normalizeAxisCode(options.selectedZCode || "", "z");
   const indexes = getCompleteAxisColumnIndexes(state.columns);
-  const pointsConfig = getAxisPoints(state.module2Points ?? [], tableId, axis);
+  const pointsConfig = getAxisPoints(state.explorerPoints ?? [], tableId, axis);
 
-  if (state.module2PointsError) {
+  if (state.explorerPointsError) {
     return {
       dateColumns: [],
       matchCount: 0,
       rows: [],
-      status: state.module2PointsError
+      status: state.explorerPointsError
     };
   }
 
@@ -47,7 +47,7 @@ export function buildModule2AxisSeries(state, options = {}) {
       dateColumns: [],
       matchCount: 0,
       rows: [],
-      status: "Configuration du module 2 en attente."
+      status: "Configuration du module Explorer en attente."
     };
   }
 
@@ -180,7 +180,7 @@ function buildTemplateSeriesRows(state, indexes, dateColumns, templates, templat
 
 function normalizeTemplateSelections(selections = {}) {
   return {
-    selectedXCode: normalizeAxisCode(selections.selectedXCode || MODULE_2_TARGET.xAxisRcCode, "x"),
+    selectedXCode: normalizeAxisCode(selections.selectedXCode || EXPLORER_TARGET.xAxisRcCode, "x"),
     selectedYCode: normalizeAxisCode(selections.selectedYCode || "", "y"),
     selectedZCode: normalizeAxisCode(selections.selectedZCode || "", "z")
   };
@@ -294,7 +294,7 @@ function getSelectedFilterFormat(state, tableId, activeAxis, selections) {
 }
 
 function getAxisCodeFormat(state, tableId, coordinate, code) {
-  const configuredPoint = (state.module2Points ?? []).find((point) => (
+  const configuredPoint = (state.explorerPoints ?? []).find((point) => (
     point.tableId === tableId
     && point.coordinate === coordinate
     && point.code === code

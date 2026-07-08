@@ -1,19 +1,19 @@
 import { parseCsv } from "./csvParser.js";
 import { normalizeAxisCode } from "./core/axisCode.js";
 
-const MODULE_2_CONFIG_URL = "./assets/ITS_all_dimension_mapping.csv";
+const EXPLORER_CONFIG_URL = "./assets/ITS_all_dimension_mapping.csv";
 
-export async function loadModule2Points() {
-  const response = await fetch(MODULE_2_CONFIG_URL, { cache: "no-store" });
+export async function loadExplorerPoints() {
+  const response = await fetch(EXPLORER_CONFIG_URL, { cache: "no-store" });
   if (!response.ok) {
-    throw new Error("La configuration interne du module 2 n'a pas pu être chargée.");
+    throw new Error("La configuration interne du module Explorer n'a pas pu être chargée.");
   }
 
   const parsed = parseCsv(await response.text());
-  return parseModule2Points(parsed.columns, parsed.rows);
+  return parseExplorerPoints(parsed.columns, parsed.rows);
 }
 
-export function parseModule2Points(columns, rows) {
+export function parseExplorerPoints(columns, rows) {
   const indexes = {
     tableId: columns.indexOf("table_id"),
     coordinate: columns.indexOf("coordinate"),
@@ -25,7 +25,7 @@ export function parseModule2Points(columns, rows) {
   };
 
   if ([indexes.tableId, indexes.coordinate, indexes.code, indexes.description].some((index) => index === -1)) {
-    throw new Error("La configuration interne du module 2 n'a pas la structure attendue.");
+    throw new Error("La configuration interne du module Explorer n'a pas la structure attendue.");
   }
 
   return rows

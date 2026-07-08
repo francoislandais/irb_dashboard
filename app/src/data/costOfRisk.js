@@ -1,7 +1,23 @@
 import { getIndexedRowsByCoordinates } from "./dataIndex.js";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "./core/axisColumns.js";
+import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "./core/formatting.js";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
+
+export const COST_OF_RISK_TREEMAP_STAGE_OPTIONS = [
+  { label: "Stage 1", value: "Stage 1" },
+  { label: "Stage 2", value: "Stage 2" },
+  { label: "Stage 3", value: "Stage 3" },
+  { label: "POCI", value: "POCI" }
+];
+export const COST_OF_RISK_TREEMAP_COUNTERPARTIES = [
+  { label: "Central banks", shortLabel: "CB", value: "Central banks" },
+  { label: "Governments", shortLabel: "Gov", value: "General governments" },
+  { label: "Credit institutions", shortLabel: "CI", value: "Credit institutions" },
+  { label: "Other financials", shortLabel: "OFI", value: "Other financial corporations" },
+  { label: "NFC", shortLabel: "NFC", value: "Non-financial corporations" },
+  { label: "HH", shortLabel: "HH", value: "Households" }
+];
 
 export const COST_OF_RISK_TABLE_ID = "F_12.01";
 export const COST_OF_RISK_STAGE_TRANSFER_TABLE_ID = "F_12.02";
@@ -1386,5 +1402,196 @@ function matchesAxis(row, indexes, axis, code) {
   const index = indexes[`${axis}AxisRcCode`];
   if (index === -1 || index === undefined) return false;
   return normalizeAxisCode(row[index], axis) === normalizeAxisCode(code, axis);
+}
+
+export function buildCostOfRiskCounterpartyTreemapData(state, filters, referenceDate = "") {
+  const baseFilters = {
+    ...filters,
+    counterparty: COST_OF_RISK_FILTER_ALL
+  };
+  const counterpartyOptions = filters.counterparty === COST_OF_RISK_FILTER_ALL
+    ? COST_OF_RISK_TREEMAP_COUNTERPARTIES
+    : COST_OF_RISK_TREEMAP_COUNTERPARTIES.filter((counterparty) => counterparty.value === filters.counterparty);
+  const totalWaterfall = buildCostOfRiskWaterfall(state, baseFilters, referenceDate);
+  const stageOptions = filters.stage === COST_OF_RISK_FILTER_ALL
+    ? COST_OF_RISK_TREEMAP_STAGE_OPTIONS
+    : COST_OF_RISK_TREEMAP_STAGE_OPTIONS.filter((stage) => stage.value === filters.stage);
+  const stageWaterfalls = stageOptions.map((stage) => {
+    const totalByCode = getCostOfRiskWaterfallPointMap(buildCostOfRiskWaterfall(state, {
+      ...baseFilters,
+      stage: stage.value
+    }, referenceDate));
+    const counterpartyWaterfalls = counterpartyOptions.map((counterparty) => ({
+      counterparty,
+      pointByCode: getCostOfRiskWaterfallPointMap(buildCostOfRiskWaterfall(state, {
+        ...baseFilters,
+        counterparty: counterparty.value,
+        stage: stage.value
+      }, referenceDate))
+    }));
+
+    return {
+      counterpartyWaterfalls,
+      label: stage.label,
+      totalByCode
+    };
+  });
+
+  return {
+    points: (totalWaterfall.points ?? []).map((point) => {
+      const counterpartyChildren = counterpartyOptions.map((counterparty) => {
+        const stages = stageWaterfalls.map((stage) => {
+          const stageWaterfall = stage.counterpartyWaterfalls.find((candidate) => candidate.counterparty.value === counterparty.value);
+
+          return {
+            counterpartyLabel: counterparty.label,
+            counterpartyShortLabel: counterparty.shortLabel,
+            key: `${counterparty.shortLabel}-${stage.label}`,
+            label: stage.label,
+            ratioBasisPoints: stageWaterfall?.pointByCode.get(point.code)?.ratioBasisPoints ?? 0,
+            value: stageWaterfall?.pointByCode.get(point.code)?.value ?? 0
+          };
+        });
+
+        return {
+          key: counterparty.shortLabel,
+          label: counterparty.label,
+          shortLabel: counterparty.shortLabel,
+          ratioBasisPoints: sumCostOfRiskTreemapChildren(stages),
+          value: sumCostOfRiskTreemapChildren(stages, "value"),
+          children: stages
+        };
+      });
+
+      return {
+        ...point,
+        children: counterpartyChildren
+      };
+    }),
+    referenceDate: totalWaterfall.referenceDate
+  };
+}
+
+function getCostOfRiskWaterfallPointMap(waterfall) {
+  return new Map((waterfall.points ?? []).map((point) => [point.code, point]));
+}
+
+function sumCostOfRiskTreemapChildren(children, field = "ratioBasisPoints") {
+  return children.reduce((sum, child) => (
+    sum + (Number.isFinite(child[field]) ? child[field] : 0)
+  ), 0);
+}
+
+export function getCostOfRiskPointDisplayValue(point, displayMode) {
+  return displayMode === "amount" ? point?.value : point?.ratioBasisPoints;
+}
+
+export function formatCostOfRiskDisplayValue(value, displayMode, selectedUnit, signed = false) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+  if (displayMode === "ratio") {
+    const sign = signed && value > 0 ? "+" : "";
+    return `${sign}${formatBasisPointsValue(value)}`;
+  }
+  return signed ? formatSignedMetricValue(value, selectedUnit) : formatMetricValue(value, selectedUnit);
+}
+
+export function createCostOfRiskChartData(points, displayMode = "ratio") {
+  return points
+    .filter((point) => point.date instanceof Date && Number.isFinite(displayMode === "ratio" ? point.smoothedRatioBasisPoints : point.smoothedValue))
+    .map((point) => ({
+      referenceLabel: point.label,
+      x: point.date.getTime(),
+      y: displayMode === "ratio" ? point.smoothedRatioBasisPoints : point.smoothedValue
+    }));
+}
+
+export function createCostOfRiskRatioChartData(points, displayMode = "ratio") {
+  return (points ?? [])
+    .filter((point) => point.date instanceof Date && Number.isFinite(getCostOfRiskPointDisplayValue(point, displayMode)))
+    .map((point) => ({
+      referenceLabel: point.label,
+      x: point.date.getTime(),
+      y: getCostOfRiskPointDisplayValue(point, displayMode)
+    }));
+}
+
+export function getCostOfRiskYAxisBounds(series) {
+  const values = series
+    .flatMap((serie) => serie.data.map((point) => point.y))
+    .filter((value) => Number.isFinite(value));
+
+  if (values.length === 0) return { max: undefined, min: undefined };
+
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const range = maxValue - minValue;
+  const padding = range > 0 ? range * 0.015 : Math.max(Math.abs(maxValue) * 0.015, 0.5);
+
+  return {
+    max: maxValue + padding,
+    min: minValue - padding
+  };
+}
+
+export function clampCostOfRiskSmoothingWindow(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 1;
+  return Math.max(1, Math.min(4, Math.round(parsed)));
+}
+
+export function formatCostOfRiskSmoothingLabel(windowSize) {
+  return `${windowSize}Q`;
+}
+
+export function formatReferenceQuarterLabel(label) {
+  const match = String(label ?? "").match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return label || "-";
+
+  const [, , month, year] = match;
+  const quarter = Math.max(1, Math.min(4, Math.ceil(Number(month) / 3)));
+  return `Q${quarter} ${year}`;
+}
+
+export function getSelectedSmoothedCostOfRiskPoint(points, smoothingWindow, referenceDate) {
+  const smoothedPoints = smoothCostOfRiskPoints(points ?? [], smoothingWindow);
+  return smoothedPoints.find((point) => point.label === referenceDate) ?? smoothedPoints.at(-1) ?? null;
+}
+
+export function formatCostOfRiskAuditValue(value, type, selectedUnit) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+  if (type === "bp") return formatBasisPointsValue(value);
+  return formatMetricValue(value, selectedUnit || "millions");
+}
+
+export function smoothCostOfRiskPoints(points, smoothingWindow) {
+  const windowSize = clampCostOfRiskSmoothingWindow(smoothingWindow);
+  if (windowSize <= 1) {
+    return points.map((point) => ({
+      ...point,
+      smoothedRatioBasisPoints: point.ratioBasisPoints,
+      smoothedValue: point.value
+    }));
+  }
+
+  return points.map((point, index) => {
+    const windowValues = points
+      .slice(Math.max(0, index - windowSize + 1), index + 1)
+      .map((candidate) => candidate.ratioBasisPoints)
+      .filter((value) => Number.isFinite(value));
+    const windowAmountValues = points
+      .slice(Math.max(0, index - windowSize + 1), index + 1)
+      .map((candidate) => candidate.value)
+      .filter((value) => Number.isFinite(value));
+
+    return {
+      ...point,
+      smoothedRatioBasisPoints: windowValues.length
+        ? windowValues.reduce((total, value) => total + value, 0) / windowValues.length
+        : null,
+      smoothedValue: windowAmountValues.length
+        ? windowAmountValues.reduce((total, value) => total + value, 0) / windowAmountValues.length
+        : null
+    };
+  });
 }
 
