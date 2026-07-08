@@ -17,6 +17,14 @@ export const COST_OF_RISK_STAGE_TRANSFER_STAGE_OPTIONS = [
   { label: "Stage 2", value: "2" },
   { label: "Stage 3", value: "3" }
 ];
+const COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS = [
+  { code: "0010", from: "1", to: "2" },
+  { code: "0020", from: "2", to: "1" },
+  { code: "0030", from: "2", to: "3" },
+  { code: "0040", from: "3", to: "2" },
+  { code: "0050", from: "1", to: "3" },
+  { code: "0060", from: "3", to: "1" }
+];
 const COST_OF_RISK_STAGE_TRANSFER_MOVEMENTS = {
   "1": [
     { code: "0010", sign: -1 },
@@ -564,6 +572,93 @@ export function buildCostOfRiskStageTransferWaterfall(state, stage = "3", refere
     referenceDate: selectedReference.label,
     stage: selectedStage,
     status: ""
+  };
+}
+
+export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "", filters = {}) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
+  const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
+  const exposureYSelection = getCostOfRiskStageExposureYSelection(state, filters);
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const selectedReference = referenceColumns[referenceIndex] ?? null;
+
+  if (!indexes || !state.selectedJst || !selectedReference) {
+    return {
+      assetLabel: ySelection.label,
+      flows: [],
+      referenceDate: "",
+      residuals: [],
+      status: "No F_12.02 stage transfer data is available.",
+      totalPreviousExposure: null
+    };
+  }
+
+  if (ySelection.codes.length === 0) {
+    return {
+      assetLabel: ySelection.label,
+      flows: [],
+      referenceDate: selectedReference.label,
+      residuals: [],
+      status: "No matching F_12.02 Y-axis point is available for the selected filters.",
+      totalPreviousExposure: null
+    };
+  }
+
+  const flowValues = new Map(COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.map((movement) => {
+    const value = ySelection.codes.reduce((total, yCode) => {
+      const series = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
+        xCode: movement.code,
+        yCode,
+        zCode: ""
+      }, state.selectedJst);
+      const quarterlySeries = decumulateQuarterlySeries(referenceColumns, series);
+      return total + (quarterlySeries[referenceIndex] ?? 0);
+    }, 0);
+
+    return [movement.code, value];
+  }));
+
+  const stageVariations = ["1", "2", "3"].map((stage) => (
+    buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, exposureYSelection, stage, referenceIndex)
+  ));
+  const previousExposureValues = stageVariations
+    .map((variation) => variation.previousValue)
+    .filter((value) => Number.isFinite(value));
+  const totalPreviousExposure = previousExposureValues.length
+    ? previousExposureValues.reduce((total, value) => total + value, 0)
+    : null;
+
+  const netTransfersByStage = new Map([["1", 0], ["2", 0], ["3", 0]]);
+  COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.forEach((movement) => {
+    const value = flowValues.get(movement.code) ?? 0;
+    netTransfersByStage.set(movement.from, (netTransfersByStage.get(movement.from) ?? 0) - value);
+    netTransfersByStage.set(movement.to, (netTransfersByStage.get(movement.to) ?? 0) + value);
+  });
+
+  return {
+    assetLabel: ySelection.label,
+    flows: COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.map((movement) => ({
+      ...movement,
+      label: xLabels.get(movement.code) ?? movement.code,
+      value: flowValues.get(movement.code) ?? null
+    })),
+    referenceDate: selectedReference.label,
+    residuals: stageVariations.map((variation, index) => {
+      const stage = String(index + 1);
+      const delta = variation.value;
+      const netTransfers = netTransfersByStage.get(stage) ?? 0;
+      return {
+        delta,
+        label: `Other Stage ${stage} movements`,
+        netTransfers,
+        stage,
+        value: Number.isFinite(delta) ? delta - netTransfers : null
+      };
+    }),
+    status: "",
+    totalPreviousExposure
   };
 }
 

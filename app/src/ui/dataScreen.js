@@ -1,6 +1,6 @@
 import { getIndexedAxisCodes, getIndexedRowsByCoordinates, getIndexedRowsByTableJst, getIndexedTableIds } from "../data/dataIndex.js";
-import { COST_OF_RISK_FILTER_ALL, COST_OF_RISK_WATERFALL_X_CODES, COST_OF_RISK_X_AXIS_CODE, buildCostOfRiskF02ImpairmentRatio, buildCostOfRiskF02ImpairmentSeries, buildCostOfRiskF12ContributionSeries, buildCostOfRiskF2VsF12Audit, buildCostOfRiskFilteredSelectionValue, buildCostOfRiskStageExposureTable, buildCostOfRiskStageTransferWaterfall, buildCostOfRiskWaterfall, getCostOfRiskFilterOptions, getCostOfRiskWaterfallXAxisOptions, getCostOfRiskXAxisOptions } from "../data/costOfRisk.js?v=20260706-stage-transfers";
-import { createStageTransferWaterfallData, getStageTransferAxisLabel, getStageTransferDisplayValue, renderCostOfRiskStageExposureTable } from "./costOfRiskStageTransfers.js";
+import { COST_OF_RISK_FILTER_ALL, COST_OF_RISK_WATERFALL_X_CODES, COST_OF_RISK_X_AXIS_CODE, buildCostOfRiskF02ImpairmentRatio, buildCostOfRiskF02ImpairmentSeries, buildCostOfRiskF12ContributionSeries, buildCostOfRiskF2VsF12Audit, buildCostOfRiskFilteredSelectionValue, buildCostOfRiskStageExposureTable, buildCostOfRiskStageTransferFlowDiagram, buildCostOfRiskStageTransferWaterfall, buildCostOfRiskWaterfall, getCostOfRiskFilterOptions, getCostOfRiskWaterfallXAxisOptions, getCostOfRiskXAxisOptions } from "../data/costOfRisk.js?v=20260707-stage-flow";
+import { createStageTransferWaterfallData, getStageTransferAxisLabel, getStageTransferDisplayValue, renderCostOfRiskStageExposureTable, renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260707-stage-flow-3";
 import { buildModule2AxisSeries, MODULE_2_TARGET } from "../data/timeSeries.js?v=20260704-cost-risk";
 import { normalizeAxisCode } from "../data/module2Config.js";
 
@@ -617,11 +617,7 @@ function renderCostOfRisk(state) {
       onSelectReferenceDate: selectCostOfRiskReferenceDate,
       selectedUnit: state.selectedUnit
     });
-    renderCostOfRiskStageTransferWaterfallChart(
-      buildCostOfRiskStageTransferWaterfall(state, getActiveCostOfRiskStageTransferStage(), activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
-      state.selectedUnit,
-      activeCostOfRiskDisplayMode
-    );
+    renderCostOfRiskStageTransferView(state);
   } else if (activeCostOfRiskTab === "analysis") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
@@ -664,6 +660,10 @@ function getActiveCostOfRiskStageTransferStage() {
   if (activeCostOfRiskFilters.stage === "Stage 2") return "2";
   if (activeCostOfRiskFilters.stage === "Stage 3") return "3";
   return "3";
+}
+
+function isCostOfRiskAllStageSelected() {
+  return !activeCostOfRiskFilters.stage || activeCostOfRiskFilters.stage === COST_OF_RISK_FILTER_ALL;
 }
 
 function normalizeActiveCostOfRiskCoreDefinition(options) {
@@ -1236,8 +1236,45 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   }
 }
 
+function renderCostOfRiskStageTransferView(state) {
+  if (isCostOfRiskAllStageSelected()) {
+    renderCostOfRiskStageTransferFlowChart(
+      buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
+      state.selectedUnit,
+      activeCostOfRiskDisplayMode
+    );
+    return;
+  }
+
+  renderCostOfRiskStageTransferWaterfallChart(
+    buildCostOfRiskStageTransferWaterfall(state, getActiveCostOfRiskStageTransferStage(), activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
+    state.selectedUnit,
+    activeCostOfRiskDisplayMode
+  );
+}
+
+function renderCostOfRiskStageTransferFlowChart(flowDiagram, selectedUnit, displayMode = "amount") {
+  if (!elements.costOfRiskStageTransferChart) return;
+  destroyCostOfRiskStageTransferChart();
+
+  if (elements.costOfRiskStageTransferTitle) {
+    const dateLabel = flowDiagram.referenceDate ? ` - ${formatReferenceQuarterLabel(flowDiagram.referenceDate)}` : "";
+    elements.costOfRiskStageTransferTitle.textContent = `F12.02 Stage transfer flows - ${flowDiagram.assetLabel} - All stages${dateLabel}`;
+  }
+
+  renderCostOfRiskStageTransferFlowDiagram({
+    container: elements.costOfRiskStageTransferChart,
+    displayMode,
+    flowDiagram,
+    formatValue: formatCostOfRiskDisplayValue,
+    primaryDark,
+    selectedUnit
+  });
+}
+
 function renderCostOfRiskStageTransferWaterfallChart(waterfall, selectedUnit, displayMode = "amount") {
   if (!elements.costOfRiskStageTransferChart || !window.Highcharts) return;
+  if (!costOfRiskStageTransferChart) elements.costOfRiskStageTransferChart.replaceChildren();
 
   if (elements.costOfRiskStageTransferTitle) {
     const stageLabel = `Stage ${waterfall.stage}`;
