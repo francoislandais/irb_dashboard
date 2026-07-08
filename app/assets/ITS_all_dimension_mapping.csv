@@ -512,6 +512,13 @@ C_08.01;x_axis_rc_code;60;CRM with substitution effects on the exposure/(-) othe
 C_08.01;x_axis_rc_code;70;CRM with substitution effects on the exposure/Substitution of the exposure due to crm/(-) total outflows;;;
 C_08.01;x_axis_rc_code;80;CRM with substitution effects on the exposure/Substitution of the exposure due to crm/Total inflows (+);;;
 C_08.01;x_axis_rc_code;90;Exposure after crm substitution effects pre conversion factors;X;;
+C_08.01;x_axis_rc_code;101;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Modelled conversion factors;;;
+C_08.01;x_axis_rc_code;102;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Standard conversion factors/0%;;;
+C_08.01;x_axis_rc_code;103;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Standard conversion factors/10%;;;
+C_08.01;x_axis_rc_code;104;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Standard conversion factors/20%;;;
+C_08.01;x_axis_rc_code;105;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Standard conversion factors/40%;;;
+C_08.01;x_axis_rc_code;106;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Standard conversion factors/50%;;;
+C_08.01;x_axis_rc_code;107;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/Standard conversion factors/100%;;;
 C_08.01;x_axis_rc_code;110;Exposure value;X;;
 C_08.01;x_axis_rc_code;140;Exposure value/Of which: large financial sector entities and unregulated financial entities;;;
 C_08.01;x_axis_rc_code;150;CRM taken into account in lgd estimates excluding double default treatment/Own estimates of lgd's are used: unfunded credit protection/Guarantees;;;
@@ -541,7 +548,7 @@ C_08.01;x_axis_rc_code;100;Exposure after crm substitution effects pre conversio
 C_08.01;x_axis_rc_code;120;Exposure value/Of which: off balance sheet items;;;
 C_08.01;x_axis_rc_code;130;Exposure value/Of which: arising from counterparty credit risk;;;
 C_08.01;z_axis_rc_code;qx01;All exposure classes and approaches;;;
-C_08.01;z_axis_rc_code;qx2023;IRB-A / Total with own estimates of LGD and/or conversion factors;;;
+C_08.01;z_axis_rc_code;qx2023;IRB-A;;;
 C_08.01;z_axis_rc_code;qx2021;IRB-A / Central governments and central banks;;;
 C_08.01;z_axis_rc_code;qx2071;IRB-A / Regional governments or local authorities;;;
 C_08.01;z_axis_rc_code;qx2073;IRB-A / Public sector entities;;;
@@ -558,7 +565,7 @@ C_08.01;z_axis_rc_code;qx2010;IRB-A / Retail / Memo item / Secured by immovable 
 C_08.01;z_axis_rc_code;qx2011;IRB-A / Retail / Memo item / Secured by immovable property / SME;;;
 C_08.01;z_axis_rc_code;qx2007;IRB-A / Retail / Memo item / Other / Non-SME;;;
 C_08.01;z_axis_rc_code;qx2008;IRB-A / Retail / Memo item / Other / SME;;;
-C_08.01;z_axis_rc_code;qx2022;IRB-F / Total without own estimates of LGD or conversion factors;;;
+C_08.01;z_axis_rc_code;qx2022;IRB-F ;;;
 C_08.01;z_axis_rc_code;qx2020;IRB-F / Central governments and central banks;;;
 C_08.01;z_axis_rc_code;qx2072;IRB-F / Regional governments or local authorities;;;
 C_08.01;z_axis_rc_code;qx2074;IRB-F / Public sector entities;;;
