@@ -33,6 +33,7 @@ import { getLatestState } from "./appState.js";
 let rerenderApp = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
+let hasInteractedWithExplorerSelection = false;
 const explorerTemplateContexts = new Map();
 const explorerTemplateAxisState = {
   scroll: { left: 0, top: 0 },
@@ -49,6 +50,17 @@ const COMMON_EXPLORER_DENOMINATORS = [
 ];
 const EXPLORER_STICKY_PARENT_ROW_HEIGHT = 28;
 const TEMPLATE_URL_PARAM = "template";
+const AXIS_URL_PARAM = "axis";
+const ROW_URL_PARAM = "row";
+const COLUMN_URL_PARAM = "column";
+const TAB_URL_PARAM = "tab";
+const EXPLORER_AXIS_VALUES = new Set(["template", "x", "y", "z"]);
+// Captured synchronously at module load, before any render can mutate the URL,
+// so the originally bookmarked/refreshed selection is never lost to a premature render.
+const pendingUrlAxis = getUrlAxisParam();
+const pendingUrlRow = getUrlRowParam();
+const pendingUrlColumn = getUrlColumnParam();
+const pendingUrlTab = getUrlTabParam();
 let explorerStickyFrame = 0;
 let explorerContextMenu = null;
 let explorerBenchmarkDialog = null;
@@ -71,6 +83,7 @@ export function wireExplorerUi(actions, rerender) {
   rerenderApp = rerender;
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       getActiveExplorerContext().activeAxis = button.getAttribute("data-explorer-axis") || "y";
       rerenderApp(actions.getState());
@@ -130,8 +143,18 @@ export function wireExplorerUi(actions, rerender) {
 function createExplorerTemplateContext() {
   return {
     activeAxis: "y",
-    defaultExpandedPathsInitialized: false,
-    expandedPaths: new Set(),
+    defaultExpandedPathsInitializedByAxis: {
+      template: false,
+      x: false,
+      y: false,
+      z: false
+    },
+    expandedPathsByAxis: {
+      template: new Set(),
+      x: new Set(),
+      y: new Set(),
+      z: new Set()
+    },
     scrollByAxis: {
       template: { left: 0, top: 0 },
       x: { left: 0, top: 0 },
@@ -175,16 +198,58 @@ function ensureActiveExplorerTemplate(state) {
   if (!hasAppliedUrlTemplate) {
     hasAppliedUrlTemplate = true;
     const urlTemplateId = findMatchingExplorerTemplateId(templates, getUrlTemplateParam());
-    if (urlTemplateId) {
-      activeExplorerTemplateId = urlTemplateId;
-      return;
-    }
+    if (urlTemplateId) activeExplorerTemplateId = urlTemplateId;
   }
 
-  if (templates.some((template) => template.tableId === activeExplorerTemplateId)) return;
+  if (!templates.some((template) => template.tableId === activeExplorerTemplateId)) {
+    activeExplorerTemplateId = templates[0].tableId;
+    updateUrlTemplateParam(activeExplorerTemplateId);
+  }
 
-  activeExplorerTemplateId = templates[0].tableId;
-  updateUrlTemplateParam(activeExplorerTemplateId);
+  applyPendingUrlExplorerSelection(getActiveExplorerContext());
+}
+
+function applyPendingUrlExplorerSelection(context) {
+  if (hasInteractedWithExplorerSelection) return;
+
+  if (EXPLORER_AXIS_VALUES.has(pendingUrlAxis)) context.activeAxis = pendingUrlAxis;
+  if (pendingUrlRow) context.selectedYCode = normalizeAxisCode(pendingUrlRow, "y");
+  if (pendingUrlColumn) context.selectedXCode = normalizeAxisCode(pendingUrlColumn, "x");
+  if (pendingUrlTab) context.selectedZCode = normalizeAxisCode(pendingUrlTab, "z");
+}
+
+function updateUrlExplorerSelectionParams() {
+  const context = getActiveExplorerContext();
+  const url = new URL(window.location.href);
+  setOrDeleteUrlParam(url, AXIS_URL_PARAM, context.activeAxis);
+  setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
+  setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
+  setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
+  window.history.replaceState({}, "", url);
+}
+
+function setOrDeleteUrlParam(url, key, value) {
+  if (value) {
+    url.searchParams.set(key, value);
+  } else {
+    url.searchParams.delete(key);
+  }
+}
+
+function getUrlAxisParam() {
+  return new URLSearchParams(window.location.search).get(AXIS_URL_PARAM) ?? "";
+}
+
+function getUrlRowParam() {
+  return new URLSearchParams(window.location.search).get(ROW_URL_PARAM) ?? "";
+}
+
+function getUrlColumnParam() {
+  return new URLSearchParams(window.location.search).get(COLUMN_URL_PARAM) ?? "";
+}
+
+function getUrlTabParam() {
+  return new URLSearchParams(window.location.search).get(TAB_URL_PARAM) ?? "";
 }
 
 function getUrlTemplateParam() {
@@ -232,7 +297,8 @@ function getActiveExplorerAxis() {
 }
 
 function getActiveExplorerExpandedPaths() {
-  return getActiveExplorerContext().expandedPaths;
+  const context = getActiveExplorerContext();
+  return context.expandedPathsByAxis[context.activeAxis];
 }
 
 function ensureExplorerSelections(state) {
@@ -304,6 +370,7 @@ export function renderExplorer(state) {
   const templates = getExplorerTemplates(state);
   ensureExplorerSelections(state);
   if (context.activeAxis === "template") ensureAllExplorerTemplateSelections(state);
+  updateUrlExplorerSelectionParams();
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
     selectedXCode: context.selectedXCode,
@@ -1204,9 +1271,10 @@ function getSelectedExplorerCodeForActiveAxis() {
 
 function expandDefaultExplorerPaths(rows, parentPaths) {
   const context = getActiveExplorerContext();
-  if (context.defaultExpandedPathsInitialized) return;
+  const activeAxis = context.activeAxis;
+  if (context.defaultExpandedPathsInitializedByAxis[activeAxis]) return;
 
-  const expandedPaths = context.expandedPaths;
+  const expandedPaths = context.expandedPathsByAxis[activeAxis];
 
   rows.forEach((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
@@ -1215,7 +1283,7 @@ function expandDefaultExplorerPaths(rows, parentPaths) {
     }
   });
 
-  context.defaultExpandedPathsInitialized = true;
+  context.defaultExpandedPathsInitializedByAxis[activeAxis] = true;
 }
 
 function createDescriptionContent(seriesRow, normalizedPath, isParent, options = {}) {
@@ -1495,6 +1563,7 @@ function getExplicitPathsFromRenderedRows(rows) {
 
 function selectExplorerRow(pointCode, options = {}) {
   const { shouldFocus = false } = options;
+  hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
   const activeAxis = context.activeAxis;
 
@@ -1624,6 +1693,7 @@ function moveExplorerSelection(direction) {
 }
 
 function setSelectedExplorerCodeForActiveAxis(pointCode) {
+  hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
 
   if (context.activeAxis === "template") {
