@@ -55,7 +55,7 @@ export function wireUi(actions) {
       );
       return;
     }
-    actions.setActiveDataset(event.target.value);
+    await actions.setActiveDataset(event.target.value);
   });
   elements.jstSelect.addEventListener("change", (event) => {
     actions.updateSelectedJst(event.target.value);

@@ -15,12 +15,13 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260708-explorer-rename";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260708-view-split";
+import { createDataStore } from "./data/dataStore.js?v=20260709-dataset-lazy-load";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260709-dataset-lazy-load";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
+const DATASET_URL_PARAM = "dataset";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
 const MODULE_URL_VALUES = new Set(["explorer", "cet-1", "cost-of-risk"]);
 const STANDALONE_MODULE_PATHS = [
@@ -112,14 +113,32 @@ const actions = {
       await clearStoredDatasetFileHandle(state.activeDatasetId);
       await clearStoredFileHandle();
       store.forgetDataset(state.activeDatasetId);
+      updateUrlDatasetParam(store.getState().activeDatasetId);
       return;
     }
     await clearStoredFileHandle();
     store.reset();
+    updateUrlDatasetParam("");
   },
 
-  setActiveDataset(datasetId) {
-    store.setActiveDataset(datasetId);
+  async setActiveDataset(datasetId) {
+    const dataset = store.getState().datasets.find((candidate) => candidate.id === datasetId);
+    if (dataset?.isLoaded === false) {
+      try {
+        const file = await readFileFromHandle(dataset.fileHandle);
+        await loadFile(file, dataset.fileHandle, {
+          datasetId: dataset.id,
+          datasetLabel: dataset.label || dataset.fileName,
+          source: dataset.source || "local"
+        });
+      } catch (error) {
+        store.setError(error);
+        return;
+      }
+    } else {
+      store.setActiveDataset(datasetId);
+    }
+    updateUrlDatasetParam(store.getState().activeDatasetId);
     updateUrlJstParam(store.getState().selectedJst);
     applyUrlPeerExclusions(store.getState().jstOptions);
     updateUrlPeerExclusionsParam(store.getState());
@@ -185,6 +204,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
     rows: parsed.rows,
     loadedAt
   });
+  updateUrlDatasetParam(store.getState().activeDatasetId);
 
   const urlJst = getUrlJstParam();
   const matchedJst = findMatchingJstCode(jstOptions, urlJst);
@@ -237,6 +257,20 @@ function updateUrlModuleParam(activeModule) {
     url.searchParams.set(MODULE_URL_PARAM, activeModule);
   } else {
     url.searchParams.delete(MODULE_URL_PARAM);
+  }
+  window.history.replaceState({}, "", url);
+}
+
+function getUrlDatasetParam() {
+  return new URLSearchParams(window.location.search).get(DATASET_URL_PARAM) ?? "";
+}
+
+function updateUrlDatasetParam(datasetId) {
+  const url = new URL(window.location.href);
+  if (datasetId) {
+    url.searchParams.set(DATASET_URL_PARAM, datasetId);
+  } else {
+    url.searchParams.delete(DATASET_URL_PARAM);
   }
   window.history.replaceState({}, "", url);
 }
@@ -464,25 +498,24 @@ async function restoreLastFile() {
   const storedDatasets = await getStoredDatasetFileHandles();
   if (!handle && storedDatasets.length === 0) return;
 
+  store.registerDatasetManifest(storedDatasets);
+
   store.setRestoring(true);
   try {
-    for (const entry of storedDatasets) {
-      if (!entry.handle) continue;
-      if (!(await hasReadPermission(entry.handle))) {
-        if (!store.getState().rememberedFileReady) {
-          store.setRememberedFileReady(entry.handle, entry.fileName || entry.handle.name || "");
-        }
-        continue;
+    const targetEntry = selectDatasetEntryToRestore(storedDatasets);
+    if (targetEntry) {
+      if (!(await hasReadPermission(targetEntry.handle))) {
+        store.setRememberedFileReady(targetEntry.handle, targetEntry.fileName || targetEntry.handle.name || "");
+        return;
       }
-      const file = await readFileFromHandle(entry.handle, { requestPermission: false });
-      await loadFile(file, entry.handle, {
-        datasetId: entry.id,
-        datasetLabel: entry.fileName || file.name,
+      const file = await readFileFromHandle(targetEntry.handle, { requestPermission: false });
+      await loadFile(file, targetEntry.handle, {
+        datasetId: targetEntry.id,
+        datasetLabel: targetEntry.fileName || file.name,
         source: "local"
       });
+      return;
     }
-
-    if (store.getState().rows.length > 0) return;
 
     if (!handle) return;
     if (!(await hasReadPermission(handle))) {
@@ -501,6 +534,21 @@ async function restoreLastFile() {
   } finally {
     store.setRestoring(false);
   }
+}
+
+function selectDatasetEntryToRestore(storedDatasets) {
+  const entriesWithHandle = storedDatasets.filter((entry) => entry.handle);
+  if (entriesWithHandle.length === 0) return null;
+
+  const requestedDatasetId = getUrlDatasetParam();
+  const requestedEntry = requestedDatasetId
+    ? entriesWithHandle.find((entry) => entry.id === requestedDatasetId)
+    : null;
+  if (requestedEntry) return requestedEntry;
+
+  return [...entriesWithHandle].sort((left, right) => (
+    new Date(right.storedAt || 0) - new Date(left.storedAt || 0)
+  ))[0];
 }
 
 function isPickerAbort(error) {

@@ -59,6 +59,7 @@ export function createDataStore() {
         dataIndexes,
         fileHandle,
         fileName: file.name,
+        isLoaded: true,
         jstOptions,
         label: datasetLabel || file.name || "Dataset",
         loadedAt,
@@ -95,9 +96,35 @@ export function createDataStore() {
       emit();
     },
 
+    registerDatasetManifest(entries) {
+      const existingIds = new Set(state.datasets.map((dataset) => dataset.id));
+      const manifestDatasets = (entries ?? [])
+        .filter((entry) => entry.handle && entry.id && !existingIds.has(entry.id))
+        .map((entry) => ({
+          id: entry.id,
+          columns: [],
+          dataIndexes: null,
+          fileHandle: entry.handle,
+          fileName: entry.fileName,
+          isLoaded: false,
+          jstOptions: [],
+          label: entry.fileName || "Dataset",
+          loadedAt: null,
+          rows: [],
+          source: "local"
+        }));
+      if (manifestDatasets.length === 0) return;
+
+      state = {
+        ...state,
+        datasets: [...state.datasets, ...manifestDatasets]
+      };
+      emit();
+    },
+
     setActiveDataset(activeDatasetId) {
       const dataset = state.datasets.find((candidate) => candidate.id === activeDatasetId);
-      if (!dataset) return;
+      if (!dataset || dataset.isLoaded === false) return;
 
       const selectedJst = dataset.jstOptions.includes(state.selectedJst)
         ? state.selectedJst
@@ -124,41 +151,24 @@ export function createDataStore() {
 
     forgetDataset(datasetId = state.activeDatasetId) {
       const datasets = state.datasets.filter((dataset) => dataset.id !== datasetId);
-      const nextDataset = datasets[0] ?? null;
+      const nextDataset = datasets.find((dataset) => dataset.isLoaded !== false) ?? null;
 
-      state = nextDataset
-        ? {
-          ...state,
-          activeDatasetId: nextDataset.id,
-          columns: nextDataset.columns,
-          datasets,
-          dataIndexes: nextDataset.dataIndexes,
-          error: "",
-          fileHandle: nextDataset.fileHandle,
-          fileName: nextDataset.fileName,
-          jstOptions: nextDataset.jstOptions,
-          loadedAt: nextDataset.loadedAt,
-          peerJstCodes: normalizePeerJstCodes(state.peerJstCodes, nextDataset.jstOptions),
-          rememberedFileReady: false,
-          rows: nextDataset.rows,
-          selectedJst: nextDataset.jstOptions[0] ?? ""
-        }
-        : {
-          ...state,
-          activeDatasetId: "",
-          columns: [],
-          datasets: [],
-          dataIndexes: null,
-          error: "",
-          fileHandle: null,
-          fileName: "",
-          jstOptions: [],
-          loadedAt: null,
-          peerJstCodes: [],
-          rememberedFileReady: false,
-          rows: [],
-          selectedJst: ""
-        };
+      state = {
+        ...state,
+        activeDatasetId: nextDataset?.id ?? "",
+        columns: nextDataset?.columns ?? [],
+        datasets,
+        dataIndexes: nextDataset?.dataIndexes ?? null,
+        error: "",
+        fileHandle: nextDataset?.fileHandle ?? null,
+        fileName: nextDataset?.fileName ?? "",
+        jstOptions: nextDataset?.jstOptions ?? [],
+        loadedAt: nextDataset?.loadedAt ?? null,
+        peerJstCodes: nextDataset ? normalizePeerJstCodes(state.peerJstCodes, nextDataset.jstOptions) : [],
+        rememberedFileReady: false,
+        rows: nextDataset?.rows ?? [],
+        selectedJst: nextDataset?.jstOptions[0] ?? ""
+      };
       emit();
     },
 
