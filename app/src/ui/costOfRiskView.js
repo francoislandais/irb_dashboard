@@ -33,9 +33,10 @@ import {
   getStageTransferDisplayValue,
   renderCostOfRiskStageExposureTable,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260707-stage-flow-3";
+} from "./costOfRiskStageTransfers.js?v=20260709-primary-dark-fix";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js";
 import { getLatestState } from "./appState.js";
+import { primaryDark } from "./theme.js";
 
 let rerenderApp = () => {};
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
@@ -675,8 +676,8 @@ function renderCostOfRiskF2VsF12Chart(f02Series, f12Series, displayMode = "ratio
       lineWidth: 2.8,
       marker: {
         enabled: true,
-        fillColor: "#primaryDark",
-        lineColor: "#primaryDark",
+        fillColor: primaryDark,
+        lineColor: primaryDark,
         lineWidth: 1.2,
         radius: 3,
         symbol: "circle"
@@ -804,12 +805,6 @@ function destroyCostOfRiskStageTransferChart() {
   costOfRiskStageTransferChart.destroy();
   costOfRiskStageTransferChart = null;
 }
-
-const primaryDark = getComputedStyle(document.documentElement)
-
-  .getPropertyValue("--primary-dark")
-
-  .trim();
 
 function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio", selectedUnit = "millions") {
   if (!elements.costOfRiskWaterfall || !window.Highcharts) return;

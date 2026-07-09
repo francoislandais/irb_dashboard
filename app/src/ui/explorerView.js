@@ -29,6 +29,7 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js";
 import { getLatestState } from "./appState.js";
+import { primaryDark } from "./theme.js";
 
 let rerenderApp = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
@@ -1103,7 +1104,7 @@ function createSvgTitle(text) {
 }
 
 function getBenchmarkColor(index, isSelectedJst = false) {
-  if (isSelectedJst) return "#17483f";
+  if (isSelectedJst) return primaryDark;
 
   const grays = ["#8d9891", "#a1aaa5", "#b5bdb8", "#7c8781"];
   return grays[index % grays.length];

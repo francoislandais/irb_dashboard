@@ -1,3 +1,5 @@
+import { primaryDark } from "./theme.js";
+
 export function renderCostOfRiskStageExposureTable({
   activeReferenceDate,
   container,
@@ -532,7 +534,7 @@ function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit,
     { "text-anchor": anchor }
   );
 
-  label.setAttribute("fill", color ?? (value >= 0 ? "#0c4c42" : "#4c5651"));
+  label.setAttribute("fill", color ?? (value >= 0 ? primaryDark : "#4c5651"));
 }
 
 function addText(svg, value, x, y, className, attrs = {}) {

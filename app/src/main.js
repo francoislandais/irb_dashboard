@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260709-dataset-lazy-load";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260709-explorer-url-state-fix2";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260709-primary-dark-fix2";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -46,6 +46,7 @@ const STANDALONE_MODULE_PATHS = [
   "src/ui/costOfRiskView.js",
   "src/ui/dataScreen.js",
   "src/ui/explorerView.js",
+  "src/ui/theme.js",
   "src/main.js"
 ];
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;

@@ -584,7 +584,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-tab.is-active {
-  background: #17483f;
+  background: var(--primary-dark);
   color: #ffffff;
 }
 
@@ -782,7 +782,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-core-table input[type="checkbox"] {
-  accent-color: #17483f;
+  accent-color: var(--primary-dark);
   cursor: pointer;
 }
 
@@ -973,7 +973,7 @@ button:focus-visible {
 
 .cost-of-risk-audit-table .is-active-reference {
   background: #eef6f2;
-  color: #17483f;
+  color: var(--primary-dark);
   font-weight: 700;
 }
 
@@ -1083,7 +1083,7 @@ button:focus-visible {
 
 .cost-of-risk-stage-exposure-table .is-active-reference {
   background: #eef6f2;
-  color: #17483f;
+  color: var(--primary-dark);
 }
 
 .cost-of-risk-stage-exposure-table .is-active-stage th {
@@ -1322,14 +1322,14 @@ table {
 }
 
 .axis-tab.is-active {
-  border-color: #17483f;
-  background: #17483f;
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
   color: #ffffff;
 }
 
 .axis-tab-title {
   align-items: center;
-  background: #17483f;
+  background: var(--primary-dark);
   border-bottom: 1px solid #ffffff;
   color: #ffffff;
   display: flex;
@@ -1353,7 +1353,7 @@ table {
 }
 
 .axis-tab.is-active .axis-tab-value {
-  background: #17483f;
+  background: var(--primary-dark);
   color: #ffffff;
 }
 
@@ -1654,7 +1654,7 @@ table {
 }
 
 .benchmark-legend span.is-selected-jst {
-  color: #17483f;
+  color: var(--primary-dark);
   opacity: 1;
 }
 
@@ -1815,7 +1815,7 @@ table {
   border: 0px solid #aebdb4;
   border-radius: 4px;
   background: transparent;
-  color: #17483f;
+  color: var(--primary-dark);
   font-size: 0.82rem;
   font-weight: 400;
   line-height: 1;
@@ -1836,17 +1836,17 @@ table {
   align-items: center;
   gap: 4px;
   flex: 0 0 auto;
-  border: 1px solid #17483f;
+  border: 1px solid var(--primary-dark);
   border-radius: 999px;
   background: #ffffff;
-  color: #17483f;
+  color: var(--primary-dark);
   font-size: 0.66rem;
   line-height: 1;
   padding: 2px 4px 2px 7px;
 }
 
 .denominator-clear {
-  color: #17483f;
+  color: var(--primary-dark);
 }
 
 .denominator-clear:hover,
@@ -1917,7 +1917,7 @@ table {
 
 .metric-table tbody tr.is-selected > th,
 .metric-table tbody tr.is-selected > td {
-  background: #17483f !important;
+  background: var(--primary-dark) !important;
   color: #f4fbf8 !important;
 }
 
@@ -1928,8 +1928,8 @@ table {
     #ffffff var(--parent-highlight-start, var(--highlight-start)),
     #f3f5f4 var(--parent-highlight-start, var(--highlight-start)),
     #f3f5f4 var(--highlight-start),
-    #17483f var(--highlight-start),
-    #17483f 100%
+    var(--primary-dark) var(--highlight-start),
+    var(--primary-dark) 100%
   ) !important;
 }
 
@@ -1938,7 +1938,7 @@ table {
 }
 
 .metric-table tbody tr.is-contribution-child > td {
-  color: #17483f;
+  color: var(--primary-dark);
 }
 
 .table-wrap th,
