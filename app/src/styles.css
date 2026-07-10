@@ -635,10 +635,10 @@ button:focus-visible {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 8px;
-  justify-self: center;
+  justify-self: left;
   min-height: 0;
   min-width: 0;
-  width: min(100%, 1180px);
+  width: min(100%, 900px);
 }
 
 .cost-of-risk-tab-panel[hidden] {
