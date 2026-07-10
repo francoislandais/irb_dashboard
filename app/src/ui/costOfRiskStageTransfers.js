@@ -1,123 +1,5 @@
 import { primaryDark } from "./theme.js";
 
-export function renderCostOfRiskStageExposureTable({
-  activeReferenceDate,
-  container,
-  exposureTable,
-  formatMetricValue,
-  formatReferenceQuarterLabel,
-  formatSignedMetricValue,
-  onSelectReferenceDate,
-  selectedUnit
-}) {
-  if (!container) return;
-
-  const rows = exposureTable?.rows ?? [];
-  const dates = exposureTable?.dates ?? [];
-  if (rows.length === 0 || dates.length === 0) {
-    container.textContent = exposureTable?.status || "";
-    return;
-  }
-
-  const title = document.createElement("div");
-  title.className = "cost-of-risk-stage-exposure-title";
-  title.textContent = `F04.04.1 gross carrying amount - ${exposureTable.label}`;
-
-  const tableWrap = document.createElement("div");
-  tableWrap.className = "cost-of-risk-stage-exposure-table-wrap";
-  const table = document.createElement("table");
-  table.className = "cost-of-risk-stage-exposure-table";
-  const selectedReferenceDate = activeReferenceDate || dates.at(-1)?.label || "";
-
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  const stageHeader = document.createElement("th");
-  stageHeader.scope = "col";
-  stageHeader.textContent = "Stage";
-  headerRow.append(stageHeader);
-
-  dates.forEach((date) => {
-    const cell = document.createElement("th");
-    cell.scope = "col";
-    cell.textContent = formatReferenceQuarterLabel(date.label);
-    if (date.label === selectedReferenceDate) cell.classList.add("is-active-reference");
-    cell.addEventListener("click", () => {
-      if (date.label) onSelectReferenceDate(date.label);
-    });
-    headerRow.append(cell);
-  });
-  thead.append(headerRow);
-
-  const tbody = document.createElement("tbody");
-  rows.forEach((row) => {
-    const tr = document.createElement("tr");
-    if (row.isActive) tr.classList.add("is-active-stage");
-
-    const labelCell = document.createElement("th");
-    labelCell.scope = "row";
-    labelCell.textContent = row.label;
-    tr.append(labelCell);
-
-    row.values.forEach((value, index) => {
-      const date = dates[index];
-      const valueCell = document.createElement("td");
-      valueCell.textContent = Number.isFinite(value) ? formatMetricValue(value, selectedUnit) : "-";
-      if (date?.label === selectedReferenceDate) valueCell.classList.add("is-active-reference");
-      valueCell.addEventListener("click", () => {
-        if (date?.label) onSelectReferenceDate(date.label);
-      });
-      tr.append(valueCell);
-    });
-
-    tbody.append(tr);
-    tbody.append(createDeltaRow({
-      dates,
-      formatSignedMetricValue,
-      onSelectReferenceDate,
-      row,
-      selectedReferenceDate,
-      selectedUnit
-    }));
-  });
-
-  table.append(thead, tbody);
-  tableWrap.append(table);
-  container.replaceChildren(title, tableWrap);
-}
-
-function createDeltaRow({
-  dates,
-  formatSignedMetricValue,
-  onSelectReferenceDate,
-  row,
-  selectedReferenceDate,
-  selectedUnit
-}) {
-  const deltaRow = document.createElement("tr");
-  deltaRow.className = "cost-of-risk-stage-exposure-delta";
-  if (row.isActive) deltaRow.classList.add("is-active-stage");
-
-  const deltaLabelCell = document.createElement("th");
-  deltaLabelCell.scope = "row";
-  deltaLabelCell.textContent = "Delta";
-  deltaRow.append(deltaLabelCell);
-
-  row.values.forEach((value, index) => {
-    const date = dates[index];
-    const previousValue = row.values[index - 1];
-    const deltaCell = document.createElement("td");
-    const delta = Number.isFinite(value) && Number.isFinite(previousValue) ? value - previousValue : null;
-    deltaCell.textContent = Number.isFinite(delta) ? formatSignedMetricValue(delta, selectedUnit) : "-";
-    if (date?.label === selectedReferenceDate) deltaCell.classList.add("is-active-reference");
-    deltaCell.addEventListener("click", () => {
-      if (date?.label) onSelectReferenceDate(date.label);
-    });
-    deltaRow.append(deltaCell);
-  });
-
-  return deltaRow;
-}
-
 export function createStageTransferWaterfallData(contributions, stage, globalVariation = null, residual = null) {
   const outflows = contributions.filter((point) => point.flowDirection === "outflow");
   const inflows = contributions.filter((point) => point.flowDirection === "inflow");
@@ -188,13 +70,16 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   displayMode,
   flowDiagram,
   formatValue,
+  onSelectFlow,
   primaryDark,
+  selectedFlowKey,
   selectedUnit
 }) {
   if (!container) return;
 
   const flows = flowDiagram?.flows ?? [];
   const residuals = flowDiagram?.residuals ?? [];
+  const writeOffs = flowDiagram?.writeOffs ?? [];
   const denominator = flowDiagram?.totalPreviousExposure ?? null;
   const displayFlows = flows.map((flow) => ({
     ...flow,
@@ -204,9 +89,14 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     ...residual,
     displayValue: getStageTransferDisplayValue(residual.value, denominator, displayMode)
   }));
+  const displayWriteOffs = writeOffs.map((writeOff) => ({
+    ...writeOff,
+    displayValue: getStageTransferDisplayValue(writeOff.value, denominator, displayMode)
+  }));
   const values = [
     ...displayFlows.map((flow) => flow.displayValue),
-    ...displayResiduals.map((residual) => residual.displayValue)
+    ...displayResiduals.map((residual) => residual.displayValue),
+    ...displayWriteOffs.map((writeOff) => writeOff.displayValue)
   ].filter((value) => Number.isFinite(value));
 
   if (values.length === 0) {
@@ -241,10 +131,14 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addHorizontalFlow(svg, {
     color: primaryDark,
     direction: "right",
+    flowKey: "transfer:1-2",
+    isSelected: selectedFlowKey === "transfer:1-2",
     labelY: 130,
     maxFlow,
     maxLength: 280,
     minLength: 28,
+    onSelect: onSelectFlow,
+    primaryDark,
     value: getFlowValue(displayFlows, "1", "2"),
     width: arrowWidth,
     x: 280,
@@ -253,10 +147,14 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addHorizontalFlow(svg, {
     color: mutedArrow,
     direction: "left",
+    flowKey: "transfer:2-1",
+    isSelected: selectedFlowKey === "transfer:2-1",
     labelY: 270,
     maxFlow,
     maxLength: 280,
     minLength: 28,
+    onSelect: onSelectFlow,
+    primaryDark,
     value: getFlowValue(displayFlows, "2", "1"),
     width: arrowWidth,
     x: 560,
@@ -265,10 +163,14 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addHorizontalFlow(svg, {
     color: primaryDark,
     direction: "right",
+    flowKey: "transfer:2-3",
+    isSelected: selectedFlowKey === "transfer:2-3",
     labelY: 130,
     maxFlow,
     maxLength: 280,
     minLength: 28,
+    onSelect: onSelectFlow,
+    primaryDark,
     value: getFlowValue(displayFlows, "2", "3"),
     width: arrowWidth,
     x: 840,
@@ -277,10 +179,14 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addHorizontalFlow(svg, {
     color: mutedArrow,
     direction: "left",
+    flowKey: "transfer:3-2",
+    isSelected: selectedFlowKey === "transfer:3-2",
     labelY: 270,
     maxFlow,
     maxLength: 280,
     minLength: 28,
+    onSelect: onSelectFlow,
+    primaryDark,
     value: getFlowValue(displayFlows, "3", "2"),
     width: arrowWidth,
     x: 1120,
@@ -292,9 +198,13 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     fromStage3Value: getFlowValue(displayFlows, "3", "1"),
     maxFlow,
     mutedArrow,
+    onSelectFlow,
     primaryDark,
+    selectedFlowKey,
     width: arrowWidth
   }, formatValue, displayMode, selectedUnit);
+
+  const stageArrowOffset = 45;
 
   [
     { stage: "1", x: 150 },
@@ -302,13 +212,36 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     { stage: "3", x: 1270 }
   ].forEach((item) => {
     const residual = displayResiduals.find((candidate) => candidate.stage === item.stage);
+    const writeOff = displayWriteOffs.find((candidate) => candidate.stage === item.stage);
+    const hasWriteOff = Number.isFinite(writeOff?.displayValue) && writeOff.displayValue !== 0;
+    const otherMovementsX = hasWriteOff ? item.x - stageArrowOffset : item.x;
+    const writeOffX = item.x + stageArrowOffset;
+
     addResidualFlow(svg, {
       color: residual?.displayValue >= 0 ? primaryDark : mutedArrow,
-      label: "Other movements",
+      flowKey: `other:${item.stage}`,
+      isSelected: selectedFlowKey === `other:${item.stage}`,
       maxFlow,
+      onSelect: onSelectFlow,
+      primaryDark,
       value: residual?.displayValue,
       width: arrowWidth,
-      x: item.x,
+      x: otherMovementsX,
+      y: 250
+    }, formatValue, displayMode, selectedUnit);
+
+    addResidualFlow(svg, {
+      color: writeOff?.displayValue >= 0 ? primaryDark : mutedArrow,
+      flowKey: `writeoff:${item.stage}`,
+      isSelected: selectedFlowKey === `writeoff:${item.stage}`,
+      labelLines: ["Write-off"],
+      labelX: writeOffX + 40,
+      maxFlow,
+      onSelect: onSelectFlow,
+      primaryDark,
+      value: writeOff?.displayValue,
+      width: arrowWidth,
+      x: writeOffX,
       y: 250
     }, formatValue, displayMode, selectedUnit);
   });
@@ -404,13 +337,20 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
 
   const path = createHorizontalArrowPath(config.x, config.y, x2, width);
 
-  svg.append(svgElement("path", {
-
+  const pathElement = svgElement("path", {
     d: path,
+    fill: config.color,
+    ...(config.isSelected ? { stroke: config.primaryDark, "stroke-width": 3 } : {})
+  });
+  svg.append(pathElement);
 
-    fill: config.color
-
-  }));
+  const hitThickness = Math.max(width, FLOW_HIT_AREA_MIN_THICKNESS);
+  appendFlowHitArea(svg, {
+    height: hitThickness,
+    width: Math.abs(x2 - config.x) + FLOW_HIT_AREA_PADDING * 2,
+    x: Math.min(config.x, x2) - FLOW_HIT_AREA_PADDING,
+    y: config.y - hitThickness / 2
+  }, config);
 
   const labelOffset = 40; // distance au-dessus de la flèche
 
@@ -430,10 +370,14 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
   addHorizontalFlow(svg, {
     color: config.primaryDark,
     direction: "right",
+    flowKey: "transfer:1-3",
+    isSelected: config.selectedFlowKey === "transfer:1-3",
     labelY: 38,
     maxFlow: config.maxFlow,
     maxLength: 900,
     minLength: 44,
+    onSelect: config.onSelectFlow,
+    primaryDark: config.primaryDark,
     value: config.fromStage1Value,
     width: config.width,
     x: 460,
@@ -443,10 +387,14 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
   addHorizontalFlow(svg, {
     color: config.mutedArrow,
     direction: "left",
+    flowKey: "transfer:3-1",
+    isSelected: config.selectedFlowKey === "transfer:3-1",
     labelY: 116,
     maxFlow: config.maxFlow,
     maxLength: 900,
     minLength: 44,
+    onSelect: config.onSelectFlow,
+    primaryDark: config.primaryDark,
     value: config.fromStage3Value,
     width: config.width,
     x: 960,
@@ -466,13 +414,26 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
   const startY = isIncrease ? config.y + length : config.y;
   const endY = isIncrease ? config.y : config.y + length;
 
-  svg.append(svgElement("path", {
+  const pathElement = svgElement("path", {
     d: createVerticalArrowPath(config.x, startY, endY, width),
-    fill: config.color
-  }));
+    fill: config.color,
+    ...(config.isSelected ? { stroke: config.primaryDark, "stroke-width": 3 } : {})
+  });
+  svg.append(pathElement);
 
-  addText(svg, "Other", config.x - 130, 335, "cost-of-risk-stage-flow-side-text");
-  addText(svg, "movements", config.x - 130, 359, "cost-of-risk-stage-flow-side-text");
+  const hitThickness = Math.max(width, FLOW_HIT_AREA_MIN_THICKNESS);
+  appendFlowHitArea(svg, {
+    height: Math.abs(endY - startY) + FLOW_HIT_AREA_PADDING * 2,
+    width: hitThickness,
+    x: config.x - hitThickness / 2,
+    y: Math.min(startY, endY) - FLOW_HIT_AREA_PADDING
+  }, config);
+
+  const labelLines = config.labelLines ?? ["Other", "movements"];
+  const labelX = config.labelX ?? (config.x - 130);
+  labelLines.forEach((line, index) => {
+    addText(svg, line, labelX, 335 + index * 24, "cost-of-risk-stage-flow-side-text");
+  });
 
   addValueLabel(
     svg,
@@ -486,6 +447,27 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
     config.color
   );
 }
+const FLOW_HIT_AREA_PADDING = 16;
+const FLOW_HIT_AREA_MIN_THICKNESS = 46;
+
+// Arrows can render very thin (low-value flows), making them hard to click.
+// Each arrow gets its own invisible, generously padded hit area instead of
+// relying on the thin visible shape to catch the click.
+function appendFlowHitArea(svg, bounds, config) {
+  if (!config.flowKey || typeof config.onSelect !== "function") return;
+
+  const hitArea = svgElement("rect", {
+    fill: "transparent",
+    height: bounds.height,
+    width: bounds.width,
+    x: bounds.x,
+    y: bounds.y
+  });
+  hitArea.style.cursor = "pointer";
+  hitArea.addEventListener("click", () => config.onSelect(config.flowKey));
+  svg.append(hitArea);
+}
+
 function createHorizontalArrowPath(x1, y, x2, width) {
   const direction = x2 >= x1 ? 1 : -1;
   const half = width / 2;

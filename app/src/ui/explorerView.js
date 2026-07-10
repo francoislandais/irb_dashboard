@@ -3,6 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260709-flow-interactive";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -11,6 +12,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-benchmark-fix2";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -32,6 +34,7 @@ import { getLatestState } from "./appState.js";
 import { primaryDark } from "./theme.js";
 
 let rerenderApp = () => {};
+let updateSelectedJst = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
@@ -64,7 +67,8 @@ const pendingUrlColumn = getUrlColumnParam();
 const pendingUrlTab = getUrlTabParam();
 let explorerStickyFrame = 0;
 let explorerContextMenu = null;
-let explorerBenchmarkDialog = null;
+let explorerBenchmarkViewActive = false;
+let explorerBenchmarkChart = null;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -74,6 +78,10 @@ const elements = {
     y: document.querySelector('[data-axis-caption="y"]'),
     z: document.querySelector('[data-axis-caption="z"]')
   },
+  explorerBenchmarkBack: document.querySelector("#explorer-benchmark-back"),
+  explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
+  explorerBenchmarkTitle: document.querySelector("#explorer-benchmark-title"),
+  explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
@@ -82,14 +90,17 @@ const elements = {
 
 export function wireExplorerUi(actions, rerender) {
   rerenderApp = rerender;
+  updateSelectedJst = actions.updateSelectedJst;
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
+      explorerBenchmarkViewActive = false;
       getActiveExplorerContext().activeAxis = button.getAttribute("data-explorer-axis") || "y";
       rerenderApp(actions.getState());
     });
   });
+  elements.explorerBenchmarkBack?.addEventListener("click", hideExplorerBenchmarkView);
   elements.explorerTableWrap?.addEventListener("scroll", scheduleExplorerStickyParentsUpdate, { passive: true });
   elements.explorerTableWrap?.addEventListener("scroll", hideExplorerContextMenu, { passive: true });
   elements.explorerTable.addEventListener("click", (event) => {
@@ -109,12 +120,6 @@ export function wireExplorerUi(actions, rerender) {
     if (!row) return;
 
     event.preventDefault();
-    if (row.dataset.pointCode) {
-      setSelectedExplorerCodeForActiveAxis(row.dataset.pointCode);
-      applyExplorerSelection();
-      renderExplorerAxisTabs();
-      row.focus({ preventScroll: true });
-    }
     showExplorerContextMenu(row, event);
   });
   elements.explorerTable.addEventListener("keydown", (event) => {
@@ -136,7 +141,6 @@ export function wireExplorerUi(actions, rerender) {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       hideExplorerContextMenu();
-      hideExplorerBenchmarkDialog();
     }
   });
 }
@@ -372,6 +376,21 @@ export function renderExplorer(state) {
   ensureExplorerSelections(state);
   if (context.activeAxis === "template") ensureAllExplorerTemplateSelections(state);
   updateUrlExplorerSelectionParams();
+  elements.unitSelect.value = state.selectedUnit;
+  renderExplorerAxisTabs();
+
+  if (elements.explorerTableWrap) elements.explorerTableWrap.hidden = explorerBenchmarkViewActive;
+  if (elements.explorerBenchmarkView) elements.explorerBenchmarkView.hidden = !explorerBenchmarkViewActive;
+
+  if (explorerBenchmarkViewActive) {
+    elements.explorerEmpty.hidden = true;
+    elements.explorerEmpty.textContent = "";
+    renderExplorerBenchmarkView(state);
+    return;
+  }
+
+  destroyExplorerBenchmarkChart();
+
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
     selectedXCode: context.selectedXCode,
@@ -382,17 +401,128 @@ export function renderExplorer(state) {
     templates
   });
   elements.explorerTable.replaceChildren();
-  elements.unitSelect.value = state.selectedUnit;
 
   elements.explorerEmpty.hidden = !tableSeries.status;
   elements.explorerEmpty.textContent = tableSeries.status;
-  renderExplorerAxisTabs();
 
   if (tableSeries.rows.length === 0 || tableSeries.dateColumns.length === 0) return;
 
   renderExplorerTable(tableSeries, state.selectedUnit);
   applyExplorerSelection();
   restoreExplorerScrollPosition();
+}
+
+function hideExplorerBenchmarkView() {
+  if (!explorerBenchmarkViewActive) return;
+
+  explorerBenchmarkViewActive = false;
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function renderExplorerBenchmarkView(state) {
+  const benchmark = buildExplorerBenchmark();
+  if (elements.explorerBenchmarkTitle) elements.explorerBenchmarkTitle.textContent = benchmark.label;
+
+  if (benchmark.series.length === 0 || benchmark.dates.length === 0) {
+    destroyExplorerBenchmarkChart();
+    if (elements.explorerBenchmarkChart) elements.explorerBenchmarkChart.textContent = "No data available for this point.";
+    return;
+  }
+
+  renderExplorerBenchmarkChart(benchmark, state);
+}
+
+function renderExplorerBenchmarkChart(benchmark, state) {
+  if (!elements.explorerBenchmarkChart || !window.Highcharts) return;
+
+  const benchmarkSeries = benchmark.series.map((serie) => ({ jstCode: serie.jstCode, points: serie.values }));
+  const series = buildBenchmarkLineSeries(benchmarkSeries, state.selectedJst, primaryDark, { displayMode: "amount" });
+
+  if (series.length === 0) {
+    destroyExplorerBenchmarkChart();
+    elements.explorerBenchmarkChart.textContent = "No data available for this point.";
+    return;
+  }
+
+  const yBounds = getCostOfRiskYAxisBounds(series);
+
+  const options = {
+    chart: {
+      animation: false,
+      backgroundColor: "transparent",
+      events: {
+        render() {
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectExplorerBenchmarkJst);
+        }
+      },
+      spacingRight: 128,
+      type: "line"
+    },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    // No reference-date callback yet: the first argument (referenceLabel) is
+    // intentionally ignored, per spec ("aucun callback sur la date de
+    // référence n'est implémenté à ce stade").
+    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
+      selectExplorerBenchmarkJst(seriesName);
+    }),
+    series,
+    title: { text: null },
+    tooltip: {
+      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
+      pointFormatter() {
+        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatBenchmarkValue(this.y, benchmark)}`;
+      },
+      shared: false,
+      split: false,
+      stickOnContact: true,
+      xDateFormat: "%d/%m/%Y"
+    },
+    xAxis: {
+      labels: { style: { color: "#5f6b65" } },
+      lineColor: "#c2cac5",
+      lineWidth: 1,
+      tickColor: "#d9dedb",
+      type: "datetime"
+    },
+    yAxis: {
+      gridLineColor: "#edf0ee",
+      labels: {
+        formatter() {
+          return formatBenchmarkValue(this.value, benchmark);
+        },
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#aeb8b2",
+      lineWidth: 1,
+      max: yBounds.max,
+      min: yBounds.min,
+      startOnTick: false,
+      endOnTick: false,
+      tickAmount: 8,
+      title: { text: null }
+    }
+  };
+
+  if (explorerBenchmarkChart) {
+    explorerBenchmarkChart.update(options, true, true, false);
+  } else {
+    explorerBenchmarkChart = window.Highcharts.chart(elements.explorerBenchmarkChart, options);
+  }
+}
+
+function destroyExplorerBenchmarkChart() {
+  if (!explorerBenchmarkChart) return;
+  explorerBenchmarkChart.destroy();
+  explorerBenchmarkChart = null;
+}
+
+// Reuses the same global JST_CODE update entry point as the header dropdown
+// and every other benchmark-style chart in the app.
+function selectExplorerBenchmarkJst(jstCode) {
+  if (!jstCode || jstCode === getLatestState()?.selectedJst) return;
+
+  updateSelectedJst(jstCode);
 }
 
 function ensureAllExplorerTemplateSelections(state) {
@@ -435,6 +565,12 @@ function renderExplorerTable(series, selectedUnit) {
   descriptionHeader.append(createExplorerSearchInput());
   headerRow.append(descriptionHeader);
 
+  const codeHeader = document.createElement("th");
+  codeHeader.scope = "col";
+  codeHeader.className = "code-column";
+  codeHeader.textContent = "Code";
+  headerRow.append(codeHeader);
+
   orderedDates.forEach((dateColumn, index) => {
     const th = document.createElement("th");
     th.scope = "col";
@@ -476,6 +612,16 @@ function renderExplorerTable(series, selectedUnit) {
       ratioAxis: activeAxis
     }));
     valueRow.append(description);
+
+    const code = document.createElement("td");
+    code.className = "code-column";
+    if (!seriesRow.isVirtual && seriesRow.code) {
+      const codeBadge = document.createElement("span");
+      codeBadge.className = "code-column-badge";
+      codeBadge.textContent = seriesRow.code;
+      code.append(codeBadge);
+    }
+    valueRow.append(code);
 
     const reversedValues = [...seriesRow.values].reverse();
     const reversedBaseValues = contributionValues ? [...contributionValues].reverse() : [];
@@ -638,32 +784,22 @@ function createExplorerContextMenu(row) {
   menu.className = "context-menu";
   menu.setAttribute("role", "menu");
 
-  const ratioBaseOptions = getExplorerRatioBaseOptions(row);
-  const commonDenominators = getCommonExplorerDenominatorOptions(row);
-  if (row.dataset.pointCode && (ratioBaseOptions.length > 0 || commonDenominators.length > 0)) {
-    menu.append(createContextSubmenu("Display as ratio of", [
-      {
-        items: ratioBaseOptions.map((option) => ({
-          indentLevel: option.indentLevel,
-          label: option.label,
-          title: option.fullLabel,
-          action: () => setExplorerContributionBase(option.row)
-        })),
-        title: "In this template"
-      },
-      {
-        items: commonDenominators.map((option) => ({
-          label: option.label,
-          action: () => setExplorerContributionBaseFromDenominator(option)
-        })),
-        title: "Commonly used denominators"
-      }
-    ]));
+  const isSelectableParent = Boolean(row.dataset.pointCode) && row.dataset.isParent === "true";
+  if (isSelectableParent) {
+    menu.append(createContextMenuButton("Use as denominator", () => {
+      setExplorerContributionBase(row);
+    }));
+
+    getCommonExplorerDenominatorOptions(row).forEach((option) => {
+      menu.append(createContextMenuButton(`Use ${option.label} as denominator`, () => {
+        setExplorerContributionBaseFromDenominator(option);
+      }));
+    });
   }
 
   if (row.dataset.pointCode) {
     menu.append(createContextMenuButton("Benchmark", () => {
-      showExplorerBenchmarkDialog();
+      showExplorerBenchmarkView(row);
     }));
   }
 
@@ -679,70 +815,11 @@ function getCommonExplorerDenominatorOptions(row) {
   }));
 }
 
-function getExplorerRatioBaseOptions(row) {
-  const parts = splitHierarchyPath(row.dataset.hierarchyPath);
-  const options = [];
-
-  for (let index = 0; index < parts.length - 1; index += 1) {
-    const path = parts.slice(0, index + 1).join(" > ");
-    const normalizedPath = normalizeHierarchyPath(path);
-    const parentRow = elements.explorerTable.querySelector(`tbody tr[data-normalized-path="${CSS.escape(normalizedPath)}"][data-point-code]`);
-    if (!parentRow) continue;
-
-    options.push({
-      fullLabel: path.replaceAll(">", "/"),
-      indentLevel: index,
-      label: parts[index],
-      row: parentRow
-    });
-  }
-
-  return options;
-}
-
-function createContextSubmenu(label, groups) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "context-submenu";
-  wrapper.setAttribute("role", "none");
-
-  const trigger = document.createElement("button");
-  trigger.type = "button";
-  trigger.className = "context-submenu-trigger";
-  trigger.setAttribute("aria-haspopup", "menu");
-  trigger.textContent = label;
-
-  const submenu = document.createElement("div");
-  submenu.className = "context-submenu-panel";
-  submenu.setAttribute("role", "menu");
-
-  groups.filter((group) => group.items.length > 0).forEach((group) => {
-    const heading = document.createElement("span");
-    heading.className = "context-submenu-heading";
-    heading.textContent = group.title;
-    submenu.append(heading);
-
-    group.items.forEach((item) => {
-      submenu.append(createContextMenuButton(item.label, item.action, {
-        indentLevel: item.indentLevel,
-        title: item.title
-      }));
-    });
-  });
-
-  wrapper.append(trigger, submenu);
-  return wrapper;
-}
-
-function createContextMenuButton(label, action, options = {}) {
+function createContextMenuButton(label, action) {
   const button = document.createElement("button");
   button.type = "button";
   button.setAttribute("role", "menuitem");
   button.textContent = label;
-  if (options.title) button.title = options.title;
-  if (Number.isFinite(options.indentLevel)) {
-    button.classList.add("context-menu-tree-item");
-    button.style.setProperty("--context-menu-indent", options.indentLevel);
-  }
   button.addEventListener("click", (event) => {
     event.stopPropagation();
     hideExplorerContextMenu();
@@ -803,64 +880,12 @@ function clearExplorerContributionBase(axis = getActiveExplorerContext().activeA
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
-function showExplorerBenchmarkDialog() {
-  hideExplorerBenchmarkDialog();
-
-  const benchmark = buildExplorerBenchmark();
-  explorerBenchmarkDialog = createExplorerBenchmarkDialog(benchmark);
-  document.body.append(explorerBenchmarkDialog);
-}
-
-function hideExplorerBenchmarkDialog() {
-  explorerBenchmarkDialog?.remove();
-  explorerBenchmarkDialog = null;
-}
-
-function createExplorerBenchmarkDialog(benchmark) {
-  const overlay = document.createElement("div");
-  overlay.className = "benchmark-overlay";
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) hideExplorerBenchmarkDialog();
-  });
-
-  const dialog = document.createElement("section");
-  dialog.className = "benchmark-dialog";
-  dialog.setAttribute("role", "dialog");
-  dialog.setAttribute("aria-modal", "true");
-  dialog.setAttribute("aria-label", "Benchmark JST");
-
-  const header = document.createElement("header");
-  header.className = "benchmark-header";
-
-  const title = document.createElement("div");
-  const strong = document.createElement("strong");
-  strong.textContent = "Benchmark JST";
-  const subtitle = document.createElement("span");
-  subtitle.textContent = benchmark.label;
-  title.append(strong, subtitle);
-
-  const closeButton = document.createElement("button");
-  closeButton.type = "button";
-  closeButton.textContent = "Fermer";
-  closeButton.addEventListener("click", hideExplorerBenchmarkDialog);
-  header.append(title, closeButton);
-
-  const body = document.createElement("div");
-  body.className = "benchmark-body";
-
-  if (benchmark.series.length === 0 || benchmark.dates.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "benchmark-empty";
-    empty.textContent = "Aucune donnée disponible pour ce point.";
-    body.append(empty);
-  } else {
-    body.append(createBenchmarkChart(benchmark));
-    body.append(createBenchmarkLegend(benchmark));
-  }
-
-  dialog.append(header, body);
-  overlay.append(dialog);
-  return overlay;
+// Right-clicking "Benchmark" needs the row selected (the one documented
+// exception to right-click no longer selecting rows), so the flag is set
+// before selectExplorerRow triggers its own single rerender.
+function showExplorerBenchmarkView(row) {
+  explorerBenchmarkViewActive = true;
+  selectExplorerRow(row.dataset.pointCode);
 }
 
 function buildExplorerBenchmark() {
@@ -928,186 +953,10 @@ function getExplorerBenchmarkContributionContext(context, activeAxis) {
   };
 }
 
-function createBenchmarkChart(benchmark) {
-  const selectedJst = getLatestState()?.selectedJst || "";
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "benchmark-chart");
-  svg.setAttribute("viewBox", "0 0 760 360");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", "Graphique benchmark par JST");
-
-  const values = benchmark.series.flatMap((serie) => serie.values.map((point) => point.value).filter((value) => value !== null));
-  const minValue = Math.min(0, ...values);
-  const maxValue = Math.max(0, ...values);
-  const range = maxValue - minValue || 1;
-  const plot = { left: 58, top: 24, width: 660, height: 270 };
-
-  appendBenchmarkGrid(svg, plot);
-  appendBenchmarkAxes(svg, benchmark, plot, minValue, maxValue);
-
-  const tooltip = createBenchmarkTooltip();
-  svg.append(tooltip.group);
-
-  benchmark.series.forEach((serie, index) => {
-    const isSelectedJst = serie.jstCode === selectedJst;
-    const color = getBenchmarkColor(index, isSelectedJst);
-    const points = serie.values
-      .map((point, pointIndex) => {
-        if (point.value === null) return null;
-        const x = plot.left + (benchmark.dates.length <= 1 ? plot.width / 2 : (pointIndex / (benchmark.dates.length - 1)) * plot.width);
-        const y = plot.top + plot.height - (((point.value - minValue) / range) * plot.height);
-        return { x, y, value: point.value, label: point.label };
-      })
-      .filter(Boolean);
-
-    if (points.length === 0) return;
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", points.map((point, pointIndex) => `${pointIndex === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" "));
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke", color);
-    path.setAttribute("stroke-width", isSelectedJst ? "2.6" : "1.4");
-    path.setAttribute("stroke-linecap", "round");
-    path.setAttribute("stroke-linejoin", "round");
-    path.setAttribute("class", isSelectedJst ? "benchmark-line is-selected-jst" : "benchmark-line");
-    if (!isSelectedJst) path.setAttribute("stroke-dasharray", "4 5");
-    svg.append(path);
-
-    points.forEach((point) => {
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("cx", point.x);
-      circle.setAttribute("cy", point.y);
-      circle.setAttribute("r", isSelectedJst ? "4" : "3");
-      circle.setAttribute("fill", color);
-      circle.setAttribute("class", isSelectedJst ? "benchmark-point is-selected-jst" : "benchmark-point");
-      circle.addEventListener("mouseenter", () => {
-        showBenchmarkTooltip(tooltip, point.x, point.y, `${serie.jstCode} - ${point.label}`, formatBenchmarkValue(point.value, benchmark));
-      });
-      circle.addEventListener("focus", () => {
-        showBenchmarkTooltip(tooltip, point.x, point.y, `${serie.jstCode} - ${point.label}`, formatBenchmarkValue(point.value, benchmark));
-      });
-      circle.addEventListener("mouseleave", () => hideBenchmarkTooltip(tooltip));
-      circle.addEventListener("blur", () => hideBenchmarkTooltip(tooltip));
-      circle.setAttribute("tabindex", "0");
-      circle.append(createSvgTitle(`${serie.jstCode} - ${point.label}: ${formatBenchmarkValue(point.value, benchmark)}`));
-      svg.append(circle);
-    });
-  });
-
-  return svg;
-}
-
-function createBenchmarkTooltip() {
-  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  const value = document.createElementNS("http://www.w3.org/2000/svg", "text");
-
-  group.setAttribute("class", "benchmark-tooltip");
-  group.setAttribute("opacity", "0");
-  background.setAttribute("rx", "5");
-  background.setAttribute("ry", "5");
-  label.setAttribute("class", "benchmark-tooltip-label");
-  value.setAttribute("class", "benchmark-tooltip-value");
-  group.append(background, label, value);
-
-  return { background, group, label, value };
-}
-
-function showBenchmarkTooltip(tooltip, x, y, label, value) {
-  tooltip.label.textContent = label;
-  tooltip.value.textContent = value;
-
-  const tooltipWidth = 178;
-  const tooltipHeight = 48;
-  const left = Math.min(Math.max(8, x + 12), 760 - tooltipWidth - 8);
-  const top = Math.max(8, y - tooltipHeight - 10);
-
-  tooltip.background.setAttribute("x", left);
-  tooltip.background.setAttribute("y", top);
-  tooltip.background.setAttribute("width", tooltipWidth);
-  tooltip.background.setAttribute("height", tooltipHeight);
-  tooltip.label.setAttribute("x", left + 10);
-  tooltip.label.setAttribute("y", top + 18);
-  tooltip.value.setAttribute("x", left + 10);
-  tooltip.value.setAttribute("y", top + 36);
-  tooltip.group.setAttribute("opacity", "1");
-}
-
-function hideBenchmarkTooltip(tooltip) {
-  tooltip.group.setAttribute("opacity", "0");
-}
-
-function appendBenchmarkGrid(svg, plot) {
-  for (let index = 0; index <= 4; index += 1) {
-    const y = plot.top + ((plot.height / 4) * index);
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", plot.left);
-    line.setAttribute("x2", plot.left + plot.width);
-    line.setAttribute("y1", y);
-    line.setAttribute("y2", y);
-    line.setAttribute("class", "benchmark-grid-line");
-    svg.append(line);
-  }
-}
-
-function appendBenchmarkAxes(svg, benchmark, plot, minValue, maxValue) {
-  [maxValue, (maxValue + minValue) / 2, minValue].forEach((value, index) => {
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", plot.left - 10);
-    text.setAttribute("y", plot.top + ((plot.height / 2) * index) + 4);
-    text.setAttribute("text-anchor", "end");
-    text.setAttribute("class", "benchmark-axis-label");
-    text.textContent = formatBenchmarkValue(value, benchmark);
-    svg.append(text);
-  });
-
-  benchmark.dates.forEach((dateColumn, index) => {
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", plot.left + (benchmark.dates.length <= 1 ? plot.width / 2 : (index / (benchmark.dates.length - 1)) * plot.width));
-    text.setAttribute("y", plot.top + plot.height + 32);
-    text.setAttribute("text-anchor", "middle");
-    text.setAttribute("class", "benchmark-axis-label");
-    text.textContent = dateColumn.label;
-    svg.append(text);
-  });
-}
-
-function createBenchmarkLegend(benchmark) {
-  const legend = document.createElement("div");
-  legend.className = "benchmark-legend";
-  const selectedJst = getLatestState()?.selectedJst || "";
-
-  benchmark.series.forEach((serie, index) => {
-    const item = document.createElement("span");
-    const swatch = document.createElement("i");
-    const isSelectedJst = serie.jstCode === selectedJst;
-    swatch.style.background = getBenchmarkColor(index, isSelectedJst);
-    item.classList.toggle("is-selected-jst", isSelectedJst);
-    item.append(swatch, document.createTextNode(serie.jstCode));
-    legend.append(item);
-  });
-
-  return legend;
-}
-
 function formatBenchmarkValue(value, benchmark) {
   return benchmark.isContribution
     ? formatContributionPercentValue(value)
     : formatMetricValue(value, getLatestState().selectedUnit, benchmark.format);
-}
-
-function createSvgTitle(text) {
-  const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-  title.textContent = text;
-  return title;
-}
-
-function getBenchmarkColor(index, isSelectedJst = false) {
-  if (isSelectedJst) return primaryDark;
-
-  const grays = ["#8d9891", "#a1aaa5", "#b5bdb8", "#7c8781"];
-  return grays[index % grays.length];
 }
 
 function createExplorerSearchInput() {
@@ -1222,12 +1071,21 @@ function getExplorerAxisCaptions() {
     ?.find(tableId, "x_axis_rc_code", context.selectedXCode)
     ?.description;
 
+  const activeTemplate = getActiveExplorerTemplate();
+
   return {
-    template: getActiveExplorerTemplate()?.label || activeExplorerTemplateId,
-    x: xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : ""),
-    y: yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : ""),
-    z: zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : "")
+    template: formatExplorerAxisCaption(activeTemplate?.tableId || activeExplorerTemplateId, activeTemplate?.label || activeExplorerTemplateId),
+    x: formatExplorerAxisCaption(context.selectedXCode, xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : "")),
+    y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
+    z: formatExplorerAxisCaption(context.selectedZCode, zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
   };
+}
+
+// Same "<CODE> - <LIBELLÉ>" convention used for the Explorer table's Code
+// column: axis captions must show the same code as the row it points at.
+function formatExplorerAxisCaption(code, label) {
+  if (!code) return label || "";
+  return label ? `${code} - ${label}` : code;
 }
 
 function getExplorerAxisRatioCaptions() {

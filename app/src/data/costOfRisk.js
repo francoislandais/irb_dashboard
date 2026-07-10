@@ -72,6 +72,7 @@ const COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS = {
   "2": "Stage 2",
   "3": "Stage 3"
 };
+const COST_OF_RISK_WRITE_OFF_X_CODES = ["0080", "0120"];
 const ALL_STAGES_LABEL = "all stages + POCI";
 const CACHE_KEY_SEPARATOR = "\u001f";
 const COST_OF_RISK_SERIES_CACHE = new WeakMap();
@@ -608,7 +609,8 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
       referenceDate: "",
       residuals: [],
       status: "No F_12.02 stage transfer data is available.",
-      totalPreviousExposure: null
+      totalPreviousExposure: null,
+      writeOffs: []
     };
   }
 
@@ -619,7 +621,8 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
       referenceDate: selectedReference.label,
       residuals: [],
       status: "No matching F_12.02 Y-axis point is available for the selected filters.",
-      totalPreviousExposure: null
+      totalPreviousExposure: null,
+      writeOffs: []
     };
   }
 
@@ -654,6 +657,9 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
     netTransfersByStage.set(movement.to, (netTransfersByStage.get(movement.to) ?? 0) + value);
   });
 
+  const writeOffsByStage = buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filters, referenceIndex);
+  const writeOffMagnitudeByStage = new Map(writeOffsByStage.map((item) => [item.stage, item.magnitude]));
+
   return {
     assetLabel: ySelection.label,
     flows: COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.map((movement) => ({
@@ -666,68 +672,211 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
       const stage = String(index + 1);
       const delta = variation.value;
       const netTransfers = netTransfersByStage.get(stage) ?? 0;
+      const writeOffMagnitude = writeOffMagnitudeByStage.get(stage) ?? 0;
+      const rawResidual = Number.isFinite(delta) ? delta - netTransfers : null;
       return {
         delta,
         label: `Other Stage ${stage} movements`,
         netTransfers,
         stage,
-        value: Number.isFinite(delta) ? delta - netTransfers : null
+        value: Number.isFinite(rawResidual) ? rawResidual + writeOffMagnitude : null
       };
     }),
     status: "",
-    totalPreviousExposure
+    totalPreviousExposure,
+    writeOffs: writeOffsByStage.map(({ magnitude, stage }) => ({
+      label: `Write-Off Stage ${stage}`,
+      stage,
+      value: magnitude > 0 ? -magnitude : 0
+    }))
   };
 }
 
-export function buildCostOfRiskStageExposureTable(state, filters = {}) {
+export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowKey) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
-  const ySelection = getCostOfRiskStageExposureYSelection(state, filters);
-  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const descriptor = parseCostOfRiskFlowKey(flowKey);
 
-  if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
-    return {
-      dates: [],
-      label: ySelection.label,
-      rows: [],
-      status: "No F_04.04.1 exposure data is available."
-    };
+  if (!indexes || !descriptor || referenceColumns.length === 0) {
+    return { benchmarkSeries: [], label: "", status: "No F_12.02 stage transfer data is available." };
   }
 
-  if (ySelection.codes.length === 0) {
-    return {
-      dates: referenceColumns.map((column) => ({ date: column.date, label: column.label })),
-      label: ySelection.label,
-      rows: [],
-      status: "No matching F_04.04.1 Y-axis point is available for the selected filters."
-    };
-  }
+  const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
+  const exposureYSelection = getCostOfRiskStageExposureYSelection(state, filters);
 
   return {
-    activeStage: normalizedFilters.stage,
-    dates: referenceColumns.map((column) => ({ date: column.date, label: column.label })),
-    label: ySelection.label,
-    rows: COST_OF_RISK_STAGE_EXPOSURE_X_CODES
-      .filter((stageDefinition) => !normalizedFilters.stage || stageDefinition.stage === normalizedFilters.stage)
-      .map((stageDefinition) => {
-      const values = createEmptySeries(referenceColumns.length);
-      ySelection.codes.forEach((yCode) => {
-        addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID, {
-          xCode: stageDefinition.xCode,
+    benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+      jstCode,
+      points: buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode)
+    })),
+    label: getCostOfRiskFlowLabel(descriptor),
+    status: ""
+  };
+}
+
+function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode) {
+  const totalPreviousExposureByStage = ["1", "2", "3"].map((stage) => (
+    computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, exposureYSelection, stage, jstCode)
+  ));
+  const totalExposureLevels = referenceColumns.map((_, index) => (
+    totalPreviousExposureByStage.reduce((total, levels) => (
+      Number.isFinite(levels[index]) ? total + levels[index] : total
+    ), 0)
+  ));
+  const rawValues = getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode);
+
+  return referenceColumns.map((column, index) => {
+    const value = rawValues[index] ?? null;
+    const denominator = index > 0 ? totalExposureLevels[index - 1] : null;
+    return {
+      date: column.date,
+      denominator,
+      label: column.label,
+      ratioBasisPoints: Number.isFinite(value) && Number.isFinite(denominator) && denominator !== 0
+        ? (value / denominator) * 10000
+        : null,
+      value
+    };
+  });
+}
+
+function getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode) {
+  if (descriptor.type === "transfer") {
+    return computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, descriptor.code, jstCode);
+  }
+
+  if (descriptor.type === "writeoff") {
+    const magnitudes = computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode);
+    return magnitudes.map((magnitude) => (magnitude > 0 ? -magnitude : 0));
+  }
+
+  const exposureLevels = computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, exposureYSelection, descriptor.stage, jstCode);
+  const writeOffMagnitudes = computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode);
+  const movementQuarterlyByCode = new Map(COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.map((movement) => [
+    movement.code,
+    computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, movement.code, jstCode)
+  ]));
+
+  return referenceColumns.map((column, index) => {
+    if (index === 0) return null;
+    const currentValue = exposureLevels[index];
+    const previousValue = exposureLevels[index - 1];
+    if (!Number.isFinite(currentValue) || !Number.isFinite(previousValue)) return null;
+
+    const delta = currentValue - previousValue;
+    let netTransfers = 0;
+    COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.forEach((movement) => {
+      const value = movementQuarterlyByCode.get(movement.code)?.[index] ?? 0;
+      if (movement.from === descriptor.stage) netTransfers -= value;
+      if (movement.to === descriptor.stage) netTransfers += value;
+    });
+    const writeOffMagnitude = writeOffMagnitudes[index] ?? 0;
+    return delta - netTransfers + writeOffMagnitude;
+  });
+}
+
+function computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, movementCode, jstCode) {
+  const raw = createEmptySeries(referenceColumns.length);
+  ySelection.codes.forEach((yCode) => {
+    addSeriesValues(raw, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
+      xCode: movementCode,
+      yCode,
+      zCode: ""
+    }, jstCode));
+  });
+  return decumulateQuarterlySeries(referenceColumns, raw);
+}
+
+function computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, exposureYSelection, stage, jstCode) {
+  const stageLabel = COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[stage];
+  const stageDefinition = COST_OF_RISK_STAGE_EXPOSURE_X_CODES.find((definition) => definition.stage === stageLabel);
+  if (!stageDefinition || exposureYSelection.codes.length === 0) return referenceColumns.map(() => null);
+
+  const values = createEmptySeries(referenceColumns.length);
+  exposureYSelection.codes.forEach((yCode) => {
+    addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID, {
+      xCode: stageDefinition.xCode,
+      yCode,
+      zCode: ""
+    }, jstCode));
+  });
+  return values;
+}
+
+function computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, stage, jstCode) {
+  const { points } = getCostOfRiskWriteOffPointsByStage(state, filters).find((item) => item.stage === stage) ?? { points: [] };
+  if (!indexes || points.length === 0) return referenceColumns.map(() => 0);
+
+  const total = createEmptySeries(referenceColumns.length);
+  COST_OF_RISK_WRITE_OFF_X_CODES.forEach((xCode) => {
+    const series = createEmptySeries(referenceColumns.length);
+    points.forEach((yCode) => {
+      addSeriesValues(series, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+        xCode,
+        yCode,
+        zCode: ""
+      }, jstCode));
+    });
+    const quarterly = decumulateQuarterlySeries(referenceColumns, series);
+    quarterly.forEach((value, index) => { total[index] += Math.abs(value); });
+  });
+  return total;
+}
+
+function parseCostOfRiskFlowKey(flowKey) {
+  const [type, value] = String(flowKey ?? "").split(":");
+  if (type === "transfer") {
+    const movement = COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.find((item) => `${item.from}-${item.to}` === value);
+    return movement ? { code: movement.code, from: movement.from, to: movement.to, type: "transfer" } : null;
+  }
+  if ((type === "writeoff" || type === "other") && ["1", "2", "3"].includes(value)) {
+    return { stage: value, type };
+  }
+  return null;
+}
+
+function getCostOfRiskFlowLabel(descriptor) {
+  if (descriptor.type === "transfer") return `Stage ${descriptor.from} → Stage ${descriptor.to}`;
+  if (descriptor.type === "writeoff") return `Write-Off - Stage ${descriptor.stage}`;
+  return `Other movements - Stage ${descriptor.stage}`;
+}
+
+function getCostOfRiskWriteOffPointsByStage(state, filters = {}) {
+  const descriptors = getCostOfRiskYMappings(state).map(describeCostOfRiskYAxisPoint);
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+
+  return ["1", "2", "3"].map((stage) => {
+    const stageFilters = { ...normalizedFilters, stage: COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[stage] };
+    const points = descriptors
+      .filter((descriptor) => matchesCostOfRiskFilterDescriptor(descriptor, stageFilters))
+      .filter((descriptor) => isCostOfRiskAggregationPoint(descriptor, stageFilters))
+      .map((descriptor) => descriptor.code);
+
+    return { points, stage };
+  });
+}
+
+function buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filters, referenceIndex) {
+  return getCostOfRiskWriteOffPointsByStage(state, filters).map(({ points, stage }) => {
+    if (!indexes || points.length === 0) {
+      return { magnitude: 0, stage };
+    }
+
+    const magnitude = COST_OF_RISK_WRITE_OFF_X_CODES.reduce((total, xCode) => {
+      const series = createEmptySeries(referenceColumns.length);
+      points.forEach((yCode) => {
+        addSeriesValues(series, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+          xCode,
           yCode,
           zCode: ""
         }, state.selectedJst));
       });
+      const quarterlyValue = decumulateQuarterlySeries(referenceColumns, series)[referenceIndex] ?? 0;
+      return total + Math.abs(quarterlyValue);
+    }, 0);
 
-      return {
-        isActive: normalizedFilters.stage === stageDefinition.stage,
-        label: stageDefinition.label,
-        values,
-        xCode: stageDefinition.xCode
-      };
-    }),
-    status: ""
-  };
+    return { magnitude, stage };
+  });
 }
 
 function buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, ySelection, stage, referenceIndex) {

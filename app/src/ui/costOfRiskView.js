@@ -8,12 +8,11 @@ import {
   buildCostOfRiskF12ContributionSeries,
   buildCostOfRiskF2VsF12Audit,
   buildCostOfRiskFilteredSelectionValue,
-  buildCostOfRiskStageExposureTable,
   buildCostOfRiskStageTransferFlowDiagram,
+  buildCostOfRiskStageTransferFlowTimeSeries,
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
   clampCostOfRiskSmoothingWindow,
-  createCostOfRiskChartData,
   createCostOfRiskRatioChartData,
   formatCostOfRiskAuditValue,
   formatCostOfRiskDisplayValue,
@@ -24,21 +23,43 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
-  getSelectedSmoothedCostOfRiskPoint,
-  smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260708-explorer-rename";
+  getSelectedSmoothedCostOfRiskPoint
+} from "../data/costOfRisk.js?v=20260709-benchmark-fix2";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
-  renderCostOfRiskStageExposureTable,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260709-primary-dark-fix";
+} from "./costOfRiskStageTransfers.js?v=20260709-benchmark-fix2";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-benchmark-fix2";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js";
 import { getLatestState } from "./appState.js";
 import { primaryDark } from "./theme.js";
 
+// Shared by every temporal chart (Contribution, F2 vs F12, Stage transfers
+// flow evolution) so quarterly reference dates always read "Q12026" on the
+// x-axis instead of a raw date.
+function formatCostOfRiskQuarterAxisLabel(timestamp) {
+  const date = new Date(timestamp);
+  const quarter = Math.floor(date.getMonth() / 3) + 1;
+  return `Q${quarter}${date.getFullYear()}`;
+}
+
+// Reference dates are real calendar quarter-ends (31/03, 30/06, ...), which
+// aren't evenly spaced in milliseconds. Highcharts' automatic datetime tick
+// picker doesn't know that and lands ticks off the actual data points. Every
+// temporal chart must pass its own reference dates here so one tick (and one
+// "Q12026" label) lines up with every single point, not an approximation.
+function getCostOfRiskAxisTickPositions(points) {
+  return [...new Set(
+    (points ?? [])
+      .filter((point) => point.date instanceof Date)
+      .map((point) => point.date.getTime())
+  )].sort((left, right) => left - right);
+}
+
 let rerenderApp = () => {};
+let updateSelectedJst = () => {};
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
 let activeCostOfRiskReferenceDate = "";
@@ -49,6 +70,8 @@ let activeCostOfRiskDisplayMode = "ratio";
 let costOfRiskChart = null;
 let costOfRiskF2VsF12Chart = null;
 let costOfRiskStageTransferChart = null;
+let costOfRiskStageTransferFlowChart = null;
+let activeCostOfRiskStageTransferFlowKey = "";
 let costOfRiskWaterfallChart = null;
 let costOfRiskTreemapChart = null;
 const activeCostOfRiskFilters = {
@@ -56,8 +79,6 @@ const activeCostOfRiskFilters = {
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
 };
-const COST_OF_RISK_BENCHMARK_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
-const COST_OF_RISK_BENCHMARK_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
 
 const elements = {
   costOfRiskAsset: document.querySelector("#cost-of-risk-asset"),
@@ -82,8 +103,10 @@ const elements = {
   costOfRiskSmoothing: document.querySelector("#cost-of-risk-smoothing"),
   costOfRiskSmoothingValue: document.querySelector("#cost-of-risk-smoothing-value"),
   costOfRiskStage: document.querySelector("#cost-of-risk-stage"),
-  costOfRiskStageExposureTable: document.querySelector("#cost-of-risk-stage-exposure-table"),
   costOfRiskStageTransferChart: document.querySelector("#cost-of-risk-stage-transfer-chart"),
+  costOfRiskStageTransferFlowChart: document.querySelector("#cost-of-risk-stage-transfer-flow-chart"),
+  costOfRiskStageTransferFlowChartTitle: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-title"),
+  costOfRiskStageTransferFlowChartWrap: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-wrap"),
   costOfRiskStageTransferTitle: document.querySelector("#cost-of-risk-stage-transfer-title"),
   costOfRiskTabButtons: [...document.querySelectorAll("[data-cost-of-risk-tab]")],
   costOfRiskTabPanels: [...document.querySelectorAll("[data-cost-of-risk-panel]")],
@@ -96,6 +119,7 @@ const elements = {
 
 export function wireCostOfRiskUi(actions, rerender) {
   rerenderApp = rerender;
+  updateSelectedJst = actions.updateSelectedJst;
   elements.costOfRiskAsset?.addEventListener("change", (event) => {
     activeCostOfRiskFilters.asset = event.target.value;
     rerenderApp(actions.getState());
@@ -197,7 +221,7 @@ export function renderCostOfRisk(state) {
     }
     destroyCostOfRiskChart();
     destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskStageTransferChart();
+    leaveCostOfRiskStageTransferTab();
     destroyCostOfRiskTreemapChart();
     return;
   }
@@ -246,12 +270,12 @@ export function renderCostOfRisk(state) {
     );
     destroyCostOfRiskTreemapChart();
     destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageTransferChart();
+    leaveCostOfRiskStageTransferTab();
   } else if (activeCostOfRiskTab === "f2-vs-f12") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
     destroyCostOfRiskTreemapChart();
-    destroyCostOfRiskStageTransferChart();
+    leaveCostOfRiskStageTransferTab();
     renderCostOfRiskF2VsF12Chart(
       f02Series,
       buildCostOfRiskF12ContributionSeries(state, activeCostOfRiskFilters, selectedCoreXCodes),
@@ -268,22 +292,12 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
-    renderCostOfRiskStageExposureTable({
-      activeReferenceDate: activeCostOfRiskReferenceDate,
-      container: elements.costOfRiskStageExposureTable,
-      exposureTable: buildCostOfRiskStageExposureTable(state, activeCostOfRiskFilters),
-      formatMetricValue,
-      formatReferenceQuarterLabel,
-      formatSignedMetricValue,
-      onSelectReferenceDate: selectCostOfRiskReferenceDate,
-      selectedUnit: state.selectedUnit
-    });
     renderCostOfRiskStageTransferView(state);
   } else if (activeCostOfRiskTab === "analysis") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
     destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageTransferChart();
+    leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
     renderCostOfRiskTreemap(
       buildCostOfRiskCounterpartyTreemapData(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate),
@@ -294,7 +308,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
     destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageTransferChart();
+    leaveCostOfRiskStageTransferTab();
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
   }
@@ -497,51 +511,7 @@ function renderCostOfRiskWaterfallTitle(referenceDate) {
 function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedContribution, displayMode = "ratio", selectedUnit = "millions") {
   if (!elements.costOfRiskChart || !window.Highcharts) return;
 
-  const series = (selection.benchmarkSeries ?? [])
-    .map((benchmark, index) => {
-      const isSelected = benchmark.jstCode === jstCode;
-      const points = smoothCostOfRiskPoints(benchmark.points ?? [], smoothingWindow);
-      const color = getCostOfRiskSeriesColor(index, isSelected, selectedContribution);
-      const chartData = createCostOfRiskChartData(points, displayMode);
-      return {
-        clip: false,
-        color,
-        dashStyle: getCostOfRiskSeriesDash(index, isSelected),
-        data: chartData,
-        dataLabels: { enabled: false },
-        lineWidth: isSelected ? 3.6 : 1.45,
-        marker: {
-          fillColor: isSelected ? "#ffffff" : color,
-          enabled: isSelected,
-          lineColor: color,
-          lineWidth: isSelected ? 1.5 : 0,
-          radius: isSelected ? 4 : 0,
-          symbol: "circle"
-        },
-        name: benchmark.jstCode,
-        opacity: isSelected ? 1 : 0.78,
-        states: {
-          hover: {
-            enabled: true,
-            halo: {
-              size: isSelected ? 5 : 0
-            },
-            lineWidth: isSelected ? 4 : 2.1,
-            lineWidthPlus: 0
-          },
-          inactive: {
-            opacity: isSelected ? 1 : 0.42
-          }
-        },
-        zIndex: isSelected ? 100 : 1
-      };
-    })
-    .filter((benchmark) => benchmark.data.length > 0)
-    .sort((left, right) => {
-      if (left.name === jstCode) return 1;
-      if (right.name === jstCode) return -1;
-      return left.name.localeCompare(right.name);
-    });
+  const series = buildBenchmarkLineSeries(selection.benchmarkSeries, jstCode, primaryDark, { displayMode, smoothingWindow });
   const yBounds = getCostOfRiskYAxisBounds(series);
   const selectedReferencePoint = selection.series?.find((point) => point.label === activeCostOfRiskReferenceDate);
 
@@ -557,7 +527,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
       backgroundColor: "transparent",
       events: {
         render() {
-          renderCostOfRiskEndpointLabels(this, jstCode);
+          renderBenchmarkEndpointLabels(this, jstCode, selectCostOfRiskChartJst);
         }
       },
       spacingRight: 128,
@@ -565,37 +535,10 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
     },
     credits: { enabled: false },
     legend: { enabled: false },
-    plotOptions: {
-      series: {
-        animation: false,
-        clip: false,
-        cursor: "pointer",
-        events: {
-          legendItemClick() {
-            return true;
-          }
-        },
-        marker: {
-          enabled: true,
-          radius: 3
-        },
-        states: {
-          hover: {
-            animation: false,
-            lineWidthPlus: 0
-          }
-        }
-      },
-      line: {
-        point: {
-          events: {
-            click() {
-              selectCostOfRiskReferenceDate(this.referenceLabel);
-            }
-          }
-        }
-      }
-    },
+    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
+      selectCostOfRiskReferenceDate(referenceLabel);
+      selectCostOfRiskChartJst(seriesName);
+    }),
     series,
     title: { text: null },
     tooltip: {
@@ -609,7 +552,13 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
       xDateFormat: "%d/%m/%Y"
     },
     xAxis: {
-      labels: { style: { color: "#5f6b65" } },
+      labels: {
+        formatter() {
+          return formatCostOfRiskQuarterAxisLabel(this.value);
+        },
+        rotation: -45,
+        style: { color: "#5f6b65" }
+      },
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: selectedReferencePoint?.date instanceof Date ? [{
@@ -620,6 +569,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
         zIndex: 3
       }] : [],
       tickColor: "#d9dedb",
+      tickPositions: getCostOfRiskAxisTickPositions(selection.series),
       type: "datetime"
     },
     yAxis: {
@@ -747,7 +697,13 @@ function renderCostOfRiskF2VsF12Chart(f02Series, f12Series, displayMode = "ratio
       }
     },
     xAxis: {
-      labels: { style: { color: "#5f6b65" } },
+      labels: {
+        formatter() {
+          return formatCostOfRiskQuarterAxisLabel(this.value);
+        },
+        rotation: -45,
+        style: { color: "#5f6b65" }
+      },
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: activePoint ? [{
@@ -758,6 +714,7 @@ function renderCostOfRiskF2VsF12Chart(f02Series, f12Series, displayMode = "ratio
         zIndex: 3
       }] : [],
       tickColor: "#d9dedb",
+      tickPositions: getCostOfRiskAxisTickPositions([...(f02Series.points ?? []), ...(f12Series.points ?? [])]),
       type: "datetime"
     },
     yAxis: {
@@ -804,6 +761,16 @@ function destroyCostOfRiskStageTransferChart() {
   if (!costOfRiskStageTransferChart) return;
   costOfRiskStageTransferChart.destroy();
   costOfRiskStageTransferChart = null;
+}
+
+// Leaving the stage-transfers tab altogether (unlike switching between the
+// flow diagram and the per-stage waterfall within it) clears the selected
+// flow so it doesn't resurface stale on return.
+function leaveCostOfRiskStageTransferTab() {
+  destroyCostOfRiskStageTransferChart();
+  activeCostOfRiskStageTransferFlowKey = "";
+  destroyCostOfRiskStageTransferFlowChart();
+  if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
 }
 
 function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio", selectedUnit = "millions") {
@@ -898,6 +865,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
 function renderCostOfRiskStageTransferView(state) {
   if (isCostOfRiskAllStageSelected()) {
     renderCostOfRiskStageTransferFlowChart(
+      state,
       buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
       state.selectedUnit,
       activeCostOfRiskDisplayMode
@@ -905,6 +873,9 @@ function renderCostOfRiskStageTransferView(state) {
     return;
   }
 
+  activeCostOfRiskStageTransferFlowKey = "";
+  destroyCostOfRiskStageTransferFlowChart();
+  if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
   renderCostOfRiskStageTransferWaterfallChart(
     buildCostOfRiskStageTransferWaterfall(state, getActiveCostOfRiskStageTransferStage(), activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
     state.selectedUnit,
@@ -912,7 +883,7 @@ function renderCostOfRiskStageTransferView(state) {
   );
 }
 
-function renderCostOfRiskStageTransferFlowChart(flowDiagram, selectedUnit, displayMode = "amount") {
+function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit, displayMode = "amount") {
   if (!elements.costOfRiskStageTransferChart) return;
   destroyCostOfRiskStageTransferChart();
 
@@ -926,9 +897,138 @@ function renderCostOfRiskStageTransferFlowChart(flowDiagram, selectedUnit, displ
     displayMode,
     flowDiagram,
     formatValue: formatCostOfRiskDisplayValue,
+    onSelectFlow: selectCostOfRiskStageTransferFlow,
     primaryDark,
+    selectedFlowKey: activeCostOfRiskStageTransferFlowKey,
     selectedUnit
   });
+
+  renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, selectedUnit);
+}
+
+// One flow can be selected at a time; clicking the selected flow again clears
+// it. Mirrors the empty-state convention used elsewhere in the module.
+function selectCostOfRiskStageTransferFlow(flowKey) {
+  activeCostOfRiskStageTransferFlowKey = activeCostOfRiskStageTransferFlowKey === flowKey ? "" : flowKey;
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, selectedUnit) {
+  if (!elements.costOfRiskStageTransferFlowChart) return;
+
+  if (!activeCostOfRiskStageTransferFlowKey) {
+    destroyCostOfRiskStageTransferFlowChart();
+    if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
+    return;
+  }
+
+  const flowSeries = buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey);
+  if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = false;
+  if (elements.costOfRiskStageTransferFlowChartTitle) {
+    elements.costOfRiskStageTransferFlowChartTitle.textContent = `${flowSeries.label} - time evolution`;
+  }
+
+  if (!window.Highcharts || flowSeries.benchmarkSeries.length === 0) {
+    destroyCostOfRiskStageTransferFlowChart();
+    elements.costOfRiskStageTransferFlowChart.textContent = flowSeries.status || "";
+    return;
+  }
+
+  const series = buildBenchmarkLineSeries(flowSeries.benchmarkSeries, state.selectedJst, primaryDark, { displayMode });
+  if (series.length === 0) {
+    destroyCostOfRiskStageTransferFlowChart();
+    elements.costOfRiskStageTransferFlowChart.textContent = "";
+    return;
+  }
+
+  const yBounds = getCostOfRiskYAxisBounds(series);
+  const selectedReferencePoint = flowSeries.benchmarkSeries
+    .find((benchmark) => benchmark.jstCode === state.selectedJst)
+    ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
+
+  const options = {
+    chart: {
+      animation: false,
+      backgroundColor: "transparent",
+      events: {
+        render() {
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst);
+        }
+      },
+      spacingRight: 128,
+      type: "line"
+    },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
+      selectCostOfRiskReferenceDate(referenceLabel);
+      selectCostOfRiskChartJst(seriesName);
+    }),
+    series,
+    title: { text: null },
+    tooltip: {
+      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
+      pointFormatter() {
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}`;
+      },
+      shared: false,
+      split: false,
+      stickOnContact: true,
+      xDateFormat: "%d/%m/%Y"
+    },
+    xAxis: {
+      labels: {
+        formatter() {
+          return formatCostOfRiskQuarterAxisLabel(this.value);
+        },
+        rotation: -45,
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#c2cac5",
+      lineWidth: 1,
+      plotLines: selectedReferencePoint?.date instanceof Date ? [{
+        color: "#7f8984",
+        dashStyle: "ShortDash",
+        value: selectedReferencePoint.date.getTime(),
+        width: 1,
+        zIndex: 3
+      }] : [],
+      tickColor: "#d9dedb",
+      tickPositions: getCostOfRiskAxisTickPositions(flowSeries.benchmarkSeries[0]?.points),
+      type: "datetime"
+    },
+    yAxis: {
+      gridLineColor: "#edf0ee",
+      labels: {
+        formatter() {
+          return displayMode === "ratio"
+            ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
+            : formatMetricValue(this.value, selectedUnit);
+        },
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#aeb8b2",
+      lineWidth: 1,
+      max: yBounds.max,
+      min: yBounds.min,
+      startOnTick: false,
+      endOnTick: false,
+      tickAmount: 6,
+      title: { text: displayMode === "ratio" ? "Basis points" : "Amount" }
+    }
+  };
+
+  if (costOfRiskStageTransferFlowChart) {
+    costOfRiskStageTransferFlowChart.update(options, true, true, false);
+  } else {
+    costOfRiskStageTransferFlowChart = window.Highcharts.chart(elements.costOfRiskStageTransferFlowChart, options);
+  }
+}
+
+function destroyCostOfRiskStageTransferFlowChart() {
+  if (!costOfRiskStageTransferFlowChart) return;
+  costOfRiskStageTransferFlowChart.destroy();
+  costOfRiskStageTransferFlowChart = null;
 }
 
 function renderCostOfRiskStageTransferWaterfallChart(waterfall, selectedUnit, displayMode = "amount") {
@@ -1762,124 +1862,22 @@ function destroyCostOfRiskTreemapChart() {
   costOfRiskTreemapChart = null;
 }
 
-function getCostOfRiskSeriesColor(index, isSelected, selectedContribution = 0) {
-  if (isSelected) {
-    return primaryDark;
-  }
-  return COST_OF_RISK_BENCHMARK_GRAYS[index % COST_OF_RISK_BENCHMARK_GRAYS.length];
-}
-
-function getCostOfRiskSeriesDash(index, isSelected) {
-  if (isSelected) return "Solid";
-  return COST_OF_RISK_BENCHMARK_DASHES[index % COST_OF_RISK_BENCHMARK_DASHES.length];
-}
-
-function renderCostOfRiskEndpointLabels(chart, selectedJst) {
-  clearCostOfRiskEndpointLabels(chart);
-
-  const candidates = chart.series
-    .filter((serie) => serie.visible && serie.points?.length > 0)
-    .map((serie) => {
-      const point = [...serie.points]
-        .reverse()
-        .find((candidate) => Number.isFinite(candidate.plotX) && Number.isFinite(candidate.plotY));
-
-      if (!point) return null;
-
-      return {
-        anchorX: chart.plotLeft + point.plotX,
-        anchorY: chart.plotTop + point.plotY,
-        color: serie.color,
-        isSelected: serie.name === selectedJst,
-        name: serie.name
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.anchorY - right.anchorY);
-
-  if (candidates.length === 0) return;
-
-  const top = chart.plotTop + 4;
-  const bottom = chart.plotTop + chart.plotHeight - 12;
-  const availableHeight = Math.max(1, bottom - top);
-  const gap = candidates.length <= 1 ? 0 : Math.max(11, Math.min(18, availableHeight / (candidates.length - 1)));
-  let previousY = top - gap;
-
-  candidates.forEach((candidate) => {
-    candidate.labelY = Math.max(candidate.anchorY, previousY + gap);
-    previousY = candidate.labelY;
-  });
-
-  const overflow = candidates.at(-1).labelY - bottom;
-  if (overflow > 0) {
-    candidates.forEach((candidate) => {
-      candidate.labelY -= overflow;
-    });
-  }
-
-  for (let index = candidates.length - 2; index >= 0; index -= 1) {
-    candidates[index].labelY = Math.min(candidates[index].labelY, candidates[index + 1].labelY - gap);
-  }
-
-  const underflow = top - candidates[0].labelY;
-  if (underflow > 0) {
-    candidates.forEach((candidate) => {
-      candidate.labelY += underflow;
-    });
-  }
-
-  const labelX = Math.min(chart.chartWidth - 54, chart.plotLeft + chart.plotWidth + 18);
-  chart.customCostOfRiskEndpointLabels = [];
-
-  candidates.forEach((candidate) => {
-    const targetY = Math.max(top, Math.min(bottom, candidate.labelY));
-    const connectorEndX = labelX - 5;
-    const connector = chart.renderer
-      .path([
-        ["M", candidate.anchorX, candidate.anchorY],
-        ["L", connectorEndX, targetY]
-      ])
-      .attr({
-        stroke: candidate.color,
-        "stroke-dasharray": "4 4",
-        "stroke-width": candidate.isSelected ? 1.35 : 1,
-        opacity: candidate.isSelected ? 0.95 : 0.78,
-        zIndex: candidate.isSelected ? 80 : 70
-      })
-      .add();
-    const label = chart.renderer
-      .label(candidate.name, labelX, targetY - 9, "rect")
-      .css({
-        color: candidate.color,
-        fontSize: candidate.isSelected ? "11px" : "10px",
-        fontWeight: candidate.isSelected ? "700" : "600"
-      })
-      .attr({
-        fill: "rgba(255, 255, 255, 0.92)",
-        padding: 2,
-        r: 3,
-        stroke: candidate.isSelected ? candidate.color : "rgba(255,255,255,0)",
-        "stroke-width": candidate.isSelected ? 1 : 0,
-        zIndex: candidate.isSelected ? 90 : 75
-      })
-      .add();
-
-    chart.customCostOfRiskEndpointLabels.push(connector, label);
-  });
-}
-
-function clearCostOfRiskEndpointLabels(chart) {
-  if (!Array.isArray(chart.customCostOfRiskEndpointLabels)) return;
-
-  chart.customCostOfRiskEndpointLabels.forEach((element) => element.destroy());
-  chart.customCostOfRiskEndpointLabels = [];
-}
-
 function selectCostOfRiskReferenceDate(referenceDate) {
   if (!referenceDate || referenceDate === activeCostOfRiskReferenceDate) return;
 
   activeCostOfRiskReferenceDate = referenceDate;
   if (getLatestState()) rerenderApp(getLatestState());
+}
+
+// Reuses the same global JST_CODE update entry point as the header dropdown
+// (actions.updateSelectedJst), so selecting a series here behaves exactly
+// like a manual header selection: same store update, same URL sync, same
+// full app re-render. Any other chart/table can call updateSelectedJst the
+// same way to gain this behavior.
+function selectCostOfRiskChartJst(jstCode) {
+  if (!jstCode || jstCode === getLatestState()?.selectedJst) return;
+
+  updateSelectedJst(jstCode);
 }
 
 function selectCostOfRiskAuditSeries(seriesName, referenceDate) {

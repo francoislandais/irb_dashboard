@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260709-primary-dark-fix">
+    <link rel="stylesheet" href="./src/styles.css?v=20260709-benchmark-fix2">
   </head>
   <body>
     <div class="app-shell">
@@ -81,6 +81,13 @@
             <div class="metric-table-wrap">
               <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
             </div>
+            <div id="explorer-benchmark-view" class="explorer-benchmark-view" hidden>
+              <div class="explorer-benchmark-header">
+                <button id="explorer-benchmark-back" class="explorer-benchmark-back" type="button">Back to table</button>
+                <h3 id="explorer-benchmark-title" class="cost-of-risk-chart-title"></h3>
+              </div>
+              <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
+            </div>
           </article>
         </section>
 
@@ -120,28 +127,28 @@
           <article class="cost-of-risk-panel">
             <div id="cost-of-risk-empty" class="notice" hidden></div>
             <div id="cost-of-risk-dashboard" class="cost-of-risk-dashboard" hidden>
-              <div class="cost-of-risk-controls">
-                <div class="cost-of-risk-filter-row">
-                  <label class="field cost-of-risk-field">
-                    <span>Accounting type</span>
-                    <select id="cost-of-risk-asset"></select>
-                  </label>
-                  <label class="field cost-of-risk-field">
-                    <span>Counterparty</span>
-                    <select id="cost-of-risk-counterparty"></select>
-                  </label>
-                  <label class="field cost-of-risk-field">
-                    <span>Stage</span>
-                    <select id="cost-of-risk-stage"></select>
-                  </label>
-                  <label class="field cost-of-risk-field">
-                    <span>Display</span>
-                    <select id="cost-of-risk-display-mode">
-                      <option value="ratio" selected>Ratio</option>
-                      <option value="amount">Amount</option>
-                    </select>
-                  </label>
-                </div>
+              <aside class="cost-of-risk-filters-sidebar" aria-label="Cost of risk filters">
+                <label class="field cost-of-risk-field cost-of-risk-field--stacked">
+                  <span>Accounting type</span>
+                  <select id="cost-of-risk-asset"></select>
+                </label>
+                <label class="field cost-of-risk-field cost-of-risk-field--stacked">
+                  <span>Counterparty</span>
+                  <select id="cost-of-risk-counterparty"></select>
+                </label>
+                <label class="field cost-of-risk-field cost-of-risk-field--stacked">
+                  <span>Stage</span>
+                  <select id="cost-of-risk-stage"></select>
+                </label>
+                <label class="field cost-of-risk-field cost-of-risk-field--stacked">
+                  <span>Display</span>
+                  <select id="cost-of-risk-display-mode">
+                    <option value="ratio" selected>Ratio</option>
+                    <option value="amount">Amount</option>
+                  </select>
+                </label>
+              </aside>
+              <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Contributions</button>
@@ -149,8 +156,7 @@
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
                 </div>
-              </div>
-              <div class="cost-of-risk-scroll">
+                <div class="cost-of-risk-scroll">
                 <div class="cost-of-risk-tab-panel is-active" data-cost-of-risk-panel="f2-vs-f12">
                   <h3 class="cost-of-risk-chart-title cost-of-risk-comparison-title">F2 vs F12</h3>
                   <div class="cost-of-risk-comparison-layout">
@@ -175,9 +181,12 @@
                   <div id="cost-of-risk-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-transfers" hidden>
-                  <div id="cost-of-risk-stage-exposure-table" class="cost-of-risk-stage-exposure" aria-label="F04.04.1 gross carrying amount by stage"></div>
                   <h3 id="cost-of-risk-stage-transfer-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12.02 Stage transfers</h3>
                   <div id="cost-of-risk-stage-transfer-chart" class="cost-of-risk-waterfall cost-of-risk-stage-transfer-chart" aria-label="F12.02 stage transfer waterfall"></div>
+                  <div id="cost-of-risk-stage-transfer-flow-chart-wrap" class="cost-of-risk-stage-transfer-flow-chart-wrap" hidden>
+                    <h3 id="cost-of-risk-stage-transfer-flow-chart-title" class="cost-of-risk-chart-title">Flow evolution</h3>
+                    <div id="cost-of-risk-stage-transfer-flow-chart" class="cost-of-risk-stage-transfer-flow-chart" aria-label="Stage transfer flow time series"></div>
+                  </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="core-definition" hidden>
                   <div id="cost-of-risk-core-definition" class="cost-of-risk-core-definition" aria-label="Core Definition"></div>
@@ -218,6 +227,7 @@
                   </div>
                 </div>
               </div>
+              </div>
             </div>
           </article>
         </section>
@@ -227,6 +237,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260709-primary-dark-fix2"></script>
+    <script type="module" src="./src/main.js?v=20260709-benchmark-fix2"></script>
   </body>
 </html>
