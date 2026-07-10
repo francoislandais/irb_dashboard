@@ -12,7 +12,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js";
-import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-theme-cache-fix";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-click-snap";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -465,7 +465,7 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     // référence n'est implémenté à ce stade").
     plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
       selectExplorerBenchmarkJst(seriesName);
-    }),
+    }, state.selectedJst),
     series,
     title: { text: null },
     tooltip: {

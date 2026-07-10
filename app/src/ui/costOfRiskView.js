@@ -24,14 +24,14 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260709-theme-cache-fix";
+} from "../data/costOfRisk.js?v=20260709-click-snap";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260709-theme-cache-fix";
-import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-theme-cache-fix";
+} from "./costOfRiskStageTransfers.js?v=20260709-click-snap";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-click-snap";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -538,7 +538,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
     plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
       selectCostOfRiskReferenceDate(referenceLabel);
       selectCostOfRiskChartJst(seriesName);
-    }),
+    }, jstCode),
     series,
     title: { text: null },
     tooltip: {
@@ -956,7 +956,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
       selectCostOfRiskReferenceDate(referenceLabel);
       selectCostOfRiskChartJst(seriesName);
-    }),
+    }, state.selectedJst),
     series,
     title: { text: null },
     tooltip: {

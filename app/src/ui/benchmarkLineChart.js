@@ -34,7 +34,7 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
           enabled: isSelected,
           lineColor: color,
           lineWidth: isSelected ? 1.5 : 0,
-          radius: isSelected ? 4 : 0,
+          radius: isSelected ? 5 : 0,
           symbol: "circle"
         },
         name: benchmark.jstCode,
@@ -42,7 +42,7 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
         states: {
           hover: {
             enabled: true,
-            halo: { size: isSelected ? 5 : 0 },
+            halo: { size: isSelected ? 9 : 0 },
             lineWidth: isSelected ? 4 : 2.1,
             lineWidthPlus: 0
           },
@@ -63,10 +63,18 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
     });
 }
 
+// Clicking near two close points from different JSTs is ambiguous — the user
+// can't tell exactly which one they hit. The selected JST's curve is meant to
+// be the "safe" target: a click within this many pixels of one of its points
+// snaps to that point instead of whatever point technically received the
+// click, so a nearby unrelated JST is never picked by accident.
+const SELECTED_SERIES_SNAP_DISTANCE = 24;
+
 // onPointClick(referenceLabel, seriesName) — callers that don't yet support a
 // reference-date callback (e.g. Explorer's Benchmark view) can simply ignore
-// the first argument.
-export function getBenchmarkLinePlotOptions(onPointClick) {
+// the first argument. selectedJstCode is the currently selected JST's name
+// (matches a series' `name`); pass "" if there is none yet.
+export function getBenchmarkLinePlotOptions(onPointClick, selectedJstCode = "") {
   return {
     series: {
       animation: false,
@@ -96,8 +104,9 @@ export function getBenchmarkLinePlotOptions(onPointClick) {
           // (it can end up empty). Running it on the next tick lets Highcharts
           // finish handling this click first.
           click() {
-            const referenceLabel = this.referenceLabel;
-            const seriesName = this.series.name;
+            const targetPoint = resolveBenchmarkClickTarget(this, selectedJstCode);
+            const referenceLabel = targetPoint.referenceLabel;
+            const seriesName = targetPoint.series.name;
             setTimeout(() => onPointClick(referenceLabel, seriesName), 0);
           }
         }
@@ -110,6 +119,26 @@ export function getBenchmarkLinePlotOptions(onPointClick) {
       }
     }
   };
+}
+
+function resolveBenchmarkClickTarget(clickedPoint, selectedJstCode) {
+  if (!selectedJstCode || clickedPoint.series.name === selectedJstCode) return clickedPoint;
+
+  const selectedSeries = clickedPoint.series.chart.series.find((serie) => serie.name === selectedJstCode);
+  if (!selectedSeries) return clickedPoint;
+
+  let closestPoint = null;
+  let closestDistance = Infinity;
+  selectedSeries.points.forEach((point) => {
+    if (!Number.isFinite(point.plotX) || !Number.isFinite(point.plotY)) return;
+    const distance = Math.hypot(point.plotX - clickedPoint.plotX, point.plotY - clickedPoint.plotY);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestPoint = point;
+    }
+  });
+
+  return closestPoint && closestDistance <= SELECTED_SERIES_SNAP_DISTANCE ? closestPoint : clickedPoint;
 }
 
 // onSelectJst(jstCode) — same JST_CODE selection entry point as clicking a

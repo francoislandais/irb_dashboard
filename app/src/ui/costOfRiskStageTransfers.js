@@ -366,7 +366,8 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
     displayMode,
     selectedUnit,
     "middle",
-    config.color
+    config.isSelected,
+    config.primaryDark
   );
 }
 function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
@@ -445,10 +446,15 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
   const lineHeight = 20;
   const labelStartY = centerY - (lineHeight * labelLines.length) / 2;
 
+  const labelColor = config.isSelected ? config.primaryDark : "#000000";
+  const labelWeight = config.isSelected ? "700" : "400";
+
   labelLines.forEach((line, index) => {
-    addText(svg, line, labelX, labelStartY + index * lineHeight, "cost-of-risk-stage-flow-side-text", {
+    const lineElement = addText(svg, line, labelX, labelStartY + index * lineHeight, "cost-of-risk-stage-flow-side-text", {
       "text-anchor": anchor
     });
+    lineElement.setAttribute("fill", labelColor);
+    lineElement.style.fontWeight = labelWeight;
   });
 
   addValueLabel(
@@ -460,7 +466,8 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
     displayMode,
     selectedUnit,
     anchor,
-    config.color
+    config.isSelected,
+    config.primaryDark
   );
 }
 const FLOW_HIT_AREA_PADDING = 16;
@@ -522,7 +529,7 @@ function createVerticalArrowPath(x, y1, y2, width) {
   ].join(" ");
 }
 
-function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit, anchor = "middle", color = null) {
+function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit, anchor = "middle", isSelected = false, selectedColor = primaryDark) {
   const label = addText(
     svg,
     formatValue(Math.abs(value), displayMode, selectedUnit, false),
@@ -532,7 +539,8 @@ function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit,
     { "text-anchor": anchor }
   );
 
-  label.setAttribute("fill", color ?? (value >= 0 ? primaryDark : "#4c5651"));
+  label.setAttribute("fill", isSelected ? selectedColor : "#000000");
+  label.style.fontWeight = isSelected ? "700" : "400";
 }
 
 function addText(svg, value, x, y, className, attrs = {}) {
