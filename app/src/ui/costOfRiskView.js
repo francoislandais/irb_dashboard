@@ -9,6 +9,7 @@ import {
   buildCostOfRiskF2VsF12Audit,
   buildCostOfRiskFilteredSelectionValue,
   buildCostOfRiskStageBoxTimeSeries,
+  buildCostOfRiskStageTransferFlowAudit,
   buildCostOfRiskStageTransferFlowDiagram,
   buildCostOfRiskStageTransferFlowTimeSeries,
   buildCostOfRiskStageTransferWaterfall,
@@ -25,14 +26,16 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260710-stage-box";
+} from "../data/costOfRisk.js?v=20260710-audit-trail";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260710-stage-box";
+} from "./costOfRiskStageTransfers.js?v=20260710-audit-trail";
 import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
+import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
+import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -932,6 +935,7 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
     flowArrowColor,
     flowDiagram,
     formatValue: formatCostOfRiskDisplayValue,
+    onContextMenu: (flowKey, event) => handleCostOfRiskStageTransferFlowContextMenu(state, flowKey, event),
     onSelectFlow: selectCostOfRiskStageTransferFlow,
     primaryDark,
     selectedFlowKey: activeCostOfRiskStageTransferFlowKey,
@@ -955,6 +959,151 @@ function selectCostOfRiskStageTransferFlow(flowKey) {
   if (!flowKey || flowKey === activeCostOfRiskStageTransferFlowKey) return;
   activeCostOfRiskStageTransferFlowKey = flowKey;
   if (getLatestState()) rerenderApp(getLatestState());
+}
+
+// "Where does it come from?" audit trail - right-clicking any part of a flow
+// (arrow, label or value) reconstructs, from the raw underlying data points,
+// exactly how the displayed value was computed. Reuses the generic
+// contextMenu.js / auditTrailDialog.js modules so the same pattern can be
+// wired onto any other chart later.
+function handleCostOfRiskStageTransferFlowContextMenu(state, flowKey, event) {
+  const audit = buildCostOfRiskStageTransferFlowAudit(state, activeCostOfRiskFilters, flowKey, activeCostOfRiskReferenceDate);
+  if (!audit) return;
+
+  showContextMenu([{
+    action: () => showAuditTrailDialog(createCostOfRiskStageTransferFlowAuditTrail(audit, state.selectedUnit)),
+    label: "Where does it come from?"
+  }], event);
+}
+
+function createCostOfRiskStageTransferFlowAuditTrail(audit, selectedUnit) {
+  const subtitle = `Reference date - ${formatReferenceQuarterLabel(audit.referenceLabel)}`;
+  const previousLabel = audit.previousReferenceLabel ? formatReferenceQuarterLabel(audit.previousReferenceLabel) : "previous quarter";
+  const currentLabel = formatReferenceQuarterLabel(audit.referenceLabel);
+  const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
+
+  if (audit.type === "transfer") {
+    return {
+      definition: `Sum, over every matching F_12.02 y-axis point, of the quarter-on-quarter change in x=${audit.xCode} (${audit.xLabel}) - the gross carrying amount reported as transferred by this movement during the reference quarter.`,
+      sections: [{
+        columns: [
+          { header: "Code", key: "code" },
+          { header: "Description", key: "description" },
+          { align: "right", header: `Cumulative @ ${previousLabel}`, key: "previous" },
+          { align: "right", header: `Cumulative @ ${currentLabel}`, key: "current" },
+          { align: "right", header: "Quarterly movement", key: "quarterly" }
+        ],
+        rows: audit.components.map((item) => ({
+          code: item.code,
+          current: formatAmount(item.currentCumulative),
+          description: item.description,
+          previous: formatAmount(item.previousCumulative),
+          quarterly: formatAmount(item.quarterly)
+        })),
+        title: `F_12.02 - x=${audit.xCode} (${audit.xLabel}) - ${audit.assetLabel}`,
+        totalRow: { description: "Total", quarterly: formatAmount(audit.value) }
+      }],
+      subtitle,
+      title: `Stage ${audit.descriptor.from} → Stage ${audit.descriptor.to}`,
+      valueLabel: formatAmount(audit.value)
+    };
+  }
+
+  if (audit.type === "writeoff") {
+    return {
+      definition: `Sum of absolute quarter-on-quarter movements in F_12.01 x=0080/x=0120 (write-offs), over every matching y-axis point, for Stage ${audit.stage}.`,
+      sections: [{
+        columns: [
+          { header: "x code", key: "xCode" },
+          { header: "y code", key: "yCode" },
+          { header: "Description", key: "description" },
+          { align: "right", header: `Cumulative @ ${previousLabel}`, key: "previous" },
+          { align: "right", header: `Cumulative @ ${currentLabel}`, key: "current" },
+          { align: "right", header: "Quarterly movement", key: "quarterly" }
+        ],
+        rows: audit.components.map((item) => ({
+          current: formatAmount(item.currentCumulative),
+          description: item.description,
+          previous: formatAmount(item.previousCumulative),
+          quarterly: formatAmount(item.quarterly),
+          xCode: `${item.xCode} (${item.xLabel})`,
+          yCode: item.yCode
+        })),
+        title: `F_12.01 - write-off codes - Stage ${audit.stage}`,
+        totalRow: { description: "Total write-off", quarterly: formatAmount(audit.value) }
+      }],
+      subtitle,
+      title: `Write-Off - Stage ${audit.stage}`,
+      valueLabel: formatAmount(audit.value)
+    };
+  }
+
+  const exposureSection = {
+    columns: [
+      { header: "Code", key: "code" },
+      { header: "Description", key: "description" },
+      { align: "right", header: `Balance @ ${previousLabel}`, key: "previous" },
+      { align: "right", header: `Balance @ ${currentLabel}`, key: "current" },
+      { align: "right", header: "Delta", key: "delta" }
+    ],
+    description: "Total exposure balance for this stage (F_04.04.1).",
+    rows: audit.exposureComponents.map((item) => ({
+      code: item.code,
+      current: formatAmount(item.currentValue),
+      delta: formatAmount(item.delta),
+      description: item.description,
+      previous: formatAmount(item.previousValue)
+    })),
+    title: "Exposure variation (F_04.04.1)",
+    totalRow: { description: "Total delta", delta: formatAmount(audit.exposureDelta) }
+  };
+
+  const transfersSection = {
+    columns: [
+      { header: "Code", key: "code" },
+      { header: "Movement", key: "label" },
+      { header: "Direction", key: "direction" },
+      { align: "right", header: "Quarterly amount", key: "quarterly" },
+      { align: "right", header: "Contribution to stage", key: "signed" }
+    ],
+    description: "Transfers already explained by the arrows leaving/entering this stage - subtracted so only the unexplained residual remains.",
+    rows: audit.transferComponents.map((item) => ({
+      code: item.code,
+      direction: item.direction === "in" ? `From Stage ${item.from}` : `To Stage ${item.to}`,
+      label: item.label,
+      quarterly: formatAmount(item.quarterly),
+      signed: formatAmount(item.signedContribution)
+    })),
+    title: "Net transfers (F_12.02)",
+    totalRow: { direction: "Net transfers", signed: formatAmount(audit.netTransfers) }
+  };
+
+  const writeOffSection = {
+    columns: [
+      { header: "x code", key: "xCode" },
+      { header: "y code", key: "yCode" },
+      { header: "Description", key: "description" },
+      { align: "right", header: "Quarterly movement", key: "quarterly" }
+    ],
+    description: "Write-offs already explained by the write-off arrow for this stage - added back since they reduce the balance without being a stage transfer.",
+    rows: audit.writeOffComponents.map((item) => ({
+      description: item.description,
+      quarterly: formatAmount(item.quarterly),
+      xCode: `${item.xCode} (${item.xLabel})`,
+      yCode: item.yCode
+    })),
+    title: "Write-offs (F_12.01)",
+    totalRow: { description: "Total write-off", quarterly: formatAmount(audit.writeOffMagnitude) }
+  };
+
+  return {
+    definition: "The residual stage variation not already explained by inter-stage transfers or write-offs: (exposure delta) − (net transfers) + (write-offs).",
+    formula: `${formatAmount(audit.exposureDelta)} − (${formatAmount(audit.netTransfers)}) + ${formatAmount(audit.writeOffMagnitude)} = ${formatAmount(audit.value)}`,
+    sections: [exposureSection, transfersSection, writeOffSection],
+    subtitle,
+    title: `Other movements - Stage ${audit.stage}`,
+    valueLabel: formatAmount(audit.value)
+  };
 }
 
 function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, selectedUnit) {

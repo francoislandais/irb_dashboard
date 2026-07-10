@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260709-dataset-lazy-load";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260710-stage-box";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260710-audit-trail";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -41,8 +41,10 @@ const STANDALONE_MODULE_PATHS = [
   "src/data/explorerConfig.js",
   "src/data/timeSeries.js",
   "src/ui/appState.js",
+  "src/ui/auditTrailDialog.js",
   "src/ui/benchmarkLineChart.js",
   "src/ui/cet1View.js",
+  "src/ui/contextMenu.js",
   "src/ui/costOfRiskStageTransfers.js",
   "src/ui/costOfRiskView.js",
   "src/ui/dataScreen.js",

@@ -702,6 +702,186 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
   };
 }
 
+// Generic audit trail: given the same flowKey used to select an arrow in the
+// stage transfer flow diagram, reconstructs every raw data point (code,
+// description, previous/current cumulative value, quarterly movement) that
+// contributed to the displayed value, for the currently selected reference
+// date. This is what powers the "Where does it come from?" right-click
+// feature — kept fully separate from the chart-building functions above so
+// it can be reused by any other flow-diagram-like view later.
+export function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowKey, referenceDate = "") {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const descriptor = parseCostOfRiskFlowKey(flowKey);
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const selectedReference = referenceColumns[referenceIndex] ?? null;
+  const previousReference = referenceColumns[referenceIndex - 1] ?? null;
+
+  if (!indexes || !descriptor || !state.selectedJst || !selectedReference) return null;
+
+  if (descriptor.type === "transfer") {
+    return buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+  }
+  if (descriptor.type === "writeoff") {
+    return buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+  }
+  return buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+}
+
+function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+  const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
+  const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
+
+  const components = ySelection.codes.map((yCode) => {
+    const raw = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
+      xCode: descriptor.code,
+      yCode,
+      zCode: ""
+    }, state.selectedJst);
+    const currentCumulative = raw[referenceIndex] ?? null;
+    const previousCumulative = raw[referenceIndex - 1] ?? null;
+    const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? null;
+
+    return {
+      code: yCode,
+      currentCumulative,
+      description: getMappingDescription(state, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, "y_axis_rc_code", yCode),
+      previousCumulative,
+      quarterly
+    };
+  });
+
+  return {
+    assetLabel: ySelection.label,
+    components,
+    descriptor,
+    previousReferenceLabel: previousReference?.label ?? "",
+    referenceLabel: selectedReference.label,
+    tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
+    type: "transfer",
+    value: components.reduce((total, item) => total + (item.quarterly ?? 0), 0),
+    xCode: descriptor.code,
+    xLabel: xLabels.get(descriptor.code) ?? descriptor.code
+  };
+}
+
+function buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+  const { points } = getCostOfRiskWriteOffPointsByStage(state, filters).find((item) => item.stage === descriptor.stage) ?? { points: [] };
+  const xLabels = getCostOfRiskXAxisLabelMap(state);
+
+  const components = COST_OF_RISK_WRITE_OFF_X_CODES.flatMap((xCode) => (
+    points.map((yCode) => {
+      const raw = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+        xCode,
+        yCode,
+        zCode: ""
+      }, state.selectedJst);
+      const currentCumulative = raw[referenceIndex] ?? null;
+      const previousCumulative = raw[referenceIndex - 1] ?? null;
+      const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? null;
+
+      return {
+        currentCumulative,
+        description: getMappingDescription(state, COST_OF_RISK_TABLE_ID, "y_axis_rc_code", yCode),
+        previousCumulative,
+        quarterly,
+        xCode,
+        xLabel: xLabels.get(xCode) ?? xCode,
+        yCode
+      };
+    })
+  ));
+
+  const magnitude = components.reduce((total, item) => total + Math.abs(item.quarterly ?? 0), 0);
+
+  return {
+    components,
+    descriptor,
+    previousReferenceLabel: previousReference?.label ?? "",
+    referenceLabel: selectedReference.label,
+    stage: descriptor.stage,
+    tableId: COST_OF_RISK_TABLE_ID,
+    type: "writeoff",
+    value: magnitude > 0 ? -magnitude : 0
+  };
+}
+
+function buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+  const exposureYSelection = getCostOfRiskStageExposureYSelection(state, filters);
+  const stageLabel = COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[descriptor.stage];
+  const stageDefinition = COST_OF_RISK_STAGE_EXPOSURE_X_CODES.find((definition) => definition.stage === stageLabel);
+
+  const exposureComponents = exposureYSelection.codes.map((yCode) => {
+    const raw = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID, {
+      xCode: stageDefinition?.xCode ?? "",
+      yCode,
+      zCode: ""
+    }, state.selectedJst);
+    const currentValue = raw[referenceIndex] ?? null;
+    const previousValue = raw[referenceIndex - 1] ?? null;
+
+    return {
+      code: yCode,
+      currentValue,
+      delta: Number.isFinite(currentValue) && Number.isFinite(previousValue) ? currentValue - previousValue : null,
+      description: getMappingDescription(state, COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID, "y_axis_rc_code", yCode),
+      previousValue
+    };
+  });
+  const exposureDelta = exposureComponents.reduce((total, item) => total + (item.delta ?? 0), 0);
+
+  const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
+  const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
+  const transferComponents = COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS
+    .filter((movement) => movement.from === descriptor.stage || movement.to === descriptor.stage)
+    .map((movement) => {
+      const raw = createEmptySeries(referenceColumns.length);
+      ySelection.codes.forEach((yCode) => {
+        addSeriesValues(raw, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
+          xCode: movement.code,
+          yCode,
+          zCode: ""
+        }, state.selectedJst));
+      });
+      const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? 0;
+      const direction = movement.from === descriptor.stage ? "out" : "in";
+
+      return {
+        code: movement.code,
+        direction,
+        from: movement.from,
+        label: xLabels.get(movement.code) ?? movement.code,
+        quarterly,
+        signedContribution: direction === "out" ? -quarterly : quarterly,
+        to: movement.to
+      };
+    });
+  const netTransfers = transferComponents.reduce((total, item) => total + item.signedContribution, 0);
+
+  const writeOffAudit = buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, { stage: descriptor.stage, type: "writeoff" }, referenceIndex, selectedReference, previousReference);
+  const writeOffMagnitude = Math.abs(writeOffAudit.value ?? 0);
+
+  return {
+    descriptor,
+    exposureComponents,
+    exposureDelta,
+    netTransfers,
+    previousReferenceLabel: previousReference?.label ?? "",
+    referenceLabel: selectedReference.label,
+    stage: descriptor.stage,
+    transferComponents,
+    type: "other",
+    value: Number.isFinite(exposureDelta) ? exposureDelta - netTransfers + writeOffMagnitude : null,
+    writeOffComponents: writeOffAudit.components,
+    writeOffMagnitude
+  };
+}
+
+function getMappingDescription(state, tableId, coordinate, code) {
+  const mappings = state.dimensionMapping?.list?.(tableId, coordinate) ?? [];
+  return mappings.find((mapping) => mapping.code === code)?.description ?? code;
+}
+
 // Clicking a stage box (rather than a flow arrow) shows the F_18.00 gross
 // carrying amount for that stage over time, per JST — a different data
 // source and computation from the F_12.01/F_12.02-based flow selections
