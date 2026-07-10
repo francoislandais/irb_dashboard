@@ -635,8 +635,10 @@ button:focus-visible {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 8px;
+  justify-self: center;
   min-height: 0;
   min-width: 0;
+  width: min(100%, 1180px);
 }
 
 .cost-of-risk-tab-panel[hidden] {
@@ -1015,9 +1017,9 @@ button:focus-visible {
 .cost-of-risk-split-section > .cost-of-risk-waterfall,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart {
   height: auto;
-  justify-self: center;
   min-height: 0;
-  width: min(100%, 1180px);
+  overflow: hidden;
+  width: 100%;
 }
 
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"] .cost-of-risk-split-section > .cost-of-risk-chart,
@@ -1033,17 +1035,21 @@ button:focus-visible {
 
 .cost-of-risk-stage-transfer-chart {
   height: 100%;
-  justify-self: center;
   min-height: 0;
   min-width: 0;
-  width: min(100%, 1180px);
+  width: 100%;
   background: #ffffff;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .cost-of-risk-stage-transfer-flow-chart-wrap {
   max-width: 100%;
   overflow: hidden;
+}
+
+.cost-of-risk-split-section .highcharts-container,
+.cost-of-risk-split-section .highcharts-root {
+  max-width: 100%;
 }
 
 .cost-of-risk-stage-transfer-flow-chart {
