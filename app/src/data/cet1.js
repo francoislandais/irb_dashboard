@@ -1,6 +1,6 @@
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
-import { formatBasisPointsValue, formatMetricValue } from "./core/formatting.js";
+import { formatBasisPointsValue, formatMetricValue } from "./core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
 export function getCet1RatioSnapshot(state) {

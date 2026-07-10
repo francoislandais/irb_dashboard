@@ -1,4 +1,4 @@
-import { formatPercentValue } from "../data/core/formatting.js";
+import { formatPercentValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { formatBasisPointChange, formatCet1Amount, getCet1RatioSnapshot } from "../data/cet1.js";
 
 const elements = {

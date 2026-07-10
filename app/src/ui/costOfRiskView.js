@@ -24,7 +24,7 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260710-stage-smoothing";
+} from "../data/costOfRisk.js?v=20260710-bp-format";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -32,7 +32,7 @@ import {
   renderCostOfRiskStageTransferFlowDiagram
 } from "./costOfRiskStageTransfers.js?v=20260709-flow-diagram-resize";
 import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
-import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js";
+import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
