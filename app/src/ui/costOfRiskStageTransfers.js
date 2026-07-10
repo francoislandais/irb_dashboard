@@ -109,7 +109,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   const svg = svgElement("svg", {
     class: "cost-of-risk-stage-flow-diagram",
     role: "img",
-    viewBox: "0 0 1400 520",
+    viewBox: "0 0 1400 400",
     "aria-label": "F12.02 IFRS 9 stage transfer flow diagram"
   });
   const stageFill = "#f7f8f7";
@@ -135,8 +135,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:1-2",
     labelY: 130,
     maxFlow,
-    maxLength: 280,
-    minLength: 28,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "1", "2"),
@@ -151,8 +149,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:2-1",
     labelY: 270,
     maxFlow,
-    maxLength: 280,
-    minLength: 28,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "2", "1"),
@@ -167,8 +163,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:2-3",
     labelY: 130,
     maxFlow,
-    maxLength: 280,
-    minLength: 28,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "2", "3"),
@@ -183,8 +177,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:3-2",
     labelY: 270,
     maxFlow,
-    maxLength: 280,
-    minLength: 28,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "3", "2"),
@@ -229,7 +221,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
       value: residual?.displayValue,
       width: arrowWidth,
       x: otherMovementsX,
-      y: 250
+      y: 260
     }, formatValue, displayMode, selectedUnit);
 
     addResidualFlow(svg, {
@@ -244,7 +236,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
       value: writeOff?.displayValue,
       width: arrowWidth,
       x: writeOffX,
-      y: 250
+      y: 260
     }, formatValue, displayMode, selectedUnit);
   });
 
@@ -293,9 +285,9 @@ function getFlowValue(flows, from, to) {
   return flows.find((flow) => flow.from === from && flow.to === to)?.displayValue ?? null;
 }
 
-function scaleArrowLength(value, maxFlow, minLength, maxLength) {
+function scaleArrowLength(value, length) {
   if (!Number.isFinite(value) || value === 0) return 8;
-  return 140;
+  return length;
 }
 
 function scaleArrowWidth(value, maxFlow, minWidth =4, maxWidth = 32) {
@@ -331,7 +323,7 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
 
   const maxFlow = config.maxFlow ?? Math.abs(value);
 
-  const length = scaleArrowLength(value, maxFlow, config.minLength ?? 70, config.maxLength ?? 280);
+  const length = scaleArrowLength(value, 132);
 
   const width = scaleArrowWidth(value, maxFlow, 6, 32);
 
@@ -341,9 +333,7 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
 
   const pathElement = svgElement("path", {
     d: path,
-    fill: config.isSelected ? config.primaryDark : config.color,
-    stroke: config.primaryDark,
-    "stroke-width": 1
+    fill: config.isSelected ? config.primaryDark : config.color
   });
   svg.append(pathElement);
 
@@ -378,8 +368,6 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
     isSelected: config.selectedFlowKey === "transfer:1-3",
     labelY: 38,
     maxFlow: config.maxFlow,
-    maxLength: 900,
-    minLength: 44,
     onSelect: config.onSelectFlow,
     primaryDark: config.primaryDark,
     value: config.fromStage1Value,
@@ -395,8 +383,6 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
     isSelected: config.selectedFlowKey === "transfer:3-1",
     labelY: 116,
     maxFlow: config.maxFlow,
-    maxLength: 900,
-    minLength: 44,
     onSelect: config.onSelectFlow,
     primaryDark: config.primaryDark,
     value: config.fromStage3Value,
@@ -412,7 +398,7 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
 
   const maxFlow = config.maxFlow ?? Math.abs(value);
   const width = scaleArrowWidth(value, maxFlow, 6, 32);
-  const length = scaleArrowLength(value, maxFlow, 28, 180);
+  const length = scaleArrowLength(value, 108);
 
   const isIncrease = value >= 0;
   const startY = isIncrease ? config.y + length : config.y;
@@ -420,9 +406,7 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
 
   const pathElement = svgElement("path", {
     d: createVerticalArrowPath(config.x, startY, endY, width),
-    fill: config.isSelected ? config.primaryDark : config.color,
-    stroke: config.primaryDark,
-    "stroke-width": 1
+    fill: config.isSelected ? config.primaryDark : config.color
   });
   svg.append(pathElement);
 

@@ -45,7 +45,7 @@ export function formatBasisPointsValue(value) {
   if (value === null || value === undefined || !Number.isFinite(value)) return "-";
 
   return `${new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 1,
+    maximumFractionDigits: 0,
     minimumFractionDigits: 0
   }).format(value)} bp`;
 }
