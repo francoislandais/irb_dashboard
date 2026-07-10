@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260709-dataset-lazy-load";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260710-fixed-chart-heights";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260710-label-clamp";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";

@@ -30,7 +30,7 @@ import {
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260710-fixed-chart-heights";
+} from "./costOfRiskStageTransfers.js?v=20260710-label-clamp";
 import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -811,7 +811,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   const contributions = (waterfall.points ?? [])
     .filter((point) => Number.isFinite(getCostOfRiskPointDisplayValue(point, displayMode)))
     .map((point) => ({
-      color: getCostOfRiskPointDisplayValue(point, displayMode) >= 0 ? "#f5f5f5" : primaryDark,
+      color: flowArrowColor,
       code: point.code,
       name: `${point.code} - ${point.label}`,
       y: getCostOfRiskPointDisplayValue(point, displayMode)
@@ -826,6 +826,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   const waterfallData = createManualWaterfallData(contributions);
   waterfallData.valueFormatter = (value) => formatCostOfRiskDisplayValue(value, displayMode, selectedUnit, true);
   waterfallData.selectedCode = activeCostOfRiskXAxisCode;
+  waterfallData.axisLabelFontSize = "8px";
   const options = {
     chart: {
       animation: false,
@@ -836,7 +837,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
           wireCostOfRiskWaterfallAxisLabels(this);
         }
       },
-      marginBottom: 50,
+      marginBottom: 65,
       type: "line"
     },
     credits: { enabled: false },
@@ -1498,6 +1499,13 @@ function formatCostOfRiskTreemapStageLabel(stage) {
   return "";
 }
 
+// Extra horizontal gap (in item-slot units, where 1 unit = one item's normal
+// spacing) inserted at each of the two group boundaries in the Contribution
+// waterfall: between "Total contribution" and the "Allowances variation"
+// items, and between "Other adjustments" and the "Direct P&L impact" items.
+// Starting value — tune to taste.
+const COST_OF_RISK_WATERFALL_GROUP_GAP_UNITS = 1;
+
 function createManualWaterfallData(contributions) {
   const total = contributions.reduce((sum, point) => sum + point.y, 0);
   let runningTotal = 0;
@@ -1505,9 +1513,10 @@ function createManualWaterfallData(contributions) {
   const values = [0, total];
 
   items.push({
-    color: total >= 0 ? "#8fb6a8" : primaryDark,
+    color: flowArrowColor,
     contribution: total,
     end: total,
+    groupIndex: 0,
     isTotal: true,
     name: "Total contribution",
     start: 0
@@ -1522,6 +1531,7 @@ function createManualWaterfallData(contributions) {
       code: point.code,
       contribution: point.y,
       end,
+      groupIndex: getCostOfRiskCoreSectionLabel(point.code) === "Direct P&L impact" ? 2 : 1,
       name: point.name,
       start
     });
@@ -1535,6 +1545,9 @@ function createManualWaterfallData(contributions) {
   const padding = range > 0 ? range * 0.08 : 1;
 
   return {
+    compactGroups: true,
+    groupGapUnits: COST_OF_RISK_WATERFALL_GROUP_GAP_UNITS,
+    itemGapUnits: 1,
     items,
     max: maxValue + padding,
     min: minValue - padding
@@ -1617,8 +1630,8 @@ function renderManualCostOfRiskWaterfall(chart, waterfallData) {
       : chart.renderer.rect(x, top, barWidth, height, 3);
     shape
       .attr({
-        fill: item.color,
-            stroke: primaryDark,
+        fill: isSelected ? primaryDark : item.color,
+        stroke: primaryDark,
         "stroke-width": isSelected ? 2 : 1,
         zIndex: isSelected ? 8 : 6
       })
@@ -1645,7 +1658,7 @@ function renderManualCostOfRiskWaterfall(chart, waterfallData) {
       });
     }
 
-    const axisLabel = renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter);
+    const axisLabel = renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth);
     if (axisLabel) elements.push(axisLabel);
 
     if (!item.isTotal && index < items.length - 1 && !items[index + 1]?.isTotal && !items[index + 1]?.isSpacer && !items[index + 1]?.groupLabel) {
@@ -1720,19 +1733,27 @@ function formatManualWaterfallValue(value, waterfallData) {
   return `${value > 0 ? "+" : ""}${formatBasisPointsValue(value)}`;
 }
 
-function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter) {
-  const lines = getCostOfRiskWaterfallLabelLines(item.axisLabel || item.name);
-  if (lines.length === 0) return null;
-
+function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth) {
   const isSelected = item.code && item.code === activeCostOfRiskXAxisCode;
   const waterfallData = chart.customCostOfRiskWaterfallData ?? {};
+  const textStyle = {
+    color: waterfallData.axisLabelColor || (isSelected ? "#24352d" : "#5f6b65"),
+    fontSize: waterfallData.axisLabelFontSize || "9px",
+    fontWeight: isSelected ? "700" : "500"
+  };
+  // Hard cap, on top of the word-wrap heuristic: whatever the content and
+  // font size, a label line is truncated with an ellipsis rather than ever
+  // spilling into its neighbor's slot.
+  const maxLineWidth = Number.isFinite(slotWidth) ? Math.max(20, slotWidth - 6) : null;
+  const lines = getCostOfRiskWaterfallLabelLines(item.axisLabel || item.name)
+    .map((line) => fitCostOfRiskWaterfallLabelLineWidth(chart, line, textStyle, maxLineWidth));
+  if (lines.length === 0) return null;
+
   const label = chart.renderer
     .text(lines.map(escapeHtml).join("<br/>"), xCenter, chart.plotTop + chart.plotHeight + 24)
     .css({
-      color: waterfallData.axisLabelColor || (isSelected ? "#24352d" : "#5f6b65"),
+      ...textStyle,
       cursor: item.code ? "pointer" : "default",
-      fontSize: waterfallData.axisLabelFontSize || "9px",
-      fontWeight: isSelected ? "700" : "500",
       lineHeight: waterfallData.axisLabelLineHeight || "12px",
       textAlign: "center"
     })
@@ -1747,6 +1768,24 @@ function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter) {
   }
 
   return label;
+}
+
+function fitCostOfRiskWaterfallLabelLineWidth(chart, text, textStyle, maxWidth) {
+  if (!maxWidth || !text) return text;
+
+  const measurer = chart.renderer.text(text, -9999, -9999).css(textStyle).add();
+  let result = text;
+
+  if (measurer.getBBox().width > maxWidth) {
+    while (result.length > 1 && measurer.getBBox().width > maxWidth) {
+      result = result.slice(0, -1);
+      measurer.attr({ text: `${result}…` });
+    }
+    result = `${result}…`;
+  }
+
+  measurer.destroy();
+  return result;
 }
 
 function createCostOfRiskWaterfallArrowPath(x, top, width, height, contribution) {
@@ -1835,7 +1874,7 @@ function getCostOfRiskWaterfallLabelLines(value) {
 
   words.forEach((word) => {
     const candidate = currentLine ? `${currentLine} ${word}` : word;
-    if (candidate.length > 15 && currentLine) {
+    if (candidate.length > 12 && currentLine) {
       lines.push(currentLine);
       currentLine = word;
     } else {
