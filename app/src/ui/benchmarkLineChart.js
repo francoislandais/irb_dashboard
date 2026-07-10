@@ -19,11 +19,15 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
       const dashStyle = isSelected ? "Solid" : BENCHMARK_LINE_DASHES[index % BENCHMARK_LINE_DASHES.length];
       const chartData = createCostOfRiskChartData(points, displayMode);
       return {
-        clip: false,
+        // Selected series render as an area down to y=0, so the reader can
+        // immediately see whether it sits above or below zero. The fill is a
+        // discreet, near-transparent gray — never tinted by the series color.
+        clip: isSelected ? true : false,
         color,
         dashStyle,
         data: chartData,
         dataLabels: { enabled: false },
+        fillColor: isSelected ? "rgba(140, 148, 144, 0.12)" : "transparent",
         lineWidth: isSelected ? 3.6 : 1.45,
         marker: {
           fillColor: isSelected ? "#ffffff" : color,
@@ -46,6 +50,8 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
             opacity: isSelected ? 1 : 0.42
           }
         },
+        threshold: 0,
+        type: isSelected ? "area" : "line",
         zIndex: isSelected ? 100 : 1
       };
     })
@@ -75,16 +81,14 @@ export function getBenchmarkLinePlotOptions(onPointClick) {
         enabled: true,
         radius: 3
       },
-      states: {
-        hover: {
-          animation: false,
-          lineWidthPlus: 0
-        }
-      }
-    },
-    line: {
       point: {
         events: {
+          // Registered on the generic "series" plotOptions (not "line") so it
+          // still fires for the selected series, which renders as an "area"
+          // type — Highcharts scopes plotOptions.<type>.point.events to that
+          // type only, and a point's click event only bubbles up to its own
+          // series-type config, never to a sibling type's config.
+          //
           // Deferred: onPointClick typically triggers a full app rerender
           // (JST_CODE/reference-date change), which can call chart.update()
           // on this very chart. Doing that synchronously, from inside
@@ -96,6 +100,12 @@ export function getBenchmarkLinePlotOptions(onPointClick) {
             const seriesName = this.series.name;
             setTimeout(() => onPointClick(referenceLabel, seriesName), 0);
           }
+        }
+      },
+      states: {
+        hover: {
+          animation: false,
+          lineWidthPlus: 0
         }
       }
     }

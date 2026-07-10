@@ -68,6 +68,7 @@ export function getStageTransferDisplayValue(value, denominator, displayMode) {
 export function renderCostOfRiskStageTransferFlowDiagram({
   container,
   displayMode,
+  flowArrowColor,
   flowDiagram,
   formatValue,
   onSelectFlow,
@@ -111,7 +112,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     viewBox: "0 0 1400 520",
     "aria-label": "F12.02 IFRS 9 stage transfer flow diagram"
   });
-  const mutedArrow = "#c9cecb";
   const stageFill = "#f7f8f7";
   const stageStroke = "#c6cec8";
   const arrowWidth = 14;
@@ -129,7 +129,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
 });
 
   addHorizontalFlow(svg, {
-    color: primaryDark,
+    color: flowArrowColor,
     direction: "right",
     flowKey: "transfer:1-2",
     isSelected: selectedFlowKey === "transfer:1-2",
@@ -145,7 +145,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     y: 205
   }, formatValue, displayMode, selectedUnit);
   addHorizontalFlow(svg, {
-    color: mutedArrow,
+    color: flowArrowColor,
     direction: "left",
     flowKey: "transfer:2-1",
     isSelected: selectedFlowKey === "transfer:2-1",
@@ -161,7 +161,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     y: 205
   }, formatValue, displayMode, selectedUnit);
   addHorizontalFlow(svg, {
-    color: primaryDark,
+    color: flowArrowColor,
     direction: "right",
     flowKey: "transfer:2-3",
     isSelected: selectedFlowKey === "transfer:2-3",
@@ -177,7 +177,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     y: 205
   }, formatValue, displayMode, selectedUnit);
   addHorizontalFlow(svg, {
-    color: mutedArrow,
+    color: flowArrowColor,
     direction: "left",
     flowKey: "transfer:3-2",
     isSelected: selectedFlowKey === "transfer:3-2",
@@ -194,17 +194,17 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   }, formatValue, displayMode, selectedUnit);
 
   addDirectFlow(svg, {
+    flowArrowColor,
     fromStage1Value: getFlowValue(displayFlows, "1", "3"),
     fromStage3Value: getFlowValue(displayFlows, "3", "1"),
     maxFlow,
-    mutedArrow,
     onSelectFlow,
     primaryDark,
     selectedFlowKey,
     width: arrowWidth
   }, formatValue, displayMode, selectedUnit);
 
-  const stageArrowOffset = 45;
+  const stageArrowOffset = 26;
 
   [
     { stage: "1", x: 150 },
@@ -218,9 +218,11 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     const writeOffX = item.x + stageArrowOffset;
 
     addResidualFlow(svg, {
-      color: residual?.displayValue >= 0 ? primaryDark : mutedArrow,
+      color: flowArrowColor,
       flowKey: `other:${item.stage}`,
       isSelected: selectedFlowKey === `other:${item.stage}`,
+      label: ["Other", "movements"],
+      labelSide: "left",
       maxFlow,
       onSelect: onSelectFlow,
       primaryDark,
@@ -231,11 +233,11 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     }, formatValue, displayMode, selectedUnit);
 
     addResidualFlow(svg, {
-      color: writeOff?.displayValue >= 0 ? primaryDark : mutedArrow,
+      color: flowArrowColor,
       flowKey: `writeoff:${item.stage}`,
       isSelected: selectedFlowKey === `writeoff:${item.stage}`,
-      labelLines: ["Write-off"],
-      labelX: writeOffX + 40,
+      label: "Write-off",
+      labelSide: "right",
       maxFlow,
       onSelect: onSelectFlow,
       primaryDark,
@@ -339,8 +341,9 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
 
   const pathElement = svgElement("path", {
     d: path,
-    fill: config.color,
-    ...(config.isSelected ? { stroke: config.primaryDark, "stroke-width": 3 } : {})
+    fill: config.isSelected ? config.primaryDark : config.color,
+    stroke: config.primaryDark,
+    "stroke-width": 1
   });
   svg.append(pathElement);
 
@@ -368,7 +371,7 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
 }
 function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
   addHorizontalFlow(svg, {
-    color: config.primaryDark,
+    color: config.flowArrowColor,
     direction: "right",
     flowKey: "transfer:1-3",
     isSelected: config.selectedFlowKey === "transfer:1-3",
@@ -385,7 +388,7 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
   }, formatValue, displayMode, selectedUnit);
 
   addHorizontalFlow(svg, {
-    color: config.mutedArrow,
+    color: config.flowArrowColor,
     direction: "left",
     flowKey: "transfer:3-1",
     isSelected: config.selectedFlowKey === "transfer:3-1",
@@ -416,8 +419,9 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
 
   const pathElement = svgElement("path", {
     d: createVerticalArrowPath(config.x, startY, endY, width),
-    fill: config.color,
-    ...(config.isSelected ? { stroke: config.primaryDark, "stroke-width": 3 } : {})
+    fill: config.isSelected ? config.primaryDark : config.color,
+    stroke: config.primaryDark,
+    "stroke-width": 1
   });
   svg.append(pathElement);
 
@@ -429,21 +433,33 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
     y: Math.min(startY, endY) - FLOW_HIT_AREA_PADDING
   }, config);
 
-  const labelLines = config.labelLines ?? ["Other", "movements"];
-  const labelX = config.labelX ?? (config.x - 130);
+  // Single combined label (name + value stacked) instead of two separate
+  // text blocks, positioned on the outer side of the arrow (away from the
+  // stage center) so the "Other movements" and "Write-off" labels stay
+  // separated even when the arrows are brought closer together.
+  const isRightSide = config.labelSide !== "left";
+  const anchor = isRightSide ? "start" : "end";
+  const labelX = config.x + (isRightSide ? 34 : -34);
+  const centerY = config.y + length / 2;
+  const labelLines = Array.isArray(config.label) ? config.label : [config.label ?? "Other movements"];
+  const lineHeight = 20;
+  const labelStartY = centerY - (lineHeight * labelLines.length) / 2;
+
   labelLines.forEach((line, index) => {
-    addText(svg, line, labelX, 335 + index * 24, "cost-of-risk-stage-flow-side-text");
+    addText(svg, line, labelX, labelStartY + index * lineHeight, "cost-of-risk-stage-flow-side-text", {
+      "text-anchor": anchor
+    });
   });
 
   addValueLabel(
     svg,
     value,
-    config.x + 55,
-    config.y + length / 2,
+    labelX,
+    labelStartY + labelLines.length * lineHeight + 6,
     formatValue,
     displayMode,
     selectedUnit,
-    "start",
+    anchor,
     config.color
   );
 }

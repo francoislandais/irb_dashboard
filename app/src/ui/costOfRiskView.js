@@ -24,17 +24,17 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260709-benchmark-fix2";
+} from "../data/costOfRisk.js?v=20260709-area-click-fix";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260709-benchmark-fix2";
-import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-benchmark-fix2";
+} from "./costOfRiskStageTransfers.js?v=20260709-area-click-fix";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-area-click-fix";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js";
 import { getLatestState } from "./appState.js";
-import { primaryDark } from "./theme.js";
+import { flowArrowColor, primaryDark } from "./theme.js";
 
 // Shared by every temporal chart (Contribution, F2 vs F12, Stage transfers
 // flow evolution) so quarterly reference dates always read "Q12026" on the
@@ -862,22 +862,14 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   }
 }
 
+// The per-stage waterfall (renderCostOfRiskStageTransferWaterfallChart) is
+// intentionally kept in the codebase but no longer displayed here: the
+// "Stage" filter no longer changes this view — the global inter-stage flow
+// diagram is always shown regardless of its value.
 function renderCostOfRiskStageTransferView(state) {
-  if (isCostOfRiskAllStageSelected()) {
-    renderCostOfRiskStageTransferFlowChart(
-      state,
-      buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
-      state.selectedUnit,
-      activeCostOfRiskDisplayMode
-    );
-    return;
-  }
-
-  activeCostOfRiskStageTransferFlowKey = "";
-  destroyCostOfRiskStageTransferFlowChart();
-  if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
-  renderCostOfRiskStageTransferWaterfallChart(
-    buildCostOfRiskStageTransferWaterfall(state, getActiveCostOfRiskStageTransferStage(), activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
+  renderCostOfRiskStageTransferFlowChart(
+    state,
+    buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
     state.selectedUnit,
     activeCostOfRiskDisplayMode
   );
@@ -895,6 +887,7 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
   renderCostOfRiskStageTransferFlowDiagram({
     container: elements.costOfRiskStageTransferChart,
     displayMode,
+    flowArrowColor,
     flowDiagram,
     formatValue: formatCostOfRiskDisplayValue,
     onSelectFlow: selectCostOfRiskStageTransferFlow,
