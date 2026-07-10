@@ -124,9 +124,24 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   const stageStroke = "#c6cec8";
   const arrowWidth = 14;
 
-  addStageBox(svg, 40, 160, "Stage 1", stageFill, stageStroke);
-  addStageBox(svg, 600, 160, "Stage 2", stageFill, stageStroke);
-  addStageBox(svg, 1160, 160, "Stage 3", stageFill, stageStroke);
+  addStageBox(svg, 40, 160, "Stage 1", stageFill, stageStroke, {
+    flowKey: "stagebox:1",
+    isSelected: selectedFlowKey === "stagebox:1",
+    onSelect: onSelectFlow,
+    primaryDark
+  });
+  addStageBox(svg, 600, 160, "Stage 2", stageFill, stageStroke, {
+    flowKey: "stagebox:2",
+    isSelected: selectedFlowKey === "stagebox:2",
+    onSelect: onSelectFlow,
+    primaryDark
+  });
+  addStageBox(svg, 1160, 160, "Stage 3", stageFill, stageStroke, {
+    flowKey: "stagebox:3",
+    isSelected: selectedFlowKey === "stagebox:3",
+    onSelect: onSelectFlow,
+    primaryDark
+  });
 
   addStage1ToStage3Junction(svg, {
   x1: 150,
@@ -318,20 +333,30 @@ function scaleArrowWidth(value, maxFlow, minWidth =4, maxWidth = 32) {
 
 }
 
-function addStageBox(svg, x, y, label, fill, stroke) {
-  svg.append(svgElement("rect", {
-    fill,
+function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
+  const isSelected = Boolean(config.isSelected);
+  const rect = svgElement("rect", {
+    fill: isSelected ? config.primaryDark : fill,
     height: 90,
     rx: 0,
-    stroke,
+    stroke: isSelected ? config.primaryDark : stroke,
     "stroke-width": 1,
     width: 220,
     x,
     y
-  }));
-  addText(svg, label, x + 110, y + 50, "cost-of-risk-stage-flow-stage-label", {
+  });
+  svg.append(rect);
+  const text = addText(svg, label, x + 110, y + 50, "cost-of-risk-stage-flow-stage-label", {
     "text-anchor": "middle"
   });
+  if (isSelected) text.style.fill = "#ffffff";
+
+  if (config.flowKey && typeof config.onSelect === "function") {
+    [rect, text].forEach((element) => {
+      element.style.cursor = "pointer";
+      element.addEventListener("click", () => config.onSelect(config.flowKey));
+    });
+  }
 }
 function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) {
 

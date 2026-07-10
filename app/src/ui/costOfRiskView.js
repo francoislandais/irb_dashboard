@@ -8,6 +8,7 @@ import {
   buildCostOfRiskF12ContributionSeries,
   buildCostOfRiskF2VsF12Audit,
   buildCostOfRiskFilteredSelectionValue,
+  buildCostOfRiskStageBoxTimeSeries,
   buildCostOfRiskStageTransferFlowDiagram,
   buildCostOfRiskStageTransferFlowTimeSeries,
   buildCostOfRiskStageTransferWaterfall,
@@ -24,15 +25,15 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260710-bp-format";
+} from "../data/costOfRisk.js?v=20260710-stage-box";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260710-label-clamp";
+} from "./costOfRiskStageTransfers.js?v=20260710-stage-box";
 import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
-import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
@@ -43,6 +44,14 @@ function formatCostOfRiskQuarterAxisLabel(timestamp) {
   const date = new Date(timestamp);
   const quarter = Math.floor(date.getMonth() / 3) + 1;
   return `Q${quarter}${date.getFullYear()}`;
+}
+
+// Stage box ratios are computed on the same internal bps-equivalent scale as
+// every other ratio in this module, but shown as a percentage instead — they
+// run in the tens of percent, so basis points would be unwieldy to read.
+function formatCostOfRiskStageBoxRatioValue(bpsValue) {
+  if (!Number.isFinite(bpsValue)) return "-";
+  return formatContributionPercentValue(bpsValue / 10000);
 }
 
 // Reference dates are real calendar quarter-ends (31/03, 30/06, ...), which
@@ -826,7 +835,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   const waterfallData = createManualWaterfallData(contributions);
   waterfallData.valueFormatter = (value) => formatCostOfRiskDisplayValue(value, displayMode, selectedUnit, true);
   waterfallData.selectedCode = activeCostOfRiskXAxisCode;
-  waterfallData.axisLabelFontSize = "8px";
+  waterfallData.axisLabelFontSize = "9px";
   const options = {
     chart: {
       animation: false,
@@ -957,7 +966,10 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     return;
   }
 
-  const flowSeries = buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey);
+  const isStageBoxSelection = activeCostOfRiskStageTransferFlowKey.startsWith("stagebox:");
+  const flowSeries = isStageBoxSelection
+    ? buildCostOfRiskStageBoxTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey.split(":")[1])
+    : buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey);
   if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = false;
   const titleText = `${flowSeries.label} - time evolution`;
   if (elements.costOfRiskStageTransferFlowChartTitle) elements.costOfRiskStageTransferFlowChartTitle.textContent = titleText;
@@ -1006,7 +1018,10 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>`;
+        const valueText = isStageBoxSelection && displayMode === "ratio"
+          ? formatCostOfRiskStageBoxRatioValue(this.y)
+          : formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit);
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${valueText}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>`;
       },
       shared: false,
       split: false,
@@ -1038,6 +1053,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       gridLineColor: "#edf0ee",
       labels: {
         formatter() {
+          if (isStageBoxSelection && displayMode === "ratio") return formatCostOfRiskStageBoxRatioValue(this.value);
           return displayMode === "ratio"
             ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
             : formatMetricValue(this.value, selectedUnit);
@@ -1051,7 +1067,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: displayMode === "ratio" ? "Basis points" : "Amount" }
+      title: { text: displayMode === "ratio" ? (isStageBoxSelection ? "Percent" : "Basis points") : "Amount" }
     }
   };
 
@@ -1733,6 +1749,24 @@ function formatManualWaterfallValue(value, waterfallData) {
   return `${value > 0 ? "+" : ""}${formatBasisPointsValue(value)}`;
 }
 
+// Display-only shortenings of the standard COREP F_12.01 x-axis (0020-0125)
+// descriptions, so the waterfall's axis labels read at a glance instead of
+// wrapping/truncating the full regulatory wording. Falls back to the real
+// label (from the loaded CSV's dimension mapping) for any code not listed
+// here — no business logic or underlying data is affected.
+const COST_OF_RISK_WATERFALL_SHORT_LABELS = {
+  "0020": "Origination and acquisition",
+  "0030": "Derecognition or repayment",
+  "0040": "Changes in credit risk",
+  "0050": "Modifications w/o derecognition",
+  "0070": "Methodology update",
+  "0080": "Write-offs",
+  "0090": "Other adjustments",
+  "0110": "Recoveries of write-offs",
+  "0120": "Amounts written off",
+  "0125": "Gains/losses on derecognition"
+};
+
 function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth) {
   const isSelected = item.code && item.code === activeCostOfRiskXAxisCode;
   const waterfallData = chart.customCostOfRiskWaterfallData ?? {};
@@ -1745,7 +1779,8 @@ function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth) {
   // font size, a label line is truncated with an ellipsis rather than ever
   // spilling into its neighbor's slot.
   const maxLineWidth = Number.isFinite(slotWidth) ? Math.max(20, slotWidth - 6) : null;
-  const lines = getCostOfRiskWaterfallLabelLines(item.axisLabel || item.name)
+  const rawLabel = COST_OF_RISK_WATERFALL_SHORT_LABELS[item.code] ?? (item.axisLabel || item.name);
+  const lines = getCostOfRiskWaterfallLabelLines(rawLabel)
     .map((line) => fitCostOfRiskWaterfallLabelLineWidth(chart, line, textStyle, maxLineWidth));
   if (lines.length === 0) return null;
 

@@ -22,6 +22,16 @@ export const COST_OF_RISK_TREEMAP_COUNTERPARTIES = [
 export const COST_OF_RISK_TABLE_ID = "F_12.01";
 export const COST_OF_RISK_STAGE_TRANSFER_TABLE_ID = "F_12.02";
 const COST_OF_RISK_STAGE_EXPOSURE_TABLE_ID = "F_04.04.1";
+const COST_OF_RISK_STAGE_BOX_TABLE_ID = "F_18.00";
+// F_18.00 gross carrying amount, split by stage on the x-axis: stage 2 is
+// reported as two separate rows (performing / non-performing) that must be
+// summed to get the total stage 2 exposure.
+const COST_OF_RISK_STAGE_BOX_X_CODES = {
+  "1": ["56"],
+  "2": ["57", "109"],
+  "3": ["121"]
+};
+const COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX = "Debt instruments other than held for trading";
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
 export const COST_OF_RISK_FILTER_ALL = "__all__";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
@@ -692,6 +702,86 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
   };
 }
 
+// Clicking a stage box (rather than a flow arrow) shows the F_18.00 gross
+// carrying amount for that stage over time, per JST — a different data
+// source and computation from the F_12.01/F_12.02-based flow selections
+// above, but returning the exact same { benchmarkSeries, label, status }
+// shape so it plugs into the same chart-rendering pipeline unchanged.
+export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const xCodes = COST_OF_RISK_STAGE_BOX_X_CODES[stage];
+
+  if (!indexes || !xCodes || referenceColumns.length === 0) {
+    return { benchmarkSeries: [], label: "", status: "No F_18.00 staging data is available." };
+  }
+
+  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+  if (ySelection.codes.length === 0) {
+    return {
+      benchmarkSeries: [],
+      label: `Stage ${stage} - ${ySelection.label}`,
+      status: "No matching F_18.00 Y-axis point is available for the selected filters."
+    };
+  }
+
+  return {
+    benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+      jstCode,
+      points: buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode)
+    })),
+    label: `Stage ${stage} - ${ySelection.label}`,
+    status: ""
+  };
+}
+
+function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode) {
+  // Gross carrying amount is a stock (balance sheet) figure, not a flow, so
+  // — unlike F_12.01/F_12.02 — it is used as-is, with no quarterly
+  // decumulation.
+  const values = createEmptySeries(referenceColumns.length);
+  xCodes.forEach((xCode) => {
+    ySelection.codes.forEach((yCode) => {
+      addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_BOX_TABLE_ID, {
+        xCode,
+        yCode,
+        zCode: ""
+      }, jstCode));
+    });
+  });
+
+  // Same denominator as the standard Cost of Risk ratio ("the usual
+  // quantity"), reused as-is per the product decision to keep this simple
+  // for now.
+  const denominatorSeries = sumConfiguredPointSeriesValues(
+    state,
+    indexes,
+    referenceColumns,
+    COST_OF_RISK_CONFIG.denominator.tableId,
+    COST_OF_RISK_CONFIG.denominator.points,
+    jstCode
+  );
+
+  return referenceColumns.map((column, index) => {
+    const value = values[index] ?? null;
+    const denominator = denominatorSeries[index] ?? null;
+    return {
+      date: column.date,
+      denominator,
+      label: column.label,
+      // Kept on the same internal bps-equivalent scale as every other ratio
+      // in this module (value / denominator * 10000) so it plugs into the
+      // shared chart pipeline unchanged; the UI layer converts this to a
+      // percentage for display only, since stage ratios are large (10s of
+      // %) and reading them in basis points would be unwieldy.
+      ratioBasisPoints: Number.isFinite(value) && Number.isFinite(denominator) && denominator !== 0
+        ? (value / denominator) * 10000
+        : null,
+      value
+    };
+  });
+}
+
 export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowKey) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
@@ -1007,8 +1097,24 @@ function getCostOfRiskStageExposureYSelection(state, filters = {}) {
   });
 }
 
+// F_18.00's y-axis repeats the same "Debt securities / Loans and advances /
+// counterparty" hierarchy once per accounting portfolio (amortised cost,
+// FVOCI, ...) — asset/counterparty matching below already sums across all of
+// them automatically since it only looks at the last segment(s) of each
+// description, not the portfolio prefix. descriptionPrefix only excludes the
+// unrelated "Off-balance sheet exposures" section, which reuses the same
+// counterparty names and would otherwise be picked up by mistake.
+function getCostOfRiskStageBoxYSelection(state, filters = {}) {
+  return getCostOfRiskStageAxisYSelection(state, filters, {
+    descriptionPrefix: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX,
+    tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
+    totalLabel: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX
+  });
+}
+
 function getCostOfRiskStageAxisYSelection(state, filters = {}, config) {
   const descriptors = getCostOfRiskStageAxisYMappings(state, config.tableId)
+    .filter((mapping) => !config.descriptionPrefix || String(mapping.description ?? "").startsWith(config.descriptionPrefix))
     .map(describeCostOfRiskStageAxisYAxisPoint);
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
   const asset = normalizedFilters.asset;
