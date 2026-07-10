@@ -12,7 +12,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js";
-import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-area-click-fix";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-theme-cache-fix";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -31,7 +31,7 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js";
 import { getLatestState } from "./appState.js";
-import { primaryDark } from "./theme.js";
+import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
 let updateSelectedJst = () => {};

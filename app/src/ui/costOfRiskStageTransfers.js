@@ -1,4 +1,4 @@
-import { primaryDark } from "./theme.js";
+import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 export function createStageTransferWaterfallData(contributions, stage, globalVariation = null, residual = null) {
   const outflows = contributions.filter((point) => point.flowDirection === "outflow");

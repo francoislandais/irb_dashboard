@@ -24,17 +24,17 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260709-area-click-fix";
+} from "../data/costOfRisk.js?v=20260709-theme-cache-fix";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260709-area-click-fix";
-import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-area-click-fix";
+} from "./costOfRiskStageTransfers.js?v=20260709-theme-cache-fix";
+import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-theme-cache-fix";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js";
 import { getLatestState } from "./appState.js";
-import { flowArrowColor, primaryDark } from "./theme.js";
+import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 // Shared by every temporal chart (Contribution, F2 vs F12, Stage transfers
 // flow evolution) so quarterly reference dates always read "Q12026" on the
