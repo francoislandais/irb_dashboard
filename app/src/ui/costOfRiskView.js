@@ -30,7 +30,7 @@ import {
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260709-flow-diagram-resize";
+} from "./costOfRiskStageTransfers.js?v=20260710-fixed-chart-heights";
 import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -67,6 +67,13 @@ let activeCostOfRiskTab = "f2-vs-f12";
 let activeCostOfRiskCoreXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
 let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
+let activeCostOfRiskChartTitleText = "Time evolution chart";
+let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
+const COST_OF_RISK_CHART_TITLE_POSITION = {
+  margin: 10,
+  x: 0,
+  y: 5
+};
 let costOfRiskChart = null;
 let costOfRiskF2VsF12Chart = null;
 let costOfRiskStageTransferChart = null;
@@ -509,17 +516,32 @@ function renderCostOfRiskSmoothingControl(windowSize) {
 }
 
 function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {
-  if (!elements.costOfRiskChartTitle) return;
   const fallbackLabel = xAxisOptions.find((option) => option.code === selectedCode)?.label ?? selectedCode;
   const label = selectedPoint?.label ?? fallbackLabel;
   const cleanLabel = String(label || "").replace(new RegExp(`^${selectedCode}\\s*-\\s*`), "");
-  elements.costOfRiskChartTitle.textContent = `${selectedCode} - ${cleanLabel}`;
+  activeCostOfRiskChartTitleText = `${selectedCode} - ${cleanLabel}`;
+  if (elements.costOfRiskChartTitle) elements.costOfRiskChartTitle.textContent = activeCostOfRiskChartTitleText;
 }
 
 function renderCostOfRiskWaterfallTitle(referenceDate) {
-  if (!elements.costOfRiskWaterfallTitle) return;
   const dateLabel = referenceDate ? ` - ${formatReferenceQuarterLabel(referenceDate)}` : "";
-  elements.costOfRiskWaterfallTitle.textContent = `F12 Contribution Breakdown${dateLabel}`;
+  activeCostOfRiskWaterfallTitleText = `F12 Contribution Breakdown${dateLabel}`;
+  if (elements.costOfRiskWaterfallTitle) elements.costOfRiskWaterfallTitle.textContent = activeCostOfRiskWaterfallTitleText;
+}
+
+function createCostOfRiskHighchartsTitle(text) {
+  return {
+    align: "left",
+    margin: COST_OF_RISK_CHART_TITLE_POSITION.margin,
+    text: text || "",
+    x: COST_OF_RISK_CHART_TITLE_POSITION.x,
+    y: COST_OF_RISK_CHART_TITLE_POSITION.y,
+    style: {
+      color: "#26332d",
+      fontSize: "12px",
+      fontWeight: "600"
+    }
+  };
 }
 
 function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedContribution, displayMode = "ratio", selectedUnit = "millions") {
@@ -554,7 +576,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
       selectCostOfRiskChartJst(seriesName);
     }, jstCode),
     series,
-    title: { text: null },
+    title: createCostOfRiskHighchartsTitle(activeCostOfRiskChartTitleText),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
@@ -832,7 +854,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
       name: "Contribution",
       showInLegend: false
     }],
-    title: { text: null },
+    title: createCostOfRiskHighchartsTitle(activeCostOfRiskWaterfallTitleText),
     tooltip: { enabled: false },
     xAxis: {
       categories: waterfallData.items.map((item) => item.name),
@@ -890,10 +912,9 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
   if (!elements.costOfRiskStageTransferChart) return;
   destroyCostOfRiskStageTransferChart();
 
-  if (elements.costOfRiskStageTransferTitle) {
-    const dateLabel = flowDiagram.referenceDate ? ` - ${formatReferenceQuarterLabel(flowDiagram.referenceDate)}` : "";
-    elements.costOfRiskStageTransferTitle.textContent = `F12.02 Stage transfer flows - ${flowDiagram.assetLabel} - All stages${dateLabel}`;
-  }
+  const dateLabel = flowDiagram.referenceDate ? ` - ${formatReferenceQuarterLabel(flowDiagram.referenceDate)}` : "";
+  const titleText = `F12.02 Stage transfer flows - ${flowDiagram.assetLabel} - All stages${dateLabel}`;
+  if (elements.costOfRiskStageTransferTitle) elements.costOfRiskStageTransferTitle.textContent = titleText;
 
   renderCostOfRiskStageTransferFlowDiagram({
     container: elements.costOfRiskStageTransferChart,
@@ -904,7 +925,9 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
     onSelectFlow: selectCostOfRiskStageTransferFlow,
     primaryDark,
     selectedFlowKey: activeCostOfRiskStageTransferFlowKey,
-    selectedUnit
+    selectedUnit,
+    titlePosition: COST_OF_RISK_CHART_TITLE_POSITION,
+    titleText
   });
 
   renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, selectedUnit);
@@ -935,9 +958,8 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
 
   const flowSeries = buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey);
   if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = false;
-  if (elements.costOfRiskStageTransferFlowChartTitle) {
-    elements.costOfRiskStageTransferFlowChartTitle.textContent = `${flowSeries.label} - time evolution`;
-  }
+  const titleText = `${flowSeries.label} - time evolution`;
+  if (elements.costOfRiskStageTransferFlowChartTitle) elements.costOfRiskStageTransferFlowChartTitle.textContent = titleText;
 
   if (!window.Highcharts || flowSeries.benchmarkSeries.length === 0) {
     destroyCostOfRiskStageTransferFlowChart();
@@ -979,7 +1001,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       selectCostOfRiskChartJst(seriesName);
     }, state.selectedJst),
     series,
-    title: { text: null },
+    title: createCostOfRiskHighchartsTitle(titleText),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {

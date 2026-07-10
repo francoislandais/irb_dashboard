@@ -74,7 +74,9 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   onSelectFlow,
   primaryDark,
   selectedFlowKey,
-  selectedUnit
+  selectedUnit,
+  titlePosition = null,
+  titleText = ""
 }) {
   if (!container) return;
 
@@ -106,10 +108,16 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   }
 
   const maxFlow = Math.max(...values.map((value) => Math.abs(value)), 1);
+  const viewBox = {
+    height: 400,
+    minX: -80,
+    minY: 0,
+    width: 1560
+  };
   const svg = svgElement("svg", {
     class: "cost-of-risk-stage-flow-diagram",
     role: "img",
-    viewBox: "0 0 1400 400",
+    viewBox: `${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`,
     "aria-label": "F12.02 IFRS 9 stage transfer flow diagram"
   });
   const stageFill = "#f7f8f7";
@@ -240,6 +248,16 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     }, formatValue, displayMode, selectedUnit);
   });
 
+  if (titleText) {
+    const title = document.createElement("div");
+    title.className = "cost-of-risk-stage-flow-title";
+    title.textContent = titleText;
+    title.style.left = `${12 + Number(titlePosition?.x ?? 0)}px`;
+    title.style.top = `${8 + Number(titlePosition?.y ?? 5)}px`;
+    container.replaceChildren(title, svg);
+    return;
+  }
+
   container.replaceChildren(svg);
 }
 
@@ -335,6 +353,7 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
     d: path,
     fill: config.isSelected ? config.primaryDark : config.color
   });
+  makeFlowElementClickable(pathElement, config);
   svg.append(pathElement);
 
   const hitThickness = Math.max(width, FLOW_HIT_AREA_MIN_THICKNESS);
@@ -357,7 +376,8 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
     selectedUnit,
     "middle",
     config.isSelected,
-    config.primaryDark
+    config.primaryDark,
+    config
   );
 }
 function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
@@ -408,6 +428,7 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
     d: createVerticalArrowPath(config.x, startY, endY, width),
     fill: config.isSelected ? config.primaryDark : config.color
   });
+  makeFlowElementClickable(pathElement, config);
   svg.append(pathElement);
 
   const hitThickness = Math.max(width, FLOW_HIT_AREA_MIN_THICKNESS);
@@ -439,6 +460,7 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
     });
     lineElement.setAttribute("fill", labelColor);
     lineElement.style.fontWeight = labelWeight;
+    makeFlowElementClickable(lineElement, config);
   });
 
   addValueLabel(
@@ -451,7 +473,8 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
     selectedUnit,
     anchor,
     config.isSelected,
-    config.primaryDark
+    config.primaryDark,
+    config
   );
 }
 const FLOW_HIT_AREA_PADDING = 16;
@@ -473,6 +496,16 @@ function appendFlowHitArea(svg, bounds, config) {
   hitArea.style.cursor = "pointer";
   hitArea.addEventListener("click", () => config.onSelect(config.flowKey));
   svg.append(hitArea);
+}
+
+function makeFlowElementClickable(element, config) {
+  if (!element || !config.flowKey || typeof config.onSelect !== "function") return;
+
+  element.style.cursor = "pointer";
+  element.addEventListener("click", (event) => {
+    event.stopPropagation();
+    config.onSelect(config.flowKey);
+  });
 }
 
 function createHorizontalArrowPath(x1, y, x2, width) {
@@ -513,7 +546,7 @@ function createVerticalArrowPath(x, y1, y2, width) {
   ].join(" ");
 }
 
-function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit, anchor = "middle", isSelected = false, selectedColor = primaryDark) {
+function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit, anchor = "middle", isSelected = false, selectedColor = primaryDark, flowConfig = null) {
   const label = addText(
     svg,
     formatValue(Math.abs(value), displayMode, selectedUnit, false),
@@ -525,6 +558,7 @@ function addValueLabel(svg, value, x, y, formatValue, displayMode, selectedUnit,
 
   label.setAttribute("fill", isSelected ? selectedColor : "#000000");
   label.style.fontWeight = isSelected ? "700" : "400";
+  makeFlowElementClickable(label, flowConfig);
 }
 
 function addText(svg, value, x, y, className, attrs = {}) {
