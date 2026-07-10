@@ -641,6 +641,15 @@ button:focus-visible {
   width: min(100%, 900px);
 }
 
+.cost-of-risk-split-section > .cost-of-risk-chart-title,
+.cost-of-risk-split-section > .cost-of-risk-chart-control {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  min-height: 24px;
+  margin: 0;
+}
+
 .cost-of-risk-tab-panel[hidden] {
   display: none;
 }
