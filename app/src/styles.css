@@ -1015,8 +1015,9 @@ button:focus-visible {
 .cost-of-risk-split-section > .cost-of-risk-waterfall,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart {
   height: auto;
+  justify-self: center;
   min-height: 0;
-  width: 100%;
+  width: min(100%, 1180px);
 }
 
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"] .cost-of-risk-split-section > .cost-of-risk-chart,
@@ -1032,9 +1033,10 @@ button:focus-visible {
 
 .cost-of-risk-stage-transfer-chart {
   height: 100%;
+  justify-self: center;
   min-height: 0;
   min-width: 0;
-  width: 100%;
+  width: min(100%, 1180px);
   background: #ffffff;
   overflow: visible;
 }
