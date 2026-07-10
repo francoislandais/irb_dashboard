@@ -727,7 +727,7 @@ function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descr
 
   return referenceColumns.map((column, index) => {
     const value = rawValues[index] ?? null;
-    const denominator = index > 0 ? totalExposureLevels[index - 1] : null;
+    const denominator = totalExposureLevels[index] ?? null;
     return {
       date: column.date,
       denominator,
@@ -1743,4 +1743,3 @@ export function smoothCostOfRiskPoints(points, smoothingWindow) {
     };
   });
 }
-

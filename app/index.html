@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260709-flow-diagram-resize">
+    <link rel="stylesheet" href="./src/styles.css?v=20260710-stage-smoothing">
   </head>
   <body>
     <div class="app-shell">
@@ -147,6 +147,10 @@
                     <option value="amount">Amount</option>
                   </select>
                 </label>
+                <label class="field cost-of-risk-smoothing-field cost-of-risk-field--stacked">
+                  <span>Smoothing <output id="cost-of-risk-smoothing-value">4Q</output></span>
+                  <input id="cost-of-risk-smoothing" type="range" min="1" max="4" step="1" value="4">
+                </label>
               </aside>
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
@@ -173,10 +177,6 @@
                   <div id="cost-of-risk-waterfall" class="cost-of-risk-waterfall" aria-label="Cost of risk contribution waterfall"></div>
                   <div class="cost-of-risk-chart-control">
                     <h3 id="cost-of-risk-chart-title" class="cost-of-risk-chart-title">Time evolution chart</h3>
-                    <label class="field cost-of-risk-smoothing-field cost-of-risk-smoothing-field--inline">
-                      <span>Smoothing <output id="cost-of-risk-smoothing-value">4Q</output></span>
-                      <input id="cost-of-risk-smoothing" type="range" min="1" max="4" step="1" value="4">
-                    </label>
                   </div>
                   <div id="cost-of-risk-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
                 </div>
@@ -237,6 +237,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260709-flow-diagram-resize"></script>
+    <script type="module" src="./src/main.js?v=20260710-stage-smoothing"></script>
   </body>
 </html>

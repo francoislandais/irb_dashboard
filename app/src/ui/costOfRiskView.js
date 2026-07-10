@@ -24,7 +24,7 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260709-flow-diagram-resize";
+} from "../data/costOfRisk.js?v=20260710-stage-smoothing";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -71,7 +71,8 @@ let costOfRiskChart = null;
 let costOfRiskF2VsF12Chart = null;
 let costOfRiskStageTransferChart = null;
 let costOfRiskStageTransferFlowChart = null;
-let activeCostOfRiskStageTransferFlowKey = "";
+const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
+let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
 let costOfRiskWaterfallChart = null;
 let costOfRiskTreemapChart = null;
 const activeCostOfRiskFilters = {
@@ -763,12 +764,8 @@ function destroyCostOfRiskStageTransferChart() {
   costOfRiskStageTransferChart = null;
 }
 
-// Leaving the stage-transfers tab altogether (unlike switching between the
-// flow diagram and the per-stage waterfall within it) clears the selected
-// flow so it doesn't resurface stale on return.
 function leaveCostOfRiskStageTransferTab() {
   destroyCostOfRiskStageTransferChart();
-  activeCostOfRiskStageTransferFlowKey = "";
   destroyCostOfRiskStageTransferFlowChart();
   if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
 }
@@ -867,6 +864,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
 // "Stage" filter no longer changes this view — the global inter-stage flow
 // diagram is always shown regardless of its value.
 function renderCostOfRiskStageTransferView(state) {
+  ensureCostOfRiskStageTransferFlowSelection();
   renderCostOfRiskStageTransferFlowChart(
     state,
     buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
@@ -899,10 +897,17 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
   renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, selectedUnit);
 }
 
-// One flow can be selected at a time; clicking the selected flow again clears
-// it. Mirrors the empty-state convention used elsewhere in the module.
+function ensureCostOfRiskStageTransferFlowSelection() {
+  if (!activeCostOfRiskStageTransferFlowKey) {
+    activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
+  }
+}
+
+// One flow is always selected. Clicking the current flow keeps it active;
+// clicking another flow moves the selection.
 function selectCostOfRiskStageTransferFlow(flowKey) {
-  activeCostOfRiskStageTransferFlowKey = activeCostOfRiskStageTransferFlowKey === flowKey ? "" : flowKey;
+  if (!flowKey || flowKey === activeCostOfRiskStageTransferFlowKey) return;
+  activeCostOfRiskStageTransferFlowKey = flowKey;
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
@@ -927,7 +932,10 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     return;
   }
 
-  const series = buildBenchmarkLineSeries(flowSeries.benchmarkSeries, state.selectedJst, primaryDark, { displayMode });
+  const series = buildBenchmarkLineSeries(flowSeries.benchmarkSeries, state.selectedJst, primaryDark, {
+    displayMode,
+    smoothingWindow: activeCostOfRiskSmoothingWindow
+  });
   if (series.length === 0) {
     destroyCostOfRiskStageTransferFlowChart();
     elements.costOfRiskStageTransferFlowChart.textContent = "";
@@ -962,7 +970,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>`;
       },
       shared: false,
       split: false,

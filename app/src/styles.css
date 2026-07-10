@@ -739,18 +739,6 @@ button:focus-visible {
   line-height: 1;
 }
 
-.cost-of-risk-smoothing-field--inline {
-  width: min(260px, 100%);
-  border: 0px solid #d8dfdb;
-  border-radius: 0px;
-  background: transparent;
-  padding: 0px 20px 0px;
-}
-
-.cost-of-risk-smoothing-field--inline span {
-  margin-bottom: 4px;
-}
-
 .cost-of-risk-core-definition {
   border: 1px solid var(--line);
   border-radius: 8px;
