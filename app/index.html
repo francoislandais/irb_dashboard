@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260710-stage-smoothing">
+    <link rel="stylesheet" href="./src/styles.css?v=20260710-split-panels">
   </head>
   <body>
     <div class="app-shell">
@@ -173,17 +173,23 @@
                   <div id="cost-of-risk-audit" class="cost-of-risk-audit" aria-label="F2 versus F12 audit trail"></div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="contributions" hidden>
-                  <h3 id="cost-of-risk-waterfall-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12 Contribution Breakdown</h3>
-                  <div id="cost-of-risk-waterfall" class="cost-of-risk-waterfall" aria-label="Cost of risk contribution waterfall"></div>
-                  <div class="cost-of-risk-chart-control">
-                    <h3 id="cost-of-risk-chart-title" class="cost-of-risk-chart-title">Time evolution chart</h3>
+                  <div class="cost-of-risk-split-section">
+                    <h3 id="cost-of-risk-waterfall-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12 Contribution Breakdown</h3>
+                    <div id="cost-of-risk-waterfall" class="cost-of-risk-waterfall" aria-label="Cost of risk contribution waterfall"></div>
                   </div>
-                  <div id="cost-of-risk-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
+                  <div class="cost-of-risk-split-section">
+                    <div class="cost-of-risk-chart-control">
+                      <h3 id="cost-of-risk-chart-title" class="cost-of-risk-chart-title">Time evolution chart</h3>
+                    </div>
+                    <div id="cost-of-risk-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
+                  </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-transfers" hidden>
-                  <h3 id="cost-of-risk-stage-transfer-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12.02 Stage transfers</h3>
-                  <div id="cost-of-risk-stage-transfer-chart" class="cost-of-risk-waterfall cost-of-risk-stage-transfer-chart" aria-label="F12.02 stage transfer waterfall"></div>
-                  <div id="cost-of-risk-stage-transfer-flow-chart-wrap" class="cost-of-risk-stage-transfer-flow-chart-wrap" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <h3 id="cost-of-risk-stage-transfer-title" class="cost-of-risk-chart-title cost-of-risk-waterfall-title">F12.02 Stage transfers</h3>
+                    <div id="cost-of-risk-stage-transfer-chart" class="cost-of-risk-waterfall cost-of-risk-stage-transfer-chart" aria-label="F12.02 stage transfer waterfall"></div>
+                  </div>
+                  <div id="cost-of-risk-stage-transfer-flow-chart-wrap" class="cost-of-risk-split-section cost-of-risk-stage-transfer-flow-chart-wrap" hidden>
                     <h3 id="cost-of-risk-stage-transfer-flow-chart-title" class="cost-of-risk-chart-title">Flow evolution</h3>
                     <div id="cost-of-risk-stage-transfer-flow-chart" class="cost-of-risk-stage-transfer-flow-chart" aria-label="Stage transfer flow time series"></div>
                   </div>
@@ -237,6 +243,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260710-stage-smoothing"></script>
+    <script type="module" src="./src/main.js?v=20260710-split-panels"></script>
   </body>
 </html>

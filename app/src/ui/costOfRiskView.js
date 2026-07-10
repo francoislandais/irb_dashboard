@@ -313,6 +313,19 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
   }
+  scheduleCostOfRiskChartReflow();
+}
+
+function scheduleCostOfRiskChartReflow() {
+  window.requestAnimationFrame?.(() => {
+    [
+      costOfRiskChart,
+      costOfRiskWaterfallChart,
+      costOfRiskStageTransferFlowChart,
+      costOfRiskF2VsF12Chart,
+      costOfRiskTreemapChart
+    ].forEach((chart) => chart?.reflow?.());
+  });
 }
 
 function renderCostOfRiskTabs() {

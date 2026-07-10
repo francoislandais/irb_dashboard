@@ -619,9 +619,24 @@ button:focus-visible {
   min-width: 0;
 }
 
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"] {
   align-content: stretch;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"] {
+  grid-template-rows: minmax(300px, calc((100% - 14px) / 2)) minmax(300px, calc((100% - 14px) / 2));
+  overflow: auto;
+}
+
+.cost-of-risk-split-section {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+  min-width: 0;
 }
 
 .cost-of-risk-tab-panel[hidden] {
@@ -685,7 +700,7 @@ button:focus-visible {
   align-items: center;
   justify-content: flex-start;
   gap: 20px;
-  margin: -4px 0 -8px;
+  margin: 0;
   min-width: 0;
 }
 
@@ -703,7 +718,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-waterfall-title {
-  margin-bottom: -8px;
+  margin-bottom: 0;
 }
 
 .cost-of-risk-comparison-title {
@@ -877,7 +892,7 @@ button:focus-visible {
 
 .cost-of-risk-chart {
   height: 300px;
-  width:80%;
+  width: 80%;
   min-width: 0;
   padding: 10px 12px 8px;
 }
@@ -996,9 +1011,28 @@ button:focus-visible {
   padding: 10px 12px 8px;
 }
 
+.cost-of-risk-split-section > .cost-of-risk-chart,
+.cost-of-risk-split-section > .cost-of-risk-waterfall,
+.cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart {
+  height: auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"] .cost-of-risk-split-section > .cost-of-risk-chart,
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"] .cost-of-risk-split-section > .cost-of-risk-waterfall {
+  height: 100%;
+  min-height: 260px;
+}
+
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"] .cost-of-risk-split-section > .cost-of-risk-stage-transfer-chart,
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"] .cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart {
+  height: 100%;
+}
+
 .cost-of-risk-stage-transfer-chart {
-  height: 300px;
-  min-height: 300px;
+  height: 100%;
+  min-height: 0;
   min-width: 0;
   width: 100%;
   background: #ffffff;
@@ -1006,12 +1040,6 @@ button:focus-visible {
 }
 
 .cost-of-risk-stage-transfer-flow-chart-wrap {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 4px;
-  margin-top: 8px;
-  min-height: 0;
-  min-width: 0;
   max-width: 100%;
   overflow: hidden;
 }
@@ -1030,7 +1058,7 @@ button:focus-visible {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 300px;
+  min-height: 0;
   background: #ffffff;
 }
 
