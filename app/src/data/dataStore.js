@@ -16,6 +16,7 @@ const initialState = {
   loadedAt: null,
   explorerPoints: [],
   explorerPointsError: "",
+  peerDisplayMode: "explicit",
   peerJstCodes: [],
   rememberedFileReady: false,
   rows: [],
@@ -245,6 +246,11 @@ export function createDataStore() {
       emit();
     },
 
+    setPeerDisplayMode(peerDisplayMode) {
+      state = { ...state, peerDisplayMode: peerDisplayMode === "anonymised" ? "anonymised" : "explicit" };
+      emit();
+    },
+
     setActiveModule(activeModule) {
       state = { ...state, activeModule };
       emit();
@@ -274,6 +280,7 @@ export function createDataStore() {
         dimensionMappingError: state.dimensionMappingError,
         explorerPoints: state.explorerPoints,
         explorerPointsError: state.explorerPointsError,
+        peerDisplayMode: state.peerDisplayMode,
         rememberedFileReady: false,
         selectedJst: "",
         selectedUnit: state.selectedUnit

@@ -12,7 +12,15 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js";
-import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
+import {
+  buildBenchmarkChartModel,
+  clearPeerDistributionBands,
+  formatAnonymisedTooltipPeerLines,
+  getBenchmarkLinePlotOptions,
+  getBenchmarkYAxisBoundsSeries,
+  renderBenchmarkEndpointLabels,
+  renderPeerDistributionBands
+} from "./benchmarkLineChart.js?v=20260712-anonymised-peers";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -436,7 +444,9 @@ function renderExplorerBenchmarkChart(benchmark, state) {
   if (!elements.explorerBenchmarkChart || !window.Highcharts) return;
 
   const benchmarkSeries = benchmark.series.map((serie) => ({ jstCode: serie.jstCode, points: serie.values }));
-  const series = buildBenchmarkLineSeries(benchmarkSeries, state.selectedJst, primaryDark, { displayMode: "amount" });
+  const chartModel = buildBenchmarkChartModel(benchmarkSeries, state.selectedJst, primaryDark, { displayMode: "amount", peerDisplayMode: state.peerDisplayMode });
+  const series = chartModel.series;
+  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
 
   if (series.length === 0) {
     destroyExplorerBenchmarkChart();
@@ -444,7 +454,7 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     return;
   }
 
-  const yBounds = getCostOfRiskYAxisBounds(series);
+  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
 
   const options = {
     chart: {
@@ -452,6 +462,11 @@ function renderExplorerBenchmarkChart(benchmark, state) {
       backgroundColor: "transparent",
       events: {
         render() {
+          if (isAnonymised) {
+            renderPeerDistributionBands(this, chartModel.distribution);
+          } else {
+            clearPeerDistributionBands(this);
+          }
           renderBenchmarkEndpointLabels(this, state.selectedJst, selectExplorerBenchmarkJst);
         }
       },
@@ -467,11 +482,15 @@ function renderExplorerBenchmarkChart(benchmark, state) {
       selectExplorerBenchmarkJst(seriesName);
     }, state.selectedJst),
     series,
+    subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
     title: { text: null },
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatBenchmarkValue(this.y, benchmark)}`;
+        const peerLines = isAnonymised
+          ? formatAnonymisedTooltipPeerLines(chartModel.distribution, this.x, (value) => formatBenchmarkValue(value, benchmark))
+          : "";
+        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatBenchmarkValue(this.y, benchmark)}${peerLines ? `<br/>${peerLines}` : ""}`;
       },
       shared: false,
       split: false,

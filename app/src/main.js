@@ -15,8 +15,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260709-dataset-lazy-load";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260712-denominator-fix";
+import { createDataStore } from "./data/dataStore.js?v=20260712-anonymised-peers";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260712-anonymised-peers";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -39,6 +39,7 @@ const STANDALONE_MODULE_PATHS = [
   "src/data/explorer.js",
   "src/data/explorerBenchmark.js",
   "src/data/explorerConfig.js",
+  "src/data/peerDistribution.js",
   "src/data/timeSeries.js",
   "src/ui/appState.js",
   "src/ui/auditTrailDialog.js",
@@ -164,6 +165,10 @@ const actions = {
   updatePeerJstCodes(peerJstCodes) {
     store.setPeerJstCodes(peerJstCodes);
     updateUrlPeerExclusionsParam(store.getState());
+  },
+
+  updatePeerDisplayMode(peerDisplayMode) {
+    store.setPeerDisplayMode(peerDisplayMode);
   },
 
   setActiveModule(activeModule) {

@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260712-denominator-fix";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260710-bp-format";
+import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260712-anonymised-peers";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260712-anonymised-peers";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -224,6 +224,8 @@ function createPeersDialog(state, actions) {
   headerText.append(title, subtitle);
   header.append(headerText, closeButton);
 
+  const peerDisplaySection = createPeerDisplaySection(state, actions);
+
   const selectedPeers = new Set(
     (state.peerJstCodes?.length ? state.peerJstCodes : state.jstOptions) ?? []
   );
@@ -261,9 +263,81 @@ function createPeersDialog(state, actions) {
   });
   actionsRow.append(cancelButton, applyButton);
 
-  dialog.append(header, list, actionsRow);
+  dialog.append(header, peerDisplaySection, list, actionsRow);
   overlay.append(dialog);
   return overlay;
+}
+
+const PEER_DISPLAY_MODE_DESCRIPTIONS = {
+  anonymised: "Display the selected institution against the anonymised statistical distribution of its peers.",
+  explicit: "Display each peer institution as an individual time series."
+};
+
+// Applied immediately (not gated behind the dialog's Apply button) since
+// it's a rendering option for the benchmark charts, not a peer group
+// change - switching modes must not touch peerJstCodes, the selected JST,
+// or the active reference date/template.
+function createPeerDisplaySection(state, actions) {
+  const section = document.createElement("div");
+  section.className = "peers-display-section";
+
+  const label = document.createElement("div");
+  label.className = "peers-display-label";
+  label.textContent = "Peer display";
+
+  const group = document.createElement("div");
+  group.className = "peers-display-group";
+  group.setAttribute("role", "radiogroup");
+  group.setAttribute("aria-label", "Peer display mode");
+
+  const description = document.createElement("div");
+  description.className = "peers-display-description";
+
+  const options = [
+    { id: "explicit", label: "Explicit" },
+    { id: "anonymised", label: "Anonymised" }
+  ];
+  const activeMode = state.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  description.textContent = PEER_DISPLAY_MODE_DESCRIPTIONS[activeMode];
+
+  const buttons = options.map(({ id, label: optionLabel }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "peers-display-option";
+    button.textContent = optionLabel;
+    button.setAttribute("role", "radio");
+    button.setAttribute("aria-checked", String(id === activeMode));
+    button.classList.toggle("is-active", id === activeMode);
+    button.dataset.peerDisplayMode = id;
+    return button;
+  });
+
+  const selectMode = (id) => {
+    buttons.forEach((button) => {
+      const isActive = button.dataset.peerDisplayMode === id;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-checked", String(isActive));
+    });
+    description.textContent = PEER_DISPLAY_MODE_DESCRIPTIONS[id];
+    actions.updatePeerDisplayMode(id);
+  };
+
+  buttons.forEach((button, index) => {
+    button.addEventListener("click", () => selectMode(button.dataset.peerDisplayMode));
+    button.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      const nextIndex = event.key === "ArrowRight"
+        ? (index + 1) % buttons.length
+        : (index - 1 + buttons.length) % buttons.length;
+      buttons[nextIndex].focus();
+      selectMode(buttons[nextIndex].dataset.peerDisplayMode);
+    });
+  });
+
+  group.append(...buttons);
+  section.append(label, group, description);
+  return section;
 }
 
 function renderActiveModule(activeModule) {

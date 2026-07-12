@@ -313,7 +313,7 @@ button:disabled {
 
 .peers-dialog {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   width: min(360px, calc(100vw - 48px));
   max-height: min(520px, calc(100vh - 48px));
   border: 1px solid #d8dfda;
@@ -356,6 +356,62 @@ button:disabled {
   font-size: 1.1rem;
   line-height: 1;
   padding: 0 2px;
+}
+
+.peers-display-section {
+  display: grid;
+  gap: 6px;
+  border-bottom: 1px solid #edf1ee;
+  padding: 11px 14px;
+}
+
+.peers-display-label {
+  color: #52615a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.peers-display-group {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid #d8dfda;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.peers-display-option {
+  min-width: 96px;
+  min-height: 28px;
+  border: 0;
+  border-right: 1px solid #d8dfda;
+  background: #ffffff;
+  color: #52615a;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0 12px;
+}
+
+.peers-display-option:last-child {
+  border-right: 0;
+}
+
+.peers-display-option:focus-visible {
+  outline: 2px solid var(--primary-dark);
+  outline-offset: -2px;
+}
+
+.peers-display-option.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.peers-display-description {
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .peers-list {
