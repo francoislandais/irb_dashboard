@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260710-short-labels">
+    <link rel="stylesheet" href="./src/styles.css?v=20260712-denominator-fix">
   </head>
   <body>
     <div class="app-shell">
@@ -145,7 +145,7 @@
                     Display
                     <button type="button" id="cost-of-risk-ratio-info" class="cost-of-risk-info-button" aria-label="Information about the ratio denominator" hidden>
                       <span aria-hidden="true">?</span>
-                      <span class="cost-of-risk-info-tooltip" role="tooltip">All values displayed in ratio mode are divided by the total gross carrying amount of debt instruments other than held for trading, as reported in FINREP F 18.00.</span>
+                      <span id="cost-of-risk-ratio-tooltip" class="cost-of-risk-info-tooltip" role="tooltip">All values displayed in ratio mode are divided by the total gross carrying amount of debt instruments other than held for trading, as reported in FINREP F 18.00.</span>
                     </button>
                   </span>
                   <select id="cost-of-risk-display-mode">
@@ -153,6 +153,13 @@
                     <option value="amount">Amount</option>
                   </select>
                 </label>
+                <button type="button" id="cost-of-risk-denominator-button" class="cost-of-risk-denominator-button" aria-haspopup="true" aria-expanded="false" hidden>
+                  <span class="cost-of-risk-denominator-button-top">
+                    <span class="cost-of-risk-denominator-button-label">Denominator</span>
+                    <span aria-hidden="true" class="cost-of-risk-denominator-chevron">⌄</span>
+                  </span>
+                  <span id="cost-of-risk-denominator-button-value" class="cost-of-risk-denominator-button-value">Total debt instruments</span>
+                </button>
                 <label class="field cost-of-risk-smoothing-field cost-of-risk-field--stacked">
                   <span>Smoothing <output id="cost-of-risk-smoothing-value">4Q</output></span>
                   <input id="cost-of-risk-smoothing" type="range" min="1" max="4" step="1" value="4">
@@ -243,6 +250,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260712-ratio-denominator"></script>
+    <script type="module" src="./src/main.js?v=20260712-denominator-fix"></script>
   </body>
 </html>

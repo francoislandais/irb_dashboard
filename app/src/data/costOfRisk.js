@@ -87,20 +87,119 @@ const ALL_STAGES_LABEL = "all stages + POCI";
 const CACHE_KEY_SEPARATOR = "\u001f";
 const COST_OF_RISK_SERIES_CACHE = new WeakMap();
 
-// Single source of truth for the Cost of Risk ratio denominator, used by
-// every chart/table/diagram in the module when displayMode is "ratio":
-// FINREP F_18.00, total gross carrying amount of debt instruments other
-// than held for trading (x=0010 "Gross carrying amount" / y=0330 "Debt
-// instruments other than held for trading" - confirmed against
-// assets/ITS_all_dimension_mapping.csv, which reports these as raw codes
-// "10"/"330"; normalizeAxisCode() pads them to "0010"/"0330").
-export const COST_OF_RISK_RATIO_DENOMINATOR = {
-  label: "Total gross carrying amount of debt instruments other than held for trading",
-  tableId: "F_18.00",
-  xCode: "0010",
-  yCode: "0330",
-  zCode: ""
+// Raw FINREP F_18.00 points used to build every ratio denominator option
+// below - coordinates confirmed against assets/ITS_all_dimension_mapping.csv
+// (which reports these as raw codes "10"/"5"/"180"/"330"/"70"/"191"/"221";
+// normalizeAxisCode() pads them to 4 digits). x=0010 ("Gross carrying
+// amount") is the total column used by every point; F_18.00 has no z-axis.
+const COST_OF_RISK_RATIO_DENOMINATOR_POINTS = {
+  // "Debt instruments other than held for trading" (y=0330) - the report's
+  // grand total row.
+  totalDebtInstruments: {
+    label: "Total debt instruments other than held for trading",
+    tableId: "F_18.00",
+    xCode: "0010",
+    yCode: "0330",
+    zCode: ""
+  },
+  // "Debt instruments other than held for trading / Cost or at amortised
+  // cost / Cash balances at central banks and other demand deposits"
+  // (y=0005) - the only row in the whole table matching "cash balances at
+  // central banks"; nested under the amortised-cost portfolio only.
+  cashBalancesAtCentralBanks: {
+    label: "Cash balances at central banks and other demand deposits",
+    tableId: "F_18.00",
+    xCode: "0010",
+    yCode: "0005",
+    zCode: ""
+  },
+  // "Debt instruments other than held for trading / Cost or at amortised
+  // cost" (y=0180) - the amortised-cost portfolio subtotal (includes cash
+  // balances, debt securities and loans and advances at amortised cost).
+  amortisedCostTotal: {
+    label: "Cost or at amortised cost (total)",
+    tableId: "F_18.00",
+    xCode: "0010",
+    yCode: "0180",
+    zCode: ""
+  },
+  // "Loans and advances" is reported once per accounting portfolio, not as
+  // a single cross-portfolio total: y=0070 (Cost or at amortised cost),
+  // y=0191 (Fair value through OCI subject to impairment), y=0221 (Strict
+  // locom / FVTPL not subject to impairment). Summing all three gives the
+  // total loans and advances gross carrying amount, excluding debt
+  // securities, cash balances and held-for-trading instruments.
+  loansAndAdvances: {
+    label: "Loans and advances (all accounting portfolios)",
+    tableId: "F_18.00",
+    xCode: "0010",
+    yCodes: ["0070", "0191", "0221"],
+    zCode: ""
+  }
 };
+
+// Every ratio denominator the user can pick from the sidebar. "terms" are
+// combined left to right (add/subtract); a missing or ambiguous term makes
+// the whole date unavailable rather than silently treating it as zero. New
+// denominators can be added here without touching any rendering code.
+export const COST_OF_RISK_RATIO_DENOMINATORS = [
+  {
+    calculation: "F_18.00 total gross carrying amount of debt instruments other than held for trading.",
+    description: "Total gross carrying amount of debt instruments other than held for trading.",
+    id: "total-debt-instruments",
+    isDefault: true,
+    label: "Total debt instruments",
+    shortLabel: "Total debt instruments",
+    terms: [
+      { key: "totalDebtInstruments", operator: "add", point: COST_OF_RISK_RATIO_DENOMINATOR_POINTS.totalDebtInstruments }
+    ],
+    tooltip: "Ratio denominator: total gross carrying amount of debt instruments other than held for trading, as reported in FINREP F 18.00."
+  },
+  {
+    calculation: "Total debt instruments − Cash balances at central banks.",
+    description: "Total debt instruments other than held for trading, less cash balances at central banks.",
+    id: "total-debt-instruments-excluding-cash-cb",
+    label: "Total debt instruments excluding cash at central banks",
+    shortLabel: "Excl. cash at CB",
+    terms: [
+      { key: "totalDebtInstruments", operator: "add", point: COST_OF_RISK_RATIO_DENOMINATOR_POINTS.totalDebtInstruments },
+      { key: "cashBalancesAtCentralBanks", operator: "subtract", point: COST_OF_RISK_RATIO_DENOMINATOR_POINTS.cashBalancesAtCentralBanks }
+    ],
+    tooltip: "Ratio denominator: total gross carrying amount of debt instruments other than held for trading, less cash balances at central banks.",
+    validate: (values) => values.cashBalancesAtCentralBanks <= values.totalDebtInstruments
+  },
+  {
+    calculation: "Sum of all F 18.00 loans and advances categories (amortised cost, FVOCI, and strict locom/FVTPL).",
+    description: "Total gross carrying amount of loans and advances, across all accounting portfolios.",
+    id: "loans-and-advances",
+    label: "Loans and advances",
+    shortLabel: "Loans and advances",
+    terms: [
+      { key: "loansAndAdvances", operator: "add", point: COST_OF_RISK_RATIO_DENOMINATOR_POINTS.loansAndAdvances }
+    ],
+    tooltip: "Ratio denominator: total gross carrying amount of loans and advances, as reported in FINREP F 18.00."
+  },
+  {
+    calculation: "Amortised cost total − Cash balances at central banks.",
+    description: "Gross carrying amount of financial assets at amortised cost, excluding cash balances at central banks.",
+    id: "amortised-cost-excluding-cash-cb",
+    label: "Amortised cost excluding cash at central banks",
+    shortLabel: "Amortised cost ex. cash",
+    terms: [
+      { key: "amortisedCostTotal", operator: "add", point: COST_OF_RISK_RATIO_DENOMINATOR_POINTS.amortisedCostTotal },
+      { key: "cashBalancesAtCentralBanks", operator: "subtract", point: COST_OF_RISK_RATIO_DENOMINATOR_POINTS.cashBalancesAtCentralBanks }
+    ],
+    tooltip: "Ratio denominator: gross carrying amount of financial assets at amortised cost, excluding cash balances at central banks.",
+    validate: (values) => values.cashBalancesAtCentralBanks <= values.amortisedCostTotal
+  }
+];
+
+export const COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID = COST_OF_RISK_RATIO_DENOMINATORS.find((option) => option.isDefault).id;
+
+export function getCostOfRiskRatioDenominatorOption(denominatorId) {
+  return COST_OF_RISK_RATIO_DENOMINATORS.find((option) => option.id === denominatorId)
+    ?? COST_OF_RISK_RATIO_DENOMINATORS.find((option) => option.isDefault);
+}
 
 export const COST_OF_RISK_CONFIG = {
   numerator: {
@@ -209,7 +308,7 @@ export function getCostOfRiskWaterfallXAxisOptions(state) {
   }));
 }
 
-export function buildCostOfRiskSelectionValue(state, selectionId, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "") {
+export function buildCostOfRiskSelectionValue(state, selectionId, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "", denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const options = getCostOfRiskSelectionOptions(state);
@@ -232,14 +331,14 @@ export function buildCostOfRiskSelectionValue(state, selectionId, xAxisCode = CO
     return { status: "No F_12.01 Y-axis point is available in the internal mapping." };
   }
 
-  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst);
+  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst, denominatorId);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const selectedPoint = series[referenceIndex];
 
   return {
-    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode),
+    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, denominatorId),
     denominator: selectedPoint?.denominator ?? null,
-    denominatorLabel: COST_OF_RISK_RATIO_DENOMINATOR.label,
+    denominatorLabel: getCostOfRiskRatioDenominatorOption(denominatorId).label,
     option: selectedOption,
     ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
     referenceDate: selectedPoint?.label ?? "",
@@ -248,11 +347,11 @@ export function buildCostOfRiskSelectionValue(state, selectionId, xAxisCode = CO
   };
 }
 
-export function buildCostOfRiskFilteredSelectionValue(state, filters, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "") {
-  return buildCostOfRiskSelectionSnapshot(state, buildCostOfRiskSelectionFromFilters(state, filters), xAxisCode, referenceDate);
+export function buildCostOfRiskFilteredSelectionValue(state, filters, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "", denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
+  return buildCostOfRiskSelectionSnapshot(state, buildCostOfRiskSelectionFromFilters(state, filters), xAxisCode, referenceDate, denominatorId);
 }
 
-export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "") {
+export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "", denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
 
@@ -266,7 +365,7 @@ export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "") {
     zCode: ""
   }, state.selectedJst);
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, denominatorId);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const value = quarterlyValueSeries[referenceIndex] ?? null;
   const denominator = denominatorSeries[referenceIndex] ?? null;
@@ -280,7 +379,7 @@ export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "") {
   };
 }
 
-export function buildCostOfRiskF02ImpairmentSeries(state) {
+export function buildCostOfRiskF02ImpairmentSeries(state, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
 
@@ -294,7 +393,7 @@ export function buildCostOfRiskF02ImpairmentSeries(state) {
     zCode: ""
   }, state.selectedJst);
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, denominatorId);
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
@@ -314,7 +413,7 @@ export function buildCostOfRiskF02ImpairmentSeries(state) {
   };
 }
 
-export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES) {
+export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
@@ -324,7 +423,7 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
     return { points: [], referenceDate: "" };
   }
 
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, denominatorId);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const denominator = denominatorSeries[referenceIndex] ?? 0;
   const xLabels = getCostOfRiskXAxisLabelMap(state);
@@ -355,7 +454,7 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
   };
 }
 
-export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES) {
+export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
@@ -377,7 +476,7 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
   });
 
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, denominatorId);
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
@@ -396,7 +495,7 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
   };
 }
 
-export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES) {
+export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
@@ -412,13 +511,14 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
     zCode: ""
   }, state.selectedJst);
   const f2QuarterlySeries = decumulateQuarterlySeries(referenceColumns, f2RawSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst);
-  const denominatorRows = [{
-    label: COST_OF_RISK_RATIO_DENOMINATOR.label,
-    source: `${COST_OF_RISK_RATIO_DENOMINATOR.tableId} / x ${COST_OF_RISK_RATIO_DENOMINATOR.xCode} / y ${COST_OF_RISK_RATIO_DENOMINATOR.yCode}`,
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, denominatorId);
+  const denominatorOption = getCostOfRiskRatioDenominatorOption(denominatorId);
+  const denominatorRows = denominatorOption.terms.map((term) => ({
+    label: `${term.operator === "subtract" ? "− " : ""}${term.point.label}`,
+    source: `${term.point.tableId} / x ${term.point.xCode} / y ${term.point.yCodes ? term.point.yCodes.join("+") : term.point.yCode}`,
     type: "amount",
-    values: denominatorSeries
-  }];
+    values: resolveCostOfRiskRatioDenominatorTermSeries(state, indexes, referenceColumns, state.selectedJst, term.point)
+  }));
   const f2RatioSeries = referenceColumns.map((_, index) => {
     const denominator = denominatorSeries[index] ?? null;
     return denominator ? (f2QuarterlySeries[index] / denominator) * 10000 : null;
@@ -488,7 +588,7 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
       {
         label: "Denominator total",
         section: "Denominator",
-        source: COST_OF_RISK_RATIO_DENOMINATOR.label,
+        source: denominatorOption.label,
         type: "amount",
         values: denominatorSeries
       },
@@ -555,7 +655,7 @@ export function buildCostOfRiskStageTransferWaterfall(state, stage = "3", refere
   };
 }
 
-export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "", filters = {}) {
+export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "", filters = {}, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
@@ -609,7 +709,7 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
   // everywhere else in the module, at the same reference date as the
   // numerator (not the previous quarter's exposure, unlike the old
   // F_04.04.1-based logic this replaces).
-  const ratioDenominator = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst)[referenceIndex] ?? null;
+  const ratioDenominator = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, denominatorId)[referenceIndex] ?? null;
 
   const netTransfersByStage = new Map([["1", 0], ["2", 0], ["3", 0]]);
   COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.forEach((movement) => {
@@ -838,7 +938,7 @@ function getMappingDescription(state, tableId, coordinate, code) {
 // source and computation from the F_12.01/F_12.02-based flow selections
 // above, but returning the exact same { benchmarkSeries, label, status }
 // shape so it plugs into the same chart-rendering pipeline unchanged.
-export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
+export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const xCodes = COST_OF_RISK_STAGE_BOX_X_CODES[stage];
@@ -859,14 +959,14 @@ export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
   return {
     benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
       jstCode,
-      points: buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode)
+      points: buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode, denominatorId)
     })),
     label: `Stage ${stage} - ${ySelection.label}`,
     status: ""
   };
 }
 
-function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode) {
+function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   // Gross carrying amount is a stock (balance sheet) figure, not a flow, so
   // — unlike F_12.01/F_12.02 — it is used as-is, with no quarterly
   // decumulation.
@@ -881,10 +981,8 @@ function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, x
     });
   });
 
-  // Same denominator as the standard Cost of Risk ratio ("the usual
-  // quantity"), reused as-is per the product decision to keep this simple
-  // for now.
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode);
+  // Same user-selected denominator as the rest of the module.
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, denominatorId);
 
   return referenceColumns.map((column, index) => {
     const value = values[index] ?? null;
@@ -906,7 +1004,7 @@ function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, x
   });
 }
 
-export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowKey) {
+export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowKey, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const descriptor = parseCostOfRiskFlowKey(flowKey);
@@ -921,16 +1019,16 @@ export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowK
   return {
     benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
       jstCode,
-      points: buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode)
+      points: buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode, denominatorId)
     })),
     label: getCostOfRiskFlowLabel(descriptor),
     status: ""
   };
 }
 
-function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode) {
+function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const rawValues = getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, descriptor, ySelection, exposureYSelection, filters, jstCode);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, denominatorId);
 
   return referenceColumns.map((column, index) => {
     const value = rawValues[index] ?? null;
@@ -1118,7 +1216,7 @@ function buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, y
   };
 }
 
-function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, referenceDate = "") {
+function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, referenceDate = "", denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedXCode = normalizeAxisCode(xAxisCode || COST_OF_RISK_X_AXIS_CODE, "x");
@@ -1139,14 +1237,14 @@ function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, refe
     return { status: "No F_12.01 Y-axis point matches the selected filters." };
   }
 
-  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst);
+  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst, denominatorId);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const selectedPoint = series[referenceIndex];
 
   return {
-    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode),
+    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, denominatorId),
     denominator: selectedPoint?.denominator ?? null,
-    denominatorLabel: COST_OF_RISK_RATIO_DENOMINATOR.label,
+    denominatorLabel: getCostOfRiskRatioDenominatorOption(denominatorId).label,
     option: selectedOption,
     ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
     referenceDate: selectedPoint?.label ?? "",
@@ -1573,10 +1671,10 @@ export function buildCostOfRiskBenchmarkRows(state, indexes, referenceColumns, c
   });
 }
 
-function buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, xAxisCode) {
+function buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
     jstCode,
-    points: buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode)
+    points: buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, denominatorId)
   }));
 }
 
@@ -1590,7 +1688,7 @@ function getCostOfRiskPeerJstCodes(state) {
   ));
 }
 
-function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode) {
+function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
   const valueSeries = createEmptySeries(referenceColumns.length);
   selectedOption.points.forEach((yCode) => {
     addSeriesValues(valueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
@@ -1599,7 +1697,7 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
       }, jstCode));
   });
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, denominatorId);
 
   return referenceColumns.map((column, index) => {
     const value = quarterlyValueSeries[index] ?? 0;
@@ -1678,41 +1776,130 @@ function sumConfiguredPointSeriesValues(state, indexes, referenceColumns, tableI
   return values;
 }
 
-// Isolated, reusable accessor for the single Cost of Risk ratio denominator
-// point (F_18.00 total gross carrying amount - see COST_OF_RISK_RATIO_
-// DENOMINATOR). Unlike sumConfiguredPointSeriesValues (used for numerator
-// aggregates that intentionally sum several rows, e.g. one per
-// counterparty), this denominator must resolve to exactly one row per JST:
-// if the coordinate is missing or matched by more than one row, the total
-// is ambiguous or unavailable and every date is returned as null so callers
-// never divide by a silently-summed or fabricated value.
-function getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode) {
+// Resolves a single F_18.00 point (or, for "loansAndAdvances", a sum of
+// several points reported one per accounting portfolio) into a per-date
+// series. A point must resolve to exactly one row per (table, x, y, z, jst):
+// missing or ambiguous (duplicate) rows return null for every date rather
+// than being silently summed or defaulted, so no denominator term is ever
+// fabricated. Blank/non-numeric raw values also resolve to null per date.
+function resolveCostOfRiskRatioDenominatorTermSeries(state, indexes, referenceColumns, jstCode, point) {
   if (!indexes) return referenceColumns.map(() => null);
 
-  const rows = getCostOfRiskPointRows(state, indexes, COST_OF_RISK_RATIO_DENOMINATOR.tableId, COST_OF_RISK_RATIO_DENOMINATOR, jstCode);
-  if (rows.length !== 1) return referenceColumns.map(() => null);
+  const yCodes = point.yCodes ?? [point.yCode];
+  const seriesPerCode = yCodes.map((yCode) => {
+    const rows = getCostOfRiskPointRows(state, indexes, point.tableId, { xCode: point.xCode, yCode, zCode: point.zCode ?? "" }, jstCode);
+    if (rows.length !== 1) return referenceColumns.map(() => null);
 
-  const [row] = rows;
-  return referenceColumns.map((column) => {
-    const raw = row[column.index];
-    if (raw === undefined || raw === null || String(raw).trim() === "") return null;
-    const parsed = parseNumericValue(raw, NaN);
-    return Number.isFinite(parsed) ? parsed : null;
+    const [row] = rows;
+    return referenceColumns.map((column) => {
+      const raw = row[column.index];
+      if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+      const parsed = parseNumericValue(raw, NaN);
+      return Number.isFinite(parsed) ? parsed : null;
+    });
+  });
+
+  return referenceColumns.map((_, index) => {
+    let total = 0;
+    for (const series of seriesPerCode) {
+      const value = series[index];
+      if (!Number.isFinite(value)) return null;
+      total += value;
+    }
+    return total;
   });
 }
 
-function buildCostOfRiskRatioDenominatorAggregate(state, indexes, referenceColumns, jstCode) {
-  const valueSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode);
+// Combines a denominator option's terms (add/subtract) into one per-date
+// series. Any date where a required term is missing/ambiguous, or where the
+// option's own consistency check fails (e.g. cash balances exceeding the
+// total they are subtracted from), resolves to null - never a partial or
+// silently-defaulted ratio.
+function getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
+  const option = getCostOfRiskRatioDenominatorOption(denominatorId);
+  const termSeriesList = option.terms.map((term) => ({
+    series: resolveCostOfRiskRatioDenominatorTermSeries(state, indexes, referenceColumns, jstCode, term.point),
+    term
+  }));
+
+  return referenceColumns.map((_, index) => {
+    const valuesByKey = {};
+    let total = 0;
+    for (const { term, series } of termSeriesList) {
+      const value = series[index];
+      if (!Number.isFinite(value)) return null;
+      valuesByKey[term.key] = value;
+      total += term.operator === "subtract" ? -value : value;
+    }
+    if (option.validate && !option.validate(valuesByKey)) return null;
+    return total;
+  });
+}
+
+// Same as getCostOfRiskRatioDenominatorSeries, but also returns the
+// per-term breakdown (value + operator) for a single reference date so the
+// UI/audit trail can explain how the denominator was computed.
+function resolveCostOfRiskRatioDenominatorDetail(state, indexes, referenceColumns, jstCode, denominatorId, referenceIndex) {
+  const option = getCostOfRiskRatioDenominatorOption(denominatorId);
+  const termSeriesList = option.terms.map((term) => ({
+    series: resolveCostOfRiskRatioDenominatorTermSeries(state, indexes, referenceColumns, jstCode, term.point),
+    term
+  }));
+
+  const components = termSeriesList.map(({ term, series }) => ({
+    label: term.point.label,
+    operator: term.operator,
+    value: series[referenceIndex] ?? null
+  }));
+
+  const hasAllComponents = components.every((component) => Number.isFinite(component.value));
+  const valuesByKey = {};
+  termSeriesList.forEach(({ term, series }) => { valuesByKey[term.key] = series[referenceIndex]; });
+  const isValid = hasAllComponents && (!option.validate || option.validate(valuesByKey));
+  const value = isValid
+    ? components.reduce((total, component) => total + (component.operator === "subtract" ? -component.value : component.value), 0)
+    : null;
 
   return {
-    label: COST_OF_RISK_RATIO_DENOMINATOR.label,
-    tableId: COST_OF_RISK_RATIO_DENOMINATOR.tableId,
+    components,
+    id: option.id,
+    label: option.label,
+    sourceTable: "F_18.00",
+    status: isValid ? "available" : "unavailable",
+    value
+  };
+}
+
+function buildCostOfRiskRatioDenominatorAggregate(state, indexes, referenceColumns, jstCode, denominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID) {
+  const valueSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, denominatorId);
+  const option = getCostOfRiskRatioDenominatorOption(denominatorId);
+
+  return {
+    label: option.label,
+    tableId: "F_18.00",
     values: referenceColumns.map((column, index) => ({
       date: column.date,
       label: column.label,
       value: valueSeries[index] ?? null
     }))
   };
+}
+
+// Public entry point for the sidebar popover / audit trail: resolves the
+// selected denominator for a single reference date, with a per-term
+// breakdown (raw value + operator) so the calculation can be explained
+// rather than just showing the final number.
+export function buildCostOfRiskRatioDenominatorDetail(state, denominatorId, referenceDate = "", jstCode = state.selectedJst) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const option = getCostOfRiskRatioDenominatorOption(denominatorId);
+
+  if (!indexes || !jstCode || referenceColumns.length === 0) {
+    return { components: [], id: option.id, label: option.label, sourceTable: "F_18.00", status: "unavailable", value: null };
+  }
+
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  return resolveCostOfRiskRatioDenominatorDetail(state, indexes, referenceColumns, jstCode, denominatorId, referenceIndex);
 }
 
 function getPointSeriesValues(state, indexes, referenceColumns, tableId, point, jstCode) {
