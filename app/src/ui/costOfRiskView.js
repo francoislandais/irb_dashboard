@@ -26,13 +26,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260710-audit-trail";
+} from "../data/costOfRisk.js?v=20260712-ratio-denominator";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260710-audit-trail";
+} from "./costOfRiskStageTransfers.js?v=20260712-ratio-denominator";
 import { buildBenchmarkLineSeries, getBenchmarkLinePlotOptions, renderBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260709-flow-diagram-resize";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
@@ -69,6 +69,8 @@ function getCostOfRiskAxisTickPositions(points) {
       .map((point) => point.date.getTime())
   )].sort((left, right) => left - right);
 }
+
+const COST_OF_RISK_RATIO_DENOMINATOR_UNAVAILABLE_REASON = "the total gross carrying amount of debt instruments other than held for trading is not available.";
 
 let rerenderApp = () => {};
 let updateSelectedJst = () => {};
@@ -119,6 +121,7 @@ const elements = {
   costOfRiskF02Value: document.querySelector("#cost-of-risk-f02-value"),
   costOfRiskPoints: document.querySelector("#cost-of-risk-points"),
   costOfRiskRatioContext: document.querySelector("#cost-of-risk-ratio-context"),
+  costOfRiskRatioInfo: document.querySelector("#cost-of-risk-ratio-info"),
   costOfRiskRatioValue: document.querySelector("#cost-of-risk-ratio-value"),
   costOfRiskSmoothing: document.querySelector("#cost-of-risk-smoothing"),
   costOfRiskSmoothingValue: document.querySelector("#cost-of-risk-smoothing-value"),
@@ -214,6 +217,7 @@ export function renderCostOfRisk(state) {
   renderCostOfRiskFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderCostOfRiskFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = activeCostOfRiskDisplayMode;
+  if (elements.costOfRiskRatioInfo) elements.costOfRiskRatioInfo.hidden = activeCostOfRiskDisplayMode !== "ratio";
   renderCostOfRiskXAxisOptions(
     selectedCoreXCodes.length > 0 ? xAxisOptions.filter((option) => selectedCoreXCodes.includes(option.code)) : xAxisOptions,
     activeCostOfRiskXAxisCode
@@ -258,6 +262,7 @@ export function renderCostOfRisk(state) {
     activeCostOfRiskSmoothingWindow,
     activeCostOfRiskReferenceDate
   );
+  const isRatioModeMissingDenominator = activeCostOfRiskDisplayMode === "ratio" && !selection.denominator;
   elements.costOfRiskRatioValue.textContent = formatCostOfRiskDisplayValue(
     activeCostOfRiskDisplayMode === "ratio"
       ? selectedSmoothedPoint?.smoothedRatioBasisPoints ?? selection.ratioBasisPoints
@@ -265,7 +270,9 @@ export function renderCostOfRisk(state) {
     activeCostOfRiskDisplayMode,
     state.selectedUnit
   );
-  elements.costOfRiskRatioContext.textContent = `${state.selectedJst} - ${selection.referenceDate} - ${activeCostOfRiskDisplayMode === "ratio" ? formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow) : "amount"}`;
+  elements.costOfRiskRatioContext.textContent = isRatioModeMissingDenominator
+    ? `Ratio unavailable: ${COST_OF_RISK_RATIO_DENOMINATOR_UNAVAILABLE_REASON}`
+    : `${state.selectedJst} - ${selection.referenceDate} - ${activeCostOfRiskDisplayMode === "ratio" ? formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow) : "amount"}`;
   elements.costOfRiskF02Value.textContent = formatCostOfRiskDisplayValue(
     activeCostOfRiskDisplayMode === "ratio" ? f02Ratio.ratioBasisPoints : f02Ratio.value,
     activeCostOfRiskDisplayMode,

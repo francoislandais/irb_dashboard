@@ -141,7 +141,13 @@
                   <select id="cost-of-risk-stage"></select>
                 </label>
                 <label class="field cost-of-risk-field cost-of-risk-field--stacked">
-                  <span>Display</span>
+                  <span class="cost-of-risk-display-label">
+                    Display
+                    <button type="button" id="cost-of-risk-ratio-info" class="cost-of-risk-info-button" aria-label="Information about the ratio denominator" hidden>
+                      <span aria-hidden="true">?</span>
+                      <span class="cost-of-risk-info-tooltip" role="tooltip">All values displayed in ratio mode are divided by the total gross carrying amount of debt instruments other than held for trading, as reported in FINREP F 18.00.</span>
+                    </button>
+                  </span>
                   <select id="cost-of-risk-display-mode">
                     <option value="ratio" selected>Ratio</option>
                     <option value="amount">Amount</option>
@@ -207,7 +213,7 @@
                     </div>
                     <div class="cost-of-risk-card">
                       <div class="cet1-card-label">Denominator</div>
-                      <div id="cost-of-risk-denominator-context" class="cet1-card-context">F_04.04.1 / loans and advances</div>
+                      <div id="cost-of-risk-denominator-context" class="cet1-card-context">F_18.00 / total gross carrying amount</div>
                       <div id="cost-of-risk-denominator-value" class="cet1-metric-value">-</div>
                     </div>
                     <div class="cost-of-risk-card">
@@ -237,6 +243,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260710-audit-trail"></script>
+    <script type="module" src="./src/main.js?v=20260712-ratio-denominator"></script>
   </body>
 </html>

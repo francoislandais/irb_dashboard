@@ -84,7 +84,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   const flows = flowDiagram?.flows ?? [];
   const residuals = flowDiagram?.residuals ?? [];
   const writeOffs = flowDiagram?.writeOffs ?? [];
-  const denominator = flowDiagram?.totalPreviousExposure ?? null;
+  const denominator = flowDiagram?.ratioDenominator ?? null;
   const displayFlows = flows.map((flow) => ({
     ...flow,
     displayValue: getStageTransferDisplayValue(flow.value, denominator, displayMode)

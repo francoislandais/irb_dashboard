@@ -669,6 +669,65 @@ button:focus-visible {
   min-width: 0;
 }
 
+.cost-of-risk-display-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cost-of-risk-info-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #9aa6a0;
+  border-radius: 50%;
+  background: transparent;
+  color: #5f6b65;
+  cursor: pointer;
+  font-size: 0.62rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.cost-of-risk-info-button:hover,
+.cost-of-risk-info-button:focus-visible {
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
+  outline: 0;
+}
+
+.cost-of-risk-info-tooltip {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  border: 1px solid #d8dfda;
+  border-radius: 6px;
+  background: #17211c;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.35;
+  padding: 8px 10px;
+  text-align: left;
+  text-transform: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease;
+  pointer-events: none;
+}
+
+.cost-of-risk-info-button:hover .cost-of-risk-info-tooltip,
+.cost-of-risk-info-button:focus-visible .cost-of-risk-info-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
 .cost-of-risk-smoothing-field {
   min-width: 0;
 }
