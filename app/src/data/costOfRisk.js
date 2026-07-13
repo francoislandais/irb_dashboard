@@ -621,6 +621,7 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
       ratioDenominator: null,
       referenceDate: "",
       residuals: [],
+      stageBalances: [],
       status: "No F_12.02 stage transfer data is available.",
       writeOffs: []
     };
@@ -633,6 +634,7 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
       ratioDenominator: null,
       referenceDate: selectedReference.label,
       residuals: [],
+      stageBalances: [],
       status: "No matching F_12.02 Y-axis point is available for the selected filters.",
       writeOffs: []
     };
@@ -693,6 +695,11 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
         value: Number.isFinite(rawResidual) ? rawResidual + writeOffMagnitude : null
       };
     }),
+    stageBalances: stageVariations.map((variation, index) => ({
+      label: COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[String(index + 1)] ?? `Stage ${index + 1}`,
+      stage: String(index + 1),
+      value: variation.currentValue ?? null
+    })),
     status: "",
     writeOffs: writeOffsByStage.map(({ magnitude, stage }) => ({
       label: `Write-Off Stage ${stage}`,
@@ -721,6 +728,9 @@ export function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowK
 
   if (descriptor.type === "transfer") {
     return buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+  }
+  if (descriptor.type === "stagebox") {
+    return buildCostOfRiskStageBoxFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference);
   }
   if (descriptor.type === "writeoff") {
     return buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
@@ -854,6 +864,50 @@ function buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns
     value: Number.isFinite(exposureDelta) ? exposureDelta - netTransfers + writeOffMagnitude : null,
     writeOffComponents: writeOffAudit.components,
     writeOffMagnitude
+  };
+}
+
+function buildCostOfRiskStageBoxFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference) {
+  const stageFilters = getCostOfRiskStageScopedFilters(filters, descriptor.stage);
+  const composition = getCostOfRiskDenominatorComposition(state, stageFilters);
+  const components = [
+    ...composition.xCodes.flatMap((xCode) => composition.yCodes.map((yCode) => {
+      const value = resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, yCode)[referenceIndex] ?? null;
+      return {
+        label: `${getMappingDescription(state, COST_OF_RISK_STAGE_BOX_TABLE_ID, "y_axis_rc_code", yCode)} (x=${xCode})`,
+        operator: "add",
+        source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${yCode}`,
+        value
+      };
+    })),
+    ...(composition.excludeCash ? composition.xCodes.map((xCode) => {
+      const value = resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, COST_OF_RISK_DENOMINATOR_CASH_Y_CODE)[referenceIndex] ?? null;
+      return {
+        label: `Cash balances at central banks and other demand deposits (x=${xCode})`,
+        operator: "subtract",
+        source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${COST_OF_RISK_DENOMINATOR_CASH_Y_CODE}`,
+        value
+      };
+    }) : [])
+  ];
+  const hasAddComponent = components.some((component) => component.operator === "add" && Number.isFinite(component.value));
+  const value = hasAddComponent
+    ? components.reduce((total, component) => {
+      if (!Number.isFinite(component.value)) return total;
+      return total + (component.operator === "subtract" ? -component.value : component.value);
+    }, 0)
+    : null;
+
+  return {
+    assetLabel: composition.label,
+    components,
+    descriptor,
+    referenceLabel: selectedReference.label,
+    stage: descriptor.stage,
+    stageLabel: COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[descriptor.stage] ?? `Stage ${descriptor.stage}`,
+    tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
+    type: "stagebox",
+    value
   };
 }
 
@@ -1049,6 +1103,9 @@ function parseCostOfRiskFlowKey(flowKey) {
   if (type === "transfer") {
     const movement = COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.find((item) => `${item.from}-${item.to}` === value);
     return movement ? { code: movement.code, from: movement.from, to: movement.to, type: "transfer" } : null;
+  }
+  if (type === "stagebox" && ["1", "2", "3"].includes(value)) {
+    return { stage: value, type };
   }
   if ((type === "writeoff" || type === "other") && ["1", "2", "3"].includes(value)) {
     return { stage: value, type };

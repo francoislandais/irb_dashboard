@@ -83,6 +83,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
 
   const flows = flowDiagram?.flows ?? [];
   const residuals = flowDiagram?.residuals ?? [];
+  const stageBalances = flowDiagram?.stageBalances ?? [];
   const writeOffs = flowDiagram?.writeOffs ?? [];
   const denominator = flowDiagram?.ratioDenominator ?? null;
   const displayFlows = flows.map((flow) => ({
@@ -102,8 +103,14 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     ...displayResiduals.map((residual) => residual.displayValue),
     ...displayWriteOffs.map((writeOff) => writeOff.displayValue)
   ].filter((value) => Number.isFinite(value));
+  const displayStageBalances = stageBalances.map((item) => ({
+    ...item,
+    displayValue: getStageTransferDisplayValue(item.value, denominator, displayMode)
+  }));
+  const stageBalanceByStage = new Map(displayStageBalances.map((item) => [item.stage, item.displayValue]));
+  const hasStageBalance = stageBalances.some((item) => Number.isFinite(item.value));
 
-  if (values.length === 0) {
+  if (values.length === 0 && !hasStageBalance) {
     container.textContent = flowDiagram?.status || "";
     return;
   }
@@ -128,20 +135,26 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addStageBox(svg, 40, 160, "Stage 1", stageFill, stageStroke, {
     flowKey: "stagebox:1",
     isSelected: selectedFlowKey === "stagebox:1",
+    onContextMenu,
     onSelect: onSelectFlow,
-    primaryDark
+    primaryDark,
+    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("1"), formatValue, displayMode, selectedUnit)
   });
   addStageBox(svg, 600, 160, "Stage 2", stageFill, stageStroke, {
     flowKey: "stagebox:2",
     isSelected: selectedFlowKey === "stagebox:2",
+    onContextMenu,
     onSelect: onSelectFlow,
-    primaryDark
+    primaryDark,
+    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("2"), formatValue, displayMode, selectedUnit)
   });
   addStageBox(svg, 1160, 160, "Stage 3", stageFill, stageStroke, {
     flowKey: "stagebox:3",
     isSelected: selectedFlowKey === "stagebox:3",
+    onContextMenu,
     onSelect: onSelectFlow,
-    primaryDark
+    primaryDark,
+    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("3"), formatValue, displayMode, selectedUnit)
   });
 
   addStage1ToStage3Junction(svg, {
@@ -343,6 +356,7 @@ function scaleArrowWidth(value, maxFlow, minWidth =4, maxWidth = 32) {
 
 function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
   const isSelected = Boolean(config.isSelected);
+  const valueLabel = String(config.valueLabel ?? "");
   const rect = svgElement("rect", {
     fill: isSelected ? config.primaryDark : fill,
     height: 90,
@@ -354,18 +368,38 @@ function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
     y
   });
   svg.append(rect);
-  const text = addText(svg, label, x + 110, y + 50, "cost-of-risk-stage-flow-stage-label", {
+  const text = addText(svg, label, x + 110, y + (valueLabel && valueLabel !== "-" ? 40 : 50), "cost-of-risk-stage-flow-stage-label", {
     "text-anchor": "middle"
   });
-  if (isSelected) text.style.fill = "#ffffff";
+  const value = valueLabel && valueLabel !== "-"
+    ? addText(svg, valueLabel, x + 110, y + 66, "cost-of-risk-stage-flow-stage-value", {
+      "text-anchor": "middle"
+    })
+    : null;
+  if (isSelected) {
+    text.style.fill = "#ffffff";
+    if (value) value.style.fill = "#ffffff";
+  }
 
   if (config.flowKey && typeof config.onSelect === "function") {
-    [rect, text].forEach((element) => {
+    [rect, text, value].filter(Boolean).forEach((element) => {
       element.style.cursor = "pointer";
       element.addEventListener("click", () => config.onSelect(config.flowKey));
+      wireFlowElementContextMenu(element, config);
     });
   }
 }
+
+function formatStageBoxValueLabel(value, formatValue, displayMode, selectedUnit) {
+  if (!Number.isFinite(value)) return "-";
+  if (displayMode !== "ratio") return formatValue(value, displayMode, selectedUnit, false);
+
+  return `${new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0
+  }).format(value / 100)} %`;
+}
+
 function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) {
 
   const value = config.value;

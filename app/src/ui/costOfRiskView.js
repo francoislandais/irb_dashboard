@@ -27,13 +27,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260713-f18-stage-exposure";
+} from "../data/costOfRisk.js?v=20260713-stagebox-audit";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260712-denominator-picker";
+} from "./costOfRiskStageTransfers.js?v=20260713-stagebox-audit";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
@@ -1021,7 +1021,11 @@ function createCostOfRiskStageTransferFlowAuditTrail(state, audit) {
   const selectedUnit = state.selectedUnit;
   const view = buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit);
   if (activeCostOfRiskDisplayMode === "ratio") {
-    appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit);
+    if (audit.type === "stagebox") {
+      appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, selectedUnit);
+    } else {
+      appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit);
+    }
   }
   return view;
 }
@@ -1063,6 +1067,43 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
 
   if (isRatioAvailable) {
     const ratioFormula = `${rawValueLabel} / ${formatAmount(denominatorDetail.value)} = ${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")}`;
+    view.formula = view.formula ? `${view.formula}\n${ratioFormula}` : ratioFormula;
+  }
+}
+
+function appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, selectedUnit) {
+  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, audit.referenceLabel, state.selectedJst);
+  const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
+  const isRatioAvailable = denominatorDetail.status === "available" && Number.isFinite(denominatorDetail.value) && denominatorDetail.value !== 0;
+  const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
+  const ratioPercent = Number.isFinite(ratioBasisPoints) ? ratioBasisPoints / 10000 : null;
+  const ratioPercentLabel = Number.isFinite(ratioPercent) ? formatContributionPercentValue(ratioPercent) : "-";
+  const rawValueLabel = view.valueLabel;
+
+  view.definition = `${view.definition} Shown in ratio mode as this stock divided by the F_18.00 gross carrying amount for the current sidebar filters (${denominatorDetail.label}).`;
+  view.valueLabel = isRatioAvailable
+    ? `${ratioPercentLabel} (${rawValueLabel} raw)`
+    : `Ratio unavailable (${rawValueLabel} raw)`;
+
+  view.sections.push({
+    columns: [
+      { header: "Component", key: "label" },
+      { align: "right", header: "Value", key: "value" }
+    ],
+    description: "Every F_18.00 denominator cell matching the current Accounting type / Counterparty / Stage filters.",
+    rows: denominatorDetail.components.map((component) => ({
+      label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
+      value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
+    })),
+    title: `Ratio denominator - ${denominatorDetail.label} (F_18.00)`,
+    totalRow: {
+      label: isRatioAvailable ? "Total" : "Total (unavailable)",
+      value: isRatioAvailable ? formatAmount(denominatorDetail.value) : "-"
+    }
+  });
+
+  if (isRatioAvailable) {
+    const ratioFormula = `${rawValueLabel} / ${formatAmount(denominatorDetail.value)} = ${ratioPercentLabel}`;
     view.formula = view.formula ? `${view.formula}\n${ratioFormula}` : ratioFormula;
   }
 }
@@ -1125,6 +1166,32 @@ function buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit) {
       }],
       subtitle,
       title: `Write-Off - Stage ${audit.stage}`,
+      valueLabel: formatAmount(audit.value)
+    };
+  }
+
+  if (audit.type === "stagebox") {
+    return {
+      definition: `Gross carrying amount for ${audit.stageLabel}, using the same F_18.00 perimeter as the stage box displayed in the flow diagram.`,
+      sections: [{
+        columns: [
+          { header: "Source", key: "source" },
+          { header: "Component", key: "label" },
+          { align: "right", header: `Balance @ ${currentLabel}`, key: "value" }
+        ],
+        rows: audit.components.map((component) => ({
+          label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
+          source: component.source,
+          value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
+        })),
+        title: `${audit.stageLabel} exposure - ${audit.assetLabel}`,
+        totalRow: {
+          label: "Total",
+          value: Number.isFinite(audit.value) ? formatAmount(audit.value) : "-"
+        }
+      }],
+      subtitle,
+      title: audit.stageLabel,
       valueLabel: formatAmount(audit.value)
     };
   }

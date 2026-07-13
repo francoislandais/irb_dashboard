@@ -1175,7 +1175,14 @@ button:focus-visible {
 
 .cost-of-risk-stage-flow-stage-label {
   fill: #111916;
-  font-size: 32px;
+  font-size: 28px;
+  font-weight: 600;
+  dominant-baseline: middle;
+}
+
+.cost-of-risk-stage-flow-stage-value {
+  fill: #26332d;
+  font-size: 17px;
   font-weight: 500;
   dominant-baseline: middle;
 }
