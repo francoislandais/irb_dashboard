@@ -27,13 +27,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260713-anonymised-no-selected-area";
+} from "../data/costOfRisk.js?v=20260713-stage-transfer-all-stage-denom";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260713-anonymised-no-selected-area";
+} from "./costOfRiskStageTransfers.js?v=20260713-stage-transfer-all-stage-denom";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
@@ -42,7 +42,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260713-anonymised-no-selected-area";
+} from "./benchmarkLineChart.js?v=20260713-stage-transfer-all-stage-denom";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
@@ -1030,6 +1030,13 @@ function createCostOfRiskStageTransferFlowAuditTrail(state, audit) {
   return view;
 }
 
+function getCostOfRiskStageTransferDenominatorFilters() {
+  return {
+    ...activeCostOfRiskFilters,
+    stage: COST_OF_RISK_FILTER_ALL
+  };
+}
+
 // Appends a "Ratio denominator" section (with the same per-cell breakdown
 // as the info tooltip) and turns the headline value into the displayed
 // ratio, since the flow diagram itself shows ratio-mode values divided by
@@ -1037,13 +1044,13 @@ function createCostOfRiskStageTransferFlowAuditTrail(state, audit) {
 // audit trail must explain that division, not just the raw movement
 // amount.
 function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit) {
-  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, audit.referenceLabel, state.selectedJst);
+  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, getCostOfRiskStageTransferDenominatorFilters(), audit.referenceLabel, state.selectedJst);
   const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
   const isRatioAvailable = denominatorDetail.status === "available" && Number.isFinite(denominatorDetail.value) && denominatorDetail.value !== 0;
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the F_18.00 gross carrying amount for the current sidebar filters (${denominatorDetail.label}).`;
+  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")} (${rawValueLabel} raw)`
     : `Ratio unavailable (${rawValueLabel} raw)`;
@@ -1053,7 +1060,7 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
       { header: "Component", key: "label" },
       { align: "right", header: "Value", key: "value" }
     ],
-    description: "Every F_18.00 cell matching the current Accounting type / Counterparty / Stage filters (cash balances at central banks are always excluded).",
+    description: "Every F_18.00 cell matching the current Accounting type / Counterparty filters, all stages combined.",
     rows: denominatorDetail.components.map((component) => ({
       label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
       value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
@@ -1072,7 +1079,7 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
 }
 
 function appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, selectedUnit) {
-  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, audit.referenceLabel, state.selectedJst);
+  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, getCostOfRiskStageTransferDenominatorFilters(), audit.referenceLabel, state.selectedJst);
   const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
   const isRatioAvailable = denominatorDetail.status === "available" && Number.isFinite(denominatorDetail.value) && denominatorDetail.value !== 0;
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
@@ -1080,7 +1087,7 @@ function appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, sel
   const ratioPercentLabel = Number.isFinite(ratioPercent) ? formatContributionPercentValue(ratioPercent) : "-";
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in ratio mode as this stock divided by the F_18.00 gross carrying amount for the current sidebar filters (${denominatorDetail.label}).`;
+  view.definition = `${view.definition} Shown in ratio mode as this stock divided by the F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${ratioPercentLabel} (${rawValueLabel} raw)`
     : `Ratio unavailable (${rawValueLabel} raw)`;
@@ -1090,7 +1097,7 @@ function appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, sel
       { header: "Component", key: "label" },
       { align: "right", header: "Value", key: "value" }
     ],
-    description: "Every F_18.00 denominator cell matching the current Accounting type / Counterparty / Stage filters.",
+    description: "Every F_18.00 denominator cell matching the current Accounting type / Counterparty filters, all stages combined.",
     rows: denominatorDetail.components.map((component) => ({
       label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
       value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"

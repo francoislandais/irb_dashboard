@@ -145,6 +145,13 @@ function getCostOfRiskDenominatorComposition(state, filters = {}) {
   };
 }
 
+function getCostOfRiskStageTransferDenominatorFilters(filters = {}) {
+  return {
+    ...filters,
+    stage: COST_OF_RISK_FILTER_ALL
+  };
+}
+
 export const COST_OF_RISK_CONFIG = {
   numerator: {
     label: "Numerator",
@@ -660,7 +667,13 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
   // Ratio denominator: same F_18.00 total gross carrying amount used
   // everywhere else in the module, at the same reference date as the
   // numerator.
-  const ratioDenominator = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters)[referenceIndex] ?? null;
+  const ratioDenominator = getCostOfRiskRatioDenominatorSeries(
+    state,
+    indexes,
+    referenceColumns,
+    state.selectedJst,
+    getCostOfRiskStageTransferDenominatorFilters(filters)
+  )[referenceIndex] ?? null;
 
   const netTransfersByStage = new Map([["1", 0], ["2", 0], ["3", 0]]);
   COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.forEach((movement) => {
@@ -964,8 +977,13 @@ function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, x
     });
   });
 
-  // Same user-selected denominator as the rest of the module.
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(
+    state,
+    indexes,
+    referenceColumns,
+    jstCode,
+    getCostOfRiskStageTransferDenominatorFilters(filters)
+  );
 
   return referenceColumns.map((column, index) => {
     const value = values[index] ?? null;
@@ -1010,7 +1028,13 @@ export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowK
 
 function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode) {
   const rawValues = getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(
+    state,
+    indexes,
+    referenceColumns,
+    jstCode,
+    getCostOfRiskStageTransferDenominatorFilters(filters)
+  );
 
   return referenceColumns.map((column, index) => {
     const value = rawValues[index] ?? null;
