@@ -1,4 +1,4 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260712-denominator-fix";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260712-filter-driven-denominator";
 import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260712-anonymised-peers";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];

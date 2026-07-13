@@ -1,7 +1,5 @@
 import {
-  COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID,
   COST_OF_RISK_FILTER_ALL,
-  COST_OF_RISK_RATIO_DENOMINATORS,
   COST_OF_RISK_WATERFALL_X_CODES,
   COST_OF_RISK_X_AXIS_CODE,
   buildCostOfRiskCounterpartyTreemapData,
@@ -25,12 +23,11 @@ import {
   formatReferenceQuarterLabel,
   getCostOfRiskFilterOptions,
   getCostOfRiskPointDisplayValue,
-  getCostOfRiskRatioDenominatorOption,
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260712-denominator-fix";
+} from "../data/costOfRisk.js?v=20260712-filter-driven-denominator";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -91,7 +88,6 @@ let activeCostOfRiskTab = "f2-vs-f12";
 let activeCostOfRiskCoreXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
 let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
-let activeCostOfRiskRatioDenominatorId = COST_OF_RISK_DEFAULT_RATIO_DENOMINATOR_ID;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 const COST_OF_RISK_CHART_TITLE_POSITION = {
@@ -112,7 +108,6 @@ const activeCostOfRiskFilters = {
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
 };
-let costOfRiskDenominatorPopover = null;
 
 const elements = {
   costOfRiskAsset: document.querySelector("#cost-of-risk-asset"),
@@ -124,8 +119,6 @@ const elements = {
   costOfRiskChart: document.querySelector("#cost-of-risk-chart"),
   costOfRiskChartTitle: document.querySelector("#cost-of-risk-chart-title"),
   costOfRiskDashboard: document.querySelector("#cost-of-risk-dashboard"),
-  costOfRiskDenominatorButton: document.querySelector("#cost-of-risk-denominator-button"),
-  costOfRiskDenominatorButtonValue: document.querySelector("#cost-of-risk-denominator-button-value"),
   costOfRiskDenominatorContext: document.querySelector("#cost-of-risk-denominator-context"),
   costOfRiskDenominatorValue: document.querySelector("#cost-of-risk-denominator-value"),
   costOfRiskDisplayMode: document.querySelector("#cost-of-risk-display-mode"),
@@ -155,103 +148,19 @@ const elements = {
   costOfRiskXAxis: document.querySelector("#cost-of-risk-x-axis")
 };
 
-// Sidebar denominator picker: visible only in ratio mode, shows the active
-// denominator's short label and updates the info tooltip. The popover
-// itself is built on demand (showCostOfRiskDenominatorPopover) and torn
-// down on close - only one instance can exist at a time.
-function renderCostOfRiskRatioDenominatorControls() {
+// The ratio denominator now follows the sidebar filters (Accounting type,
+// Counterparty, Stage) automatically - there is no picker to render here
+// any more. The info icon (visible only in ratio mode) is the only control
+// left: its tooltip always reflects whatever F_18.00 perimeter the current
+// filters resolve to.
+function renderCostOfRiskRatioDenominatorControls(state) {
   const isRatioMode = activeCostOfRiskDisplayMode === "ratio";
-  const activeDenominator = getCostOfRiskRatioDenominatorOption(activeCostOfRiskRatioDenominatorId);
-
   if (elements.costOfRiskRatioInfo) elements.costOfRiskRatioInfo.hidden = !isRatioMode;
-  if (elements.costOfRiskRatioTooltip) elements.costOfRiskRatioTooltip.textContent = activeDenominator.tooltip;
-  if (elements.costOfRiskDenominatorButton) elements.costOfRiskDenominatorButton.hidden = !isRatioMode;
-  if (elements.costOfRiskDenominatorButtonValue) elements.costOfRiskDenominatorButtonValue.textContent = activeDenominator.shortLabel;
+  if (!isRatioMode || !elements.costOfRiskRatioTooltip) return;
 
-  if (!isRatioMode) hideCostOfRiskDenominatorPopover();
+  const detail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, state.selectedJst);
+  elements.costOfRiskRatioTooltip.textContent = `Ratio denominator: ${detail.label}, as reported in FINREP F 18.00.`;
 }
-
-function showCostOfRiskDenominatorPopover(actions, rerender) {
-  hideCostOfRiskDenominatorPopover();
-  const anchor = elements.costOfRiskDenominatorButton;
-  if (!anchor) return;
-
-  const popover = document.createElement("div");
-  popover.className = "cost-of-risk-denominator-popover";
-  popover.setAttribute("role", "menu");
-
-  COST_OF_RISK_RATIO_DENOMINATORS.forEach((option) => {
-    const row = document.createElement("label");
-    row.className = "cost-of-risk-denominator-option";
-
-    const radio = document.createElement("input");
-    radio.type = "radio";
-    radio.name = "cost-of-risk-denominator";
-    radio.value = option.id;
-    radio.checked = option.id === activeCostOfRiskRatioDenominatorId;
-    radio.addEventListener("change", () => {
-      activeCostOfRiskRatioDenominatorId = option.id;
-      hideCostOfRiskDenominatorPopover();
-      anchor.focus();
-      rerender(actions.getState());
-    });
-
-    const text = document.createElement("div");
-    const title = document.createElement("div");
-    title.className = "cost-of-risk-denominator-option-title";
-    title.textContent = option.label;
-    if (option.isDefault) {
-      const defaultTag = document.createElement("span");
-      defaultTag.className = "cost-of-risk-denominator-option-default";
-      defaultTag.textContent = " · Default";
-      title.append(defaultTag);
-    }
-    const description = document.createElement("div");
-    description.className = "cost-of-risk-denominator-option-description";
-    description.textContent = option.description;
-    const calculation = document.createElement("div");
-    calculation.className = "cost-of-risk-denominator-option-calculation";
-    calculation.textContent = `Calculation: ${option.calculation}`;
-    text.append(title, description, calculation);
-
-    row.append(radio, text);
-    popover.append(row);
-  });
-
-  document.body.append(popover);
-  costOfRiskDenominatorPopover = popover;
-  anchor.setAttribute("aria-expanded", "true");
-
-  const anchorRect = anchor.getBoundingClientRect();
-  const popoverRect = popover.getBoundingClientRect();
-  const left = Math.min(anchorRect.left, window.innerWidth - popoverRect.width - 8);
-  const top = Math.min(anchorRect.bottom + 6, window.innerHeight - popoverRect.height - 8);
-  popover.style.left = `${Math.max(8, left)}px`;
-  popover.style.top = `${Math.max(8, top)}px`;
-
-  document.addEventListener("click", handleCostOfRiskDenominatorPopoverOutsideClick);
-}
-
-function handleCostOfRiskDenominatorPopoverOutsideClick(event) {
-  if (!costOfRiskDenominatorPopover) return;
-  if (costOfRiskDenominatorPopover.contains(event.target) || event.target === elements.costOfRiskDenominatorButton) return;
-  hideCostOfRiskDenominatorPopover();
-}
-
-function hideCostOfRiskDenominatorPopover() {
-  if (!costOfRiskDenominatorPopover) return;
-  costOfRiskDenominatorPopover.remove();
-  costOfRiskDenominatorPopover = null;
-  document.removeEventListener("click", handleCostOfRiskDenominatorPopoverOutsideClick);
-  elements.costOfRiskDenominatorButton?.setAttribute("aria-expanded", "false");
-}
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && costOfRiskDenominatorPopover) {
-    hideCostOfRiskDenominatorPopover();
-    elements.costOfRiskDenominatorButton?.focus();
-  }
-});
 
 export function wireCostOfRiskUi(actions, rerender) {
   rerenderApp = rerender;
@@ -293,14 +202,6 @@ export function wireCostOfRiskUi(actions, rerender) {
       rerenderApp(actions.getState());
     });
   });
-  elements.costOfRiskDenominatorButton?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (costOfRiskDenominatorPopover) {
-      hideCostOfRiskDenominatorPopover();
-    } else {
-      showCostOfRiskDenominatorPopover(actions, rerender);
-    }
-  });
 }
 
 export function renderCostOfRisk(state) {
@@ -327,19 +228,18 @@ export function renderCostOfRisk(state) {
     state,
     activeCostOfRiskFilters,
     activeCostOfRiskXAxisCode,
-    activeCostOfRiskReferenceDate,
-    activeCostOfRiskRatioDenominatorId
+    activeCostOfRiskReferenceDate
   );
   activeCostOfRiskReferenceDate = selection.referenceDate || activeCostOfRiskReferenceDate;
-  const f02Ratio = buildCostOfRiskF02ImpairmentRatio(state, activeCostOfRiskReferenceDate, activeCostOfRiskRatioDenominatorId);
-  const f02Series = buildCostOfRiskF02ImpairmentSeries(state, activeCostOfRiskRatioDenominatorId);
-  const waterfall = buildCostOfRiskWaterfall(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedCoreXCodes, activeCostOfRiskRatioDenominatorId);
+  const f02Ratio = buildCostOfRiskF02ImpairmentRatio(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters);
+  const f02Series = buildCostOfRiskF02ImpairmentSeries(state, activeCostOfRiskFilters);
+  const waterfall = buildCostOfRiskWaterfall(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedCoreXCodes);
 
   renderCostOfRiskFilterSelect(elements.costOfRiskAsset, filterOptions.assets, activeCostOfRiskFilters.asset);
   renderCostOfRiskFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderCostOfRiskFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = activeCostOfRiskDisplayMode;
-  renderCostOfRiskRatioDenominatorControls();
+  renderCostOfRiskRatioDenominatorControls(state);
   renderCostOfRiskXAxisOptions(
     selectedCoreXCodes.length > 0 ? xAxisOptions.filter((option) => selectedCoreXCodes.includes(option.code)) : xAxisOptions,
     activeCostOfRiskXAxisCode
@@ -393,7 +293,7 @@ export function renderCostOfRisk(state) {
     state.selectedUnit
   );
   elements.costOfRiskRatioContext.textContent = isRatioModeMissingDenominator
-    ? `Ratio unavailable: ${getCostOfRiskRatioDenominatorOption(activeCostOfRiskRatioDenominatorId).description.toLowerCase().replace(/\.$/, "")} is not available.`
+    ? `Ratio unavailable: ${selection.denominatorLabel.toLowerCase()} is not available.`
     : `${state.selectedJst} - ${selection.referenceDate} - ${activeCostOfRiskDisplayMode === "ratio" ? formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow) : "amount"}`;
   elements.costOfRiskF02Value.textContent = formatCostOfRiskDisplayValue(
     activeCostOfRiskDisplayMode === "ratio" ? f02Ratio.ratioBasisPoints : f02Ratio.value,
@@ -428,12 +328,12 @@ export function renderCostOfRisk(state) {
     leaveCostOfRiskStageTransferTab();
     renderCostOfRiskF2VsF12Chart(
       f02Series,
-      buildCostOfRiskF12ContributionSeries(state, activeCostOfRiskFilters, selectedCoreXCodes, activeCostOfRiskRatioDenominatorId),
+      buildCostOfRiskF12ContributionSeries(state, activeCostOfRiskFilters, selectedCoreXCodes),
       activeCostOfRiskDisplayMode,
       state.selectedUnit
     );
     renderCostOfRiskAuditTable(
-      buildCostOfRiskF2VsF12Audit(state, activeCostOfRiskFilters, selectedCoreXCodes, activeCostOfRiskRatioDenominatorId),
+      buildCostOfRiskF2VsF12Audit(state, activeCostOfRiskFilters, selectedCoreXCodes),
       state.selectedUnit
     );
   } else if (activeCostOfRiskTab === "stage-transfers") {
@@ -1056,7 +956,7 @@ function renderCostOfRiskStageTransferView(state) {
   ensureCostOfRiskStageTransferFlowSelection();
   renderCostOfRiskStageTransferFlowChart(
     state,
-    buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters, activeCostOfRiskRatioDenominatorId),
+    buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters),
     state.selectedUnit,
     activeCostOfRiskDisplayMode
   );
@@ -1126,20 +1026,20 @@ function createCostOfRiskStageTransferFlowAuditTrail(state, audit) {
   return view;
 }
 
-// Appends a "Ratio denominator" section (with the same per-term breakdown
-// as the sidebar popover) and turns the headline value into the displayed
+// Appends a "Ratio denominator" section (with the same per-cell breakdown
+// as the info tooltip) and turns the headline value into the displayed
 // ratio, since the flow diagram itself shows ratio-mode values divided by
-// the user-selected denominator - the audit trail must explain that
-// division, not just the raw movement amount.
+// the F_18.00 denominator that follows the current sidebar filters - the
+// audit trail must explain that division, not just the raw movement
+// amount.
 function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit) {
-  const denominatorOption = getCostOfRiskRatioDenominatorOption(activeCostOfRiskRatioDenominatorId);
-  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskRatioDenominatorId, audit.referenceLabel, state.selectedJst);
+  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, audit.referenceLabel, state.selectedJst);
   const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
   const isRatioAvailable = denominatorDetail.status === "available" && Number.isFinite(denominatorDetail.value) && denominatorDetail.value !== 0;
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the selected ratio denominator (${denominatorOption.label}).`;
+  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the F_18.00 gross carrying amount for the current sidebar filters (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")} (${rawValueLabel} raw)`
     : `Ratio unavailable (${rawValueLabel} raw)`;
@@ -1149,12 +1049,12 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
       { header: "Component", key: "label" },
       { align: "right", header: "Value", key: "value" }
     ],
-    description: `${denominatorOption.description} Calculation: ${denominatorOption.calculation}`,
+    description: "Every F_18.00 cell matching the current Accounting type / Counterparty / Stage filters (cash balances at central banks are always excluded).",
     rows: denominatorDetail.components.map((component) => ({
       label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
       value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
     })),
-    title: `Ratio denominator - ${denominatorOption.label} (F_18.00)`,
+    title: `Ratio denominator - ${denominatorDetail.label} (F_18.00)`,
     totalRow: {
       label: isRatioAvailable ? "Total" : "Total (unavailable)",
       value: isRatioAvailable ? formatAmount(denominatorDetail.value) : "-"
@@ -1308,8 +1208,8 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
 
   const isStageBoxSelection = activeCostOfRiskStageTransferFlowKey.startsWith("stagebox:");
   const flowSeries = isStageBoxSelection
-    ? buildCostOfRiskStageBoxTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey.split(":")[1], activeCostOfRiskRatioDenominatorId)
-    : buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey, activeCostOfRiskRatioDenominatorId);
+    ? buildCostOfRiskStageBoxTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey.split(":")[1])
+    : buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey);
   if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = false;
   const titleText = `${flowSeries.label} - time evolution`;
   if (elements.costOfRiskStageTransferFlowChartTitle) elements.costOfRiskStageTransferFlowChartTitle.textContent = titleText;
