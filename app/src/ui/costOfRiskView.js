@@ -27,7 +27,7 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260712-filter-driven-denominator";
+} from "../data/costOfRisk.js?v=20260713-f18-stage-exposure";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -1137,7 +1137,7 @@ function buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit) {
       { align: "right", header: `Balance @ ${currentLabel}`, key: "current" },
       { align: "right", header: "Delta", key: "delta" }
     ],
-    description: "Total exposure balance for this stage (F_04.04.1).",
+    description: "Total exposure balance for this stage, using the same F_18.00 perimeter as the ratio denominator.",
     rows: audit.exposureComponents.map((item) => ({
       code: item.code,
       current: formatAmount(item.currentValue),
@@ -1145,7 +1145,7 @@ function buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit) {
       description: item.description,
       previous: formatAmount(item.previousValue)
     })),
-    title: "Exposure variation (F_04.04.1)",
+    title: "Exposure variation (F_18.00)",
     totalRow: { description: "Total delta", delta: formatAmount(audit.exposureDelta) }
   };
 
