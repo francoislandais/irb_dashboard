@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260713-stagebox-audit";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260713-anonymised-no-selected-area";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -20,7 +20,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260712-anonymised-peers";
+} from "./benchmarkLineChart.js?v=20260713-anonymised-no-selected-area";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,

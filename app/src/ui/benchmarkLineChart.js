@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260713-stagebox-audit";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260712-anonymised-peers";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260713-anonymised-no-selected-area";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260713-anonymised-no-selected-area";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
@@ -10,6 +10,7 @@ const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
 // diverge between charts using the same visual language.
 export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, primaryDark, {
   displayMode = "amount",
+  selectedAreaFill = true,
   smoothingWindow = 1
 } = {}) {
   return (benchmarkSeries ?? [])
@@ -19,16 +20,19 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
       const color = isSelected ? primaryDark : BENCHMARK_LINE_GRAYS[index % BENCHMARK_LINE_GRAYS.length];
       const dashStyle = isSelected ? "Solid" : BENCHMARK_LINE_DASHES[index % BENCHMARK_LINE_DASHES.length];
       const chartData = createCostOfRiskChartData(points, displayMode);
+      const shouldFillSelectedArea = isSelected && selectedAreaFill;
       return {
         // Selected series render as an area down to y=0, so the reader can
         // immediately see whether it sits above or below zero. The fill is a
         // discreet, near-transparent gray — never tinted by the series color.
-        clip: isSelected ? true : false,
+        // In anonymised mode this fill is disabled so the peer quantile bands
+        // remain visually unambiguous.
+        clip: shouldFillSelectedArea,
         color,
         dashStyle,
         data: chartData,
         dataLabels: { enabled: false },
-        fillColor: isSelected ? "rgba(140, 148, 144, 0.12)" : "transparent",
+        fillColor: shouldFillSelectedArea ? "rgba(140, 148, 144, 0.12)" : "transparent",
         lineWidth: isSelected ? 3.6 : 1.45,
         marker: {
           fillColor: isSelected ? "#ffffff" : color,
@@ -52,7 +56,7 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
           }
         },
         threshold: 0,
-        type: isSelected ? "area" : "line",
+        type: shouldFillSelectedArea ? "area" : "line",
         zIndex: isSelected ? 100 : 1
       };
     })
@@ -75,7 +79,10 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
 // (percentiles, peer count), never individual peer values or jst_codes.
 export function buildBenchmarkChartModel(benchmarkSeries, selectedJstCode, primaryDark, options = {}) {
   const peerDisplayMode = options.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
-  const explicitSeries = buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, primaryDark, options);
+  const explicitSeries = buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, primaryDark, {
+    ...options,
+    selectedAreaFill: peerDisplayMode !== "anonymised"
+  });
 
   if (peerDisplayMode !== "anonymised") {
     return { distribution: null, peerDisplayMode, series: explicitSeries, status: "" };
