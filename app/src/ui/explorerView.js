@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260713-stage-transfer-all-stage-denom";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260713-temporal-xy-zoom";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -20,7 +20,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260713-stage-transfer-all-stage-denom";
+} from "./benchmarkLineChart.js?v=20260713-temporal-xy-zoom";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -471,7 +471,9 @@ function renderExplorerBenchmarkChart(benchmark, state) {
         }
       },
       spacingRight: 128,
-      type: "line"
+      type: "line",
+      zooming: { type: "xy" },
+      zoomType: "xy"
     },
     credits: { enabled: false },
     legend: { enabled: false },
