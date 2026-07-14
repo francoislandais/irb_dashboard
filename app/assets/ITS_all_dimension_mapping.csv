@@ -5218,12 +5218,13 @@ F_12.01;y_axis_rc_code;540;Total  provisions on commitments and financial guaran
 F_12.01;y_axis_rc_code;550;Total  provisions on commitments and financial guarantees given/Stage 2/Of which: non-performing exposures;;;
 F_12.01;y_axis_rc_code;560;Total  provisions on commitments and financial guarantees given/Stage 3;;;
 F_12.01;y_axis_rc_code;565;Total  provisions on commitments and financial guarantees given/POCI;;;
-F_12.02;x_axis_rc_code;10;Gross carrying amount / nominal amount/Transfers between stage 1 and stage 2/To stage 2 from stage 1;;;
-F_12.02;x_axis_rc_code;20;Gross carrying amount / nominal amount/Transfers between stage 1 and stage 2/To stage 1 from stage 2;;;
-F_12.02;x_axis_rc_code;30;Gross carrying amount / nominal amount/Transfers between stage 2 and stage 3/To stage 3 from stage 2;;;
-F_12.02;x_axis_rc_code;40;Gross carrying amount / nominal amount/Transfers between stage 2 and stage 3/To stage 2 from stage 3;;;
-F_12.02;x_axis_rc_code;50;Gross carrying amount / nominal amount/Transfers between stage 1 and stage 3/To stage 3 from stage 1;;;
-F_12.02;x_axis_rc_code;60;Gross carrying amount / nominal amount/Transfers between stage 1 and stage 3/To stage 1 from stage 3;;;
+F_12.02;y_axis_rc_code;140;Total debt instruments;;;
+F_12.02;x_axis_rc_code;10;Gross carrying amount/Transfers between stage 1 and stage 2/To stage 2 from stage 1;;;
+F_12.02;x_axis_rc_code;20;Gross carrying amount/Transfers between stage 1 and stage 2/To stage 1 from stage 2;;;
+F_12.02;x_axis_rc_code;30;Gross carrying amount/Transfers between stage 2 and stage 3/To stage 3 from stage 2;;;
+F_12.02;x_axis_rc_code;40;Gross carrying amount/Transfers between stage 2 and stage 3/To stage 2 from stage 3;;;
+F_12.02;x_axis_rc_code;50;Gross carrying amount/Transfers between stage 1 and stage 3/To stage 3 from stage 1;;;
+F_12.02;x_axis_rc_code;60;Gross carrying amount/Transfers between stage 1 and stage 3/To stage 1 from stage 3;;;
 F_12.02;y_axis_rc_code;10;Total debt instruments/Debt securities;;;
 F_12.02;y_axis_rc_code;20;Total debt instruments/Debt securities/Central banks;;;
 F_12.02;y_axis_rc_code;30;Total debt instruments/Debt securities/General governments;;;
@@ -5237,7 +5238,6 @@ F_12.02;y_axis_rc_code;100;Total debt instruments/Loans and advances/Credit inst
 F_12.02;y_axis_rc_code;110;Total debt instruments/Loans and advances/Other financial corporations;;;
 F_12.02;y_axis_rc_code;120;Total debt instruments/Loans and advances/Non-financial corporations;;;
 F_12.02;y_axis_rc_code;130;Total debt instruments/Loans and advances/Households;;;
-F_12.02;y_axis_rc_code;140;Total debt instruments;;;
 F_12.02;y_axis_rc_code;150;Commitments and financial guarantees given;;;
 F_13.01;x_axis_rc_code;10;Maximum amount of the collateral or guarantee that can be considered/Loans collateralized by immovable property/Residential immovable property;;;
 F_13.01;x_axis_rc_code;20;Maximum amount of the collateral or guarantee that can be considered/Loans collateralized by immovable property/Commercial immovable property;;;

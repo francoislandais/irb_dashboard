@@ -1,8 +1,10 @@
 import {
   COST_OF_RISK_FILTER_ALL,
+  DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_WATERFALL_X_CODES,
   COST_OF_RISK_X_AXIS_CODE,
+  buildCostOfRiskCounterpartySummaryModel,
   buildCostOfRiskCounterpartyTreemapData,
   buildCostOfRiskF02ImpairmentRatio,
   buildCostOfRiskF02ImpairmentSeries,
@@ -29,13 +31,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-stage-summary-positive-allowances";
+} from "../data/costOfRisk.js?v=20260714-summary-cross-selection";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-stage-summary-positive-allowances";
+} from "./costOfRiskStageTransfers.js?v=20260714-summary-cross-selection";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
@@ -43,7 +45,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260714-stage-summary-positive-allowances";
+} from "./benchmarkLineChart.js?v=20260714-summary-cross-selection";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
@@ -89,6 +91,8 @@ let activeCostOfRiskTab = "stage-summary";
 let activeCostOfRiskCoreXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
 let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
+let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
+let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
@@ -98,6 +102,7 @@ const COST_OF_RISK_CHART_TITLE_POSITION = {
   y: 5
 };
 let costOfRiskChart = null;
+let costOfRiskCounterpartySummaryChart = null;
 let costOfRiskF2VsF12Chart = null;
 let costOfRiskStageSummaryChart = null;
 let costOfRiskStageTransferChart = null;
@@ -111,11 +116,50 @@ const activeCostOfRiskFilters = {
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
 };
+const COST_OF_RISK_FILTER_PARENT_VALUES = {
+  counterparty: {
+    HH_CONSUMPTION: "Households",
+    HH_RRE: "Households",
+    NFC_CRE: "Non-financial corporations",
+    NFC_SMES: "Non-financial corporations"
+  }
+};
+const COST_OF_RISK_FILTER_UNAVAILABLE_LABELS = {
+  counterparty: {
+    HH_CONSUMPTION: "credit for consumption",
+    HH_RRE: "residential real estate collateralised loans",
+    NFC_CRE: "commercial real estate collateralised loans",
+    NFC_SMES: "SMEs"
+  }
+};
+const COST_OF_RISK_FILTER_PARENT_LABELS = {
+  counterparty: {
+    "Households": "Households",
+    "Non-financial corporations": "NFC"
+  }
+};
+const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES = {
+  all: COST_OF_RISK_FILTER_ALL,
+  "central-banks": "Central banks",
+  "credit-institutions": "Credit institutions",
+  governments: "General governments",
+  households: "Households",
+  "hh-consumption": "HH_CONSUMPTION",
+  "hh-rre": "HH_RRE",
+  nfc: "Non-financial corporations",
+  "nfc-cre": "NFC_CRE",
+  "nfc-smes": "NFC_SMES",
+  "other-financials": "Other financial corporations"
+};
+const COST_OF_RISK_UNAVAILABLE_MESSAGE = "FINREP data does not support this level of detail for the current selection.";
 
 const elements = {
+  costOfRiskActiveFilters: document.querySelector("#cost-of-risk-active-filters"),
   costOfRiskAsset: document.querySelector("#cost-of-risk-asset"),
   costOfRiskAudit: document.querySelector("#cost-of-risk-audit"),
   costOfRiskCounterparty: document.querySelector("#cost-of-risk-counterparty"),
+  costOfRiskCounterpartySummaryChart: document.querySelector("#cost-of-risk-counterparty-summary-chart"),
+  costOfRiskCounterpartySummaryTable: document.querySelector("#cost-of-risk-counterparty-summary-table"),
   costOfRiskCoreDefinition: document.querySelector("#cost-of-risk-core-definition"),
   costOfRiskF2VsF12CoreDefinition: document.querySelector("#cost-of-risk-f2-f12-core-definition"),
   costOfRiskContext: document.querySelector("#cost-of-risk-context"),
@@ -194,6 +238,13 @@ export function wireCostOfRiskUi(actions, rerender) {
     activeCostOfRiskSmoothingWindow = clampCostOfRiskSmoothingWindow(event.target.value);
     rerenderApp(actions.getState());
   });
+  elements.costOfRiskActiveFilters?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-cost-of-risk-clear-filter]");
+    if (!button) return;
+
+    clearActiveCostOfRiskFilter(button.dataset.costOfRiskClearFilter);
+    rerenderApp(actions.getState());
+  });
   elements.costOfRiskDashboard?.addEventListener("change", (event) => {
     const checkbox = event.target.closest?.("[data-cost-of-risk-core-code]");
     if (!checkbox) return;
@@ -212,6 +263,7 @@ export function wireCostOfRiskUi(actions, rerender) {
 export function renderCostOfRisk(state) {
   if (!elements.costOfRiskEmpty || !elements.costOfRiskDashboard) return;
   renderCostOfRiskTabs();
+  clearCostOfRiskEmptyPanels();
 
   const filterOptions = getCostOfRiskFilterOptions(state);
   const xAxisOptions = getCostOfRiskXAxisOptions(state);
@@ -245,11 +297,18 @@ export function renderCostOfRisk(state) {
     activeCostOfRiskReferenceDate,
     activeCostOfRiskStageSummaryCellKey
   );
+  const counterpartySummary = buildCostOfRiskCounterpartySummaryModel(
+    state,
+    activeCostOfRiskFilters,
+    activeCostOfRiskReferenceDate,
+    activeCostOfRiskCounterpartySummaryCellKey
+  );
   activeCostOfRiskReferenceDate = stageSummary.referenceDate || activeCostOfRiskReferenceDate;
 
   renderCostOfRiskFilterSelect(elements.costOfRiskAsset, filterOptions.assets, activeCostOfRiskFilters.asset);
   renderCostOfRiskFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderCostOfRiskFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
+  renderCostOfRiskActiveFilters(filterOptions);
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = activeCostOfRiskDisplayMode;
   renderCostOfRiskRatioDenominatorControls(state);
   renderCostOfRiskXAxisOptions(
@@ -259,27 +318,37 @@ export function renderCostOfRisk(state) {
   renderCostOfRiskSmoothingControl(activeCostOfRiskSmoothingWindow);
   renderCostOfRiskCoreDefinition(waterfallXAxisOptions);
 
+  const isF18SummaryTab = activeCostOfRiskTab === "stage-summary" || activeCostOfRiskTab === "counterparty-summary";
+  const activeF18Summary = activeCostOfRiskTab === "counterparty-summary" ? counterpartySummary : stageSummary;
+  if (selection.status && isF18SummaryTab && !activeF18Summary.status) {
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    renderCostOfRiskF18SummaryOnlyView(activeF18Summary, state);
+    scheduleCostOfRiskChartReflow();
+    return;
+  }
+
   if (selection.status) {
-    elements.costOfRiskEmpty.hidden = false;
-    elements.costOfRiskEmpty.textContent = selection.status;
-    const canAdjustFilters = selection.status.includes("matches the selected filters");
-    elements.costOfRiskDashboard.hidden = !canAdjustFilters;
-    if (canAdjustFilters) {
-      elements.costOfRiskValue.textContent = "-";
-      elements.costOfRiskContext.textContent = "-";
-      elements.costOfRiskDenominatorValue.textContent = "-";
-      elements.costOfRiskDenominatorContext.textContent = "-";
-      elements.costOfRiskRatioValue.textContent = "-";
-      elements.costOfRiskRatioContext.textContent = "-";
-      elements.costOfRiskF02Value.textContent = "-";
-      elements.costOfRiskF02Context.textContent = "-";
-      elements.costOfRiskPoints.textContent = "-";
-      renderCostOfRiskWaterfallTitle("");
-      renderCostOfRiskChartTitle(null, xAxisOptions, activeCostOfRiskXAxisCode);
-    }
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    renderCostOfRiskTabEmpty(selection.status);
+    elements.costOfRiskValue.textContent = "-";
+    elements.costOfRiskContext.textContent = "-";
+    elements.costOfRiskDenominatorValue.textContent = "-";
+    elements.costOfRiskDenominatorContext.textContent = "-";
+    elements.costOfRiskRatioValue.textContent = "-";
+    elements.costOfRiskRatioContext.textContent = "-";
+    elements.costOfRiskF02Value.textContent = "-";
+    elements.costOfRiskF02Context.textContent = "-";
+    elements.costOfRiskPoints.textContent = "-";
+    renderCostOfRiskWaterfallTitle("");
+    renderCostOfRiskChartTitle(null, xAxisOptions, activeCostOfRiskXAxisCode);
     destroyCostOfRiskChart();
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     leaveCostOfRiskStageTransferTab();
     destroyCostOfRiskTreemapChart();
     return;
@@ -323,11 +392,21 @@ export function renderCostOfRisk(state) {
   if (activeCostOfRiskTab === "stage-summary") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
     renderCostOfRiskStageSummaryView(stageSummary, state);
+  } else if (activeCostOfRiskTab === "counterparty-summary") {
+    destroyCostOfRiskWaterfallChart();
+    destroyCostOfRiskChart();
+    destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskTreemapChart();
+    leaveCostOfRiskStageTransferTab();
+    clearCostOfRiskAuditTable();
+    renderCostOfRiskCounterpartySummaryView(counterpartySummary, state);
   } else if (activeCostOfRiskTab === "contributions") {
     renderCostOfRiskWaterfallChart(waterfall, state.selectedJst, activeCostOfRiskDisplayMode, state.selectedUnit);
     renderCostOfRiskChart(
@@ -342,11 +421,13 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskTreemapChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     leaveCostOfRiskStageTransferTab();
   } else if (activeCostOfRiskTab === "f2-vs-f12") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
     destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     renderCostOfRiskF2VsF12Chart(
@@ -364,6 +445,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
     renderCostOfRiskStageTransferView(state);
@@ -372,6 +454,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
     renderCostOfRiskTreemap(
@@ -384,6 +467,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
     leaveCostOfRiskStageTransferTab();
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
@@ -397,6 +481,7 @@ function scheduleCostOfRiskChartReflow() {
       costOfRiskChart,
       costOfRiskWaterfallChart,
       costOfRiskStageSummaryChart,
+      costOfRiskCounterpartySummaryChart,
       costOfRiskStageTransferFlowChart,
       costOfRiskF2VsF12Chart,
       costOfRiskTreemapChart
@@ -416,6 +501,62 @@ function renderCostOfRiskTabs() {
     panel.classList.toggle("is-active", isActive);
     panel.hidden = !isActive;
   });
+}
+
+function renderCostOfRiskTabEmpty(message) {
+  const panel = getActiveCostOfRiskPanel();
+  if (!panel) return;
+
+  panel.classList.add("is-empty");
+  panel.querySelectorAll(".cost-of-risk-tab-empty").forEach((node) => node.remove());
+  const empty = document.createElement("div");
+  empty.className = "cost-of-risk-tab-empty";
+  empty.textContent = getCostOfRiskUnavailableMessage();
+  panel.prepend(empty);
+}
+
+function clearCostOfRiskEmptyPanels() {
+  elements.costOfRiskTabPanels.forEach((panel) => {
+    panel.classList.remove("is-empty");
+    panel.querySelectorAll(".cost-of-risk-tab-empty").forEach((node) => node.remove());
+  });
+}
+
+function getActiveCostOfRiskPanel() {
+  return elements.costOfRiskTabPanels.find((panel) => panel.dataset.costOfRiskPanel === activeCostOfRiskTab) ?? null;
+}
+
+function renderCostOfRiskF18SummaryOnlyView(summary, state) {
+  elements.costOfRiskValue.textContent = "-";
+  elements.costOfRiskContext.textContent = "-";
+  elements.costOfRiskDenominatorValue.textContent = "-";
+  elements.costOfRiskDenominatorContext.textContent = "-";
+  elements.costOfRiskRatioValue.textContent = "-";
+  elements.costOfRiskRatioContext.textContent = "F_18.00 summary";
+  elements.costOfRiskF02Value.textContent = "-";
+  elements.costOfRiskF02Context.textContent = "-";
+  elements.costOfRiskPoints.textContent = "-";
+
+  if (activeCostOfRiskTab === "counterparty-summary") {
+    destroyCostOfRiskWaterfallChart();
+    destroyCostOfRiskChart();
+    destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskTreemapChart();
+    leaveCostOfRiskStageTransferTab();
+    clearCostOfRiskAuditTable();
+    renderCostOfRiskCounterpartySummaryView(summary, state);
+    return;
+  }
+
+  destroyCostOfRiskWaterfallChart();
+  destroyCostOfRiskChart();
+  destroyCostOfRiskCounterpartySummaryChart();
+  destroyCostOfRiskF2VsF12Chart();
+  destroyCostOfRiskTreemapChart();
+  leaveCostOfRiskStageTransferTab();
+  clearCostOfRiskAuditTable();
+  renderCostOfRiskStageSummaryView(summary, state);
 }
 
 function normalizeActiveCostOfRiskFilter(name, options) {
@@ -469,10 +610,93 @@ function renderCostOfRiskFilterSelect(select, options, selectedValue) {
   if (!select) return;
 
   select.replaceChildren();
+  const groups = new Map();
   options.forEach((option) => {
-    select.append(new Option(option.label, option.value, false, option.value === selectedValue));
+    const optionElement = new Option(option.label, option.value, false, option.value === selectedValue);
+    if (!option.groupLabel) {
+      select.append(optionElement);
+      return;
+    }
+    if (!groups.has(option.groupLabel)) {
+      const group = document.createElement("optgroup");
+      group.label = option.groupLabel;
+      groups.set(option.groupLabel, group);
+      select.append(group);
+    }
+    groups.get(option.groupLabel).append(optionElement);
   });
   select.disabled = options.length <= 1;
+}
+
+function renderCostOfRiskActiveFilters(filterOptions) {
+  if (!elements.costOfRiskActiveFilters) return;
+
+  const chips = [
+    createCostOfRiskReferenceDateChip(activeCostOfRiskReferenceDate),
+    createCostOfRiskActiveFilterChip("asset", activeCostOfRiskFilters.asset, filterOptions.assets),
+    createCostOfRiskActiveFilterChip("counterparty", activeCostOfRiskFilters.counterparty, filterOptions.counterparties),
+    createCostOfRiskActiveFilterChip("stage", activeCostOfRiskFilters.stage, filterOptions.stages)
+  ].filter(Boolean);
+
+  elements.costOfRiskActiveFilters.replaceChildren(...chips);
+  elements.costOfRiskActiveFilters.classList.toggle("is-empty", chips.length === 0);
+}
+
+function createCostOfRiskReferenceDateChip(referenceDate) {
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--locked";
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label";
+  label.textContent = formatReferenceQuarterLabel(referenceDate);
+  chip.append(label);
+  return chip;
+}
+
+function createCostOfRiskActiveFilterChip(filterName, value, options) {
+  if (!value || value === COST_OF_RISK_FILTER_ALL) return null;
+
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip";
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label";
+  label.textContent = getCostOfRiskFilterOptionLabel(options, value);
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-filter-chip-close";
+  button.type = "button";
+  button.dataset.costOfRiskClearFilter = filterName;
+  button.setAttribute("aria-label", `Remove ${label.textContent} filter`);
+  button.textContent = "×";
+  chip.append(label, button);
+  return chip;
+}
+
+function getCostOfRiskFilterOptionLabel(options, value) {
+  return (options ?? []).find((option) => option.value === value)?.label ?? value;
+}
+
+function clearActiveCostOfRiskFilter(filterName) {
+  if (!Object.prototype.hasOwnProperty.call(activeCostOfRiskFilters, filterName)) return;
+
+  activeCostOfRiskFilters[filterName] = getCostOfRiskFilterParentValue(filterName, activeCostOfRiskFilters[filterName]);
+  if (filterName === "asset" && elements.costOfRiskAsset) elements.costOfRiskAsset.value = activeCostOfRiskFilters[filterName];
+  if (filterName === "counterparty" && elements.costOfRiskCounterparty) elements.costOfRiskCounterparty.value = activeCostOfRiskFilters[filterName];
+  if (filterName === "stage" && elements.costOfRiskStage) elements.costOfRiskStage.value = activeCostOfRiskFilters[filterName];
+}
+
+function getCostOfRiskFilterParentValue(filterName, value) {
+  return COST_OF_RISK_FILTER_PARENT_VALUES[filterName]?.[value] ?? COST_OF_RISK_FILTER_ALL;
+}
+
+function getCostOfRiskUnavailableMessage() {
+  const counterparty = activeCostOfRiskFilters.counterparty;
+  const parent = getCostOfRiskFilterParentValue("counterparty", counterparty);
+  if (parent !== COST_OF_RISK_FILTER_ALL) {
+    const detailLabel = COST_OF_RISK_FILTER_UNAVAILABLE_LABELS.counterparty[counterparty] ?? counterparty;
+    const parentLabel = COST_OF_RISK_FILTER_PARENT_LABELS.counterparty[parent] ?? parent;
+    return `FINREP data does not support this level of detail for ${detailLabel}. Select ${parentLabel} instead.`;
+  }
+
+  return COST_OF_RISK_UNAVAILABLE_MESSAGE;
 }
 
 function renderCostOfRiskCoreDefinition(options) {
@@ -622,27 +846,30 @@ function renderCostOfRiskStageSummaryTable(stageSummary, selectedUnit = "million
   if (!elements.costOfRiskStageSummaryTable) return;
 
   if (stageSummary.status) {
-    elements.costOfRiskStageSummaryTable.textContent = stageSummary.status;
     destroyCostOfRiskStageSummaryChart();
+    renderCostOfRiskTabEmpty(stageSummary.status);
     return;
   }
 
   const table = document.createElement("table");
   table.className = "cost-of-risk-stage-summary-grid";
   table.append(createCostOfRiskStageSummaryColGroup());
-  table.append(createCostOfRiskStageSummaryHead());
+  table.append(createCostOfRiskStageSummaryHead(activeCostOfRiskStageSummaryCellKey, selectCostOfRiskStageSummaryColumn));
 
   const tbody = document.createElement("tbody");
   (stageSummary.rows ?? []).forEach((row) => {
     const tr = document.createElement("tr");
     tr.className = "cost-of-risk-stage-summary-row";
+    tr.classList.add(`cost-of-risk-stage-summary-row--level-${getCostOfRiskStageSummaryRowLevel(row.key)}`);
+    tr.classList.toggle("is-total-row", row.key === "all");
     tr.classList.toggle("is-active-stage", isCostOfRiskStageSummaryRowActive(row.key));
+    tr.classList.toggle("is-active-summary-row", getCostOfRiskSummaryCellRowKey(activeCostOfRiskStageSummaryCellKey) === row.key);
     tr.dataset.costOfRiskStageSummaryRow = row.key;
     tr.addEventListener("click", () => selectCostOfRiskStageSummaryRow(row.key));
     const labelCell = document.createElement("th");
     labelCell.scope = "row";
     labelCell.className = "cost-of-risk-stage-summary-row-label";
-    labelCell.textContent = row.label;
+    labelCell.append(createCostOfRiskSummaryRowButton(row.label, () => selectCostOfRiskStageSummaryRow(row.key)));
     tr.append(labelCell);
 
     ["gca", "allowances", "coverage"].forEach((metric, index) => {
@@ -682,23 +909,23 @@ function createCostOfRiskStageSummaryColGroup() {
   return colgroup;
 }
 
-function createCostOfRiskStageSummaryHead() {
+function createCostOfRiskStageSummaryHead(activeCellKey, onColumnSelect) {
   const thead = document.createElement("thead");
   const tr = document.createElement("tr");
   tr.append(document.createElement("th"));
   [
-    ["GCA", "MoM"],
-    ["Allowances", "MoM"],
-    ["Coverage", "MoM"]
-  ].forEach(([metricLabel, momLabel], index) => {
+    [{ label: "GCA", metric: "gca", kind: "level" }, { label: "Variation", metric: "gca", kind: "mom" }],
+    [{ label: "Allowances", metric: "allowances", kind: "level" }, { label: "Variation", metric: "allowances", kind: "mom" }],
+    [{ label: "Coverage", metric: "coverage", kind: "level" }, { label: "Variation", metric: "coverage", kind: "mom" }]
+  ].forEach(([metricColumn, momColumn], index) => {
     const metric = document.createElement("th");
     metric.className = "cost-of-risk-stage-summary-metric-head";
-    metric.textContent = metricLabel;
+    metric.append(createCostOfRiskSummaryHeaderButton(metricColumn, activeCellKey, onColumnSelect));
     tr.append(metric);
 
     const mom = document.createElement("th");
     mom.className = "cost-of-risk-stage-summary-mom-head";
-    mom.textContent = momLabel;
+    mom.append(createCostOfRiskSummaryHeaderButton(momColumn, activeCellKey, onColumnSelect));
     tr.append(mom);
 
     if (index < 2) {
@@ -711,15 +938,47 @@ function createCostOfRiskStageSummaryHead() {
   return thead;
 }
 
+function createCostOfRiskSummaryHeaderButton(column, activeCellKey, onColumnSelect) {
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-stage-summary-head-button";
+  button.classList.toggle("is-active-column", getCostOfRiskSummaryCellColumnKey(activeCellKey) === `${column.metric}:${column.kind}`);
+  button.type = "button";
+  button.textContent = column.label;
+  button.addEventListener("click", () => onColumnSelect(column.metric, column.kind));
+  return button;
+}
+
+function createCostOfRiskSummaryRowButton(label, onSelect) {
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-stage-summary-row-button";
+  button.type = "button";
+  button.textContent = label;
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onSelect();
+  });
+  return button;
+}
+
 function createCostOfRiskStageSummaryDataCell(row, metric, kind, selectedUnit) {
   const td = document.createElement("td");
   const cellKey = `${metric}:${kind}:${row.key}`;
   const button = document.createElement("button");
+  const displayValue = formatCostOfRiskStageSummaryCell(row.cells?.[metric], metric, kind, selectedUnit);
   button.className = "cost-of-risk-stage-summary-cell";
   button.classList.toggle("is-active", cellKey === activeCostOfRiskStageSummaryCellKey);
   button.type = "button";
   button.dataset.costOfRiskStageSummaryCell = cellKey;
-  button.textContent = formatCostOfRiskStageSummaryCell(row.cells?.[metric], metric, kind, selectedUnit);
+  button.textContent = displayValue;
+  button.title = createCostOfRiskSummaryCellTooltip({
+    counterpartyLabel: getActiveCostOfRiskCounterpartyTooltipLabel(),
+    displayValue,
+    kind,
+    metric,
+    selectedUnit,
+    stageLabel: getCostOfRiskStageSummaryTooltipStageLabel(row)
+  });
+  button.setAttribute("aria-label", button.title);
   button.addEventListener("click", (event) => {
     event.stopPropagation();
     selectCostOfRiskStageSummaryCell(cellKey, row.key);
@@ -732,7 +991,7 @@ function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit) {
   if (!cell) return "-";
   if (metric === "coverage") {
     return kind === "mom"
-      ? formatBasisPointsValue(cell.momRatioBasisPoints)
+      ? formatSignedBasisPointsValue(cell.momRatioBasisPoints)
       : (Number.isFinite(cell.ratio) ? formatContributionPercentValue(cell.ratio) : "-");
   }
 
@@ -741,8 +1000,92 @@ function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit) {
     return Number.isFinite(cell.value) ? formatMetricValue(cell.value, selectedUnit) : "-";
   }
 
-  if (kind === "mom") return formatBasisPointsValue(cell.momRatioBasisPoints);
+  if (kind === "mom") return formatSignedBasisPointsValue(cell.momRatioBasisPoints);
   return Number.isFinite(cell.ratio) ? formatContributionPercentValue(cell.ratio) : "-";
+}
+
+function formatSignedBasisPointsValue(value) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+
+  return `${new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    signDisplay: "exceptZero"
+  }).format(value)} bp`;
+}
+
+function createCostOfRiskSummaryCellTooltip({ counterpartyLabel, displayValue, kind, metric, selectedUnit, stageLabel }) {
+  const dateLabel = formatReferenceQuarterLabel(activeCostOfRiskReferenceDate);
+  const assetLabel = getActiveCostOfRiskAssetTooltipLabel();
+  const metricLabel = getCostOfRiskSummaryMetricTooltipLabel(metric);
+  const scope = [stageLabel, counterpartyLabel, assetLabel].filter(Boolean).join(", ");
+
+  if (displayValue === "-") {
+    return `In ${dateLabel}, ${metricLabel.toLowerCase()} is not available for ${scope}.`;
+  }
+
+  if (kind === "mom") {
+    return `In ${dateLabel}, the variation in ${metricLabel.toLowerCase()} for ${scope} is ${displayValue}.`;
+  }
+
+  if (metric === "coverage") {
+    return `In ${dateLabel}, the coverage ratio for ${scope} is ${displayValue}.`;
+  }
+
+  if (activeCostOfRiskDisplayMode === "ratio") {
+    return `In ${dateLabel}, ${scope} represents ${displayValue} of total ${metricLabel.toLowerCase()}.`;
+  }
+
+  return `In ${dateLabel}, ${metricLabel} for ${scope} is ${displayValue} ${getCostOfRiskUnitTooltipLabel(selectedUnit)}.`;
+}
+
+function getCostOfRiskSummaryMetricTooltipLabel(metric) {
+  return {
+    allowances: "allowances",
+    coverage: "coverage",
+    gca: "GCA"
+  }[metric] ?? metric;
+}
+
+function getCostOfRiskUnitTooltipLabel(selectedUnit) {
+  return {
+    billions: "billion euros",
+    euros: "euros",
+    millions: "million euros",
+    thousands: "thousand euros"
+  }[selectedUnit] ?? "million euros";
+}
+
+function getCostOfRiskStageSummaryTooltipStageLabel(row) {
+  return row.key === "all" ? "all stages" : row.label;
+}
+
+function getActiveCostOfRiskAssetTooltipLabel() {
+  return activeCostOfRiskFilters.asset === COST_OF_RISK_FILTER_ALL
+    ? "all asset types"
+    : activeCostOfRiskFilters.asset;
+}
+
+function getActiveCostOfRiskCounterpartyTooltipLabel() {
+  return getCostOfRiskCounterpartyTooltipLabel(activeCostOfRiskFilters.counterparty);
+}
+
+function getActiveCostOfRiskStageTooltipLabel() {
+  return activeCostOfRiskFilters.stage === COST_OF_RISK_FILTER_ALL
+    ? "all stages"
+    : activeCostOfRiskFilters.stage;
+}
+
+function getCostOfRiskCounterpartyTooltipLabel(value) {
+  if (!value || value === COST_OF_RISK_FILTER_ALL) return "all counterparties";
+
+  return {
+    HH_CONSUMPTION: "credit for consumption",
+    HH_RRE: "residential real estate collateralised loans",
+    NFC_CRE: "commercial real estate collateralised loans",
+    NFC_SMES: "SMEs",
+    "Non-financial corporations": "NFC"
+  }[value] ?? value;
 }
 
 function renderCostOfRiskStageSummaryChart(stageSummary, state) {
@@ -760,7 +1103,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
 
   if (!selectedCell || series.length === 0) {
     destroyCostOfRiskStageSummaryChart();
-    elements.costOfRiskStageSummaryChart.textContent = stageSummary.status || "";
+    renderCostOfRiskTabEmpty(stageSummary.status || "No stage summary time series is available for the current selection.");
     return;
   }
 
@@ -797,7 +1140,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
       selectCostOfRiskChartJst(seriesName);
     }, state.selectedJst),
     series,
-    subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
+    subtitle: { text: "" },
     title: createCostOfRiskHighchartsTitle(titleText),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
@@ -877,11 +1220,16 @@ function getCostOfRiskStageSummaryMetricLabel(selectedCell) {
     coverage: "Coverage",
     gca: "GCA"
   }[selectedCell.metric] ?? selectedCell.metric;
-  return selectedCell.kind === "mom" ? `${metricLabel} MoM` : metricLabel;
+  return selectedCell.kind === "mom" ? `${metricLabel} variation` : metricLabel;
 }
 
 function getCostOfRiskStageSummaryStageLabel(stageSummary, stageKey) {
   return (stageSummary.rows ?? []).find((row) => row.key === stageKey)?.label ?? stageKey;
+}
+
+function selectCostOfRiskStageSummaryColumn(metric, kind) {
+  const rowKey = getCostOfRiskSummaryCellRowKey(activeCostOfRiskStageSummaryCellKey) || "all";
+  selectCostOfRiskStageSummaryCell(`${metric}:${kind}:${rowKey}`, rowKey);
 }
 
 function selectCostOfRiskStageSummaryCell(cellKey, rowKey = "") {
@@ -896,8 +1244,8 @@ function selectCostOfRiskStageSummaryCell(cellKey, rowKey = "") {
 }
 
 function selectCostOfRiskStageSummaryRow(rowKey) {
-  if (!updateCostOfRiskStageFromSummaryRow(rowKey)) return;
-  if (getLatestState()) rerenderApp(getLatestState());
+  const columnKey = getCostOfRiskSummaryCellColumnKey(activeCostOfRiskStageSummaryCellKey) || "gca:level";
+  selectCostOfRiskStageSummaryCell(`${columnKey}:${rowKey}`, rowKey);
 }
 
 function updateCostOfRiskStageFromSummaryRow(rowKey) {
@@ -923,6 +1271,284 @@ function getCostOfRiskStageSummaryFilterValue(rowKey) {
   }[rowKey] ?? "";
 }
 
+function getCostOfRiskStageSummaryRowLevel(rowKey) {
+  return rowKey === "all" ? 0 : 1;
+}
+
+function renderCostOfRiskCounterpartySummaryView(counterpartySummary, state) {
+  renderCostOfRiskCounterpartySummaryTable(counterpartySummary, state.selectedUnit);
+  renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state);
+}
+
+function renderCostOfRiskCounterpartySummaryTable(counterpartySummary, selectedUnit = "millions") {
+  if (!elements.costOfRiskCounterpartySummaryTable) return;
+
+  if (counterpartySummary.status) {
+    destroyCostOfRiskCounterpartySummaryChart();
+    renderCostOfRiskTabEmpty(counterpartySummary.status);
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-stage-summary-grid cost-of-risk-counterparty-summary-grid";
+  table.append(createCostOfRiskStageSummaryColGroup());
+  table.append(createCostOfRiskStageSummaryHead(activeCostOfRiskCounterpartySummaryCellKey, selectCostOfRiskCounterpartySummaryColumn));
+
+  const tbody = document.createElement("tbody");
+  (counterpartySummary.rows ?? []).forEach((row) => {
+    if (row.type === "group") {
+      tbody.append(createCostOfRiskCounterpartySummaryGroupRow(row));
+      return;
+    }
+    if (row.group === "other" && !activeCostOfRiskCounterpartySummaryOtherOpen) return;
+
+    const tr = document.createElement("tr");
+    tr.className = "cost-of-risk-stage-summary-row";
+    tr.classList.add(`cost-of-risk-stage-summary-row--level-${getCostOfRiskCounterpartySummaryRowLevel(row)}`);
+    tr.classList.toggle("is-total-row", row.key === "all");
+    tr.classList.toggle("is-active-stage", isCostOfRiskCounterpartySummaryRowActive(row.value));
+    tr.classList.toggle("is-active-summary-row", getCostOfRiskSummaryCellRowKey(activeCostOfRiskCounterpartySummaryCellKey) === row.key);
+    tr.dataset.costOfRiskCounterpartySummaryRow = row.key;
+    tr.addEventListener("click", () => selectCostOfRiskCounterpartySummaryRow(row.key, row.value));
+    const labelCell = document.createElement("th");
+    labelCell.scope = "row";
+    labelCell.className = `cost-of-risk-stage-summary-row-label${row.group === "other" ? " cost-of-risk-counterparty-summary-other-label" : ""}`;
+    labelCell.append(createCostOfRiskSummaryRowButton(row.label, () => selectCostOfRiskCounterpartySummaryRow(row.key, row.value)));
+    tr.append(labelCell);
+
+    ["gca", "allowances", "coverage"].forEach((metric, index) => {
+      tr.append(createCostOfRiskCounterpartySummaryDataCell(row, metric, "level", selectedUnit));
+      tr.append(createCostOfRiskCounterpartySummaryDataCell(row, metric, "mom", selectedUnit));
+      if (index < 2) {
+        const gap = document.createElement("td");
+        gap.className = "cost-of-risk-stage-summary-gap";
+        tr.append(gap);
+      }
+    });
+    tbody.append(tr);
+  });
+  table.append(tbody);
+
+  elements.costOfRiskCounterpartySummaryTable.replaceChildren(table);
+}
+
+function createCostOfRiskCounterpartySummaryGroupRow(row) {
+  const tr = document.createElement("tr");
+  tr.className = "cost-of-risk-counterparty-summary-group-row";
+  const cell = document.createElement("th");
+  cell.colSpan = 9;
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-counterparty-summary-toggle";
+  button.type = "button";
+  button.textContent = `${activeCostOfRiskCounterpartySummaryOtherOpen ? "−" : "+"} ${row.label}`;
+  button.addEventListener("click", () => {
+    activeCostOfRiskCounterpartySummaryOtherOpen = !activeCostOfRiskCounterpartySummaryOtherOpen;
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
+  cell.append(button);
+  tr.append(cell);
+  return tr;
+}
+
+function createCostOfRiskCounterpartySummaryDataCell(row, metric, kind, selectedUnit) {
+  const td = document.createElement("td");
+  const cellKey = `${metric}:${kind}:${row.key}`;
+  const button = document.createElement("button");
+  const displayValue = formatCostOfRiskStageSummaryCell(row.cells?.[metric], metric, kind, selectedUnit);
+  button.className = "cost-of-risk-stage-summary-cell";
+  button.classList.toggle("is-active", cellKey === activeCostOfRiskCounterpartySummaryCellKey);
+  button.type = "button";
+  button.dataset.costOfRiskCounterpartySummaryCell = cellKey;
+  button.textContent = displayValue;
+  button.title = createCostOfRiskSummaryCellTooltip({
+    counterpartyLabel: getCostOfRiskCounterpartySummaryTooltipLabel(row),
+    displayValue,
+    kind,
+    metric,
+    selectedUnit,
+    stageLabel: getActiveCostOfRiskStageTooltipLabel()
+  });
+  button.setAttribute("aria-label", button.title);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    selectCostOfRiskCounterpartySummaryCell(cellKey, row.value);
+  });
+  td.append(button);
+  return td;
+}
+
+function getCostOfRiskCounterpartySummaryTooltipLabel(row) {
+  return row.key === "all" ? "all counterparties" : getCostOfRiskCounterpartyTooltipLabel(row.value) || row.label;
+}
+
+function getCostOfRiskCounterpartySummaryRowLevel(row) {
+  if (row.key === "all") return 0;
+  if (["nfc-smes", "nfc-cre", "hh-consumption", "hh-rre"].includes(row.key) || row.group === "other") return 2;
+  return 1;
+}
+
+function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
+  if (!elements.costOfRiskCounterpartySummaryChart || !window.Highcharts) return;
+
+  const selectedCell = counterpartySummary.selectedCell;
+  const chartDisplayMode = selectedCell?.metric === "coverage" ? "ratio" : activeCostOfRiskDisplayMode;
+  const chartModel = buildBenchmarkChartModel(counterpartySummary.benchmarkSeries, state.selectedJst, primaryDark, {
+    displayMode: chartDisplayMode,
+    peerDisplayMode: state.peerDisplayMode,
+    smoothingWindow: activeCostOfRiskSmoothingWindow
+  });
+  const series = chartModel.series;
+  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
+
+  if (!selectedCell || series.length === 0) {
+    destroyCostOfRiskCounterpartySummaryChart();
+    renderCostOfRiskTabEmpty(counterpartySummary.status || "No counterparty summary time series is available for the current selection.");
+    return;
+  }
+
+  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
+  const selectedReferencePoint = counterpartySummary.benchmarkSeries
+    .find((benchmark) => benchmark.jstCode === state.selectedJst)
+    ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
+  const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getCostOfRiskCounterpartySummaryRowLabel(counterpartySummary, selectedCell.rowKey)} - time evolution`;
+  const ratioIsPercent = selectedCell.kind === "level";
+
+  const options = {
+    chart: {
+      animation: false,
+      backgroundColor: "transparent",
+      events: {
+        render() {
+          if (isAnonymised) {
+            renderPeerDistributionBands(this, chartModel.distribution);
+          } else {
+            clearPeerDistributionBands(this);
+          }
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst);
+        }
+      },
+      spacingRight: 128,
+      type: "line",
+      zooming: { type: "xy" },
+      zoomType: "xy"
+    },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
+      selectCostOfRiskReferenceDate(referenceLabel);
+      selectCostOfRiskChartJst(seriesName);
+    }, state.selectedJst),
+    series,
+    subtitle: { text: "" },
+    title: createCostOfRiskHighchartsTitle(titleText),
+    tooltip: {
+      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
+      pointFormatter() {
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageSummaryChartValue(this.y, selectedCell, chartDisplayMode, state.selectedUnit)}`;
+      },
+      shared: false,
+      split: false,
+      stickOnContact: true,
+      xDateFormat: "%d/%m/%Y"
+    },
+    xAxis: {
+      labels: {
+        formatter() {
+          return formatCostOfRiskQuarterAxisLabel(this.value);
+        },
+        rotation: -45,
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#c2cac5",
+      lineWidth: 1,
+      plotLines: selectedReferencePoint?.date instanceof Date ? [{
+        color: "#7f8984",
+        dashStyle: "ShortDash",
+        value: selectedReferencePoint.date.getTime(),
+        width: 1,
+        zIndex: 3
+      }] : [],
+      tickColor: "#d9dedb",
+      tickPositions: getCostOfRiskAxisTickPositions(counterpartySummary.benchmarkSeries[0]?.points),
+      type: "datetime"
+    },
+    yAxis: {
+      gridLineColor: "#edf0ee",
+      labels: {
+        formatter() {
+          return formatCostOfRiskStageSummaryChartValue(this.value, selectedCell, chartDisplayMode, state.selectedUnit);
+        },
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#aeb8b2",
+      lineWidth: 1,
+      max: yBounds.max,
+      min: yBounds.min,
+      startOnTick: false,
+      endOnTick: false,
+      tickAmount: 6,
+      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Basis points") }
+    }
+  };
+
+  if (costOfRiskCounterpartySummaryChart) {
+    costOfRiskCounterpartySummaryChart.update(options, true, true, false);
+  } else {
+    costOfRiskCounterpartySummaryChart = window.Highcharts.chart(elements.costOfRiskCounterpartySummaryChart, options);
+  }
+}
+
+function getCostOfRiskCounterpartySummaryRowLabel(counterpartySummary, rowKey) {
+  return (counterpartySummary.rows ?? []).find((row) => row.key === rowKey)?.label ?? rowKey;
+}
+
+function selectCostOfRiskCounterpartySummaryColumn(metric, kind) {
+  const rowKey = getCostOfRiskSummaryCellRowKey(activeCostOfRiskCounterpartySummaryCellKey) || "nfc";
+  selectCostOfRiskCounterpartySummaryCell(`${metric}:${kind}:${rowKey}`, getCostOfRiskCounterpartySummaryValue(rowKey));
+}
+
+function selectCostOfRiskCounterpartySummaryCell(cellKey, counterpartyValue = "") {
+  let shouldRerender = false;
+  if (cellKey && cellKey !== activeCostOfRiskCounterpartySummaryCellKey) {
+    activeCostOfRiskCounterpartySummaryCellKey = cellKey;
+    shouldRerender = true;
+  }
+  if (updateCostOfRiskCounterpartyFromSummaryRow(counterpartyValue)) shouldRerender = true;
+  if (!shouldRerender) return;
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function selectCostOfRiskCounterpartySummaryRow(rowKey, counterpartyValue) {
+  if (!rowKey) return;
+  const columnKey = getCostOfRiskSummaryCellColumnKey(activeCostOfRiskCounterpartySummaryCellKey) || "gca:level";
+  selectCostOfRiskCounterpartySummaryCell(`${columnKey}:${rowKey}`, counterpartyValue);
+}
+
+function updateCostOfRiskCounterpartyFromSummaryRow(counterpartyValue) {
+  if (!counterpartyValue || counterpartyValue === activeCostOfRiskFilters.counterparty) return false;
+
+  activeCostOfRiskFilters.counterparty = counterpartyValue;
+  if (elements.costOfRiskCounterparty) elements.costOfRiskCounterparty.value = counterpartyValue;
+  return true;
+}
+
+function isCostOfRiskCounterpartySummaryRowActive(counterpartyValue) {
+  return counterpartyValue === activeCostOfRiskFilters.counterparty;
+}
+
+function getCostOfRiskCounterpartySummaryValue(rowKey) {
+  return COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES[rowKey] ?? "";
+}
+
+function getCostOfRiskSummaryCellColumnKey(cellKey) {
+  const [metric, kind] = String(cellKey ?? "").split(":");
+  return metric && kind ? `${metric}:${kind}` : "";
+}
+
+function getCostOfRiskSummaryCellRowKey(cellKey) {
+  return String(cellKey ?? "").split(":")[2] ?? "";
+}
+
 function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedContribution, displayMode = "ratio", selectedUnit = "millions", peerDisplayMode = "explicit") {
   if (!elements.costOfRiskChart || !window.Highcharts) return;
 
@@ -934,7 +1560,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
 
   if (series.length === 0) {
     destroyCostOfRiskChart();
-    elements.costOfRiskChart.textContent = "";
+    renderCostOfRiskTabEmpty("No contribution time series is available for the current selection.");
     return;
   }
 
@@ -964,7 +1590,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
       selectCostOfRiskChartJst(seriesName);
     }, jstCode),
     series,
-    subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
+    subtitle: { text: "" },
     title: createCostOfRiskHighchartsTitle(activeCostOfRiskChartTitleText),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
@@ -1065,7 +1691,7 @@ function renderCostOfRiskF2VsF12Chart(f02Series, f12Series, displayMode = "ratio
 
   if (series.length === 0) {
     destroyCostOfRiskF2VsF12Chart();
-    elements.costOfRiskF2VsF12Chart.textContent = "";
+    renderCostOfRiskTabEmpty("No F2/F12 time series is available for the current selection.");
     return;
   }
 
@@ -1178,6 +1804,12 @@ function destroyCostOfRiskChart() {
   costOfRiskChart = null;
 }
 
+function destroyCostOfRiskCounterpartySummaryChart() {
+  if (!costOfRiskCounterpartySummaryChart) return;
+  costOfRiskCounterpartySummaryChart.destroy();
+  costOfRiskCounterpartySummaryChart = null;
+}
+
 function destroyCostOfRiskF2VsF12Chart() {
   if (!costOfRiskF2VsF12Chart) return;
   costOfRiskF2VsF12Chart.destroy();
@@ -1216,7 +1848,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
 
   if (contributions.length === 0) {
     destroyCostOfRiskWaterfallChart();
-    elements.costOfRiskWaterfall.textContent = "";
+    renderCostOfRiskTabEmpty("No contribution breakdown is available for the current selection.");
     return;
   }
 
@@ -1634,7 +2266,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
 
   if (!window.Highcharts || flowSeries.benchmarkSeries.length === 0) {
     destroyCostOfRiskStageTransferFlowChart();
-    elements.costOfRiskStageTransferFlowChart.textContent = flowSeries.status || "";
+    renderCostOfRiskTabEmpty(flowSeries.status || "No stage transfer time series is available for the current selection.");
     return;
   }
 
@@ -1647,7 +2279,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
   if (series.length === 0) {
     destroyCostOfRiskStageTransferFlowChart();
-    elements.costOfRiskStageTransferFlowChart.textContent = "";
+    renderCostOfRiskTabEmpty("No stage transfer time series is available for the current selection.");
     return;
   }
 
@@ -1682,7 +2314,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       selectCostOfRiskChartJst(seriesName);
     }, state.selectedJst),
     series,
-    subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
+    subtitle: { text: "" },
     title: createCostOfRiskHighchartsTitle(titleText),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
@@ -1797,7 +2429,7 @@ function renderCostOfRiskStageTransferWaterfallChart(waterfall, selectedUnit, di
 
   if (contributions.length === 0 && !globalVariation) {
     destroyCostOfRiskStageTransferChart();
-    elements.costOfRiskStageTransferChart.textContent = waterfall.status || "";
+    renderCostOfRiskTabEmpty(waterfall.status || "No stage transfer data is available for the current selection.");
     return;
   }
 

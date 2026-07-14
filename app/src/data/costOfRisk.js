@@ -4,6 +4,7 @@ import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "./core/axisC
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "./core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
+export const COST_OF_RISK_FILTER_ALL = "__all__";
 export const COST_OF_RISK_TREEMAP_STAGE_OPTIONS = [
   { label: "Stage 1", value: "Stage 1" },
   { label: "Stage 2", value: "Stage 2" },
@@ -17,6 +18,20 @@ export const COST_OF_RISK_TREEMAP_COUNTERPARTIES = [
   { label: "Other financials", shortLabel: "OFI", value: "Other financial corporations" },
   { label: "NFC", shortLabel: "NFC", value: "Non-financial corporations" },
   { label: "HH", shortLabel: "HH", value: "Households" }
+];
+const COST_OF_RISK_COUNTERPARTY_OTHER_GROUP = "Other";
+const COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP = "Key counterparties";
+const COST_OF_RISK_COUNTERPARTY_FILTER_OPTIONS = [
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "NFC", shortLabel: "NFC", terminal: "Non-financial corporations", value: "Non-financial corporations" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w SMEs", parent: "Non-financial corporations", terminal: "Of which: small and medium-sized enterprises", value: "NFC_SMES" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w collat. CRE", parent: "Non-financial corporations", terminal: "Of which: loans collateralised by commercial immovable property", value: "NFC_CRE" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "Households", shortLabel: "HH", terminal: "Households", value: "Households" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w credit for consumption", parent: "Households", terminal: "Of which: credit for consumption", value: "HH_CONSUMPTION" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w collat. RRE", parent: "Households", terminal: "Of which: loans collateralised by residential immovable property", value: "HH_RRE" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "Central banks", shortLabel: "CB", terminal: "Central banks", value: "Central banks" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "General governments", shortLabel: "Gov", terminal: "General governments", value: "General governments" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "Credit institutions", shortLabel: "CI", terminal: "Credit institutions", value: "Credit institutions" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "Other financial corporations", shortLabel: "OFI", terminal: "Other financial corporations", value: "Other financial corporations" }
 ];
 
 export const COST_OF_RISK_TABLE_ID = "F_12.01";
@@ -38,9 +53,30 @@ const COST_OF_RISK_STAGE_SUMMARY_ROWS = [
   { key: "poci", label: "POCI", gcaXCodes: ["0058", "0900"], allowanceXCodes: ["0143", "0952"] }
 ];
 export const DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL = "gca:level:all";
+const COST_OF_RISK_ALLOWANCE_STAGE_X_CODES = {
+  "": ["0130"],
+  "POCI": ["0143", "0952"],
+  "Stage 1": ["0141"],
+  "Stage 2": ["0142", "0950"],
+  "Stage 3": ["0951"]
+};
+const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS = [
+  { key: "all", label: "All", type: "row", value: COST_OF_RISK_FILTER_ALL },
+  { key: "nfc", label: "NFC", type: "row", value: "Non-financial corporations" },
+  { key: "nfc-smes", label: "SMEs", type: "row", value: "NFC_SMES" },
+  { key: "nfc-cre", label: "collat. CRE", type: "row", value: "NFC_CRE" },
+  { key: "households", label: "Households", type: "row", value: "Households" },
+  { key: "hh-consumption", label: "credit for consumption", type: "row", value: "HH_CONSUMPTION" },
+  { key: "hh-rre", label: "collat. RRE", type: "row", value: "HH_RRE" },
+  { key: "other", label: "Other", type: "group" },
+  { group: "other", key: "central-banks", label: "Central banks", type: "row", value: "Central banks" },
+  { group: "other", key: "governments", label: "General governments", type: "row", value: "General governments" },
+  { group: "other", key: "credit-institutions", label: "Credit institutions", type: "row", value: "Credit institutions" },
+  { group: "other", key: "other-financials", label: "Other financial corporations", type: "row", value: "Other financial corporations" }
+];
+export const DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL = "gca:level:nfc";
 const COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX = "Debt instruments other than held for trading";
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
-export const COST_OF_RISK_FILTER_ALL = "__all__";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
 const COST_OF_RISK_F02_X_AXIS_CODE = "0010";
 const COST_OF_RISK_F02_Y_AXIS_CODE = "0460";
@@ -243,7 +279,7 @@ export function getCostOfRiskFilterOptions(state) {
 
   return {
     assets: createCostOfRiskFilterOptions(ASSET_LABELS, formatCostOfRiskAssetLabel),
-    counterparties: createCostOfRiskFilterOptions(COUNTERPARTY_LABELS, formatCostOfRiskCounterpartyLabel),
+    counterparties: createCostOfRiskCounterpartyFilterOptions(),
     stages: createCostOfRiskFilterOptions(getAvailableCostOfRiskStages(descriptors), formatCostOfRiskStageLabel)
   };
 }
@@ -1072,6 +1108,141 @@ function buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySe
     : values;
 }
 
+export function buildCostOfRiskCounterpartySummaryModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const baseFilters = { ...filters, counterparty: COST_OF_RISK_FILTER_ALL };
+  const totalYSelection = getCostOfRiskStageBoxYSelection(state, baseFilters);
+
+  if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
+    return { rows: [], selectedCell: null, status: "Load a CSV and select a JST." };
+  }
+
+  if (totalYSelection.codes.length === 0) {
+    return {
+      rows: [],
+      selectedCell: null,
+      status: "No matching F_18.00 Y-axis point is available for the selected filters."
+    };
+  }
+
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const referenceLabel = referenceColumns[referenceIndex]?.label ?? "";
+  const selectedCell = parseCostOfRiskCounterpartySummaryCellKey(selectedCellKey)
+    ?? parseCostOfRiskCounterpartySummaryCellKey(DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL);
+  const rows = buildCostOfRiskCounterpartySummaryRowsForJst(state, indexes, referenceColumns, normalizedFilters, state.selectedJst, referenceIndex);
+
+  return {
+    benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+      jstCode,
+      points: buildCostOfRiskCounterpartySummaryPointsForJst(state, indexes, referenceColumns, normalizedFilters, jstCode, selectedCell)
+    })),
+    filterLabel: totalYSelection.label,
+    referenceDate: referenceLabel,
+    rows,
+    selectedCell,
+    status: ""
+  };
+}
+
+function buildCostOfRiskCounterpartySummaryRowsForJst(state, indexes, referenceColumns, filters, jstCode, referenceIndex) {
+  const totalGca = buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, "gca");
+  const totalAllowances = buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, "allowances");
+
+  return COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.map((rowDefinition) => {
+    if (rowDefinition.type === "group") return { ...rowDefinition };
+
+    const gca = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "gca", rowDefinition.value);
+    const allowances = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "allowances", rowDefinition.value);
+    const coverage = buildCostOfRiskCoverageSeries(gca, allowances);
+    return {
+      ...rowDefinition,
+      cells: {
+        allowances: createCostOfRiskStageSummaryCellValues(allowances, totalAllowances, referenceIndex),
+        coverage: createCostOfRiskCoverageCellValues(coverage, referenceIndex),
+        gca: createCostOfRiskStageSummaryCellValues(gca, totalGca, referenceIndex)
+      }
+    };
+  });
+}
+
+function buildCostOfRiskCounterpartySummaryPointsForJst(state, indexes, referenceColumns, filters, jstCode, selectedCell) {
+  const metricSeries = buildCostOfRiskCounterpartySummaryMetricSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric, selectedCell.rowKey);
+  const totalSeries = selectedCell.metric === "gca" || selectedCell.metric === "allowances"
+    ? buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric)
+    : null;
+
+  return referenceColumns.map((column, index) => {
+    const previousValue = index > 0 ? metricSeries[index - 1] : null;
+    const value = metricSeries[index] ?? null;
+    const pointValue = selectedCell.kind === "mom"
+      ? getFiniteDelta(value, previousValue)
+      : value;
+    const ratioBasisPoints = getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selectedCell, index);
+
+    return {
+      date: column.date,
+      denominator: totalSeries?.[index] ?? null,
+      label: column.label,
+      ratioBasisPoints,
+      value: pointValue
+    };
+  });
+}
+
+function buildCostOfRiskCounterpartySummaryMetricSeries(state, indexes, referenceColumns, filters, jstCode, metric, rowKey) {
+  const rowDefinition = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((candidate) => candidate.key === rowKey && candidate.type === "row")
+    ?? COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((candidate) => candidate.key === "nfc");
+
+  if (metric === "coverage") {
+    return buildCostOfRiskCoverageSeries(
+      buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "gca", rowDefinition.value),
+      buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "allowances", rowDefinition.value)
+    );
+  }
+
+  return buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, metric, rowDefinition.value);
+}
+
+function buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, metric, counterpartyValue) {
+  const ySelection = getCostOfRiskStageBoxYSelection(state, {
+    ...filters,
+    counterparty: counterpartyValue
+  });
+  return buildCostOfRiskCounterpartySummarySeriesFromYCodes(state, indexes, referenceColumns, filters, jstCode, metric, ySelection.codes);
+}
+
+function buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, metric) {
+  if (metric === "gca") {
+    return getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
+      ...filters,
+      counterparty: COST_OF_RISK_FILTER_ALL
+    });
+  }
+
+  const ySelection = getCostOfRiskStageBoxYSelection(state, {
+    ...filters,
+    counterparty: COST_OF_RISK_FILTER_ALL
+  });
+  return buildCostOfRiskCounterpartySummarySeriesFromYCodes(state, indexes, referenceColumns, filters, jstCode, metric, ySelection.codes);
+}
+
+function buildCostOfRiskCounterpartySummarySeriesFromYCodes(state, indexes, referenceColumns, filters, jstCode, metric, yCodes) {
+  const xCodes = getCostOfRiskCounterpartySummaryXCodes(metric, filters.stage);
+  const values = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, yCodes);
+
+  return metric === "allowances"
+    ? values.map((value) => (Number.isFinite(value) ? -value : value))
+    : values;
+}
+
+function getCostOfRiskCounterpartySummaryXCodes(metric, stage) {
+  const normalizedStage = stage && stage !== COST_OF_RISK_FILTER_ALL ? stage : "";
+  if (metric === "allowances") return COST_OF_RISK_ALLOWANCE_STAGE_X_CODES[normalizedStage] ?? COST_OF_RISK_ALLOWANCE_STAGE_X_CODES[""];
+  return COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[normalizedStage] ?? COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[""];
+}
+
 function buildCostOfRiskCoverageSeries(gcaSeries, allowanceSeries) {
   return gcaSeries.map((gca, index) => {
     const allowances = allowanceSeries[index];
@@ -1151,6 +1322,14 @@ export function parseCostOfRiskStageSummaryCellKey(cellKey) {
   const isKind = ["level", "mom"].includes(kind);
   const isStage = COST_OF_RISK_STAGE_SUMMARY_ROWS.some((row) => row.key === stageKey);
   return isMetric && isKind && isStage ? { key: `${metric}:${kind}:${stageKey}`, kind, metric, stageKey } : null;
+}
+
+export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
+  const [metric, kind, rowKey] = String(cellKey ?? "").split(":");
+  const isMetric = ["gca", "allowances", "coverage"].includes(metric);
+  const isKind = ["level", "mom"].includes(kind);
+  const isRow = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.some((row) => row.type === "row" && row.key === rowKey);
+  return isMetric && isKind && isRow ? { key: `${metric}:${kind}:${rowKey}`, kind, metric, rowKey } : null;
 }
 
 function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode, filters = {}) {
@@ -1563,7 +1742,7 @@ function getCostOfRiskStageAxisYSelection(state, filters = {}, config) {
 
   const matchingDescriptors = descriptors.filter((descriptor) => (
     (!asset || descriptor.asset === asset)
-    && (!counterparty || descriptor.counterparty === counterparty)
+    && (!counterparty || matchesCostOfRiskCounterpartyDescriptor(descriptor, counterparty))
     && isCostOfRiskStageAxisAggregationPoint(descriptor, { asset, counterparty })
   ));
 
@@ -1642,6 +1821,17 @@ function createCostOfRiskFilterOptions(values, formatLabel) {
   ];
 }
 
+function createCostOfRiskCounterpartyFilterOptions() {
+  return [
+    { label: "All", value: COST_OF_RISK_FILTER_ALL },
+    ...COST_OF_RISK_COUNTERPARTY_FILTER_OPTIONS.map((option) => ({
+      groupLabel: option.groupLabel,
+      label: option.label,
+      value: option.value
+    }))
+  ];
+}
+
 function getAvailableCostOfRiskStages(descriptors) {
   const stages = ["Stage 1", "Stage 2", "Stage 3", "POCI"];
   return stages.filter((stage) => descriptors.some((descriptor) => descriptor.stage === stage));
@@ -1689,7 +1879,7 @@ function isCostOfRiskTotalFilter(filters) {
 
 function matchesCostOfRiskFilterDescriptor(descriptor, filters) {
   return (!filters.asset || descriptor.asset === filters.asset)
-    && (!filters.counterparty || descriptor.counterparty === filters.counterparty)
+    && (!filters.counterparty || matchesCostOfRiskCounterpartyDescriptor(descriptor, filters.counterparty))
     && (!filters.stage || descriptor.stage === filters.stage);
 }
 
@@ -1705,7 +1895,16 @@ function isCostOfRiskAggregationPoint(descriptor, filters) {
 }
 
 function isCostOfRiskCounterpartyLabel(value, counterparty) {
-  return value === counterparty || String(value ?? "").startsWith(`${counterparty} `);
+  const definition = getCostOfRiskCounterpartyDefinition(counterparty);
+  const target = definition?.terminal ?? counterparty;
+  return value === target || String(value ?? "").startsWith(`${target} `);
+}
+
+function matchesCostOfRiskCounterpartyDescriptor(descriptor, counterparty) {
+  const definition = getCostOfRiskCounterpartyDefinition(counterparty);
+  if (!definition) return descriptor.counterparty === counterparty;
+  if (definition.parent && descriptor.counterparty !== definition.parent) return false;
+  return isCostOfRiskCounterpartyLabel(descriptor.terminal, counterparty);
 }
 
 function createCostOfRiskFilteredSelectionLabel(filters) {
@@ -1743,7 +1942,13 @@ function formatCostOfRiskAssetLabel(asset) {
 }
 
 function formatCostOfRiskCounterpartyLabel(counterparty) {
+  const definition = getCostOfRiskCounterpartyDefinition(counterparty);
+  if (definition) return definition.shortLabel ?? definition.label;
   return COUNTERPARTY_SHORT_LABELS.get(counterparty) ?? counterparty;
+}
+
+function getCostOfRiskCounterpartyDefinition(value) {
+  return COST_OF_RISK_COUNTERPARTY_FILTER_OPTIONS.find((option) => option.value === value) ?? null;
 }
 
 function formatCostOfRiskStageLabel(stage) {

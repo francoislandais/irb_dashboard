@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260714-stage-summary-positive-allowances";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260714-stage-summary-positive-allowances";
+import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260714-summary-cross-selection";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260714-summary-cross-selection";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
