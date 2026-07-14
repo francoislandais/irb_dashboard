@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260713-temporal-xy-zoom";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260714-anonymised-percentile-labels";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -15,12 +15,11 @@ import {
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
-  formatAnonymisedTooltipPeerLines,
   getBenchmarkLinePlotOptions,
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260713-temporal-xy-zoom";
+} from "./benchmarkLineChart.js?v=20260714-anonymised-percentile-labels";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -489,10 +488,7 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        const peerLines = isAnonymised
-          ? formatAnonymisedTooltipPeerLines(chartModel.distribution, this.x, (value) => formatBenchmarkValue(value, benchmark))
-          : "";
-        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatBenchmarkValue(this.y, benchmark)}${peerLines ? `<br/>${peerLines}` : ""}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatBenchmarkValue(this.y, benchmark)}`;
       },
       shared: false,
       split: false,

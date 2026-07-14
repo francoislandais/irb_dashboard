@@ -27,22 +27,21 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260713-temporal-xy-zoom";
+} from "../data/costOfRisk.js?v=20260714-anonymised-percentile-labels";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260713-temporal-xy-zoom";
+} from "./costOfRiskStageTransfers.js?v=20260714-anonymised-percentile-labels";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
-  formatAnonymisedTooltipPeerLines,
   getBenchmarkLinePlotOptions,
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260713-temporal-xy-zoom";
+} from "./benchmarkLineChart.js?v=20260714-anonymised-percentile-labels";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
@@ -632,10 +631,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        const peerLines = isAnonymised
-          ? formatAnonymisedTooltipPeerLines(chartModel.distribution, this.x, (value) => formatCostOfRiskDisplayValue(value, displayMode, selectedUnit))
-          : "";
-        return `<span style="color:${this.series.color}">\u25cf</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(smoothingWindow)}</span>${peerLines ? `<br/>${peerLines}` : ""}`;
+        return `<span style="color:${this.series.color}">\u25cf</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(smoothingWindow)}</span>`;
       },
       shared: false,
       split: false,
@@ -1350,8 +1346,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
         const valueFormatter = (value) => (isStageBoxSelection && displayMode === "ratio"
           ? formatCostOfRiskStageBoxRatioValue(value)
           : formatCostOfRiskDisplayValue(value, displayMode, selectedUnit));
-        const peerLines = isAnonymised ? formatAnonymisedTooltipPeerLines(chartModel.distribution, this.x, valueFormatter) : "";
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${valueFormatter(this.y)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>${peerLines ? `<br/>${peerLines}` : ""}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${valueFormatter(this.y)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>`;
       },
       shared: false,
       split: false,

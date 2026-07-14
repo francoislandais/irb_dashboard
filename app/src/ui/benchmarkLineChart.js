@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260713-temporal-xy-zoom";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260713-temporal-xy-zoom";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260714-anonymised-percentile-labels";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260714-anonymised-percentile-labels";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
@@ -70,13 +70,9 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
 
 // Builds the Highcharts series list for a benchmark chart under either
 // display mode. In "explicit" mode this is unchanged (every peer JST as its
-// own line). In "anonymised" mode the peer series are never returned - only
-// the selected JST's series goes into the model, so no peer jst_code ever
-// reaches a Highcharts series/point/tooltip/legend/DOM node. The peer
-// distribution (percentiles per date) is returned separately for the
-// caller to draw as custom background bands via renderPeerDistributionBands
-// and to read from in a tooltip formatter - it carries only aggregates
-// (percentiles, peer count), never individual peer values or jst_codes.
+// own line). In "anonymised" mode individual peer series are replaced by
+// aggregate percentile series, so no peer jst_code ever reaches a
+// Highcharts series/point/tooltip/legend/DOM node.
 export function buildBenchmarkChartModel(benchmarkSeries, selectedJstCode, primaryDark, options = {}) {
   const peerDisplayMode = options.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
   const explicitSeries = buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, primaryDark, {
@@ -102,11 +98,12 @@ export function buildBenchmarkChartModel(benchmarkSeries, selectedJstCode, prima
 
   const distribution = buildPeerDistributionByDate(peerChartSeries);
   const hasAvailableDate = distribution.some((point) => point.status === "available");
+  const distributionSeries = buildPeerDistributionLineSeries(distribution);
 
   return {
     distribution,
     peerDisplayMode,
-    series: selectedSeries ? [selectedSeries] : [],
+    series: selectedSeries ? [selectedSeries, ...distributionSeries] : distributionSeries,
     status: hasAvailableDate ? "" : "Anonymised peer distribution unavailable: insufficient peer population."
   };
 }
@@ -127,14 +124,67 @@ export function getBenchmarkYAxisBoundsSeries(series, distribution) {
   return [...series, { data: bandValues }];
 }
 
+function buildPeerDistributionLineSeries(distribution) {
+  if (!Array.isArray(distribution) || distribution.length === 0) return [];
+
+  return PEER_DISTRIBUTION_LINE_SERIES.map((definition) => {
+    const data = distribution.map((point) => (
+      point.status === "available"
+        ? {
+          custom: { peerCount: point.peerCount },
+          x: point.x,
+          y: point[definition.key]
+        }
+        : {
+          x: point.x,
+          y: null
+        }
+    ));
+
+    return {
+      clip: false,
+      color: PEER_MEDIAN_COLOR,
+      custom: {
+        benchmarkLabel: definition.name,
+        isBenchmarkDistribution: true,
+        isEndpointSelectable: false
+      },
+      cursor: "default",
+      dashStyle: definition.dashStyle,
+      data,
+      enableMouseTracking: true,
+      lineWidth: definition.lineWidth,
+      marker: { enabled: false, radius: 0 },
+      name: definition.name,
+      opacity: definition.opacity,
+      states: {
+        hover: {
+          enabled: true,
+          halo: { size: 0 },
+          lineWidth: Math.max(definition.lineWidth + 0.45, 1.4),
+          lineWidthPlus: 0
+        },
+        inactive: { opacity: definition.opacity }
+      },
+      type: "line",
+      zIndex: definition.zIndex
+    };
+  }).filter((series) => series.data.some((point) => Number.isFinite(point.y)));
+}
+
 const PEER_BAND_OUTER_FILL = "rgba(143, 152, 147, 0.10)";
 const PEER_BAND_INNER_FILL = "rgba(143, 152, 147, 0.22)";
 const PEER_MEDIAN_COLOR = "#8f9893";
+const PEER_DISTRIBUTION_LINE_SERIES = [
+  { dashStyle: "ShortDash", key: "median", lineWidth: 1.7, name: "Median", opacity: 0.95, zIndex: 62 },
+  { dashStyle: "ShortDot", key: "p25", lineWidth: 1.15, name: "25th percentile", opacity: 0.78, zIndex: 61 },
+  { dashStyle: "ShortDot", key: "p75", lineWidth: 1.15, name: "75th percentile", opacity: 0.78, zIndex: 61 },
+  { dashStyle: "Dot", key: "p01", lineWidth: 0.9, name: "1st percentile", opacity: 0.62, zIndex: 60 },
+  { dashStyle: "Dot", key: "p99", lineWidth: 0.9, name: "99th percentile", opacity: 0.62, zIndex: 60 }
+];
 
-// Draws the P01-P99 and P25-P75 bands plus the median line as custom SVG
-// shapes on top of an already-rendered chart - not as Highcharts series,
-// so no peer data is ever attached to a chart series/point (which is what
-// keeps tooltips/legend/export naturally free of individual peer data).
+// Draws the P01-P99 and P25-P75 bands as custom SVG shapes behind the
+// aggregate percentile Highcharts series.
 // Call from the chart's "render" event, same pattern as
 // renderBenchmarkEndpointLabels. A run of consecutive dates without a
 // gap is drawn as one continuous band; a gap (insufficient population or a
@@ -151,7 +201,6 @@ export function renderPeerDistributionBands(chart, distribution) {
   splitIntoAvailableRuns(distribution).forEach((run) => {
     elements.push(drawPeerBand(chart, xAxis, yAxis, run, "p01", "p99", PEER_BAND_OUTER_FILL));
     elements.push(drawPeerBand(chart, xAxis, yAxis, run, "p25", "p75", PEER_BAND_INNER_FILL));
-    elements.push(drawPeerMedianLine(chart, xAxis, yAxis, run));
   });
 
   chart.customPeerDistributionElements = elements.filter(Boolean);
@@ -211,45 +260,6 @@ function drawPeerBand(chart, xAxis, yAxis, run, lowerKey, upperKey, fillColor) {
     .add();
 }
 
-function drawPeerMedianLine(chart, xAxis, yAxis, run) {
-  if (run.length === 0) return null;
-
-  if (run.length === 1) {
-    const point = run[0];
-    const x = xAxis.toPixels(point.x, false);
-    const y = yAxis.toPixels(point.median, false);
-    return chart.renderer
-      .path([["M", x - 4, y], ["L", x + 4, y]])
-      .attr({ "stroke-dasharray": "3 3", "stroke-width": 1.6, stroke: PEER_MEDIAN_COLOR, fill: "none", zIndex: 3 })
-      .add();
-  }
-
-  const segments = run.map((point) => ["L", xAxis.toPixels(point.x, false), yAxis.toPixels(point.median, false)]);
-  segments[0][0] = "M";
-
-  return chart.renderer
-    .path(segments)
-    .attr({ "stroke-dasharray": "3 3", "stroke-width": 1.6, stroke: PEER_MEDIAN_COLOR, fill: "none", zIndex: 3 })
-    .add();
-}
-
-// Extra tooltip lines for anonymised mode, appended after the selected
-// series' own line in a pointFormatter. Only ever reads aggregates
-// (percentiles, peer count) from the distribution - never an individual
-// peer's jst_code or value.
-export function formatAnonymisedTooltipPeerLines(distribution, x, formatValue) {
-  const point = (distribution ?? []).find((candidate) => candidate.x === x);
-  if (!point || point.status !== "available") return "";
-
-  return [
-    "",
-    `<span style="color:${PEER_MEDIAN_COLOR}">Peer median</span>: ${formatValue(point.median)}`,
-    `<span style="color:${PEER_MEDIAN_COLOR}">25th-75th percentile</span>: ${formatValue(point.p25)}-${formatValue(point.p75)}`,
-    `<span style="color:${PEER_MEDIAN_COLOR}">1st-99th percentile</span>: ${formatValue(point.p01)}-${formatValue(point.p99)}`,
-    `<span style="color:${PEER_MEDIAN_COLOR}">Peer population</span>: ${point.peerCount}`
-  ].join("<br/>");
-}
-
 // Clicking near two close points from different JSTs is ambiguous — the user
 // can't tell exactly which one they hit. The selected JST's curve is meant to
 // be the "safe" target: a click within this many pixels of one of its points
@@ -291,6 +301,7 @@ export function getBenchmarkLinePlotOptions(onPointClick, selectedJstCode = "") 
           // (it can end up empty). Running it on the next tick lets Highcharts
           // finish handling this click first.
           click() {
+            if (this.series.userOptions?.custom?.isBenchmarkDistribution) return;
             const targetPoint = resolveBenchmarkClickTarget(this, selectedJstCode);
             const referenceLabel = targetPoint.referenceLabel;
             const seriesName = targetPoint.series.name;
@@ -342,12 +353,14 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
 
       if (!point) return null;
 
+      const custom = serie.userOptions?.custom ?? {};
       return {
         anchorX: chart.plotLeft + point.plotX,
         anchorY: chart.plotTop + point.plotY,
         color: serie.color,
         isSelected: serie.name === selectedJst,
-        name: serie.name
+        isSelectable: custom.isEndpointSelectable !== false,
+        name: custom.benchmarkLabel ?? serie.name
       };
     })
     .filter(Boolean)
@@ -407,7 +420,7 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
       .label(candidate.name, labelX, targetY - 9, "rect")
       .css({
         color: candidate.color,
-        cursor: "pointer",
+        cursor: candidate.isSelectable ? "pointer" : "default",
         fontSize: candidate.isSelected ? "11px" : "10px",
         fontWeight: candidate.isSelected ? "700" : "600"
       })
@@ -419,8 +432,11 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
         "stroke-width": candidate.isSelected ? 1 : 0,
         zIndex: candidate.isSelected ? 90 : 75
       })
-      .on("click", () => setTimeout(() => onSelectJst(candidate.name), 0))
       .add();
+
+    if (candidate.isSelectable) {
+      label.on("click", () => setTimeout(() => onSelectJst(candidate.name), 0));
+    }
 
     chart.customBenchmarkEndpointLabels.push(connector, label);
   });
