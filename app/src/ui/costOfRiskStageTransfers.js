@@ -131,6 +131,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   const stageFill = "#f7f8f7";
   const stageStroke = "#c6cec8";
   const arrowWidth = 14;
+  const selectedStage = getSelectedStageBoxStage(selectedFlowKey);
 
   addStageBox(svg, 40, 160, "Stage 1", stageFill, stageStroke, {
     flowKey: "stagebox:1",
@@ -169,6 +170,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     color: flowArrowColor,
     direction: "right",
     flowKey: "transfer:1-2",
+    isStageRelated: isFlowRelatedToSelectedStage("transfer:1-2", selectedStage),
     isSelected: selectedFlowKey === "transfer:1-2",
     labelY: 130,
     maxFlow,
@@ -184,6 +186,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     color: flowArrowColor,
     direction: "left",
     flowKey: "transfer:2-1",
+    isStageRelated: isFlowRelatedToSelectedStage("transfer:2-1", selectedStage),
     isSelected: selectedFlowKey === "transfer:2-1",
     labelY: 270,
     maxFlow,
@@ -199,6 +202,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     color: flowArrowColor,
     direction: "right",
     flowKey: "transfer:2-3",
+    isStageRelated: isFlowRelatedToSelectedStage("transfer:2-3", selectedStage),
     isSelected: selectedFlowKey === "transfer:2-3",
     labelY: 130,
     maxFlow,
@@ -214,6 +218,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     color: flowArrowColor,
     direction: "left",
     flowKey: "transfer:3-2",
+    isStageRelated: isFlowRelatedToSelectedStage("transfer:3-2", selectedStage),
     isSelected: selectedFlowKey === "transfer:3-2",
     labelY: 270,
     maxFlow,
@@ -234,6 +239,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     onContextMenu,
     onSelectFlow,
     primaryDark,
+    selectedStage,
     selectedFlowKey,
     width: arrowWidth
   }, formatValue, displayMode, selectedUnit);
@@ -254,6 +260,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     addResidualFlow(svg, {
       color: flowArrowColor,
       flowKey: `other:${item.stage}`,
+      isStageRelated: isFlowRelatedToSelectedStage(`other:${item.stage}`, selectedStage),
       isSelected: selectedFlowKey === `other:${item.stage}`,
       label: ["Other", "movements"],
       labelSide: "left",
@@ -270,6 +277,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     addResidualFlow(svg, {
       color: flowArrowColor,
       flowKey: `writeoff:${item.stage}`,
+      isStageRelated: isFlowRelatedToSelectedStage(`writeoff:${item.stage}`, selectedStage),
       isSelected: selectedFlowKey === `writeoff:${item.stage}`,
       label: "Write-off",
       labelSide: "right",
@@ -295,6 +303,23 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   }
 
   container.replaceChildren(svg);
+}
+
+function getSelectedStageBoxStage(selectedFlowKey) {
+  return String(selectedFlowKey ?? "").match(/^stagebox:(\d)$/)?.[1] ?? "";
+}
+
+function isFlowRelatedToSelectedStage(flowKey, selectedStage) {
+  if (!selectedStage) return false;
+
+  const key = String(flowKey ?? "");
+  const transferMatch = key.match(/^transfer:(\d)-(\d)$/);
+  if (transferMatch) return transferMatch[1] === selectedStage || transferMatch[2] === selectedStage;
+
+  const stageMovementMatch = key.match(/^(other|writeoff):(\d)$/);
+  if (stageMovementMatch) return stageMovementMatch[2] === selectedStage;
+
+  return false;
 }
 
 function addStage1ToStage3Junction(svg, {
@@ -418,7 +443,10 @@ function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) 
 
   const pathElement = svgElement("path", {
     d: path,
-    fill: config.isSelected ? config.primaryDark : config.color
+    fill: config.isSelected ? config.primaryDark : config.color,
+    stroke: config.isStageRelated ? config.primaryDark : "none",
+    "stroke-linejoin": "round",
+    "stroke-width": config.isStageRelated ? 2.5 : 0
   });
   makeFlowElementClickable(pathElement, config);
   svg.append(pathElement);
@@ -452,6 +480,7 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
     color: config.flowArrowColor,
     direction: "right",
     flowKey: "transfer:1-3",
+    isStageRelated: isFlowRelatedToSelectedStage("transfer:1-3", config.selectedStage),
     isSelected: config.selectedFlowKey === "transfer:1-3",
     labelY: 38,
     maxFlow: config.maxFlow,
@@ -468,6 +497,7 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
     color: config.flowArrowColor,
     direction: "left",
     flowKey: "transfer:3-1",
+    isStageRelated: isFlowRelatedToSelectedStage("transfer:3-1", config.selectedStage),
     isSelected: config.selectedFlowKey === "transfer:3-1",
     labelY: 116,
     maxFlow: config.maxFlow,
@@ -495,7 +525,10 @@ function addResidualFlow(svg, config, formatValue, displayMode, selectedUnit) {
 
   const pathElement = svgElement("path", {
     d: createVerticalArrowPath(config.x, startY, endY, width),
-    fill: config.isSelected ? config.primaryDark : config.color
+    fill: config.isSelected ? config.primaryDark : config.color,
+    stroke: config.isStageRelated ? config.primaryDark : "none",
+    "stroke-linejoin": "round",
+    "stroke-width": config.isStageRelated ? 2.5 : 0
   });
   makeFlowElementClickable(pathElement, config);
   svg.append(pathElement);

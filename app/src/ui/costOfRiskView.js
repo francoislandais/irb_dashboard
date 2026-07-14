@@ -31,13 +31,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-stage-transfer-stage-link";
+} from "../data/costOfRisk.js?v=20260714-stagebox-cash-exclusion";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-stage-transfer-stage-link";
+} from "./costOfRiskStageTransfers.js?v=20260714-stagebox-cash-exclusion";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
@@ -45,7 +45,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260714-stage-transfer-stage-link";
+} from "./benchmarkLineChart.js?v=20260714-stagebox-cash-exclusion";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";

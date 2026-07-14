@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260714-stage-transfer-stage-link";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260714-stage-transfer-stage-link";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260714-stagebox-cash-exclusion";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260714-stagebox-cash-exclusion";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];

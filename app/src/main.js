@@ -15,8 +15,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260714-stage-transfer-stage-link";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260714-stage-transfer-stage-link";
+import { createDataStore } from "./data/dataStore.js?v=20260714-stagebox-cash-exclusion";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260714-stagebox-cash-exclusion";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";

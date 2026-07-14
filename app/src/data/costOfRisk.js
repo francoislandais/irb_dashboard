@@ -999,7 +999,7 @@ export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
   return {
     benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
       jstCode,
-      points: buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode, filters)
+      points: buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, stage, jstCode, filters)
     })),
     label: `Stage ${stage} - ${ySelection.label}`,
     status: ""
@@ -1332,20 +1332,14 @@ export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
   return isMetric && isKind && isRow ? { key: `${metric}:${kind}:${rowKey}`, kind, metric, rowKey } : null;
 }
 
-function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode, filters = {}) {
+function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, stage, jstCode, filters = {}) {
   // Gross carrying amount is a stock (balance sheet) figure, not a flow, so
   // — unlike F_12.01/F_12.02 — it is used as-is, with no quarterly
-  // decumulation.
-  const values = createEmptySeries(referenceColumns.length);
-  xCodes.forEach((xCode) => {
-    ySelection.codes.forEach((yCode) => {
-      addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_BOX_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, jstCode));
-    });
-  });
+  // decumulation. Use the same perimeter as the stage boxes in the flow
+  // diagram, including the systematic exclusion of cash balances at central
+  // banks when the selected perimeter otherwise resolves to the F_18.00
+  // all-debt-instruments total.
+  const values = computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, filters, stage, jstCode);
 
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(
     state,
