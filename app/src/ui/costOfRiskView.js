@@ -31,13 +31,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-summary-cross-selection";
+} from "../data/costOfRisk.js?v=20260714-stage-transfer-stage-link";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-summary-cross-selection";
+} from "./costOfRiskStageTransfers.js?v=20260714-stage-transfer-stage-link";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
@@ -45,7 +45,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260714-summary-cross-selection";
+} from "./benchmarkLineChart.js?v=20260714-stage-transfer-stage-link";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
@@ -223,7 +223,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     rerenderApp(actions.getState());
   });
   elements.costOfRiskStage?.addEventListener("change", (event) => {
-    activeCostOfRiskFilters.stage = event.target.value;
+    setActiveCostOfRiskStageFilter(event.target.value);
     rerenderApp(actions.getState());
   });
   elements.costOfRiskDisplayMode?.addEventListener("change", (event) => {
@@ -561,6 +561,10 @@ function renderCostOfRiskF18SummaryOnlyView(summary, state) {
 
 function normalizeActiveCostOfRiskFilter(name, options) {
   if (!options.some((option) => option.value === activeCostOfRiskFilters[name])) {
+    if (name === "stage") {
+      setActiveCostOfRiskStageFilter(COST_OF_RISK_FILTER_ALL);
+      return;
+    }
     activeCostOfRiskFilters[name] = COST_OF_RISK_FILTER_ALL;
   }
 }
@@ -570,6 +574,42 @@ function getActiveCostOfRiskStageTransferStage() {
   if (activeCostOfRiskFilters.stage === "Stage 2") return "2";
   if (activeCostOfRiskFilters.stage === "Stage 3") return "3";
   return "3";
+}
+
+function getCostOfRiskStageTransferFlowKeyForStageFilter(stageValue) {
+  if (stageValue === "Stage 1") return "stagebox:1";
+  if (stageValue === "Stage 2") return "stagebox:2";
+  if (stageValue === "Stage 3") return "stagebox:3";
+  return "";
+}
+
+function getCostOfRiskStageFilterForStageTransferFlowKey(flowKey) {
+  if (flowKey === "stagebox:1") return "Stage 1";
+  if (flowKey === "stagebox:2") return "Stage 2";
+  if (flowKey === "stagebox:3") return "Stage 3";
+  return "";
+}
+
+function syncCostOfRiskStageTransferSelectionFromStageFilter() {
+  const flowKey = getCostOfRiskStageTransferFlowKeyForStageFilter(activeCostOfRiskFilters.stage);
+  if (flowKey) {
+    activeCostOfRiskStageTransferFlowKey = flowKey;
+    return;
+  }
+  if (activeCostOfRiskStageTransferFlowKey?.startsWith("stagebox:")) {
+    activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
+  }
+}
+
+function setActiveCostOfRiskStageFilter(stageValue) {
+  const nextStage = stageValue || COST_OF_RISK_FILTER_ALL;
+  const changed = activeCostOfRiskFilters.stage !== nextStage;
+  activeCostOfRiskFilters.stage = nextStage;
+  if (elements.costOfRiskStage && elements.costOfRiskStage.value !== nextStage) {
+    elements.costOfRiskStage.value = nextStage;
+  }
+  syncCostOfRiskStageTransferSelectionFromStageFilter();
+  return changed;
 }
 
 function isCostOfRiskAllStageSelected() {
@@ -677,10 +717,13 @@ function getCostOfRiskFilterOptionLabel(options, value) {
 function clearActiveCostOfRiskFilter(filterName) {
   if (!Object.prototype.hasOwnProperty.call(activeCostOfRiskFilters, filterName)) return;
 
+  if (filterName === "stage") {
+    setActiveCostOfRiskStageFilter(getCostOfRiskFilterParentValue(filterName, activeCostOfRiskFilters[filterName]));
+    return;
+  }
   activeCostOfRiskFilters[filterName] = getCostOfRiskFilterParentValue(filterName, activeCostOfRiskFilters[filterName]);
   if (filterName === "asset" && elements.costOfRiskAsset) elements.costOfRiskAsset.value = activeCostOfRiskFilters[filterName];
   if (filterName === "counterparty" && elements.costOfRiskCounterparty) elements.costOfRiskCounterparty.value = activeCostOfRiskFilters[filterName];
-  if (filterName === "stage" && elements.costOfRiskStage) elements.costOfRiskStage.value = activeCostOfRiskFilters[filterName];
 }
 
 function getCostOfRiskFilterParentValue(filterName, value) {
@@ -1250,11 +1293,8 @@ function selectCostOfRiskStageSummaryRow(rowKey) {
 
 function updateCostOfRiskStageFromSummaryRow(rowKey) {
   const stageValue = getCostOfRiskStageSummaryFilterValue(rowKey);
-  if (!stageValue || stageValue === activeCostOfRiskFilters.stage) return false;
-
-  activeCostOfRiskFilters.stage = stageValue;
-  if (elements.costOfRiskStage) elements.costOfRiskStage.value = stageValue;
-  return true;
+  if (!stageValue) return false;
+  return setActiveCostOfRiskStageFilter(stageValue);
 }
 
 function isCostOfRiskStageSummaryRowActive(rowKey) {
@@ -1973,8 +2013,18 @@ function ensureCostOfRiskStageTransferFlowSelection() {
 // One flow is always selected. Clicking the current flow keeps it active;
 // clicking another flow moves the selection.
 function selectCostOfRiskStageTransferFlow(flowKey) {
-  if (!flowKey || flowKey === activeCostOfRiskStageTransferFlowKey) return;
+  if (!flowKey) return;
+
+  let shouldRerender = flowKey !== activeCostOfRiskStageTransferFlowKey;
   activeCostOfRiskStageTransferFlowKey = flowKey;
+
+  const stageFilter = getCostOfRiskStageFilterForStageTransferFlowKey(flowKey);
+  if (stageFilter && activeCostOfRiskFilters.stage !== stageFilter) {
+    setActiveCostOfRiskStageFilter(stageFilter);
+    shouldRerender = true;
+  }
+
+  if (!shouldRerender) return;
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
