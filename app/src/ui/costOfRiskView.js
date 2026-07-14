@@ -31,13 +31,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-benchmark-mode-recreate";
+} from "../data/costOfRisk.js?v=20260714-filter-context-line";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-benchmark-mode-recreate";
+} from "./costOfRiskStageTransfers.js?v=20260714-filter-context-line";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -675,20 +675,23 @@ function renderCostOfRiskFilterSelect(select, options, selectedValue) {
 function renderCostOfRiskActiveFilters(filterOptions) {
   if (!elements.costOfRiskActiveFilters) return;
 
+  const activeItems = [
+    createCostOfRiskActiveFilterChip("asset", "Accounting", activeCostOfRiskFilters.asset, filterOptions.assets),
+    createCostOfRiskActiveFilterChip("counterparty", "Counterparty", activeCostOfRiskFilters.counterparty, filterOptions.counterparties),
+    createCostOfRiskActiveFilterChip("stage", "Stage", activeCostOfRiskFilters.stage, filterOptions.stages)
+  ].filter(Boolean);
   const chips = [
     createCostOfRiskReferenceDateChip(activeCostOfRiskReferenceDate),
-    createCostOfRiskActiveFilterChip("asset", activeCostOfRiskFilters.asset, filterOptions.assets),
-    createCostOfRiskActiveFilterChip("counterparty", activeCostOfRiskFilters.counterparty, filterOptions.counterparties),
-    createCostOfRiskActiveFilterChip("stage", activeCostOfRiskFilters.stage, filterOptions.stages)
-  ].filter(Boolean);
+    ...(activeItems.length > 0 ? activeItems : [createCostOfRiskNoFilterChip()])
+  ];
 
   elements.costOfRiskActiveFilters.replaceChildren(...chips);
-  elements.costOfRiskActiveFilters.classList.toggle("is-empty", chips.length === 0);
+  elements.costOfRiskActiveFilters.classList.toggle("is-empty", activeItems.length === 0);
 }
 
 function createCostOfRiskReferenceDateChip(referenceDate) {
   const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--locked";
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--date";
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label";
   label.textContent = formatReferenceQuarterLabel(referenceDate);
@@ -696,19 +699,35 @@ function createCostOfRiskReferenceDateChip(referenceDate) {
   return chip;
 }
 
-function createCostOfRiskActiveFilterChip(filterName, value, options) {
+function createCostOfRiskNoFilterChip() {
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--muted";
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label";
+  label.textContent = "No perimeter filter";
+  chip.append(label);
+  return chip;
+}
+
+function createCostOfRiskActiveFilterChip(filterName, filterLabel, value, options) {
   if (!value || value === COST_OF_RISK_FILTER_ALL) return null;
 
   const chip = document.createElement("div");
   chip.className = "cost-of-risk-filter-chip";
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label";
-  label.textContent = getCostOfRiskFilterOptionLabel(options, value);
+  const labelPrefix = document.createElement("span");
+  labelPrefix.className = "cost-of-risk-filter-chip-prefix";
+  labelPrefix.textContent = `${filterLabel}: `;
+  const labelValue = document.createElement("span");
+  labelValue.className = "cost-of-risk-filter-chip-value";
+  labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
+  label.append(labelPrefix, labelValue);
   const button = document.createElement("button");
   button.className = "cost-of-risk-filter-chip-close";
   button.type = "button";
   button.dataset.costOfRiskClearFilter = filterName;
-  button.setAttribute("aria-label", `Remove ${label.textContent} filter`);
+  button.setAttribute("aria-label", `Remove ${labelValue.textContent} filter`);
   button.textContent = "×";
   chip.append(label, button);
   return chip;
@@ -2089,13 +2108,15 @@ function getCostOfRiskStageTransferDenominatorFilters() {
 // audit trail must explain that division, not just the raw movement
 // amount.
 function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit) {
-  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, getCostOfRiskStageTransferDenominatorFilters(), audit.referenceLabel, state.selectedJst);
+  const denominatorReferenceLabel = audit.previousReferenceLabel || "";
+  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, getCostOfRiskStageTransferDenominatorFilters(), denominatorReferenceLabel, state.selectedJst);
+  const denominatorDateLabel = denominatorReferenceLabel ? formatReferenceQuarterLabel(denominatorReferenceLabel) : "previous quarter";
   const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
   const isRatioAvailable = denominatorDetail.status === "available" && Number.isFinite(denominatorDetail.value) && denominatorDetail.value !== 0;
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
+  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the previous-quarter F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")} (${rawValueLabel} raw)`
     : `Ratio unavailable (${rawValueLabel} raw)`;
@@ -2105,12 +2126,12 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
       { header: "Component", key: "label" },
       { align: "right", header: "Value", key: "value" }
     ],
-    description: "Every F_18.00 cell matching the current Accounting type / Counterparty filters, all stages combined.",
+    description: `Every F_18.00 cell matching the current Accounting type / Counterparty filters, all stages combined, at ${denominatorDateLabel}.`,
     rows: denominatorDetail.components.map((component) => ({
       label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
       value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
     })),
-    title: `Ratio denominator - ${denominatorDetail.label} (F_18.00)`,
+    title: `Ratio denominator - ${denominatorDetail.label} (F_18.00, ${denominatorDateLabel})`,
     totalRow: {
       label: isRatioAvailable ? "Total" : "Total (unavailable)",
       value: isRatioAvailable ? formatAmount(denominatorDetail.value) : "-"

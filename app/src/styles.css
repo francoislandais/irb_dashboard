@@ -662,26 +662,32 @@ button:focus-visible {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  min-height: 30px;
+  gap: 0;
+  min-height: 28px;
+  padding: 2px 0;
 }
 
 .cost-of-risk-active-filters.is-empty {
-  min-height: 30px;
+  min-height: 28px;
 }
 
 .cost-of-risk-filter-chip {
   align-items: center;
-  background: #f4f7f5;
-  border: 1px solid var(--primary-dark);
-  border-radius: 6px;
   color: var(--primary-dark);
   display: inline-flex;
-  font-size: 0.75rem;
-  font-weight: 700;
-  min-height: 28px;
-  padding: 6px 26px 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1;
+  min-height: 24px;
+  padding: 3px 0;
   position: relative;
+}
+
+.cost-of-risk-filter-chip:not(:first-child)::before {
+  color: rgba(36, 53, 45, 0.38);
+  content: "·";
+  font-weight: 600;
+  margin: 0 8px;
 }
 
 .cost-of-risk-filter-chip-label {
@@ -689,8 +695,16 @@ button:focus-visible {
   white-space: nowrap;
 }
 
-.cost-of-risk-filter-chip--locked {
-  padding-right: 10px;
+.cost-of-risk-filter-chip-prefix,
+.cost-of-risk-filter-chip--muted {
+  color: rgba(36, 53, 45, 0.68);
+  font-weight: 500;
+}
+
+.cost-of-risk-filter-chip-value,
+.cost-of-risk-filter-chip--date {
+  color: var(--primary-dark);
+  font-weight: 700;
 }
 
 .cost-of-risk-filter-chip-close {
@@ -701,16 +715,14 @@ button:focus-visible {
   color: var(--primary-dark);
   cursor: pointer;
   display: inline-flex;
-  font-size: 0.78rem;
-  font-weight: 800;
-  height: 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  height: 18px;
   justify-content: center;
   line-height: 1;
+  margin-left: 4px;
   padding: 0;
-  position: absolute;
-  right: 5px;
-  top: 4px;
-  width: 16px;
+  width: 18px;
 }
 
 .cost-of-risk-filter-chip-close:hover {

@@ -363,7 +363,7 @@ export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "", fil
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const value = quarterlyValueSeries[referenceIndex] ?? null;
-  const denominator = denominatorSeries[referenceIndex] ?? null;
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
 
   return {
     denominator,
@@ -394,7 +394,7 @@ export function buildCostOfRiskF02ImpairmentSeries(state, filters = {}) {
     points: referenceColumns.map((referenceColumn, index) => {
       const value = quarterlyValueSeries[index] ?? null;
       const signedValue = Number.isFinite(value) ? -value : value;
-      const denominator = denominatorSeries[index] ?? null;
+      const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
       return {
         date: referenceColumn.date,
@@ -420,7 +420,7 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
 
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const denominator = denominatorSeries[referenceIndex] ?? 0;
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex) ?? 0;
   const xLabels = getCostOfRiskXAxisLabelMap(state);
   const points = COST_OF_RISK_WATERFALL_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)).map((xCode) => {
     const rawValueSeries = createEmptySeries(referenceColumns.length);
@@ -476,7 +476,7 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
   return {
     points: referenceColumns.map((referenceColumn, index) => {
       const value = quarterlyValueSeries[index] ?? null;
-      const denominator = denominatorSeries[index] ?? null;
+      const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
       return {
         date: referenceColumn.date,
@@ -523,7 +523,7 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
     })) : [])
   ];
   const f2RatioSeries = referenceColumns.map((_, index) => {
-    const denominator = denominatorSeries[index] ?? null;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
     return denominator ? (f2QuarterlySeries[index] / denominator) * 10000 : null;
   });
   const xLabels = getCostOfRiskXAxisLabelMap(state);
@@ -549,7 +549,7 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
   const f12TotalSeries = createEmptySeries(referenceColumns.length);
   f12Rows.forEach((row) => addSeriesValues(f12TotalSeries, row.values));
   const f12RatioSeries = referenceColumns.map((_, index) => {
-    const denominator = denominatorSeries[index] ?? null;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
     return denominator ? (f12TotalSeries[index] / denominator) * 10000 : null;
   });
 
@@ -708,16 +708,15 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
   const stageVariations = ["1", "2", "3"].map((stage) => (
     buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, filters, stage, referenceIndex)
   ));
-  // Ratio denominator: same F_18.00 total gross carrying amount used
-  // everywhere else in the module, at the same reference date as the
-  // numerator.
-  const ratioDenominator = getCostOfRiskRatioDenominatorSeries(
+  const ratioDenominatorSeries = getCostOfRiskRatioDenominatorSeries(
     state,
     indexes,
     referenceColumns,
     state.selectedJst,
     getCostOfRiskStageTransferDenominatorFilters(filters)
-  )[referenceIndex] ?? null;
+  );
+  const ratioDenominator = getCostOfRiskMovementDenominator(ratioDenominatorSeries, referenceIndex);
+  const stageBalanceRatioDenominator = ratioDenominatorSeries[referenceIndex] ?? null;
 
   const netTransfersByStage = new Map([["1", 0], ["2", 0], ["3", 0]]);
   COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.forEach((movement) => {
@@ -754,6 +753,7 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
     }),
     stageBalances: stageVariations.map((variation, index) => ({
       label: COST_OF_RISK_STAGE_TRANSFER_STAGE_LABELS[String(index + 1)] ?? `Stage ${index + 1}`,
+      ratioDenominator: stageBalanceRatioDenominator,
       stage: String(index + 1),
       value: variation.currentValue ?? null
     })),
@@ -1402,7 +1402,7 @@ function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descr
 
   return referenceColumns.map((column, index) => {
     const value = rawValues[index] ?? null;
-    const denominator = denominatorSeries[index] ?? null;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
     return {
       date: column.date,
       denominator,
@@ -2118,7 +2118,7 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
 
   return referenceColumns.map((column, index) => {
     const value = quarterlyValueSeries[index] ?? 0;
-    const denominator = denominatorSeries[index] ?? 0;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
     return {
       date: column.date,
       denominator,
@@ -2166,11 +2166,14 @@ function hasConfiguredPointCoordinates(point) {
 }
 
 function buildRatioSeries(referenceColumns, numerator, denominator) {
+  const useMovementDenominator = numerator.tableId === COST_OF_RISK_TABLE_ID || numerator.tableId === COST_OF_RISK_F02_TABLE_ID;
   return {
     label: "Cost of risk ratio",
     values: referenceColumns.map((column, index) => {
       const numeratorValue = numerator.values[index]?.value ?? null;
-      const denominatorValue = denominator.values[index]?.value ?? null;
+      const denominatorValue = useMovementDenominator
+        ? denominator.values[index - 1]?.value ?? null
+        : denominator.values[index]?.value ?? null;
 
       return {
         date: column.date,
@@ -2179,6 +2182,12 @@ function buildRatioSeries(referenceColumns, numerator, denominator) {
       };
     })
   };
+}
+
+function getCostOfRiskMovementDenominator(denominatorSeries, index) {
+  if (!Array.isArray(denominatorSeries) || index <= 0) return null;
+  const denominator = denominatorSeries[index - 1];
+  return Number.isFinite(denominator) ? denominator : null;
 }
 
 function sumConfiguredPointSeriesValues(state, indexes, referenceColumns, tableId, points, jstCode) {

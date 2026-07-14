@@ -105,7 +105,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   ].filter((value) => Number.isFinite(value));
   const displayStageBalances = stageBalances.map((item) => ({
     ...item,
-    displayValue: getStageTransferDisplayValue(item.value, denominator, displayMode)
+    displayValue: getStageTransferDisplayValue(item.value, item.ratioDenominator ?? denominator, displayMode)
   }));
   const stageBalanceByStage = new Map(displayStageBalances.map((item) => [item.stage, item.displayValue]));
   const hasStageBalance = stageBalances.some((item) => Number.isFinite(item.value));
