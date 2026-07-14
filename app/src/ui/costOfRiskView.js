@@ -29,13 +29,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-stage-summary-row-filter";
+} from "../data/costOfRisk.js?v=20260714-stage-summary-positive-allowances";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-stage-summary-row-filter";
+} from "./costOfRiskStageTransfers.js?v=20260714-stage-summary-positive-allowances";
 import {
   buildBenchmarkChartModel,
   clearPeerDistributionBands,
@@ -43,7 +43,7 @@ import {
   getBenchmarkYAxisBoundsSeries,
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260714-stage-summary-row-filter";
+} from "./benchmarkLineChart.js?v=20260714-stage-summary-positive-allowances";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
@@ -802,7 +802,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageSummaryChartValue(this.y, selectedCell, chartDisplayMode, state.selectedUnit)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageSummaryChartValue(this.y, selectedCell, chartDisplayMode, state.selectedUnit)}`;
       },
       shared: false,
       split: false,
@@ -969,7 +969,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">\u25cf</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(smoothingWindow)}</span>`;
+        return `<span style="color:${this.series.color}">\u25cf</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}`;
       },
       shared: false,
       split: false,
@@ -1690,7 +1690,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
         const valueFormatter = (value) => (isStageBoxSelection && displayMode === "ratio"
           ? formatCostOfRiskStageBoxRatioValue(value)
           : formatCostOfRiskDisplayValue(value, displayMode, selectedUnit));
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${valueFormatter(this.y)}<br/><span style="color:#6f7974">${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)}</span>`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${valueFormatter(this.y)}`;
       },
       shared: false,
       split: false,

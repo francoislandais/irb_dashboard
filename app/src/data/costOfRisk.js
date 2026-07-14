@@ -1065,8 +1065,11 @@ function buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySe
   const rowDefinition = COST_OF_RISK_STAGE_SUMMARY_ROWS.find((candidate) => candidate.key === stageKey)
     ?? COST_OF_RISK_STAGE_SUMMARY_ROWS[0];
   const xCodes = metric === "allowances" ? rowDefinition.allowanceXCodes : rowDefinition.gcaXCodes;
+  const values = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
 
-  return resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
+  return metric === "allowances"
+    ? values.map((value) => (Number.isFinite(value) ? -value : value))
+    : values;
 }
 
 function buildCostOfRiskCoverageSeries(gcaSeries, allowanceSeries) {
