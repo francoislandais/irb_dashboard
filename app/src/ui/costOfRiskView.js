@@ -31,21 +31,25 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-stagebox-cash-exclusion";
+} from "../data/costOfRisk.js?v=20260714-benchmark-mode-recreate";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-stagebox-cash-exclusion";
+} from "./costOfRiskStageTransfers.js?v=20260714-benchmark-mode-recreate";
 import {
   buildBenchmarkChartModel,
+  clearBenchmarkEndpointLabels,
   clearPeerDistributionBands,
   getBenchmarkLinePlotOptions,
   getBenchmarkYAxisBoundsSeries,
+  hasBenchmarkChartModeChanged,
+  markBenchmarkChartMode,
   renderBenchmarkEndpointLabels,
-  renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260714-stagebox-cash-exclusion";
+  renderPeerDistributionBands,
+  scheduleBenchmarkEndpointLabels
+} from "./benchmarkLineChart.js?v=20260714-benchmark-mode-recreate";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
@@ -1168,7 +1172,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
           } else {
             clearPeerDistributionBands(this);
           }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst);
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
         }
       },
       spacingRight: 128,
@@ -1235,10 +1239,15 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
     }
   };
 
+  if (hasBenchmarkChartModeChanged(costOfRiskStageSummaryChart, chartModel.peerDisplayMode)) destroyCostOfRiskStageSummaryChart();
   if (costOfRiskStageSummaryChart) {
+    clearBenchmarkEndpointLabels(costOfRiskStageSummaryChart);
     costOfRiskStageSummaryChart.update(options, true, true, false);
+    markBenchmarkChartMode(costOfRiskStageSummaryChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(costOfRiskStageSummaryChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
   } else {
     costOfRiskStageSummaryChart = window.Highcharts.chart(elements.costOfRiskStageSummaryChart, options);
+    markBenchmarkChartMode(costOfRiskStageSummaryChart, chartModel.peerDisplayMode);
   }
 }
 
@@ -1464,7 +1473,7 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
           } else {
             clearPeerDistributionBands(this);
           }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst);
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
         }
       },
       spacingRight: 128,
@@ -1531,10 +1540,15 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
     }
   };
 
+  if (hasBenchmarkChartModeChanged(costOfRiskCounterpartySummaryChart, chartModel.peerDisplayMode)) destroyCostOfRiskCounterpartySummaryChart();
   if (costOfRiskCounterpartySummaryChart) {
+    clearBenchmarkEndpointLabels(costOfRiskCounterpartySummaryChart);
     costOfRiskCounterpartySummaryChart.update(options, true, true, false);
+    markBenchmarkChartMode(costOfRiskCounterpartySummaryChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(costOfRiskCounterpartySummaryChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
   } else {
     costOfRiskCounterpartySummaryChart = window.Highcharts.chart(elements.costOfRiskCounterpartySummaryChart, options);
+    markBenchmarkChartMode(costOfRiskCounterpartySummaryChart, chartModel.peerDisplayMode);
   }
 }
 
@@ -1615,7 +1629,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
           } else {
             clearPeerDistributionBands(this);
           }
-          renderBenchmarkEndpointLabels(this, jstCode, selectCostOfRiskChartJst);
+          renderBenchmarkEndpointLabels(this, jstCode, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
         }
       },
       spacingRight: 128,
@@ -1684,10 +1698,15 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
     }
   };
 
+  if (hasBenchmarkChartModeChanged(costOfRiskChart, chartModel.peerDisplayMode)) destroyCostOfRiskChart();
   if (costOfRiskChart) {
+    clearBenchmarkEndpointLabels(costOfRiskChart);
     costOfRiskChart.update(options, true, true, false);
+    markBenchmarkChartMode(costOfRiskChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(costOfRiskChart, jstCode, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
   } else {
     costOfRiskChart = window.Highcharts.chart(elements.costOfRiskChart, options);
+    markBenchmarkChartMode(costOfRiskChart, chartModel.peerDisplayMode);
   }
 }
 
@@ -2349,7 +2368,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
           } else {
             clearPeerDistributionBands(this);
           }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst);
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
         }
       },
       spacingRight: 128,
@@ -2422,10 +2441,15 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     }
   };
 
+  if (hasBenchmarkChartModeChanged(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode)) destroyCostOfRiskStageTransferFlowChart();
   if (costOfRiskStageTransferFlowChart) {
+    clearBenchmarkEndpointLabels(costOfRiskStageTransferFlowChart);
     costOfRiskStageTransferFlowChart.update(options, true, true, false);
+    markBenchmarkChartMode(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(costOfRiskStageTransferFlowChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
   } else {
     costOfRiskStageTransferFlowChart = window.Highcharts.chart(elements.costOfRiskStageTransferFlowChart, options);
+    markBenchmarkChartMode(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode);
   }
 }
 

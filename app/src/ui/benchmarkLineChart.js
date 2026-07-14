@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260714-stagebox-cash-exclusion";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260714-stagebox-cash-exclusion";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260714-benchmark-mode-recreate";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260714-benchmark-mode-recreate";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
@@ -341,11 +341,16 @@ function resolveBenchmarkClickTarget(clickedPoint, selectedJstCode) {
 
 // onSelectJst(jstCode) — same JST_CODE selection entry point as clicking a
 // series or a point, so clicking an endpoint label behaves identically.
-export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
+export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst, options = {}) {
   clearBenchmarkEndpointLabels(chart);
 
+  const peerDisplayMode = options.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
   const candidates = chart.series
-    .filter((serie) => serie.visible && serie.points?.length > 0)
+    .filter((serie) => {
+      if (!serie.visible || !serie.points?.length) return false;
+      const custom = serie.userOptions?.custom ?? {};
+      return peerDisplayMode === "anonymised" || custom.isBenchmarkDistribution !== true;
+    })
     .map((serie) => {
       const point = [...serie.points]
         .reverse()
@@ -409,6 +414,7 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
         ["L", connectorEndX, targetY]
       ])
       .attr({
+        class: "cost-risk-benchmark-endpoint-label",
         stroke: candidate.color,
         "stroke-dasharray": "4 4",
         "stroke-width": candidate.isSelected ? 1.35 : 1,
@@ -425,6 +431,7 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
         fontWeight: candidate.isSelected ? "700" : "600"
       })
       .attr({
+        class: "cost-risk-benchmark-endpoint-label",
         fill: "rgba(255, 255, 255, 0.92)",
         padding: 4,
         r: 3,
@@ -442,8 +449,43 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst) {
   });
 }
 
+export function scheduleBenchmarkEndpointLabels(chart, selectedJst, onSelectJst, options = {}) {
+  clearBenchmarkEndpointLabels(chart);
+  const render = () => {
+    if (!chart?.container || chart.destroyed) return;
+    renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst, options);
+  };
+
+  if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(render));
+    return;
+  }
+
+  setTimeout(render, 0);
+}
+
+export function hasBenchmarkChartModeChanged(chart, peerDisplayMode) {
+  if (!chart) return false;
+
+  const nextMode = peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  return Boolean(chart.customBenchmarkPeerDisplayMode && chart.customBenchmarkPeerDisplayMode !== nextMode);
+}
+
+export function markBenchmarkChartMode(chart, peerDisplayMode) {
+  if (!chart) return;
+
+  chart.customBenchmarkPeerDisplayMode = peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+}
+
 export function clearBenchmarkEndpointLabels(chart) {
-  if (!Array.isArray(chart.customBenchmarkEndpointLabels)) return;
+  chart.container
+    ?.querySelectorAll?.(".cost-risk-benchmark-endpoint-label")
+    ?.forEach((element) => element.remove());
+
+  if (!Array.isArray(chart.customBenchmarkEndpointLabels)) {
+    chart.customBenchmarkEndpointLabels = [];
+    return;
+  }
 
   chart.customBenchmarkEndpointLabels.forEach((element) => element.destroy());
   chart.customBenchmarkEndpointLabels = [];

@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260714-stagebox-cash-exclusion";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260714-benchmark-mode-recreate";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -14,12 +14,16 @@ import {
 } from "../data/explorerBenchmark.js";
 import {
   buildBenchmarkChartModel,
+  clearBenchmarkEndpointLabels,
   clearPeerDistributionBands,
   getBenchmarkLinePlotOptions,
   getBenchmarkYAxisBoundsSeries,
+  hasBenchmarkChartModeChanged,
+  markBenchmarkChartMode,
   renderBenchmarkEndpointLabels,
-  renderPeerDistributionBands
-} from "./benchmarkLineChart.js?v=20260714-stagebox-cash-exclusion";
+  renderPeerDistributionBands,
+  scheduleBenchmarkEndpointLabels
+} from "./benchmarkLineChart.js?v=20260714-benchmark-mode-recreate";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -466,7 +470,7 @@ function renderExplorerBenchmarkChart(benchmark, state) {
           } else {
             clearPeerDistributionBands(this);
           }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectExplorerBenchmarkJst);
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectExplorerBenchmarkJst, { peerDisplayMode: chartModel.peerDisplayMode });
         }
       },
       spacingRight: 128,
@@ -521,10 +525,15 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     }
   };
 
+  if (hasBenchmarkChartModeChanged(explorerBenchmarkChart, chartModel.peerDisplayMode)) destroyExplorerBenchmarkChart();
   if (explorerBenchmarkChart) {
+    clearBenchmarkEndpointLabels(explorerBenchmarkChart);
     explorerBenchmarkChart.update(options, true, true, false);
+    markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(explorerBenchmarkChart, state.selectedJst, selectExplorerBenchmarkJst, { peerDisplayMode: chartModel.peerDisplayMode });
   } else {
     explorerBenchmarkChart = window.Highcharts.chart(elements.explorerBenchmarkChart, options);
+    markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
   }
 }
 
