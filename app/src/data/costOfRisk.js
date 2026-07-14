@@ -30,6 +30,14 @@ const COST_OF_RISK_STAGE_BOX_X_CODES = {
   "2": ["57", "109"],
   "3": ["121"]
 };
+const COST_OF_RISK_STAGE_SUMMARY_ROWS = [
+  { key: "all", label: "All", gcaXCodes: ["0010"], allowanceXCodes: ["0130"] },
+  { key: "stage1", label: "Stage 1", gcaXCodes: ["0056"], allowanceXCodes: ["0141"] },
+  { key: "stage2", label: "Stage 2", gcaXCodes: ["0057", "0109"], allowanceXCodes: ["0142", "0950"] },
+  { key: "stage3", label: "Stage 3", gcaXCodes: ["0121"], allowanceXCodes: ["0951"] },
+  { key: "poci", label: "POCI", gcaXCodes: ["0058", "0900"], allowanceXCodes: ["0143", "0952"] }
+];
+export const DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL = "gca:level:all";
 const COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX = "Debt instruments other than held for trading";
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
 export const COST_OF_RISK_FILTER_ALL = "__all__";
@@ -960,6 +968,186 @@ export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
     label: `Stage ${stage} - ${ySelection.label}`,
     status: ""
   };
+}
+
+export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+
+  if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
+    return { rows: [], selectedCell: null, status: "Load a CSV and select a JST." };
+  }
+
+  if (ySelection.codes.length === 0) {
+    return {
+      rows: [],
+      selectedCell: null,
+      status: "No matching F_18.00 Y-axis point is available for the selected filters."
+    };
+  }
+
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const referenceLabel = referenceColumns[referenceIndex]?.label ?? "";
+  const selectedCell = parseCostOfRiskStageSummaryCellKey(selectedCellKey)
+    ?? parseCostOfRiskStageSummaryCellKey(DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL);
+  const rows = buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, state.selectedJst, referenceIndex);
+
+  return {
+    benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+      jstCode,
+      points: buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell)
+    })),
+    filterLabel: ySelection.label,
+    referenceDate: referenceLabel,
+    rows,
+    selectedCell,
+    status: ""
+  };
+}
+
+function buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, jstCode, referenceIndex) {
+  const totalGca = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", "all");
+  const totalAllowances = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", "all");
+
+  return COST_OF_RISK_STAGE_SUMMARY_ROWS.map((rowDefinition) => {
+    const gca = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", rowDefinition.key);
+    const allowances = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", rowDefinition.key);
+    const coverage = buildCostOfRiskCoverageSeries(gca, allowances);
+    return {
+      key: rowDefinition.key,
+      label: rowDefinition.label,
+      cells: {
+        allowances: createCostOfRiskStageSummaryCellValues(allowances, totalAllowances, referenceIndex),
+        coverage: createCostOfRiskCoverageCellValues(coverage, referenceIndex),
+        gca: createCostOfRiskStageSummaryCellValues(gca, totalGca, referenceIndex)
+      }
+    };
+  });
+}
+
+function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell) {
+  const metricSeries = buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, jstCode, selectedCell.metric, selectedCell.stageKey);
+  const totalSeries = selectedCell.metric === "gca" || selectedCell.metric === "allowances"
+    ? buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, selectedCell.metric, "all")
+    : null;
+
+  return referenceColumns.map((column, index) => {
+    const previousValue = index > 0 ? metricSeries[index - 1] : null;
+    const value = metricSeries[index] ?? null;
+    const pointValue = selectedCell.kind === "mom"
+      ? getFiniteDelta(value, previousValue)
+      : value;
+    const ratioBasisPoints = getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selectedCell, index);
+
+    return {
+      date: column.date,
+      denominator: totalSeries?.[index] ?? null,
+      label: column.label,
+      ratioBasisPoints,
+      value: pointValue
+    };
+  });
+}
+
+function buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey) {
+  if (metric === "coverage") {
+    return buildCostOfRiskCoverageSeries(
+      buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", stageKey),
+      buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", stageKey)
+    );
+  }
+
+  return buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey);
+}
+
+function buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey) {
+  const rowDefinition = COST_OF_RISK_STAGE_SUMMARY_ROWS.find((candidate) => candidate.key === stageKey)
+    ?? COST_OF_RISK_STAGE_SUMMARY_ROWS[0];
+  const xCodes = metric === "allowances" ? rowDefinition.allowanceXCodes : rowDefinition.gcaXCodes;
+
+  return resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
+}
+
+function buildCostOfRiskCoverageSeries(gcaSeries, allowanceSeries) {
+  return gcaSeries.map((gca, index) => {
+    const allowances = allowanceSeries[index];
+    return Number.isFinite(gca) && gca !== 0 && Number.isFinite(allowances)
+      ? allowances / gca
+      : null;
+  });
+}
+
+function createCostOfRiskStageSummaryCellValues(series, totalSeries, referenceIndex) {
+  const value = series[referenceIndex] ?? null;
+  const previousValue = referenceIndex > 0 ? series[referenceIndex - 1] : null;
+  const total = totalSeries[referenceIndex] ?? null;
+  const previousTotal = referenceIndex > 0 ? totalSeries[referenceIndex - 1] : null;
+  const ratio = Number.isFinite(value) && Number.isFinite(total) && total !== 0 ? value / total : null;
+  const previousRatio = Number.isFinite(previousValue) && Number.isFinite(previousTotal) && previousTotal !== 0
+    ? previousValue / previousTotal
+    : null;
+
+  return {
+    mom: getFiniteDelta(value, previousValue),
+    momRatioBasisPoints: getFiniteDelta(ratio, previousRatio) === null ? null : getFiniteDelta(ratio, previousRatio) * 10000,
+    ratio,
+    value
+  };
+}
+
+function createCostOfRiskCoverageCellValues(series, referenceIndex) {
+  const value = series[referenceIndex] ?? null;
+  const previousValue = referenceIndex > 0 ? series[referenceIndex - 1] : null;
+  const momRatioBasisPoints = getFiniteDelta(value, previousValue);
+
+  return {
+    mom: momRatioBasisPoints === null ? null : momRatioBasisPoints * 10000,
+    momRatioBasisPoints: momRatioBasisPoints === null ? null : momRatioBasisPoints * 10000,
+    ratio: value,
+    value
+  };
+}
+
+function getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selectedCell, index) {
+  const value = metricSeries[index] ?? null;
+  const previousValue = index > 0 ? metricSeries[index - 1] : null;
+
+  if (selectedCell.metric === "coverage") {
+    if (selectedCell.kind === "mom") {
+      const delta = getFiniteDelta(value, previousValue);
+      return delta === null ? null : delta * 10000;
+    }
+    return Number.isFinite(value) ? value * 10000 : null;
+  }
+
+  const total = totalSeries?.[index] ?? null;
+  const previousTotal = index > 0 ? totalSeries?.[index - 1] : null;
+  const ratio = Number.isFinite(value) && Number.isFinite(total) && total !== 0 ? value / total : null;
+
+  if (selectedCell.kind === "mom") {
+    const previousRatio = Number.isFinite(previousValue) && Number.isFinite(previousTotal) && previousTotal !== 0
+      ? previousValue / previousTotal
+      : null;
+    const delta = getFiniteDelta(ratio, previousRatio);
+    return delta === null ? null : delta * 10000;
+  }
+
+  return ratio === null ? null : ratio * 10000;
+}
+
+function getFiniteDelta(currentValue, previousValue) {
+  return Number.isFinite(currentValue) && Number.isFinite(previousValue)
+    ? currentValue - previousValue
+    : null;
+}
+
+export function parseCostOfRiskStageSummaryCellKey(cellKey) {
+  const [metric, kind, stageKey] = String(cellKey ?? "").split(":");
+  const isMetric = ["gca", "allowances", "coverage"].includes(metric);
+  const isKind = ["level", "mom"].includes(kind);
+  const isStage = COST_OF_RISK_STAGE_SUMMARY_ROWS.some((row) => row.key === stageKey);
+  return isMetric && isKind && isStage ? { key: `${metric}:${kind}:${stageKey}`, kind, metric, stageKey } : null;
 }
 
 function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, xCodes, ySelection, jstCode, filters = {}) {
