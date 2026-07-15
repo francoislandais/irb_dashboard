@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260714-benchmark-mode-recreate";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260715-cost-risk-tabs-view";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260715-cost-risk-cache-view";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
