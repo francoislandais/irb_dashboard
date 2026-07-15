@@ -34,13 +34,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-chart-retention";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-dom-cache";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-chart-retention";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-dom-cache";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -96,6 +96,12 @@ let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
+let lastCostOfRiskActiveFiltersRenderKey = "";
+const lastCostOfRiskCoreDefinitionRenderKeys = new Map();
+const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
+let lastCostOfRiskRatioDenominatorRenderKey = "";
+let lastCostOfRiskSmoothingRenderKey = "";
+let lastCostOfRiskXAxisRenderKey = "";
 const COST_OF_RISK_CHART_TITLE_POSITION = {
   margin: 10,
   x: 0,
@@ -208,6 +214,17 @@ function renderCostOfRiskRatioDenominatorControls(state) {
   const isRatioMode = activeCostOfRiskDisplayMode === "ratio";
   if (elements.costOfRiskRatioInfo) elements.costOfRiskRatioInfo.hidden = !isRatioMode;
   if (!isRatioMode || !elements.costOfRiskRatioTooltip) return;
+
+  const renderKey = createCostOfRiskModelCacheKey(
+    state,
+    "ratio-denominator-tooltip",
+    activeCostOfRiskTab,
+    activeCostOfRiskFilters,
+    activeCostOfRiskReferenceDate,
+    activeCostOfRiskDisplayMode
+  );
+  if (renderKey === lastCostOfRiskRatioDenominatorRenderKey) return;
+  lastCostOfRiskRatioDenominatorRenderKey = renderKey;
 
   if (activeCostOfRiskTab === "contributions") {
     elements.costOfRiskRatioTooltip.textContent = "Rate denominator: previous-quarter FINREP F 18.00 gross carrying amount for the current Accounting type / Counterparty / Stage filters.";
@@ -771,6 +788,18 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 function renderCostOfRiskFilterSelect(select, options, selectedValue) {
   if (!select) return;
 
+  const renderKey = `${selectedValue}\u001f${serializeCostOfRiskCachePart((options ?? []).map((option) => ({
+    groupLabel: option.groupLabel ?? "",
+    label: option.label,
+    value: option.value
+  })))}`;
+  if (lastCostOfRiskFilterSelectRenderKeys.get(select) === renderKey) {
+    if (select.value !== selectedValue) select.value = selectedValue;
+    const shouldDisable = options.length <= 1;
+    if (select.disabled !== shouldDisable) select.disabled = shouldDisable;
+    return;
+  }
+  lastCostOfRiskFilterSelectRenderKeys.set(select, renderKey);
   select.replaceChildren();
   const groups = new Map();
   options.forEach((option) => {
@@ -792,6 +821,18 @@ function renderCostOfRiskFilterSelect(select, options, selectedValue) {
 
 function renderCostOfRiskActiveFilters(filterOptions) {
   if (!elements.costOfRiskActiveFilters) return;
+
+  const renderKey = serializeCostOfRiskCachePart({
+    filters: activeCostOfRiskFilters,
+    labels: {
+      asset: getCostOfRiskFilterOptionLabel(filterOptions.assets, activeCostOfRiskFilters.asset),
+      counterparty: getCostOfRiskFilterOptionLabel(filterOptions.counterparties, activeCostOfRiskFilters.counterparty),
+      stage: getCostOfRiskFilterOptionLabel(filterOptions.stages, activeCostOfRiskFilters.stage)
+    },
+    referenceDate: activeCostOfRiskReferenceDate
+  });
+  if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
+  lastCostOfRiskActiveFiltersRenderKey = renderKey;
 
   const activeItems = [
     createCostOfRiskActiveFilterChip("asset", "Accounting", activeCostOfRiskFilters.asset, filterOptions.assets),
@@ -892,6 +933,14 @@ function renderCostOfRiskCoreDefinitionTable(container, options, isCompact = fal
   if (!container) return;
 
   const selectedCodes = getActiveCostOfRiskCoreXCodes(options, scope);
+  const renderKey = serializeCostOfRiskCachePart({
+    isCompact,
+    options: (options ?? []).map((option) => ({ code: option.code, label: option.label })),
+    scope,
+    selectedCodes
+  });
+  if (lastCostOfRiskCoreDefinitionRenderKeys.get(scope) === renderKey) return;
+  lastCostOfRiskCoreDefinitionRenderKeys.set(scope, renderKey);
   const selectedCodeSet = new Set(selectedCodes);
   const table = document.createElement("table");
   table.className = isCompact
@@ -970,6 +1019,17 @@ function getCostOfRiskCoreSectionLabel(code) {
 function renderCostOfRiskXAxisOptions(options, selectedCode) {
   if (!elements.costOfRiskXAxis) return;
 
+  const renderKey = `${selectedCode}\u001f${serializeCostOfRiskCachePart((options ?? []).map((option) => ({
+    code: option.code,
+    label: option.label
+  })))}`;
+  if (renderKey === lastCostOfRiskXAxisRenderKey) {
+    if (elements.costOfRiskXAxis.value !== selectedCode) elements.costOfRiskXAxis.value = selectedCode;
+    const shouldDisable = options.length === 0;
+    if (elements.costOfRiskXAxis.disabled !== shouldDisable) elements.costOfRiskXAxis.disabled = shouldDisable;
+    return;
+  }
+  lastCostOfRiskXAxisRenderKey = renderKey;
   elements.costOfRiskXAxis.replaceChildren();
   if (options.length === 0) {
     elements.costOfRiskXAxis.append(new Option(COST_OF_RISK_X_AXIS_CODE, COST_OF_RISK_X_AXIS_CODE));
@@ -984,6 +1044,9 @@ function renderCostOfRiskXAxisOptions(options, selectedCode) {
 }
 
 function renderCostOfRiskSmoothingControl(windowSize) {
+  const renderKey = String(windowSize);
+  if (renderKey === lastCostOfRiskSmoothingRenderKey) return;
+  lastCostOfRiskSmoothingRenderKey = renderKey;
   if (elements.costOfRiskSmoothing) {
     elements.costOfRiskSmoothing.value = String(windowSize);
   }
