@@ -34,35 +34,41 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-summary-tables";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-summary-charts";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-summary-tables";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-summary-charts";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-summary-tables";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-summary-charts";
 import {
   COST_OF_RISK_CHART_TITLE_POSITION,
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-summary-tables";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-summary-charts";
 import {
-  formatSignedGrowthPercentValue,
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
-  getCostOfRiskStageSummaryMetricLabel,
   getCostOfRiskSummaryCellColumnKey,
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-summary-tables";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-summary-charts";
+import {
+  destroyCostOfRiskCounterpartySummaryChart,
+  destroyCostOfRiskStageSummaryChart,
+  getCostOfRiskCounterpartySummaryChart,
+  getCostOfRiskStageSummaryChart,
+  renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
+  renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-summary-charts";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -105,9 +111,7 @@ let lastCostOfRiskXAxisRenderKey = "";
 const COST_OF_RISK_EMPTY_ROWS_CACHE_KEY = [];
 const COST_OF_RISK_VIEW_MODEL_CACHE = new WeakMap();
 let costOfRiskChart = null;
-let costOfRiskCounterpartySummaryChart = null;
 let costOfRiskF2VsF12Chart = null;
-let costOfRiskStageSummaryChart = null;
 let costOfRiskStageTransferChart = null;
 let costOfRiskStageTransferFlowChart = null;
 const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
@@ -597,8 +601,8 @@ function scheduleCostOfRiskChartReflow() {
 }
 
 function getActiveCostOfRiskCharts() {
-  if (activeCostOfRiskTab === "stage-summary") return [costOfRiskStageSummaryChart];
-  if (activeCostOfRiskTab === "counterparty-summary") return [costOfRiskCounterpartySummaryChart];
+  if (activeCostOfRiskTab === "stage-summary") return [getCostOfRiskStageSummaryChart()];
+  if (activeCostOfRiskTab === "counterparty-summary") return [getCostOfRiskCounterpartySummaryChart()];
   if (activeCostOfRiskTab === "contributions") return [costOfRiskWaterfallChart, costOfRiskChart];
   if (activeCostOfRiskTab === "f2-vs-f12") return [costOfRiskF2VsF12Chart];
   if (activeCostOfRiskTab === "stage-transfers") return [costOfRiskStageTransferChart, costOfRiskStageTransferFlowChart];
@@ -1093,145 +1097,18 @@ function renderCostOfRiskStageSummaryTable(stageSummary, selectedUnit = "million
 }
 
 function renderCostOfRiskStageSummaryChart(stageSummary, state) {
-  if (!elements.costOfRiskStageSummaryChart || !window.Highcharts) return;
-
-  const selectedCell = stageSummary.selectedCell;
-  const chartDisplayMode = getCostOfRiskSummaryChartDisplayMode(selectedCell);
-  const chartModel = buildBenchmarkChartModel(stageSummary.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: chartDisplayMode,
-    peerDisplayMode: state.peerDisplayMode,
-    smoothingWindow: activeCostOfRiskSmoothingWindow
+  renderStageSummaryTimeChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    container: elements.costOfRiskStageSummaryChart,
+    displayMode: activeCostOfRiskDisplayMode,
+    model: stageSummary,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    selectedUnit: state.selectedUnit,
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    state
   });
-  const series = chartModel.series;
-  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
-
-  if (!selectedCell || series.length === 0) {
-    destroyCostOfRiskStageSummaryChart();
-    renderCostOfRiskTabEmpty(stageSummary.status || "No stage summary time series is available for the current selection.");
-    return;
-  }
-
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
-  const selectedReferencePoint = stageSummary.benchmarkSeries
-    .find((benchmark) => benchmark.jstCode === state.selectedJst)
-    ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
-  const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey)} - time evolution`;
-  const ratioIsPercent = selectedCell.metric === "coverage" && selectedCell.kind === "level";
-
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      events: {
-        render() {
-          if (isAnonymised) {
-            renderPeerDistributionBands(this, chartModel.distribution);
-          } else {
-            clearPeerDistributionBands(this);
-          }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
-        }
-      },
-      spacingRight: 128,
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
-      selectCostOfRiskReferenceDate(referenceLabel);
-      selectCostOfRiskChartJst(seriesName);
-    }, state.selectedJst),
-    series,
-    subtitle: { text: "" },
-    title: createCostOfRiskHighchartsTitle(titleText),
-    tooltip: {
-      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
-      pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageSummaryChartValue(this.y, selectedCell, chartDisplayMode, state.selectedUnit)}`;
-      },
-      shared: false,
-      split: false,
-      stickOnContact: true,
-      xDateFormat: "%d/%m/%Y"
-    },
-    xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      plotLines: selectedReferencePoint?.date instanceof Date ? [{
-        color: "#7f8984",
-        dashStyle: "ShortDash",
-        value: selectedReferencePoint.date.getTime(),
-        width: 1,
-        zIndex: 3
-      }] : [],
-      tickColor: "#d9dedb",
-      tickPositions: getCostOfRiskAxisTickPositions(stageSummary.benchmarkSeries[0]?.points),
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return formatCostOfRiskStageSummaryChartValue(this.value, selectedCell, chartDisplayMode, state.selectedUnit);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      max: yBounds.max,
-      min: yBounds.min,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 6,
-      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (%)") }
-    }
-  };
-
-  if (hasBenchmarkChartModeChanged(costOfRiskStageSummaryChart, chartModel.peerDisplayMode)) destroyCostOfRiskStageSummaryChart();
-  if (costOfRiskStageSummaryChart) {
-    clearBenchmarkEndpointLabels(costOfRiskStageSummaryChart);
-    costOfRiskStageSummaryChart.update(options, true, true, false);
-    markBenchmarkChartMode(costOfRiskStageSummaryChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(costOfRiskStageSummaryChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
-  } else {
-    costOfRiskStageSummaryChart = window.Highcharts.chart(elements.costOfRiskStageSummaryChart, options);
-    markBenchmarkChartMode(costOfRiskStageSummaryChart, chartModel.peerDisplayMode);
-  }
-}
-
-function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode, selectedUnit) {
-  if (!Number.isFinite(value)) return "-";
-  if (selectedCell.metric === "coverage") {
-    return selectedCell.kind === "mom"
-      ? formatBasisPointsValue(value)
-      : formatContributionPercentValue(value / 10000);
-  }
-  if (selectedCell.kind === "level" || displayMode === "amount") return selectedCell.kind === "mom"
-    ? formatSignedMetricValue(value, selectedUnit)
-    : formatMetricValue(value, selectedUnit);
-  return selectedCell.kind === "mom"
-    ? formatSignedGrowthPercentValue(value)
-    : formatContributionPercentValue(value / 10000);
-}
-
-function getCostOfRiskSummaryChartDisplayMode(selectedCell) {
-  if (!selectedCell) return "amount";
-  if (selectedCell.metric === "coverage") return "ratio";
-  if (selectedCell.kind === "level") return "amount";
-  return activeCostOfRiskDisplayMode;
-}
-
-function getCostOfRiskStageSummaryStageLabel(stageSummary, stageKey) {
-  return (stageSummary.rows ?? []).find((row) => row.key === stageKey)?.label ?? stageKey;
 }
 
 function selectCostOfRiskStageSummaryColumn(metric, kind) {
@@ -1296,123 +1173,18 @@ function renderCostOfRiskCounterpartySummaryTable(counterpartySummary, selectedU
 }
 
 function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
-  if (!elements.costOfRiskCounterpartySummaryChart || !window.Highcharts) return;
-
-  const selectedCell = counterpartySummary.selectedCell;
-  const chartDisplayMode = getCostOfRiskSummaryChartDisplayMode(selectedCell);
-  const chartModel = buildBenchmarkChartModel(counterpartySummary.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: chartDisplayMode,
-    peerDisplayMode: state.peerDisplayMode,
-    smoothingWindow: activeCostOfRiskSmoothingWindow
+  renderCounterpartySummaryTimeChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    container: elements.costOfRiskCounterpartySummaryChart,
+    displayMode: activeCostOfRiskDisplayMode,
+    model: counterpartySummary,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    selectedUnit: state.selectedUnit,
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    state
   });
-  const series = chartModel.series;
-  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
-
-  if (!selectedCell || series.length === 0) {
-    destroyCostOfRiskCounterpartySummaryChart();
-    renderCostOfRiskTabEmpty(counterpartySummary.status || "No counterparty summary time series is available for the current selection.");
-    return;
-  }
-
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
-  const selectedReferencePoint = counterpartySummary.benchmarkSeries
-    .find((benchmark) => benchmark.jstCode === state.selectedJst)
-    ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
-  const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getCostOfRiskCounterpartySummaryRowLabel(counterpartySummary, selectedCell.rowKey)} - time evolution`;
-  const ratioIsPercent = selectedCell.metric === "coverage" && selectedCell.kind === "level";
-
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      events: {
-        render() {
-          if (isAnonymised) {
-            renderPeerDistributionBands(this, chartModel.distribution);
-          } else {
-            clearPeerDistributionBands(this);
-          }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
-        }
-      },
-      spacingRight: 128,
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
-      selectCostOfRiskReferenceDate(referenceLabel);
-      selectCostOfRiskChartJst(seriesName);
-    }, state.selectedJst),
-    series,
-    subtitle: { text: "" },
-    title: createCostOfRiskHighchartsTitle(titleText),
-    tooltip: {
-      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
-      pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageSummaryChartValue(this.y, selectedCell, chartDisplayMode, state.selectedUnit)}`;
-      },
-      shared: false,
-      split: false,
-      stickOnContact: true,
-      xDateFormat: "%d/%m/%Y"
-    },
-    xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      plotLines: selectedReferencePoint?.date instanceof Date ? [{
-        color: "#7f8984",
-        dashStyle: "ShortDash",
-        value: selectedReferencePoint.date.getTime(),
-        width: 1,
-        zIndex: 3
-      }] : [],
-      tickColor: "#d9dedb",
-      tickPositions: getCostOfRiskAxisTickPositions(counterpartySummary.benchmarkSeries[0]?.points),
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return formatCostOfRiskStageSummaryChartValue(this.value, selectedCell, chartDisplayMode, state.selectedUnit);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      max: yBounds.max,
-      min: yBounds.min,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 6,
-      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (%)") }
-    }
-  };
-
-  if (hasBenchmarkChartModeChanged(costOfRiskCounterpartySummaryChart, chartModel.peerDisplayMode)) destroyCostOfRiskCounterpartySummaryChart();
-  if (costOfRiskCounterpartySummaryChart) {
-    clearBenchmarkEndpointLabels(costOfRiskCounterpartySummaryChart);
-    costOfRiskCounterpartySummaryChart.update(options, true, true, false);
-    markBenchmarkChartMode(costOfRiskCounterpartySummaryChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(costOfRiskCounterpartySummaryChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
-  } else {
-    costOfRiskCounterpartySummaryChart = window.Highcharts.chart(elements.costOfRiskCounterpartySummaryChart, options);
-    markBenchmarkChartMode(costOfRiskCounterpartySummaryChart, chartModel.peerDisplayMode);
-  }
-}
-
-function getCostOfRiskCounterpartySummaryRowLabel(counterpartySummary, rowKey) {
-  return (counterpartySummary.rows ?? []).find((row) => row.key === rowKey)?.label ?? rowKey;
 }
 
 function selectCostOfRiskCounterpartySummaryColumn(metric, kind) {
@@ -1705,22 +1477,10 @@ function destroyCostOfRiskChart() {
   costOfRiskChart = null;
 }
 
-function destroyCostOfRiskCounterpartySummaryChart() {
-  if (!costOfRiskCounterpartySummaryChart) return;
-  costOfRiskCounterpartySummaryChart.destroy();
-  costOfRiskCounterpartySummaryChart = null;
-}
-
 function destroyCostOfRiskF2VsF12Chart() {
   if (!costOfRiskF2VsF12Chart) return;
   costOfRiskF2VsF12Chart.destroy();
   costOfRiskF2VsF12Chart = null;
-}
-
-function destroyCostOfRiskStageSummaryChart() {
-  if (!costOfRiskStageSummaryChart) return;
-  costOfRiskStageSummaryChart.destroy();
-  costOfRiskStageSummaryChart = null;
 }
 
 function destroyCostOfRiskStageTransferChart() {
