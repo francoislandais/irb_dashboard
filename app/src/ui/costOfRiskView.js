@@ -2350,8 +2350,7 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
   if (!elements.costOfRiskStageTransferChart) return;
   destroyCostOfRiskStageTransferChart();
 
-  const dateLabel = flowDiagram.referenceDate ? ` - ${formatReferenceQuarterLabel(flowDiagram.referenceDate)}` : "";
-  const titleText = `F12.02 Stage transfer flows - ${flowDiagram.assetLabel} - All stages${dateLabel}`;
+  const titleText = "Stage Transfer Flows";
   if (elements.costOfRiskStageTransferTitle) elements.costOfRiskStageTransferTitle.textContent = titleText;
 
   renderCostOfRiskStageTransferFlowDiagram({
