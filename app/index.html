@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260715-summary-growth-percent">
+    <link rel="stylesheet" href="./src/styles.css?v=20260715-stage-reconciliation">
   </head>
   <body>
     <div class="app-shell">
@@ -165,6 +165,7 @@
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Movement in allowance</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Stage transfers</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation">Stage Reconciliation</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
                 </div>
@@ -211,6 +212,14 @@
                   </div>
                   <div id="cost-of-risk-stage-transfer-flow-chart-wrap" class="cost-of-risk-split-section cost-of-risk-stage-transfer-flow-chart-wrap" hidden>
                     <div id="cost-of-risk-stage-transfer-flow-chart" class="cost-of-risk-stage-transfer-flow-chart" aria-label="Stage transfer flow time series"></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-reconciliation" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-stage-reconciliation-summary" class="cost-of-risk-stage-reconciliation-summary" aria-label="Stage reconciliation summary"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-stage-reconciliation-chart" class="cost-of-risk-chart cost-of-risk-stage-reconciliation-chart" aria-label="Stage reconciliation benchmark time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="core-definition" hidden>
@@ -262,6 +271,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260715-summary-growth-percent"></script>
+    <script type="module" src="./src/main.js?v=20260715-stage-reconciliation"></script>
   </body>
 </html>

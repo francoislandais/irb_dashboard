@@ -14,6 +14,7 @@ import {
   buildCostOfRiskFilteredSelectionValue,
   buildCostOfRiskRatioDenominatorDetail,
   buildCostOfRiskStageBoxTimeSeries,
+  buildCostOfRiskStageReconciliationModel,
   buildCostOfRiskStageSummaryModel,
   buildCostOfRiskStageTransferFlowAudit,
   buildCostOfRiskStageTransferFlowDiagram,
@@ -33,13 +34,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-summary-growth-percent";
+} from "../data/costOfRisk.js?v=20260715-stage-reconciliation";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-summary-growth-percent";
+} from "./costOfRiskStageTransfers.js?v=20260715-stage-reconciliation";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -103,6 +104,7 @@ const COST_OF_RISK_CHART_TITLE_POSITION = {
 let costOfRiskChart = null;
 let costOfRiskCounterpartySummaryChart = null;
 let costOfRiskF2VsF12Chart = null;
+let costOfRiskStageReconciliationChart = null;
 let costOfRiskStageSummaryChart = null;
 let costOfRiskStageTransferChart = null;
 let costOfRiskStageTransferFlowChart = null;
@@ -180,6 +182,8 @@ const elements = {
   costOfRiskSmoothing: document.querySelector("#cost-of-risk-smoothing"),
   costOfRiskSmoothingValue: document.querySelector("#cost-of-risk-smoothing-value"),
   costOfRiskStage: document.querySelector("#cost-of-risk-stage"),
+  costOfRiskStageReconciliationChart: document.querySelector("#cost-of-risk-stage-reconciliation-chart"),
+  costOfRiskStageReconciliationSummary: document.querySelector("#cost-of-risk-stage-reconciliation-summary"),
   costOfRiskStageSummaryChart: document.querySelector("#cost-of-risk-stage-summary-chart"),
   costOfRiskStageSummaryTable: document.querySelector("#cost-of-risk-stage-summary-table"),
   costOfRiskStageTransferChart: document.querySelector("#cost-of-risk-stage-transfer-chart"),
@@ -307,6 +311,11 @@ export function renderCostOfRisk(state) {
     activeCostOfRiskReferenceDate,
     activeCostOfRiskCounterpartySummaryCellKey
   );
+  const stageReconciliation = buildCostOfRiskStageReconciliationModel(
+    state,
+    activeCostOfRiskFilters,
+    activeCostOfRiskReferenceDate
+  );
   activeCostOfRiskReferenceDate = stageSummary.referenceDate || activeCostOfRiskReferenceDate;
 
   renderCostOfRiskFilterSelect(elements.costOfRiskAsset, filterOptions.assets, activeCostOfRiskFilters.asset);
@@ -333,6 +342,32 @@ export function renderCostOfRisk(state) {
     return;
   }
 
+  if (selection.status && activeCostOfRiskTab === "stage-reconciliation") {
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    elements.costOfRiskValue.textContent = "-";
+    elements.costOfRiskContext.textContent = "-";
+    elements.costOfRiskDenominatorValue.textContent = "-";
+    elements.costOfRiskDenominatorContext.textContent = "-";
+    elements.costOfRiskRatioValue.textContent = "-";
+    elements.costOfRiskRatioContext.textContent = "Stage reconciliation";
+    elements.costOfRiskF02Value.textContent = "-";
+    elements.costOfRiskF02Context.textContent = "-";
+    elements.costOfRiskPoints.textContent = "-";
+    destroyCostOfRiskChart();
+    destroyCostOfRiskWaterfallChart();
+    destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskF2VsF12Chart();
+    leaveCostOfRiskStageTransferTab();
+    destroyCostOfRiskTreemapChart();
+    clearCostOfRiskAuditTable();
+    renderCostOfRiskStageReconciliationView(stageReconciliation, state);
+    scheduleCostOfRiskChartReflow();
+    return;
+  }
+
   if (selection.status) {
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
@@ -353,6 +388,8 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
     destroyCostOfRiskTreemapChart();
     return;
@@ -398,6 +435,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskChart();
     destroyCostOfRiskCounterpartySummaryChart();
     destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskStageReconciliationChart();
     destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
@@ -407,6 +445,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskChart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskStageReconciliationChart();
     destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
@@ -426,12 +465,14 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
   } else if (activeCostOfRiskTab === "f2-vs-f12") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskStageReconciliationChart();
     destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     renderCostOfRiskF2VsF12Chart(
@@ -450,15 +491,27 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskStageReconciliationChart();
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
     renderCostOfRiskStageTransferView(state);
+  } else if (activeCostOfRiskTab === "stage-reconciliation") {
+    destroyCostOfRiskWaterfallChart();
+    destroyCostOfRiskChart();
+    destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskStageSummaryChart();
+    destroyCostOfRiskCounterpartySummaryChart();
+    leaveCostOfRiskStageTransferTab();
+    destroyCostOfRiskTreemapChart();
+    clearCostOfRiskAuditTable();
+    renderCostOfRiskStageReconciliationView(stageReconciliation, state);
   } else if (activeCostOfRiskTab === "analysis") {
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
     renderCostOfRiskTreemap(
@@ -472,6 +525,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageSummaryChart();
     destroyCostOfRiskCounterpartySummaryChart();
+    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
     destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
@@ -486,6 +540,7 @@ function scheduleCostOfRiskChartReflow() {
       costOfRiskWaterfallChart,
       costOfRiskStageSummaryChart,
       costOfRiskCounterpartySummaryChart,
+      costOfRiskStageReconciliationChart,
       costOfRiskStageTransferFlowChart,
       costOfRiskF2VsF12Chart,
       costOfRiskTreemapChart
@@ -515,8 +570,16 @@ function renderCostOfRiskTabEmpty(message) {
   panel.querySelectorAll(".cost-of-risk-tab-empty").forEach((node) => node.remove());
   const empty = document.createElement("div");
   empty.className = "cost-of-risk-tab-empty";
-  empty.textContent = getCostOfRiskUnavailableMessage();
+  empty.textContent = resolveCostOfRiskTabEmptyMessage(message);
   panel.prepend(empty);
+}
+
+function resolveCostOfRiskTabEmptyMessage(message) {
+  if (!message) return getCostOfRiskUnavailableMessage();
+  if (String(message).startsWith("No matching F") || String(message).startsWith("No F_")) {
+    return getCostOfRiskUnavailableMessage();
+  }
+  return message;
 }
 
 function clearCostOfRiskEmptyPanels() {
@@ -918,6 +981,241 @@ function createCostOfRiskHighchartsTitle(text) {
       fontWeight: "600"
     }
   };
+}
+
+function renderCostOfRiskStageReconciliationView(model, state) {
+  if (!elements.costOfRiskStageReconciliationSummary) return;
+
+  if (model.status) {
+    elements.costOfRiskStageReconciliationSummary.replaceChildren();
+    destroyCostOfRiskStageReconciliationChart();
+    renderCostOfRiskTabEmpty(getCostOfRiskStageReconciliationEmptyMessage(model.status));
+    return;
+  }
+
+  clearCostOfRiskEmptyPanels();
+  renderCostOfRiskStageReconciliationSummary(model, state.selectedUnit);
+  renderCostOfRiskStageReconciliationChart(model, state);
+}
+
+function getCostOfRiskStageReconciliationEmptyMessage(status) {
+  if (status === "No matching FINREP point is available for the selected filters.") {
+    return getCostOfRiskUnavailableMessage();
+  }
+  return status;
+}
+
+function renderCostOfRiskStageReconciliationSummary(model, selectedUnit) {
+  const container = elements.costOfRiskStageReconciliationSummary;
+  if (!container) return;
+
+  const header = document.createElement("div");
+  header.className = "cost-of-risk-stage-reconciliation-header";
+  const title = document.createElement("div");
+  title.className = "cost-of-risk-stage-reconciliation-title";
+  title.textContent = `${model.stageLabel} reconciliation`;
+  const context = document.createElement("div");
+  context.className = "cost-of-risk-stage-reconciliation-context";
+  context.textContent = `${formatReferenceQuarterLabel(model.referenceDate)} - ${model.transferLabel}`;
+  header.append(title, context);
+
+  const metrics = document.createElement("div");
+  metrics.className = "cost-of-risk-stage-reconciliation-metrics";
+  metrics.append(
+    createCostOfRiskStageReconciliationMetric("Net stage transfers", formatSignedMetricValue(model.netTransfers, selectedUnit), "F12.02 inter-stage transfers only"),
+    createCostOfRiskStageReconciliationMetric("Change in credit risk", formatSignedMetricValue(model.creditRiskChange, selectedUnit), "F12.01 x=0040"),
+    createCostOfRiskStageReconciliationMetric("Allowance / transfer ratio", formatCostOfRiskStageReconciliationPercentValue(model.ratio), "Change in credit risk divided by net stage transfers")
+  );
+
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-stage-reconciliation-table";
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  ["Component", "Direction", "Quarterly amount", "Contribution"].forEach((label) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headRow.append(th);
+  });
+  thead.append(headRow);
+  const tbody = document.createElement("tbody");
+  model.breakdown.forEach((item) => {
+    const row = document.createElement("tr");
+    const direction = item.direction === "in"
+      ? `From Stage ${item.from}`
+      : `To Stage ${item.to}`;
+    [
+      item.label,
+      direction,
+      formatMetricValue(item.value, selectedUnit),
+      formatSignedMetricValue(item.signedValue, selectedUnit)
+    ].forEach((value, index) => {
+      const td = document.createElement("td");
+      td.textContent = value;
+      if (index >= 2) td.className = "cost-of-risk-stage-reconciliation-number";
+      row.append(td);
+    });
+    tbody.append(row);
+  });
+  const totalRow = document.createElement("tr");
+  totalRow.className = "cost-of-risk-stage-reconciliation-total";
+  const totalLabel = document.createElement("td");
+  totalLabel.colSpan = 3;
+  totalLabel.textContent = "Net stage transfers";
+  const totalValue = document.createElement("td");
+  totalValue.className = "cost-of-risk-stage-reconciliation-number";
+  totalValue.textContent = formatSignedMetricValue(model.netTransfers, selectedUnit);
+  totalRow.append(totalLabel, totalValue);
+  tbody.append(totalRow);
+  table.append(thead, tbody);
+
+  container.replaceChildren(header, metrics, table);
+}
+
+function createCostOfRiskStageReconciliationMetric(label, value, context) {
+  const item = document.createElement("div");
+  item.className = "cost-of-risk-stage-reconciliation-metric";
+  const itemLabel = document.createElement("div");
+  itemLabel.className = "cost-of-risk-stage-reconciliation-metric-label";
+  itemLabel.textContent = label;
+  const itemValue = document.createElement("div");
+  itemValue.className = "cost-of-risk-stage-reconciliation-metric-value";
+  itemValue.textContent = value;
+  const itemContext = document.createElement("div");
+  itemContext.className = "cost-of-risk-stage-reconciliation-metric-context";
+  itemContext.textContent = context;
+  item.append(itemLabel, itemValue, itemContext);
+  return item;
+}
+
+function formatCostOfRiskStageReconciliationPercentValue(value) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "-";
+
+  return `${new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    signDisplay: "exceptZero"
+  }).format(value * 100)} %`;
+}
+
+function capCostOfRiskStageReconciliationYAxisBounds(bounds) {
+  return {
+    max: Number.isFinite(bounds?.max) ? Math.min(bounds.max, 1) : bounds?.max,
+    min: Number.isFinite(bounds?.min) ? Math.max(bounds.min, -1) : bounds?.min
+  };
+}
+
+function renderCostOfRiskStageReconciliationChart(model, state) {
+  if (!elements.costOfRiskStageReconciliationChart || !window.Highcharts) return;
+
+  const chartModel = buildBenchmarkChartModel(model.benchmarkSeries, state.selectedJst, primaryDark, {
+    displayMode: "amount",
+    peerDisplayMode: state.peerDisplayMode,
+    smoothingWindow: activeCostOfRiskSmoothingWindow
+  });
+  const series = chartModel.series;
+  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
+
+  if (series.length === 0) {
+    destroyCostOfRiskStageReconciliationChart();
+    renderCostOfRiskTabEmpty("No stage reconciliation benchmark is available for the current selection.");
+    return;
+  }
+
+  const yBounds = capCostOfRiskStageReconciliationYAxisBounds(
+    getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution))
+  );
+  const selectedReferencePoint = model.benchmarkSeries
+    .find((benchmark) => benchmark.jstCode === state.selectedJst)
+    ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
+  const titleText = `${model.stageLabel} reconciliation ratio - time evolution`;
+  const options = {
+    chart: {
+      animation: false,
+      backgroundColor: "transparent",
+      events: {
+        render() {
+          if (isAnonymised) {
+            renderPeerDistributionBands(this, chartModel.distribution);
+          } else {
+            clearPeerDistributionBands(this);
+          }
+          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
+        }
+      },
+      spacingRight: 128,
+      type: "line",
+      zooming: { type: "xy" },
+      zoomType: "xy"
+    },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
+      selectCostOfRiskReferenceDate(referenceLabel);
+      selectCostOfRiskChartJst(seriesName);
+    }, state.selectedJst),
+    series,
+    subtitle: { text: "" },
+    title: createCostOfRiskHighchartsTitle(titleText),
+    tooltip: {
+      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
+      pointFormatter() {
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageReconciliationPercentValue(this.y)}`;
+      },
+      shared: false,
+      split: false,
+      stickOnContact: true,
+      xDateFormat: "%d/%m/%Y"
+    },
+    xAxis: {
+      labels: {
+        formatter() {
+          return formatCostOfRiskQuarterAxisLabel(this.value);
+        },
+        rotation: -45,
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#c2cac5",
+      lineWidth: 1,
+      plotLines: selectedReferencePoint?.date instanceof Date ? [{
+        color: "#7f8984",
+        dashStyle: "ShortDash",
+        value: selectedReferencePoint.date.getTime(),
+        width: 1,
+        zIndex: 3
+      }] : [],
+      tickColor: "#d9dedb",
+      tickPositions: getCostOfRiskAxisTickPositions(model.benchmarkSeries[0]?.points),
+      type: "datetime"
+    },
+    yAxis: {
+      gridLineColor: "#edf0ee",
+      labels: {
+        formatter() {
+          return formatCostOfRiskStageReconciliationPercentValue(this.value);
+        },
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#aeb8b2",
+      lineWidth: 1,
+      max: yBounds.max,
+      min: yBounds.min,
+      startOnTick: false,
+      endOnTick: false,
+      tickAmount: 6,
+      title: { text: "Ratio (%)" }
+    }
+  };
+
+  if (hasBenchmarkChartModeChanged(costOfRiskStageReconciliationChart, chartModel.peerDisplayMode)) destroyCostOfRiskStageReconciliationChart();
+  if (costOfRiskStageReconciliationChart) {
+    clearBenchmarkEndpointLabels(costOfRiskStageReconciliationChart);
+    costOfRiskStageReconciliationChart.update(options, true, true, false);
+    markBenchmarkChartMode(costOfRiskStageReconciliationChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(costOfRiskStageReconciliationChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
+  } else {
+    costOfRiskStageReconciliationChart = window.Highcharts.chart(elements.costOfRiskStageReconciliationChart, options);
+    markBenchmarkChartMode(costOfRiskStageReconciliationChart, chartModel.peerDisplayMode);
+  }
 }
 
 function renderCostOfRiskStageSummaryView(stageSummary, state) {
@@ -1918,6 +2216,12 @@ function destroyCostOfRiskF2VsF12Chart() {
   if (!costOfRiskF2VsF12Chart) return;
   costOfRiskF2VsF12Chart.destroy();
   costOfRiskF2VsF12Chart = null;
+}
+
+function destroyCostOfRiskStageReconciliationChart() {
+  if (!costOfRiskStageReconciliationChart) return;
+  costOfRiskStageReconciliationChart.destroy();
+  costOfRiskStageReconciliationChart = null;
 }
 
 function destroyCostOfRiskStageSummaryChart() {

@@ -770,7 +770,8 @@ button:focus-visible {
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-summary"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="counterparty-summary"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"],
-.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"] {
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"],
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-reconciliation"] {
   align-content: stretch;
   grid-template-rows: var(--cost-risk-top-chart-height) var(--cost-risk-time-chart-height);
   overflow: auto;
@@ -1477,11 +1478,99 @@ button:focus-visible {
 .cost-of-risk-split-section > .cost-of-risk-chart,
 .cost-of-risk-split-section > .cost-of-risk-waterfall,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-chart,
-.cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart {
+.cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart,
+.cost-of-risk-split-section > .cost-of-risk-stage-reconciliation-chart {
   height: 100%;
   min-height: 0;
   overflow: hidden;
   width: 100%;
+}
+
+.cost-of-risk-stage-reconciliation-summary {
+  align-content: start;
+  background: #ffffff;
+  display: grid;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px;
+  width: 100%;
+}
+
+.cost-of-risk-stage-reconciliation-header {
+  align-items: baseline;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.cost-of-risk-stage-reconciliation-title {
+  color: #26332d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cost-of-risk-stage-reconciliation-context {
+  color: #5f6b65;
+  font-size: 12px;
+}
+
+.cost-of-risk-stage-reconciliation-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cost-of-risk-stage-reconciliation-metric {
+  border: 1px solid #d7ded9;
+  border-radius: 6px;
+  padding: 9px 10px;
+}
+
+.cost-of-risk-stage-reconciliation-metric-label,
+.cost-of-risk-stage-reconciliation-metric-context {
+  color: #66726b;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.cost-of-risk-stage-reconciliation-metric-value {
+  color: #26332d;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 3px 0;
+}
+
+.cost-of-risk-stage-reconciliation-table {
+  border-collapse: collapse;
+  color: #111916;
+  font-size: 12px;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.cost-of-risk-stage-reconciliation-table th {
+  color: #26332d;
+  font-weight: 500;
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.cost-of-risk-stage-reconciliation-table td {
+  padding: 5px 8px;
+}
+
+.cost-of-risk-stage-reconciliation-number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cost-of-risk-stage-reconciliation-total td {
+  border-top: 1px solid #d7ded9;
+  color: #26332d;
+  font-weight: 600;
 }
 
 .cost-of-risk-stage-transfer-chart {
