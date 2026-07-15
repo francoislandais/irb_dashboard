@@ -31,21 +31,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-core-definition-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-active-filters-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-active-filters-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-active-filters-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-active-filters-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +53,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-active-filters-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,32 +61,33 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-core-definition-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-core-definition-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-active-filters-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-active-filters-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-active-filters-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-active-filters-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-active-filters-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-active-filters-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-active-filters-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-core-definition-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-active-filters-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260715-cost-risk-active-filters-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -106,7 +107,6 @@ let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
-let lastCostOfRiskActiveFiltersRenderKey = "";
 const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 let lastCostOfRiskSmoothingRenderKey = "";
@@ -827,80 +827,12 @@ function renderCostOfRiskFilterSelect(select, options, selectedValue) {
 }
 
 function renderCostOfRiskActiveFilters(filterOptions) {
-  if (!elements.costOfRiskActiveFilters) return;
-
-  const renderKey = serializeCostOfRiskCachePart({
+  renderCostOfRiskActiveFiltersView({
+    container: elements.costOfRiskActiveFilters,
+    filterOptions,
     filters: activeCostOfRiskFilters,
-    labels: {
-      asset: getCostOfRiskFilterOptionLabel(filterOptions.assets, activeCostOfRiskFilters.asset),
-      counterparty: getCostOfRiskFilterOptionLabel(filterOptions.counterparties, activeCostOfRiskFilters.counterparty),
-      stage: getCostOfRiskFilterOptionLabel(filterOptions.stages, activeCostOfRiskFilters.stage)
-    },
     referenceDate: activeCostOfRiskReferenceDate
   });
-  if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
-  lastCostOfRiskActiveFiltersRenderKey = renderKey;
-
-  const activeItems = [
-    createCostOfRiskActiveFilterChip("asset", "Accounting", activeCostOfRiskFilters.asset, filterOptions.assets),
-    createCostOfRiskActiveFilterChip("counterparty", "Counterparty", activeCostOfRiskFilters.counterparty, filterOptions.counterparties),
-    createCostOfRiskActiveFilterChip("stage", "Stage", activeCostOfRiskFilters.stage, filterOptions.stages)
-  ].filter(Boolean);
-  const chips = [
-    createCostOfRiskReferenceDateChip(activeCostOfRiskReferenceDate),
-    ...(activeItems.length > 0 ? activeItems : [createCostOfRiskNoFilterChip()])
-  ];
-
-  elements.costOfRiskActiveFilters.replaceChildren(...chips);
-  elements.costOfRiskActiveFilters.classList.toggle("is-empty", activeItems.length === 0);
-}
-
-function createCostOfRiskReferenceDateChip(referenceDate) {
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--date";
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  label.textContent = formatReferenceQuarterLabel(referenceDate);
-  chip.append(label);
-  return chip;
-}
-
-function createCostOfRiskNoFilterChip() {
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--muted";
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  label.textContent = "No perimeter filter";
-  chip.append(label);
-  return chip;
-}
-
-function createCostOfRiskActiveFilterChip(filterName, filterLabel, value, options) {
-  if (!value || value === COST_OF_RISK_FILTER_ALL) return null;
-
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip";
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  const labelPrefix = document.createElement("span");
-  labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-  labelPrefix.textContent = `${filterLabel}: `;
-  const labelValue = document.createElement("span");
-  labelValue.className = "cost-of-risk-filter-chip-value";
-  labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
-  label.append(labelPrefix, labelValue);
-  const button = document.createElement("button");
-  button.className = "cost-of-risk-filter-chip-close";
-  button.type = "button";
-  button.dataset.costOfRiskClearFilter = filterName;
-  button.setAttribute("aria-label", `Remove ${labelValue.textContent} filter`);
-  button.textContent = "×";
-  chip.append(label, button);
-  return chip;
-}
-
-function getCostOfRiskFilterOptionLabel(options, value) {
-  return (options ?? []).find((option) => option.value === value)?.label ?? value;
 }
 
 function clearActiveCostOfRiskFilter(filterName) {
