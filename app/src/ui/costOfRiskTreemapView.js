@@ -1,8 +1,8 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskPointDisplayValue
-} from "../data/costOfRisk.js?v=20260715-cost-risk-ratio-denominator-view";
-import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260715-cost-risk-ratio-denominator-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-tabs-view";
+import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260715-cost-risk-tabs-view";
 
 let costOfRiskTreemapChart = null;
 
