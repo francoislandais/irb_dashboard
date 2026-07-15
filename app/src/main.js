@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260714-benchmark-mode-recreate";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260715-cost-risk-dom-cache";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260715-cost-risk-chart-utils";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -46,6 +46,8 @@ const STANDALONE_MODULE_PATHS = [
   "src/ui/benchmarkLineChart.js",
   "src/ui/cet1View.js",
   "src/ui/contextMenu.js",
+  "src/ui/costOfRiskChartUtils.js",
+  "src/ui/costOfRiskStageReconciliationView.js",
   "src/ui/costOfRiskStageTransfers.js",
   "src/ui/costOfRiskView.js",
   "src/ui/dataScreen.js",
