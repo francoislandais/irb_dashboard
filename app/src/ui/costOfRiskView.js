@@ -33,25 +33,25 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-audit";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-time-series";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-stage-transfer-audit";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-stage-transfer-time-series";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-stage-transfer-audit";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-stage-transfer-time-series";
 import {
   COST_OF_RISK_CHART_TITLE_POSITION,
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-audit";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-time-series";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -59,7 +59,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-stage-transfer-audit";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-stage-transfer-time-series";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -67,8 +67,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-stage-transfer-audit";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-stage-transfer-audit";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-stage-transfer-time-series";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-stage-transfer-time-series";
+import {
+  destroyCostOfRiskStageTransferFlowChart,
+  getCostOfRiskStageTransferFlowChart,
+  renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-stage-transfer-time-series";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -111,7 +116,6 @@ const COST_OF_RISK_VIEW_MODEL_CACHE = new WeakMap();
 let costOfRiskChart = null;
 let costOfRiskF2VsF12Chart = null;
 let costOfRiskStageTransferChart = null;
-let costOfRiskStageTransferFlowChart = null;
 const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
 let costOfRiskWaterfallChart = null;
@@ -603,7 +607,7 @@ function getActiveCostOfRiskCharts() {
   if (activeCostOfRiskTab === "counterparty-summary") return [getCostOfRiskCounterpartySummaryChart()];
   if (activeCostOfRiskTab === "contributions") return [costOfRiskWaterfallChart, costOfRiskChart];
   if (activeCostOfRiskTab === "f2-vs-f12") return [costOfRiskF2VsF12Chart];
-  if (activeCostOfRiskTab === "stage-transfers") return [costOfRiskStageTransferChart, costOfRiskStageTransferFlowChart];
+  if (activeCostOfRiskTab === "stage-transfers") return [costOfRiskStageTransferChart, getCostOfRiskStageTransferFlowChart()];
   if (activeCostOfRiskTab === "stage-reconciliation") return [getCostOfRiskStageReconciliationChart()];
   if (activeCostOfRiskTab === "analysis") return [costOfRiskTreemapChart];
   return [];
@@ -1686,130 +1690,20 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       createCostOfRiskModelCacheKey(state, "stage-transfer-flow-time-series", activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey),
       () => buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey)
     );
-  if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = false;
-  const titleText = `${flowSeries.label} - time evolution`;
-  if (elements.costOfRiskStageTransferFlowChartTitle) elements.costOfRiskStageTransferFlowChartTitle.textContent = titleText;
-
-  if (!window.Highcharts || flowSeries.benchmarkSeries.length === 0) {
-    destroyCostOfRiskStageTransferFlowChart();
-    renderCostOfRiskTabEmpty(flowSeries.status || "No stage transfer time series is available for the current selection.");
-    return;
-  }
-
-  const chartModel = buildBenchmarkChartModel(flowSeries.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: chartDisplayMode,
-    peerDisplayMode: state.peerDisplayMode,
-    smoothingWindow: activeCostOfRiskSmoothingWindow
+  renderStageTransferFlowTimeSeriesChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    chartDisplayMode,
+    container: elements.costOfRiskStageTransferFlowChart,
+    flowSeries,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    selectedUnit,
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    state,
+    titleElement: elements.costOfRiskStageTransferFlowChartTitle,
+    wrapElement: elements.costOfRiskStageTransferFlowChartWrap
   });
-  const series = chartModel.series;
-  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
-  if (series.length === 0) {
-    destroyCostOfRiskStageTransferFlowChart();
-    renderCostOfRiskTabEmpty("No stage transfer time series is available for the current selection.");
-    return;
-  }
-
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
-  const selectedReferencePoint = flowSeries.benchmarkSeries
-    .find((benchmark) => benchmark.jstCode === state.selectedJst)
-    ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
-
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      events: {
-        render() {
-          if (isAnonymised) {
-            renderPeerDistributionBands(this, chartModel.distribution);
-          } else {
-            clearPeerDistributionBands(this);
-          }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
-        }
-      },
-      spacingRight: 128,
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
-      selectCostOfRiskReferenceDate(referenceLabel);
-      selectCostOfRiskChartJst(seriesName);
-    }, state.selectedJst),
-    series,
-    subtitle: { text: "" },
-    title: createCostOfRiskHighchartsTitle(titleText),
-    tooltip: {
-      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
-      pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, chartDisplayMode, selectedUnit)}`;
-      },
-      shared: false,
-      split: false,
-      stickOnContact: true,
-      xDateFormat: "%d/%m/%Y"
-    },
-    xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      plotLines: selectedReferencePoint?.date instanceof Date ? [{
-        color: "#7f8984",
-        dashStyle: "ShortDash",
-        value: selectedReferencePoint.date.getTime(),
-        width: 1,
-        zIndex: 3
-      }] : [],
-      tickColor: "#d9dedb",
-      tickPositions: getCostOfRiskAxisTickPositions(flowSeries.benchmarkSeries[0]?.points),
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return chartDisplayMode === "ratio"
-            ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
-            : formatMetricValue(this.value, selectedUnit);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      max: yBounds.max,
-      min: yBounds.min,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 6,
-      title: { text: chartDisplayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
-    }
-  };
-
-  if (hasBenchmarkChartModeChanged(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode)) destroyCostOfRiskStageTransferFlowChart();
-  if (costOfRiskStageTransferFlowChart) {
-    clearBenchmarkEndpointLabels(costOfRiskStageTransferFlowChart);
-    costOfRiskStageTransferFlowChart.update(options, true, true, false);
-    markBenchmarkChartMode(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(costOfRiskStageTransferFlowChart, state.selectedJst, selectCostOfRiskChartJst, { peerDisplayMode: chartModel.peerDisplayMode });
-  } else {
-    costOfRiskStageTransferFlowChart = window.Highcharts.chart(elements.costOfRiskStageTransferFlowChart, options);
-    markBenchmarkChartMode(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode);
-  }
-}
-
-function destroyCostOfRiskStageTransferFlowChart() {
-  if (!costOfRiskStageTransferFlowChart) return;
-  costOfRiskStageTransferFlowChart.destroy();
-  costOfRiskStageTransferFlowChart = null;
 }
 
 function renderCostOfRiskStageTransferWaterfallChart(waterfall, selectedUnit, displayMode = "amount") {
