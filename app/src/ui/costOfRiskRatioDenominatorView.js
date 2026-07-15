@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-selection-view";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260715-cost-risk-core-selection-view";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 
