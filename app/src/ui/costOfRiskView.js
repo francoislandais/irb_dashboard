@@ -34,13 +34,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-model-cache";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-chart-retention";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-model-cache";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-chart-retention";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -413,13 +413,6 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
-    destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskChart();
-    destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
-    destroyCostOfRiskStageReconciliationChart();
-    destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
     renderCostOfRiskStageTransferView(state);
     scheduleCostOfRiskChartReflow();
@@ -450,13 +443,7 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskF02Value.textContent = "-";
     elements.costOfRiskF02Context.textContent = "-";
     elements.costOfRiskPoints.textContent = "-";
-    destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskChart();
-    destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
     leaveCostOfRiskStageTransferTab();
-    destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
     renderCostOfRiskStageReconciliationView(stageReconciliation, state);
     scheduleCostOfRiskChartReflow();
@@ -484,12 +471,9 @@ export function renderCostOfRisk(state) {
     renderCostOfRiskChartTitle(null, xAxisOptions, activeCostOfRiskXAxisCode);
     destroyCostOfRiskChart();
     destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
     destroyCostOfRiskF2VsF12Chart();
     destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
-    destroyCostOfRiskTreemapChart();
     return;
   }
 
@@ -552,19 +536,8 @@ export function renderCostOfRisk(state) {
       state.selectedUnit,
       state.peerDisplayMode
     );
-    destroyCostOfRiskTreemapChart();
-    destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
-    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
   } else if (activeCostOfRiskTab === "f2-vs-f12") {
-    destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskChart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
-    destroyCostOfRiskStageReconciliationChart();
-    destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     renderCostOfRiskF2VsF12Chart(
       getCostOfRiskCachedModel(
@@ -589,12 +562,6 @@ export function renderCostOfRisk(state) {
       state.selectedUnit
     );
   } else if (activeCostOfRiskTab === "analysis") {
-    destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskChart();
-    destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
-    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
     renderCostOfRiskTreemap(
@@ -607,14 +574,7 @@ export function renderCostOfRisk(state) {
       state.selectedUnit
     );
   } else {
-    destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskChart();
-    destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskCounterpartySummaryChart();
-    destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
-    destroyCostOfRiskTreemapChart();
     clearCostOfRiskAuditTable();
   }
   scheduleCostOfRiskChartReflow();
@@ -622,17 +582,19 @@ export function renderCostOfRisk(state) {
 
 function scheduleCostOfRiskChartReflow() {
   window.requestAnimationFrame?.(() => {
-    [
-      costOfRiskChart,
-      costOfRiskWaterfallChart,
-      costOfRiskStageSummaryChart,
-      costOfRiskCounterpartySummaryChart,
-      costOfRiskStageReconciliationChart,
-      costOfRiskStageTransferFlowChart,
-      costOfRiskF2VsF12Chart,
-      costOfRiskTreemapChart
-    ].forEach((chart) => chart?.reflow?.());
+    getActiveCostOfRiskCharts().forEach((chart) => chart?.reflow?.());
   });
+}
+
+function getActiveCostOfRiskCharts() {
+  if (activeCostOfRiskTab === "stage-summary") return [costOfRiskStageSummaryChart];
+  if (activeCostOfRiskTab === "counterparty-summary") return [costOfRiskCounterpartySummaryChart];
+  if (activeCostOfRiskTab === "contributions") return [costOfRiskWaterfallChart, costOfRiskChart];
+  if (activeCostOfRiskTab === "f2-vs-f12") return [costOfRiskF2VsF12Chart];
+  if (activeCostOfRiskTab === "stage-transfers") return [costOfRiskStageTransferChart, costOfRiskStageTransferFlowChart];
+  if (activeCostOfRiskTab === "stage-reconciliation") return [costOfRiskStageReconciliationChart];
+  if (activeCostOfRiskTab === "analysis") return [costOfRiskTreemapChart];
+  return [];
 }
 
 function renderCostOfRiskTabs() {
@@ -692,22 +654,12 @@ function renderCostOfRiskF18SummaryOnlyView(summary, state) {
   elements.costOfRiskPoints.textContent = "-";
 
   if (activeCostOfRiskTab === "counterparty-summary") {
-    destroyCostOfRiskWaterfallChart();
-    destroyCostOfRiskChart();
-    destroyCostOfRiskStageSummaryChart();
-    destroyCostOfRiskF2VsF12Chart();
-    destroyCostOfRiskTreemapChart();
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
     renderCostOfRiskCounterpartySummaryView(summary, state);
     return;
   }
 
-  destroyCostOfRiskWaterfallChart();
-  destroyCostOfRiskChart();
-  destroyCostOfRiskCounterpartySummaryChart();
-  destroyCostOfRiskF2VsF12Chart();
-  destroyCostOfRiskTreemapChart();
   leaveCostOfRiskStageTransferTab();
   clearCostOfRiskAuditTable();
   renderCostOfRiskStageSummaryView(summary, state);
@@ -2324,8 +2276,6 @@ function destroyCostOfRiskStageTransferChart() {
 }
 
 function leaveCostOfRiskStageTransferTab() {
-  destroyCostOfRiskStageTransferChart();
-  destroyCostOfRiskStageTransferFlowChart();
   if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
 }
 
