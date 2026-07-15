@@ -31,21 +31,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-movement-chart-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-core-definition-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-core-definition-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-core-definition-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-core-definition-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +53,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-core-definition-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,28 +61,32 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-movement-chart-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-movement-chart-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-core-definition-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-core-definition-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-core-definition-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-core-definition-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-core-definition-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-core-definition-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-movement-chart-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-core-definition-view";
+import {
+  getCostOfRiskCoreSectionLabel,
+  renderCostOfRiskCoreDefinitionTables
+} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-core-definition-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -103,7 +107,6 @@ let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CEL
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let lastCostOfRiskActiveFiltersRenderKey = "";
-const lastCostOfRiskCoreDefinitionRenderKeys = new Map();
 const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 let lastCostOfRiskSmoothingRenderKey = "";
@@ -929,95 +932,14 @@ function getCostOfRiskUnavailableMessage() {
 }
 
 function renderCostOfRiskCoreDefinition(movementOptions, f2F12Options) {
-  renderCostOfRiskCoreDefinitionTable(elements.costOfRiskCoreDefinition, movementOptions, false, "movement");
-  renderCostOfRiskCoreDefinitionTable(elements.costOfRiskF2VsF12CoreDefinition, f2F12Options, true, "f2-f12");
-}
-
-function renderCostOfRiskCoreDefinitionTable(container, options, isCompact = false, scope = "movement") {
-  if (!container) return;
-
-  const selectedCodes = getActiveCostOfRiskCoreXCodes(options, scope);
-  const renderKey = serializeCostOfRiskCachePart({
-    isCompact,
-    options: (options ?? []).map((option) => ({ code: option.code, label: option.label })),
-    scope,
-    selectedCodes
+  renderCostOfRiskCoreDefinitionTables({
+    f2F12Container: elements.costOfRiskF2VsF12CoreDefinition,
+    f2F12Options,
+    f2F12SelectedCodes: getActiveCostOfRiskCoreXCodes(f2F12Options, "f2-f12"),
+    movementContainer: elements.costOfRiskCoreDefinition,
+    movementOptions,
+    movementSelectedCodes: getActiveCostOfRiskCoreXCodes(movementOptions, "movement")
   });
-  if (lastCostOfRiskCoreDefinitionRenderKeys.get(scope) === renderKey) return;
-  lastCostOfRiskCoreDefinitionRenderKeys.set(scope, renderKey);
-  const selectedCodeSet = new Set(selectedCodes);
-  const table = document.createElement("table");
-  table.className = isCompact
-    ? "cost-of-risk-core-table cost-of-risk-core-table--compact"
-    : "cost-of-risk-core-table";
-  table.append(createCostOfRiskCoreColumnGroup(isCompact));
-
-  const tbody = document.createElement("tbody");
-  let previousSectionLabel = "";
-  (options ?? []).forEach((option) => {
-    const sectionLabel = getCostOfRiskCoreSectionLabel(option.code);
-    if (sectionLabel && sectionLabel !== previousSectionLabel) {
-      tbody.append(createCostOfRiskCoreSectionRow(sectionLabel));
-      previousSectionLabel = sectionLabel;
-    }
-
-    const row = document.createElement("tr");
-    row.classList.toggle("is-disabled", !selectedCodeSet.has(option.code));
-
-    const checkboxCell = document.createElement("td");
-    checkboxCell.className = "cost-of-risk-core-check";
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = selectedCodeSet.has(option.code);
-    checkbox.dataset.costOfRiskCoreCode = option.code;
-    checkbox.dataset.costOfRiskCoreScope = scope;
-    checkbox.setAttribute("aria-label", `Use ${option.code}`);
-    checkboxCell.append(checkbox);
-
-    const codeCell = document.createElement("td");
-    codeCell.className = "cost-of-risk-core-code";
-    codeCell.textContent = option.code;
-
-    const labelCell = document.createElement("td");
-    labelCell.className = "cost-of-risk-core-label";
-    labelCell.textContent = option.label;
-
-    row.append(checkboxCell, codeCell, labelCell);
-    tbody.append(row);
-  });
-
-  table.append(tbody);
-  container.replaceChildren(table);
-}
-
-function createCostOfRiskCoreColumnGroup(isCompact) {
-  const colgroup = document.createElement("colgroup");
-  [
-    isCompact ? "22px" : "26px",
-    isCompact ? "42px" : "48px",
-    "auto"
-  ].forEach((width) => {
-    const col = document.createElement("col");
-    col.style.width = width;
-    colgroup.append(col);
-  });
-  return colgroup;
-}
-
-function createCostOfRiskCoreSectionRow(sectionLabel) {
-  const row = document.createElement("tr");
-  row.className = "cost-of-risk-core-section-row";
-  const cell = document.createElement("td");
-  cell.colSpan = 3;
-  cell.textContent = sectionLabel;
-  row.append(cell);
-  return row;
-}
-
-function getCostOfRiskCoreSectionLabel(code) {
-  const numericCode = Number(code);
-  if (!Number.isFinite(numericCode)) return "";
-  return numericCode >= 110 ? "Direct P&L impact" : "Allowances variation";
 }
 
 function renderCostOfRiskXAxisOptions(options, selectedCode) {
