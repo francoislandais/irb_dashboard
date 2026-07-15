@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260715-cost-risk-movement-fix";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260715-cost-risk-movement-chart-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -17,11 +17,11 @@ import {
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-movement-fix";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-movement-chart-view";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-movement-fix";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-movement-chart-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;

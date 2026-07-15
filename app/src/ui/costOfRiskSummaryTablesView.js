@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260715-cost-risk-movement-fix";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260715-cost-risk-movement-chart-view";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 export const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES = {
