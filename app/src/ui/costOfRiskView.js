@@ -31,13 +31,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-filter-context-line";
+} from "../data/costOfRisk.js?v=20260714-allowance-denominator";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-filter-context-line";
+} from "./costOfRiskStageTransfers.js?v=20260714-allowance-denominator";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -63,14 +63,6 @@ function formatCostOfRiskQuarterAxisLabel(timestamp) {
   const date = new Date(timestamp);
   const quarter = Math.floor(date.getMonth() / 3) + 1;
   return `Q${quarter}${date.getFullYear()}`;
-}
-
-// Stage box ratios are computed on the same internal bps-equivalent scale as
-// every other ratio in this module, but shown as a percentage instead — they
-// run in the tens of percent, so basis points would be unwieldy to read.
-function formatCostOfRiskStageBoxRatioValue(bpsValue) {
-  if (!Number.isFinite(bpsValue)) return "-";
-  return formatContributionPercentValue(bpsValue / 10000);
 }
 
 // Reference dates are real calendar quarter-ends (31/03, 30/06, ...), which
@@ -201,18 +193,20 @@ const elements = {
   costOfRiskXAxis: document.querySelector("#cost-of-risk-x-axis")
 };
 
-// The ratio denominator now follows the sidebar filters (Accounting type,
-// Counterparty, Stage) automatically - there is no picker to render here
-// any more. The info icon (visible only in ratio mode) is the only control
-// left: its tooltip always reflects whatever F_18.00 perimeter the current
-// filters resolve to.
+// Growth-rate denominators follow the sidebar filters automatically. The
+// tooltip is visible only when variations are shown as growth rates.
 function renderCostOfRiskRatioDenominatorControls(state) {
   const isRatioMode = activeCostOfRiskDisplayMode === "ratio";
   if (elements.costOfRiskRatioInfo) elements.costOfRiskRatioInfo.hidden = !isRatioMode;
   if (!isRatioMode || !elements.costOfRiskRatioTooltip) return;
 
+  if (activeCostOfRiskTab === "contributions") {
+    elements.costOfRiskRatioTooltip.textContent = "Growth rate denominator: previous-quarter FINREP F 18.00 allowances for the current Accounting type / Counterparty / Stage filters.";
+    return;
+  }
+
   const detail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, state.selectedJst);
-  elements.costOfRiskRatioTooltip.textContent = `Ratio denominator: ${detail.label}, as reported in FINREP F 18.00.`;
+  elements.costOfRiskRatioTooltip.textContent = `Growth rate denominator: previous-quarter ${detail.label}, as reported in FINREP F 18.00.`;
 }
 
 export function wireCostOfRiskUi(actions, rerender) {
@@ -370,7 +364,7 @@ export function renderCostOfRisk(state) {
     activeCostOfRiskSmoothingWindow,
     activeCostOfRiskReferenceDate
   );
-  const isRatioModeMissingDenominator = activeCostOfRiskDisplayMode === "ratio" && !selection.denominator;
+  const isGrowthRateModeMissingDenominator = activeCostOfRiskDisplayMode === "ratio" && !selection.denominator;
   elements.costOfRiskRatioValue.textContent = formatCostOfRiskDisplayValue(
     activeCostOfRiskDisplayMode === "ratio"
       ? selectedSmoothedPoint?.smoothedRatioBasisPoints ?? selection.ratioBasisPoints
@@ -378,9 +372,9 @@ export function renderCostOfRisk(state) {
     activeCostOfRiskDisplayMode,
     state.selectedUnit
   );
-  elements.costOfRiskRatioContext.textContent = isRatioModeMissingDenominator
-    ? `Ratio unavailable: ${selection.denominatorLabel.toLowerCase()} is not available.`
-    : `${state.selectedJst} - ${selection.referenceDate} - ${activeCostOfRiskDisplayMode === "ratio" ? formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow) : "amount"}`;
+  elements.costOfRiskRatioContext.textContent = isGrowthRateModeMissingDenominator
+    ? `Growth rate unavailable: ${selection.denominatorLabel.toLowerCase()} is not available.`
+    : `${state.selectedJst} - ${selection.referenceDate} - ${activeCostOfRiskDisplayMode === "ratio" ? `${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)} growth rate` : "amount"}`;
   elements.costOfRiskF02Value.textContent = formatCostOfRiskDisplayValue(
     activeCostOfRiskDisplayMode === "ratio" ? f02Ratio.ratioBasisPoints : f02Ratio.value,
     activeCostOfRiskDisplayMode,
@@ -1061,13 +1055,9 @@ function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit) {
       : (Number.isFinite(cell.ratio) ? formatContributionPercentValue(cell.ratio) : "-");
   }
 
-  if (activeCostOfRiskDisplayMode === "amount") {
-    if (kind === "mom") return Number.isFinite(cell.mom) ? formatSignedMetricValue(cell.mom, selectedUnit) : "-";
-    return Number.isFinite(cell.value) ? formatMetricValue(cell.value, selectedUnit) : "-";
-  }
-
-  if (kind === "mom") return formatSignedBasisPointsValue(cell.momRatioBasisPoints);
-  return Number.isFinite(cell.ratio) ? formatContributionPercentValue(cell.ratio) : "-";
+  if (kind === "level") return Number.isFinite(cell.value) ? formatMetricValue(cell.value, selectedUnit) : "-";
+  if (activeCostOfRiskDisplayMode === "amount") return Number.isFinite(cell.mom) ? formatSignedMetricValue(cell.mom, selectedUnit) : "-";
+  return formatSignedBasisPointsValue(cell.momRatioBasisPoints);
 }
 
 function formatSignedBasisPointsValue(value) {
@@ -1096,10 +1086,6 @@ function createCostOfRiskSummaryCellTooltip({ counterpartyLabel, displayValue, k
 
   if (metric === "coverage") {
     return `In ${dateLabel}, the coverage ratio for ${scope} is ${displayValue}.`;
-  }
-
-  if (activeCostOfRiskDisplayMode === "ratio") {
-    return `In ${dateLabel}, ${scope} represents ${displayValue} of total ${metricLabel.toLowerCase()}.`;
   }
 
   return `In ${dateLabel}, ${metricLabel} for ${scope} is ${displayValue} ${getCostOfRiskUnitTooltipLabel(selectedUnit)}.`;
@@ -1158,7 +1144,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
   if (!elements.costOfRiskStageSummaryChart || !window.Highcharts) return;
 
   const selectedCell = stageSummary.selectedCell;
-  const chartDisplayMode = selectedCell?.metric === "coverage" ? "ratio" : activeCostOfRiskDisplayMode;
+  const chartDisplayMode = getCostOfRiskSummaryChartDisplayMode(selectedCell);
   const chartModel = buildBenchmarkChartModel(stageSummary.benchmarkSeries, state.selectedJst, primaryDark, {
     displayMode: chartDisplayMode,
     peerDisplayMode: state.peerDisplayMode,
@@ -1178,7 +1164,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
   const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey)} - time evolution`;
-  const ratioIsPercent = selectedCell.kind === "level";
+  const ratioIsPercent = selectedCell.metric === "coverage" && selectedCell.kind === "level";
 
   const options = {
     chart: {
@@ -1254,7 +1240,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Basis points") }
+      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (bp)") }
     }
   };
 
@@ -1277,12 +1263,19 @@ function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode
       ? formatBasisPointsValue(value)
       : formatContributionPercentValue(value / 10000);
   }
-  if (displayMode === "amount") return selectedCell.kind === "mom"
+  if (selectedCell.kind === "level" || displayMode === "amount") return selectedCell.kind === "mom"
     ? formatSignedMetricValue(value, selectedUnit)
     : formatMetricValue(value, selectedUnit);
   return selectedCell.kind === "mom"
     ? formatBasisPointsValue(value)
     : formatContributionPercentValue(value / 10000);
+}
+
+function getCostOfRiskSummaryChartDisplayMode(selectedCell) {
+  if (!selectedCell) return "amount";
+  if (selectedCell.metric === "coverage") return "ratio";
+  if (selectedCell.kind === "level") return "amount";
+  return activeCostOfRiskDisplayMode;
 }
 
 function getCostOfRiskStageSummaryMetricLabel(selectedCell) {
@@ -1459,7 +1452,7 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
   if (!elements.costOfRiskCounterpartySummaryChart || !window.Highcharts) return;
 
   const selectedCell = counterpartySummary.selectedCell;
-  const chartDisplayMode = selectedCell?.metric === "coverage" ? "ratio" : activeCostOfRiskDisplayMode;
+  const chartDisplayMode = getCostOfRiskSummaryChartDisplayMode(selectedCell);
   const chartModel = buildBenchmarkChartModel(counterpartySummary.benchmarkSeries, state.selectedJst, primaryDark, {
     displayMode: chartDisplayMode,
     peerDisplayMode: state.peerDisplayMode,
@@ -1479,7 +1472,7 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeCostOfRiskReferenceDate);
   const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getCostOfRiskCounterpartySummaryRowLabel(counterpartySummary, selectedCell.rowKey)} - time evolution`;
-  const ratioIsPercent = selectedCell.kind === "level";
+  const ratioIsPercent = selectedCell.metric === "coverage" && selectedCell.kind === "level";
 
   const options = {
     chart: {
@@ -1555,7 +1548,7 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Basis points") }
+      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (bp)") }
     }
   };
 
@@ -1713,7 +1706,7 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
       startOnTick: false,
       endOnTick: false,
       tickAmount: 8,
-      title: { text: displayMode === "ratio" ? "Basis points" : "Amount" }
+      title: { text: displayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
     }
   };
 
@@ -1865,7 +1858,7 @@ function renderCostOfRiskF2VsF12Chart(f02Series, f12Series, displayMode = "ratio
       startOnTick: false,
       endOnTick: false,
       tickAmount: 8,
-      title: { text: displayMode === "ratio" ? "Basis points" : "Amount" }
+      title: { text: displayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
     }
   };
 
@@ -1991,7 +1984,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
         value: 0,
         width: 1
       }],
-      title: { text: displayMode === "ratio" ? "Basis points" : "Amount" }
+      title: { text: displayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
     }
   };
 
@@ -2084,12 +2077,8 @@ function handleCostOfRiskStageTransferFlowContextMenu(state, flowKey, event) {
 function createCostOfRiskStageTransferFlowAuditTrail(state, audit) {
   const selectedUnit = state.selectedUnit;
   const view = buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit);
-  if (activeCostOfRiskDisplayMode === "ratio") {
-    if (audit.type === "stagebox") {
-      appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, selectedUnit);
-    } else {
-      appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit);
-    }
+  if (activeCostOfRiskDisplayMode === "ratio" && audit.type !== "stagebox") {
+    appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit);
   }
   return view;
 }
@@ -2101,12 +2090,9 @@ function getCostOfRiskStageTransferDenominatorFilters() {
   };
 }
 
-// Appends a "Ratio denominator" section (with the same per-cell breakdown
-// as the info tooltip) and turns the headline value into the displayed
-// ratio, since the flow diagram itself shows ratio-mode values divided by
-// the F_18.00 denominator that follows the current sidebar filters - the
-// audit trail must explain that division, not just the raw movement
-// amount.
+// Appends a growth-rate denominator section and turns the headline value
+// into the displayed growth-rate value. The audit trail must explain that
+// division, not just the raw movement amount.
 function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUnit) {
   const denominatorReferenceLabel = audit.previousReferenceLabel || "";
   const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, getCostOfRiskStageTransferDenominatorFilters(), denominatorReferenceLabel, state.selectedJst);
@@ -2116,10 +2102,10 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in ratio mode as this amount divided by the previous-quarter F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
+  view.definition = `${view.definition} Shown in growth-rate mode as this amount divided by the previous-quarter F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")} (${rawValueLabel} raw)`
-    : `Ratio unavailable (${rawValueLabel} raw)`;
+    : `Growth rate unavailable (${rawValueLabel} raw)`;
 
   view.sections.push({
     columns: [
@@ -2131,7 +2117,7 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
       label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
       value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
     })),
-    title: `Ratio denominator - ${denominatorDetail.label} (F_18.00, ${denominatorDateLabel})`,
+    title: `Growth rate denominator - ${denominatorDetail.label} (F_18.00, ${denominatorDateLabel})`,
     totalRow: {
       label: isRatioAvailable ? "Total" : "Total (unavailable)",
       value: isRatioAvailable ? formatAmount(denominatorDetail.value) : "-"
@@ -2140,43 +2126,6 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, selectedUni
 
   if (isRatioAvailable) {
     const ratioFormula = `${rawValueLabel} / ${formatAmount(denominatorDetail.value)} = ${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")}`;
-    view.formula = view.formula ? `${view.formula}\n${ratioFormula}` : ratioFormula;
-  }
-}
-
-function appendCostOfRiskStageBoxRatioDenominatorSection(view, audit, state, selectedUnit) {
-  const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(state, getCostOfRiskStageTransferDenominatorFilters(), audit.referenceLabel, state.selectedJst);
-  const formatAmount = (value) => formatCostOfRiskAuditValue(value, "amount", selectedUnit);
-  const isRatioAvailable = denominatorDetail.status === "available" && Number.isFinite(denominatorDetail.value) && denominatorDetail.value !== 0;
-  const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
-  const ratioPercent = Number.isFinite(ratioBasisPoints) ? ratioBasisPoints / 10000 : null;
-  const ratioPercentLabel = Number.isFinite(ratioPercent) ? formatContributionPercentValue(ratioPercent) : "-";
-  const rawValueLabel = view.valueLabel;
-
-  view.definition = `${view.definition} Shown in ratio mode as this stock divided by the F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
-  view.valueLabel = isRatioAvailable
-    ? `${ratioPercentLabel} (${rawValueLabel} raw)`
-    : `Ratio unavailable (${rawValueLabel} raw)`;
-
-  view.sections.push({
-    columns: [
-      { header: "Component", key: "label" },
-      { align: "right", header: "Value", key: "value" }
-    ],
-    description: "Every F_18.00 denominator cell matching the current Accounting type / Counterparty filters, all stages combined.",
-    rows: denominatorDetail.components.map((component) => ({
-      label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
-      value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"
-    })),
-    title: `Ratio denominator - ${denominatorDetail.label} (F_18.00)`,
-    totalRow: {
-      label: isRatioAvailable ? "Total" : "Total (unavailable)",
-      value: isRatioAvailable ? formatAmount(denominatorDetail.value) : "-"
-    }
-  });
-
-  if (isRatioAvailable) {
-    const ratioFormula = `${rawValueLabel} / ${formatAmount(denominatorDetail.value)} = ${ratioPercentLabel}`;
     view.formula = view.formula ? `${view.formula}\n${ratioFormula}` : ratioFormula;
   }
 }
@@ -2347,6 +2296,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
   }
 
   const isStageBoxSelection = activeCostOfRiskStageTransferFlowKey.startsWith("stagebox:");
+  const chartDisplayMode = isStageBoxSelection ? "amount" : displayMode;
   const flowSeries = isStageBoxSelection
     ? buildCostOfRiskStageBoxTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey.split(":")[1])
     : buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey);
@@ -2361,7 +2311,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
   }
 
   const chartModel = buildBenchmarkChartModel(flowSeries.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode,
+    displayMode: chartDisplayMode,
     peerDisplayMode: state.peerDisplayMode,
     smoothingWindow: activeCostOfRiskSmoothingWindow
   });
@@ -2409,10 +2359,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        const valueFormatter = (value) => (isStageBoxSelection && displayMode === "ratio"
-          ? formatCostOfRiskStageBoxRatioValue(value)
-          : formatCostOfRiskDisplayValue(value, displayMode, selectedUnit));
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${valueFormatter(this.y)}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, chartDisplayMode, selectedUnit)}`;
       },
       shared: false,
       split: false,
@@ -2444,8 +2391,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       gridLineColor: "#edf0ee",
       labels: {
         formatter() {
-          if (isStageBoxSelection && displayMode === "ratio") return formatCostOfRiskStageBoxRatioValue(this.value);
-          return displayMode === "ratio"
+          return chartDisplayMode === "ratio"
             ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
             : formatMetricValue(this.value, selectedUnit);
         },
@@ -2458,7 +2404,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: displayMode === "ratio" ? (isStageBoxSelection ? "Percent" : "Basis points") : "Amount" }
+      title: { text: chartDisplayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
     }
   };
 
@@ -2595,7 +2541,7 @@ function renderCostOfRiskStageTransferWaterfallChart(waterfall, selectedUnit, di
         value: 0,
         width: 1
       }],
-      title: { text: displayMode === "ratio" ? "Basis points" : "Amount" }
+      title: { text: displayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
     }
   };
 
@@ -3145,7 +3091,7 @@ function formatManualWaterfallValue(value, waterfallData) {
   return `${value > 0 ? "+" : ""}${formatBasisPointsValue(value)}`;
 }
 
-// Display-only shortenings of the standard COREP F_12.01 x-axis (0020-0125)
+// Display-only shortenings of the allowance-movement COREP F_12.01 x-axis
 // descriptions, so the waterfall's axis labels read at a glance instead of
 // wrapping/truncating the full regulatory wording. Falls back to the real
 // label (from the loaded CSV's dimension mapping) for any code not listed
@@ -3157,10 +3103,7 @@ const COST_OF_RISK_WATERFALL_SHORT_LABELS = {
   "0050": "Modifications w/o derecognition",
   "0070": "Methodology update",
   "0080": "Write-offs",
-  "0090": "Other adjustments",
-  "0110": "Recoveries of write-offs",
-  "0120": "Amounts written off",
-  "0125": "Gains/losses on derecognition"
+  "0090": "Other adjustments"
 };
 
 function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth) {

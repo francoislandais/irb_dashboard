@@ -81,7 +81,7 @@ const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
 const COST_OF_RISK_F02_X_AXIS_CODE = "0010";
 const COST_OF_RISK_F02_Y_AXIS_CODE = "0460";
 const COST_OF_RISK_TOTAL_Y_AXIS_CODE = "0520";
-export const COST_OF_RISK_WATERFALL_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090", "0110", "0120", "0125"];
+export const COST_OF_RISK_WATERFALL_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090"];
 export const COST_OF_RISK_STAGE_TRANSFER_STAGE_OPTIONS = [
   { label: "Stage 1", value: "1" },
   { label: "Stage 2", value: "2" },
@@ -333,7 +333,7 @@ export function buildCostOfRiskSelectionValue(state, selectionId, xAxisCode = CO
   return {
     benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, filters),
     denominator: selectedPoint?.denominator ?? null,
-    denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
+    denominatorLabel: getCostOfRiskAllowanceMovementDenominatorLabel(state, filters),
     option: selectedOption,
     ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
     referenceDate: selectedPoint?.label ?? "",
@@ -418,7 +418,7 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
     return { points: [], referenceDate: "" };
   }
 
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  const denominatorSeries = getCostOfRiskAllowanceMovementDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex) ?? 0;
   const xLabels = getCostOfRiskXAxisLabelMap(state);
@@ -471,7 +471,7 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
   });
 
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  const denominatorSeries = getCostOfRiskAllowanceMovementDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
@@ -1256,15 +1256,15 @@ function createCostOfRiskStageSummaryCellValues(series, totalSeries, referenceIn
   const value = series[referenceIndex] ?? null;
   const previousValue = referenceIndex > 0 ? series[referenceIndex - 1] : null;
   const total = totalSeries[referenceIndex] ?? null;
-  const previousTotal = referenceIndex > 0 ? totalSeries[referenceIndex - 1] : null;
   const ratio = Number.isFinite(value) && Number.isFinite(total) && total !== 0 ? value / total : null;
-  const previousRatio = Number.isFinite(previousValue) && Number.isFinite(previousTotal) && previousTotal !== 0
-    ? previousValue / previousTotal
+  const mom = getFiniteDelta(value, previousValue);
+  const momRatioBasisPoints = Number.isFinite(mom) && Number.isFinite(previousValue) && previousValue !== 0
+    ? (mom / previousValue) * 10000
     : null;
 
   return {
-    mom: getFiniteDelta(value, previousValue),
-    momRatioBasisPoints: getFiniteDelta(ratio, previousRatio) === null ? null : getFiniteDelta(ratio, previousRatio) * 10000,
+    mom,
+    momRatioBasisPoints,
     ratio,
     value
   };
@@ -1296,15 +1296,13 @@ function getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selected
   }
 
   const total = totalSeries?.[index] ?? null;
-  const previousTotal = index > 0 ? totalSeries?.[index - 1] : null;
   const ratio = Number.isFinite(value) && Number.isFinite(total) && total !== 0 ? value / total : null;
 
   if (selectedCell.kind === "mom") {
-    const previousRatio = Number.isFinite(previousValue) && Number.isFinite(previousTotal) && previousTotal !== 0
-      ? previousValue / previousTotal
+    const delta = getFiniteDelta(value, previousValue);
+    return Number.isFinite(delta) && Number.isFinite(previousValue) && previousValue !== 0
+      ? (delta / previousValue) * 10000
       : null;
-    const delta = getFiniteDelta(ratio, previousRatio);
-    return delta === null ? null : delta * 10000;
   }
 
   return ratio === null ? null : ratio * 10000;
@@ -1642,7 +1640,7 @@ function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, refe
   return {
     benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, filters),
     denominator: selectedPoint?.denominator ?? null,
-    denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
+    denominatorLabel: getCostOfRiskAllowanceMovementDenominatorLabel(state, filters),
     option: selectedOption,
     ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
     referenceDate: selectedPoint?.label ?? "",
@@ -2114,7 +2112,7 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
       }, jstCode));
   });
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+  const denominatorSeries = getCostOfRiskAllowanceMovementDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((column, index) => {
     const value = quarterlyValueSeries[index] ?? 0;
@@ -2264,6 +2262,21 @@ function getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, j
     if (!Number.isFinite(base)) return null;
     return Number.isFinite(cash) ? base - cash : base;
   });
+}
+
+function getCostOfRiskAllowanceMovementDenominatorSeries(state, indexes, referenceColumns, jstCode, filters = {}) {
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+  const xCodes = COST_OF_RISK_ALLOWANCE_STAGE_X_CODES[normalizedFilters.stage] ?? COST_OF_RISK_ALLOWANCE_STAGE_X_CODES[""];
+  const values = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
+  return values.map((value) => (Number.isFinite(value) ? -value : value));
+}
+
+function getCostOfRiskAllowanceMovementDenominatorLabel(state, filters = {}) {
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+  const stageLabel = normalizedFilters.stage ? formatCostOfRiskStageLabel(normalizedFilters.stage) : ALL_STAGES_LABEL;
+  return `F_18.00 allowances - ${ySelection.label} - ${stageLabel}`;
 }
 
 function buildCostOfRiskRatioDenominatorAggregate(state, indexes, referenceColumns, jstCode, filters = {}) {

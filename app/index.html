@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260714-filter-context-line">
+    <link rel="stylesheet" href="./src/styles.css?v=20260714-allowance-denominator">
   </head>
   <body>
     <div class="app-shell">
@@ -142,15 +142,15 @@
                 </label>
                 <label class="field cost-of-risk-field cost-of-risk-field--stacked">
                   <span class="cost-of-risk-display-label">
-                    Display
-                    <button type="button" id="cost-of-risk-ratio-info" class="cost-of-risk-info-button" aria-label="Information about the ratio denominator" hidden>
+                    Variation display
+                    <button type="button" id="cost-of-risk-ratio-info" class="cost-of-risk-info-button" aria-label="Information about the growth rate denominator" hidden>
                       <span aria-hidden="true">?</span>
-                      <span id="cost-of-risk-ratio-tooltip" class="cost-of-risk-info-tooltip" role="tooltip">Ratio denominator: FINREP F 18.00 gross carrying amount for the current Accounting type / Counterparty / Stage filters (cash balances at central banks are always excluded).</span>
+                      <span id="cost-of-risk-ratio-tooltip" class="cost-of-risk-info-tooltip" role="tooltip">Growth rate denominator: previous-quarter FINREP F 18.00 stock for the current filters.</span>
                     </button>
                   </span>
                   <select id="cost-of-risk-display-mode">
-                    <option value="ratio" selected>Ratio</option>
                     <option value="amount">Amount</option>
+                    <option value="ratio" selected>Growth rate</option>
                   </select>
                 </label>
                 <label class="field cost-of-risk-smoothing-field cost-of-risk-field--stacked">
@@ -262,6 +262,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260714-filter-context-line"></script>
+    <script type="module" src="./src/main.js?v=20260714-allowance-denominator"></script>
   </body>
 </html>
