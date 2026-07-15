@@ -257,6 +257,10 @@ const STAGE_SHORT_LABELS = new Map([
   ["Purchased or originated credit-impaired", "POCI"]
 ]);
 
+function formatCostOfRiskAllowanceMovementDisplayValue(value) {
+  return Number.isFinite(value) ? -value : value;
+}
+
 export function getCostOfRiskSelectionOptions(state) {
   const yMappings = getCostOfRiskYMappings(state);
   const descriptors = yMappings.map(describeCostOfRiskYAxisPoint);
@@ -371,7 +375,7 @@ export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "", fil
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const value = quarterlyValueSeries[referenceIndex] ?? null;
+  const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[referenceIndex] ?? null);
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
 
   return {
@@ -430,7 +434,7 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex) ?? 0;
-  const xLabels = getCostOfRiskXAxisLabelMap(state);
+  const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const points = COST_OF_RISK_WATERFALL_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)).map((xCode) => {
     const rawValueSeries = createEmptySeries(referenceColumns.length);
     selectedOption.points.forEach((yCode) => {
@@ -441,7 +445,7 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
       }, state.selectedJst));
     });
     const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-    const value = quarterlyValueSeries[referenceIndex] ?? 0;
+    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[referenceIndex] ?? 0);
 
     return {
       code: xCode,
@@ -484,7 +488,7 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
-      const value = quarterlyValueSeries[index] ?? null;
+      const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? null);
       const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
       return {
@@ -531,11 +535,12 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
       values: resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, COST_OF_RISK_DENOMINATOR_CASH_Y_CODE)
     })) : [])
   ];
+  const f2DisplaySeries = f2QuarterlySeries.map(formatCostOfRiskAllowanceMovementDisplayValue);
   const f2RatioSeries = referenceColumns.map((_, index) => {
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
-    return denominator ? (f2QuarterlySeries[index] / denominator) * 10000 : null;
+    return denominator ? (f2DisplaySeries[index] / denominator) * 10000 : null;
   });
-  const xLabels = getCostOfRiskXAxisLabelMap(state);
+  const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const selectedXList = COST_OF_RISK_F12_RECONCILIATION_X_CODES.filter((xCode) => selectedCodeSet.has(xCode));
   const f12Rows = selectedXList.map((xCode) => {
     const rawSeries = createEmptySeries(referenceColumns.length);
@@ -546,7 +551,8 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
         zCode: ""
       }, state.selectedJst));
     });
-    const quarterlyValues = decumulateQuarterlySeries(referenceColumns, rawSeries);
+    const quarterlyValues = decumulateQuarterlySeries(referenceColumns, rawSeries)
+      .map(formatCostOfRiskAllowanceMovementDisplayValue);
 
     return {
       label: xLabels.get(xCode) ?? xCode,
@@ -580,7 +586,7 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
         section: "F2",
         source: `${COST_OF_RISK_F02_TABLE_ID} / x ${COST_OF_RISK_F02_X_AXIS_CODE} / y ${COST_OF_RISK_F02_Y_AXIS_CODE}`,
         type: "amount",
-        values: f2QuarterlySeries
+        values: f2DisplaySeries
       },
       {
         label: "F12 selected contribution ratio",
@@ -2230,6 +2236,21 @@ function getCostOfRiskXAxisLabelMap(state) {
   ]));
 }
 
+function getCostOfRiskXAxisFullLabelMap(state) {
+  const mappings = state.dimensionMapping?.list?.(COST_OF_RISK_TABLE_ID, "x_axis_rc_code") ?? [];
+  return new Map(mappings.map((mapping) => [
+    mapping.code,
+    formatCostOfRiskFullAxisLabel(mapping.description || mapping.code)
+  ]));
+}
+
+function formatCostOfRiskFullAxisLabel(label) {
+  return String(label ?? "")
+    .replace(/^Movements\s*\/\s*/i, "")
+    .replace(/\bmovement_/gi, "")
+    .trim();
+}
+
 function getCostOfRiskStageTransferXAxisLabelMap(state) {
   const mappings = state.dimensionMapping?.list?.(COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, "x_axis_rc_code") ?? [];
   return new Map(mappings.map((mapping) => [
@@ -2292,7 +2313,7 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((column, index) => {
-    const value = quarterlyValueSeries[index] ?? 0;
+    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? 0);
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
     return {
       date: column.date,

@@ -29,21 +29,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-core-selection-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -51,7 +51,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -59,56 +59,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-core-selection-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-core-selection-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-core-selection-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskControlsView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260715-cost-risk-core-selection-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskTabsView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskModelCache.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -116,12 +116,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260715-cost-risk-core-selection-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -144,6 +144,7 @@ let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
 let costOfRiskWaterfallChart = null;
+const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
   asset: "Loans and advances",
   counterparty: COST_OF_RISK_FILTER_ALL,
@@ -753,9 +754,8 @@ function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {
   if (elements.costOfRiskChartTitle) elements.costOfRiskChartTitle.textContent = activeCostOfRiskChartTitleText;
 }
 
-function renderCostOfRiskWaterfallTitle(referenceDate) {
-  const dateLabel = referenceDate ? ` - ${formatReferenceQuarterLabel(referenceDate)}` : "";
-  activeCostOfRiskWaterfallTitleText = `F12 Contribution Breakdown${dateLabel}`;
+function renderCostOfRiskWaterfallTitle() {
+  activeCostOfRiskWaterfallTitleText = "Movement in the stock of allowance";
   if (elements.costOfRiskWaterfallTitle) elements.costOfRiskWaterfallTitle.textContent = activeCostOfRiskWaterfallTitleText;
 }
 
@@ -940,7 +940,9 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   const waterfallData = createManualWaterfallData(contributions);
   waterfallData.valueFormatter = (value) => formatCostOfRiskDisplayValue(value, displayMode, selectedUnit, true);
   waterfallData.selectedCode = activeCostOfRiskXAxisCode;
-  waterfallData.axisLabelFontSize = "9px";
+  waterfallData.axisLabelFontSize = "11px";
+  waterfallData.axisLabelLineHeight = "13px";
+  waterfallData.valueLabelFontSize = "12px";
   const options = {
     chart: {
       animation: false,
@@ -951,7 +953,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
           wireCostOfRiskWaterfallAxisLabels(this);
         }
       },
-      marginBottom: 65,
+      marginBottom: 112,
       type: "line"
     },
     credits: { enabled: false },
@@ -1380,7 +1382,7 @@ function renderManualCostOfRiskWaterfall(chart, waterfallData) {
       : chart.renderer.rect(x, top, barWidth, height, 3);
     shape
       .attr({
-        fill: isSelected ? primaryDark : item.color,
+        fill: isSelected ? primaryDark : COST_OF_RISK_STAGE_BOX_FILL,
         stroke: primaryDark,
         "stroke-width": isSelected ? 2 : 1,
         zIndex: isSelected ? 8 : 6
@@ -1390,7 +1392,7 @@ function renderManualCostOfRiskWaterfall(chart, waterfallData) {
       .text(formatManualWaterfallValue(item.contribution, waterfallData), xCenter, Math.max(chart.plotTop + 10, labelY))
       .css({
         color: primaryDark,
-        fontSize: "10px",
+        fontSize: waterfallData.valueLabelFontSize || "10px",
         fontWeight: isSelected ? "700" : "500"
       })
       .attr({
@@ -1483,21 +1485,6 @@ function formatManualWaterfallValue(value, waterfallData) {
   return `${value > 0 ? "+" : ""}${formatBasisPointsValue(value)}`;
 }
 
-// Display-only shortenings of the allowance-movement COREP F_12.01 x-axis
-// descriptions, so the waterfall's axis labels read at a glance instead of
-// wrapping/truncating the full regulatory wording. Falls back to the real
-// label (from the loaded CSV's dimension mapping) for any code not listed
-// here — no business logic or underlying data is affected.
-const COST_OF_RISK_WATERFALL_SHORT_LABELS = {
-  "0020": "Origination and acquisition",
-  "0030": "Derecognition or repayment",
-  "0040": "Changes in credit risk",
-  "0050": "Modifications w/o derecognition",
-  "0070": "Methodology update",
-  "0080": "Write-offs",
-  "0090": "Other adjustments"
-};
-
 function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth) {
   const isSelected = item.code && item.code === activeCostOfRiskXAxisCode;
   const waterfallData = chart.customCostOfRiskWaterfallData ?? {};
@@ -1510,7 +1497,7 @@ function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth) {
   // font size, a label line is truncated with an ellipsis rather than ever
   // spilling into its neighbor's slot.
   const maxLineWidth = Number.isFinite(slotWidth) ? Math.max(20, slotWidth - 6) : null;
-  const rawLabel = COST_OF_RISK_WATERFALL_SHORT_LABELS[item.code] ?? (item.axisLabel || item.name);
+  const rawLabel = item.axisLabel || item.name;
   const lines = getCostOfRiskWaterfallLabelLines(rawLabel)
     .map((line) => fitCostOfRiskWaterfallLabelLineWidth(chart, line, textStyle, maxLineWidth));
   if (lines.length === 0) return null;
@@ -1555,23 +1542,30 @@ function fitCostOfRiskWaterfallLabelLineWidth(chart, text, textStyle, maxWidth) 
 }
 
 function createCostOfRiskWaterfallArrowPath(x, top, width, height, contribution) {
-  if (height < 8) {
-    return [
-      ["M", x, top],
-      ["L", x + width, top],
-      ["L", x + width, top + height],
-      ["L", x, top + height],
-      ["Z"]
-    ];
-  }
-
   const isPositive = contribution >= 0;
   const bottom = top + height;
-  const headHeight = Math.min(18, Math.max(7, height * 0.34));
+  const center = x + width / 2;
+
+  if (height < 8) {
+    return isPositive
+      ? [
+        ["M", center, top],
+        ["L", x + width, bottom],
+        ["L", x, bottom],
+        ["Z"]
+      ]
+      : [
+        ["M", x, top],
+        ["L", x + width, top],
+        ["L", center, bottom],
+        ["Z"]
+      ];
+  }
+
+  const headHeight = Math.min(18, Math.max(7, height * 0.48));
   const bodyInset = width * 0.18;
   const leftBody = x + bodyInset;
   const rightBody = x + width - bodyInset;
-  const center = x + width / 2;
 
   if (isPositive) {
     const headBase = top + headHeight;
@@ -1632,7 +1626,7 @@ function wrapCostOfRiskWaterfallLabel(value) {
 function getCostOfRiskWaterfallLabelLines(value) {
   const text = String(value ?? "").replace(/^\d{4}\s+-\s+/, "");
   const explicitLines = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
-  if (explicitLines.length > 1) return explicitLines.slice(0, 4);
+  if (explicitLines.length > 1) return explicitLines.slice(0, 6);
 
   const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
@@ -1649,7 +1643,7 @@ function getCostOfRiskWaterfallLabelLines(value) {
   });
 
   if (currentLine) lines.push(currentLine);
-  return lines.slice(0, 4);
+  return lines.slice(0, 6);
 }
 
 function getCostOfRiskWaterfallLabelCode(value) {

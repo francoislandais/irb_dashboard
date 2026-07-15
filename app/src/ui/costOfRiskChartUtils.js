@@ -34,7 +34,7 @@ export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CH
     style: {
       color: "#26332d",
       fontSize: "12px",
-      fontWeight: "600"
+      fontWeight: "400"
     }
   };
 }
