@@ -1,11 +1,11 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260715-cost-risk-chart-utils";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260715-cost-risk-summary-tables";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-chart-utils";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-summary-tables";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
