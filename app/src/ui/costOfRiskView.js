@@ -2,6 +2,7 @@ import {
   COST_OF_RISK_FILTER_ALL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
+  COST_OF_RISK_F12_RECONCILIATION_X_CODES,
   COST_OF_RISK_WATERFALL_X_CODES,
   COST_OF_RISK_X_AXIS_CODE,
   buildCostOfRiskCounterpartySummaryModel,
@@ -26,18 +27,19 @@ import {
   formatCostOfRiskSmoothingLabel,
   formatReferenceQuarterLabel,
   getCostOfRiskFilterOptions,
+  getCostOfRiskF12ReconciliationXAxisOptions,
   getCostOfRiskPointDisplayValue,
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260714-allowance-denominator";
+} from "../data/costOfRisk.js?v=20260715-f2-f12-gca-denominator";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260714-allowance-denominator";
+} from "./costOfRiskStageTransfers.js?v=20260715-f2-f12-gca-denominator";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -84,7 +86,8 @@ let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
 let activeCostOfRiskReferenceDate = "";
 let activeCostOfRiskTab = "stage-summary";
-let activeCostOfRiskCoreXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
+let activeCostOfRiskMovementXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
+let activeCostOfRiskF2F12XCodes = new Set(COST_OF_RISK_F12_RECONCILIATION_X_CODES);
 let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
 let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
@@ -201,7 +204,7 @@ function renderCostOfRiskRatioDenominatorControls(state) {
   if (!isRatioMode || !elements.costOfRiskRatioTooltip) return;
 
   if (activeCostOfRiskTab === "contributions") {
-    elements.costOfRiskRatioTooltip.textContent = "Growth rate denominator: previous-quarter FINREP F 18.00 allowances for the current Accounting type / Counterparty / Stage filters.";
+    elements.costOfRiskRatioTooltip.textContent = "Rate denominator: previous-quarter FINREP F 18.00 gross carrying amount for the current Accounting type / Counterparty / Stage filters.";
     return;
   }
 
@@ -247,7 +250,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     const checkbox = event.target.closest?.("[data-cost-of-risk-core-code]");
     if (!checkbox) return;
 
-    updateCostOfRiskCoreDefinition(checkbox.dataset.costOfRiskCoreCode, checkbox.checked);
+    updateCostOfRiskCoreDefinition(checkbox.dataset.costOfRiskCoreCode, checkbox.checked, checkbox.dataset.costOfRiskCoreScope);
     rerenderApp(actions.getState());
   });
   elements.costOfRiskTabButtons.forEach((button) => {
@@ -266,13 +269,16 @@ export function renderCostOfRisk(state) {
   const filterOptions = getCostOfRiskFilterOptions(state);
   const xAxisOptions = getCostOfRiskXAxisOptions(state);
   const waterfallXAxisOptions = getCostOfRiskWaterfallXAxisOptions(state);
-  normalizeActiveCostOfRiskCoreDefinition(waterfallXAxisOptions);
+  const f2F12XAxisOptions = getCostOfRiskF12ReconciliationXAxisOptions(state);
+  normalizeActiveCostOfRiskCoreDefinition(waterfallXAxisOptions, "movement");
+  normalizeActiveCostOfRiskCoreDefinition(f2F12XAxisOptions, "f2-f12");
   normalizeActiveCostOfRiskFilter("asset", filterOptions.assets);
   normalizeActiveCostOfRiskFilter("counterparty", filterOptions.counterparties);
   normalizeActiveCostOfRiskFilter("stage", filterOptions.stages);
-  const selectedCoreXCodes = getActiveCostOfRiskCoreXCodes(waterfallXAxisOptions);
-  if (selectedCoreXCodes.length > 0 && !selectedCoreXCodes.includes(activeCostOfRiskXAxisCode)) {
-    activeCostOfRiskXAxisCode = selectedCoreXCodes[0];
+  const selectedMovementXCodes = getActiveCostOfRiskCoreXCodes(waterfallXAxisOptions, "movement");
+  const selectedF2F12XCodes = getActiveCostOfRiskCoreXCodes(f2F12XAxisOptions, "f2-f12");
+  if (selectedMovementXCodes.length > 0 && !selectedMovementXCodes.includes(activeCostOfRiskXAxisCode)) {
+    activeCostOfRiskXAxisCode = selectedMovementXCodes[0];
   }
   if (!xAxisOptions.some((option) => option.code === activeCostOfRiskXAxisCode)) {
     activeCostOfRiskXAxisCode = xAxisOptions.some((option) => option.code === COST_OF_RISK_X_AXIS_CODE)
@@ -288,7 +294,7 @@ export function renderCostOfRisk(state) {
   activeCostOfRiskReferenceDate = selection.referenceDate || activeCostOfRiskReferenceDate;
   const f02Ratio = buildCostOfRiskF02ImpairmentRatio(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters);
   const f02Series = buildCostOfRiskF02ImpairmentSeries(state, activeCostOfRiskFilters);
-  const waterfall = buildCostOfRiskWaterfall(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedCoreXCodes);
+  const waterfall = buildCostOfRiskWaterfall(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedMovementXCodes);
   const stageSummary = buildCostOfRiskStageSummaryModel(
     state,
     activeCostOfRiskFilters,
@@ -310,11 +316,11 @@ export function renderCostOfRisk(state) {
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = activeCostOfRiskDisplayMode;
   renderCostOfRiskRatioDenominatorControls(state);
   renderCostOfRiskXAxisOptions(
-    selectedCoreXCodes.length > 0 ? xAxisOptions.filter((option) => selectedCoreXCodes.includes(option.code)) : xAxisOptions,
+    selectedMovementXCodes.length > 0 ? xAxisOptions.filter((option) => selectedMovementXCodes.includes(option.code)) : xAxisOptions,
     activeCostOfRiskXAxisCode
   );
   renderCostOfRiskSmoothingControl(activeCostOfRiskSmoothingWindow);
-  renderCostOfRiskCoreDefinition(waterfallXAxisOptions);
+  renderCostOfRiskCoreDefinition(waterfallXAxisOptions, f2F12XAxisOptions);
 
   const isF18SummaryTab = activeCostOfRiskTab === "stage-summary" || activeCostOfRiskTab === "counterparty-summary";
   const activeF18Summary = activeCostOfRiskTab === "counterparty-summary" ? counterpartySummary : stageSummary;
@@ -430,12 +436,12 @@ export function renderCostOfRisk(state) {
     leaveCostOfRiskStageTransferTab();
     renderCostOfRiskF2VsF12Chart(
       f02Series,
-      buildCostOfRiskF12ContributionSeries(state, activeCostOfRiskFilters, selectedCoreXCodes),
+      buildCostOfRiskF12ContributionSeries(state, activeCostOfRiskFilters, selectedF2F12XCodes),
       activeCostOfRiskDisplayMode,
       state.selectedUnit
     );
     renderCostOfRiskAuditTable(
-      buildCostOfRiskF2VsF12Audit(state, activeCostOfRiskFilters, selectedCoreXCodes),
+      buildCostOfRiskF2VsF12Audit(state, activeCostOfRiskFilters, selectedF2F12XCodes),
       state.selectedUnit
     );
   } else if (activeCostOfRiskTab === "stage-transfers") {
@@ -614,33 +620,49 @@ function isCostOfRiskAllStageSelected() {
   return !activeCostOfRiskFilters.stage || activeCostOfRiskFilters.stage === COST_OF_RISK_FILTER_ALL;
 }
 
-function normalizeActiveCostOfRiskCoreDefinition(options) {
+function getCostOfRiskCoreSelection(scope = "movement") {
+  return scope === "f2-f12" ? activeCostOfRiskF2F12XCodes : activeCostOfRiskMovementXCodes;
+}
+
+function setCostOfRiskCoreSelection(scope, nextSelection) {
+  if (scope === "f2-f12") {
+    activeCostOfRiskF2F12XCodes = nextSelection;
+    return;
+  }
+  activeCostOfRiskMovementXCodes = nextSelection;
+}
+
+function normalizeActiveCostOfRiskCoreDefinition(options, scope = "movement") {
   const availableCodes = new Set((options ?? []).map((option) => option.code));
-  activeCostOfRiskCoreXCodes = new Set(
-    [...activeCostOfRiskCoreXCodes].filter((code) => availableCodes.has(code))
+  let selectedCodes = new Set(
+    [...getCostOfRiskCoreSelection(scope)].filter((code) => availableCodes.has(code))
   );
 
-  if (activeCostOfRiskCoreXCodes.size === 0 && availableCodes.size > 0) {
-    activeCostOfRiskCoreXCodes = new Set(availableCodes);
+  if (selectedCodes.size === 0 && availableCodes.size > 0) {
+    selectedCodes = new Set(availableCodes);
   }
+  setCostOfRiskCoreSelection(scope, selectedCodes);
 }
 
-function getActiveCostOfRiskCoreXCodes(options) {
+function getActiveCostOfRiskCoreXCodes(options, scope = "movement") {
   const optionCodes = (options ?? []).map((option) => option.code);
-  return optionCodes.filter((code) => activeCostOfRiskCoreXCodes.has(code));
+  const selectedCodes = getCostOfRiskCoreSelection(scope);
+  return optionCodes.filter((code) => selectedCodes.has(code));
 }
 
-function updateCostOfRiskCoreDefinition(code, isSelected) {
+function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
   if (!code) return;
+  const selectedCodes = new Set(getCostOfRiskCoreSelection(scope));
   if (isSelected) {
-    activeCostOfRiskCoreXCodes.add(code);
+    selectedCodes.add(code);
   } else {
-    if (activeCostOfRiskCoreXCodes.size <= 1) return;
-    activeCostOfRiskCoreXCodes.delete(code);
+    if (selectedCodes.size <= 1) return;
+    selectedCodes.delete(code);
   }
+  setCostOfRiskCoreSelection(scope, selectedCodes);
 
-  if (!activeCostOfRiskCoreXCodes.has(activeCostOfRiskXAxisCode) && activeCostOfRiskCoreXCodes.size > 0) {
-    activeCostOfRiskXAxisCode = [...activeCostOfRiskCoreXCodes][0];
+  if (scope !== "f2-f12" && !selectedCodes.has(activeCostOfRiskXAxisCode) && selectedCodes.size > 0) {
+    activeCostOfRiskXAxisCode = [...selectedCodes][0];
   }
 }
 
@@ -759,15 +781,15 @@ function getCostOfRiskUnavailableMessage() {
   return COST_OF_RISK_UNAVAILABLE_MESSAGE;
 }
 
-function renderCostOfRiskCoreDefinition(options) {
-  renderCostOfRiskCoreDefinitionTable(elements.costOfRiskCoreDefinition, options);
-  renderCostOfRiskCoreDefinitionTable(elements.costOfRiskF2VsF12CoreDefinition, options, true);
+function renderCostOfRiskCoreDefinition(movementOptions, f2F12Options) {
+  renderCostOfRiskCoreDefinitionTable(elements.costOfRiskCoreDefinition, movementOptions, false, "movement");
+  renderCostOfRiskCoreDefinitionTable(elements.costOfRiskF2VsF12CoreDefinition, f2F12Options, true, "f2-f12");
 }
 
-function renderCostOfRiskCoreDefinitionTable(container, options, isCompact = false) {
+function renderCostOfRiskCoreDefinitionTable(container, options, isCompact = false, scope = "movement") {
   if (!container) return;
 
-  const selectedCodes = getActiveCostOfRiskCoreXCodes(options);
+  const selectedCodes = getActiveCostOfRiskCoreXCodes(options, scope);
   const selectedCodeSet = new Set(selectedCodes);
   const table = document.createElement("table");
   table.className = isCompact
@@ -793,6 +815,7 @@ function renderCostOfRiskCoreDefinitionTable(container, options, isCompact = fal
     checkbox.type = "checkbox";
     checkbox.checked = selectedCodeSet.has(option.code);
     checkbox.dataset.costOfRiskCoreCode = option.code;
+    checkbox.dataset.costOfRiskCoreScope = scope;
     checkbox.setAttribute("aria-label", `Use ${option.code}`);
     checkboxCell.append(checkbox);
 
