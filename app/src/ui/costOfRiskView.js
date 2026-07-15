@@ -33,25 +33,23 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-time-series";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
-  getStageTransferDisplayValue,
-  renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-stage-transfer-time-series";
+  getStageTransferDisplayValue
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-stage-transfer-time-series";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
-  COST_OF_RISK_CHART_TITLE_POSITION,
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-time-series";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -59,7 +57,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-stage-transfer-time-series";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -67,13 +65,14 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-stage-transfer-time-series";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-stage-transfer-time-series";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-stage-transfer-flow";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-stage-transfer-flow";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-stage-transfer-time-series";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-stage-transfer-flow";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -1607,22 +1606,15 @@ function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit
   if (!elements.costOfRiskStageTransferChart) return;
   destroyCostOfRiskStageTransferChart();
 
-  const titleText = "Stage Transfer Flows";
-  if (elements.costOfRiskStageTransferTitle) elements.costOfRiskStageTransferTitle.textContent = titleText;
-
-  renderCostOfRiskStageTransferFlowDiagram({
+  renderCostOfRiskStageTransferFlowView({
     container: elements.costOfRiskStageTransferChart,
     displayMode,
-    flowArrowColor,
     flowDiagram,
-    formatValue: formatCostOfRiskDisplayValue,
     onContextMenu: (flowKey, event) => handleCostOfRiskStageTransferFlowContextMenu(state, flowKey, event),
     onSelectFlow: selectCostOfRiskStageTransferFlow,
-    primaryDark,
     selectedFlowKey: activeCostOfRiskStageTransferFlowKey,
     selectedUnit,
-    titlePosition: COST_OF_RISK_CHART_TITLE_POSITION,
-    titleText
+    titleElement: elements.costOfRiskStageTransferTitle
   });
 
   renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, selectedUnit);
