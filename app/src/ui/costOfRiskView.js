@@ -33,13 +33,13 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-f2-f12-gca-denominator";
+} from "../data/costOfRisk.js?v=20260715-summary-growth-percent";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue,
   renderCostOfRiskStageTransferFlowDiagram
-} from "./costOfRiskStageTransfers.js?v=20260715-f2-f12-gca-denominator";
+} from "./costOfRiskStageTransfers.js?v=20260715-summary-growth-percent";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -1080,7 +1080,7 @@ function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit) {
 
   if (kind === "level") return Number.isFinite(cell.value) ? formatMetricValue(cell.value, selectedUnit) : "-";
   if (activeCostOfRiskDisplayMode === "amount") return Number.isFinite(cell.mom) ? formatSignedMetricValue(cell.mom, selectedUnit) : "-";
-  return formatSignedBasisPointsValue(cell.momRatioBasisPoints);
+  return formatSignedGrowthPercentValue(cell.momRatioBasisPoints);
 }
 
 function formatSignedBasisPointsValue(value) {
@@ -1091,6 +1091,16 @@ function formatSignedBasisPointsValue(value) {
     minimumFractionDigits: 0,
     signDisplay: "exceptZero"
   }).format(value)} bp`;
+}
+
+function formatSignedGrowthPercentValue(basisPointsValue) {
+  if (basisPointsValue === null || basisPointsValue === undefined || !Number.isFinite(basisPointsValue)) return "-";
+
+  return `${new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    signDisplay: "exceptZero"
+  }).format(basisPointsValue / 100)} %`;
 }
 
 function createCostOfRiskSummaryCellTooltip({ counterpartyLabel, displayValue, kind, metric, selectedUnit, stageLabel }) {
@@ -1263,7 +1273,7 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (bp)") }
+      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (%)") }
     }
   };
 
@@ -1290,7 +1300,7 @@ function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode
     ? formatSignedMetricValue(value, selectedUnit)
     : formatMetricValue(value, selectedUnit);
   return selectedCell.kind === "mom"
-    ? formatBasisPointsValue(value)
+    ? formatSignedGrowthPercentValue(value)
     : formatContributionPercentValue(value / 10000);
 }
 
@@ -1571,7 +1581,7 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (bp)") }
+      title: { text: chartDisplayMode === "amount" ? "Amount" : (ratioIsPercent ? "Percent" : "Growth rate (%)") }
     }
   };
 
