@@ -1,8 +1,8 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskPointDisplayValue
-} from "../data/costOfRisk.js?v=20260715-cost-risk-filter-rules-view";
-import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260715-cost-risk-filter-rules-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-selection-view";
+import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-selection-view";
 
 let costOfRiskTreemapChart = null;
 

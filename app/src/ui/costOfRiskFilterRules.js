@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260715-cost-risk-filter-rules-view";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-selection-view";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {
