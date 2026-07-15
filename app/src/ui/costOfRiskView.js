@@ -31,21 +31,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-active-filters-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-controls-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-controls-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-controls-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-controls-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +53,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-controls-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,33 +61,38 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-active-filters-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-active-filters-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-controls-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-controls-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-controls-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-controls-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-controls-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-controls-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-controls-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-active-filters-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-controls-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260715-cost-risk-controls-view";
+import {
+  renderCostOfRiskFilterSelect as renderFilterSelect,
+  renderCostOfRiskSmoothingControl as renderSmoothingControl,
+  renderCostOfRiskXAxisOptions as renderXAxisOptions
+} from "./costOfRiskControlsView.js?v=20260715-cost-risk-controls-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -107,10 +112,7 @@ let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
-const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
 let lastCostOfRiskRatioDenominatorRenderKey = "";
-let lastCostOfRiskSmoothingRenderKey = "";
-let lastCostOfRiskXAxisRenderKey = "";
 const COST_OF_RISK_EMPTY_ROWS_CACHE_KEY = [];
 const COST_OF_RISK_VIEW_MODEL_CACHE = new WeakMap();
 let costOfRiskStageTransferChart = null;
@@ -355,17 +357,22 @@ export function renderCostOfRisk(state) {
     return waterfall;
   };
 
-  renderCostOfRiskFilterSelect(elements.costOfRiskAsset, filterOptions.assets, activeCostOfRiskFilters.asset);
-  renderCostOfRiskFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
-  renderCostOfRiskFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
+  renderFilterSelect(elements.costOfRiskAsset, filterOptions.assets, activeCostOfRiskFilters.asset);
+  renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
+  renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   renderCostOfRiskActiveFilters(filterOptions);
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = activeCostOfRiskDisplayMode;
   renderCostOfRiskRatioDenominatorControls(state);
-  renderCostOfRiskXAxisOptions(
+  renderXAxisOptions(
+    elements.costOfRiskXAxis,
     selectedMovementXCodes.length > 0 ? xAxisOptions.filter((option) => selectedMovementXCodes.includes(option.code)) : xAxisOptions,
     activeCostOfRiskXAxisCode
   );
-  renderCostOfRiskSmoothingControl(activeCostOfRiskSmoothingWindow);
+  renderSmoothingControl({
+    output: elements.costOfRiskSmoothingValue,
+    slider: elements.costOfRiskSmoothing,
+    windowSize: activeCostOfRiskSmoothingWindow
+  });
   renderCostOfRiskCoreDefinition(waterfallXAxisOptions, f2F12XAxisOptions);
 
   if (activeCostOfRiskTab === "stage-summary") {
@@ -792,40 +799,6 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
   }
 }
 
-function renderCostOfRiskFilterSelect(select, options, selectedValue) {
-  if (!select) return;
-
-  const renderKey = `${selectedValue}\u001f${serializeCostOfRiskCachePart((options ?? []).map((option) => ({
-    groupLabel: option.groupLabel ?? "",
-    label: option.label,
-    value: option.value
-  })))}`;
-  if (lastCostOfRiskFilterSelectRenderKeys.get(select) === renderKey) {
-    if (select.value !== selectedValue) select.value = selectedValue;
-    const shouldDisable = options.length <= 1;
-    if (select.disabled !== shouldDisable) select.disabled = shouldDisable;
-    return;
-  }
-  lastCostOfRiskFilterSelectRenderKeys.set(select, renderKey);
-  select.replaceChildren();
-  const groups = new Map();
-  options.forEach((option) => {
-    const optionElement = new Option(option.label, option.value, false, option.value === selectedValue);
-    if (!option.groupLabel) {
-      select.append(optionElement);
-      return;
-    }
-    if (!groups.has(option.groupLabel)) {
-      const group = document.createElement("optgroup");
-      group.label = option.groupLabel;
-      groups.set(option.groupLabel, group);
-      select.append(group);
-    }
-    groups.get(option.groupLabel).append(optionElement);
-  });
-  select.disabled = options.length <= 1;
-}
-
 function renderCostOfRiskActiveFilters(filterOptions) {
   renderCostOfRiskActiveFiltersView({
     container: elements.costOfRiskActiveFilters,
@@ -872,46 +845,6 @@ function renderCostOfRiskCoreDefinition(movementOptions, f2F12Options) {
     movementOptions,
     movementSelectedCodes: getActiveCostOfRiskCoreXCodes(movementOptions, "movement")
   });
-}
-
-function renderCostOfRiskXAxisOptions(options, selectedCode) {
-  if (!elements.costOfRiskXAxis) return;
-
-  const renderKey = `${selectedCode}\u001f${serializeCostOfRiskCachePart((options ?? []).map((option) => ({
-    code: option.code,
-    label: option.label
-  })))}`;
-  if (renderKey === lastCostOfRiskXAxisRenderKey) {
-    if (elements.costOfRiskXAxis.value !== selectedCode) elements.costOfRiskXAxis.value = selectedCode;
-    const shouldDisable = options.length === 0;
-    if (elements.costOfRiskXAxis.disabled !== shouldDisable) elements.costOfRiskXAxis.disabled = shouldDisable;
-    return;
-  }
-  lastCostOfRiskXAxisRenderKey = renderKey;
-  elements.costOfRiskXAxis.replaceChildren();
-  if (options.length === 0) {
-    elements.costOfRiskXAxis.append(new Option(COST_OF_RISK_X_AXIS_CODE, COST_OF_RISK_X_AXIS_CODE));
-    elements.costOfRiskXAxis.disabled = true;
-    return;
-  }
-
-  options.forEach((option) => {
-    elements.costOfRiskXAxis.append(new Option(option.label, option.code, false, option.code === selectedCode));
-  });
-  elements.costOfRiskXAxis.disabled = false;
-}
-
-function renderCostOfRiskSmoothingControl(windowSize) {
-  const renderKey = String(windowSize);
-  if (renderKey === lastCostOfRiskSmoothingRenderKey) return;
-  lastCostOfRiskSmoothingRenderKey = renderKey;
-  if (elements.costOfRiskSmoothing) {
-    elements.costOfRiskSmoothing.value = String(windowSize);
-  }
-  if (elements.costOfRiskSmoothingValue) {
-    elements.costOfRiskSmoothingValue.value = formatCostOfRiskSmoothingLabel(windowSize);
-    elements.costOfRiskSmoothingValue.textContent = formatCostOfRiskSmoothingLabel(windowSize);
-  }
 }
 
 function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {

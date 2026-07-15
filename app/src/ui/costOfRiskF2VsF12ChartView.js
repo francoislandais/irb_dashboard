@@ -2,12 +2,12 @@ import {
   createCostOfRiskRatioChartData,
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260715-cost-risk-active-filters-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-controls-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-active-filters-view";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-controls-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskF2VsF12Chart = null;

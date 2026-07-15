@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260715-cost-risk-active-filters-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-controls-view";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
