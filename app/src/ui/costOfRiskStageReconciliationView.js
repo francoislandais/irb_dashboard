@@ -1,11 +1,12 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
-  getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+  getCostOfRiskAxisTickPositions,
+  renderCostOfRiskSmoothingBadge
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -40,6 +41,7 @@ export function renderCostOfRiskStageReconciliationView({
   model,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -62,6 +64,7 @@ export function renderCostOfRiskStageReconciliationView({
     model,
     onSelectJst,
     onSelectReferenceDate,
+    onClearSmoothing,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -181,6 +184,7 @@ function renderCostOfRiskStageReconciliationChart({
   model,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   renderTabEmpty,
   smoothingWindow,
   state
@@ -220,6 +224,7 @@ function renderCostOfRiskStageReconciliationChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
         }
       },
       spacingRight: 128,

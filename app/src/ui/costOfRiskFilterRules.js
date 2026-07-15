@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

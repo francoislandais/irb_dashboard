@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -16,12 +16,13 @@ import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
-  getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+  getCostOfRiskAxisTickPositions,
+  renderCostOfRiskSmoothingBadge
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;
@@ -54,6 +55,7 @@ export function renderCostOfRiskStageSummaryChart({
   model,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -72,6 +74,7 @@ export function renderCostOfRiskStageSummaryChart({
     onChartCreated: (chart) => { costOfRiskStageSummaryChart = chart; },
     onSelectJst,
     onSelectReferenceDate,
+    onClearSmoothing,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -86,6 +89,7 @@ export function renderCostOfRiskCounterpartySummaryChart({
   model,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -104,6 +108,7 @@ export function renderCostOfRiskCounterpartySummaryChart({
     onChartCreated: (chart) => { costOfRiskCounterpartySummaryChart = chart; },
     onSelectJst,
     onSelectReferenceDate,
+    onClearSmoothing,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -124,6 +129,7 @@ function renderCostOfRiskSummaryChart({
   onChartCreated,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -166,6 +172,7 @@ function renderCostOfRiskSummaryChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
         }
       },
       spacingRight: 128,

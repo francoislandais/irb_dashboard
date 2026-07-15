@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_X_AXIS_CODE,
   formatCostOfRiskSmoothingLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 
 const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
 let lastCostOfRiskSmoothingRenderKey = "";

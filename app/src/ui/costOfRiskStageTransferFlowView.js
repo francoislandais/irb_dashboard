@@ -1,6 +1,6 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
-import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
-import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
+import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
+import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 export function renderCostOfRiskStageTransferFlowView({

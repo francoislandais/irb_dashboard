@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -19,8 +19,9 @@ import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
-  getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+  getCostOfRiskAxisTickPositions,
+  renderCostOfRiskSmoothingBadge
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;
@@ -42,6 +43,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
   flowSeries,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -91,6 +93,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
         }
       },
       spacingRight: 128,

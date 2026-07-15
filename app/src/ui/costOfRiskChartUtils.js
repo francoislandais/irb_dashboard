@@ -33,10 +33,53 @@ export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CH
     y: position.y,
     style: {
       color: "#26332d",
-      fontSize: "12px",
+      fontSize: "13px",
       fontWeight: "400"
     }
   };
+}
+
+export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSmoothing) {
+  clearCostOfRiskSmoothingBadge(chart);
+  const windowSize = Number(smoothingWindow);
+  if (!chart?.renderer || !Number.isFinite(windowSize) || windowSize <= 1) return;
+
+  const titleBox = chart.title?.getBBox?.();
+  const titleX = chart.title?.alignAttr?.x ?? chart.plotLeft ?? 12;
+  const titleY = chart.title?.alignAttr?.y ?? 8;
+  const titleWidth = Number.isFinite(titleBox?.width) ? titleBox.width : 0;
+  const badgeX = Math.min(chart.chartWidth - 104, titleX + titleWidth + 12);
+  const badgeY = Math.max(4, titleY - 19);
+  const labelText = `Smoothed ${windowSize}Q  ×`;
+  const elements = [];
+
+  const label = chart.renderer
+    .label(labelText, badgeX, badgeY, "rect")
+    .css({
+      color: "#26332d",
+      cursor: "pointer",
+      fontSize: "9px",
+      fontWeight: "400"
+    })
+    .attr({
+      fill: "#eef2f0",
+      padding: 3,
+      r: 3,
+      stroke: "none",
+      zIndex: 12
+    })
+    .add();
+  label.on("click", () => {
+    if (typeof onClearSmoothing === "function") onClearSmoothing();
+  });
+  elements.push(label);
+
+  chart.customCostOfRiskSmoothingBadge = elements;
+}
+
+export function clearCostOfRiskSmoothingBadge(chart) {
+  chart?.customCostOfRiskSmoothingBadge?.forEach((element) => element?.destroy?.());
+  if (chart) chart.customCostOfRiskSmoothingBadge = [];
 }
 
 export function escapeHtml(value) {

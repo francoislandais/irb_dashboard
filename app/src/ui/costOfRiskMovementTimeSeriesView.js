@@ -1,14 +1,15 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
-  getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+  getCostOfRiskAxisTickPositions,
+  renderCostOfRiskSmoothingBadge
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -42,6 +43,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
   jstCode,
   onSelectJst,
   onSelectReferenceDate,
+  onClearSmoothing,
   peerDisplayMode = "explicit",
   renderTabEmpty,
   selectedUnit = "millions",
@@ -75,6 +77,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, jstCode, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
         }
       },
       spacingRight: 128,

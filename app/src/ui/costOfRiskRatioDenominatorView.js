@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

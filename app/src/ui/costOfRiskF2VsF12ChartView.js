@@ -1,13 +1,15 @@
 import {
-  createCostOfRiskRatioChartData,
+  createCostOfRiskChartData,
   formatCostOfRiskDisplayValue,
-  getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+  getCostOfRiskYAxisBounds,
+  smoothCostOfRiskPoints
+} from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   formatCostOfRiskQuarterAxisLabel,
-  getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-waterfall-flat-small-arrow-view";
+  getCostOfRiskAxisTickPositions,
+  renderCostOfRiskSmoothingBadge
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskF2VsF12Chart = null;
@@ -28,9 +30,11 @@ export function renderCostOfRiskF2VsF12Chart({
   displayMode = "ratio",
   f02Series,
   f12Series,
+  onClearSmoothing,
   onSelectAuditSeries,
   renderTabEmpty,
-  selectedUnit = "millions"
+  selectedUnit = "millions",
+  smoothingWindow = 1
 }) {
   if (!container || !window.Highcharts) return;
 
@@ -38,7 +42,7 @@ export function renderCostOfRiskF2VsF12Chart({
     {
       color: "#b8b8b8",
       dashStyle: "ShortDash",
-      data: createCostOfRiskRatioChartData(f12Series.points, displayMode),
+      data: createCostOfRiskChartData(smoothCostOfRiskPoints(f12Series.points, smoothingWindow), displayMode),
       lineWidth: 2.6,
       marker: {
         enabled: true,
@@ -53,7 +57,7 @@ export function renderCostOfRiskF2VsF12Chart({
     },
     {
       color: primaryDark,
-      data: createCostOfRiskRatioChartData(f02Series.points, displayMode),
+      data: createCostOfRiskChartData(smoothCostOfRiskPoints(f02Series.points, smoothingWindow), displayMode),
       lineWidth: 2.8,
       marker: {
         enabled: true,
@@ -81,6 +85,11 @@ export function renderCostOfRiskF2VsF12Chart({
     chart: {
       animation: false,
       backgroundColor: "transparent",
+      events: {
+        render() {
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
+        }
+      },
       type: "line",
       zooming: { type: "xy" },
       zoomType: "xy"

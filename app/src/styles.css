@@ -915,7 +915,7 @@ button:focus-visible {
   min-width: 0;
   margin: 0 0 2px 0;
   color: #26332d;
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   font-weight: 400;
   line-height: 1.2;
   overflow: hidden;
@@ -1074,6 +1074,7 @@ button:focus-visible {
 .cost-of-risk-card,
 .cost-of-risk-chart,
 .cost-of-risk-f2-f12-chart,
+.cost-of-risk-stage-transfer-flow-chart,
 .cost-of-risk-waterfall,
 .cost-of-risk-treemap,
 .cost-of-risk-details {
@@ -1594,6 +1595,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-stage-transfer-flow-chart {
+  padding: 10px 12px 8px;
   height: 100%;
   min-height: 0;
   min-width: 0;
