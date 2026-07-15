@@ -1,11 +1,11 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-flow";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260715-cost-risk-f2-f12-chart";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,

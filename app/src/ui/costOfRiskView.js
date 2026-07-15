@@ -21,7 +21,6 @@ import {
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
   clampCostOfRiskSmoothingWindow,
-  createCostOfRiskRatioChartData,
   formatCostOfRiskAuditValue,
   formatCostOfRiskDisplayValue,
   formatCostOfRiskSmoothingLabel,
@@ -33,23 +32,23 @@ import {
   getCostOfRiskXAxisOptions,
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -57,7 +56,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -65,14 +64,19 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-stage-transfer-flow";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-stage-transfer-flow";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-f2-f12-chart";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-f2-f12-chart";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-f2-f12-chart";
+import {
+  destroyCostOfRiskF2VsF12Chart,
+  getCostOfRiskF2VsF12Chart,
+  renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
+} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-f2-f12-chart";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -113,7 +117,6 @@ let lastCostOfRiskXAxisRenderKey = "";
 const COST_OF_RISK_EMPTY_ROWS_CACHE_KEY = [];
 const COST_OF_RISK_VIEW_MODEL_CACHE = new WeakMap();
 let costOfRiskChart = null;
-let costOfRiskF2VsF12Chart = null;
 let costOfRiskStageTransferChart = null;
 const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
@@ -554,20 +557,24 @@ export function renderCostOfRisk(state) {
     leaveCostOfRiskStageTransferTab();
   } else if (activeCostOfRiskTab === "f2-vs-f12") {
     leaveCostOfRiskStageTransferTab();
-    renderCostOfRiskF2VsF12Chart(
-      getCostOfRiskCachedModel(
+    renderF2VsF12Chart({
+      activeReferenceDate: activeCostOfRiskReferenceDate,
+      container: elements.costOfRiskF2VsF12Chart,
+      displayMode: activeCostOfRiskDisplayMode,
+      f02Series: getCostOfRiskCachedModel(
         state,
         createCostOfRiskModelCacheKey(state, "f02-series", activeCostOfRiskFilters),
         () => buildCostOfRiskF02ImpairmentSeries(state, activeCostOfRiskFilters)
       ),
-      getCostOfRiskCachedModel(
+      f12Series: getCostOfRiskCachedModel(
         state,
         createCostOfRiskModelCacheKey(state, "f12-contribution-series", activeCostOfRiskFilters, selectedF2F12XCodes),
         () => buildCostOfRiskF12ContributionSeries(state, activeCostOfRiskFilters, selectedF2F12XCodes)
       ),
-      activeCostOfRiskDisplayMode,
-      state.selectedUnit
-    );
+      onSelectAuditSeries: selectCostOfRiskAuditSeries,
+      renderTabEmpty: renderCostOfRiskTabEmpty,
+      selectedUnit: state.selectedUnit
+    });
     renderCostOfRiskAuditTable(
       getCostOfRiskCachedModel(
         state,
@@ -605,7 +612,7 @@ function getActiveCostOfRiskCharts() {
   if (activeCostOfRiskTab === "stage-summary") return [getCostOfRiskStageSummaryChart()];
   if (activeCostOfRiskTab === "counterparty-summary") return [getCostOfRiskCounterpartySummaryChart()];
   if (activeCostOfRiskTab === "contributions") return [costOfRiskWaterfallChart, costOfRiskChart];
-  if (activeCostOfRiskTab === "f2-vs-f12") return [costOfRiskF2VsF12Chart];
+  if (activeCostOfRiskTab === "f2-vs-f12") return [getCostOfRiskF2VsF12Chart()];
   if (activeCostOfRiskTab === "stage-transfers") return [costOfRiskStageTransferChart, getCostOfRiskStageTransferFlowChart()];
   if (activeCostOfRiskTab === "stage-reconciliation") return [getCostOfRiskStageReconciliationChart()];
   if (activeCostOfRiskTab === "analysis") return [costOfRiskTreemapChart];
@@ -1325,163 +1332,10 @@ function renderCostOfRiskChart(selection, jstCode, smoothingWindow, selectedCont
   }
 }
 
-function renderCostOfRiskF2VsF12Chart(f02Series, f12Series, displayMode = "ratio", selectedUnit = "millions") {
-  if (!elements.costOfRiskF2VsF12Chart || !window.Highcharts) return;
-
-  const series = [
-    {
-      color: "#b8b8b8",
-      dashStyle: "ShortDash",
-      data: createCostOfRiskRatioChartData(f12Series.points, displayMode),
-      lineWidth: 2.6,
-      marker: {
-        enabled: true,
-        fillColor: "#b8b8b8",
-        lineColor: "#b8b8b8",
-        lineWidth: 1.2,
-        radius: 3,
-        symbol: "circle"
-      },
-      name: "F12 total selected contributions",
-      custom: { auditSeries: "f12" }
-    },
-    {
-      color: primaryDark,
-      data: createCostOfRiskRatioChartData(f02Series.points, displayMode),
-      lineWidth: 2.8,
-      marker: {
-        enabled: true,
-        fillColor: primaryDark,
-        lineColor: primaryDark,
-        lineWidth: 1.2,
-        radius: 3,
-        symbol: "circle"
-      },
-      name: "F2",
-      custom: { auditSeries: "f2" }
-    }
-    
-  ].filter((item) => item.data.length > 0);
-
-  if (series.length === 0) {
-    destroyCostOfRiskF2VsF12Chart();
-    renderCostOfRiskTabEmpty("No F2/F12 time series is available for the current selection.");
-    return;
-  }
-
-  const yBounds = getCostOfRiskYAxisBounds(series);
-  const activePoint = [...(f02Series.points ?? []), ...(f12Series.points ?? [])]
-    .find((point) => point.label === activeCostOfRiskReferenceDate && point.date instanceof Date);
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: {
-      enabled: true,
-      align: "center",
-      verticalAlign: "bottom",
-      layout: "horizontal",
-      y: 8
-    },
-    plotOptions: {
-      series: {
-        animation: false,
-        cursor: "pointer",
-        point: {
-          events: {
-            click() {
-              selectCostOfRiskAuditSeries(this.series.options.custom?.auditSeries, this.referenceLabel);
-            }
-          }
-        },
-        states: {
-          hover: {
-            animation: false,
-            lineWidthPlus: 0
-          }
-        }
-      }
-    },
-    series,
-    title: { text: null },
-    tooltip: {
-      shared: false,
-      formatter() {
-        const date = new Date(this.x);
-        const quarter = Math.floor(date.getMonth() / 3) + 1;
-        const year = date.getFullYear();
-
-        return `
-          <span style="font-size:11px">Q${quarter} ${year}</span><br/>
-          <span style="color:${this.series.color}">●</span>
-          <b>${this.series.name}</b>: ${formatCostOfRiskDisplayValue(this.y, displayMode, selectedUnit)}
-        `;
-      }
-    },
-    xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      plotLines: activePoint ? [{
-        color: "#7f8984",
-        dashStyle: "ShortDash",
-        value: activePoint.date.getTime(),
-        width: 1,
-        zIndex: 3
-      }] : [],
-      tickColor: "#d9dedb",
-      tickPositions: getCostOfRiskAxisTickPositions([...(f02Series.points ?? []), ...(f12Series.points ?? [])]),
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return displayMode === "ratio"
-            ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
-            : formatMetricValue(this.value, selectedUnit);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      max: yBounds.max,
-      min: yBounds.min,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 8,
-      title: { text: displayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
-    }
-  };
-
-  if (costOfRiskF2VsF12Chart) {
-    costOfRiskF2VsF12Chart.update(options, true, true, false);
-  } else {
-    costOfRiskF2VsF12Chart = window.Highcharts.chart(elements.costOfRiskF2VsF12Chart, options);
-  }
-}
-
 function destroyCostOfRiskChart() {
   if (!costOfRiskChart) return;
   costOfRiskChart.destroy();
   costOfRiskChart = null;
-}
-
-function destroyCostOfRiskF2VsF12Chart() {
-  if (!costOfRiskF2VsF12Chart) return;
-  costOfRiskF2VsF12Chart.destroy();
-  costOfRiskF2VsF12Chart = null;
 }
 
 function destroyCostOfRiskStageTransferChart() {

@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-f2-f12-chart";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -20,7 +20,7 @@ import {
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-stage-transfer-flow";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-f2-f12-chart";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;
