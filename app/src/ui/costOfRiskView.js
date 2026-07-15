@@ -12,7 +12,6 @@ import {
   buildCostOfRiskF12ContributionSeries,
   buildCostOfRiskF2VsF12Audit,
   buildCostOfRiskFilteredSelectionValue,
-  buildCostOfRiskRatioDenominatorDetail,
   buildCostOfRiskStageBoxTimeSeries,
   buildCostOfRiskStageReconciliationModel,
   buildCostOfRiskStageSummaryModel,
@@ -21,7 +20,6 @@ import {
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
   clampCostOfRiskSmoothingWindow,
-  formatCostOfRiskAuditValue,
   formatCostOfRiskDisplayValue,
   formatCostOfRiskSmoothingLabel,
   formatReferenceQuarterLabel,
@@ -31,21 +29,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260715-cost-risk-controls-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskStageTransfers.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +51,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,38 +59,43 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-controls-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-controls-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260715-cost-risk-ratio-denominator-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260715-cost-risk-ratio-denominator-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskTreemapView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-controls-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260715-cost-risk-ratio-denominator-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskControlsView.js?v=20260715-cost-risk-ratio-denominator-view";
+import {
+  clearCostOfRiskAuditTableView,
+  renderCostOfRiskAuditTableView
+} from "./costOfRiskAuditTableView.js?v=20260715-cost-risk-ratio-denominator-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260715-cost-risk-ratio-denominator-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -112,7 +115,6 @@ let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
-let lastCostOfRiskRatioDenominatorRenderKey = "";
 const COST_OF_RISK_EMPTY_ROWS_CACHE_KEY = [];
 const COST_OF_RISK_VIEW_MODEL_CACHE = new WeakMap();
 let costOfRiskStageTransferChart = null;
@@ -194,31 +196,16 @@ const elements = {
   costOfRiskXAxis: document.querySelector("#cost-of-risk-x-axis")
 };
 
-// Growth-rate denominators follow the sidebar filters automatically. The
-// tooltip is visible only when variations are shown as growth rates.
 function renderCostOfRiskRatioDenominatorControls(state) {
-  const isRatioMode = activeCostOfRiskDisplayMode === "ratio";
-  if (elements.costOfRiskRatioInfo) elements.costOfRiskRatioInfo.hidden = !isRatioMode;
-  if (!isRatioMode || !elements.costOfRiskRatioTooltip) return;
-
-  const renderKey = createCostOfRiskModelCacheKey(
+  renderRatioDenominatorControls({
+    activeTab: activeCostOfRiskTab,
+    displayMode: activeCostOfRiskDisplayMode,
+    filters: activeCostOfRiskFilters,
+    infoElement: elements.costOfRiskRatioInfo,
+    referenceDate: activeCostOfRiskReferenceDate,
     state,
-    "ratio-denominator-tooltip",
-    activeCostOfRiskTab,
-    activeCostOfRiskFilters,
-    activeCostOfRiskReferenceDate,
-    activeCostOfRiskDisplayMode
-  );
-  if (renderKey === lastCostOfRiskRatioDenominatorRenderKey) return;
-  lastCostOfRiskRatioDenominatorRenderKey = renderKey;
-
-  if (activeCostOfRiskTab === "contributions") {
-    elements.costOfRiskRatioTooltip.textContent = "Rate denominator: previous-quarter FINREP F 18.00 gross carrying amount for the current Accounting type / Counterparty / Stage filters.";
-    return;
-  }
-
-  const detail = buildCostOfRiskRatioDenominatorDetail(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, state.selectedJst);
-  elements.costOfRiskRatioTooltip.textContent = `Growth rate denominator: previous-quarter ${detail.label}, as reported in FINREP F 18.00.`;
+    tooltipElement: elements.costOfRiskRatioTooltip
+  });
 }
 
 function getCostOfRiskCachedModel(state, cacheKey, buildModel) {
@@ -1815,70 +1802,15 @@ function selectCostOfRiskAuditSeries(seriesName, referenceDate) {
 }
 
 function renderCostOfRiskAuditTable(audit, selectedUnit) {
-  if (!elements.costOfRiskAudit) return;
-
-  const rows = (audit?.rows ?? []).filter((row) => {
-    if (activeCostOfRiskAuditSeries === "f2") return row.section === "F2" || row.section === "Denominator" || row.section === "Denominator components";
-    return row.section === "F12" || row.section === "F12 components" || row.section === "Denominator" || row.section === "Denominator components";
+  renderCostOfRiskAuditTableView({
+    activeDateLabel: activeCostOfRiskReferenceDate,
+    activeSeries: activeCostOfRiskAuditSeries,
+    audit,
+    container: elements.costOfRiskAudit,
+    selectedUnit
   });
-  const dates = audit?.dates ?? [];
-
-  if (rows.length === 0 || dates.length === 0) {
-    elements.costOfRiskAudit.textContent = "";
-    return;
-  }
-
-  const activeDateIndex = Math.max(0, dates.findIndex((date) => date.label === activeCostOfRiskReferenceDate));
-  const activeDate = dates[activeDateIndex] ?? dates.at(-1);
-  const title = document.createElement("div");
-  title.className = "cost-of-risk-audit-title";
-  const titlePrefix = activeCostOfRiskAuditSeries === "f2"
-    ? "Audit trail - F2"
-    : "Audit trail - F12 selected contributions";
-  title.textContent = `${titlePrefix} - ${formatReferenceQuarterLabel(activeDate?.label)}`;
-
-  const tableWrap = document.createElement("div");
-  tableWrap.className = "cost-of-risk-audit-table-wrap";
-  const table = document.createElement("table");
-  table.className = "cost-of-risk-audit-table";
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  ["Step", "Component", "Source", "Selected date", "Value"].forEach((label) => {
-    const cell = document.createElement("th");
-    cell.scope = "col";
-    cell.textContent = label;
-    headerRow.append(cell);
-  });
-  thead.append(headerRow);
-
-  const tbody = document.createElement("tbody");
-  rows.forEach((row) => {
-    const tr = document.createElement("tr");
-    const sectionCell = document.createElement("td");
-    sectionCell.className = "cost-of-risk-audit-section";
-    sectionCell.textContent = row.section;
-    const labelCell = document.createElement("td");
-    labelCell.className = "cost-of-risk-audit-label";
-    labelCell.textContent = row.label;
-    const sourceCell = document.createElement("td");
-    sourceCell.className = "cost-of-risk-audit-source";
-    sourceCell.textContent = row.source;
-    const dateCell = document.createElement("td");
-    dateCell.className = "cost-of-risk-audit-date";
-    dateCell.textContent = formatReferenceQuarterLabel(activeDate?.label);
-    const valueCell = document.createElement("td");
-    valueCell.className = "cost-of-risk-audit-value is-active-reference";
-    valueCell.textContent = formatCostOfRiskAuditValue(row.values?.[activeDateIndex], row.type, selectedUnit);
-    tr.append(sectionCell, labelCell, sourceCell, dateCell, valueCell);
-    tbody.append(tr);
-  });
-
-  table.append(thead, tbody);
-  tableWrap.append(table);
-  elements.costOfRiskAudit.replaceChildren(title, tableWrap);
 }
 
 function clearCostOfRiskAuditTable() {
-  if (!elements.costOfRiskAudit) return;
-  elements.costOfRiskAudit.textContent = "";
+  clearCostOfRiskAuditTableView(elements.costOfRiskAudit);
 }

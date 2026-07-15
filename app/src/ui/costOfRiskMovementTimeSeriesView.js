@@ -1,14 +1,14 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260715-cost-risk-controls-view";
+} from "../data/costOfRisk.js?v=20260715-cost-risk-ratio-denominator-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-controls-view";
+} from "./costOfRiskChartUtils.js?v=20260715-cost-risk-ratio-denominator-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
