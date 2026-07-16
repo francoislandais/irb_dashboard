@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

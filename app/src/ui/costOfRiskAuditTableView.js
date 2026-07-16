@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
+} from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

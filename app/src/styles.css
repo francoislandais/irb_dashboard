@@ -893,6 +893,15 @@ button:focus-visible {
 }
 
 @media (max-width: 1180px) {
+  .explorer-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(180px, auto);
+  }
+
+  .explorer-context-panel {
+    max-height: 220px;
+  }
+
   .cost-of-risk-dashboard {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2300,13 +2309,109 @@ button:focus-visible {
 
 .metric-panel {
   display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 10px;
   height: 100%;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+  padding: 18px;
+}
+
+.explorer-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 900px) minmax(260px, 1fr);
+  gap: 16px;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.explorer-main-pane {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.explorer-context-panel {
+  align-self: stretch;
+  align-content: start;
+  box-sizing: border-box;
+  display: grid;
+  gap: 10px;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.explorer-context-article {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  color: #26332d;
+}
+
+.explorer-context-eyebrow {
+  color: var(--primary-dark);
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.explorer-context-title {
+  margin: 0;
+  color: var(--primary-dark);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.explorer-context-lead {
+  margin: 0;
+  color: #435049;
+  font-size: 0.78rem;
+  line-height: 1.42;
+}
+
+.explorer-context-item {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding-top: 9px;
+  border-top: 1px solid #edf0ee;
+}
+
+.explorer-context-item h3 {
+  margin: 0;
+  color: #26332d;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.explorer-context-item p,
+.explorer-context-hint {
+  margin: 0;
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+}
+
+.explorer-context-hint {
+  padding: 9px;
+  border-radius: 7px;
+  background: #f4f6f5;
+  color: #435049;
 }
 
 .filter-summary {
@@ -2450,22 +2555,23 @@ table {
 }
 
 .axis-tabs {
-  --axis-tabs-offset-left: 20px;
+  --axis-tabs-offset-left: 0px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin-left: var(--axis-tabs-offset-left);
+  max-width: 900px;
   min-width: 0;
   overflow: hidden;
 }
 
 .axis-tab {
   display: grid;
-  flex: 0 0 300px;
-  grid-template-rows: 22px 1fr;
-  width: 300px;
-  max-width: 300px;
-  height: 120px;
+  flex: 0 0 219px;
+  grid-template-rows: 18px 1fr;
+  width: 219px;
+  max-width: 219px;
+  height: 78px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -2494,10 +2600,10 @@ table {
   border-bottom: 1px solid #ffffff;
   color: #ffffff;
   display: flex;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 400;
   line-height: 1.1;
-  padding: 0 9px;
+  padding: 0 7px;
   text-transform: none;
 }
 
@@ -2507,10 +2613,10 @@ table {
   overflow: hidden;
   background: #ffffff;
   color: var(--ink);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 400;
-  line-height: 1.22;
-  padding: 6px 9px 7px;
+  line-height: 1.15;
+  padding: 5px 7px;
 }
 
 .axis-tab.is-active .axis-tab-value {
@@ -2522,13 +2628,17 @@ table {
 .axis-tab-line {
   display: block;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
   overflow-wrap: anywhere;
   white-space: normal;
 }
 
 .axis-tab-lines {
   display: grid;
-  gap: 4px;
+  gap: 2px;
+  max-height: 48px;
+  overflow: hidden;
 }
 
 .axis-tab-ratio {
@@ -2538,9 +2648,9 @@ table {
   display: grid;
   gap: 6px;
   grid-template-columns: minmax(0, 1fr) auto;
-  font-size: 0.68rem;
-  line-height: 1.18;
-  padding-top: 4px;
+  font-size: 0.62rem;
+  line-height: 1.1;
+  padding-top: 2px;
 }
 
 .axis-tab.is-active .axis-tab-ratio {
@@ -2873,9 +2983,9 @@ table {
   position: sticky;
   left: 0;
   z-index: 2;
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
+  width: 350px;
+  min-width: 350px;
+  max-width: 350px;
   background: #ffffff;
   color: var(--text);
   padding-left: calc(8px + (var(--indent-level, 0) * 18px));
@@ -2895,7 +3005,7 @@ table {
 
 .metric-table .code-column {
   position: sticky;
-  left: 400px;
+  left: 350px;
   z-index: 2;
   width: 76px;
   min-width: 76px;

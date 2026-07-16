@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260716-smoothing-help-slider-drag";
+} from "./benchmarkLineChart.js?v=20260717-explorer-context-panel";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -94,6 +94,7 @@ const elements = {
   explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
   explorerBenchmarkTitle: document.querySelector("#explorer-benchmark-title"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
+  explorerContextPanel: document.querySelector("#explorer-context-panel"),
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
@@ -390,6 +391,7 @@ export function renderExplorer(state) {
   updateUrlExplorerSelectionParams();
   elements.unitSelect.value = state.selectedUnit;
   renderExplorerAxisTabs();
+  renderExplorerContextPanel(state);
 
   if (elements.explorerTableWrap) elements.explorerTableWrap.hidden = explorerBenchmarkViewActive;
   if (elements.explorerBenchmarkView) elements.explorerBenchmarkView.hidden = !explorerBenchmarkViewActive;
@@ -1064,6 +1066,72 @@ function renderExplorerAxisTabs() {
   });
 }
 
+function renderExplorerContextPanel(state) {
+  if (!elements.explorerContextPanel) return;
+
+  const captions = getExplorerAxisCaptions();
+  const activeAxis = getActiveExplorerAxis();
+  const activeTemplate = getActiveExplorerTemplate();
+  const activeAxisLabel = getExplorerAxisDisplayName(activeAxis);
+  const selectedCaption = captions[activeAxis] || "-";
+  const article = document.createElement("article");
+  article.className = "explorer-context-article";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "explorer-context-eyebrow";
+  eyebrow.textContent = explorerBenchmarkViewActive ? "Benchmark context" : "Explorer context";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = explorerBenchmarkViewActive ? "Selected datapoint benchmark" : "Regulatory datapoint explorer";
+
+  const lead = document.createElement("p");
+  lead.className = "explorer-context-lead";
+  lead.textContent = explorerBenchmarkViewActive
+    ? "This view compares the selected datapoint across the peer set and keeps the selected JST visible in context."
+    : "Explorer lets you inspect source regulatory datapoints by template, row, column and tab.";
+
+  article.append(eyebrow, title, lead);
+
+  [
+    ["Template", `${activeTemplate?.tableId || activeExplorerTemplateId} - ${activeTemplate?.label || ""}`.trim()],
+    ["Active axis", activeAxisLabel],
+    ["Selected item", selectedCaption],
+    ["Selected JST", state?.selectedJst || "-"]
+  ].forEach(([label, value]) => {
+    article.append(createExplorerContextItem(label, value || "-"));
+  });
+
+  const hint = document.createElement("p");
+  hint.className = "explorer-context-hint";
+  hint.textContent = "Use the compact axis buttons to switch the table dimension. Right-click a row to use it as a denominator or benchmark it.";
+  article.append(hint);
+
+  elements.explorerContextPanel.replaceChildren(article);
+}
+
+function createExplorerContextItem(label, value) {
+  const item = document.createElement("section");
+  item.className = "explorer-context-item";
+
+  const heading = document.createElement("h3");
+  heading.textContent = label;
+
+  const body = document.createElement("p");
+  body.textContent = value;
+  body.title = value;
+
+  item.append(heading, body);
+  return item;
+}
+
+function getExplorerAxisDisplayName(axis) {
+  if (axis === "template") return "Template";
+  if (axis === "x") return "Column";
+  if (axis === "z") return "Tab";
+  return "Row";
+}
+
 function createAxisCaptionLine(caption, ratioCaption = "", axis = "") {
   const parts = splitAxisCaption(caption);
   const wrapper = document.createElement("span");
@@ -1074,7 +1142,7 @@ function createAxisCaptionLine(caption, ratioCaption = "", axis = "") {
   if (parts.length === 0) {
     line.textContent = "-";
   } else {
-    line.textContent = parts.join(" - ");
+    line.textContent = truncateExplorerAxisCaption(parts.join(" - "));
   }
 
   wrapper.append(line);
@@ -1089,6 +1157,14 @@ function createAxisCaptionLine(caption, ratioCaption = "", axis = "") {
   }
 
   return wrapper;
+}
+
+function truncateExplorerAxisCaption(value, maxLength = 58) {
+  const text = String(value ?? "");
+  if (text.length <= maxLength) return text;
+
+  const edgeLength = Math.max(12, Math.floor((maxLength - 5) / 2));
+  return `${text.slice(0, edgeLength).trimEnd()} ... ${text.slice(-edgeLength).trimStart()}`;
 }
 
 function createAxisRatioClearButton(axis) {

@@ -1,6 +1,6 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
-import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260716-smoothing-help-slider-drag";
-import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260716-smoothing-help-slider-drag";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
+import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260717-explorer-context-panel";
+import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260717-explorer-context-panel";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 export function renderCostOfRiskStageTransferFlowView({
