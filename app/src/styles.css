@@ -7,7 +7,8 @@
   --muted: #66736b;
   --line: #d7ded8;
   --primary: #116a5b;
-  --primary-dark: #0c4c42;
+  /* --primary-dark: #0c4c42;*/
+  --primary-dark: #003D4C;
   --flow-arrow: #e2e5e3;
   --cost-risk-top-chart-height: 260px;
   --cost-risk-time-chart-height: 300px;
@@ -63,7 +64,7 @@ button:disabled {
   grid-row: 1;
   grid-template-columns: 190px minmax(0, 1fr);
   min-height: 40px;
-  background: #17211c;
+  background: #003D4C;
 }
 
 .sidebar {
@@ -74,7 +75,7 @@ button:disabled {
   min-width: 0;
   min-height: 0;
   overflow: hidden auto;
-  background: #213028;
+  background: #003D4C;
   color: #f5faf6;
   padding: 24px 18px;
 }
@@ -261,7 +262,7 @@ button:disabled {
   min-height: 40px;
   width: 100%;
   padding: 4px 14px;
-  background: #17211c;
+  background: #003D4C;
   color: #ffffff;
 }
 
