@@ -630,15 +630,50 @@ button:focus-visible {
 .cost-of-risk-tabs {
   display: inline-flex;
   align-items: stretch;
-  width: fit-content;
+  max-width: min(100%, 900px);
+  width: min(100%, 900px);
   border: 1px solid #d8dfdb;
   border-radius: 6px;
   background: #ffffff;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 5px;
+  scrollbar-color: #c8d0cb transparent;
+  scrollbar-width: thin;
+  white-space: nowrap;
+}
+
+.cost-of-risk-tabs.can-scroll-left {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 100%);
+}
+
+.cost-of-risk-tabs.can-scroll-right {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 22px), transparent 100%);
+}
+
+.cost-of-risk-tabs.can-scroll-left.can-scroll-right {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+}
+
+.cost-of-risk-tabs::-webkit-scrollbar {
+  height: 3px;
+}
+
+.cost-of-risk-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cost-of-risk-tabs::-webkit-scrollbar-thumb {
+  background: #c8d0cb;
+  border-radius: 999px;
 }
 
 .cost-of-risk-tab {
-  min-width: 136px;
+  flex: 0 0 auto;
+  min-width: max-content;
   border: 0;
   border-right: 1px solid #d8dfdb;
   background: transparent;

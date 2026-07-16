@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-filters-above-tabs-view";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

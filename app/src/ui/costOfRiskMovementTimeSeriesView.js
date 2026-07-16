@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-filters-above-tabs-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -9,7 +9,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-smoothing-badge-align-up-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-filters-above-tabs-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,

@@ -44,27 +44,30 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   const windowSize = Number(smoothingWindow);
   if (!chart?.renderer || !Number.isFinite(windowSize) || windowSize <= 1) return;
 
+  const primaryDark = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary-dark")
+    .trim() || "#0c4c42";
   const titleBox = chart.title?.getBBox?.();
   const titleX = chart.title?.alignAttr?.x ?? chart.plotLeft ?? 12;
   const titleY = chart.title?.alignAttr?.y ?? 8;
   const titleWidth = Number.isFinite(titleBox?.width) ? titleBox.width : 0;
   const badgeX = Math.min(chart.chartWidth - 104, titleX + titleWidth + 12);
-  const badgeY = Math.max(4, titleY - 19);
+  const badgeY = Math.max(-2, titleY - 14);
   const labelText = `Smoothed ${windowSize}Q  ×`;
   const elements = [];
 
   const label = chart.renderer
     .label(labelText, badgeX, badgeY, "rect")
     .css({
-      color: "#26332d",
+      color: "#ffffff",
       cursor: "pointer",
-      fontSize: "9px",
+      fontSize: "10px",
       fontWeight: "400"
     })
     .attr({
-      fill: "#eef2f0",
+      fill: primaryDark,
       padding: 3,
-      r: 3,
+      r: 5,
       stroke: "none",
       zIndex: 12
     })
