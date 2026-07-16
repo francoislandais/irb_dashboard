@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-explorer-return-to-cost-risk";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

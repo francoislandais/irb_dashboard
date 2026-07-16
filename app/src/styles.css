@@ -2361,6 +2361,24 @@ button:focus-visible {
   color: #26332d;
 }
 
+.explorer-context-back {
+  justify-self: start;
+  border: 1px solid var(--primary-dark);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: 0.74rem;
+  line-height: 1.15;
+  padding: 6px 9px;
+}
+
+.explorer-context-back:hover,
+.explorer-context-back:focus-visible {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
 .explorer-context-eyebrow {
   color: var(--primary-dark);
   font-size: 0.68rem;

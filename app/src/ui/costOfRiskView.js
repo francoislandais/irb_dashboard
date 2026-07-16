@@ -32,21 +32,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
+} from "../data/costOfRisk.js?v=20260717-explorer-return-to-cost-risk";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskStageTransfers.js?v=20260717-explorer-return-to-cost-risk";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskChartUtils.js?v=20260717-explorer-return-to-cost-risk";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -54,7 +54,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -62,56 +62,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-context-panel";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-return-to-cost-risk";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskTreemapView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-context-panel";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-return-to-cost-risk";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskControlsView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-explorer-context-panel";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-context-panel";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskAuditTableView.js?v=20260717-explorer-return-to-cost-risk";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-return-to-cost-risk";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskTabsView.js?v=20260717-explorer-return-to-cost-risk";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskModelCache.js?v=20260717-explorer-return-to-cost-risk";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskFilterRules.js?v=20260717-explorer-return-to-cost-risk";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -119,12 +119,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-return-to-cost-risk";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-explorer-context-panel";
+} from "./costOfRiskCoreSelection.js?v=20260717-explorer-return-to-cost-risk";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -1107,7 +1107,13 @@ function renderCostOfRiskStageTransferAuditPanel(state) {
 }
 
 function openCostOfRiskAuditSourceInExplorer(sourcePoint) {
-  if (!openExplorerPoint(sourcePoint)) return;
+  if (!openExplorerPoint({
+    ...sourcePoint,
+    returnTarget: {
+      label: "Cost of risk",
+      module: "cost-of-risk"
+    }
+  })) return;
 
   setActiveModule("explorer");
 }

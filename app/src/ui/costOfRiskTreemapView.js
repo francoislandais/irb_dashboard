@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskPointDisplayValue
-} from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
+} from "../data/costOfRisk.js?v=20260717-explorer-return-to-cost-risk";
 import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
 
 let costOfRiskTreemapChart = null;

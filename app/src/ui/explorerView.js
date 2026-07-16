@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-context-panel";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-return-to-cost-risk";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-explorer-context-panel";
+} from "./benchmarkLineChart.js?v=20260717-explorer-return-to-cost-risk";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -45,6 +45,7 @@ import { getLatestState } from "./appState.js";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
+let setActiveModule = () => {};
 let updateSelectedJst = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
@@ -80,6 +81,7 @@ let explorerStickyFrame = 0;
 let explorerContextMenu = null;
 let explorerBenchmarkViewActive = false;
 let explorerBenchmarkChart = null;
+let explorerReturnTarget = null;
 let shouldFocusOpenedExplorerPoint = false;
 
 const elements = {
@@ -103,6 +105,7 @@ const elements = {
 
 export function wireExplorerUi(actions, rerender) {
   rerenderApp = rerender;
+  setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -434,6 +437,7 @@ export function renderExplorer(state) {
 }
 
 export function openExplorerPoint({
+  returnTarget = null,
   tableId,
   xCode = "",
   yCode = "",
@@ -443,6 +447,7 @@ export function openExplorerPoint({
 
   hasInteractedWithExplorerSelection = true;
   explorerBenchmarkViewActive = false;
+  explorerReturnTarget = returnTarget?.module ? returnTarget : null;
   activeExplorerTemplateId = tableId;
   updateUrlTemplateParam(activeExplorerTemplateId);
 
@@ -1077,6 +1082,10 @@ function renderExplorerContextPanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article";
 
+  if (explorerReturnTarget?.module) {
+    article.append(createExplorerReturnButton(explorerReturnTarget));
+  }
+
   const eyebrow = document.createElement("div");
   eyebrow.className = "explorer-context-eyebrow";
   eyebrow.textContent = explorerBenchmarkViewActive ? "Benchmark context" : "Explorer context";
@@ -1108,6 +1117,19 @@ function renderExplorerContextPanel(state) {
   article.append(hint);
 
   elements.explorerContextPanel.replaceChildren(article);
+}
+
+function createExplorerReturnButton(target) {
+  const button = document.createElement("button");
+  button.className = "explorer-context-back";
+  button.type = "button";
+  button.textContent = `Back to ${target.label || "previous module"}`;
+  button.addEventListener("click", () => {
+    const moduleName = target.module;
+    explorerReturnTarget = null;
+    if (moduleName) setActiveModule(moduleName);
+  });
+  return button;
 }
 
 function createExplorerContextItem(label, value) {
