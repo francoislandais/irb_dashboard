@@ -30,21 +30,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-bs-only-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -52,7 +52,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -60,56 +60,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-bs-only-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-cost-risk-bs-only-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-audit-soft-card-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-cost-risk-audit-soft-card-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-bs-only-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-audit-soft-card-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskControlsView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-bs-only-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-audit-soft-card-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskTabsView.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskModelCache.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -117,12 +117,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-audit-soft-card-view";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-bs-only-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-audit-soft-card-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -1019,6 +1019,7 @@ function renderCostOfRiskMovementAuditPanel(state) {
     activeSeries: "movement",
     audit,
     container: elements.costOfRiskAuditPanel,
+    displayMode: activeCostOfRiskMovementDisplayMode,
     selectedUnit: state.selectedUnit
   });
 }

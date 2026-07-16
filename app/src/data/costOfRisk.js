@@ -525,27 +525,21 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
   const selectedTotal = createEmptySeries(referenceColumns.length);
   selectedRows.forEach((row) => addSeriesValues(selectedTotal, row.values));
 
-  const reconciliationYCodes = ["0010", "0180", "0360", "0600"];
-  const totalRows = buildCostOfRiskMovementAuditRowsForYCodes(
+  const denominatorComposition = getCostOfRiskDenominatorComposition(state, filters);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  const denominatorRows = buildCostOfRiskMovementDenominatorAuditRows(
     state,
     indexes,
     referenceColumns,
-    normalizedXCode,
-    [COST_OF_RISK_TOTAL_Y_AXIS_CODE],
-    "Reconciliation"
+    denominatorComposition
   );
-  const stageRows = buildCostOfRiskMovementAuditRowsForYCodes(
-    state,
-    indexes,
-    referenceColumns,
-    normalizedXCode,
-    reconciliationYCodes,
-    "Reconciliation"
-  );
-  const stageSum = createEmptySeries(referenceColumns.length);
-  stageRows.forEach((row) => addSeriesValues(stageSum, row.values));
-  const totalValues = totalRows[0]?.values ?? createEmptySeries(referenceColumns.length);
-  const gapValues = totalValues.map((value, index) => value - (stageSum[index] ?? 0));
+  const denominatorValues = shiftCostOfRiskSeriesToPreviousReference(denominatorSeries);
+  const relativeValues = selectedTotal.map((value, index) => {
+    const denominator = denominatorValues[index];
+    return Number.isFinite(value) && Number.isFinite(denominator) && denominator !== 0
+      ? (value / denominator) * 10000
+      : null;
+  });
 
   return {
     dates: referenceColumns.map((column) => ({
@@ -561,25 +555,57 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
         values: selectedTotal
       },
       ...selectedRows,
-      ...totalRows,
-      ...stageRows,
       {
-        label: "Stage 1 + Stage 2 + Stage 3 + POCI",
-        section: "Reconciliation",
-        source: "F_12.01 / x selected / y 0010 + 0180 + 0360 + 0600",
+        label: "Denominator total",
+        section: "Denominator",
+        source: `${denominatorComposition.label} / previous quarter`,
         type: "amount",
-        values: stageSum
+        values: denominatorValues
       },
+      ...denominatorRows,
       {
-        label: "Gap: total − stage sum",
-        section: "Reconciliation",
-        source: "y 0520 − (0010 + 0180 + 0360 + 0600)",
-        type: "amount",
-        values: gapValues
+        denominatorValues,
+        label: "Relative contribution",
+        numeratorValues: selectedTotal,
+        section: "Calculation",
+        source: "Displayed contribution / previous-quarter denominator",
+        type: "bp",
+        values: relativeValues
       }
     ],
     title: `${normalizedXCode} - ${xLabel}`
   };
+}
+
+function buildCostOfRiskMovementDenominatorAuditRows(state, indexes, referenceColumns, composition) {
+  const rows = composition.xCodes.flatMap((xCode) => composition.yCodes.map((yCode) => ({
+    label: getMappingDescription(state, COST_OF_RISK_STAGE_BOX_TABLE_ID, "y_axis_rc_code", yCode),
+    section: "Denominator",
+    source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${yCode}`,
+    type: "amount",
+    values: shiftCostOfRiskSeriesToPreviousReference(
+      resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, yCode)
+    )
+  })));
+
+  if (!composition.excludeCash) return rows;
+
+  return [
+    ...rows,
+    ...composition.xCodes.map((xCode) => ({
+      label: "− Cash balances at central banks and other demand deposits",
+      section: "Denominator",
+      source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${COST_OF_RISK_DENOMINATOR_CASH_Y_CODE}`,
+      type: "amount",
+      values: shiftCostOfRiskSeriesToPreviousReference(
+        resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, COST_OF_RISK_DENOMINATOR_CASH_Y_CODE)
+      )
+    }))
+  ];
+}
+
+function shiftCostOfRiskSeriesToPreviousReference(series) {
+  return series.map((_, index) => (index > 0 ? series[index - 1] ?? null : null));
 }
 
 function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColumns, xCode, yCodes, section) {
