@@ -820,10 +820,6 @@ button:focus-visible {
   width: min(100%, 900px);
 }
 
-.cost-of-risk-summary-table-section {
-  position: relative;
-}
-
 .cost-of-risk-tab-panel[hidden] {
   display: none;
 }
@@ -1213,26 +1209,21 @@ button:focus-visible {
 .cost-of-risk-stage-summary-head-button {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #cfd5d1;
-  border-radius: 4px;
+  border: 0;
+  border-radius: 0;
   color: #111814;
   cursor: pointer;
   display: inline-flex;
   font: inherit;
   height: 24px;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 0 8px;
+  text-align: right;
   width: 100%;
 }
 
 .cost-of-risk-stage-summary-head-button:hover {
-  background: #f6f7f6;
-}
-
-.cost-of-risk-stage-summary-head-button.is-active-column {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-  color: #ffffff;
+  color: var(--primary-dark);
 }
 
 .cost-of-risk-stage-summary-grid thead th:first-child,
@@ -1242,37 +1233,58 @@ button:focus-visible {
   border-radius: 0;
 }
 
+.cost-of-risk-summary-display-control {
+  align-items: center;
+  color: var(--primary-dark);
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1;
+  margin-left: 8px;
+  min-height: 24px;
+  padding: 3px 0;
+}
+
+.cost-of-risk-summary-display-control .cost-of-risk-filter-chip-prefix {
+  margin-right: 4px;
+}
+
 .cost-of-risk-summary-switch {
   align-items: center;
-  background: #f8faf8;
-  border: 1px solid #d3dad6;
-  border-radius: 5px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   display: inline-flex;
-  gap: 1px;
-  height: 24px;
-  padding: 2px;
+  gap: 0;
+  height: 20px;
+  padding: 0;
   vertical-align: top;
   white-space: nowrap;
 }
 
-.cost-of-risk-summary-breakdown-switch {
-  left: 18px;
-  position: absolute;
-  top: 2px;
-  z-index: 8;
-}
-
 .cost-of-risk-summary-switch-button {
-  background: transparent;
-  border: 0;
+  background: #ffffff;
+  border: 1px solid #d3dad6;
   border-radius: 3px;
   color: #34443c;
   cursor: pointer;
-  font: inherit;
-  font-size: 0.72rem;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 500;
   height: 18px;
   line-height: 1;
-  padding: 0 6px;
+  padding: 0 5px;
+}
+
+.cost-of-risk-summary-switch-button:first-child {
+  border-bottom-right-radius: 0;
+  border-right: 0;
+  border-top-right-radius: 0;
+}
+
+.cost-of-risk-summary-switch-button:last-child {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
 }
 
 .cost-of-risk-summary-switch-button:hover {
@@ -1320,11 +1332,6 @@ button:focus-visible {
   background: rgba(36, 53, 45, 0.06);
 }
 
-.cost-of-risk-stage-summary-row.is-active-summary-row .cost-of-risk-stage-summary-row-button {
-  background: var(--primary-dark);
-  color: #ffffff;
-}
-
 .cost-of-risk-stage-summary-row--level-1 .cost-of-risk-stage-summary-row-label {
   padding-left: 16px !important;
 }
@@ -1369,6 +1376,22 @@ button:focus-visible {
   background: #f1f3f2;
 }
 
+.cost-of-risk-stage-summary-row.is-active-summary-row .cost-of-risk-stage-summary-row-label,
+.cost-of-risk-stage-summary-row.is-active-summary-row td,
+.cost-of-risk-stage-summary-row.is-active-summary-row .cost-of-risk-stage-summary-cell,
+.cost-of-risk-stage-summary-row.is-active-summary-row .cost-of-risk-stage-summary-row-button {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.cost-of-risk-stage-summary-row.is-active-summary-row:hover .cost-of-risk-stage-summary-row-label,
+.cost-of-risk-stage-summary-row.is-active-summary-row:hover td,
+.cost-of-risk-stage-summary-row.is-active-summary-row:hover .cost-of-risk-stage-summary-cell,
+.cost-of-risk-stage-summary-row.is-active-summary-row:hover .cost-of-risk-stage-summary-row-button {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
 .cost-of-risk-stage-summary-grid td {
   border: 0;
 }
@@ -1409,14 +1432,14 @@ button:focus-visible {
 }
 
 .cost-of-risk-stage-summary-cell.is-active {
-  background: var(--primary-dark);
-  color: #ffffff;
+  background: inherit;
+  color: inherit;
 }
 
 .cost-of-risk-stage-summary-row:hover .cost-of-risk-stage-summary-cell.is-active,
 .cost-of-risk-stage-summary-row.is-active-stage .cost-of-risk-stage-summary-cell.is-active {
-  background: var(--primary-dark);
-  color: #ffffff;
+  background: inherit;
+  color: inherit;
 }
 
 .cost-of-risk-counterparty-summary-group-row th {

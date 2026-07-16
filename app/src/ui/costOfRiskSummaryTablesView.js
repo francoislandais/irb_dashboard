@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260716-cost-risk-filters-below-tabs-view";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260716-cost-risk-tab-order-view";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 export const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES = {
@@ -291,7 +291,6 @@ function createCostOfRiskStageSummaryHead(activeCellKey, onColumnSelect) {
 function createCostOfRiskSummaryHeaderButton(column, activeCellKey, onColumnSelect) {
   const button = document.createElement("button");
   button.className = "cost-of-risk-stage-summary-head-button";
-  button.classList.toggle("is-active-column", getCostOfRiskSummaryCellColumnKey(activeCellKey) === `${column.metric}:${column.kind}`);
   button.type = "button";
   button.textContent = column.label;
   button.addEventListener("click", () => onColumnSelect(column.metric, column.kind));

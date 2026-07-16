@@ -29,21 +29,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-tab-order-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-tab-order-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-tab-order-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -51,7 +51,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-tab-order-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -59,56 +59,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-filters-below-tabs-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-cost-risk-filters-below-tabs-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-tab-order-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-cost-risk-tab-order-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-tab-order-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-tab-order-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-tab-order-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-tab-order-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-tab-order-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-filters-below-tabs-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-tab-order-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-tab-order-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskControlsView.js?v=20260716-cost-risk-tab-order-view";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-filters-below-tabs-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-tab-order-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-tab-order-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskTabsView.js?v=20260716-cost-risk-tab-order-view";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskModelCache.js?v=20260716-cost-risk-tab-order-view";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-tab-order-view";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -116,12 +116,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-tab-order-view";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-tab-order-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -189,7 +189,6 @@ const elements = {
   costOfRiskStageTransferFlowChartTitle: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-title"),
   costOfRiskStageTransferFlowChartWrap: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-wrap"),
   costOfRiskStageTransferTitle: document.querySelector("#cost-of-risk-stage-transfer-title"),
-  costOfRiskSummaryBreakdownButtons: [...document.querySelectorAll("[data-cost-of-risk-summary-breakdown]")],
   costOfRiskTabs: document.querySelector(".cost-of-risk-tabs"),
   costOfRiskTabButtons: [...document.querySelectorAll("[data-cost-of-risk-tab]")],
   costOfRiskTabPanels: [...document.querySelectorAll("[data-cost-of-risk-panel]")],
@@ -729,10 +728,12 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 
 function renderCostOfRiskActiveFilters(filterOptions) {
   renderCostOfRiskActiveFiltersView({
+    activeTab: activeCostOfRiskTab,
     container: elements.costOfRiskActiveFilters,
     filterOptions,
     filters: activeCostOfRiskFilters,
-    referenceDate: activeCostOfRiskReferenceDate
+    referenceDate: activeCostOfRiskReferenceDate,
+    summaryBreakdown: activeCostOfRiskSummaryBreakdown
   });
 }
 
@@ -891,7 +892,7 @@ function renderCostOfRiskCounterpartySummaryTable(counterpartySummary, selectedU
 }
 
 function renderCostOfRiskSummaryBreakdownSwitch() {
-  elements.costOfRiskSummaryBreakdownButtons.forEach((button) => {
+  document.querySelectorAll("[data-cost-of-risk-summary-breakdown]").forEach((button) => {
     const isActive = button.dataset.costOfRiskSummaryBreakdown === activeCostOfRiskSummaryBreakdown;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));

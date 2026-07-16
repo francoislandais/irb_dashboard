@@ -1,42 +1,82 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-filters-below-tabs-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-tab-order-view";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
 export function renderCostOfRiskActiveFiltersView({
+  activeTab,
   container,
   filterOptions,
   filters,
-  referenceDate
+  referenceDate,
+  summaryBreakdown
 }) {
   if (!container) return;
 
   const renderKey = serializeCostOfRiskActiveFiltersPart({
+    activeTab,
     filters,
     labels: {
       asset: getCostOfRiskFilterOptionLabel(filterOptions.assets, filters.asset),
       counterparty: getCostOfRiskFilterOptionLabel(filterOptions.counterparties, filters.counterparty),
       stage: getCostOfRiskFilterOptionLabel(filterOptions.stages, filters.stage)
     },
-    referenceDate
+    referenceDate,
+    summaryBreakdown
   });
   if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
   lastCostOfRiskActiveFiltersRenderKey = renderKey;
 
-  const activeItems = [
-    createCostOfRiskActiveFilterChip("asset", "Accounting", filters.asset, filterOptions.assets),
+  const accountingItem = createCostOfRiskActiveFilterChip("asset", "Accounting", filters.asset, filterOptions.assets);
+  const remainingActiveItems = [
     createCostOfRiskActiveFilterChip("counterparty", "Counterparty", filters.counterparty, filterOptions.counterparties),
     createCostOfRiskActiveFilterChip("stage", "Stage", filters.stage, filterOptions.stages)
   ].filter(Boolean);
+  const activeItems = [accountingItem, ...remainingActiveItems].filter(Boolean);
   const chips = [
     createCostOfRiskReferenceDateChip(referenceDate),
-    ...(activeItems.length > 0 ? activeItems : [createCostOfRiskNoFilterChip()])
+    ...(accountingItem ? [accountingItem] : []),
+    ...(remainingActiveItems.length > 0
+      ? remainingActiveItems
+      : activeItems.length === 0 ? [createCostOfRiskNoFilterChip()] : []),
+    ...(activeTab === "summary" ? [createCostOfRiskSummaryBreakdownSwitch(summaryBreakdown)] : [])
   ];
 
   container.replaceChildren(...chips);
   container.classList.toggle("is-empty", activeItems.length === 0);
+}
+
+function createCostOfRiskSummaryBreakdownSwitch(summaryBreakdown) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "cost-of-risk-summary-display-control";
+  const prefix = document.createElement("span");
+  prefix.className = "cost-of-risk-filter-chip-prefix";
+  prefix.textContent = "Display: ";
+
+  const switcher = document.createElement("div");
+  switcher.className = "cost-of-risk-summary-switch";
+  switcher.setAttribute("aria-label", "Summary breakdown");
+  switcher.setAttribute("role", "group");
+
+  [
+    { label: "by stage", value: "stage" },
+    { label: "by counterparty", value: "counterparty" }
+  ].forEach((option) => {
+    const button = document.createElement("button");
+    const isActive = summaryBreakdown === option.value;
+    button.className = "cost-of-risk-summary-switch-button";
+    button.classList.toggle("is-active", isActive);
+    button.type = "button";
+    button.dataset.costOfRiskSummaryBreakdown = option.value;
+    button.setAttribute("aria-pressed", String(isActive));
+    button.textContent = option.label;
+    switcher.append(button);
+  });
+
+  wrapper.append(prefix, switcher);
+  return wrapper;
 }
 
 function createCostOfRiskReferenceDateChip(referenceDate) {
