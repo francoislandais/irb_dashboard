@@ -1266,6 +1266,28 @@ button:focus-visible {
   color: #ffffff;
 }
 
+.cost-of-risk-chart-y-focus-badge {
+  --y-focus-badge-fill: #eef1ef;
+  position: absolute;
+  z-index: 1000;
+  min-height: 19px;
+  border: 1px solid #d2d9d5;
+  border-radius: 5px;
+  background: var(--y-focus-badge-fill);
+  color: #52615a;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 3px 6px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.cost-of-risk-chart-y-focus-badge.is-focused {
+  border-color: var(--y-focus-badge-fill);
+  color: #ffffff;
+}
+
 .cost-of-risk-chart-smoothing-badge-toggle,
 .cost-of-risk-chart-smoothing-badge-clear {
   border: 0;

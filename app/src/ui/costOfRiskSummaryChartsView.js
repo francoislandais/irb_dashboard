@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-intro-panel-view";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -17,12 +17,14 @@ import {
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
+  getCostOfRiskFocusedYAxisBounds,
+  renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-context-help-panel-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;
@@ -52,11 +54,13 @@ export function renderCostOfRiskStageSummaryChart({
   activeReferenceDate,
   container,
   displayMode,
+  focusSelectedYAxis = false,
   model,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -68,6 +72,7 @@ export function renderCostOfRiskStageSummaryChart({
     container,
     destroyChart: destroyCostOfRiskStageSummaryChart,
     displayMode,
+    focusSelectedYAxis,
     getChart: () => costOfRiskStageSummaryChart,
     getPointRowLabel: (stageSummary, selectedCell) => getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey),
     missingMessage: "No stage summary time series is available for the current selection.",
@@ -77,6 +82,7 @@ export function renderCostOfRiskStageSummaryChart({
     onSelectReferenceDate,
     onClearSmoothing,
     onChangeSmoothing,
+    onToggleYAxisFocus,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -88,11 +94,13 @@ export function renderCostOfRiskCounterpartySummaryChart({
   activeReferenceDate,
   container,
   displayMode,
+  focusSelectedYAxis = false,
   model,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -104,6 +112,7 @@ export function renderCostOfRiskCounterpartySummaryChart({
     container,
     destroyChart: destroyCostOfRiskCounterpartySummaryChart,
     displayMode,
+    focusSelectedYAxis,
     getChart: () => costOfRiskCounterpartySummaryChart,
     getPointRowLabel: (counterpartySummary, selectedCell) => getCostOfRiskCounterpartySummaryRowLabel(counterpartySummary, selectedCell.rowKey),
     missingMessage: "No counterparty summary time series is available for the current selection.",
@@ -113,6 +122,7 @@ export function renderCostOfRiskCounterpartySummaryChart({
     onSelectReferenceDate,
     onClearSmoothing,
     onChangeSmoothing,
+    onToggleYAxisFocus,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -126,6 +136,7 @@ function renderCostOfRiskSummaryChart({
   container,
   destroyChart,
   displayMode,
+  focusSelectedYAxis = false,
   getChart,
   getPointRowLabel,
   missingMessage,
@@ -135,6 +146,7 @@ function renderCostOfRiskSummaryChart({
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -158,7 +170,9 @@ function renderCostOfRiskSummaryChart({
     return;
   }
 
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
+  const yBounds = focusSelectedYAxis
+    ? getCostOfRiskFocusedYAxisBounds(series, state.selectedJst)
+    : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
   const selectedReferencePoint = model.benchmarkSeries
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeReferenceDate);
@@ -178,6 +192,7 @@ function renderCostOfRiskSummaryChart({
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
           renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
+          renderCostOfRiskYAxisFocusBadge(this, focusSelectedYAxis, onToggleYAxisFocus);
         }
       },
       spacingRight: 128,

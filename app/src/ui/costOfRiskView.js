@@ -31,21 +31,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +53,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,55 +61,55 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-audit-intro-panel-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-context-help-panel-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-audit-intro-panel-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-context-help-panel-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskControlsView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-audit-intro-panel-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-context-help-panel-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskTabsView.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskModelCache.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -117,12 +117,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-context-help-panel-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -132,6 +132,7 @@ let updateSelectedJst = () => {};
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
 let activeCostOfRiskReferenceDate = "";
+let activeCostOfRiskFocusSelectedYAxis = false;
 let activeCostOfRiskTab = "summary";
 let activeCostOfRiskSummaryBreakdown = "stage";
 let activeCostOfRiskMovementXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
@@ -152,6 +153,7 @@ let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CEL
 let activeCostOfRiskStageFilterMenuOpen = false;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskAuditIntroTab = "summary";
+let activeCostOfRiskHelpTopic = "";
 let activeCostOfRiskMovementAuditXCode = "";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
@@ -272,6 +274,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       } else {
         activeCostOfRiskMovementDisplayMode = nextMode;
       }
+      setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, nextMode));
       if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
       rerenderApp(actions.getState());
       return;
@@ -294,6 +297,12 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskInstrumentFilterMenuOpen = false;
       activeCostOfRiskCounterpartyFilterMenuOpen = false;
       activeCostOfRiskStageFilterMenuOpen = false;
+      const currentMode = scope === "stageTransfer"
+        ? activeCostOfRiskStageTransferDisplayMode
+        : scope === "summaryVariation"
+          ? activeCostOfRiskSummaryDisplayMode
+          : activeCostOfRiskMovementDisplayMode;
+      setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, currentMode));
       rerenderApp(actions.getState());
       return;
     }
@@ -409,6 +418,7 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
       activeCostOfRiskTab = button.dataset.costOfRiskTab || "contributions";
+      clearCostOfRiskHelpTopic();
       activeCostOfRiskAuditIntroTab = activeCostOfRiskTab;
       closeCostOfRiskFilterMenus();
       rerenderApp(actions.getState());
@@ -567,16 +577,19 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskPoints.textContent = "-";
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
+    renderCostOfRiskAuditPanelIntro();
     renderCostOfRiskStageReconciliationView({
       activeReferenceDate: activeCostOfRiskReferenceDate,
       clearEmptyPanels: clearCostOfRiskEmptyPanels,
       elements,
+      focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
       formatReferenceQuarterLabel,
       model: stageReconciliation,
       onClearSmoothing: clearCostOfRiskSmoothing,
       onChangeSmoothing: updateCostOfRiskSmoothingWindow,
       onSelectJst: selectCostOfRiskChartJst,
       onSelectReferenceDate: selectCostOfRiskReferenceDate,
+      onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
       renderTabEmpty: renderCostOfRiskTabEmpty,
       selectedUnit: state.selectedUnit,
       smoothingWindow: activeCostOfRiskSmoothingWindow,
@@ -668,11 +681,13 @@ export function renderCostOfRisk(state) {
       activeReferenceDate: activeCostOfRiskReferenceDate,
       container: elements.costOfRiskChart,
       displayMode,
+      focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
       jstCode: state.selectedJst,
       onClearSmoothing: clearCostOfRiskSmoothing,
       onChangeSmoothing: updateCostOfRiskSmoothingWindow,
       onSelectJst: selectCostOfRiskChartJst,
       onSelectReferenceDate: selectCostOfRiskReferenceDate,
+      onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
       peerDisplayMode: state.peerDisplayMode,
       renderTabEmpty: renderCostOfRiskTabEmpty,
       selectedUnit: state.selectedUnit,
@@ -1008,6 +1023,8 @@ function renderCostOfRiskWaterfallTitle() {
 function renderCostOfRiskMovementAuditPanel(state) {
   if (!elements.costOfRiskAuditPanel) return;
 
+  if (renderCostOfRiskHelpPanel()) return;
+
   if (isCostOfRiskAuditIntroVisible()) {
     renderCostOfRiskAuditPanelIntro();
     return;
@@ -1035,6 +1052,8 @@ function renderCostOfRiskMovementAuditPanel(state) {
 
 function renderCostOfRiskStageTransferAuditPanel(state) {
   if (!elements.costOfRiskAuditPanel) return;
+
+  if (renderCostOfRiskHelpPanel()) return;
 
   if (isCostOfRiskAuditIntroVisible()) {
     renderCostOfRiskAuditPanelIntro();
@@ -1079,12 +1098,26 @@ function isCostOfRiskAuditIntroVisible() {
     && Boolean(getCostOfRiskAuditPanelIntroContent(activeCostOfRiskTab));
 }
 
+function isCostOfRiskHelpVisible() {
+  return Boolean(getCostOfRiskHelpPanelContent(activeCostOfRiskHelpTopic));
+}
+
 function hideCostOfRiskAuditIntro() {
   activeCostOfRiskAuditIntroTab = "";
 }
 
+function clearCostOfRiskHelpTopic() {
+  activeCostOfRiskHelpTopic = "";
+}
+
+function setCostOfRiskHelpTopic(topic) {
+  activeCostOfRiskHelpTopic = topic || "";
+}
+
 function renderCostOfRiskAuditPanelIntro() {
   if (!elements.costOfRiskAuditPanel) return;
+
+  if (renderCostOfRiskHelpPanel()) return;
 
   const content = getCostOfRiskAuditPanelIntroContent(activeCostOfRiskTab);
   if (!content) {
@@ -1129,6 +1162,236 @@ function renderCostOfRiskAuditPanelIntro() {
   intro.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function renderCostOfRiskHelpPanel() {
+  if (!elements.costOfRiskAuditPanel) return false;
+
+  const content = getCostOfRiskHelpPanelContent(activeCostOfRiskHelpTopic);
+  if (!content) return false;
+
+  renderCostOfRiskPanelArticle(content);
+  return true;
+}
+
+function renderCostOfRiskPanelArticle(content) {
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = content.eyebrow;
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = content.title;
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = content.lead;
+
+  intro.append(eyebrow, title, summary);
+
+  content.sections.forEach((section) => {
+    const block = document.createElement("section");
+    block.className = "cost-of-risk-audit-intro-section";
+
+    const heading = document.createElement("h3");
+    heading.textContent = section.title;
+
+    const body = document.createElement("p");
+    body.textContent = section.body;
+
+    block.append(heading, body);
+    intro.append(block);
+  });
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = content.hint;
+  intro.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function getCostOfRiskDisplayModeHelpTopic(scope, mode) {
+  const normalizedMode = mode === "ratio" ? "relative" : "absolute";
+  if (scope === "stageTransfer") return `stage-transfer-${normalizedMode}`;
+  if (scope === "summaryVariation") return `summary-${normalizedMode}`;
+  return `movement-${normalizedMode}`;
+}
+
+function getCostOfRiskHelpPanelContent(topic) {
+  if (!topic) return null;
+
+  if (topic.startsWith("smoothing:")) {
+    const windowSize = Math.max(1, Math.min(4, Number(topic.split(":")[1]) || 1));
+    return {
+      eyebrow: "Time series option",
+      title: windowSize > 1 ? `Smoothing ${windowSize}Q` : "Raw figures",
+      lead: windowSize > 1
+        ? `The time chart is displayed as a rolling ${windowSize}-quarter average.`
+        : "The time chart is displayed without smoothing.",
+      sections: [
+        {
+          title: "How it is calculated",
+          body: windowSize > 1
+            ? `For each point, the chart averages the current quarter and up to ${windowSize - 1} preceding quarters when they are available. This reduces short-term volatility while preserving the direction of the selected series.`
+            : "Each point corresponds to the reported quarterly value, without any rolling average."
+        },
+        {
+          title: "Scope",
+          body: "Smoothing affects the temporal chart only. It does not change the underlying FINREP data or the selected perimeter."
+        }
+      ],
+      hint: "Use the chart badge to change or clear the smoothing window."
+    };
+  }
+
+  const content = {
+    "stage-transfer-absolute": {
+      eyebrow: "Transfer display",
+      title: "Absolute Transfer",
+      lead: "Absolute transfer shows the amount of exposure that moved through the selected stage-transfer flow.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is the quarterly transfer amount reported in F_12.02 for the selected flow and perimeter."
+        },
+        {
+          title: "Unit",
+          body: "Values are displayed in the selected monetary unit. No denominator is applied."
+        }
+      ],
+      hint: "Switch to Relative Transfer to express the same flow against the exposure base."
+    },
+    "stage-transfer-relative": {
+      eyebrow: "Transfer display",
+      title: "Relative Transfer",
+      lead: "Relative transfer expresses a stage-transfer flow as a contribution relative to the exposure base.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is the quarterly transfer amount from F_12.02 for the selected flow."
+        },
+        {
+          title: "Denominator",
+          body: "The denominator is the previous-quarter gross carrying amount from F_18.00 on the selected instruments and counterparty perimeter, taken across all stages and excluding central bank cash where relevant."
+        },
+        {
+          title: "Formula",
+          body: "Relative transfer = transfer amount divided by previous-quarter exposure denominator, displayed in basis points."
+        }
+      ],
+      hint: "Use this mode to compare transfer intensity across JSTs and across time."
+    },
+    "movement-absolute": {
+      eyebrow: "Allowance movement display",
+      title: "Absolute Contribution",
+      lead: "Absolute contribution shows the amount by which a selected FINREP component changes the stock of allowances.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The value is the selected movement component from F_12.01, on the current perimeter."
+        },
+        {
+          title: "Unit",
+          body: "Values are displayed in the selected monetary unit. No denominator is applied."
+        }
+      ],
+      hint: "Switch to Relative Contribution to compare allowance movements against the exposure base."
+    },
+    "movement-relative": {
+      eyebrow: "Allowance movement display",
+      title: "Relative Contribution",
+      lead: "Relative contribution expresses an allowance movement against the corresponding exposure base.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is the selected F_12.01 allowance movement component."
+        },
+        {
+          title: "Denominator",
+          body: "The denominator is the previous-quarter exposure base from F_18.00, filtered by the selected instruments, counterparty and stage where available."
+        },
+        {
+          title: "Formula",
+          body: "Relative contribution = allowance movement divided by previous-quarter exposure denominator, displayed in basis points."
+        }
+      ],
+      hint: "This is a contribution-to-exposure measure, not a growth rate of allowances."
+    },
+    "summary-absolute": {
+      eyebrow: "Summary display",
+      title: "Absolute Variation",
+      lead: "Absolute variation shows the quarter-on-quarter movement in amount for the selected summary row.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The value is the current-quarter stock minus the previous-quarter stock for the selected stage or counterparty line."
+        },
+        {
+          title: "Unit",
+          body: "Values are displayed in the selected monetary unit."
+        }
+      ],
+      hint: "Switch to Relative Variation to read the same movement as a growth rate."
+    },
+    "summary-relative": {
+      eyebrow: "Summary display",
+      title: "Relative Variation",
+      lead: "Relative variation is a growth rate for the selected summary row.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is the quarter-on-quarter variation of the selected row and metric."
+        },
+        {
+          title: "Denominator",
+          body: "The denominator is the previous-quarter value of that same row and metric, after applying the active perimeter filters."
+        },
+        {
+          title: "Formula",
+          body: "Relative variation = quarterly variation divided by previous-quarter value, displayed as a percentage."
+        }
+      ],
+      hint: "Use this mode when the question is how fast the selected stock is growing or shrinking."
+    },
+    "y-focus-on": {
+      eyebrow: "Chart scale",
+      title: "Focused JST axis",
+      lead: "The Y-axis is now driven by the selected JST curve.",
+      sections: [
+        {
+          title: "What changes",
+          body: "The chart chooses its vertical bounds from the selected JST series, with a small margin so that its movements are easier to read."
+        },
+        {
+          title: "What may happen",
+          body: "Peer curves or percentile lines can move partly outside the visible area if they take more extreme values."
+        }
+      ],
+      hint: "Turn the button off to return to a global scale that includes the full benchmark range."
+    },
+    "y-focus-off": {
+      eyebrow: "Chart scale",
+      title: "Global benchmark axis",
+      lead: "The Y-axis is sized to include the benchmark range.",
+      sections: [
+        {
+          title: "What changes",
+          body: "The selected JST, peers and anonymised percentile lines are all considered when setting the vertical bounds."
+        },
+        {
+          title: "Trade-off",
+          body: "This makes comparison easier, but the selected JST curve may look flatter when benchmark dispersion is large."
+        }
+      ],
+      hint: "Turn on Focus JST axis when the selected JST curve needs to be read more precisely."
+    }
+  };
+
+  return content[topic] ?? null;
 }
 
 function getCostOfRiskAuditPanelIntroContent(tab) {
@@ -1234,11 +1497,13 @@ function renderCostOfRiskStageSummaryChart(stageSummary, state) {
     activeReferenceDate: activeCostOfRiskReferenceDate,
     container: elements.costOfRiskStageSummaryChart,
     displayMode: getActiveCostOfRiskDisplayMode(),
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
     model: stageSummary,
     onClearSmoothing: clearCostOfRiskSmoothing,
     onChangeSmoothing: updateCostOfRiskSmoothingWindow,
     onSelectJst: selectCostOfRiskChartJst,
     onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
     renderTabEmpty: renderCostOfRiskTabEmpty,
     selectedUnit: state.selectedUnit,
     smoothingWindow: activeCostOfRiskSmoothingWindow,
@@ -1252,6 +1517,7 @@ function selectCostOfRiskStageSummaryColumn(metric, kind) {
 }
 
 function selectCostOfRiskStageSummaryCell(cellKey, rowKey = "") {
+  clearCostOfRiskHelpTopic();
   let shouldRerender = false;
   if (cellKey && cellKey !== activeCostOfRiskStageSummaryCellKey) {
     activeCostOfRiskStageSummaryCellKey = cellKey;
@@ -1345,11 +1611,13 @@ function renderCostOfRiskCounterpartySummaryChart(counterpartySummary, state) {
     activeReferenceDate: activeCostOfRiskReferenceDate,
     container: elements.costOfRiskCounterpartySummaryChart,
     displayMode: getActiveCostOfRiskDisplayMode(),
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
     model: counterpartySummary,
     onClearSmoothing: clearCostOfRiskSmoothing,
     onChangeSmoothing: updateCostOfRiskSmoothingWindow,
     onSelectJst: selectCostOfRiskChartJst,
     onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
     renderTabEmpty: renderCostOfRiskTabEmpty,
     selectedUnit: state.selectedUnit,
     smoothingWindow: activeCostOfRiskSmoothingWindow,
@@ -1363,6 +1631,7 @@ function selectCostOfRiskCounterpartySummaryColumn(metric, kind) {
 }
 
 function selectCostOfRiskCounterpartySummaryCell(cellKey, counterpartyValue = "") {
+  clearCostOfRiskHelpTopic();
   let shouldRerender = false;
   if (cellKey && cellKey !== activeCostOfRiskCounterpartySummaryCellKey) {
     activeCostOfRiskCounterpartySummaryCellKey = cellKey;
@@ -1539,6 +1808,7 @@ function selectCostOfRiskStageTransferFlow(flowKey) {
   if (!flowKey) return;
 
   const hadIntro = isCostOfRiskAuditIntroVisible();
+  clearCostOfRiskHelpTopic();
   hideCostOfRiskAuditIntro();
   let shouldRerender = flowKey !== activeCostOfRiskStageTransferFlowKey;
   activeCostOfRiskStageTransferFlowKey = flowKey;
@@ -1582,11 +1852,13 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     activeReferenceDate: activeCostOfRiskReferenceDate,
     chartDisplayMode,
     container: elements.costOfRiskStageTransferFlowChart,
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
     flowSeries,
     onClearSmoothing: clearCostOfRiskSmoothing,
     onChangeSmoothing: updateCostOfRiskSmoothingWindow,
     onSelectJst: selectCostOfRiskChartJst,
     onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
     renderTabEmpty: renderCostOfRiskTabEmpty,
     selectedUnit,
     smoothingWindow: activeCostOfRiskSmoothingWindow,
@@ -2092,6 +2364,7 @@ function getSelectedCostOfRiskWaterfallStroke(item) {
 function selectCostOfRiskXAxisFromWaterfall(code) {
   if (!code) return;
 
+  clearCostOfRiskHelpTopic();
   hideCostOfRiskAuditIntro();
   activeCostOfRiskMovementAuditXCode = code;
   if (code === activeCostOfRiskXAxisCode) {
@@ -2182,7 +2455,11 @@ function selectCostOfRiskReferenceDate(referenceDate) {
 
 function updateCostOfRiskSmoothingWindow(value) {
   const nextWindow = clampCostOfRiskSmoothingWindow(value);
-  if (activeCostOfRiskSmoothingWindow === nextWindow) return;
+  setCostOfRiskHelpTopic(`smoothing:${nextWindow}`);
+  if (activeCostOfRiskSmoothingWindow === nextWindow) {
+    renderCostOfRiskHelpPanel();
+    return;
+  }
   activeCostOfRiskSmoothingWindow = nextWindow;
   if (elements.costOfRiskSmoothing) elements.costOfRiskSmoothing.value = String(nextWindow);
   if (elements.costOfRiskSmoothingValue) elements.costOfRiskSmoothingValue.textContent = formatCostOfRiskSmoothingLabel(nextWindow);
@@ -2192,6 +2469,12 @@ function updateCostOfRiskSmoothingWindow(value) {
 function clearCostOfRiskSmoothing() {
   if (activeCostOfRiskSmoothingWindow <= 1) return;
   updateCostOfRiskSmoothingWindow(1);
+}
+
+function toggleCostOfRiskFocusedYAxis() {
+  activeCostOfRiskFocusSelectedYAxis = !activeCostOfRiskFocusSelectedYAxis;
+  setCostOfRiskHelpTopic(activeCostOfRiskFocusSelectedYAxis ? "y-focus-on" : "y-focus-off");
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 // Reuses the same global JST_CODE update entry point as the header dropdown

@@ -1,15 +1,17 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
+  getCostOfRiskFocusedYAxisBounds,
+  renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -40,11 +42,13 @@ export function renderCostOfRiskMovementTimeSeriesChart({
   activeReferenceDate,
   container,
   displayMode = "ratio",
+  focusSelectedYAxis = false,
   jstCode,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   peerDisplayMode = "explicit",
   renderTabEmpty,
   selectedUnit = "millions",
@@ -57,7 +61,9 @@ export function renderCostOfRiskMovementTimeSeriesChart({
   const chartModel = buildBenchmarkChartModel(selection.benchmarkSeries, jstCode, primaryDark, { displayMode, peerDisplayMode, smoothingWindow });
   const series = chartModel.series;
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
+  const yBounds = focusSelectedYAxis
+    ? getCostOfRiskFocusedYAxisBounds(series, jstCode)
+    : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
   const selectedReferencePoint = selection.series?.find((point) => point.label === activeReferenceDate);
 
   if (series.length === 0) {
@@ -79,6 +85,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
           }
           renderBenchmarkEndpointLabels(this, jstCode, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
           renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
+          renderCostOfRiskYAxisFocusBadge(this, focusSelectedYAxis, onToggleYAxisFocus);
         }
       },
       spacingRight: 128,

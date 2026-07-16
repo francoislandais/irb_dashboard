@@ -24,6 +24,38 @@ export function getCostOfRiskAxisTickPositions(points) {
   )].sort((left, right) => left - right);
 }
 
+export function getCostOfRiskFocusedYAxisBounds(series, selectedSeriesName, options = {}) {
+  const selectedSeries = (series ?? []).find((serie) => serie.name === selectedSeriesName);
+  const selectedValues = extractCostOfRiskFiniteYValues(selectedSeries ? [selectedSeries] : []);
+  const values = selectedValues.length > 0
+    ? selectedValues
+    : extractCostOfRiskFiniteYValues(series);
+
+  if (values.length === 0) return { max: undefined, min: undefined };
+
+  const paddingRatio = selectedValues.length > 0
+    ? options.selectedPaddingRatio ?? 0.12
+    : options.fallbackPaddingRatio ?? 0.015;
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const range = maxValue - minValue;
+  const minimumPadding = options.minimumPadding ?? 0.5;
+  const padding = range > 0
+    ? range * paddingRatio
+    : Math.max(Math.abs(maxValue) * paddingRatio, minimumPadding);
+
+  return {
+    max: maxValue + padding,
+    min: minValue - padding
+  };
+}
+
+function extractCostOfRiskFiniteYValues(series) {
+  return (series ?? [])
+    .flatMap((serie) => (serie?.data ?? []).map((point) => point?.y))
+    .filter((value) => Number.isFinite(value));
+}
+
 export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CHART_TITLE_POSITION) {
   return {
     align: "left",
@@ -123,6 +155,44 @@ export function clearCostOfRiskSmoothingBadge(chart) {
   });
   if (chart) chart.customCostOfRiskSmoothingBadge = [];
   clearCostOfRiskSmoothingSlider(chart, { keepOpen: true });
+}
+
+export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus) {
+  clearCostOfRiskYAxisFocusBadge(chart);
+  const host = chart?.renderTo;
+  if (!host || typeof onToggleFocus !== "function") return;
+
+  const primaryDark = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary-dark")
+    .trim() || "#0c4c42";
+  const badgeX = Math.max(8, chart.chartWidth - 232);
+  const titleY = chart.title?.alignAttr?.y ?? 8;
+  const badgeY = Math.max(8, titleY - 4);
+
+  host.style.position = host.style.position || "relative";
+  const badge = document.createElement("button");
+  badge.className = "cost-of-risk-chart-y-focus-badge";
+  badge.classList.toggle("is-focused", Boolean(isFocused));
+  badge.type = "button";
+  badge.textContent = "focus JST axis";
+  badge.style.left = `${badgeX}px`;
+  badge.style.top = `${badgeY}px`;
+  if (isFocused) badge.style.setProperty("--y-focus-badge-fill", primaryDark);
+  badge.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleFocus();
+  });
+  ["pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
+    badge.addEventListener(eventName, (event) => event.stopPropagation());
+  });
+  host.append(badge);
+  chart.customCostOfRiskYAxisFocusBadge = [badge];
+}
+
+export function clearCostOfRiskYAxisFocusBadge(chart) {
+  chart?.customCostOfRiskYAxisFocusBadge?.forEach((element) => element?.remove?.());
+  if (chart) chart.customCostOfRiskYAxisFocusBadge = [];
 }
 
 function renderCostOfRiskSmoothingSlider(chart, {

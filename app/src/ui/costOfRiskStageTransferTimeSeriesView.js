@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -20,8 +20,10 @@ import {
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
+  getCostOfRiskFocusedYAxisBounds,
+  renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-context-help-panel-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;
@@ -40,11 +42,13 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
   activeReferenceDate,
   chartDisplayMode,
   container,
+  focusSelectedYAxis = false,
   flowSeries,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -77,7 +81,9 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
     return;
   }
 
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
+  const yBounds = focusSelectedYAxis
+    ? getCostOfRiskFocusedYAxisBounds(series, state.selectedJst)
+    : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
   const selectedReferencePoint = flowSeries.benchmarkSeries
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeReferenceDate);
@@ -95,6 +101,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
           renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
+          renderCostOfRiskYAxisFocusBadge(this, focusSelectedYAxis, onToggleYAxisFocus);
         }
       },
       spacingRight: 128,

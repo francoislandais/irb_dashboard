@@ -1,12 +1,14 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-intro-panel-view";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
+  getCostOfRiskFocusedYAxisBounds,
+  renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-intro-panel-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-context-help-panel-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -37,12 +39,14 @@ export function renderCostOfRiskStageReconciliationView({
   activeReferenceDate,
   clearEmptyPanels,
   elements,
+  focusSelectedYAxis = false,
   formatReferenceQuarterLabel,
   model,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -62,11 +66,13 @@ export function renderCostOfRiskStageReconciliationView({
   renderCostOfRiskStageReconciliationChart({
     activeReferenceDate,
     elements,
+    focusSelectedYAxis,
     model,
     onSelectJst,
     onSelectReferenceDate,
     onClearSmoothing,
     onChangeSmoothing,
+    onToggleYAxisFocus,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -183,11 +189,13 @@ function capCostOfRiskStageReconciliationYAxisBounds(bounds) {
 function renderCostOfRiskStageReconciliationChart({
   activeReferenceDate,
   elements,
+  focusSelectedYAxis = false,
   model,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
   onChangeSmoothing,
+  onToggleYAxisFocus,
   renderTabEmpty,
   smoothingWindow,
   state
@@ -209,7 +217,9 @@ function renderCostOfRiskStageReconciliationChart({
   }
 
   const yBounds = capCostOfRiskStageReconciliationYAxisBounds(
-    getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution))
+    focusSelectedYAxis
+      ? getCostOfRiskFocusedYAxisBounds(series, state.selectedJst)
+      : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution))
   );
   const selectedReferencePoint = model.benchmarkSeries
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
@@ -228,6 +238,7 @@ function renderCostOfRiskStageReconciliationChart({
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
           renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
+          renderCostOfRiskYAxisFocusBadge(this, focusSelectedYAxis, onToggleYAxisFocus);
         }
       },
       spacingRight: 128,
