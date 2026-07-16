@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260716-cost-risk-summary-hidden-fix-view">
+    <link rel="stylesheet" href="./src/styles.css?v=20260716-cost-risk-filters-below-tabs-view">
   </head>
   <body>
     <div class="app-shell">
@@ -159,7 +159,6 @@
                 </label>
               </aside>
               <div class="cost-of-risk-main">
-                <div id="cost-of-risk-active-filters" class="cost-of-risk-active-filters" aria-label="Active cost of risk filters"></div>
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
@@ -169,6 +168,7 @@
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
                 </div>
+                <div id="cost-of-risk-active-filters" class="cost-of-risk-active-filters" aria-label="Active cost of risk filters"></div>
                 <div class="cost-of-risk-scroll">
                 <div class="cost-of-risk-tab-panel is-active" data-cost-of-risk-panel="summary">
                   <div class="cost-of-risk-split-section cost-of-risk-summary-table-section">
@@ -268,6 +268,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260716-cost-risk-summary-hidden-fix-view"></script>
+    <script type="module" src="./src/main.js?v=20260716-cost-risk-filters-below-tabs-view"></script>
   </body>
 </html>
