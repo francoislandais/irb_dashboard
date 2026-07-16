@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-soft-card-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-stage-related-flow-blue-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -9,7 +9,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-soft-card-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-stage-related-flow-blue-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,

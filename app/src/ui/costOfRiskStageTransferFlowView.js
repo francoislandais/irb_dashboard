@@ -1,13 +1,12 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-soft-card-view";
-import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
-import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-tab-order-view";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-stage-related-flow-blue-view";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 export function renderCostOfRiskStageTransferFlowView({
   container,
   displayMode = "amount",
   flowDiagram,
-  onContextMenu,
   onSelectFlow,
   selectedFlowKey,
   selectedUnit,
@@ -24,7 +23,6 @@ export function renderCostOfRiskStageTransferFlowView({
     flowArrowColor,
     flowDiagram,
     formatValue: formatCostOfRiskDisplayValue,
-    onContextMenu,
     onSelectFlow,
     primaryDark,
     selectedFlowKey,

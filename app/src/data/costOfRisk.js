@@ -1109,6 +1109,168 @@ export function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowK
   return buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
 }
 
+export function buildCostOfRiskStageTransferPanelAudit(state, filters = {}, flowKey, referenceDate = "") {
+  const audit = buildCostOfRiskStageTransferFlowAudit(state, filters, flowKey, referenceDate);
+  if (!audit) return { dates: [], rows: [], title: "Stage Transfer" };
+
+  const selectedValue = Number.isFinite(audit.value) ? audit.value : null;
+  let relativeValue = null;
+  const selectedRows = buildCostOfRiskStageTransferSelectedScopeRows(audit);
+  const selectedScopeRows = selectedRows.length > 0
+    ? selectedRows
+    : [{
+      label: "No lower-level component available",
+      section: "Selected scope",
+      source: getCostOfRiskStageTransferAuditSource(audit),
+      type: "amount",
+      values: [selectedValue]
+    }];
+  const rows = [
+    {
+      label: "Displayed value",
+      section: "Selected scope",
+      source: getCostOfRiskStageTransferAuditSource(audit),
+      type: "amount",
+      values: [selectedValue]
+    },
+    ...selectedScopeRows
+  ];
+
+  if (audit.type !== "stagebox") {
+    const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(
+      state,
+      getCostOfRiskStageTransferDenominatorFilters(filters),
+      audit.previousReferenceLabel,
+      state.selectedJst
+    );
+    const denominatorValue = denominatorDetail.status === "available" ? denominatorDetail.value : null;
+    relativeValue = Number.isFinite(selectedValue) && Number.isFinite(denominatorValue) && denominatorValue !== 0
+      ? (selectedValue / denominatorValue) * 10000
+      : null;
+
+    rows.push(
+      {
+        label: "Denominator total",
+        section: "Denominator",
+        source: `${denominatorDetail.label} / ${formatReferenceQuarterLabel(audit.previousReferenceLabel)}`,
+        type: "amount",
+        values: [denominatorValue]
+      },
+      ...denominatorDetail.components.map((component) => ({
+        label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
+        section: "Denominator",
+        source: component.source ?? denominatorDetail.sourceTable,
+        type: "amount",
+        values: [Number.isFinite(component.value) ? component.value : null]
+      })),
+      {
+        denominatorValues: [denominatorValue],
+        label: "Relative transfer",
+        numeratorValues: [selectedValue],
+        section: "Calculation",
+        source: "Displayed value / previous-quarter denominator",
+        type: "bp",
+        values: [relativeValue]
+      }
+    );
+  }
+
+  return {
+    dates: [{ date: null, label: audit.referenceLabel }],
+    hero: {
+      amount: {
+        type: "amount",
+        value: Number.isFinite(selectedValue) ? Math.abs(selectedValue) : null
+      },
+      ratio: {
+        type: "bp",
+        value: Number.isFinite(relativeValue) ? Math.abs(relativeValue) : null
+      }
+    },
+    rows,
+    title: getCostOfRiskStageTransferAuditTitle(audit)
+  };
+}
+
+function buildCostOfRiskStageTransferSelectedScopeRows(audit) {
+  if (audit.type === "transfer") {
+    return audit.components.map((component) => ({
+      label: formatCostOfRiskStageTransferAuditComponentLabel(component.description),
+      section: "Selected scope",
+      source: `${audit.tableId} / x ${audit.xCode} / y ${component.code}`,
+      type: "amount",
+      values: [component.quarterly]
+    }));
+  }
+
+  if (audit.type === "stagebox") {
+    return audit.components.map((component) => ({
+      label: `${component.operator === "subtract" ? "− " : ""}${formatCostOfRiskStageTransferAuditComponentLabel(component.label)}`,
+      section: "Selected scope",
+      source: component.source,
+      type: "amount",
+      values: [Number.isFinite(component.value) ? (component.operator === "subtract" ? -component.value : component.value) : null]
+    }));
+  }
+
+  if (audit.type === "writeoff") {
+    return audit.components.map((component) => ({
+      label: `${component.xLabel} / ${component.description}`,
+      section: "Selected scope",
+      source: `${audit.tableId} / x ${component.xCode} / y ${component.yCode}`,
+      type: "amount",
+      values: [Number.isFinite(component.quarterly) ? -Math.abs(component.quarterly) : null]
+    }));
+  }
+
+  return [
+    {
+      label: "Exposure variation",
+      section: "Selected scope",
+      source: "F_18.00 / current stage exposure delta",
+      type: "amount",
+      values: [audit.exposureDelta]
+    },
+    {
+      label: "Less net transfers",
+      section: "Selected scope",
+      source: "F_12.02 / net transfers in and out of the stage",
+      type: "amount",
+      values: [Number.isFinite(audit.netTransfers) ? -audit.netTransfers : null]
+    },
+    {
+      label: "Add write-offs",
+      section: "Selected scope",
+      source: "F_12.01 / write-off movements",
+      type: "amount",
+      values: [audit.writeOffMagnitude]
+    }
+  ];
+}
+
+function getCostOfRiskStageTransferAuditSource(audit) {
+  if (audit.type === "transfer") return `${audit.tableId} / x ${audit.xCode} / selected Y scope`;
+  if (audit.type === "stagebox") return `${audit.tableId} / ${audit.stageLabel}`;
+  if (audit.type === "writeoff") return `${audit.tableId} / write-off codes / Stage ${audit.stage}`;
+  return `F_18.00 and F_12.02 / Stage ${audit.stage}`;
+}
+
+function formatCostOfRiskStageTransferAuditComponentLabel(label) {
+  return String(label ?? "")
+    .replace(/^Total debt instruments\s*\/\s*/i, "")
+    .replace(/^Debt instruments other than held for trading\s*\/\s*/i, "")
+    .replace(/^Financial assets at amortised cost\s*\/\s*/i, "")
+    .replace(/^Financial assets at fair value through other comprehensive income\s*\/\s*/i, "")
+    .replace(/^Non-trading non-derivative financial assets measured at fair value through profit or loss\s*\/\s*/i, "");
+}
+
+function getCostOfRiskStageTransferAuditTitle(audit) {
+  if (audit.type === "transfer") return `${audit.xCode} - ${audit.xLabel}`;
+  if (audit.type === "stagebox") return audit.stageLabel;
+  if (audit.type === "writeoff") return `Write-off - Stage ${audit.stage}`;
+  return `Other movements - Stage ${audit.stage}`;
+}
+
 function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
   const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
   const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
@@ -2637,11 +2799,13 @@ export function buildCostOfRiskRatioDenominatorDetail(state, filters, referenceD
     ...composition.xCodes.flatMap((xCode) => composition.yCodes.map((yCode) => ({
       label: `${getMappingDescription(state, COST_OF_RISK_STAGE_BOX_TABLE_ID, "y_axis_rc_code", yCode)} (x=${xCode})`,
       operator: "add",
+      source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${yCode}`,
       value: resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, jstCode, xCode, yCode)[referenceIndex] ?? null
     }))),
     ...(composition.excludeCash ? composition.xCodes.map((xCode) => ({
       label: `Cash balances at central banks and other demand deposits (x=${xCode})`,
       operator: "subtract",
+      source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${COST_OF_RISK_DENOMINATOR_CASH_Y_CODE}`,
       value: resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, jstCode, xCode, COST_OF_RISK_DENOMINATOR_CASH_Y_CODE)[referenceIndex] ?? null
     })) : [])
   ];

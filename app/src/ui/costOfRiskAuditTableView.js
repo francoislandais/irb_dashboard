@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-soft-card-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-stage-related-flow-blue-view";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,
@@ -15,6 +15,7 @@ export function renderCostOfRiskAuditTableView({
 
   const rows = (audit?.rows ?? []).filter((row) => {
     if (activeSeries === "movement") return true;
+    if (activeSeries === "stage-transfer") return true;
     if (activeSeries === "f2") return row.section === "F2" || row.section === "Denominator" || row.section === "Denominator components";
     return row.section === "F12" || row.section === "F12 components" || row.section === "Denominator" || row.section === "Denominator components";
   });
@@ -29,8 +30,8 @@ export function renderCostOfRiskAuditTableView({
   const activeDateIndex = matchingDateIndex >= 0 ? matchingDateIndex : Math.max(0, dates.length - 1);
   const activeDate = dates[activeDateIndex] ?? dates.at(-1);
 
-  if (activeSeries === "movement") {
-    renderCostOfRiskMovementAuditBlocks({
+  if (activeSeries === "movement" || activeSeries === "stage-transfer") {
+    renderCostOfRiskBlockAuditView({
       activeDate,
       activeDateIndex,
       audit,
@@ -90,7 +91,7 @@ export function renderCostOfRiskAuditTableView({
   container.replaceChildren(title, tableWrap);
 }
 
-function renderCostOfRiskMovementAuditBlocks({
+function renderCostOfRiskBlockAuditView({
   activeDate,
   activeDateIndex,
   audit,
@@ -101,12 +102,13 @@ function renderCostOfRiskMovementAuditBlocks({
 }) {
   const isRelative = displayMode === "ratio";
   const selectedRow = (isRelative
-    ? rows.find((row) => row.section === "Calculation" && row.label === "Relative contribution")
-    : rows.find((row) => row.section === "Selected scope" && row.label === "Displayed contribution"))
+    ? rows.find((row) => row.section === "Calculation")
+    : rows.find((row) => row.section === "Selected scope" && /^Displayed/i.test(row.label)))
     ?? rows[0];
+  const heroValueDefinition = isRelative ? audit?.hero?.ratio : audit?.hero?.amount;
   const selectedValue = formatCostOfRiskAuditValue(
-    selectedRow?.values?.[activeDateIndex],
-    selectedRow?.type,
+    heroValueDefinition ? heroValueDefinition.value : selectedRow?.values?.[activeDateIndex],
+    heroValueDefinition ? heroValueDefinition.type : selectedRow?.type,
     selectedUnit
   );
   const activeDateText = formatReferenceQuarterLabel(activeDate?.label);
@@ -131,7 +133,7 @@ function renderCostOfRiskMovementAuditBlocks({
   heroMeta.textContent = [
     audit?.title || "Movement in allowance",
     activeDateText,
-    isRelative ? "Relative contribution" : "Absolute contribution"
+    isRelative ? "Relative value" : "Absolute value"
   ].filter(Boolean).join(" · ");
   hero.append(heroLabel, heroValue, heroMeta);
 
@@ -143,14 +145,14 @@ function renderCostOfRiskMovementAuditBlocks({
   sectionOrder.forEach((section) => {
     const sectionRows = rows.filter((row) => (
       row.section === section
-      && !(section === "Selected scope" && row.label === "Displayed contribution")
+      && !(section === "Selected scope" && /^Displayed/i.test(row.label))
     ));
     if (sectionRows.length === 0) return;
     view.append(renderCostOfRiskMovementAuditSection({
       activeDateIndex,
       rows: sectionRows,
       selectedUnit,
-      title: section
+      title: audit?.sectionTitles?.[section] ?? section
     }));
   });
 

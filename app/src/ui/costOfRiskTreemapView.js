@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskPointDisplayValue
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-soft-card-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-stage-related-flow-blue-view";
 import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
 
 let costOfRiskTreemapChart = null;
