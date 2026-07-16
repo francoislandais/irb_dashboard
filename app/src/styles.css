@@ -46,7 +46,7 @@ button:disabled {
 .app-shell {
   display: grid;
   grid-template-columns: 165px minmax(0, 1fr);
-  grid-template-rows: 46px minmax(0, 1fr);
+  grid-template-rows: 40px minmax(0, 1fr);
   height: 100vh;
   min-height: 0;
   overflow: hidden;
@@ -61,8 +61,8 @@ button:disabled {
   display: grid;
   grid-column: 1 / -1;
   grid-row: 1;
-  grid-template-columns: 165px minmax(0, 1fr);
-  min-height: 46px;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-height: 40px;
   background: #17211c;
 }
 
@@ -84,8 +84,8 @@ button:disabled {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  min-height: 46px;
-  padding: 6px 18px;
+  min-height: 40px;
+  padding: 4px 18px;
 }
 
 .brand strong {
@@ -97,9 +97,9 @@ button:disabled {
 
 .sidebar-toggle {
   display: inline-flex;
-  flex: 0 0 30px;
-  width: 30px;
-  height: 30px;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -255,11 +255,12 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 10px;
+  column-gap: 14px;
+  row-gap: 6px;
   align-items: center;
-  min-height: 46px;
+  min-height: 40px;
   width: 100%;
-  padding: 6px 14px;
+  padding: 4px 14px;
   background: #17211c;
   color: #ffffff;
 }
@@ -267,7 +268,7 @@ button:disabled {
 .dataset-controls {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 12px;
   min-width: 0;
   margin-left: auto;
 }
@@ -277,7 +278,7 @@ button:disabled {
 }
 
 .topbar-button {
-  min-height: 28px;
+  min-height: 24px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 6px;
   background: transparent;
@@ -301,6 +302,58 @@ button:disabled {
   border-color: rgba(255, 255, 255, 0.13);
 }
 
+.header-peer-display {
+  align-items: center;
+  color: #ffffff;
+  display: inline-flex;
+  gap: 8px;
+  margin-right: 2px;
+  min-height: 24px;
+  white-space: nowrap;
+}
+
+.header-peer-display > span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.header-peer-display-group {
+  display: inline-flex;
+}
+
+.header-peer-display-option {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.76);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  height: 24px;
+  padding: 0 8px;
+}
+
+.header-peer-display-option:first-child {
+  border-bottom-left-radius: 5px;
+  border-right: 0;
+  border-top-left-radius: 5px;
+}
+
+.header-peer-display-option:last-child {
+  border-bottom-right-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.header-peer-display-option.is-active {
+  background: #ffffff;
+  color: var(--primary-dark);
+}
+
+.header-peer-display-option:disabled {
+  color: rgba(255, 255, 255, 0.32);
+  cursor: not-allowed;
+}
+
 .peers-overlay {
   position: fixed;
   inset: 0;
@@ -313,7 +366,7 @@ button:disabled {
 
 .peers-dialog {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   width: min(360px, calc(100vw - 48px));
   max-height: min(520px, calc(100vh - 48px));
   border: 1px solid #d8dfda;
@@ -356,62 +409,6 @@ button:disabled {
   font-size: 1.1rem;
   line-height: 1;
   padding: 0 2px;
-}
-
-.peers-display-section {
-  display: grid;
-  gap: 6px;
-  border-bottom: 1px solid #edf1ee;
-  padding: 11px 14px;
-}
-
-.peers-display-label {
-  color: #52615a;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.peers-display-group {
-  display: inline-flex;
-  width: fit-content;
-  border: 1px solid #d8dfda;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.peers-display-option {
-  min-width: 96px;
-  min-height: 28px;
-  border: 0;
-  border-right: 1px solid #d8dfda;
-  background: #ffffff;
-  color: #52615a;
-  cursor: pointer;
-  font-size: 0.76rem;
-  font-weight: 600;
-  padding: 0 12px;
-}
-
-.peers-display-option:last-child {
-  border-right: 0;
-}
-
-.peers-display-option:focus-visible {
-  outline: 2px solid var(--primary-dark);
-  outline-offset: -2px;
-}
-
-.peers-display-option.is-active {
-  background: var(--primary-dark);
-  color: #ffffff;
-}
-
-.peers-display-description {
-  color: #66736d;
-  font-size: 0.72rem;
-  line-height: 1.35;
 }
 
 .peers-list {
@@ -535,6 +532,7 @@ p {
   border-color: rgba(255, 255, 255, 0.28);
   color: #ffffff;
   background: transparent;
+  min-height: 24px;
   width: 100%;
 }
 

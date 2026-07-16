@@ -19,6 +19,7 @@ const elements = {
   jstSelect: document.querySelector("#jst-select"),
   moduleButtons: [...document.querySelectorAll("[data-module-target]")],
   moduleViews: [...document.querySelectorAll(".module-view")],
+  peerDisplayButtons: [...document.querySelectorAll("[data-peer-display-mode]")],
   peersButton: document.querySelector("#peers-button"),
   reloadFileButton: document.querySelector("#reload-file-button"),
   rowCount: document.querySelector("#row-count"),
@@ -34,6 +35,9 @@ export function wireUi(actions) {
   elements.forgetFileButton?.addEventListener("click", actions.forgetFile);
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
   elements.peersButton?.addEventListener("click", () => showPeersDialog(actions));
+  elements.peerDisplayButtons.forEach((button) => {
+    button.addEventListener("click", () => actions.updatePeerDisplayMode(button.dataset.peerDisplayMode));
+  });
   elements.datasetSelect?.addEventListener("change", async (event) => {
     if (event.target.value === ADD_DATASET_OPTION) {
       await actions.chooseFile();
@@ -100,6 +104,7 @@ export function renderAppState(state) {
   }
   if (elements.exportStandaloneButton) elements.exportStandaloneButton.disabled = !hasData;
   if (elements.peersButton) elements.peersButton.disabled = state.jstOptions.length === 0;
+  renderPeerDisplayControl(state.peerDisplayMode, state.jstOptions.length > 0);
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
   renderJstSelect(state.jstOptions, state.selectedJst);
   renderActiveModule(state.activeModule);
@@ -224,8 +229,6 @@ function createPeersDialog(state, actions) {
   headerText.append(title, subtitle);
   header.append(headerText, closeButton);
 
-  const peerDisplaySection = createPeerDisplaySection(state, actions);
-
   const selectedPeers = new Set(
     (state.peerJstCodes?.length ? state.peerJstCodes : state.jstOptions) ?? []
   );
@@ -263,81 +266,19 @@ function createPeersDialog(state, actions) {
   });
   actionsRow.append(cancelButton, applyButton);
 
-  dialog.append(header, peerDisplaySection, list, actionsRow);
+  dialog.append(header, list, actionsRow);
   overlay.append(dialog);
   return overlay;
 }
 
-const PEER_DISPLAY_MODE_DESCRIPTIONS = {
-  anonymised: "Display the selected institution against the anonymised statistical distribution of its peers.",
-  explicit: "Display each peer institution as an individual time series."
-};
-
-// Applied immediately (not gated behind the dialog's Apply button) since
-// it's a rendering option for the benchmark charts, not a peer group
-// change - switching modes must not touch peerJstCodes, the selected JST,
-// or the active reference date/template.
-function createPeerDisplaySection(state, actions) {
-  const section = document.createElement("div");
-  section.className = "peers-display-section";
-
-  const label = document.createElement("div");
-  label.className = "peers-display-label";
-  label.textContent = "Peer display";
-
-  const group = document.createElement("div");
-  group.className = "peers-display-group";
-  group.setAttribute("role", "radiogroup");
-  group.setAttribute("aria-label", "Peer display mode");
-
-  const description = document.createElement("div");
-  description.className = "peers-display-description";
-
-  const options = [
-    { id: "explicit", label: "Explicit" },
-    { id: "anonymised", label: "Anonymised" }
-  ];
-  const activeMode = state.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
-  description.textContent = PEER_DISPLAY_MODE_DESCRIPTIONS[activeMode];
-
-  const buttons = options.map(({ id, label: optionLabel }) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "peers-display-option";
-    button.textContent = optionLabel;
-    button.setAttribute("role", "radio");
-    button.setAttribute("aria-checked", String(id === activeMode));
-    button.classList.toggle("is-active", id === activeMode);
-    button.dataset.peerDisplayMode = id;
-    return button;
+function renderPeerDisplayControl(peerDisplayMode, hasPeers) {
+  const activeMode = peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  elements.peerDisplayButtons.forEach((button) => {
+    const isActive = button.dataset.peerDisplayMode === activeMode;
+    button.classList.toggle("is-active", isActive);
+    button.disabled = !hasPeers;
+    button.setAttribute("aria-checked", String(isActive));
   });
-
-  const selectMode = (id) => {
-    buttons.forEach((button) => {
-      const isActive = button.dataset.peerDisplayMode === id;
-      button.classList.toggle("is-active", isActive);
-      button.setAttribute("aria-checked", String(isActive));
-    });
-    description.textContent = PEER_DISPLAY_MODE_DESCRIPTIONS[id];
-    actions.updatePeerDisplayMode(id);
-  };
-
-  buttons.forEach((button, index) => {
-    button.addEventListener("click", () => selectMode(button.dataset.peerDisplayMode));
-    button.addEventListener("keydown", (event) => {
-      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-      event.preventDefault();
-      const nextIndex = event.key === "ArrowRight"
-        ? (index + 1) % buttons.length
-        : (index - 1 + buttons.length) % buttons.length;
-      buttons[nextIndex].focus();
-      selectMode(buttons[nextIndex].dataset.peerDisplayMode);
-    });
-  });
-
-  group.append(...buttons);
-  section.append(label, group, description);
-  return section;
 }
 
 function renderActiveModule(activeModule) {
