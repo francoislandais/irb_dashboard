@@ -4,7 +4,7 @@ import {
   buildCostOfRiskStageTransferFlowAudit,
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 

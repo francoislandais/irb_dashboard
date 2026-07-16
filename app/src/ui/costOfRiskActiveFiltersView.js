@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 

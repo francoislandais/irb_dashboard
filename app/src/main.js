@@ -15,8 +15,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260716-cost-risk-audit-explorer-link-view";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { createDataStore } from "./data/dataStore.js?v=20260716-smoothing-help-slider-drag";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260716-smoothing-help-slider-drag";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";

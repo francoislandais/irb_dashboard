@@ -32,21 +32,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-smoothing-help-slider-drag";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-smoothing-help-slider-drag";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-help-slider-drag";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -54,7 +54,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-smoothing-help-slider-drag";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -62,56 +62,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-audit-explorer-link-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-smoothing-help-slider-drag";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-smoothing-help-slider-drag";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-smoothing-help-slider-drag";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-smoothing-help-slider-drag";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskTreemapView.js?v=20260716-smoothing-help-slider-drag";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-smoothing-help-slider-drag";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-audit-explorer-link-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-smoothing-help-slider-drag";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-smoothing-help-slider-drag";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskControlsView.js?v=20260716-smoothing-help-slider-drag";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-audit-explorer-link-view";
-import { openExplorerPoint } from "./explorerView.js?v=20260716-cost-risk-audit-explorer-link-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-smoothing-help-slider-drag";
+import { openExplorerPoint } from "./explorerView.js?v=20260716-smoothing-help-slider-drag";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-smoothing-help-slider-drag";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskTabsView.js?v=20260716-smoothing-help-slider-drag";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskModelCache.js?v=20260716-smoothing-help-slider-drag";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskFilterRules.js?v=20260716-smoothing-help-slider-drag";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -119,12 +119,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-smoothing-help-slider-drag";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-smoothing-help-slider-drag";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -1169,6 +1169,10 @@ function renderCostOfRiskAuditPanelIntro() {
 
   intro.append(eyebrow, title, summary);
 
+  if (content.control?.type === "smoothing") {
+    intro.append(renderCostOfRiskSmoothingHelpControl(content.control.windowSize));
+  }
+
   content.sections.forEach((section) => {
     const block = document.createElement("section");
     block.className = "cost-of-risk-audit-intro-section";
@@ -1219,6 +1223,10 @@ function renderCostOfRiskPanelArticle(content) {
 
   intro.append(eyebrow, title, summary);
 
+  if (content.control?.type === "smoothing") {
+    intro.append(renderCostOfRiskSmoothingHelpControl(content.control.windowSize));
+  }
+
   content.sections.forEach((section) => {
     const block = document.createElement("section");
     block.className = "cost-of-risk-audit-intro-section";
@@ -1239,6 +1247,80 @@ function renderCostOfRiskPanelArticle(content) {
   intro.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function renderCostOfRiskSmoothingHelpControl(windowSize) {
+  const normalizedWindow = clampCostOfRiskSmoothingWindow(windowSize);
+  const control = document.createElement("div");
+  control.className = "cost-of-risk-help-smoothing-control";
+
+  const label = document.createElement("label");
+  label.className = "cost-of-risk-help-smoothing-label";
+  label.htmlFor = "cost-of-risk-help-smoothing-slider";
+  label.textContent = "Smoothing window";
+
+  const value = document.createElement("output");
+  value.className = "cost-of-risk-help-smoothing-value";
+  value.htmlFor = "cost-of-risk-help-smoothing-slider";
+  value.textContent = formatCostOfRiskSmoothingLabel(normalizedWindow);
+
+  const slider = document.createElement("input");
+  slider.id = "cost-of-risk-help-smoothing-slider";
+  slider.type = "range";
+  slider.min = "1";
+  slider.max = "4";
+  slider.step = "1";
+  slider.value = String(normalizedWindow);
+  slider.setAttribute("aria-label", "Smoothing window");
+  const applySliderWindow = (nextWindow) => {
+    const normalizedNextWindow = clampCostOfRiskSmoothingWindow(nextWindow);
+    slider.value = String(normalizedNextWindow);
+    value.textContent = formatCostOfRiskSmoothingLabel(normalizedNextWindow);
+    updateCostOfRiskSmoothingWindow(normalizedNextWindow);
+  };
+  slider.addEventListener("input", (event) => {
+    const nextWindow = clampCostOfRiskSmoothingWindow(event.target.value);
+    value.textContent = formatCostOfRiskSmoothingLabel(nextWindow);
+    updateCostOfRiskSmoothingWindow(nextWindow);
+  });
+  slider.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const rect = slider.getBoundingClientRect();
+    let lastWindow = Number(slider.value);
+    const getWindowFromClientX = (clientX) => {
+      const ratio = rect.width > 0 ? (clientX - rect.left) / rect.width : 0;
+      return Math.max(1, Math.min(4, Math.round(1 + ratio * 3)));
+    };
+    const applyClientX = (clientX) => {
+      const nextWindow = getWindowFromClientX(clientX);
+      if (nextWindow === lastWindow) return;
+      lastWindow = nextWindow;
+      applySliderWindow(nextWindow);
+    };
+    const handlePointerMove = (moveEvent) => {
+      moveEvent.preventDefault();
+      applyClientX(moveEvent.clientX);
+    };
+    const handlePointerUp = (upEvent) => {
+      upEvent.preventDefault();
+      applyClientX(upEvent.clientX);
+      document.removeEventListener("pointermove", handlePointerMove, true);
+      document.removeEventListener("pointerup", handlePointerUp, true);
+      document.removeEventListener("pointercancel", handlePointerUp, true);
+    };
+    document.addEventListener("pointermove", handlePointerMove, true);
+    document.addEventListener("pointerup", handlePointerUp, true);
+    document.addEventListener("pointercancel", handlePointerUp, true);
+    applyClientX(event.clientX);
+  });
+
+  const header = document.createElement("div");
+  header.className = "cost-of-risk-help-smoothing-header";
+  header.append(label, value);
+  control.append(header, slider);
+
+  return control;
 }
 
 function getCostOfRiskDisplayModeHelpTopic(scope, mode) {
@@ -1271,7 +1353,13 @@ function getCostOfRiskHelpPanelContent(topic) {
           body: "Smoothing affects the temporal chart only. It does not change the underlying FINREP data or the selected perimeter."
         }
       ],
-      hint: "Use the chart badge to change or clear the smoothing window."
+      control: {
+        type: "smoothing",
+        windowSize
+      },
+      hint: windowSize > 1
+        ? "The chart badge shows the active smoothing window. Use its cross to return to raw figures."
+        : "Move the slider to apply smoothing to the temporal chart."
     };
   }
 

@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

@@ -722,6 +722,40 @@ button:focus-visible {
   color: #435049;
 }
 
+.cost-of-risk-help-smoothing-control {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 7px;
+  background: #f7f8f7;
+}
+
+.cost-of-risk-help-smoothing-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cost-of-risk-help-smoothing-label,
+.cost-of-risk-help-smoothing-value {
+  color: #26332d;
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+
+.cost-of-risk-help-smoothing-value {
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+.cost-of-risk-help-smoothing-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary-dark);
+}
+
 .cost-of-risk-audit-panel .cost-of-risk-audit-title {
   font-size: 0.78rem;
   font-weight: 500;
@@ -1332,25 +1366,6 @@ button:focus-visible {
   min-height: 17px;
   padding: 2px 5px 3px 2px;
   cursor: pointer;
-}
-
-.cost-of-risk-chart-smoothing-panel {
-  position: absolute;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  width: 132px;
-  min-height: 19px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  pointer-events: auto;
-}
-
-.cost-of-risk-chart-smoothing-panel input[type="range"] {
-  width: 100%;
-  accent-color: var(--primary-dark);
 }
 
 .cost-of-risk-waterfall-title {
@@ -2162,6 +2177,13 @@ button:focus-visible {
 .cost-of-risk-stage-flow-value {
   font-size: 22px;
   font-weight: 700;
+  dominant-baseline: middle;
+}
+
+.cost-of-risk-stage-flow-net-label {
+  fill: #26332d;
+  font-size: 15px;
+  font-weight: 500;
   dominant-baseline: middle;
 }
 

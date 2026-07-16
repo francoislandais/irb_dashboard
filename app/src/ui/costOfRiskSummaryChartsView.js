@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./benchmarkLineChart.js?v=20260716-smoothing-help-slider-drag";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,11 +20,11 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-help-slider-drag";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-explorer-link-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-smoothing-help-slider-drag";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;

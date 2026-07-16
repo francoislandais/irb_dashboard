@@ -71,8 +71,6 @@ export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CH
   };
 }
 
-let costOfRiskSmoothingPanelOpen = false;
-
 export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSmoothing, onChangeSmoothing) {
   clearCostOfRiskSmoothingBadge(chart);
   const windowSize = Number(smoothingWindow);
@@ -105,12 +103,7 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   toggle.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    renderCostOfRiskSmoothingSlider(chart, {
-      badgeX,
-      badgeY,
-      onChangeSmoothing,
-      windowSize
-    });
+    if (typeof onChangeSmoothing === "function") onChangeSmoothing(windowSize);
   });
 
   badge.append(toggle);
@@ -123,7 +116,6 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
     clearButton.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      clearCostOfRiskSmoothingSlider(chart);
       if (typeof onClearSmoothing === "function") onClearSmoothing();
     });
     badge.append(clearButton);
@@ -135,14 +127,6 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   host.append(badge);
 
   chart.customCostOfRiskSmoothingBadge = [badge];
-  if (costOfRiskSmoothingPanelOpen) {
-    renderCostOfRiskSmoothingSlider(chart, {
-      badgeX,
-      badgeY,
-      onChangeSmoothing,
-      windowSize
-    });
-  }
 }
 
 export function clearCostOfRiskSmoothingBadge(chart) {
@@ -154,7 +138,6 @@ export function clearCostOfRiskSmoothingBadge(chart) {
     element?.remove?.();
   });
   if (chart) chart.customCostOfRiskSmoothingBadge = [];
-  clearCostOfRiskSmoothingSlider(chart, { keepOpen: true });
 }
 
 export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus) {
@@ -193,94 +176,6 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
 export function clearCostOfRiskYAxisFocusBadge(chart) {
   chart?.customCostOfRiskYAxisFocusBadge?.forEach((element) => element?.remove?.());
   if (chart) chart.customCostOfRiskYAxisFocusBadge = [];
-}
-
-function renderCostOfRiskSmoothingSlider(chart, {
-  badgeX,
-  badgeY,
-  onChangeSmoothing,
-  windowSize
-}) {
-  const host = chart?.renderTo;
-  if (!host || typeof onChangeSmoothing !== "function") return;
-  clearCostOfRiskSmoothingSlider(chart, { keepOpen: true });
-  costOfRiskSmoothingPanelOpen = true;
-
-  host.style.position = host.style.position || "relative";
-  const panel = document.createElement("div");
-  panel.className = "cost-of-risk-chart-smoothing-panel";
-  panel.style.left = `${Math.max(8, Math.min(chart.chartWidth - 148, badgeX + 116))}px`;
-  panel.style.top = `${badgeY}px`;
-
-  const slider = document.createElement("input");
-  slider.type = "range";
-  slider.min = "1";
-  slider.max = "4";
-  slider.step = "1";
-  slider.value = String(Math.max(1, Math.min(4, windowSize || 1)));
-  slider.setAttribute("aria-label", "Smoothing window");
-  const stopPanelEvent = (event) => event.stopPropagation();
-  slider.addEventListener("click", stopPanelEvent);
-  slider.addEventListener("mousedown", stopPanelEvent);
-  slider.addEventListener("touchstart", stopPanelEvent);
-  slider.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const rect = slider.getBoundingClientRect();
-    let lastValue = Number(slider.value);
-    const applyPointerValue = (clientX) => {
-      const ratio = rect.width > 0 ? (clientX - rect.left) / rect.width : 0;
-      const nextValue = Math.max(1, Math.min(4, Math.round(1 + ratio * 3)));
-      slider.value = String(nextValue);
-      if (nextValue === lastValue) return;
-      lastValue = nextValue;
-      onChangeSmoothing(nextValue);
-    };
-    const handlePointerMove = (moveEvent) => {
-      moveEvent.preventDefault();
-      applyPointerValue(moveEvent.clientX);
-    };
-    const handlePointerUp = (upEvent) => {
-      upEvent.preventDefault();
-      applyPointerValue(upEvent.clientX);
-      document.removeEventListener("pointermove", handlePointerMove, true);
-      document.removeEventListener("pointerup", handlePointerUp, true);
-      document.removeEventListener("pointercancel", handlePointerUp, true);
-    };
-    document.addEventListener("pointermove", handlePointerMove, true);
-    document.addEventListener("pointerup", handlePointerUp, true);
-    document.addEventListener("pointercancel", handlePointerUp, true);
-    applyPointerValue(event.clientX);
-  });
-  const applySmoothing = (event) => {
-    const nextValue = Number(event.target.value);
-    onChangeSmoothing(nextValue);
-  };
-  slider.addEventListener("change", applySmoothing);
-
-  ["click", "pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
-    panel.addEventListener(eventName, stopPanelEvent);
-  });
-  panel.append(slider);
-  host.append(panel);
-
-  const handleOutsidePointerDown = (event) => {
-    if (panel.contains(event.target)) return;
-    clearCostOfRiskSmoothingSlider(chart);
-  };
-  window.setTimeout(() => document.addEventListener("pointerdown", handleOutsidePointerDown, true), 0);
-  chart.customCostOfRiskSmoothingSlider = {
-    destroy() {
-      document.removeEventListener("pointerdown", handleOutsidePointerDown, true);
-      panel.remove();
-    }
-  };
-}
-
-function clearCostOfRiskSmoothingSlider(chart, { keepOpen = false } = {}) {
-  chart?.customCostOfRiskSmoothingSlider?.destroy?.();
-  if (chart) chart.customCostOfRiskSmoothingSlider = null;
-  if (!keepOpen) costOfRiskSmoothingPanelOpen = false;
 }
 
 export function escapeHtml(value) {

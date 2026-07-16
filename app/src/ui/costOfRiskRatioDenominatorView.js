@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260716-smoothing-help-slider-drag";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

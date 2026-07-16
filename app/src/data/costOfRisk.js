@@ -1139,6 +1139,9 @@ export function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowK
   if (descriptor.type === "transfer") {
     return buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
   }
+  if (descriptor.type === "net") {
+    return buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+  }
   if (descriptor.type === "stagebox") {
     return buildCostOfRiskStageBoxFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference);
   }
@@ -1242,6 +1245,16 @@ function buildCostOfRiskStageTransferSelectedScopeRows(audit) {
     }));
   }
 
+  if (audit.type === "net") {
+    return audit.components.map((component) => ({
+      label: `${component.sign < 0 ? "− " : ""}${component.label} / ${formatCostOfRiskStageTransferAuditComponentLabel(component.description)}`,
+      section: "Selected scope",
+      source: `${audit.tableId} / x ${component.xCode} / y ${component.yCode}`,
+      type: "amount",
+      values: [Number.isFinite(component.quarterly) ? component.sign * component.quarterly : null]
+    }));
+  }
+
   if (audit.type === "stagebox") {
     return audit.components.map((component) => ({
       label: `${component.operator === "subtract" ? "− " : ""}${formatCostOfRiskStageTransferAuditComponentLabel(component.label)}`,
@@ -1289,6 +1302,7 @@ function buildCostOfRiskStageTransferSelectedScopeRows(audit) {
 
 function getCostOfRiskStageTransferAuditSource(audit) {
   if (audit.type === "transfer") return `${audit.tableId} / x ${audit.xCode} / selected Y scope`;
+  if (audit.type === "net") return `${audit.tableId} / net Stage ${audit.from} to Stage ${audit.to}`;
   if (audit.type === "stagebox") return `${audit.tableId} / ${audit.stageLabel}`;
   if (audit.type === "writeoff") return `${audit.tableId} / write-off codes / Stage ${audit.stage}`;
   return `F_18.00 and F_12.02 / Stage ${audit.stage}`;
@@ -1305,6 +1319,7 @@ function formatCostOfRiskStageTransferAuditComponentLabel(label) {
 
 function getCostOfRiskStageTransferAuditTitle(audit) {
   if (audit.type === "transfer") return `${audit.xCode} - ${audit.xLabel}`;
+  if (audit.type === "net") return `Net Stage ${audit.from} → Stage ${audit.to}`;
   if (audit.type === "stagebox") return audit.stageLabel;
   if (audit.type === "writeoff") return `Write-off - Stage ${audit.stage}`;
   return `Other movements - Stage ${audit.stage}`;
@@ -1344,6 +1359,48 @@ function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filt
     value: components.reduce((total, item) => total + (item.quarterly ?? 0), 0),
     xCode: descriptor.code,
     xLabel: xLabels.get(descriptor.code) ?? descriptor.code
+  };
+}
+
+function buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+  const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
+  const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
+  const movements = [
+    { ...descriptor.forwardMovement, sign: 1 },
+    { ...descriptor.reverseMovement, sign: -1 }
+  ];
+
+  const components = movements.flatMap((movement) => (
+    ySelection.codes.map((yCode) => {
+      const raw = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
+        xCode: movement.code,
+        yCode,
+        zCode: ""
+      }, state.selectedJst);
+      const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? null;
+
+      return {
+        description: getMappingDescription(state, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, "y_axis_rc_code", yCode),
+        label: xLabels.get(movement.code) ?? `Stage ${movement.from} to Stage ${movement.to}`,
+        quarterly,
+        sign: movement.sign,
+        xCode: movement.code,
+        yCode
+      };
+    })
+  ));
+
+  return {
+    assetLabel: ySelection.label,
+    components,
+    descriptor,
+    from: descriptor.from,
+    previousReferenceLabel: previousReference?.label ?? "",
+    referenceLabel: selectedReference.label,
+    tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
+    to: descriptor.to,
+    type: "net",
+    value: components.reduce((total, item) => total + (item.sign * (item.quarterly ?? 0)), 0)
   };
 }
 
@@ -1933,6 +1990,30 @@ function getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, d
     return computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, descriptor.code, jstCode);
   }
 
+  if (descriptor.type === "net") {
+    const forwardSeries = computeCostOfRiskTransferFlowQuarterlySeries(
+      state,
+      indexes,
+      referenceColumns,
+      ySelection,
+      descriptor.forwardMovement.code,
+      jstCode
+    );
+    const reverseSeries = computeCostOfRiskTransferFlowQuarterlySeries(
+      state,
+      indexes,
+      referenceColumns,
+      ySelection,
+      descriptor.reverseMovement.code,
+      jstCode
+    );
+    return referenceColumns.map((column, index) => {
+      const forwardValue = forwardSeries[index] ?? 0;
+      const reverseValue = reverseSeries[index] ?? 0;
+      return forwardValue - reverseValue;
+    });
+  }
+
   if (descriptor.type === "writeoff") {
     const magnitudes = computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode);
     return magnitudes.map((magnitude) => (magnitude > 0 ? -magnitude : 0));
@@ -2005,6 +2086,14 @@ function parseCostOfRiskFlowKey(flowKey) {
     const movement = COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.find((item) => `${item.from}-${item.to}` === value);
     return movement ? { code: movement.code, from: movement.from, to: movement.to, type: "transfer" } : null;
   }
+  if (type === "net") {
+    const [from, to] = String(value ?? "").split("-");
+    const forwardMovement = COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.find((item) => item.from === from && item.to === to);
+    const reverseMovement = COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.find((item) => item.from === to && item.to === from);
+    return forwardMovement && reverseMovement
+      ? { forwardMovement, from, reverseMovement, to, type: "net" }
+      : null;
+  }
   if (type === "stagebox" && ["1", "2", "3"].includes(value)) {
     return { stage: value, type };
   }
@@ -2016,6 +2105,7 @@ function parseCostOfRiskFlowKey(flowKey) {
 
 function getCostOfRiskFlowLabel(descriptor) {
   if (descriptor.type === "transfer") return `Stage ${descriptor.from} → Stage ${descriptor.to}`;
+  if (descriptor.type === "net") return `Net Stage ${descriptor.from} → Stage ${descriptor.to}`;
   if (descriptor.type === "writeoff") return `Write-Off - Stage ${descriptor.stage}`;
   return `Other movements - Stage ${descriptor.stage}`;
 }

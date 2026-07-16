@@ -1,7 +1,5 @@
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
-const STAGE_RELATED_FLOW_FILL = "#9fbfd7";
-
 export function createStageTransferWaterfallData(contributions, stage, globalVariation = null, residual = null) {
   const outflows = contributions.filter((point) => point.flowDirection === "outflow");
   const inflows = contributions.filter((point) => point.flowDirection === "inflow");
@@ -194,6 +192,18 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     x: 560,
     y: 205
   }, formatValue, displayMode, selectedUnit);
+  addNetFlowLabel(svg, {
+    flowKey: "net:1-2",
+    from: "1",
+    isSelected: selectedFlowKey === "net:1-2",
+    onSelect: onSelectFlow,
+    primaryDark,
+    reverseValue: getFlowValue(displayFlows, "2", "1"),
+    to: "2",
+    value: getFlowValue(displayFlows, "1", "2"),
+    x: 420,
+    y: 245
+  }, formatValue, displayMode, selectedUnit);
   addHorizontalFlow(svg, {
     color: flowArrowColor,
     direction: "right",
@@ -224,6 +234,18 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     x: 1120,
     y: 205
   }, formatValue, displayMode, selectedUnit);
+  addNetFlowLabel(svg, {
+    flowKey: "net:2-3",
+    from: "2",
+    isSelected: selectedFlowKey === "net:2-3",
+    onSelect: onSelectFlow,
+    primaryDark,
+    reverseValue: getFlowValue(displayFlows, "3", "2"),
+    to: "3",
+    value: getFlowValue(displayFlows, "2", "3"),
+    x: 980,
+    y: 245
+  }, formatValue, displayMode, selectedUnit);
 
   addDirectFlow(svg, {
     flowArrowColor,
@@ -235,6 +257,18 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     selectedStage,
     selectedFlowKey,
     width: arrowWidth
+  }, formatValue, displayMode, selectedUnit);
+  addNetFlowLabel(svg, {
+    flowKey: "net:1-3",
+    from: "1",
+    isSelected: selectedFlowKey === "net:1-3",
+    onSelect: onSelectFlow,
+    primaryDark,
+    reverseValue: getFlowValue(displayFlows, "3", "1"),
+    to: "3",
+    value: getFlowValue(displayFlows, "1", "3"),
+    x: 710,
+    y: 123
   }, formatValue, displayMode, selectedUnit);
 
   const stageArrowOffset = 26;
@@ -315,7 +349,6 @@ function isFlowRelatedToSelectedStage(flowKey, selectedStage) {
 
 function getFlowFillColor(config) {
   if (config.isSelected) return config.primaryDark;
-  if (config.isStageRelated) return STAGE_RELATED_FLOW_FILL;
   return config.color;
 }
 
@@ -352,13 +385,67 @@ function addStage1ToStage3Junction(svg, {
 
     "cost-of-risk-stage-flow-direct-transfer-label",
 
-    { "text-anchor": "middle" }
+    {
+      fill: "#26332d",
+      "font-size": 20,
+      "text-anchor": "middle"
+    }
 
   );
 }
 
 function getFlowValue(flows, from, to) {
   return flows.find((flow) => flow.from === from && flow.to === to)?.displayValue ?? null;
+}
+
+function addNetFlowLabel(svg, config, formatValue, displayMode, selectedUnit) {
+  const hasForwardValue = Number.isFinite(config.value);
+  const hasReverseValue = Number.isFinite(config.reverseValue);
+  if (!hasForwardValue && !hasReverseValue) return;
+
+  const forwardValue = hasForwardValue ? config.value : 0;
+  const reverseValue = hasReverseValue ? config.reverseValue : 0;
+  const netValue = forwardValue - reverseValue;
+  const from = netValue < 0 ? config.to : config.from;
+  const to = netValue < 0 ? config.from : config.to;
+  const direction = netValue === 0 ? `${config.from}<->${config.to}` : `${from}->${to}`;
+  const formattedValue = formatValue(Math.abs(netValue), displayMode, selectedUnit, false);
+  const label = `Net ${direction}: ${formattedValue}`;
+  const labelWidth = Math.max(120, label.length * 8.4 + 18);
+  const group = svgElement("g", {
+    class: "cost-of-risk-stage-flow-net-label-group"
+  });
+  if (config.flowKey && typeof config.onSelect === "function") {
+    group.style.cursor = "pointer";
+    group.addEventListener("click", (event) => {
+      event.stopPropagation();
+      config.onSelect(config.flowKey);
+    });
+  }
+
+  if (config.isSelected) {
+    group.append(svgElement("rect", {
+      fill: config.primaryDark,
+      height: 24,
+      rx: 4,
+      width: labelWidth,
+      x: config.x - labelWidth / 2,
+      y: config.y - 16
+    }));
+  }
+
+  const text = addText(
+    group,
+    label,
+    config.x,
+    config.y,
+    "cost-of-risk-stage-flow-net-label",
+    { "text-anchor": "middle" }
+  );
+  text.setAttribute("fill", config.isSelected ? "#ffffff" : "#26332d");
+  text.style.fill = config.isSelected ? "#ffffff" : "#26332d";
+  text.style.fontWeight = config.isSelected ? "700" : "500";
+  svg.append(group);
 }
 
 function scaleArrowLength(value, length) {
