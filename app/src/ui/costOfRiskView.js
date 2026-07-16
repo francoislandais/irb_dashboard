@@ -32,21 +32,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-explorer-return-to-cost-risk";
+} from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskStageTransfers.js?v=20260717-cost-risk-reference-date-help";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-cost-risk-reference-date-help";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-reference-date-help";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -54,7 +54,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-cost-risk-reference-date-help";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -62,56 +62,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-return-to-cost-risk";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-cost-risk-reference-date-help";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-cost-risk-reference-date-help";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-cost-risk-reference-date-help";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-cost-risk-reference-date-help";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskTreemapView.js?v=20260717-cost-risk-reference-date-help";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-cost-risk-reference-date-help";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-return-to-cost-risk";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-cost-risk-reference-date-help";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-cost-risk-reference-date-help";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskControlsView.js?v=20260717-cost-risk-reference-date-help";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-explorer-return-to-cost-risk";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-return-to-cost-risk";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskAuditTableView.js?v=20260717-cost-risk-reference-date-help";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-cost-risk-reference-date-help";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-cost-risk-reference-date-help";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskTabsView.js?v=20260717-cost-risk-reference-date-help";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskModelCache.js?v=20260717-cost-risk-reference-date-help";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskFilterRules.js?v=20260717-cost-risk-reference-date-help";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -119,12 +119,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-cost-risk-reference-date-help";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-explorer-return-to-cost-risk";
+} from "./costOfRiskCoreSelection.js?v=20260717-cost-risk-reference-date-help";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -264,6 +264,16 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabs?.addEventListener("scroll", updateCostOfRiskTabsFade, { passive: true });
   window.addEventListener("resize", updateCostOfRiskTabsFade);
   elements.costOfRiskActiveFilters?.addEventListener("click", (event) => {
+    const referenceDateHelp = event.target.closest?.("[data-cost-of-risk-reference-date-help]");
+    if (referenceDateHelp) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("reference-date");
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const displayModeOption = event.target.closest?.("[data-cost-of-risk-display-mode-option]");
     if (displayModeOption) {
       event.preventDefault();
@@ -1370,6 +1380,22 @@ function getCostOfRiskHelpPanelContent(topic) {
   }
 
   const content = {
+    "reference-date": {
+      eyebrow: "Reference date",
+      title: "Reference Date",
+      lead: "The reference date is the quarter currently used to populate the upper view and the audit trail.",
+      sections: [
+        {
+          title: "What it controls",
+          body: "Tables, flow diagrams and selected values use this quarter as their current observation date. When a metric is a variation, the calculation may also use the previous quarter where the methodology requires it."
+        },
+        {
+          title: "How to change it",
+          body: "Click any point on the temporal chart in the lower part of the tab to set a new reference quarter. You can change it as often as needed while exploring the same perimeter."
+        }
+      ],
+      hint: "The date chip always shows the active reference quarter."
+    },
     "stage-transfer-absolute": {
       eyebrow: "Transfer display",
       title: "Absolute Transfer",

@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-explorer-return-to-cost-risk";
+} from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -106,10 +106,16 @@ export function renderCostOfRiskActiveFiltersView({
 function createCostOfRiskReferenceDateChip(referenceDate) {
   const chip = document.createElement("div");
   chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--date";
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskReferenceDateHelp = "true";
+  toggle.setAttribute("aria-label", "Explain the reference date");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label";
   label.textContent = formatReferenceQuarterLabel(referenceDate);
-  chip.append(label);
+  toggle.append(label);
+  chip.append(toggle);
   return chip;
 }
 
