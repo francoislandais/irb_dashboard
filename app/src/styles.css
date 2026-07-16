@@ -609,15 +609,15 @@ button:focus-visible {
 
 .cost-of-risk-dashboard {
   display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   height: 100%;
   min-height: 0;
   width: 100%;
 }
 
 .cost-of-risk-filters-sidebar {
-  display: grid;
+  display: none;
   align-content: start;
   gap: 16px;
   min-width: 0;
