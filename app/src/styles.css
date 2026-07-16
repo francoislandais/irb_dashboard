@@ -609,8 +609,8 @@ button:focus-visible {
 
 .cost-of-risk-dashboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+  grid-template-columns: minmax(0, 900px) minmax(260px, 1fr);
+  gap: 16px;
   height: 100%;
   min-height: 0;
   width: 100%;
@@ -635,6 +635,145 @@ button:focus-visible {
   gap: 6px;
   min-height: 0;
   min-width: 0;
+}
+
+.cost-of-risk-audit-panel {
+  align-content: start;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
+.cost-of-risk-audit-placeholder {
+  color: #66736d;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.cost-of-risk-audit-panel .cost-of-risk-audit-title {
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.cost-of-risk-audit-panel .cost-of-risk-audit-table-wrap {
+  max-height: none;
+}
+
+.cost-of-risk-audit-panel .cost-of-risk-audit-table {
+  min-width: 680px;
+}
+
+.cost-of-risk-audit-panel .cost-of-risk-audit-table th,
+.cost-of-risk-audit-panel .cost-of-risk-audit-table td {
+  padding: 6px 7px;
+}
+
+.cost-of-risk-audit-blocks {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cost-of-risk-audit-hero {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #d8dfdb;
+  border-radius: 7px;
+  background: #f7f9f8;
+}
+
+.cost-of-risk-audit-hero-label {
+  color: #66736d;
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.cost-of-risk-audit-hero-value {
+  color: var(--primary-dark);
+  font-size: 1.38rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.cost-of-risk-audit-hero-meta {
+  color: #52615a;
+  font-size: 0.7rem;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+
+.cost-of-risk-audit-block {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cost-of-risk-audit-block-heading {
+  margin: 0;
+  color: var(--primary-dark);
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.cost-of-risk-audit-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 9px;
+  min-width: 0;
+  padding-top: 7px;
+  border-top: 1px solid #edf0ee;
+}
+
+.cost-of-risk-audit-item-label {
+  grid-column: 1 / -1;
+  color: #26332d;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.cost-of-risk-audit-item-source {
+  color: #66736d;
+  font-size: 0.66rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.cost-of-risk-audit-item-value {
+  align-self: start;
+  color: #26332d;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cost-of-risk-audit-item.is-gap .cost-of-risk-audit-item-label,
+.cost-of-risk-audit-item.is-gap .cost-of-risk-audit-item-value {
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+@media (max-width: 1180px) {
+  .cost-of-risk-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cost-of-risk-audit-panel {
+    min-height: 180px;
+  }
 }
 
 .cost-of-risk-tabs {

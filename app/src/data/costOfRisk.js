@@ -76,6 +76,7 @@ const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS = [
 ];
 export const DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL = "gca:level:nfc";
 const COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX = "Debt instruments other than held for trading";
+const COST_OF_RISK_BALANCE_SHEET_ALLOWANCE_PREFIX = "Total allowance for debt instruments";
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
 const COST_OF_RISK_F02_X_AXIS_CODE = "0010";
@@ -262,8 +263,7 @@ function formatCostOfRiskAllowanceMovementDisplayValue(value) {
 }
 
 export function getCostOfRiskSelectionOptions(state) {
-  const yMappings = getCostOfRiskYMappings(state);
-  const descriptors = yMappings.map(describeCostOfRiskYAxisPoint);
+  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
   const aggregateOptions = buildCostOfRiskAggregateOptions(descriptors);
   const individualOptions = descriptors.map((descriptor) => ({
     groupLabel: getCostOfRiskOptionGroupLabel(descriptor, "individual"),
@@ -280,7 +280,7 @@ export function getCostOfRiskSelectionOptions(state) {
 }
 
 export function getCostOfRiskFilterOptions(state) {
-  const descriptors = getCostOfRiskYMappings(state).map(describeCostOfRiskYAxisPoint);
+  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
 
   return {
     assets: createCostOfRiskFilterOptions(ASSET_LABELS, formatCostOfRiskAssetLabel),
@@ -501,6 +501,111 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
     }),
     status: ""
   };
+}
+
+export function buildCostOfRiskMovementContributionAudit(state, filters, xCode = COST_OF_RISK_X_AXIS_CODE) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
+  const normalizedXCode = normalizeAxisCode(xCode || COST_OF_RISK_X_AXIS_CODE, "x");
+
+  if (!indexes || !state.selectedJst || referenceColumns.length === 0 || selectedOption.points.length === 0) {
+    return { dates: [], rows: [], title: "Audit trail" };
+  }
+
+  const xLabel = getCostOfRiskXAxisFullLabelMap(state).get(normalizedXCode) ?? normalizedXCode;
+  const selectedRows = buildCostOfRiskMovementAuditRowsForYCodes(
+    state,
+    indexes,
+    referenceColumns,
+    normalizedXCode,
+    selectedOption.points,
+    "Selected scope"
+  );
+  const selectedTotal = createEmptySeries(referenceColumns.length);
+  selectedRows.forEach((row) => addSeriesValues(selectedTotal, row.values));
+
+  const reconciliationYCodes = ["0010", "0180", "0360", "0600"];
+  const totalRows = buildCostOfRiskMovementAuditRowsForYCodes(
+    state,
+    indexes,
+    referenceColumns,
+    normalizedXCode,
+    [COST_OF_RISK_TOTAL_Y_AXIS_CODE],
+    "Reconciliation"
+  );
+  const stageRows = buildCostOfRiskMovementAuditRowsForYCodes(
+    state,
+    indexes,
+    referenceColumns,
+    normalizedXCode,
+    reconciliationYCodes,
+    "Reconciliation"
+  );
+  const stageSum = createEmptySeries(referenceColumns.length);
+  stageRows.forEach((row) => addSeriesValues(stageSum, row.values));
+  const totalValues = totalRows[0]?.values ?? createEmptySeries(referenceColumns.length);
+  const gapValues = totalValues.map((value, index) => value - (stageSum[index] ?? 0));
+
+  return {
+    dates: referenceColumns.map((column) => ({
+      label: column.label,
+      date: column.date
+    })),
+    rows: [
+      {
+        label: "Displayed contribution",
+        section: "Selected scope",
+        source: `${selectedOption.label} / x ${normalizedXCode}`,
+        type: "amount",
+        values: selectedTotal
+      },
+      ...selectedRows,
+      ...totalRows,
+      ...stageRows,
+      {
+        label: "Stage 1 + Stage 2 + Stage 3 + POCI",
+        section: "Reconciliation",
+        source: "F_12.01 / x selected / y 0010 + 0180 + 0360 + 0600",
+        type: "amount",
+        values: stageSum
+      },
+      {
+        label: "Gap: total − stage sum",
+        section: "Reconciliation",
+        source: "y 0520 − (0010 + 0180 + 0360 + 0600)",
+        type: "amount",
+        values: gapValues
+      }
+    ],
+    title: `${normalizedXCode} - ${xLabel}`
+  };
+}
+
+function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColumns, xCode, yCodes, section) {
+  return yCodes.map((yCode) => {
+    const point = {
+      xCode,
+      yCode,
+      zCode: ""
+    };
+    const rows = getCostOfRiskPointRows(state, indexes, COST_OF_RISK_TABLE_ID, point, state.selectedJst);
+    const rawSeries = referenceColumns.map((column) => (
+      rows.reduce((total, row) => total + parseNumericValue(row[column.index]), 0)
+    ));
+    const values = decumulateQuarterlySeries(referenceColumns, rawSeries)
+      .map(formatCostOfRiskAllowanceMovementDisplayValue);
+    const normalizedYCode = normalizeAxisCode(yCode, "y");
+    const rowLabel = rows.length === 1 ? "1 row" : `${rows.length} rows`;
+
+    return {
+      label: getMappingDescription(state, COST_OF_RISK_TABLE_ID, "y_axis_rc_code", normalizedYCode),
+      section,
+      source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / y ${normalizedYCode} / ${rowLabel}`,
+      type: "amount",
+      values
+    };
+  });
 }
 
 export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COST_OF_RISK_F12_RECONCILIATION_X_CODES) {
@@ -1735,7 +1840,7 @@ function buildCostOfRiskStageExposureComponents(state, indexes, referenceColumns
 }
 
 function getCostOfRiskWriteOffPointsByStage(state, filters = {}) {
-  const descriptors = getCostOfRiskYMappings(state).map(describeCostOfRiskYAxisPoint);
+  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
 
   return ["1", "2", "3"].map((stage) => {
@@ -1877,8 +1982,19 @@ function getCostOfRiskYMappings(state) {
   return state.dimensionMapping?.list?.(COST_OF_RISK_TABLE_ID, "y_axis_rc_code") ?? [];
 }
 
+function getCostOfRiskBalanceSheetAllowanceDescriptors(state) {
+  return getCostOfRiskYMappings(state)
+    .map(describeCostOfRiskYAxisPoint)
+    .filter(isCostOfRiskBalanceSheetAllowanceDescriptor);
+}
+
+function isCostOfRiskBalanceSheetAllowanceDescriptor(descriptor) {
+  return String(descriptor.description ?? "").startsWith(COST_OF_RISK_BALANCE_SHEET_ALLOWANCE_PREFIX);
+}
+
 function getCostOfRiskStageTransferYSelection(state, filters = {}) {
   return getCostOfRiskStageAxisYSelection(state, filters, {
+    descriptionPrefix: "Total debt instruments",
     tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
     totalLabel: "Total debt instruments"
   });
@@ -2013,7 +2129,7 @@ function getAvailableCostOfRiskStages(descriptors) {
 }
 
 function buildCostOfRiskSelectionFromFilters(state, filters = {}) {
-  const descriptors = getCostOfRiskYMappings(state).map(describeCostOfRiskYAxisPoint);
+  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
   if (isCostOfRiskTotalFilter(normalizedFilters)) {
     const totalDescriptor = descriptors.find((descriptor) => descriptor.code === COST_OF_RISK_TOTAL_Y_AXIS_CODE);

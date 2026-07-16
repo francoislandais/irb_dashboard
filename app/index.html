@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260716-hide-cost-risk-sidebar-view">
+    <link rel="stylesheet" href="./src/styles.css?v=20260716-cost-risk-bs-only-view">
   </head>
   <body>
     <div class="app-shell">
@@ -266,8 +266,11 @@
                     <div id="cost-of-risk-points" class="cost-of-risk-points">-</div>
                   </div>
                 </div>
+                </div>
               </div>
-              </div>
+              <aside id="cost-of-risk-audit-panel" class="cost-of-risk-audit-panel" aria-label="Audit trail">
+                <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
+              </aside>
             </div>
           </article>
         </section>
@@ -277,6 +280,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260716-hide-cost-risk-sidebar-view"></script>
+    <script type="module" src="./src/main.js?v=20260716-cost-risk-bs-only-view"></script>
   </body>
 </html>

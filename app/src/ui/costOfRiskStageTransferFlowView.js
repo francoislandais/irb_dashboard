@@ -1,4 +1,4 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-cost-risk-instrument-filter-view";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260716-cost-risk-bs-only-view";
 import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
 import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-tab-order-view";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";

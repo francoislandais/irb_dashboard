@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-instrument-filter-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-bs-only-view";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,
@@ -13,6 +13,7 @@ export function renderCostOfRiskAuditTableView({
   if (!container) return;
 
   const rows = (audit?.rows ?? []).filter((row) => {
+    if (activeSeries === "movement") return true;
     if (activeSeries === "f2") return row.section === "F2" || row.section === "Denominator" || row.section === "Denominator components";
     return row.section === "F12" || row.section === "F12 components" || row.section === "Denominator" || row.section === "Denominator components";
   });
@@ -23,13 +24,27 @@ export function renderCostOfRiskAuditTableView({
     return;
   }
 
-  const activeDateIndex = Math.max(0, dates.findIndex((date) => date.label === activeDateLabel));
+  const matchingDateIndex = dates.findIndex((date) => date.label === activeDateLabel);
+  const activeDateIndex = matchingDateIndex >= 0 ? matchingDateIndex : Math.max(0, dates.length - 1);
   const activeDate = dates[activeDateIndex] ?? dates.at(-1);
+
+  if (activeSeries === "movement") {
+    renderCostOfRiskMovementAuditBlocks({
+      activeDate,
+      activeDateIndex,
+      audit,
+      container,
+      rows,
+      selectedUnit
+    });
+    return;
+  }
+
   const title = document.createElement("div");
   title.className = "cost-of-risk-audit-title";
   const titlePrefix = activeSeries === "f2"
-    ? "Audit trail - F2"
-    : "Audit trail - F12 selected contributions";
+      ? "Audit trail - F2"
+      : "Audit trail - F12 selected contributions";
   title.textContent = `${titlePrefix} - ${formatReferenceQuarterLabel(activeDate?.label)}`;
 
   const tableWrap = document.createElement("div");
@@ -71,6 +86,116 @@ export function renderCostOfRiskAuditTableView({
   table.append(thead, tbody);
   tableWrap.append(table);
   container.replaceChildren(title, tableWrap);
+}
+
+function renderCostOfRiskMovementAuditBlocks({
+  activeDate,
+  activeDateIndex,
+  audit,
+  container,
+  rows,
+  selectedUnit
+}) {
+  const selectedRow = rows.find((row) => row.section === "Selected scope")
+    ?? rows[0];
+  const selectedValue = formatCostOfRiskAuditValue(
+    selectedRow?.values?.[activeDateIndex],
+    selectedRow?.type,
+    selectedUnit
+  );
+  const activeDateText = formatReferenceQuarterLabel(activeDate?.label);
+
+  const view = document.createElement("div");
+  view.className = "cost-of-risk-audit-blocks";
+
+  const title = document.createElement("div");
+  title.className = "cost-of-risk-audit-title";
+  title.textContent = "Audit trail";
+
+  const hero = document.createElement("div");
+  hero.className = "cost-of-risk-audit-hero";
+  const heroLabel = document.createElement("div");
+  heroLabel.className = "cost-of-risk-audit-hero-label";
+  heroLabel.textContent = "Selected value";
+  const heroValue = document.createElement("div");
+  heroValue.className = "cost-of-risk-audit-hero-value";
+  heroValue.textContent = selectedValue;
+  const heroMeta = document.createElement("div");
+  heroMeta.className = "cost-of-risk-audit-hero-meta";
+  heroMeta.textContent = [
+    audit?.title || "Movement in allowance",
+    activeDateText,
+    selectedRow?.label
+  ].filter(Boolean).join(" · ");
+  hero.append(heroLabel, heroValue, heroMeta);
+
+  view.append(title, hero);
+
+  const sectionOrder = ["Selected scope", "Reconciliation"];
+  sectionOrder.forEach((section) => {
+    const sectionRows = rows.filter((row) => row.section === section);
+    if (sectionRows.length === 0) return;
+    view.append(renderCostOfRiskMovementAuditSection({
+      activeDateIndex,
+      rows: sectionRows,
+      selectedUnit,
+      title: section
+    }));
+  });
+
+  const remainingRows = rows.filter((row) => !sectionOrder.includes(row.section));
+  if (remainingRows.length > 0) {
+    view.append(renderCostOfRiskMovementAuditSection({
+      activeDateIndex,
+      rows: remainingRows,
+      selectedUnit,
+      title: "Other checks"
+    }));
+  }
+
+  container.replaceChildren(view);
+}
+
+function renderCostOfRiskMovementAuditSection({
+  activeDateIndex,
+  rows,
+  selectedUnit,
+  title
+}) {
+  const section = document.createElement("section");
+  section.className = "cost-of-risk-audit-block";
+
+  const heading = document.createElement("h3");
+  heading.className = "cost-of-risk-audit-block-heading";
+  heading.textContent = title;
+  section.append(heading);
+
+  rows.forEach((row) => {
+    const item = document.createElement("div");
+    item.className = "cost-of-risk-audit-item";
+    if (/gap/i.test(row.label)) item.classList.add("is-gap");
+
+    const label = document.createElement("div");
+    label.className = "cost-of-risk-audit-item-label";
+    label.textContent = row.label;
+
+    const source = document.createElement("div");
+    source.className = "cost-of-risk-audit-item-source";
+    source.textContent = row.source;
+
+    const value = document.createElement("div");
+    value.className = "cost-of-risk-audit-item-value";
+    value.textContent = formatCostOfRiskAuditValue(
+      row.values?.[activeDateIndex],
+      row.type,
+      selectedUnit
+    );
+
+    item.append(label, source, value);
+    section.append(item);
+  });
+
+  return section;
 }
 
 export function clearCostOfRiskAuditTableView(container) {
