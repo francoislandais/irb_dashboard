@@ -3,6 +3,7 @@ import {
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_F12_RECONCILIATION_X_CODES,
+  COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE,
   COST_OF_RISK_WATERFALL_X_CODES,
   COST_OF_RISK_X_AXIS_CODE,
   buildCostOfRiskCounterpartySummaryModel,
@@ -31,21 +32,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +54,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,55 +62,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-context-help-panel-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-context-help-panel-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskControlsView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-context-help-panel-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { openExplorerPoint } from "./explorerView.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskTabsView.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskModelCache.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -117,17 +119,18 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-context-help-panel-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-audit-explorer-link-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
+let setActiveModule = () => {};
 let updateSelectedJst = () => {};
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
@@ -229,6 +232,7 @@ function renderCostOfRiskRatioDenominatorControls(state) {
 
 export function wireCostOfRiskUi(actions, rerender) {
   rerenderApp = rerender;
+  setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
   elements.costOfRiskAsset?.addEventListener("change", (event) => {
     activeCostOfRiskInstrumentFilterMenuOpen = false;
@@ -442,7 +446,11 @@ export function renderCostOfRisk(state) {
   normalizeActiveCostOfRiskFilter("stage", filterOptions.stages);
   const selectedMovementXCodes = getActiveCostOfRiskCoreXCodes(waterfallXAxisOptions, "movement");
   const selectedF2F12XCodes = getActiveCostOfRiskCoreXCodes(f2F12XAxisOptions, "f2-f12");
-  if (selectedMovementXCodes.length > 0 && !selectedMovementXCodes.includes(activeCostOfRiskXAxisCode)) {
+  if (
+    selectedMovementXCodes.length > 0
+    && activeCostOfRiskXAxisCode !== COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE
+    && !selectedMovementXCodes.includes(activeCostOfRiskXAxisCode)
+  ) {
     activeCostOfRiskXAxisCode = selectedMovementXCodes[0];
   }
   if (!xAxisOptions.some((option) => option.code === activeCostOfRiskXAxisCode)) {
@@ -786,6 +794,11 @@ function updateCostOfRiskTabsFade() {
   tabs.classList.toggle("can-scroll-right", tabs.scrollLeft < maxScrollLeft - 1);
 }
 
+export function showCostOfRiskPeerDisplayHelp(peerDisplayMode) {
+  setCostOfRiskHelpTopic(peerDisplayMode === "anonymised" ? "peer-anonymised" : "peer-explicit");
+  renderCostOfRiskHelpPanel();
+}
+
 function renderCostOfRiskTabEmpty(message) {
   renderCostOfRiskTabEmptyView({
     activeTab: activeCostOfRiskTab,
@@ -1008,6 +1021,12 @@ function renderCostOfRiskCoreDefinition(movementOptions, f2F12Options) {
 }
 
 function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {
+  if (selectedCode === COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE) {
+    activeCostOfRiskChartTitleText = "Total contribution";
+    if (elements.costOfRiskChartTitle) elements.costOfRiskChartTitle.textContent = activeCostOfRiskChartTitleText;
+    return;
+  }
+
   const fallbackLabel = xAxisOptions.find((option) => option.code === selectedCode)?.label ?? selectedCode;
   const label = selectedPoint?.label ?? fallbackLabel;
   const cleanLabel = String(label || "").replace(new RegExp(`^${selectedCode}\\s*-\\s*`), "");
@@ -1046,6 +1065,7 @@ function renderCostOfRiskMovementAuditPanel(state) {
     audit,
     container: elements.costOfRiskAuditPanel,
     displayMode: activeCostOfRiskMovementDisplayMode,
+    onOpenSourcePoint: openCostOfRiskAuditSourceInExplorer,
     selectedUnit: state.selectedUnit
   });
 }
@@ -1081,8 +1101,15 @@ function renderCostOfRiskStageTransferAuditPanel(state) {
     audit,
     container: elements.costOfRiskAuditPanel,
     displayMode: panelDisplayMode,
+    onOpenSourcePoint: openCostOfRiskAuditSourceInExplorer,
     selectedUnit: state.selectedUnit
   });
+}
+
+function openCostOfRiskAuditSourceInExplorer(sourcePoint) {
+  if (!openExplorerPoint(sourcePoint)) return;
+
+  setActiveModule("explorer");
 }
 
 function renderCostOfRiskAuditPanelPlaceholder() {
@@ -1388,6 +1415,46 @@ function getCostOfRiskHelpPanelContent(topic) {
         }
       ],
       hint: "Turn on Focus JST axis when the selected JST curve needs to be read more precisely."
+    },
+    "peer-explicit": {
+      eyebrow: "Peer display",
+      title: "Explicit peer display",
+      lead: "Benchmark charts show each peer JST as an individual labelled curve.",
+      sections: [
+        {
+          title: "What changes",
+          body: "The selected JST remains highlighted, while the peer institutions selected through the Peers control are displayed as separate time series."
+        },
+        {
+          title: "How to read it",
+          body: "This mode is useful when the identity and trajectory of each peer matter. Endpoint labels show JST codes directly on the right-hand side of the chart."
+        },
+        {
+          title: "Confidentiality",
+          body: "Because peer JST codes are visible, this mode is best suited to internal analysis where explicit peer identification is acceptable."
+        }
+      ],
+      hint: "Switch to Anonymized when the benchmark should be read as a distribution rather than as named peer curves."
+    },
+    "peer-anonymised": {
+      eyebrow: "Peer display",
+      title: "Anonymized peer display",
+      lead: "Benchmark charts replace named peer curves with an anonymized peer distribution.",
+      sections: [
+        {
+          title: "What changes",
+          body: "The selected JST remains visible, but individual peer JST codes are hidden. The chart displays percentile curves and quantile areas instead."
+        },
+        {
+          title: "How to read it",
+          body: "Use this mode to compare the selected JST against the peer distribution without focusing on the identity of any individual peer."
+        },
+        {
+          title: "Distribution",
+          body: "The anonymized view shows indicators such as median and percentile bands when enough peer observations are available for the selected date."
+        }
+      ],
+      hint: "Switch to Explicit when you need to inspect the trajectory of individual peer JSTs."
     }
   };
 
@@ -2008,6 +2075,7 @@ function createManualWaterfallData(contributions) {
   const values = [0, total];
 
   items.push({
+    code: COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE,
     color: flowArrowColor,
     contribution: total,
     end: total,
@@ -2372,7 +2440,7 @@ function selectCostOfRiskXAxisFromWaterfall(code) {
     return;
   }
   activeCostOfRiskXAxisCode = code;
-  if (elements.costOfRiskXAxis) {
+  if (elements.costOfRiskXAxis && code !== COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE) {
     elements.costOfRiskXAxis.value = code;
   }
   if (getLatestState()) rerenderApp(getLatestState());
@@ -2500,6 +2568,7 @@ function renderCostOfRiskAuditTable(audit, selectedUnit) {
     activeSeries: activeCostOfRiskAuditSeries,
     audit,
     container: elements.costOfRiskAudit,
+    onOpenSourcePoint: openCostOfRiskAuditSourceInExplorer,
     selectedUnit
   });
 }

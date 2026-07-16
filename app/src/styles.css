@@ -816,6 +816,32 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.cost-of-risk-audit-source-content {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+}
+
+.cost-of-risk-audit-source-link {
+  border: 1px solid #cfd8d3;
+  border-radius: 5px;
+  background: #f4f6f5;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.1;
+  padding: 2px 5px;
+}
+
+.cost-of-risk-audit-source-link:hover,
+.cost-of-risk-audit-source-link:focus-visible {
+  border-color: var(--primary-dark);
+  background: #ffffff;
+  outline: 0;
+}
+
 .cost-of-risk-audit-item-value {
   align-self: start;
   color: #26332d;

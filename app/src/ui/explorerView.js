@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260714-benchmark-mode-recreate";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260714-benchmark-mode-recreate";
+} from "./benchmarkLineChart.js?v=20260716-cost-risk-audit-explorer-link-view";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -80,6 +80,7 @@ let explorerStickyFrame = 0;
 let explorerContextMenu = null;
 let explorerBenchmarkViewActive = false;
 let explorerBenchmarkChart = null;
+let shouldFocusOpenedExplorerPoint = false;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -420,7 +421,38 @@ export function renderExplorer(state) {
 
   renderExplorerTable(tableSeries, state.selectedUnit);
   applyExplorerSelection();
-  restoreExplorerScrollPosition();
+  if (shouldFocusOpenedExplorerPoint) {
+    shouldFocusOpenedExplorerPoint = false;
+    revealSelectedExplorerRowPath();
+    applyExplorerSelection();
+    focusSelectedExplorerRow();
+  } else {
+    restoreExplorerScrollPosition();
+  }
+}
+
+export function openExplorerPoint({
+  tableId,
+  xCode = "",
+  yCode = "",
+  zCode = ""
+} = {}) {
+  if (!tableId) return false;
+
+  hasInteractedWithExplorerSelection = true;
+  explorerBenchmarkViewActive = false;
+  activeExplorerTemplateId = tableId;
+  updateUrlTemplateParam(activeExplorerTemplateId);
+
+  const context = getExplorerContextForTemplate(activeExplorerTemplateId);
+  context.activeAxis = yCode ? "y" : xCode ? "x" : zCode ? "z" : "template";
+  if (xCode) context.selectedXCode = normalizeAxisCode(xCode, "x");
+  if (yCode) context.selectedYCode = normalizeAxisCode(yCode, "y");
+  if (zCode) context.selectedZCode = normalizeAxisCode(zCode, "z");
+
+  shouldFocusOpenedExplorerPoint = true;
+  updateUrlExplorerSelectionParams();
+  return true;
 }
 
 function hideExplorerBenchmarkView() {
@@ -1606,6 +1638,20 @@ function focusSelectedExplorerRow() {
 
   row.focus({ preventScroll: true });
   row.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+function revealSelectedExplorerRowPath() {
+  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
+  if (!row?.dataset.hierarchyPath) return;
+
+  const expandedPaths = getActiveExplorerExpandedPaths();
+  getHierarchyAncestorPaths(row.dataset.hierarchyPath).forEach((path) => {
+    expandedPaths.add(path);
+  });
+
+  const rows = [...elements.explorerTable.querySelectorAll("tbody tr[data-normalized-path]")];
+  applyExplorerTreeState(getParentPathsFromRenderedRows(rows), getExplicitPathsFromRenderedRows(rows));
 }
 
 export function saveExplorerScrollPosition() {

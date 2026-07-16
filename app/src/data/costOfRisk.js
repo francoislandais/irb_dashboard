@@ -78,6 +78,7 @@ export const DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL = "gca:level:nfc";
 const COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX = "Debt instruments other than held for trading";
 const COST_OF_RISK_BALANCE_SHEET_ALLOWANCE_PREFIX = "Total allowance for debt instruments";
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
+export const COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE = "__total_contribution__";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
 const COST_OF_RISK_F02_X_AXIS_CODE = "0010";
 const COST_OF_RISK_F02_Y_AXIS_CODE = "0460";
@@ -513,15 +514,26 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
     return { dates: [], rows: [], title: "Audit trail" };
   }
 
-  const xLabel = getCostOfRiskXAxisFullLabelMap(state).get(normalizedXCode) ?? normalizedXCode;
-  const selectedRows = buildCostOfRiskMovementAuditRowsForYCodes(
-    state,
-    indexes,
-    referenceColumns,
-    normalizedXCode,
-    selectedOption.points,
-    "Selected scope"
-  );
+  const isTotalContribution = normalizedXCode === COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE;
+  const xLabel = isTotalContribution
+    ? "Total contribution"
+    : getCostOfRiskXAxisFullLabelMap(state).get(normalizedXCode) ?? normalizedXCode;
+  const selectedRows = isTotalContribution
+    ? buildCostOfRiskMovementTotalContributionAuditRows(
+      state,
+      indexes,
+      referenceColumns,
+      selectedOption.points,
+      "Selected scope"
+    )
+    : buildCostOfRiskMovementAuditRowsForYCodes(
+      state,
+      indexes,
+      referenceColumns,
+      normalizedXCode,
+      selectedOption.points,
+      "Selected scope"
+    );
   const selectedTotal = createEmptySeries(referenceColumns.length);
   selectedRows.forEach((row) => addSeriesValues(selectedTotal, row.values));
 
@@ -550,7 +562,9 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
       {
         label: "Displayed contribution",
         section: "Selected scope",
-        source: `${selectedOption.label} / x ${normalizedXCode}`,
+        source: isTotalContribution
+          ? `${selectedOption.label} / selected waterfall components`
+          : `${selectedOption.label} / x ${normalizedXCode}`,
         type: "amount",
         values: selectedTotal
       },
@@ -573,8 +587,33 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
         values: relativeValues
       }
     ],
-    title: `${normalizedXCode} - ${xLabel}`
+    title: isTotalContribution ? xLabel : `${normalizedXCode} - ${xLabel}`
   };
+}
+
+function buildCostOfRiskMovementTotalContributionAuditRows(state, indexes, referenceColumns, yCodes, section) {
+  const xLabels = getCostOfRiskXAxisFullLabelMap(state);
+
+  return COST_OF_RISK_WATERFALL_X_CODES.map((xCode) => {
+    const rawSeries = createEmptySeries(referenceColumns.length);
+    yCodes.forEach((yCode) => {
+      addSeriesValues(rawSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+        xCode,
+        yCode,
+        zCode: ""
+      }, state.selectedJst));
+    });
+    const values = decumulateQuarterlySeries(referenceColumns, rawSeries)
+      .map(formatCostOfRiskAllowanceMovementDisplayValue);
+
+    return {
+      label: xLabels.get(xCode) ?? xCode,
+      section,
+      source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / selected Y scope`,
+      type: "amount",
+      values
+    };
+  });
 }
 
 function buildCostOfRiskMovementDenominatorAuditRows(state, indexes, referenceColumns, composition) {
@@ -2606,6 +2645,10 @@ function getCostOfRiskPeerJstCodes(state) {
 }
 
 function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, filters = {}) {
+  if (xAxisCode === COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE) {
+    return buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters);
+  }
+
   const valueSeries = createEmptySeries(referenceColumns.length);
   selectedOption.points.forEach((yCode) => {
     addSeriesValues(valueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
@@ -2613,6 +2656,34 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
         yCode
       }, jstCode));
   });
+  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+
+  return referenceColumns.map((column, index) => {
+    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? 0);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
+    return {
+      date: column.date,
+      denominator,
+      label: column.label,
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      value
+    };
+  });
+}
+
+function buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters = {}) {
+  const valueSeries = createEmptySeries(referenceColumns.length);
+  COST_OF_RISK_WATERFALL_X_CODES.forEach((xCode) => {
+    selectedOption.points.forEach((yCode) => {
+      addSeriesValues(valueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+        xCode,
+        yCode,
+        zCode: ""
+      }, jstCode));
+    });
+  });
+
   const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 

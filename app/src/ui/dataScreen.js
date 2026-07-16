@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260716-cost-risk-context-help-panel-view";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260714-benchmark-mode-recreate";
+import { renderCostOfRisk, showCostOfRiskPeerDisplayHelp, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260716-cost-risk-audit-explorer-link-view";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260716-cost-risk-audit-explorer-link-view";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -37,7 +37,11 @@ export function wireUi(actions) {
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
   elements.peersButton?.addEventListener("click", () => showPeersDialog(actions));
   elements.peerDisplayButtons.forEach((button) => {
-    button.addEventListener("click", () => actions.updatePeerDisplayMode(button.dataset.peerDisplayMode));
+    button.addEventListener("click", () => {
+      const peerDisplayMode = button.dataset.peerDisplayMode;
+      showCostOfRiskPeerDisplayHelp(peerDisplayMode);
+      actions.updatePeerDisplayMode(peerDisplayMode);
+    });
   });
   elements.datasetSelect?.addEventListener("change", async (event) => {
     if (event.target.value === ADD_DATASET_OPTION) {

@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-context-help-panel-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-explorer-link-view";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,
@@ -9,6 +9,7 @@ export function renderCostOfRiskAuditTableView({
   audit,
   container,
   displayMode = "amount",
+  onOpenSourcePoint = null,
   selectedUnit
 }) {
   if (!container) return;
@@ -37,6 +38,7 @@ export function renderCostOfRiskAuditTableView({
       audit,
       container,
       displayMode,
+      onOpenSourcePoint,
       rows,
       selectedUnit
     });
@@ -75,7 +77,7 @@ export function renderCostOfRiskAuditTableView({
     labelCell.textContent = row.label;
     const sourceCell = document.createElement("td");
     sourceCell.className = "cost-of-risk-audit-source";
-    sourceCell.textContent = row.source;
+    sourceCell.append(createCostOfRiskAuditSourceContent(row, onOpenSourcePoint));
     const dateCell = document.createElement("td");
     dateCell.className = "cost-of-risk-audit-date";
     dateCell.textContent = formatReferenceQuarterLabel(activeDate?.label);
@@ -97,6 +99,7 @@ function renderCostOfRiskBlockAuditView({
   audit,
   container,
   displayMode,
+  onOpenSourcePoint,
   rows,
   selectedUnit
 }) {
@@ -150,6 +153,7 @@ function renderCostOfRiskBlockAuditView({
     if (sectionRows.length === 0) return;
     view.append(renderCostOfRiskMovementAuditSection({
       activeDateIndex,
+      onOpenSourcePoint,
       rows: sectionRows,
       selectedUnit,
       title: audit?.sectionTitles?.[section] ?? section
@@ -161,6 +165,7 @@ function renderCostOfRiskBlockAuditView({
 
 function renderCostOfRiskMovementAuditSection({
   activeDateIndex,
+  onOpenSourcePoint,
   rows,
   selectedUnit,
   title
@@ -184,7 +189,7 @@ function renderCostOfRiskMovementAuditSection({
 
     const source = document.createElement("div");
     source.className = "cost-of-risk-audit-item-source";
-    source.textContent = getCostOfRiskAuditRowSourceText(row, activeDateIndex, selectedUnit);
+    source.append(createCostOfRiskAuditSourceContent(row, onOpenSourcePoint, getCostOfRiskAuditRowSourceText(row, activeDateIndex, selectedUnit)));
 
     const value = document.createElement("div");
     value.className = "cost-of-risk-audit-item-value";
@@ -199,6 +204,48 @@ function renderCostOfRiskMovementAuditSection({
   });
 
   return section;
+}
+
+function createCostOfRiskAuditSourceContent(row, onOpenSourcePoint, sourceText = row.source) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "cost-of-risk-audit-source-content";
+
+  const text = document.createElement("span");
+  text.textContent = sourceText ?? "";
+  wrapper.append(text);
+
+  const sourcePoint = row.sourcePoint ?? parseCostOfRiskAuditSourcePoint(row.source);
+  if (sourcePoint && typeof onOpenSourcePoint === "function") {
+    const button = document.createElement("button");
+    button.className = "cost-of-risk-audit-source-link";
+    button.type = "button";
+    button.textContent = "Explorer";
+    button.setAttribute("aria-label", `Open ${sourcePoint.tableId} source point in Explorer`);
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onOpenSourcePoint(sourcePoint);
+    });
+    wrapper.append(button);
+  }
+
+  return wrapper;
+}
+
+function parseCostOfRiskAuditSourcePoint(source) {
+  const text = String(source ?? "");
+  const tableMatch = text.match(/\b([CF]_\d{2}\.\d{2}(?:\.\d)?)\b/);
+  const xMatch = text.match(/\bx\s+([A-Za-z0-9_]+)\b/i);
+  const yMatch = text.match(/\by\s+([A-Za-z0-9_]+)\b/i);
+  const zMatch = text.match(/\bz\s+([A-Za-z0-9_]+)\b/i);
+  if (!tableMatch || !xMatch || !yMatch) return null;
+
+  return {
+    tableId: tableMatch[1],
+    xCode: xMatch?.[1] ?? "",
+    yCode: yMatch?.[1] ?? "",
+    zCode: zMatch?.[1] ?? ""
+  };
 }
 
 function getCostOfRiskAuditRowSourceText(row, activeDateIndex, selectedUnit) {
