@@ -9,7 +9,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-control-lower-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskF2VsF12Chart = null;
@@ -31,6 +31,7 @@ export function renderCostOfRiskF2VsF12Chart({
   f02Series,
   f12Series,
   onClearSmoothing,
+  onChangeSmoothing,
   onSelectAuditSeries,
   renderTabEmpty,
   selectedUnit = "millions",
@@ -87,7 +88,7 @@ export function renderCostOfRiskF2VsF12Chart({
       backgroundColor: "transparent",
       events: {
         render() {
-          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
         }
       },
       type: "line",

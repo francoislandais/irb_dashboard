@@ -18,11 +18,11 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-control-lower-view";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-tab-order-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-smoothing-control-lower-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;
@@ -56,6 +56,7 @@ export function renderCostOfRiskStageSummaryChart({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -75,6 +76,7 @@ export function renderCostOfRiskStageSummaryChart({
     onSelectJst,
     onSelectReferenceDate,
     onClearSmoothing,
+    onChangeSmoothing,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -90,6 +92,7 @@ export function renderCostOfRiskCounterpartySummaryChart({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -109,6 +112,7 @@ export function renderCostOfRiskCounterpartySummaryChart({
     onSelectJst,
     onSelectReferenceDate,
     onClearSmoothing,
+    onChangeSmoothing,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -130,6 +134,7 @@ function renderCostOfRiskSummaryChart({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -172,7 +177,7 @@ function renderCostOfRiskSummaryChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
         }
       },
       spacingRight: 128,

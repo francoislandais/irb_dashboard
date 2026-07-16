@@ -21,7 +21,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-control-lower-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;
@@ -44,6 +44,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -93,7 +94,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
         }
       },
       spacingRight: 128,

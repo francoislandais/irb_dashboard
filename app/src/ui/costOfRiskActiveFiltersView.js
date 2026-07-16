@@ -1,13 +1,17 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-extraction-timestamp-view";
+} from "../data/costOfRisk.js?v=20260716-summary-display-chip-view";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
 export function renderCostOfRiskActiveFiltersView({
   activeTab,
+  contributionDisplayMenuOpen,
   container,
+  displayMode,
+  summaryDisplayMenuOpen,
+  stageTransferDisplayMenuOpen,
   filterOptions,
   filters,
   counterpartyMenuOpen,
@@ -19,6 +23,8 @@ export function renderCostOfRiskActiveFiltersView({
 
   const renderKey = serializeCostOfRiskActiveFiltersPart({
     activeTab,
+    contributionDisplayMenuOpen,
+    displayMode,
     filters,
     labels: {
       asset: getCostOfRiskFilterOptionLabel(filterOptions.assets, filters.asset),
@@ -28,7 +34,9 @@ export function renderCostOfRiskActiveFiltersView({
     counterpartyMenuOpen,
     instrumentMenuOpen,
     referenceDate,
-    stageMenuOpen
+    summaryDisplayMenuOpen,
+    stageMenuOpen,
+    stageTransferDisplayMenuOpen
   });
   if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
   lastCostOfRiskActiveFiltersRenderKey = renderKey;
@@ -46,7 +54,49 @@ export function renderCostOfRiskActiveFiltersView({
     createCostOfRiskReferenceDateChip(referenceDate),
     ...(remainingActiveItems.length > 0
       ? remainingActiveItems
-      : activeItems.length === 0 ? [createCostOfRiskNoFilterChip()] : [])
+      : activeItems.length === 0 ? [createCostOfRiskNoFilterChip()] : []),
+    ...(activeTab === "contributions"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: contributionDisplayMenuOpen,
+        labels: {
+          absolute: "Absolute Contribution",
+          relative: "Relative Contribution",
+          switchToAbsolute: "Switch to Absolute Contribution",
+          switchToRelative: "Switch to Relative Contribution"
+        },
+        menuLabel: "Contribution display",
+        name: "contribution"
+      })]
+      : []),
+    ...(activeTab === "summary"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: summaryDisplayMenuOpen,
+        labels: {
+          absolute: "Absolute Variation",
+          relative: "Relative Variation",
+          switchToAbsolute: "Switch to Absolute Variation",
+          switchToRelative: "Switch to Relative Variation"
+        },
+        menuLabel: "Variation display",
+        name: "summaryVariation"
+      })]
+      : []),
+    ...(activeTab === "stage-transfers"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: stageTransferDisplayMenuOpen,
+        labels: {
+          absolute: "Absolute Transfer",
+          relative: "Relative Transfer",
+          switchToAbsolute: "Switch to Absolute Transfer",
+          switchToRelative: "Switch to Relative Transfer"
+        },
+        menuLabel: "Transfer display",
+        name: "stageTransfer"
+      })]
+      : [])
   ];
 
   container.replaceChildren(...chips);
@@ -70,6 +120,56 @@ function createCostOfRiskNoFilterChip() {
   label.className = "cost-of-risk-filter-chip-label";
   label.textContent = "No perimeter filter";
   chip.append(label);
+  return chip;
+}
+
+function createCostOfRiskDisplayModeChip({
+  displayMode,
+  isOpen,
+  labels,
+  menuLabel,
+  name
+}) {
+  const isRelative = displayMode === "ratio";
+  const kebabName = name.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--contribution-display";
+  chip.classList.toggle("is-open", Boolean(isOpen));
+
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskDisplayModeToggle = name;
+  toggle.setAttribute("aria-haspopup", "listbox");
+  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  toggle.setAttribute("aria-label", `Change ${menuLabel.toLowerCase()}`);
+
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  label.textContent = isRelative ? labels.relative : labels.absolute;
+  toggle.append(label);
+  chip.append(toggle);
+
+  if (isOpen) {
+    const menu = document.createElement("div");
+    menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-contribution-display-menu";
+    menu.setAttribute("role", "listbox");
+    menu.setAttribute("aria-label", menuLabel);
+
+    const option = document.createElement("button");
+    option.className = "cost-of-risk-stage-filter-option";
+    option.type = "button";
+    option.dataset.costOfRiskDisplayModeOption = `${name}:${isRelative ? "amount" : "ratio"}`;
+    option.dataset.costOfRiskDisplayModeScope = kebabName;
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
+    option.textContent = isRelative
+      ? labels.switchToAbsolute
+      : labels.switchToRelative;
+    menu.append(option);
+    chip.append(menu);
+  }
+
   return chip;
 }
 

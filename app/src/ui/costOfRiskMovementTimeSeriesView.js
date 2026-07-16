@@ -9,7 +9,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-control-lower-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -44,6 +44,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   peerDisplayMode = "explicit",
   renderTabEmpty,
   selectedUnit = "millions",
@@ -77,7 +78,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, jstCode, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
         }
       },
       spacingRight: 128,

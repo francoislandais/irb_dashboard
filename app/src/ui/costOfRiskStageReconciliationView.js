@@ -6,7 +6,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
+} from "./costOfRiskChartUtils.js?v=20260716-smoothing-control-lower-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -42,6 +42,7 @@ export function renderCostOfRiskStageReconciliationView({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   renderTabEmpty,
   selectedUnit,
   smoothingWindow,
@@ -65,6 +66,7 @@ export function renderCostOfRiskStageReconciliationView({
     onSelectJst,
     onSelectReferenceDate,
     onClearSmoothing,
+    onChangeSmoothing,
     renderTabEmpty,
     selectedUnit,
     smoothingWindow,
@@ -185,6 +187,7 @@ function renderCostOfRiskStageReconciliationChart({
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
+  onChangeSmoothing,
   renderTabEmpty,
   smoothingWindow,
   state
@@ -224,7 +227,7 @@ function renderCostOfRiskStageReconciliationChart({
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing);
+          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
         }
       },
       spacingRight: 128,
