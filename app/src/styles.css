@@ -7,8 +7,9 @@
   --muted: #66736b;
   --line: #d7ded8;
   --primary: #116a5b;
+
   /* --primary-dark: #0c4c42;*/
-  --primary-dark: #003D4C;
+  --primary-dark: #0168a0;
   --flow-arrow: #e2e5e3;
   --cost-risk-top-chart-height: 260px;
   --cost-risk-time-chart-height: 300px;
@@ -64,7 +65,7 @@ button:disabled {
   grid-row: 1;
   grid-template-columns: 190px minmax(0, 1fr);
   min-height: 40px;
-  background: #003D4C;
+  background: var(--primary-dark);
 }
 
 .sidebar {
@@ -75,7 +76,7 @@ button:disabled {
   min-width: 0;
   min-height: 0;
   overflow: hidden auto;
-  background: #003D4C;
+  background: #d3e2ee;
   color: #f5faf6;
   padding: 24px 18px;
 }
@@ -141,13 +142,13 @@ button:disabled {
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: #d9e4dc;
+  color: black;
   text-align: left;
   padding: 0 12px;
 }
 
 .module-link.is-active {
-  background: #24352d;
+  background: var(--primary-dark);
   border-color: #3f574b;
   color: #ffffff;
 }
@@ -262,7 +263,7 @@ button:disabled {
   min-height: 40px;
   width: 100%;
   padding: 4px 14px;
-  background: #003D4C;
+  background: var(--primary-dark);
   color: #ffffff;
 }
 
