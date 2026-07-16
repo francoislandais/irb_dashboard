@@ -1,6 +1,6 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260716-cost-risk-filters-above-tabs-view";
+import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260716-cost-risk-summary-hidden-fix-view";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260714-benchmark-mode-recreate";
 
 const ADD_DATASET_OPTION = "__add_dataset__";

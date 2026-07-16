@@ -802,8 +802,7 @@ button:focus-visible {
   padding: 10px 0;
 }
 
-.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-summary"],
-.cost-of-risk-tab-panel[data-cost-of-risk-panel="counterparty-summary"],
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="summary"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-reconciliation"] {
@@ -819,6 +818,10 @@ button:focus-visible {
   min-height: 0;
   min-width: 0;
   width: min(100%, 900px);
+}
+
+.cost-of-risk-summary-table-section {
+  position: relative;
 }
 
 .cost-of-risk-tab-panel[hidden] {
@@ -1153,6 +1156,11 @@ button:focus-visible {
   width: 100%;
 }
 
+.cost-of-risk-stage-summary-table[hidden],
+.cost-of-risk-stage-summary-chart[hidden] {
+  display: none !important;
+}
+
 .cost-of-risk-stage-summary-grid {
   border-collapse: separate;
   border-spacing: 0;
@@ -1232,6 +1240,48 @@ button:focus-visible {
   background: #ffffff;
   border: 0;
   border-radius: 0;
+}
+
+.cost-of-risk-summary-switch {
+  align-items: center;
+  background: #f8faf8;
+  border: 1px solid #d3dad6;
+  border-radius: 5px;
+  display: inline-flex;
+  gap: 1px;
+  height: 24px;
+  padding: 2px;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.cost-of-risk-summary-breakdown-switch {
+  left: 18px;
+  position: absolute;
+  top: 2px;
+  z-index: 8;
+}
+
+.cost-of-risk-summary-switch-button {
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  color: #34443c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  height: 18px;
+  line-height: 1;
+  padding: 0 6px;
+}
+
+.cost-of-risk-summary-switch-button:hover {
+  background: rgba(36, 53, 45, 0.08);
+}
+
+.cost-of-risk-summary-switch-button.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
 }
 
 .cost-of-risk-stage-summary-grid .cost-of-risk-stage-summary-mom-head {

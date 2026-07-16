@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-filters-above-tabs-view";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260716-cost-risk-summary-hidden-fix-view";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -6,7 +6,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-filters-above-tabs-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-summary-hidden-fix-view";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,

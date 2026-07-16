@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260716-cost-risk-filters-above-tabs-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-summary-hidden-fix-view";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -21,7 +21,7 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-filters-above-tabs-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-summary-hidden-fix-view";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;
