@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260714-benchmark-mode-recreate";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260716-header-peer-spacing-view";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260716-extraction-timestamp-view";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -208,6 +208,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const parsed = parseCsv(text);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
   const jstOptions = getUniqueValues(parsed.columns, parsed.rows, "jst_code");
+  const extractionTimestamp = getExtractionTimestamp(parsed.columns, parsed.rows);
   const datasetId = options.datasetId || createDatasetId(options.source || "local");
   csvTextByDatasetId.set(datasetId, text);
   store.setData({
@@ -217,6 +218,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
     dataIndexes,
     datasetId,
     datasetLabel: options.datasetLabel || fileName,
+    extractionTimestamp,
     source: options.source || "local",
     jstOptions,
     rows: parsed.rows,
@@ -228,6 +230,14 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const matchedJst = findMatchingJstCode(jstOptions, urlJst);
   if (matchedJst) store.setSelectedJst(matchedJst);
   applyUrlPeerExclusions(jstOptions);
+}
+
+function getExtractionTimestamp(columns, rows) {
+  const index = columns.findIndex((column) => (
+    ["extraction_timestamp", "extraction timestamp"].includes(String(column ?? "").trim().toLowerCase())
+  ));
+  if (index === -1) return "";
+  return String(rows[0]?.[index] ?? "").trim();
 }
 
 async function loadStandaloneData() {

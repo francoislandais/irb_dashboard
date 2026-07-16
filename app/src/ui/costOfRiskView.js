@@ -29,7 +29,7 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-tab-order-view";
+} from "../data/costOfRisk.js?v=20260716-extraction-timestamp-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -60,7 +60,7 @@ import {
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
 } from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-tab-order-view";
-import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-cost-risk-tab-order-view";
+import { showCostOfRiskStageTransferFlowAuditMenu } from "./costOfRiskStageTransferAuditView.js?v=20260716-extraction-timestamp-view";
 import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-tab-order-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
@@ -85,7 +85,7 @@ import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-tab-order-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-tab-order-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-extraction-timestamp-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -95,7 +95,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-tab-order-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-tab-order-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-extraction-timestamp-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
@@ -139,7 +139,10 @@ let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
 let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
 let activeCostOfRiskCounterpartySummaryOtherOpen = false;
+let activeCostOfRiskCounterpartyFilterMenuOpen = false;
+let activeCostOfRiskInstrumentFilterMenuOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
+let activeCostOfRiskStageFilterMenuOpen = false;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
@@ -147,7 +150,7 @@ let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_F
 let costOfRiskWaterfallChart = null;
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
-  asset: "Loans and advances",
+  asset: COST_OF_RISK_FILTER_ALL,
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
 };
@@ -182,6 +185,7 @@ const elements = {
   costOfRiskStage: document.querySelector("#cost-of-risk-stage"),
   costOfRiskStageReconciliationChart: document.querySelector("#cost-of-risk-stage-reconciliation-chart"),
   costOfRiskStageReconciliationSummary: document.querySelector("#cost-of-risk-stage-reconciliation-summary"),
+  costOfRiskSummaryDisplayControl: document.querySelector("#cost-of-risk-summary-display-control"),
   costOfRiskStageSummaryChart: document.querySelector("#cost-of-risk-stage-summary-chart"),
   costOfRiskStageSummaryTable: document.querySelector("#cost-of-risk-stage-summary-table"),
   costOfRiskStageTransferChart: document.querySelector("#cost-of-risk-stage-transfer-chart"),
@@ -215,14 +219,17 @@ export function wireCostOfRiskUi(actions, rerender) {
   rerenderApp = rerender;
   updateSelectedJst = actions.updateSelectedJst;
   elements.costOfRiskAsset?.addEventListener("change", (event) => {
+    activeCostOfRiskInstrumentFilterMenuOpen = false;
     activeCostOfRiskFilters.asset = event.target.value;
     rerenderApp(actions.getState());
   });
   elements.costOfRiskCounterparty?.addEventListener("change", (event) => {
+    activeCostOfRiskCounterpartyFilterMenuOpen = false;
     activeCostOfRiskFilters.counterparty = event.target.value;
     rerenderApp(actions.getState());
   });
   elements.costOfRiskStage?.addEventListener("change", (event) => {
+    activeCostOfRiskStageFilterMenuOpen = false;
     setActiveCostOfRiskStageFilter(event.target.value);
     rerenderApp(actions.getState());
   });
@@ -241,12 +248,90 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabs?.addEventListener("scroll", updateCostOfRiskTabsFade, { passive: true });
   window.addEventListener("resize", updateCostOfRiskTabsFade);
   elements.costOfRiskActiveFilters?.addEventListener("click", (event) => {
+    const instrumentOption = event.target.closest?.("[data-cost-of-risk-instrument-filter-option]");
+    if (instrumentOption) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      activeCostOfRiskFilters.asset = instrumentOption.dataset.costOfRiskInstrumentFilterOption;
+      if (elements.costOfRiskAsset) elements.costOfRiskAsset.value = activeCostOfRiskFilters.asset;
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const instrumentToggle = event.target.closest?.("[data-cost-of-risk-instrument-filter-toggle]");
+    if (instrumentToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      activeCostOfRiskInstrumentFilterMenuOpen = !activeCostOfRiskInstrumentFilterMenuOpen;
+      activeCostOfRiskCounterpartyFilterMenuOpen = false;
+      activeCostOfRiskStageFilterMenuOpen = false;
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const counterpartyOption = event.target.closest?.("[data-cost-of-risk-counterparty-filter-option]");
+    if (counterpartyOption) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      activeCostOfRiskFilters.counterparty = counterpartyOption.dataset.costOfRiskCounterpartyFilterOption;
+      if (elements.costOfRiskCounterparty) elements.costOfRiskCounterparty.value = activeCostOfRiskFilters.counterparty;
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const counterpartyToggle = event.target.closest?.("[data-cost-of-risk-counterparty-filter-toggle]");
+    if (counterpartyToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      activeCostOfRiskCounterpartyFilterMenuOpen = !activeCostOfRiskCounterpartyFilterMenuOpen;
+      activeCostOfRiskInstrumentFilterMenuOpen = false;
+      activeCostOfRiskStageFilterMenuOpen = false;
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const stageOption = event.target.closest?.("[data-cost-of-risk-stage-filter-option]");
+    if (stageOption) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      setActiveCostOfRiskStageFilter(stageOption.dataset.costOfRiskStageFilterOption);
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const stageToggle = event.target.closest?.("[data-cost-of-risk-stage-filter-toggle]");
+    if (stageToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      activeCostOfRiskStageFilterMenuOpen = !activeCostOfRiskStageFilterMenuOpen;
+      activeCostOfRiskInstrumentFilterMenuOpen = false;
+      activeCostOfRiskCounterpartyFilterMenuOpen = false;
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const button = event.target.closest?.("[data-cost-of-risk-clear-filter]");
     if (!button) return;
 
+    closeCostOfRiskFilterMenus();
     clearActiveCostOfRiskFilter(button.dataset.costOfRiskClearFilter);
     rerenderApp(actions.getState());
   });
+  document.addEventListener("click", (event) => {
+    if (!activeCostOfRiskInstrumentFilterMenuOpen && !activeCostOfRiskCounterpartyFilterMenuOpen && !activeCostOfRiskStageFilterMenuOpen) return;
+    if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
+    if (closeCostOfRiskFilterMenus()) rerenderApp(actions.getState());
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!activeCostOfRiskInstrumentFilterMenuOpen && !activeCostOfRiskCounterpartyFilterMenuOpen && !activeCostOfRiskStageFilterMenuOpen) return;
+    if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
+    window.setTimeout(() => {
+      if (closeCostOfRiskFilterMenus()) rerenderApp(actions.getState());
+    }, 0);
+  }, true);
   elements.costOfRiskDashboard?.addEventListener("click", (event) => {
     const button = event.target.closest?.("[data-cost-of-risk-summary-breakdown]");
     if (!button) return;
@@ -367,6 +452,7 @@ export function renderCostOfRisk(state) {
       );
     activeCostOfRiskReferenceDate = summary.referenceDate || activeCostOfRiskReferenceDate;
     renderCostOfRiskActiveFilters(filterOptions);
+    renderCostOfRiskSummaryDisplayControl();
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
@@ -730,11 +816,54 @@ function renderCostOfRiskActiveFilters(filterOptions) {
   renderCostOfRiskActiveFiltersView({
     activeTab: activeCostOfRiskTab,
     container: elements.costOfRiskActiveFilters,
+    counterpartyMenuOpen: activeCostOfRiskCounterpartyFilterMenuOpen,
+    instrumentMenuOpen: activeCostOfRiskInstrumentFilterMenuOpen,
     filterOptions,
     filters: activeCostOfRiskFilters,
     referenceDate: activeCostOfRiskReferenceDate,
-    summaryBreakdown: activeCostOfRiskSummaryBreakdown
+    stageMenuOpen: activeCostOfRiskStageFilterMenuOpen
   });
+}
+
+function closeCostOfRiskFilterMenus() {
+  const changed = activeCostOfRiskInstrumentFilterMenuOpen
+    || activeCostOfRiskCounterpartyFilterMenuOpen
+    || activeCostOfRiskStageFilterMenuOpen;
+  activeCostOfRiskInstrumentFilterMenuOpen = false;
+  activeCostOfRiskCounterpartyFilterMenuOpen = false;
+  activeCostOfRiskStageFilterMenuOpen = false;
+  return changed;
+}
+
+function renderCostOfRiskSummaryDisplayControl() {
+  if (!elements.costOfRiskSummaryDisplayControl) return;
+
+  const prefix = document.createElement("span");
+  prefix.className = "cost-of-risk-filter-chip-prefix";
+  prefix.textContent = "Display: ";
+
+  const switcher = document.createElement("div");
+  switcher.className = "cost-of-risk-summary-switch";
+  switcher.setAttribute("aria-label", "Summary breakdown");
+  switcher.setAttribute("role", "group");
+
+  [
+    { label: "by stage", value: "stage" },
+    { label: "by counterparty", value: "counterparty" }
+  ].forEach((option) => {
+    const button = document.createElement("button");
+    const isActive = activeCostOfRiskSummaryBreakdown === option.value;
+    button.className = "cost-of-risk-summary-switch-button";
+    button.classList.toggle("is-active", isActive);
+    button.type = "button";
+    button.dataset.costOfRiskSummaryBreakdown = option.value;
+    button.setAttribute("aria-pressed", String(isActive));
+    button.textContent = option.label;
+    switcher.append(button);
+  });
+
+  elements.costOfRiskSummaryDisplayControl.replaceChildren(prefix, switcher);
+  renderCostOfRiskSummaryBreakdownSwitch();
 }
 
 function clearActiveCostOfRiskFilter(filterName) {

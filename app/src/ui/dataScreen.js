@@ -1,6 +1,6 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260716-cost-risk-tab-order-view";
+import { renderCostOfRisk, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260716-extraction-timestamp-view";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260714-benchmark-mode-recreate";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
@@ -12,6 +12,7 @@ const elements = {
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
   datasetSelect: document.querySelector("#dataset-select"),
+  extractionTimestamp: document.querySelector("#extraction-timestamp"),
   exportStandaloneButton: document.querySelector("#export-standalone-button"),
   fileName: document.querySelector("#file-name"),
   fileStatus: document.querySelector("#file-status"),
@@ -98,6 +99,7 @@ export function renderAppState(state) {
   if (elements.rowCount) elements.rowCount.textContent = state.rows.length.toLocaleString("fr-FR");
   if (elements.columnCount) elements.columnCount.textContent = state.columns.length.toLocaleString("fr-FR");
   if (elements.fileName) elements.fileName.textContent = activeDataset?.label || state.fileName || "-";
+  renderExtractionTimestamp(state.extractionTimestamp);
   if (elements.reloadFileButton) elements.reloadFileButton.disabled = !state.fileHandle;
   if (elements.forgetFileButton) {
     elements.forgetFileButton.disabled = !hasData || activeDataset?.source === "embedded";
@@ -132,6 +134,31 @@ export function renderAppState(state) {
   if (state.activeModule === "explorer") renderExplorer(state);
   if (state.activeModule === "cet-1") renderCet1(state);
   if (state.activeModule === "cost-of-risk") renderCostOfRisk(state);
+}
+
+function renderExtractionTimestamp(extractionTimestamp) {
+  if (!elements.extractionTimestamp) return;
+  const formatted = formatExtractionTimestamp(extractionTimestamp);
+  elements.extractionTimestamp.textContent = formatted
+    ? `Extraction: ${formatted}`
+    : "Extraction date not available";
+  elements.extractionTimestamp.title = formatted
+    ? `Extraction timestamp: ${extractionTimestamp}`
+    : "Extraction date not available";
+}
+
+function formatExtractionTimestamp(extractionTimestamp) {
+  const value = String(extractionTimestamp ?? "").trim();
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    return new Intl.DateTimeFormat("fr-FR", {
+      dateStyle: "short"
+    }).format(date);
+  }
+
+  return value;
 }
 
 function renderDatasetSelect(datasets, activeDatasetId, rememberedFileReady = false, rememberedFileName = "") {

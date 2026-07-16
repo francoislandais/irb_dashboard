@@ -355,6 +355,16 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.header-extraction-timestamp {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .peers-overlay {
   position: fixed;
   inset: 0;
@@ -621,7 +631,7 @@ button:focus-visible {
 .cost-of-risk-main {
   display: grid;
   grid-template-rows: auto auto 1fr;
-  gap: 10px;
+  gap: 6px;
   min-height: 0;
   min-width: 0;
 }
@@ -729,6 +739,26 @@ button:focus-visible {
   white-space: nowrap;
 }
 
+.cost-of-risk-filter-chip-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  min-height: 20px;
+  padding: 0 2px;
+}
+
+.cost-of-risk-filter-chip-toggle:hover,
+.cost-of-risk-filter-chip--instrument.is-open .cost-of-risk-filter-chip-toggle,
+.cost-of-risk-filter-chip--counterparty.is-open .cost-of-risk-filter-chip-toggle,
+.cost-of-risk-filter-chip--stage.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
 .cost-of-risk-filter-chip-prefix,
 .cost-of-risk-filter-chip--muted {
   color: rgba(36, 53, 45, 0.68);
@@ -761,6 +791,52 @@ button:focus-visible {
 
 .cost-of-risk-filter-chip-close:hover {
   background: rgba(36, 53, 45, 0.08);
+}
+
+.cost-of-risk-stage-filter-menu {
+  background: #ffffff;
+  border: 1px solid #d8dfdb;
+  border-radius: 6px;
+  box-shadow: 0 10px 24px rgba(21, 33, 27, 0.14);
+  display: grid;
+  left: 8px;
+  max-height: 240px;
+  min-width: 128px;
+  overflow: auto;
+  padding: 3px;
+  position: absolute;
+  top: calc(100% + 4px);
+  z-index: 25;
+}
+
+.cost-of-risk-counterparty-filter-menu {
+  min-width: 210px;
+}
+
+.cost-of-risk-instrument-filter-menu {
+  min-width: 170px;
+}
+
+.cost-of-risk-stage-filter-option {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.76rem;
+  min-height: 24px;
+  padding: 0 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.cost-of-risk-stage-filter-option:hover {
+  background: #eef2ef;
+}
+
+.cost-of-risk-stage-filter-option.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
 }
 
 .cost-of-risk-scroll {
@@ -1151,6 +1227,32 @@ button:focus-visible {
   width: 100%;
 }
 
+.cost-of-risk-summary-table-panel {
+  align-content: start;
+  background: #ffffff;
+  border-radius: 8px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 4px 18px 16px;
+  width: 100%;
+}
+
+.cost-of-risk-summary-table-body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cost-of-risk-summary-table-body > .cost-of-risk-stage-summary-table {
+  padding: 0;
+}
+
 .cost-of-risk-stage-summary-table[hidden],
 .cost-of-risk-stage-summary-chart[hidden] {
   display: none !important;
@@ -1239,9 +1341,10 @@ button:focus-visible {
   font-size: 0.76rem;
   font-weight: 500;
   line-height: 1;
-  margin-left: 8px;
+  justify-self: start;
+  margin: 0 0 2px;
   min-height: 24px;
-  padding: 3px 0;
+  padding: 0;
 }
 
 .cost-of-risk-summary-display-control .cost-of-risk-filter-chip-prefix {

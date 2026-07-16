@@ -9,6 +9,7 @@ const initialState = {
   dimensionMapping: null,
   dimensionMappingError: "",
   error: "",
+  extractionTimestamp: "",
   fileHandle: null,
   fileName: "",
   isRestoring: false,
@@ -52,12 +53,13 @@ export function createDataStore() {
       return () => listeners.delete(listener);
     },
 
-    setData({ file, fileHandle, columns, dataIndexes, datasetId, datasetLabel, source, jstOptions, rows, loadedAt }) {
+    setData({ file, fileHandle, columns, dataIndexes, datasetId, datasetLabel, extractionTimestamp, source, jstOptions, rows, loadedAt }) {
       const nextDatasetId = datasetId || createDatasetId(source || "local");
       const nextDataset = {
         id: nextDatasetId,
         columns,
         dataIndexes,
+        extractionTimestamp: extractionTimestamp || "",
         fileHandle,
         fileName: file.name,
         isLoaded: true,
@@ -85,6 +87,7 @@ export function createDataStore() {
         datasets,
         dataIndexes,
         error: "",
+        extractionTimestamp: extractionTimestamp || "",
         fileHandle,
         fileName: file.name,
         jstOptions,
@@ -107,6 +110,7 @@ export function createDataStore() {
           dataIndexes: null,
           fileHandle: entry.handle,
           fileName: entry.fileName,
+          extractionTimestamp: "",
           isLoaded: false,
           jstOptions: [],
           label: entry.fileName || "Dataset",
@@ -138,6 +142,7 @@ export function createDataStore() {
         columns: dataset.columns,
         dataIndexes: dataset.dataIndexes,
         error: "",
+        extractionTimestamp: dataset.extractionTimestamp || "",
         fileHandle: dataset.fileHandle,
         fileName: dataset.fileName,
         jstOptions: dataset.jstOptions,
@@ -161,6 +166,7 @@ export function createDataStore() {
         datasets,
         dataIndexes: nextDataset?.dataIndexes ?? null,
         error: "",
+        extractionTimestamp: nextDataset?.extractionTimestamp ?? "",
         fileHandle: nextDataset?.fileHandle ?? null,
         fileName: nextDataset?.fileName ?? "",
         jstOptions: nextDataset?.jstOptions ?? [],

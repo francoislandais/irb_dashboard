@@ -4,7 +4,7 @@ import {
   buildCostOfRiskStageTransferFlowAudit,
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260716-cost-risk-tab-order-view";
+} from "../data/costOfRisk.js?v=20260716-extraction-timestamp-view";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 
@@ -64,7 +64,7 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, filters, se
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in growth-rate mode as this amount divided by the previous-quarter F_18.00 gross carrying amount for the current Accounting type / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
+  view.definition = `${view.definition} Shown in growth-rate mode as this amount divided by the previous-quarter F_18.00 gross carrying amount for the current Instruments / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")} (${rawValueLabel} raw)`
     : `Growth rate unavailable (${rawValueLabel} raw)`;
@@ -74,7 +74,7 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, filters, se
       { header: "Component", key: "label" },
       { align: "right", header: "Value", key: "value" }
     ],
-    description: `Every F_18.00 cell matching the current Accounting type / Counterparty filters, all stages combined, at ${denominatorDateLabel}.`,
+    description: `Every F_18.00 cell matching the current Instruments / Counterparty filters, all stages combined, at ${denominatorDateLabel}.`,
     rows: denominatorDetail.components.map((component) => ({
       label: `${component.operator === "subtract" ? "− " : ""}${component.label}`,
       value: Number.isFinite(component.value) ? formatAmount(component.value) : "-"

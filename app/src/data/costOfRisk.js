@@ -1955,7 +1955,7 @@ function isCostOfRiskStageAxisAggregationPoint(descriptor, filters) {
 
 function createCostOfRiskStageAxisSelectionLabel(filters) {
   return [
-    filters.asset ? formatCostOfRiskAssetLabel(filters.asset) : "All accounting types",
+    filters.asset ? formatCostOfRiskAssetLabel(filters.asset) : "All instruments",
     filters.counterparty ? formatCostOfRiskCounterpartyLabel(filters.counterparty) : "All counterparties"
   ].join(" / ");
 }
@@ -2084,7 +2084,7 @@ function matchesCostOfRiskCounterpartyDescriptor(descriptor, counterparty) {
 
 function createCostOfRiskFilteredSelectionLabel(filters) {
   return [
-    filters.asset ? formatCostOfRiskAssetLabel(filters.asset) : "All accounting types",
+    filters.asset ? formatCostOfRiskAssetLabel(filters.asset) : "All instruments",
     filters.counterparty ? formatCostOfRiskCounterpartyLabel(filters.counterparty) : "All counterparties",
     filters.stage ? formatCostOfRiskStageLabel(filters.stage) : ALL_STAGES_LABEL
   ].join(" / ");
@@ -2168,7 +2168,7 @@ function buildCostOfRiskAggregateOptions(descriptors) {
 function buildCostOfRiskTotalAggregateOption(descriptors) {
   const totalDescriptor = descriptors.find((descriptor) => descriptor.code === COST_OF_RISK_TOTAL_Y_AXIS_CODE);
   return {
-    groupLabel: "Aggregations - all exposure types",
+    groupLabel: "Aggregations - all instruments",
     id: "aggregate:total",
     kind: "aggregate",
     label: totalDescriptor?.terminal || "Total allowance for debt instruments",
@@ -2197,12 +2197,12 @@ function buildAggregateOption(descriptors, criteria) {
 
 function getCostOfRiskAggregateGroupLabel(criteria) {
   if (criteria.asset) return `Aggregations - ${formatCostOfRiskAssetLabel(criteria.asset)}`;
-  return "Aggregations - all exposure types";
+  return "Aggregations - all instruments";
 }
 
 function createCostOfRiskAggregateLabel(criteria) {
   const segments = [
-    criteria.asset ? formatCostOfRiskAssetLabel(criteria.asset) : "All exposure types",
+    criteria.asset ? formatCostOfRiskAssetLabel(criteria.asset) : "All instruments",
     criteria.counterparty ? formatCostOfRiskCounterpartyLabel(criteria.counterparty) : "All counterparties",
     criteria.stage ? formatCostOfRiskStageLabel(criteria.stage) : ALL_STAGES_LABEL
   ];
