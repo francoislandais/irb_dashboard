@@ -31,21 +31,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "../data/costOfRisk.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskStageTransfers.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskStageReconciliationView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskChartUtils.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -53,7 +53,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskSummaryTablesView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -61,55 +61,55 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskSummaryChartsView.js?v=20260716-cost-risk-audit-intro-panel-view";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskTreemapView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskCoreDefinitionView.js?v=20260716-cost-risk-audit-intro-panel-view";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskControlsView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskAuditTableView.js?v=20260716-cost-risk-audit-intro-panel-view";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskTabsView.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskModelCache.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskFilterRules.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -117,12 +117,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskStageTransferSelection.js?v=20260716-cost-risk-audit-intro-panel-view";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-stage-related-flow-blue-view";
+} from "./costOfRiskCoreSelection.js?v=20260716-cost-risk-audit-intro-panel-view";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -151,6 +151,7 @@ let activeCostOfRiskSummaryDisplayMenuOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskStageFilterMenuOpen = false;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
+let activeCostOfRiskAuditIntroTab = "summary";
 let activeCostOfRiskMovementAuditXCode = "";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
@@ -408,6 +409,7 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
       activeCostOfRiskTab = button.dataset.costOfRiskTab || "contributions";
+      activeCostOfRiskAuditIntroTab = activeCostOfRiskTab;
       closeCostOfRiskFilterMenus();
       rerenderApp(actions.getState());
     });
@@ -473,7 +475,7 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   renderCostOfRiskActiveFilters(filterOptions);
-  if (!["contributions", "stage-transfers"].includes(activeCostOfRiskTab)) renderCostOfRiskAuditPanelPlaceholder();
+  if (!["contributions", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskAuditPanelIntro();
   const displayMode = getActiveCostOfRiskDisplayMode();
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = displayMode;
   if (elements.costOfRiskDisplayMode) {
@@ -523,6 +525,7 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
     renderCostOfRiskF18SummaryOnlyView(summary, state);
+    renderCostOfRiskAuditPanelIntro();
     scheduleCostOfRiskChartReflow();
     return;
   }
@@ -1005,8 +1008,13 @@ function renderCostOfRiskWaterfallTitle() {
 function renderCostOfRiskMovementAuditPanel(state) {
   if (!elements.costOfRiskAuditPanel) return;
 
+  if (isCostOfRiskAuditIntroVisible()) {
+    renderCostOfRiskAuditPanelIntro();
+    return;
+  }
+
   if (activeCostOfRiskTab !== "contributions" || !activeCostOfRiskMovementAuditXCode) {
-    renderCostOfRiskAuditPanelPlaceholder();
+    renderCostOfRiskAuditPanelIntro();
     return;
   }
 
@@ -1028,8 +1036,13 @@ function renderCostOfRiskMovementAuditPanel(state) {
 function renderCostOfRiskStageTransferAuditPanel(state) {
   if (!elements.costOfRiskAuditPanel) return;
 
+  if (isCostOfRiskAuditIntroVisible()) {
+    renderCostOfRiskAuditPanelIntro();
+    return;
+  }
+
   if (activeCostOfRiskTab !== "stage-transfers" || !activeCostOfRiskStageTransferFlowKey) {
-    renderCostOfRiskAuditPanelPlaceholder();
+    renderCostOfRiskAuditPanelIntro();
     return;
   }
 
@@ -1059,6 +1072,130 @@ function renderCostOfRiskAuditPanelPlaceholder() {
   placeholder.className = "cost-of-risk-audit-placeholder";
   placeholder.textContent = "Select a data point to display its audit trail.";
   elements.costOfRiskAuditPanel.replaceChildren(placeholder);
+}
+
+function isCostOfRiskAuditIntroVisible() {
+  return activeCostOfRiskAuditIntroTab === activeCostOfRiskTab
+    && Boolean(getCostOfRiskAuditPanelIntroContent(activeCostOfRiskTab));
+}
+
+function hideCostOfRiskAuditIntro() {
+  activeCostOfRiskAuditIntroTab = "";
+}
+
+function renderCostOfRiskAuditPanelIntro() {
+  if (!elements.costOfRiskAuditPanel) return;
+
+  const content = getCostOfRiskAuditPanelIntroContent(activeCostOfRiskTab);
+  if (!content) {
+    renderCostOfRiskAuditPanelPlaceholder();
+    return;
+  }
+
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = content.eyebrow;
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = content.title;
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = content.lead;
+
+  intro.append(eyebrow, title, summary);
+
+  content.sections.forEach((section) => {
+    const block = document.createElement("section");
+    block.className = "cost-of-risk-audit-intro-section";
+
+    const heading = document.createElement("h3");
+    heading.textContent = section.title;
+
+    const body = document.createElement("p");
+    body.textContent = section.body;
+
+    block.append(heading, body);
+    intro.append(block);
+  });
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = content.hint;
+  intro.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function getCostOfRiskAuditPanelIntroContent(tab) {
+  const content = {
+    summary: {
+      eyebrow: "Overview",
+      title: "Summary",
+      lead: "This view gives a compact reading of the selected perimeter using FINREP F_18.00. It is designed as a first checkpoint before moving into the more analytical tabs.",
+      sections: [
+        {
+          title: "What you see",
+          body: "The upper table decomposes gross carrying amount, allowances and coverage either by stage or by counterparty. Stock measures stay in amount, while variation columns can be displayed as absolute or relative movements."
+        },
+        {
+          title: "How to use it",
+          body: "Use the display switch to move between stage and counterparty breakdowns. Clicking a row updates the global filter, and clicking a cell drives the time evolution chart below."
+        },
+        {
+          title: "Source",
+          body: "Figures are built from F_18.00, with the active instruments, counterparty and stage filters applied where the regulatory template supports that level of detail."
+        }
+      ],
+      hint: "Click a table cell to focus the time chart on that metric."
+    },
+    "stage-transfers": {
+      eyebrow: "Flow analysis",
+      title: "Stage Transfer",
+      lead: "This view explains how exposures move between IFRS 9 stages over the selected quarter. It focuses on the mechanics of migration, while keeping the surrounding exposure movements visible.",
+      sections: [
+        {
+          title: "What you see",
+          body: "The flow chart shows transfers between Stage 1, Stage 2 and Stage 3, together with write-offs and other residual movements. Stage blocks display the current stock on the selected perimeter."
+        },
+        {
+          title: "How to read it",
+          body: "Click a stage block or a flow to select it. The time chart tracks the same measure across reporting dates and peer institutions. Relative transfer mode expresses flows against the previous-quarter exposure denominator."
+        },
+        {
+          title: "Source",
+          body: "Transfer flows come mainly from F_12.02. Stage stocks and denominator controls rely on F_18.00, excluding central bank cash where it should not be part of the credit-risk exposure base."
+        }
+      ],
+      hint: "Click any flow or stage block to replace this introduction with a detailed audit trail."
+    },
+    contributions: {
+      eyebrow: "Allowance movement",
+      title: "Movement in Allowance",
+      lead: "This view reconciles the movement in the stock of allowances and helps identify which FINREP components explain the quarterly change.",
+      sections: [
+        {
+          title: "What you see",
+          body: "The waterfall decomposes the selected allowance movement into the relevant F_12.01 components. Direct P&L impacts that do not move the allowance stock are intentionally kept outside this view."
+        },
+        {
+          title: "How to read it",
+          body: "Absolute contribution mode shows the movement in amount. Relative contribution mode divides the selected contribution by the exposure denominator of the same perimeter, using the previous quarter for variation measures."
+        },
+        {
+          title: "Source",
+          body: "The waterfall is built from F_12.01 and reconciled with the selected instruments, counterparty and stage filters whenever FINREP provides the required granularity."
+        }
+      ],
+      hint: "Click a waterfall component to display its selected scope and, in relative mode, its denominator."
+    }
+  };
+
+  return content[tab] ?? null;
 }
 
 function renderCostOfRiskStageSummaryView(stageSummary, state) {
@@ -1401,6 +1538,8 @@ function ensureCostOfRiskStageTransferFlowSelection() {
 function selectCostOfRiskStageTransferFlow(flowKey) {
   if (!flowKey) return;
 
+  const hadIntro = isCostOfRiskAuditIntroVisible();
+  hideCostOfRiskAuditIntro();
   let shouldRerender = flowKey !== activeCostOfRiskStageTransferFlowKey;
   activeCostOfRiskStageTransferFlowKey = flowKey;
 
@@ -1410,7 +1549,10 @@ function selectCostOfRiskStageTransferFlow(flowKey) {
     shouldRerender = true;
   }
 
-  if (!shouldRerender) return;
+  if (!shouldRerender) {
+    if (hadIntro && getLatestState()) renderCostOfRiskStageTransferAuditPanel(getLatestState());
+    return;
+  }
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
@@ -1950,6 +2092,7 @@ function getSelectedCostOfRiskWaterfallStroke(item) {
 function selectCostOfRiskXAxisFromWaterfall(code) {
   if (!code) return;
 
+  hideCostOfRiskAuditIntro();
   activeCostOfRiskMovementAuditXCode = code;
   if (code === activeCostOfRiskXAxisCode) {
     if (getLatestState()) renderCostOfRiskMovementAuditPanel(getLatestState());

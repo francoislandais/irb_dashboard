@@ -662,6 +662,66 @@ button:focus-visible {
   line-height: 1.35;
 }
 
+.cost-of-risk-audit-intro {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  color: #26332d;
+}
+
+.cost-of-risk-audit-intro-eyebrow {
+  color: var(--primary-dark);
+  font-size: 0.68rem;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.cost-of-risk-audit-intro-title {
+  margin: 0;
+  color: var(--primary-dark);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.cost-of-risk-audit-intro-lead {
+  margin: 0;
+  color: #435049;
+  font-size: 0.78rem;
+  line-height: 1.42;
+}
+
+.cost-of-risk-audit-intro-section {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding-top: 9px;
+  border-top: 1px solid #edf0ee;
+}
+
+.cost-of-risk-audit-intro-section h3 {
+  margin: 0;
+  color: #26332d;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.cost-of-risk-audit-intro-section p,
+.cost-of-risk-audit-intro-hint {
+  margin: 0;
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.38;
+}
+
+.cost-of-risk-audit-intro-hint {
+  padding: 9px;
+  border-radius: 7px;
+  background: #f4f6f5;
+  color: #435049;
+}
+
 .cost-of-risk-audit-panel .cost-of-risk-audit-title {
   font-size: 0.78rem;
   font-weight: 500;
