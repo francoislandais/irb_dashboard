@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

@@ -1,6 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
+  DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_F12_RECONCILIATION_X_CODES,
   COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE,
@@ -15,6 +16,7 @@ import {
   buildCostOfRiskFilteredSelectionValue,
   buildCostOfRiskMovementContributionAudit,
   buildCostOfRiskStageBoxTimeSeries,
+  buildCostOfRiskStageRatioModel,
   buildCostOfRiskStageReconciliationModel,
   buildCostOfRiskStageSummaryModel,
   buildCostOfRiskStageTransferFlowDiagram,
@@ -32,21 +34,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
+} from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskStageTransfers.js?v=20260717-staging-menu-tab";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-staging-menu-tab";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskChartUtils.js?v=20260717-staging-menu-tab";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -54,7 +56,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-staging-menu-tab";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -62,56 +64,64 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-disabled-axis-tabs";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-staging-menu-tab";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-staging-menu-tab";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-staging-menu-tab";
+import {
+  destroyCostOfRiskStageRatioChart,
+  formatCostOfRiskStageRatioCellValue,
+  getCostOfRiskStageRatioChart,
+  getCostOfRiskStageRatioMetricLabel,
+  renderCostOfRiskStageRatioChart,
+  renderCostOfRiskStageRatioTable
+} from "./costOfRiskStageRatioView.js?v=20260717-staging-menu-tab";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-staging-menu-tab";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskTreemapView.js?v=20260717-staging-menu-tab";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-staging-menu-tab";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-disabled-axis-tabs";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-staging-menu-tab";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-staging-menu-tab";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskControlsView.js?v=20260717-staging-menu-tab";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-explorer-disabled-axis-tabs";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-disabled-axis-tabs";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskAuditTableView.js?v=20260717-staging-menu-tab";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-staging-menu-tab";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-staging-menu-tab";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskTabsView.js?v=20260717-staging-menu-tab";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskModelCache.js?v=20260717-staging-menu-tab";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskFilterRules.js?v=20260717-staging-menu-tab";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -119,12 +129,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-staging-menu-tab";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskCoreSelection.js?v=20260717-staging-menu-tab";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -153,7 +163,9 @@ let activeCostOfRiskInstrumentFilterMenuOpen = false;
 let activeCostOfRiskStageTransferDisplayMenuOpen = false;
 let activeCostOfRiskSummaryDisplayMenuOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
+let activeCostOfRiskStageRatioCellKey = DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL;
 let activeCostOfRiskStageFilterMenuOpen = false;
+let activeCostOfRiskStagingTabMenuOpen = false;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskAuditIntroTab = "summary";
 let activeCostOfRiskHelpTopic = "";
@@ -200,6 +212,8 @@ const elements = {
   costOfRiskStage: document.querySelector("#cost-of-risk-stage"),
   costOfRiskStageReconciliationChart: document.querySelector("#cost-of-risk-stage-reconciliation-chart"),
   costOfRiskStageReconciliationSummary: document.querySelector("#cost-of-risk-stage-reconciliation-summary"),
+  costOfRiskStageRatioChart: document.querySelector("#cost-of-risk-stage-ratio-chart"),
+  costOfRiskStageRatioTable: document.querySelector("#cost-of-risk-stage-ratio-table"),
   costOfRiskSummaryDisplayControl: document.querySelector("#cost-of-risk-summary-display-control"),
   costOfRiskStageSummaryChart: document.querySelector("#cost-of-risk-stage-summary-chart"),
   costOfRiskStageSummaryTable: document.querySelector("#cost-of-risk-stage-summary-table"),
@@ -208,6 +222,10 @@ const elements = {
   costOfRiskStageTransferFlowChartTitle: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-title"),
   costOfRiskStageTransferFlowChartWrap: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-wrap"),
   costOfRiskStageTransferTitle: document.querySelector("#cost-of-risk-stage-transfer-title"),
+  costOfRiskStagingTab: document.querySelector("[data-cost-of-risk-tab-group='staging']"),
+  costOfRiskStagingTabLabel: document.querySelector("#cost-of-risk-staging-tab-label"),
+  costOfRiskStagingTabMenu: document.querySelector("#cost-of-risk-staging-tab-menu"),
+  costOfRiskStagingTabToggle: document.querySelector("#cost-of-risk-staging-tab-toggle"),
   costOfRiskTabs: document.querySelector(".cost-of-risk-tabs"),
   costOfRiskTabButtons: [...document.querySelectorAll("[data-cost-of-risk-tab]")],
   costOfRiskTabPanels: [...document.querySelectorAll("[data-cost-of-risk-panel]")],
@@ -250,7 +268,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     rerenderApp(actions.getState());
   });
   elements.costOfRiskDisplayMode?.addEventListener("change", (event) => {
-    if (["contributions", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) return;
+    if (["contributions", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) return;
     activeCostOfRiskDisplayMode = event.target.value === "amount" ? "amount" : "ratio";
     rerenderApp(actions.getState());
   });
@@ -260,6 +278,26 @@ export function wireCostOfRiskUi(actions, rerender) {
   });
   elements.costOfRiskSmoothing?.addEventListener("input", (event) => {
     updateCostOfRiskSmoothingWindow(event.target.value);
+  });
+  elements.costOfRiskStagingTabToggle?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    activeCostOfRiskStagingTabMenuOpen = !activeCostOfRiskStagingTabMenuOpen;
+    closeCostOfRiskFilterMenus();
+    renderCostOfRiskStagingTab();
+  });
+  elements.costOfRiskStagingTabMenu?.addEventListener("click", (event) => {
+    const option = event.target.closest?.("[data-cost-of-risk-staging-option]");
+    if (!option) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    activeCostOfRiskTab = option.dataset.costOfRiskStagingOption === "stage-transfers" ? "stage-transfers" : "stage-ratio";
+    activeCostOfRiskStagingTabMenuOpen = false;
+    clearCostOfRiskHelpTopic();
+    activeCostOfRiskAuditIntroTab = activeCostOfRiskTab;
+    closeCostOfRiskFilterMenus();
+    rerenderApp(actions.getState());
   });
   elements.costOfRiskTabs?.addEventListener("scroll", updateCostOfRiskTabsFade, { passive: true });
   window.addEventListener("resize", updateCostOfRiskTabsFade);
@@ -403,11 +441,21 @@ export function wireCostOfRiskUi(actions, rerender) {
     rerenderApp(actions.getState());
   });
   document.addEventListener("click", (event) => {
+    if (activeCostOfRiskStagingTabMenuOpen && !elements.costOfRiskStagingTab?.contains(event.target)) {
+      activeCostOfRiskStagingTabMenuOpen = false;
+      renderCostOfRiskStagingTab();
+    }
     if (!hasOpenCostOfRiskFilterMenu()) return;
     if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
     if (closeCostOfRiskFilterMenus()) rerenderApp(actions.getState());
   });
   document.addEventListener("pointerdown", (event) => {
+    if (activeCostOfRiskStagingTabMenuOpen && !elements.costOfRiskStagingTab?.contains(event.target)) {
+      window.setTimeout(() => {
+        activeCostOfRiskStagingTabMenuOpen = false;
+        renderCostOfRiskStagingTab();
+      }, 0);
+    }
     if (!hasOpenCostOfRiskFilterMenu()) return;
     if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
     window.setTimeout(() => {
@@ -432,6 +480,7 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
       activeCostOfRiskTab = button.dataset.costOfRiskTab || "contributions";
+      activeCostOfRiskStagingTabMenuOpen = false;
       clearCostOfRiskHelpTopic();
       activeCostOfRiskAuditIntroTab = activeCostOfRiskTab;
       closeCostOfRiskFilterMenus();
@@ -503,11 +552,12 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   renderCostOfRiskActiveFilters(filterOptions);
-  if (!["contributions", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskAuditPanelIntro();
+  if (!["contributions", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskAuditPanelIntro();
   const displayMode = getActiveCostOfRiskDisplayMode();
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = displayMode;
   if (elements.costOfRiskDisplayMode) {
     elements.costOfRiskDisplayMode.disabled = activeCostOfRiskTab === "contributions"
+      || activeCostOfRiskTab === "stage-ratio"
       || activeCostOfRiskTab === "stage-transfers"
       || activeCostOfRiskTab === "summary";
   }
@@ -554,6 +604,39 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskDashboard.hidden = false;
     renderCostOfRiskF18SummaryOnlyView(summary, state);
     renderCostOfRiskAuditPanelIntro();
+    scheduleCostOfRiskChartReflow();
+    return;
+  }
+
+  if (activeCostOfRiskTab === "stage-ratio") {
+    const stageRatio = getCostOfRiskCachedModel(
+      state,
+      createCostOfRiskModelCacheKey(state, "stage-ratio", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageRatioCellKey),
+      () => buildCostOfRiskStageRatioModel(
+        state,
+        activeCostOfRiskFilters,
+        activeCostOfRiskReferenceDate,
+        activeCostOfRiskStageRatioCellKey
+      )
+    );
+    activeCostOfRiskReferenceDate = stageRatio.referenceDate || activeCostOfRiskReferenceDate;
+    renderCostOfRiskActiveFilters(filterOptions);
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    elements.costOfRiskValue.textContent = "-";
+    elements.costOfRiskContext.textContent = "-";
+    elements.costOfRiskDenominatorValue.textContent = "-";
+    elements.costOfRiskDenominatorContext.textContent = "-";
+    elements.costOfRiskRatioValue.textContent = "-";
+    elements.costOfRiskRatioContext.textContent = "F_18.00 stage ratios";
+    elements.costOfRiskF02Value.textContent = "-";
+    elements.costOfRiskF02Context.textContent = "-";
+    elements.costOfRiskPoints.textContent = "-";
+    leaveCostOfRiskStageTransferTab();
+    clearCostOfRiskAuditTable();
+    renderCostOfRiskStageRatioView(stageRatio, state);
+    renderCostOfRiskStageRatioAuditPanel(stageRatio, state);
     scheduleCostOfRiskChartReflow();
     return;
   }
@@ -639,6 +722,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskMovementChart();
     destroyCostOfRiskWaterfallChart();
     destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskStageRatioChart();
     destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
     return;
@@ -778,6 +862,7 @@ function getActiveCostOfRiskCharts() {
       ? [getCostOfRiskCounterpartySummaryChart()]
       : [getCostOfRiskStageSummaryChart()];
   }
+  if (activeCostOfRiskTab === "stage-ratio") return [getCostOfRiskStageRatioChart()];
   if (activeCostOfRiskTab === "contributions") return [costOfRiskWaterfallChart, getCostOfRiskMovementChart()];
   if (activeCostOfRiskTab === "f2-vs-f12") return [getCostOfRiskF2VsF12Chart()];
   if (activeCostOfRiskTab === "stage-transfers") return [costOfRiskStageTransferChart, getCostOfRiskStageTransferFlowChart()];
@@ -792,7 +877,35 @@ function renderCostOfRiskTabs() {
     panels: elements.costOfRiskTabPanels,
     tabButtons: elements.costOfRiskTabButtons
   });
+  renderCostOfRiskStagingTab();
   window.requestAnimationFrame?.(updateCostOfRiskTabsFade);
+}
+
+function renderCostOfRiskStagingTab() {
+  const isStagingTab = activeCostOfRiskTab === "stage-ratio" || activeCostOfRiskTab === "stage-transfers";
+  const activeStagingLabel = activeCostOfRiskTab === "stage-transfers" ? "Transfer" : "Ratio";
+  elements.costOfRiskStagingTab?.classList.toggle("is-active", isStagingTab);
+  elements.costOfRiskStagingTab?.classList.toggle("is-open", activeCostOfRiskStagingTabMenuOpen);
+  elements.costOfRiskStagingTabToggle?.setAttribute("aria-selected", String(isStagingTab));
+  elements.costOfRiskStagingTabToggle?.setAttribute("aria-expanded", String(activeCostOfRiskStagingTabMenuOpen));
+  if (elements.costOfRiskStagingTabLabel) elements.costOfRiskStagingTabLabel.textContent = activeStagingLabel;
+  if (elements.costOfRiskStagingTabMenu) {
+    elements.costOfRiskStagingTabMenu.hidden = !activeCostOfRiskStagingTabMenuOpen;
+    if (activeCostOfRiskStagingTabMenuOpen) positionCostOfRiskStagingMenu();
+  }
+  elements.costOfRiskStagingTabMenu?.querySelectorAll("[data-cost-of-risk-staging-option]").forEach((option) => {
+    const isActive = option.dataset.costOfRiskStagingOption === activeCostOfRiskTab;
+    option.classList.toggle("is-active", isActive);
+    option.setAttribute("aria-checked", String(isActive));
+  });
+}
+
+function positionCostOfRiskStagingMenu() {
+  const toggleRect = elements.costOfRiskStagingTabToggle?.getBoundingClientRect();
+  if (!toggleRect || !elements.costOfRiskStagingTabMenu) return;
+
+  elements.costOfRiskStagingTabMenu.style.left = `${Math.max(8, toggleRect.left)}px`;
+  elements.costOfRiskStagingTabMenu.style.top = `${toggleRect.bottom}px`;
 }
 
 function updateCostOfRiskTabsFade() {
@@ -802,6 +915,7 @@ function updateCostOfRiskTabsFade() {
   const maxScrollLeft = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
   tabs.classList.toggle("can-scroll-left", tabs.scrollLeft > 1);
   tabs.classList.toggle("can-scroll-right", tabs.scrollLeft < maxScrollLeft - 1);
+  if (activeCostOfRiskStagingTabMenuOpen) positionCostOfRiskStagingMenu();
 }
 
 export function showCostOfRiskPeerDisplayHelp(peerDisplayMode) {
@@ -852,6 +966,36 @@ function renderCostOfRiskF18SummaryOnlyView(summary, state) {
   leaveCostOfRiskStageTransferTab();
   clearCostOfRiskAuditTable();
   renderCostOfRiskStageSummaryView(summary, state);
+}
+
+function renderCostOfRiskStageRatioView(stageRatio, state) {
+  renderCostOfRiskStageRatioTable({
+    activeCellKey: activeCostOfRiskStageRatioCellKey,
+    container: elements.costOfRiskStageRatioTable,
+    onCellSelect: selectCostOfRiskStageRatioCell,
+    stageRatio
+  });
+  renderCostOfRiskStageRatioChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    container: elements.costOfRiskStageRatioChart,
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
+    model: stageRatio,
+    onClearSmoothing: clearCostOfRiskSmoothing,
+    onChangeSmoothing: updateCostOfRiskSmoothingWindow,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    state
+  });
+}
+
+function selectCostOfRiskStageRatioCell(cellKey) {
+  activeCostOfRiskStageRatioCellKey = cellKey;
+  hideCostOfRiskAuditIntro();
+  clearCostOfRiskHelpTopic();
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 function normalizeActiveCostOfRiskFilter(name, options) {
@@ -925,6 +1069,9 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 }
 
 function renderCostOfRiskActiveFilters(filterOptions) {
+  const displayedFilters = activeCostOfRiskTab === "stage-ratio"
+    ? { ...activeCostOfRiskFilters, stage: COST_OF_RISK_FILTER_ALL }
+    : activeCostOfRiskFilters;
   renderCostOfRiskActiveFiltersView({
     activeTab: activeCostOfRiskTab,
     contributionDisplayMenuOpen: activeCostOfRiskContributionDisplayMenuOpen,
@@ -933,7 +1080,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     displayMode: getActiveCostOfRiskDisplayMode(),
     instrumentMenuOpen: activeCostOfRiskInstrumentFilterMenuOpen,
     filterOptions,
-    filters: activeCostOfRiskFilters,
+    filters: displayedFilters,
     referenceDate: activeCostOfRiskReferenceDate,
     stageMenuOpen: activeCostOfRiskStageFilterMenuOpen,
     summaryDisplayMenuOpen: activeCostOfRiskSummaryDisplayMenuOpen,
@@ -1114,6 +1261,80 @@ function renderCostOfRiskStageTransferAuditPanel(state) {
     onOpenSourcePoint: openCostOfRiskAuditSourceInExplorer,
     selectedUnit: state.selectedUnit
   });
+}
+
+function renderCostOfRiskStageRatioAuditPanel(stageRatio, state) {
+  if (!elements.costOfRiskAuditPanel) return;
+
+  if (renderCostOfRiskHelpPanel()) return;
+
+  if (isCostOfRiskAuditIntroVisible()) {
+    renderCostOfRiskAuditPanelIntro();
+    return;
+  }
+
+  const selectedCell = stageRatio.selectedCell;
+  const row = (stageRatio.rows ?? []).find((candidate) => candidate.key === selectedCell?.stageKey);
+  if (activeCostOfRiskTab !== "stage-ratio" || !selectedCell || !row) {
+    renderCostOfRiskAuditPanelIntro();
+    return;
+  }
+
+  const selectedValue = row.cells?.[selectedCell.metric]?.value ?? null;
+  const article = document.createElement("article");
+  article.className = "cost-of-risk-audit-intro";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = "Stage ratio audit trail";
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = `${getCostOfRiskStageRatioMetricLabel(selectedCell.metric)} - ${row.label}`;
+
+  const lead = document.createElement("p");
+  lead.className = "cost-of-risk-audit-intro-lead";
+  lead.textContent = `Selected value: ${formatCostOfRiskStageRatioCellValue(selectedValue, selectedCell.metric)}.`;
+
+  article.append(eyebrow, title, lead);
+  article.append(createCostOfRiskAuditInfoSection("Selected scope", [
+    `Reference date: ${formatReferenceQuarterLabel(stageRatio.referenceDate)}`,
+    `JST: ${state.selectedJst}`,
+    `Perimeter: ${stageRatio.filterLabel || "selected instruments and counterparties"}`,
+    "The global Stage filter is not applied here because the three stages are shown explicitly."
+  ]));
+  article.append(createCostOfRiskAuditInfoSection("Ratio components", [
+    `Current numerator: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
+    `Current denominator: ${formatMetricValue(row.currentDenominator, state.selectedUnit)}`,
+    `Previous numerator: ${formatMetricValue(row.previousNumerator, state.selectedUnit)}`,
+    `Previous denominator: ${formatMetricValue(row.previousDenominator, state.selectedUnit)}`
+  ]));
+  article.append(createCostOfRiskAuditInfoSection("Decomposition method", [
+    "The change in the ratio is decomposed with a two-factor Shapley method.",
+    "One path changes the numerator first and then the denominator; the other path changes the denominator first and then the numerator.",
+    "The displayed numerator and denominator effects are the average of these two paths, so their sum equals the total ratio variation."
+  ]));
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "Click another cell in the upper table to benchmark and explain that stage-ratio component.";
+  article.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(article);
+}
+
+function createCostOfRiskAuditInfoSection(titleText, lines) {
+  const section = document.createElement("section");
+  section.className = "cost-of-risk-audit-intro-section";
+
+  const title = document.createElement("h3");
+  title.textContent = titleText;
+
+  const body = document.createElement("p");
+  body.textContent = lines.filter(Boolean).join("\n");
+
+  section.append(title, body);
+  return section;
 }
 
 function openCostOfRiskAuditSourceInExplorer(sourcePoint) {
@@ -1602,6 +1823,26 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         }
       ],
       hint: "Click a table cell to focus the time chart on that metric."
+    },
+    "stage-ratio": {
+      eyebrow: "Stage mix",
+      title: "Stage Ratio",
+      lead: "This view measures the share of the selected exposure perimeter that sits in Stage 1, Stage 2 or Stage 3.",
+      sections: [
+        {
+          title: "What you see",
+          body: "The upper table shows each stage ratio, its quarter-on-quarter change, and a split of that change between numerator and denominator effects."
+        },
+        {
+          title: "How it is calculated",
+          body: "Stage ratio = gross carrying amount of the stage divided by total gross carrying amount of the perimeter. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
+        },
+        {
+          title: "Source",
+          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the global stage filter is ignored in this view because stages are displayed explicitly."
+        }
+      ],
+      hint: "Click a table cell to benchmark the selected ratio or decomposition effect over time."
     },
     "stage-transfers": {
       eyebrow: "Flow analysis",

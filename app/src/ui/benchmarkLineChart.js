@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260717-explorer-disabled-axis-tabs";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260717-staging-menu-tab";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];

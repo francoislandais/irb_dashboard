@@ -715,6 +715,10 @@ button:focus-visible {
   line-height: 1.38;
 }
 
+.cost-of-risk-audit-intro-section p {
+  white-space: pre-line;
+}
+
 .cost-of-risk-audit-intro-hint {
   padding: 9px;
   border-radius: 7px;
@@ -921,7 +925,6 @@ button:focus-visible {
   background: #ffffff;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 5px;
   scrollbar-color: #c8d0cb transparent;
   scrollbar-width: thin;
   white-space: nowrap;
@@ -966,6 +969,79 @@ button:focus-visible {
   font-size: 0.78rem;
   font-weight: 600;
   padding: 7px 12px;
+}
+
+.cost-of-risk-staging-tab-wrap {
+  display: inline-flex;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.cost-of-risk-staging-tab {
+  align-items: center;
+  display: inline-flex;
+  gap: 5px;
+  min-height: 100%;
+  padding: 7px 12px;
+}
+
+.cost-of-risk-staging-tab-label {
+  font-weight: 700;
+}
+
+.cost-of-risk-staging-tab-caret {
+  font-size: 0.66rem;
+}
+
+.cost-of-risk-staging-tab-menu {
+  background: #ffffff;
+  border: 1px solid #d8dfdb;
+  border-radius: 7px;
+  box-shadow: 0 12px 26px rgba(21, 33, 27, 0.16);
+  display: grid;
+  gap: 3px;
+  left: 6px;
+  min-width: 240px;
+  padding: 5px;
+  position: fixed;
+  top: var(--staging-tab-menu-top, 0);
+  transform: translateY(4px);
+  z-index: 90;
+}
+
+.cost-of-risk-staging-tab-menu[hidden] {
+  display: none;
+}
+
+.cost-of-risk-staging-tab-option {
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: #26332d;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.cost-of-risk-staging-tab-option:hover,
+.cost-of-risk-staging-tab-option.is-active {
+  background: #eef3f0;
+}
+
+.cost-of-risk-staging-tab-option-title {
+  color: var(--primary-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.cost-of-risk-staging-tab-option-text {
+  color: #66736d;
+  font-size: 0.68rem;
+  font-weight: 400;
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .cost-of-risk-tab:last-child {
@@ -1158,6 +1234,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="summary"],
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-ratio"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-reconciliation"] {
@@ -1625,6 +1702,10 @@ button:focus-visible {
   width: 80px;
 }
 
+.cost-of-risk-stage-ratio-col-value {
+  width: 132px;
+}
+
 .cost-of-risk-stage-summary-col-gap {
   width: 18px;
 }
@@ -1915,6 +1996,30 @@ button:focus-visible {
 
 .cost-of-risk-counterparty-summary-grid .cost-of-risk-stage-summary-row-label {
   white-space: normal;
+}
+
+.cost-of-risk-stage-ratio-table {
+  justify-content: start;
+  padding-top: 0;
+}
+
+.cost-of-risk-stage-ratio-grid {
+  width: 688px;
+}
+
+.cost-of-risk-stage-ratio-grid thead th {
+  text-align: right;
+}
+
+.cost-of-risk-stage-ratio-grid thead th:first-child,
+.cost-of-risk-stage-ratio-grid tbody th {
+  text-align: left;
+}
+
+.cost-of-risk-stage-ratio-grid .cost-of-risk-stage-summary-cell.is-active,
+.cost-of-risk-stage-ratio-grid .cost-of-risk-stage-summary-cell.is-active:hover {
+  background: var(--primary-dark);
+  color: #ffffff;
 }
 
 .cost-of-risk-f2-f12-chart {

@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_X_AXIS_CODE,
   formatCostOfRiskSmoothingLabel
-} from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
+} from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
 
 const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
 let lastCostOfRiskSmoothingRenderKey = "";

@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./benchmarkLineChart.js?v=20260717-staging-menu-tab";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,11 +20,11 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskChartUtils.js?v=20260717-staging-menu-tab";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-disabled-axis-tabs";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-staging-menu-tab";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260717-explorer-disabled-axis-tabs">
+    <link rel="stylesheet" href="./src/styles.css?v=20260717-staging-menu-tab">
   </head>
   <body>
     <div class="app-shell">
@@ -174,7 +174,23 @@
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Stage transfers</button>
+                  <div class="cost-of-risk-staging-tab-wrap" data-cost-of-risk-tab-group="staging">
+                    <button id="cost-of-risk-staging-tab-toggle" class="cost-of-risk-tab cost-of-risk-staging-tab" type="button" role="tab" aria-selected="false" aria-haspopup="menu" aria-expanded="false">
+                      <span>Staging:</span>
+                      <span id="cost-of-risk-staging-tab-label" class="cost-of-risk-staging-tab-label">Ratio</span>
+                      <span class="cost-of-risk-staging-tab-caret" aria-hidden="true">▾</span>
+                    </button>
+                    <div id="cost-of-risk-staging-tab-menu" class="cost-of-risk-staging-tab-menu" role="menu" hidden>
+                      <button class="cost-of-risk-staging-tab-option" type="button" role="menuitemradio" data-cost-of-risk-staging-option="stage-ratio">
+                        <span class="cost-of-risk-staging-tab-option-title">Staging Ratio</span>
+                        <span class="cost-of-risk-staging-tab-option-text">Benchmark the share of exposures in each IFRS 9 stage.</span>
+                      </button>
+                      <button class="cost-of-risk-staging-tab-option" type="button" role="menuitemradio" data-cost-of-risk-staging-option="stage-transfers">
+                        <span class="cost-of-risk-staging-tab-option-title">Staging Transfer</span>
+                        <span class="cost-of-risk-staging-tab-option-text">Analyse flows moving exposures between stages.</span>
+                      </button>
+                    </div>
+                  </div>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Movement in allowance</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation">Stage Reconciliation</button>
@@ -196,6 +212,14 @@
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-stage-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 stage summary time series"></div>
                     <div id="cost-of-risk-counterparty-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 counterparty summary time series" hidden></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-ratio" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-stage-ratio-table" class="cost-of-risk-stage-summary-table cost-of-risk-stage-ratio-table" aria-label="Stage ratio decomposition table"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-stage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Stage ratio time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="f2-vs-f12" hidden>
@@ -285,6 +309,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260717-explorer-disabled-axis-tabs"></script>
+    <script type="module" src="./src/main.js?v=20260717-staging-menu-tab"></script>
   </body>
 </html>

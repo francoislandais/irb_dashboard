@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
+} from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
