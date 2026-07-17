@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260717-standalone-export";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260717-header-context-controls";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

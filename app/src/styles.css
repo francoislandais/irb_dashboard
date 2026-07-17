@@ -279,6 +279,22 @@ button:disabled {
   width: 230px;
 }
 
+.dataset-info-button {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.dataset-info-button:hover {
+  color: #ffffff;
+}
+
 .topbar-button {
   min-height: 24px;
   border: 1px solid rgba(255, 255, 255, 0.28);
@@ -302,68 +318,6 @@ button:disabled {
 .topbar-button:disabled {
   color: rgba(255, 255, 255, 0.38);
   border-color: rgba(255, 255, 255, 0.13);
-}
-
-.header-peer-display {
-  align-items: center;
-  color: #ffffff;
-  display: inline-flex;
-  gap: 8px;
-  margin-right: 2px;
-  min-height: 24px;
-  white-space: nowrap;
-}
-
-.header-peer-display > span {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-.header-peer-display-group {
-  display: inline-flex;
-}
-
-.header-peer-display-option {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: rgba(255, 255, 255, 0.76);
-  cursor: pointer;
-  font-size: 0.72rem;
-  font-weight: 600;
-  height: 24px;
-  padding: 0 8px;
-}
-
-.header-peer-display-option:first-child {
-  border-bottom-left-radius: 5px;
-  border-right: 0;
-  border-top-left-radius: 5px;
-}
-
-.header-peer-display-option:last-child {
-  border-bottom-right-radius: 5px;
-  border-top-right-radius: 5px;
-}
-
-.header-peer-display-option.is-active {
-  background: #ffffff;
-  color: var(--primary-dark);
-}
-
-.header-peer-display-option:disabled {
-  color: rgba(255, 255, 255, 0.32);
-  cursor: not-allowed;
-}
-
-.header-extraction-timestamp {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.72rem;
-  font-weight: 600;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 h1,
@@ -648,7 +602,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-peer-selection-panel {
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr) auto auto;
   height: 100%;
 }
 
@@ -656,6 +610,53 @@ button:focus-visible {
   display: flex;
   gap: 6px;
   min-width: 0;
+}
+
+.cost-of-risk-peer-display-panel {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cost-of-risk-peer-display-label {
+  color: #69766f;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cost-of-risk-peer-display-group {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.cost-of-risk-peer-display-option {
+  background: #ffffff;
+  border: 1px solid #d8dfdb;
+  color: #516059;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  height: 28px;
+  padding: 0 9px;
+}
+
+.cost-of-risk-peer-display-option:first-child {
+  border-bottom-left-radius: 6px;
+  border-right: 0;
+  border-top-left-radius: 6px;
+}
+
+.cost-of-risk-peer-display-option:last-child {
+  border-bottom-right-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.cost-of-risk-peer-display-option.is-active {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: #ffffff;
 }
 
 .cost-of-risk-peer-selection-button {

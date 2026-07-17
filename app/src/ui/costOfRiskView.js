@@ -36,21 +36,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-standalone-export";
+} from "../data/costOfRisk.js?v=20260717-header-context-controls";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-standalone-export";
+} from "./costOfRiskStageTransfers.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-standalone-export";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-header-context-controls";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-standalone-export";
+} from "./costOfRiskChartUtils.js?v=20260717-header-context-controls";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -58,7 +58,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-standalone-export";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -66,13 +66,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-standalone-export";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-standalone-export";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-header-context-controls";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-standalone-export";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -80,7 +80,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260717-standalone-export";
+} from "./costOfRiskStageRatioView.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -88,50 +88,50 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260717-standalone-export";
+} from "./costOfRiskCoverageRatioView.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-standalone-export";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-header-context-controls";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-standalone-export";
+} from "./costOfRiskTreemapView.js?v=20260717-header-context-controls";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-standalone-export";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-header-context-controls";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-standalone-export";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-standalone-export";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-header-context-controls";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-header-context-controls";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-standalone-export";
+} from "./costOfRiskControlsView.js?v=20260717-header-context-controls";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-standalone-export";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-standalone-export";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-standalone-export";
+} from "./costOfRiskAuditTableView.js?v=20260717-header-context-controls";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-header-context-controls";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-header-context-controls";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-standalone-export";
+} from "./costOfRiskTabsView.js?v=20260717-header-context-controls";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-standalone-export";
+} from "./costOfRiskModelCache.js?v=20260717-header-context-controls";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-standalone-export";
+} from "./costOfRiskFilterRules.js?v=20260717-header-context-controls";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -139,12 +139,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-standalone-export";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-header-context-controls";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-standalone-export";
+} from "./costOfRiskCoreSelection.js?v=20260717-header-context-controls";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -189,6 +189,7 @@ let costOfRiskStageTransferChart = null;
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
 let costOfRiskWaterfallChart = null;
 let costOfRiskPeerSelectionActions = null;
+let costOfRiskDatasetInfoActions = null;
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
   asset: COST_OF_RISK_FILTER_ALL,
@@ -1088,6 +1089,12 @@ export function showCostOfRiskPeerSelection(actions) {
   renderCostOfRiskHelpPanel();
 }
 
+export function showCostOfRiskDatasetInfo(actions) {
+  costOfRiskDatasetInfoActions = actions;
+  setCostOfRiskHelpTopic("dataset-info");
+  renderCostOfRiskHelpPanel();
+}
+
 function renderCostOfRiskTabEmpty(message) {
   renderCostOfRiskTabEmptyView({
     activeTab: activeCostOfRiskTab,
@@ -1695,6 +1702,11 @@ function renderCostOfRiskHelpPanel() {
     return true;
   }
 
+  if (activeCostOfRiskHelpTopic === "dataset-info") {
+    renderCostOfRiskDatasetInfoPanel();
+    return true;
+  }
+
   const content = getCostOfRiskHelpPanelContent(activeCostOfRiskHelpTopic);
   if (!content) return false;
 
@@ -1772,6 +1784,8 @@ function renderCostOfRiskPeerSelectionPanel() {
   intro.append(eyebrow, title, summary);
 
   if (jstOptions.length > 0) {
+    intro.append(renderCostOfRiskPeerDisplayControl(state));
+
     const actions = document.createElement("div");
     actions.className = "cost-of-risk-peer-selection-actions";
     actions.append(
@@ -1822,6 +1836,46 @@ function renderCostOfRiskPeerSelectionPanel() {
   elements.costOfRiskAuditPanel.replaceChildren(intro);
 }
 
+function renderCostOfRiskPeerDisplayControl(state) {
+  const activeMode = state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  const block = document.createElement("section");
+  block.className = "cost-of-risk-peer-display-panel";
+
+  const label = document.createElement("div");
+  label.className = "cost-of-risk-peer-display-label";
+  label.textContent = "Display";
+
+  const group = document.createElement("div");
+  group.className = "cost-of-risk-peer-display-group";
+  group.setAttribute("role", "radiogroup");
+  group.setAttribute("aria-label", "Peer display mode");
+  group.append(
+    createCostOfRiskPeerDisplayOption("Explicit", "explicit", activeMode),
+    createCostOfRiskPeerDisplayOption("Anonymized", "anonymised", activeMode)
+  );
+
+  block.append(label, group);
+  return block;
+}
+
+function createCostOfRiskPeerDisplayOption(label, mode, activeMode) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "cost-of-risk-peer-display-option";
+  button.classList.toggle("is-active", mode === activeMode);
+  button.dataset.peerDisplayMode = mode;
+  button.setAttribute("role", "radio");
+  button.setAttribute("aria-checked", String(mode === activeMode));
+  button.textContent = label;
+  button.addEventListener("click", () => updateCostOfRiskPeerDisplayMode(mode));
+  return button;
+}
+
+function updateCostOfRiskPeerDisplayMode(peerDisplayMode) {
+  if (!costOfRiskPeerSelectionActions?.updatePeerDisplayMode) return;
+  costOfRiskPeerSelectionActions.updatePeerDisplayMode(peerDisplayMode);
+}
+
 function createCostOfRiskPeerSelectionButton(label, onClick) {
   const button = document.createElement("button");
   button.type = "button";
@@ -1834,6 +1888,67 @@ function createCostOfRiskPeerSelectionButton(label, onClick) {
 function updateCostOfRiskPeerSelection(peerJstCodes) {
   if (!costOfRiskPeerSelectionActions?.updatePeerJstCodes) return;
   costOfRiskPeerSelectionActions.updatePeerJstCodes(peerJstCodes);
+}
+
+function renderCostOfRiskDatasetInfoPanel() {
+  const state = costOfRiskDatasetInfoActions?.getState?.() ?? getLatestState();
+  const activeDataset = state?.datasets?.find((dataset) => dataset.id === state.activeDatasetId) ?? null;
+  const extractionDate = formatCostOfRiskExtractionDate(state?.extractionTimestamp);
+
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = "Dataset metadata";
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = "Dataset";
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = activeDataset
+    ? "This panel summarises the dataset currently loaded in the application."
+    : "No dataset is currently loaded.";
+
+  intro.append(eyebrow, title, summary);
+  intro.append(createCostOfRiskAuditInfoSection("Loaded file", [
+    activeDataset?.label || state?.fileName || "No dataset",
+    `Source: ${formatCostOfRiskDatasetSource(activeDataset?.source || state?.source)}`,
+    `Rows: ${Number(state?.rows?.length ?? 0).toLocaleString("fr-FR")}`,
+    `Columns: ${Number(state?.columns?.length ?? 0).toLocaleString("fr-FR")}`
+  ]));
+  intro.append(createCostOfRiskAuditInfoSection("Extraction", [
+    extractionDate
+      ? `Extraction date: ${extractionDate}`
+      : "Extraction date not available",
+    state?.extractionTimestamp ? `Raw timestamp: ${state.extractionTimestamp}` : ""
+  ]));
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "Use the Dataset dropdown in the header to switch to another loaded dataset or add a new one.";
+  intro.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function formatCostOfRiskDatasetSource(source) {
+  if (source === "embedded") return "portable embedded dataset";
+  if (source === "local") return "local file";
+  if (source === "session") return "session file";
+  return source || "not available";
+}
+
+function formatCostOfRiskExtractionDate(extractionTimestamp) {
+  const value = String(extractionTimestamp ?? "").trim();
+  if (!value) return "";
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    return new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(date);
+  }
+  return value;
 }
 
 function renderCostOfRiskSmoothingHelpControl(windowSize) {

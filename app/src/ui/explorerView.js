@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-standalone-export";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-header-context-controls";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-standalone-export";
+} from "./benchmarkLineChart.js?v=20260717-header-context-controls";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -89,6 +89,7 @@ let explorerCellRangePreview = null;
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
 let explorerPeerSelectionActions = null;
+let explorerDatasetInfoActions = null;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -185,6 +186,12 @@ export function wireExplorerUi(actions, rerender) {
 export function showExplorerPeerSelection(actions) {
   explorerPeerSelectionActions = actions;
   explorerContextTopic = "peer-selection";
+  renderExplorerContextPanel(actions.getState());
+}
+
+export function showExplorerDatasetInfo(actions) {
+  explorerDatasetInfoActions = actions;
+  explorerContextTopic = "dataset-info";
   renderExplorerContextPanel(actions.getState());
 }
 
@@ -1310,6 +1317,11 @@ function renderExplorerContextPanel(state) {
     return;
   }
 
+  if (explorerContextTopic === "dataset-info") {
+    renderExplorerDatasetInfoPanel(state);
+    return;
+  }
+
   const captions = getExplorerAxisCaptions();
   const activeAxis = getActiveExplorerAxis();
   const activeTemplate = getActiveExplorerTemplate();
@@ -1384,6 +1396,8 @@ function renderExplorerPeerSelectionPanel(state) {
   article.append(eyebrow, title, lead);
 
   if (jstOptions.length > 0) {
+    article.append(renderExplorerPeerDisplayControl(state));
+
     const actions = document.createElement("div");
     actions.className = "cost-of-risk-peer-selection-actions";
     actions.append(
@@ -1434,6 +1448,46 @@ function renderExplorerPeerSelectionPanel(state) {
   elements.explorerContextPanel.replaceChildren(article);
 }
 
+function renderExplorerPeerDisplayControl(state) {
+  const activeMode = state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  const block = document.createElement("section");
+  block.className = "cost-of-risk-peer-display-panel";
+
+  const label = document.createElement("div");
+  label.className = "cost-of-risk-peer-display-label";
+  label.textContent = "Display";
+
+  const group = document.createElement("div");
+  group.className = "cost-of-risk-peer-display-group";
+  group.setAttribute("role", "radiogroup");
+  group.setAttribute("aria-label", "Peer display mode");
+  group.append(
+    createExplorerPeerDisplayOption("Explicit", "explicit", activeMode),
+    createExplorerPeerDisplayOption("Anonymized", "anonymised", activeMode)
+  );
+
+  block.append(label, group);
+  return block;
+}
+
+function createExplorerPeerDisplayOption(label, mode, activeMode) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "cost-of-risk-peer-display-option";
+  button.classList.toggle("is-active", mode === activeMode);
+  button.dataset.peerDisplayMode = mode;
+  button.setAttribute("role", "radio");
+  button.setAttribute("aria-checked", String(mode === activeMode));
+  button.textContent = label;
+  button.addEventListener("click", () => updateExplorerPeerDisplayMode(mode));
+  return button;
+}
+
+function updateExplorerPeerDisplayMode(peerDisplayMode) {
+  if (!explorerPeerSelectionActions?.updatePeerDisplayMode) return;
+  explorerPeerSelectionActions.updatePeerDisplayMode(peerDisplayMode);
+}
+
 function createExplorerPeerSelectionButton(label, onClick) {
   const button = document.createElement("button");
   button.type = "button";
@@ -1446,6 +1500,65 @@ function createExplorerPeerSelectionButton(label, onClick) {
 function updateExplorerPeerSelection(peerJstCodes) {
   if (!explorerPeerSelectionActions?.updatePeerJstCodes) return;
   explorerPeerSelectionActions.updatePeerJstCodes(peerJstCodes);
+}
+
+function renderExplorerDatasetInfoPanel(state) {
+  const panelState = state ?? explorerDatasetInfoActions?.getState?.() ?? getLatestState();
+  const activeDataset = panelState?.datasets?.find((dataset) => dataset.id === panelState.activeDatasetId) ?? null;
+  const extractionDate = formatExplorerExtractionDate(panelState?.extractionTimestamp);
+
+  const article = document.createElement("article");
+  article.className = "explorer-context-article";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "explorer-context-eyebrow";
+  eyebrow.textContent = "Dataset metadata";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Dataset";
+
+  const lead = document.createElement("p");
+  lead.className = "explorer-context-lead";
+  lead.textContent = activeDataset
+    ? "This panel summarises the dataset currently loaded in the application."
+    : "No dataset is currently loaded.";
+
+  article.append(eyebrow, title, lead);
+  article.append(createExplorerContextItem("Loaded file", [
+    activeDataset?.label || panelState?.fileName || "No dataset",
+    `Source: ${formatExplorerDatasetSource(activeDataset?.source || panelState?.source)}`,
+    `Rows: ${Number(panelState?.rows?.length ?? 0).toLocaleString("fr-FR")}`,
+    `Columns: ${Number(panelState?.columns?.length ?? 0).toLocaleString("fr-FR")}`
+  ].join("\n")));
+  article.append(createExplorerContextItem("Extraction", [
+    extractionDate ? `Extraction date: ${extractionDate}` : "Extraction date not available",
+    panelState?.extractionTimestamp ? `Raw timestamp: ${panelState.extractionTimestamp}` : ""
+  ].filter(Boolean).join("\n")));
+
+  const hint = document.createElement("p");
+  hint.className = "explorer-context-hint";
+  hint.textContent = "Use the Dataset dropdown in the header to switch to another loaded dataset or add a new one.";
+  article.append(hint);
+
+  elements.explorerContextPanel.replaceChildren(article);
+}
+
+function formatExplorerDatasetSource(source) {
+  if (source === "embedded") return "portable embedded dataset";
+  if (source === "local") return "local file";
+  if (source === "session") return "session file";
+  return source || "not available";
+}
+
+function formatExplorerExtractionDate(extractionTimestamp) {
+  const value = String(extractionTimestamp ?? "").trim();
+  if (!value) return "";
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    return new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(date);
+  }
+  return value;
 }
 
 function createExplorerReturnButton(target) {

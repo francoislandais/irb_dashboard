@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, showCostOfRiskPeerDisplayHelp, showCostOfRiskPeerSelection, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260717-standalone-export";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260717-standalone-export";
+import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260717-header-context-controls";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260717-header-context-controls";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -9,8 +9,8 @@ const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
+  datasetInfoButton: document.querySelector("#dataset-info-button"),
   datasetSelect: document.querySelector("#dataset-select"),
-  extractionTimestamp: document.querySelector("#extraction-timestamp"),
   exportStandaloneButton: document.querySelector("#export-standalone-button"),
   fileName: document.querySelector("#file-name"),
   fileStatus: document.querySelector("#file-status"),
@@ -18,7 +18,6 @@ const elements = {
   jstSelect: document.querySelector("#jst-select"),
   moduleButtons: [...document.querySelectorAll("[data-module-target]")],
   moduleViews: [...document.querySelectorAll(".module-view")],
-  peerDisplayButtons: [...document.querySelectorAll("[data-peer-display-mode]")],
   peersButton: document.querySelector("#peers-button"),
   reloadFileButton: document.querySelector("#reload-file-button"),
   rowCount: document.querySelector("#row-count"),
@@ -33,6 +32,14 @@ export function wireUi(actions) {
   elements.reloadFileButton?.addEventListener("click", actions.reloadFile);
   elements.forgetFileButton?.addEventListener("click", actions.forgetFile);
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
+  elements.datasetInfoButton?.addEventListener("click", () => {
+    const activeModule = actions.getState().activeModule;
+    if (activeModule === "cost-of-risk") {
+      showCostOfRiskDatasetInfo(actions);
+    } else if (activeModule === "explorer") {
+      showExplorerDatasetInfo(actions);
+    }
+  });
   elements.peersButton?.addEventListener("click", () => {
     const activeModule = actions.getState().activeModule;
     if (activeModule === "cost-of-risk") {
@@ -40,13 +47,6 @@ export function wireUi(actions) {
     } else if (activeModule === "explorer") {
       showExplorerPeerSelection(actions);
     }
-  });
-  elements.peerDisplayButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const peerDisplayMode = button.dataset.peerDisplayMode;
-      showCostOfRiskPeerDisplayHelp(peerDisplayMode);
-      actions.updatePeerDisplayMode(peerDisplayMode);
-    });
   });
   elements.datasetSelect?.addEventListener("change", async (event) => {
     if (event.target.value === ADD_DATASET_OPTION) {
@@ -105,14 +105,12 @@ export function renderAppState(state) {
   if (elements.rowCount) elements.rowCount.textContent = state.rows.length.toLocaleString("fr-FR");
   if (elements.columnCount) elements.columnCount.textContent = state.columns.length.toLocaleString("fr-FR");
   if (elements.fileName) elements.fileName.textContent = activeDataset?.label || state.fileName || "-";
-  renderExtractionTimestamp(state.extractionTimestamp);
   if (elements.reloadFileButton) elements.reloadFileButton.disabled = !state.fileHandle;
   if (elements.forgetFileButton) {
     elements.forgetFileButton.disabled = !hasData || activeDataset?.source === "embedded";
   }
   if (elements.exportStandaloneButton) elements.exportStandaloneButton.disabled = !hasData;
   if (elements.peersButton) elements.peersButton.disabled = state.jstOptions.length === 0;
-  renderPeerDisplayControl(state.peerDisplayMode, state.jstOptions.length > 0);
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
   renderJstSelect(state.jstOptions, state.selectedJst);
   renderActiveModule(state.activeModule);
@@ -140,31 +138,6 @@ export function renderAppState(state) {
   if (state.activeModule === "explorer") renderExplorer(state);
   if (state.activeModule === "cet-1") renderCet1(state);
   if (state.activeModule === "cost-of-risk") renderCostOfRisk(state);
-}
-
-function renderExtractionTimestamp(extractionTimestamp) {
-  if (!elements.extractionTimestamp) return;
-  const formatted = formatExtractionTimestamp(extractionTimestamp);
-  elements.extractionTimestamp.textContent = formatted
-    ? `Extraction: ${formatted}`
-    : "Extraction date not available";
-  elements.extractionTimestamp.title = formatted
-    ? `Extraction timestamp: ${extractionTimestamp}`
-    : "Extraction date not available";
-}
-
-function formatExtractionTimestamp(extractionTimestamp) {
-  const value = String(extractionTimestamp ?? "").trim();
-  if (!value) return "";
-
-  const date = new Date(value);
-  if (!Number.isNaN(date.getTime())) {
-    return new Intl.DateTimeFormat("fr-FR", {
-      dateStyle: "short"
-    }).format(date);
-  }
-
-  return value;
 }
 
 function renderDatasetSelect(datasets, activeDatasetId, rememberedFileReady = false, rememberedFileName = "") {
@@ -216,16 +189,6 @@ function renderJstSelect(jstOptions, selectedJst) {
     elements.jstSelect.append(new Option(jstCode, jstCode, false, jstCode === selectedJst));
   });
   elements.jstSelect.disabled = false;
-}
-
-function renderPeerDisplayControl(peerDisplayMode, hasPeers) {
-  const activeMode = peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
-  elements.peerDisplayButtons.forEach((button) => {
-    const isActive = button.dataset.peerDisplayMode === activeMode;
-    button.classList.toggle("is-active", isActive);
-    button.disabled = !hasPeers;
-    button.setAttribute("aria-checked", String(isActive));
-  });
 }
 
 function renderActiveModule(activeModule) {

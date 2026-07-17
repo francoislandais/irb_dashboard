@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260717-standalone-export";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260717-standalone-export";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260717-header-context-controls";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260717-header-context-controls";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
