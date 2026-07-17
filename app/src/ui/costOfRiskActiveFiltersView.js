@@ -157,14 +157,23 @@ function createCostOfRiskDefinitionChip(definitionId, isOpen) {
     COST_OF_RISK_DEFINITION_OPTIONS.forEach((definition) => {
       const button = document.createElement("button");
       const isActive = definition.id === activeDefinition.id;
-      button.className = "cost-of-risk-stage-filter-option";
+      button.className = "cost-of-risk-definition-filter-option";
       button.classList.toggle("is-active", isActive);
       button.type = "button";
       button.dataset.costOfRiskDefinitionOption = definition.id;
       button.setAttribute("role", "option");
       button.setAttribute("aria-selected", String(isActive));
-      button.textContent = definition.label;
       button.title = definition.description;
+      const title = document.createElement("span");
+      title.className = "cost-of-risk-definition-filter-option-title";
+      title.textContent = definition.label;
+      const description = document.createElement("span");
+      description.className = "cost-of-risk-definition-filter-option-description";
+      description.textContent = definition.description;
+      const source = document.createElement("span");
+      source.className = "cost-of-risk-definition-filter-option-source";
+      source.textContent = definition.source;
+      button.append(title, description, source);
       menu.append(button);
     });
     chip.append(menu);

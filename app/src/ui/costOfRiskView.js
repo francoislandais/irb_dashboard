@@ -1,5 +1,6 @@
 import {
   COST_OF_RISK_FILTER_ALL,
+  COST_OF_RISK_DEFINITION_OPTIONS,
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
   DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL,
@@ -451,7 +452,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       closeCostOfRiskFilterMenus();
       activeCostOfRiskDefinitionId = definitionOption.dataset.costOfRiskDefinitionOption || "f12-selected-components";
       activeCostOfRiskDefinitionDriverCode = "";
-      clearCostOfRiskHelpTopic();
+      setCostOfRiskHelpTopic(`cost-risk-definition:${activeCostOfRiskDefinitionId}`);
       rerenderApp(actions.getState());
       return;
     }
@@ -467,6 +468,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskInstrumentFilterMenuOpen = false;
       activeCostOfRiskCounterpartyFilterMenuOpen = false;
       activeCostOfRiskStageFilterMenuOpen = false;
+      setCostOfRiskHelpTopic(`cost-risk-definition:${activeCostOfRiskDefinitionId}`);
       rerenderApp(actions.getState());
       return;
     }
@@ -1432,42 +1434,38 @@ function createCostOfRiskDefinitionCard(labelText, valueText, contextText, optio
 
 function renderCostOfRiskDefinitionAuditPanel(definitionModel) {
   if (!elements.costOfRiskAuditPanel) return;
-  const content = getCostOfRiskAuditPanelIntroContent("cost-of-risk");
+  if (renderCostOfRiskHelpPanel()) return;
   const article = document.createElement("article");
   article.className = "cost-of-risk-audit-intro";
 
   const eyebrow = document.createElement("div");
   eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = content.eyebrow;
+  eyebrow.textContent = "Cost of risk method";
 
   const title = document.createElement("h2");
   title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = content.title;
+  title.textContent = definitionModel.definition?.label ?? "Cost of risk definition";
 
   const lead = document.createElement("p");
   lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = content.lead;
+  lead.textContent = definitionModel.definition?.description ?? "";
 
   article.append(eyebrow, title, lead);
-  article.append(createCostOfRiskAuditInfoSection("Selected definition", [
-    definitionModel.definition?.label ?? "-",
-    definitionModel.definition?.description ?? "",
-    `Source: ${definitionModel.definition?.source ?? "-"}`
+  article.append(createCostOfRiskAuditInfoSection("Regulatory source", [
+    definitionModel.definition?.source ?? "-"
   ]));
-  article.append(createCostOfRiskAuditInfoSection("Display", [
-    activeCostOfRiskDefinitionDisplayMode === "ratio"
-      ? "Basis points mode divides the selected cost of risk numerator by the previous-quarter exposure denominator."
-      : "Absolute value mode displays the quarterly numerator amount.",
-    `Current denominator: ${definitionModel.denominatorLabel || "not available"}`
+  article.append(createCostOfRiskAuditInfoSection("Selected components", definitionModel.definition?.components ?? [
+    "No component detail is available for this definition."
   ]));
-  article.append(createCostOfRiskAuditInfoSection("Drivers", [
-    "The upper panel ranks the largest selected F12 component × detailed FINREP row combinations by absolute amount for the reference quarter.",
-    "When the template provides the granularity, each driver identifies the movement component together with stage, counterparty and instrument type."
+  article.append(createCostOfRiskAuditInfoSection("Interpretation", [
+    definitionModel.definition?.id === "f02-impairment"
+      ? "This method reads the cost of risk directly from the income statement. It is compact and close to the reported P&L measure, but it does not expose the underlying allowance movement components."
+      : "This method reconstructs cost of risk from the selected F_12.01 movement columns. It is more analytical because the same definition can be decomposed by movement component, stage, counterparty and instrument when FINREP provides the detail."
   ]));
 
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Click another reference date in the time chart to update the reading date and recompute the displayed drivers.";
+  hint.textContent = "Use the method selector to switch definition. The value and time chart are recomputed immediately.";
   article.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(article);
@@ -2328,6 +2326,35 @@ function getCostOfRiskDisplayModeHelpTopic(scope, mode) {
 function getCostOfRiskHelpPanelContent(topic) {
   if (!topic) return null;
 
+  if (topic.startsWith("cost-risk-definition:")) {
+    const definitionId = topic.split(":")[1] || activeCostOfRiskDefinitionId;
+    const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === definitionId)
+      ?? COST_OF_RISK_DEFINITION_OPTIONS[0];
+    const isF02Definition = definition.id === "f02-impairment";
+    return {
+      eyebrow: "Cost of risk method",
+      title: definition.label,
+      lead: definition.description,
+      sections: [
+        {
+          title: "Regulatory source",
+          body: definition.source
+        },
+        {
+          title: "Selected components",
+          body: (definition.components ?? []).join("\n")
+        },
+        {
+          title: "What it represents",
+          body: isF02Definition
+            ? "This method reads cost of risk directly from the FINREP income statement. It is close to the reported P&L impairment measure, but it does not expose the underlying allowance movement components."
+            : "This method reconstructs cost of risk from selected F_12.01 movements. It is designed for analysis because the same definition can be decomposed by component, stage, counterparty and instrument where FINREP provides the detail."
+        }
+      ],
+      hint: "Changing the method immediately recomputes the selected value, the drivers and the time series."
+    };
+  }
+
   if (topic.startsWith("smoothing:")) {
     const windowSize = Math.max(1, Math.min(4, Number(topic.split(":")[1]) || 1));
     return {
@@ -2625,7 +2652,7 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
       sections: [
         {
           title: "Definitions",
-          body: "F02 impairment uses F_02.00 row 460. F12 selected components sums F_12.01 columns 020, 040, 050, 070, 090, 110 and 120 on the selected perimeter."
+          body: "F02 impairment uses F_02.00 row 460. EBA definition sums F_12.01 columns 020, 040, 050, 070, 090, 110 and 120 on the selected perimeter."
         },
         {
           title: "Display",

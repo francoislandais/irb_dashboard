@@ -93,13 +93,27 @@ export const COST_OF_RISK_DEFINITION_OPTIONS = [
     id: "f02-impairment",
     label: "F02 impairment",
     source: "F_02.00 r0460",
-    description: "Direct impairment contribution reported in FINREP F_02.00 row 460."
+    description: "Direct impairment or reversal line reported in the FINREP income statement.",
+    components: [
+      "F_02.00 row 460",
+      "Single income statement impairment/reversal measure",
+      "Quarterly amount after detrimestrialisation"
+    ]
   },
   {
     id: "f12-selected-components",
-    label: "F12 selected components",
+    label: "EBA definition",
     source: "F_12.01 c020+c040+c050+c070+c090+c110+c120",
-    description: "Sum of selected F_12.01 allowance and direct P&L components."
+    description: "Component-based cost of risk proxy built from selected FINREP F_12.01 movements.",
+    components: [
+      "c020 - Increased due to origination and acquisition",
+      "c040 - Increased due to changes in credit risk",
+      "c050 - Decreased due to changes in credit risk",
+      "c070 - Decreased due to derecognition",
+      "c090 - Changes due to updates in the institution's methodology for estimation",
+      "c110 - Foreign exchange and other movements",
+      "c120 - Changes due to modifications without derecognition"
+    ]
   }
 ];
 export const COST_OF_RISK_STAGE_TRANSFER_STAGE_OPTIONS = [
