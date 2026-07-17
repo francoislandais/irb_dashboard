@@ -88,6 +88,9 @@ const COST_OF_RISK_TOTAL_Y_AXIS_CODE = "0520";
 export const COST_OF_RISK_WATERFALL_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090"];
 export const COST_OF_RISK_F12_RECONCILIATION_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090", "0110", "0120", "0125"];
 export const COST_OF_RISK_DEFINITION_F12_X_CODES = ["0020", "0040", "0050", "0070", "0090", "0110", "0120"];
+// Same components as the EBA definition, plus c030 (decrease due to
+// derecognition, repayments and disposals).
+export const COST_OF_RISK_DEFINITION_ACPR_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0090", "0110", "0120"];
 export const COST_OF_RISK_DEFINITION_OPTIONS = [
   {
     id: "f02-impairment",
@@ -107,6 +110,22 @@ export const COST_OF_RISK_DEFINITION_OPTIONS = [
     description: "Component-based cost of risk proxy built from selected FINREP F_12.01 movements.",
     components: [
       "c020 - Increased due to origination and acquisition",
+      "c040 - Increased due to changes in credit risk",
+      "c050 - Decreased due to changes in credit risk",
+      "c070 - Decreased due to derecognition",
+      "c090 - Changes due to updates in the institution's methodology for estimation",
+      "c110 - Foreign exchange and other movements",
+      "c120 - Changes due to modifications without derecognition"
+    ]
+  },
+  {
+    id: "f12-acpr-components",
+    label: "ACPR definition",
+    source: "F_12.01 c020+c030+c040+c050+c070+c090+c110+c120",
+    description: "Same as the EBA definition, plus c030 (decrease due to derecognition, repayments and disposals).",
+    components: [
+      "c020 - Increased due to origination and acquisition",
+      "c030 - Decrease due to derecognition, repayments and disposals",
       "c040 - Increased due to changes in credit risk",
       "c050 - Decreased due to changes in credit risk",
       "c070 - Decreased due to derecognition",
@@ -590,10 +609,14 @@ function buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColum
   }));
 }
 
+function getCostOfRiskDefinitionXCodes(definitionId) {
+  return definitionId === "f12-acpr-components" ? COST_OF_RISK_DEFINITION_ACPR_X_CODES : COST_OF_RISK_DEFINITION_F12_X_CODES;
+}
+
 function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode) {
   return definitionId === "f02-impairment"
     ? buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode)
-    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode);
+    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskDefinitionXCodes(definitionId));
 }
 
 function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, driverCode, jstCode) {
@@ -651,10 +674,10 @@ function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColum
   });
 }
 
-function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode) {
+function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, xCodes = COST_OF_RISK_DEFINITION_F12_X_CODES) {
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
   const rawValueSeries = createEmptySeries(referenceColumns.length);
-  COST_OF_RISK_DEFINITION_F12_X_CODES.forEach((xCode) => {
+  xCodes.forEach((xCode) => {
     selectedOption.points.forEach((yCode) => {
       addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
         xCode,
@@ -702,7 +725,7 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
     : buildCostOfRiskSelectionFromFilters(state, filters).points;
   const descriptorByCode = new Map(granularDescriptors.map((descriptor) => [descriptor.code, descriptor]));
 
-  return COST_OF_RISK_DEFINITION_F12_X_CODES.flatMap((xCode) => selectedYCodes.map((yCode) => {
+  return getCostOfRiskDefinitionXCodes(definitionId).flatMap((xCode) => selectedYCodes.map((yCode) => {
     const rawValueSeries = createEmptySeries(referenceColumns.length);
     addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
       xCode,
