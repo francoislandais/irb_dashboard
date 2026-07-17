@@ -450,7 +450,7 @@ button:focus-visible {
 
 .cost-of-risk-dashboard {
   display: grid;
-  grid-template-columns: 270px minmax(0, 900px);
+  grid-template-columns: 300px minmax(0, 900px);
   gap: 16px;
   height: 100%;
   justify-content: start;
@@ -531,6 +531,11 @@ button:focus-visible {
   color: #435049;
   font-size: 0.78rem;
   line-height: 1.42;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: normal;
 }
 
 .cost-of-risk-audit-intro-section {
@@ -715,10 +720,15 @@ button:focus-visible {
 
 .cost-of-risk-filter-selection-table {
   border-collapse: collapse;
+  max-width: 100%;
+  min-width: 0;
+  table-layout: fixed;
   width: 100%;
 }
 
 .cost-of-risk-filter-selection-row td {
+  max-width: 100%;
+  min-width: 0;
   padding: 0;
 }
 
@@ -728,12 +738,34 @@ button:focus-visible {
   border-bottom: 1px solid #eef2ef;
   color: var(--text);
   cursor: pointer;
-  display: block;
+  display: grid;
+  gap: 2px;
   font-size: 0.78rem;
+  max-width: 100%;
   min-height: 32px;
+  min-width: 0;
   padding: 7px 8px;
   text-align: left;
+  white-space: normal;
   width: 100%;
+}
+
+.cost-of-risk-filter-selection-row.is-indented .cost-of-risk-filter-selection-option {
+  padding-left: 22px;
+}
+
+.cost-of-risk-filter-selection-option-label,
+.cost-of-risk-filter-selection-option-reason {
+  display: block;
+  line-height: 1.22;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.cost-of-risk-filter-selection-option-reason {
+  color: #7c8781;
+  font-size: 0.68rem;
 }
 
 .cost-of-risk-filter-selection-row:first-child .cost-of-risk-filter-selection-option {
@@ -749,6 +781,16 @@ button:focus-visible {
   border-color: var(--primary-dark);
   color: #ffffff;
   font-weight: 700;
+}
+
+.cost-of-risk-filter-selection-row.is-disabled .cost-of-risk-filter-selection-option {
+  background: #f7f8f7;
+  color: #9aa39e;
+  cursor: default;
+}
+
+.cost-of-risk-filter-selection-row.is-disabled .cost-of-risk-filter-selection-option:hover {
+  background: #f7f8f7;
 }
 
 .cost-of-risk-filter-selection-option--definition {
@@ -2633,7 +2675,7 @@ button:focus-visible {
 
 .explorer-workspace {
   display: grid;
-  grid-template-columns: 270px minmax(0, 900px);
+  grid-template-columns: 300px minmax(0, 900px);
   gap: 16px;
   min-height: 0;
   min-width: 0;

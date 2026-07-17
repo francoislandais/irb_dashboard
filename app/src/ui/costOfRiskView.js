@@ -38,21 +38,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
+} from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskStageTransfers.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskStageReconciliationView.js?v=20260719-context-panel-filter-fixes";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskChartUtils.js?v=20260719-context-panel-filter-fixes";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -60,7 +60,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskSummaryTablesView.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -68,13 +68,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-cost-risk-tab";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskSummaryChartsView.js?v=20260719-context-panel-filter-fixes";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -82,7 +82,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskStageRatioView.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -90,50 +90,50 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskCoverageRatioView.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260719-context-panel-filter-fixes";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskTreemapView.js?v=20260719-context-panel-filter-fixes";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260719-context-panel-filter-fixes";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-cost-risk-tab";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260719-context-panel-filters";
+} from "./costOfRiskCoreDefinitionView.js?v=20260719-context-panel-filter-fixes";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260719-context-panel-filter-fixes";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskControlsView.js?v=20260719-context-panel-filter-fixes";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-cost-risk-tab";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-cost-risk-tab";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskAuditTableView.js?v=20260719-context-panel-filter-fixes";
+import { openExplorerPoint } from "./explorerView.js?v=20260719-context-panel-filter-fixes";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260719-context-panel-filter-fixes";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskTabsView.js?v=20260719-context-panel-filter-fixes";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskModelCache.js?v=20260719-context-panel-filter-fixes";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskFilterRules.js?v=20260719-context-panel-filter-fixes";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -141,12 +141,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskStageTransferSelection.js?v=20260719-context-panel-filter-fixes";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskCoreSelection.js?v=20260719-context-panel-filter-fixes";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -2263,6 +2263,14 @@ const COST_OF_RISK_FILTER_SELECTION_META = {
   instrument: { allLabel: "All Instruments", filterKey: "asset", label: "Instruments", optionsKey: "assets" },
   stage: { allLabel: "All Stage", filterKey: "stage", label: "Stage", optionsKey: "stages" }
 };
+const COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS = new Set([
+  "analysis",
+  "contributions",
+  "cost-of-risk",
+  "f2-vs-f12",
+  "stage-reconciliation",
+  "stage-transfers"
+]);
 
 function renderCostOfRiskFilterSelectionPanel(kind) {
   if (kind === "definition") {
@@ -2304,10 +2312,11 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   tbody.append(createCostOfRiskFilterSelectionRow(meta.allLabel, isAllActive, () => {
     applyCostOfRiskFilterSelection(meta.filterKey, COST_OF_RISK_FILTER_ALL);
   }));
-  options.forEach((option) => {
-    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === activeValue, () => {
+  options.filter((option) => option.value !== COST_OF_RISK_FILTER_ALL).forEach((option) => {
+    const optionState = getCostOfRiskFilterSelectionOptionState(kind, option);
+    tbody.append(createCostOfRiskFilterSelectionRow(optionState.label, option.value === activeValue, () => {
       applyCostOfRiskFilterSelection(meta.filterKey, option.value);
-    }));
+    }, optionState));
   });
 
   table.append(tbody);
@@ -2321,19 +2330,55 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   elements.costOfRiskAuditPanel.replaceChildren(intro);
 }
 
-function createCostOfRiskFilterSelectionRow(label, isActive, onSelect) {
+function getCostOfRiskFilterSelectionOptionState(kind, option) {
+  if (kind !== "counterparty") {
+    return { disabled: false, indent: false, label: option.label };
+  }
+
+  const parent = getFilterParentValue("counterparty", option.value);
+  const isFineCounterparty = parent !== COST_OF_RISK_FILTER_ALL;
+  const isDisabled = isFineCounterparty && COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS.has(activeCostOfRiskTab);
+  return {
+    disabled: isDisabled,
+    disabledReason: isDisabled ? "Not available in this tab" : "",
+    indent: isFineCounterparty,
+    label: formatCostOfRiskCounterpartySelectionLabel(option.label)
+  };
+}
+
+function formatCostOfRiskCounterpartySelectionLabel(label) {
+  return String(label ?? "")
+    .replace(/^o\/w\s+/i, "")
+    .replace(/^of which[:\s]+/i, "")
+    .trim();
+}
+
+function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options = {}) {
   const row = document.createElement("tr");
   row.className = "cost-of-risk-filter-selection-row";
   row.classList.toggle("is-active", isActive);
+  row.classList.toggle("is-disabled", Boolean(options.disabled));
+  row.classList.toggle("is-indented", Boolean(options.indent));
 
   const cell = document.createElement("td");
   const button = document.createElement("button");
   button.type = "button";
   button.className = "cost-of-risk-filter-selection-option";
+  button.disabled = Boolean(options.disabled);
   button.setAttribute("role", "option");
   button.setAttribute("aria-selected", String(isActive));
-  button.textContent = label;
-  button.addEventListener("click", onSelect);
+  if (options.disabled) button.setAttribute("aria-disabled", "true");
+  const labelNode = document.createElement("span");
+  labelNode.className = "cost-of-risk-filter-selection-option-label";
+  labelNode.textContent = label;
+  button.append(labelNode);
+  if (options.disabledReason) {
+    const reason = document.createElement("span");
+    reason.className = "cost-of-risk-filter-selection-option-reason";
+    reason.textContent = options.disabledReason;
+    button.append(reason);
+  }
+  if (!options.disabled) button.addEventListener("click", onSelect);
   cell.append(button);
   row.append(cell);
   return row;

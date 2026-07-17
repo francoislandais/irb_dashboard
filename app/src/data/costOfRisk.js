@@ -23,11 +23,11 @@ const COST_OF_RISK_COUNTERPARTY_OTHER_GROUP = "Other";
 const COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP = "Key counterparties";
 const COST_OF_RISK_COUNTERPARTY_FILTER_OPTIONS = [
   { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "NFC", shortLabel: "NFC", terminal: "Non-financial corporations", value: "Non-financial corporations" },
-  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w SMEs", parent: "Non-financial corporations", terminal: "Of which: small and medium-sized enterprises", value: "NFC_SMES" },
-  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w collat. CRE", parent: "Non-financial corporations", terminal: "Of which: loans collateralised by commercial immovable property", value: "NFC_CRE" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "SMEs", parent: "Non-financial corporations", terminal: "Of which: small and medium-sized enterprises", value: "NFC_SMES" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "collat. CRE", parent: "Non-financial corporations", terminal: "Of which: loans collateralised by commercial immovable property", value: "NFC_CRE" },
   { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "Households", shortLabel: "HH", terminal: "Households", value: "Households" },
-  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w credit for consumption", parent: "Households", terminal: "Of which: credit for consumption", value: "HH_CONSUMPTION" },
-  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "o/w collat. RRE", parent: "Households", terminal: "Of which: loans collateralised by residential immovable property", value: "HH_RRE" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "credit for consumption", parent: "Households", terminal: "Of which: credit for consumption", value: "HH_CONSUMPTION" },
+  { groupLabel: COST_OF_RISK_COUNTERPARTY_PRIORITY_GROUP, label: "collat. RRE", parent: "Households", terminal: "Of which: loans collateralised by residential immovable property", value: "HH_RRE" },
   { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "Central banks", shortLabel: "CB", terminal: "Central banks", value: "Central banks" },
   { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "General governments", shortLabel: "Gov", terminal: "General governments", value: "General governments" },
   { groupLabel: COST_OF_RISK_COUNTERPARTY_OTHER_GROUP, label: "Credit institutions", shortLabel: "CI", terminal: "Credit institutions", value: "Credit institutions" },
