@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-explorer-multi-range-sum";
+} from "./benchmarkLineChart.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -113,6 +113,8 @@ export function wireExplorerUi(actions, rerender) {
   updateSelectedJst = actions.updateSelectedJst;
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      if (button.disabled) return;
+
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       explorerBenchmarkViewActive = false;
@@ -1268,8 +1270,11 @@ function renderExplorerAxisTabs() {
     const isActive = axis === activeAxis;
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     button.classList.toggle("is-active", isActive);
-    button.hidden = !isAvailable;
-    button.setAttribute("aria-selected", String(isActive));
+    button.classList.toggle("is-disabled", !isAvailable);
+    button.disabled = !isAvailable;
+    button.hidden = false;
+    button.setAttribute("aria-disabled", String(!isAvailable));
+    button.setAttribute("aria-selected", String(isActive && isAvailable));
   });
 
   Object.entries(elements.explorerAxisCaptions).forEach(([axis, element]) => {

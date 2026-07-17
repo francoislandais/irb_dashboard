@@ -32,21 +32,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
+} from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskStageTransfers.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskChartUtils.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -54,7 +54,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -62,56 +62,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-multi-range-sum";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-disabled-axis-tabs";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskTreemapView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-multi-range-sum";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-disabled-axis-tabs";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskControlsView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-explorer-multi-range-sum";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-multi-range-sum";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskAuditTableView.js?v=20260717-explorer-disabled-axis-tabs";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-disabled-axis-tabs";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskTabsView.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskModelCache.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskFilterRules.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -119,12 +119,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-disabled-axis-tabs";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-explorer-multi-range-sum";
+} from "./costOfRiskCoreSelection.js?v=20260717-explorer-disabled-axis-tabs";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";

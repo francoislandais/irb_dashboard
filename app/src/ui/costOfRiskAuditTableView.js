@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
+} from "../data/costOfRisk.js?v=20260717-explorer-disabled-axis-tabs";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

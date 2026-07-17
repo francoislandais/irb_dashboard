@@ -2624,6 +2624,14 @@ table {
   color: #ffffff;
 }
 
+.axis-tab.is-disabled,
+.axis-tab:disabled {
+  border-color: #e3e8e5;
+  background: #f6f8f7;
+  color: #9aa6a0;
+  cursor: default;
+}
+
 .axis-tab-title {
   align-items: center;
   background: var(--primary-dark);
@@ -2637,6 +2645,13 @@ table {
   text-transform: none;
 }
 
+.axis-tab.is-disabled .axis-tab-title,
+.axis-tab:disabled .axis-tab-title {
+  background: #eef1ef;
+  border-bottom-color: #e3e8e5;
+  color: #9aa6a0;
+}
+
 .axis-tab-value {
   display: block;
   min-width: 0;
@@ -2647,6 +2662,12 @@ table {
   font-weight: 400;
   line-height: 1.15;
   padding: 5px 7px;
+}
+
+.axis-tab.is-disabled .axis-tab-value,
+.axis-tab:disabled .axis-tab-value {
+  background: #f6f8f7;
+  color: #a6b0ab;
 }
 
 .axis-tab.is-active .axis-tab-value {
