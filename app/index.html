@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260717-header-context-controls">
+    <link rel="stylesheet" href="./src/styles.css?v=20260717-cost-risk-tab">
   </head>
   <body>
     <div class="app-shell">
@@ -166,6 +166,7 @@
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="cost-of-risk">Cost of Risk</button>
                   <div class="cost-of-risk-staging-tab-wrap" data-cost-of-risk-tab-group="staging">
                     <button id="cost-of-risk-staging-tab-main" class="cost-of-risk-tab cost-of-risk-staging-tab" type="button" role="tab" aria-selected="false">
                       <span>Staging:</span>
@@ -224,6 +225,14 @@
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-stage-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 stage summary time series"></div>
                     <div id="cost-of-risk-counterparty-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 counterparty summary time series" hidden></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="cost-of-risk" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-definition-panel" class="cost-of-risk-definition-panel" aria-label="Cost of risk definition and drivers"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-definition-chart" class="cost-of-risk-chart" aria-label="Cost of risk time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-ratio" hidden>
@@ -329,6 +338,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260717-header-context-controls"></script>
+    <script type="module" src="./src/main.js?v=20260717-cost-risk-tab"></script>
   </body>
 </html>

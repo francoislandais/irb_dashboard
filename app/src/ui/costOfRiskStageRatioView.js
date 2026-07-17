@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-header-context-controls";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
 import { formatBasisPointsValue, formatContributionPercentValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-header-context-controls";
+} from "./benchmarkLineChart.js?v=20260717-cost-risk-tab";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,7 +20,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
   renderCostOfRiskYAxisFocusBadge
-} from "./costOfRiskChartUtils.js?v=20260717-header-context-controls";
+} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-tab";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageRatioChart = null;

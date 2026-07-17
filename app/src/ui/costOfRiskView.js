@@ -2,6 +2,7 @@ import {
   COST_OF_RISK_FILTER_ALL,
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
+  COST_OF_RISK_DEFINITION_OPTIONS,
   DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_F12_RECONCILIATION_X_CODES,
@@ -11,6 +12,7 @@ import {
   buildCostOfRiskCoverageRatioModel,
   buildCostOfRiskCounterpartySummaryModel,
   buildCostOfRiskCounterpartyTreemapData,
+  buildCostOfRiskDefinitionModel,
   buildCostOfRiskF02ImpairmentRatio,
   buildCostOfRiskF02ImpairmentSeries,
   buildCostOfRiskF12ContributionSeries,
@@ -36,21 +38,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-header-context-controls";
+} from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-header-context-controls";
+} from "./costOfRiskStageTransfers.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-header-context-controls";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-cost-risk-tab";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-header-context-controls";
+} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-tab";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -58,7 +60,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-header-context-controls";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -66,13 +68,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-header-context-controls";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-header-context-controls";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-cost-risk-tab";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-header-context-controls";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -80,7 +82,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260717-header-context-controls";
+} from "./costOfRiskStageRatioView.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -88,50 +90,50 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260717-header-context-controls";
+} from "./costOfRiskCoverageRatioView.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-header-context-controls";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-cost-risk-tab";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-header-context-controls";
+} from "./costOfRiskTreemapView.js?v=20260717-cost-risk-tab";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-header-context-controls";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-cost-risk-tab";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-header-context-controls";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-header-context-controls";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-cost-risk-tab";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-cost-risk-tab";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-header-context-controls";
+} from "./costOfRiskControlsView.js?v=20260717-cost-risk-tab";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-header-context-controls";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-header-context-controls";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-header-context-controls";
+} from "./costOfRiskAuditTableView.js?v=20260717-cost-risk-tab";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-cost-risk-tab";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-cost-risk-tab";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-header-context-controls";
+} from "./costOfRiskTabsView.js?v=20260717-cost-risk-tab";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-header-context-controls";
+} from "./costOfRiskModelCache.js?v=20260717-cost-risk-tab";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-header-context-controls";
+} from "./costOfRiskFilterRules.js?v=20260717-cost-risk-tab";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -139,12 +141,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-header-context-controls";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-cost-risk-tab";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-header-context-controls";
+} from "./costOfRiskCoreSelection.js?v=20260717-cost-risk-tab";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -162,6 +164,9 @@ let activeCostOfRiskMovementXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
 let activeCostOfRiskF2F12XCodes = new Set(COST_OF_RISK_F12_RECONCILIATION_X_CODES);
 let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
+let activeCostOfRiskDefinitionDisplayMode = "ratio";
+let activeCostOfRiskDefinitionId = "f12-selected-components";
+let activeCostOfRiskDefinitionDriverCode = "";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -218,6 +223,8 @@ const elements = {
   costOfRiskDashboard: document.querySelector("#cost-of-risk-dashboard"),
   costOfRiskDenominatorContext: document.querySelector("#cost-of-risk-denominator-context"),
   costOfRiskDenominatorValue: document.querySelector("#cost-of-risk-denominator-value"),
+  costOfRiskDefinitionChart: document.querySelector("#cost-of-risk-definition-chart"),
+  costOfRiskDefinitionPanel: document.querySelector("#cost-of-risk-definition-panel"),
   costOfRiskDisplayMode: document.querySelector("#cost-of-risk-display-mode"),
   costOfRiskEmpty: document.querySelector("#cost-of-risk-empty"),
   costOfRiskF2VsF12Chart: document.querySelector("#cost-of-risk-f2-f12-chart"),
@@ -546,6 +553,37 @@ export function wireCostOfRiskUi(actions, rerender) {
     }, 0);
   }, true);
   elements.costOfRiskDashboard?.addEventListener("click", (event) => {
+    const definitionButton = event.target.closest?.("[data-cost-of-risk-definition]");
+    if (definitionButton) {
+      event.preventDefault();
+      activeCostOfRiskDefinitionId = definitionButton.dataset.costOfRiskDefinition || "f12-selected-components";
+      activeCostOfRiskDefinitionDriverCode = "";
+      clearCostOfRiskHelpTopic();
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const definitionDriverButton = event.target.closest?.("[data-cost-of-risk-definition-driver]");
+    if (definitionDriverButton) {
+      event.preventDefault();
+      const nextDriverCode = definitionDriverButton.dataset.costOfRiskDefinitionDriver || "";
+      activeCostOfRiskDefinitionDriverCode = activeCostOfRiskDefinitionDriverCode === nextDriverCode ? "" : nextDriverCode;
+      clearCostOfRiskHelpTopic();
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const definitionDisplayButton = event.target.closest?.("[data-cost-of-risk-definition-display]");
+    if (definitionDisplayButton) {
+      event.preventDefault();
+      activeCostOfRiskDefinitionDisplayMode = definitionDisplayButton.dataset.costOfRiskDefinitionDisplay === "amount"
+        ? "amount"
+        : "ratio";
+      clearCostOfRiskHelpTopic();
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const button = event.target.closest?.("[data-cost-of-risk-summary-breakdown]");
     if (!button) return;
 
@@ -636,11 +674,12 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   renderCostOfRiskActiveFilters(filterOptions);
-  if (!["contributions", "coverage-ratio", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskAuditPanelIntro();
+  if (!["contributions", "cost-of-risk", "coverage-ratio", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskAuditPanelIntro();
   const displayMode = getActiveCostOfRiskDisplayMode();
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = displayMode;
   if (elements.costOfRiskDisplayMode) {
     elements.costOfRiskDisplayMode.disabled = activeCostOfRiskTab === "contributions"
+      || activeCostOfRiskTab === "cost-of-risk"
       || activeCostOfRiskTab === "coverage-ratio"
       || activeCostOfRiskTab === "stage-ratio"
       || activeCostOfRiskTab === "stage-transfers"
@@ -658,6 +697,31 @@ export function renderCostOfRisk(state) {
     windowSize: activeCostOfRiskSmoothingWindow
   });
   renderCostOfRiskCoreDefinition(waterfallXAxisOptions, f2F12XAxisOptions);
+
+  if (activeCostOfRiskTab === "cost-of-risk") {
+    const definitionModel = getCostOfRiskCachedModel(
+      state,
+      createCostOfRiskModelCacheKey(state, "cost-of-risk-definition", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskDefinitionId, activeCostOfRiskDefinitionDriverCode),
+      () => buildCostOfRiskDefinitionModel(
+        state,
+        activeCostOfRiskDefinitionId,
+        activeCostOfRiskFilters,
+        activeCostOfRiskReferenceDate,
+        activeCostOfRiskDefinitionDriverCode
+      )
+    );
+    activeCostOfRiskReferenceDate = definitionModel.referenceDate || activeCostOfRiskReferenceDate;
+    renderCostOfRiskActiveFilters(filterOptions);
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    renderCostOfRiskDefinitionView(definitionModel, state);
+    renderCostOfRiskDefinitionAuditPanel(definitionModel);
+    leaveCostOfRiskStageTransferTab();
+    clearCostOfRiskAuditTable();
+    scheduleCostOfRiskChartReflow();
+    return;
+  }
 
   if (activeCostOfRiskTab === "summary") {
     const summary = activeCostOfRiskSummaryBreakdown === "counterparty"
@@ -897,6 +961,9 @@ export function renderCostOfRisk(state) {
     renderCostOfRiskChartTitle(selectedWaterfallPoint, xAxisOptions, activeCostOfRiskXAxisCode);
     renderCostOfRiskWaterfallChart(activeWaterfall, state.selectedJst, displayMode, state.selectedUnit);
     renderCostOfRiskMovementAuditPanel(state);
+    if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskChart) {
+      destroyCostOfRiskMovementChart();
+    }
     renderMovementTimeSeriesChart({
       activeReferenceDate: activeCostOfRiskReferenceDate,
       container: elements.costOfRiskChart,
@@ -980,6 +1047,7 @@ function getActiveCostOfRiskCharts() {
       ? [getCostOfRiskCounterpartySummaryChart()]
       : [getCostOfRiskStageSummaryChart()];
   }
+  if (activeCostOfRiskTab === "cost-of-risk") return [getCostOfRiskMovementChart()];
   if (activeCostOfRiskTab === "stage-ratio") return [getCostOfRiskStageRatioChart()];
   if (activeCostOfRiskTab === "coverage-ratio") return [getCostOfRiskCoverageRatioChart()];
   if (activeCostOfRiskTab === "contributions") return [costOfRiskWaterfallChart, getCostOfRiskMovementChart()];
@@ -1186,6 +1254,212 @@ function renderCostOfRiskCoverageRatioView(coverageRatio, state) {
   });
 }
 
+function renderCostOfRiskDefinitionView(definitionModel, state) {
+  renderCostOfRiskDefinitionPanel(definitionModel, state.selectedUnit);
+  if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
+    destroyCostOfRiskMovementChart();
+  }
+  renderMovementTimeSeriesChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    container: elements.costOfRiskDefinitionChart,
+    displayMode: activeCostOfRiskDefinitionDisplayMode,
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
+    jstCode: state.selectedJst,
+    onClearSmoothing: clearCostOfRiskSmoothing,
+    onChangeSmoothing: updateCostOfRiskSmoothingWindow,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
+    peerDisplayMode: state.peerDisplayMode,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    selectedUnit: state.selectedUnit,
+    selection: {
+      ...definitionModel,
+      series: definitionModel.chartSeries ?? definitionModel.series
+    },
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    titleText: "Cost of Risk - Time Evolution"
+  });
+}
+
+function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millions") {
+  if (!elements.costOfRiskDefinitionPanel) return;
+  if (definitionModel.status) {
+    elements.costOfRiskDefinitionPanel.replaceChildren(createCostOfRiskDefinitionEmpty(definitionModel.status));
+    return;
+  }
+
+  const root = document.createElement("div");
+  root.className = "cost-of-risk-definition-grid";
+
+  const control = document.createElement("div");
+  control.className = "cost-of-risk-definition-control";
+  const definitionSwitch = document.createElement("div");
+  definitionSwitch.className = "cost-of-risk-definition-switch";
+  COST_OF_RISK_DEFINITION_OPTIONS.forEach((definition) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "cost-of-risk-definition-switch-button";
+    button.classList.toggle("is-active", definition.id === activeCostOfRiskDefinitionId);
+    button.dataset.costOfRiskDefinition = definition.id;
+    button.textContent = definition.label;
+    button.title = definition.description;
+    definitionSwitch.append(button);
+  });
+
+  const displaySwitch = document.createElement("div");
+  displaySwitch.className = "cost-of-risk-definition-display";
+  [
+    ["amount", "Absolute value"],
+    ["ratio", "Basis points"]
+  ].forEach(([mode, label]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "cost-of-risk-definition-display-button";
+    button.classList.toggle("is-active", activeCostOfRiskDefinitionDisplayMode === mode);
+    button.dataset.costOfRiskDefinitionDisplay = mode;
+    button.textContent = label;
+    displaySwitch.append(button);
+  });
+  control.append(definitionSwitch, displaySwitch);
+
+  const cards = document.createElement("div");
+  cards.className = "cost-of-risk-definition-cards";
+  cards.append(
+    createCostOfRiskDefinitionCard(
+      "Selected definition",
+      definitionModel.definition.label,
+      definitionModel.definition.source
+    ),
+    createCostOfRiskDefinitionCard(
+      "Benchmarked item",
+      definitionModel.selectedDriver?.label ?? "Total cost of risk",
+      definitionModel.selectedDriver?.source ?? definitionModel.definition.description
+    ),
+    createCostOfRiskDefinitionCard(
+      activeCostOfRiskDefinitionDisplayMode === "ratio" ? "Cost of risk" : "Cost of risk amount",
+      formatCostOfRiskDisplayValue(
+        activeCostOfRiskDefinitionDisplayMode === "ratio"
+          ? definitionModel.ratioBasisPoints
+          : definitionModel.value,
+        activeCostOfRiskDefinitionDisplayMode,
+        selectedUnit,
+        true
+      ),
+      `${definitionModel.referenceDate || "-"} - ${activeCostOfRiskDefinitionDisplayMode === "ratio" ? definitionModel.denominatorLabel : "amount"}`
+    ),
+    createCostOfRiskDefinitionCard(
+      "Denominator",
+      formatMetricValue(definitionModel.denominator, selectedUnit),
+      definitionModel.denominatorLabel || "Not available"
+    )
+  );
+
+  const drivers = document.createElement("div");
+  drivers.className = "cost-of-risk-definition-drivers";
+  const driversTitle = document.createElement("div");
+  driversTitle.className = "cost-of-risk-definition-drivers-title";
+  driversTitle.textContent = "Main drivers";
+  drivers.append(driversTitle);
+  if ((definitionModel.drivers ?? []).length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "cost-of-risk-definition-driver-empty";
+    empty.textContent = "No significant driver is available for the selected definition.";
+    drivers.append(empty);
+  } else {
+    definitionModel.drivers.forEach((driver) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "cost-of-risk-definition-driver";
+      row.classList.toggle("is-active", driver.code === activeCostOfRiskDefinitionDriverCode);
+      row.dataset.costOfRiskDefinitionDriver = driver.code;
+      const label = document.createElement("div");
+      label.className = "cost-of-risk-definition-driver-label";
+      label.textContent = driver.label;
+      label.title = driver.source;
+      const value = document.createElement("div");
+      value.className = "cost-of-risk-definition-driver-value";
+      value.textContent = formatCostOfRiskDisplayValue(
+        activeCostOfRiskDefinitionDisplayMode === "ratio" ? driver.ratioBasisPoints : driver.value,
+        activeCostOfRiskDefinitionDisplayMode,
+        selectedUnit,
+        true
+      );
+      row.append(label, value);
+      drivers.append(row);
+    });
+  }
+
+  root.append(control, cards, drivers);
+  elements.costOfRiskDefinitionPanel.replaceChildren(root);
+}
+
+function createCostOfRiskDefinitionEmpty(message) {
+  const empty = document.createElement("div");
+  empty.className = "cost-of-risk-definition-empty";
+  empty.textContent = resolveCostOfRiskTabEmptyMessage(message);
+  return empty;
+}
+
+function createCostOfRiskDefinitionCard(labelText, valueText, contextText) {
+  const card = document.createElement("div");
+  card.className = "cost-of-risk-definition-card";
+  const label = document.createElement("div");
+  label.className = "cost-of-risk-definition-card-label";
+  label.textContent = labelText;
+  const value = document.createElement("div");
+  value.className = "cost-of-risk-definition-card-value";
+  value.textContent = valueText;
+  const context = document.createElement("div");
+  context.className = "cost-of-risk-definition-card-context";
+  context.textContent = contextText;
+  card.append(label, value, context);
+  return card;
+}
+
+function renderCostOfRiskDefinitionAuditPanel(definitionModel) {
+  if (!elements.costOfRiskAuditPanel) return;
+  const content = getCostOfRiskAuditPanelIntroContent("cost-of-risk");
+  const article = document.createElement("article");
+  article.className = "cost-of-risk-audit-intro";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = content.eyebrow;
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = content.title;
+
+  const lead = document.createElement("p");
+  lead.className = "cost-of-risk-audit-intro-lead";
+  lead.textContent = content.lead;
+
+  article.append(eyebrow, title, lead);
+  article.append(createCostOfRiskAuditInfoSection("Selected definition", [
+    definitionModel.definition?.label ?? "-",
+    definitionModel.definition?.description ?? "",
+    `Source: ${definitionModel.definition?.source ?? "-"}`
+  ]));
+  article.append(createCostOfRiskAuditInfoSection("Display", [
+    activeCostOfRiskDefinitionDisplayMode === "ratio"
+      ? "Basis points mode divides the selected cost of risk numerator by the previous-quarter exposure denominator."
+      : "Absolute value mode displays the quarterly numerator amount.",
+    `Current denominator: ${definitionModel.denominatorLabel || "not available"}`
+  ]));
+  article.append(createCostOfRiskAuditInfoSection("Drivers", [
+    "The upper panel ranks the largest selected F12 component × detailed FINREP row combinations by absolute amount for the reference quarter.",
+    "When the template provides the granularity, each driver identifies the movement component together with stage, counterparty and instrument type."
+  ]));
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "Click another reference date in the time chart to update the reading date and recompute the displayed drivers.";
+  article.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(article);
+}
+
 function selectCostOfRiskStageRatioCell(cellKey) {
   activeCostOfRiskStageRatioCellKey = cellKey;
   hideCostOfRiskAuditIntro();
@@ -1292,6 +1566,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
 
 function getActiveCostOfRiskDisplayMode() {
   if (activeCostOfRiskTab === "summary") return activeCostOfRiskSummaryDisplayMode;
+  if (activeCostOfRiskTab === "cost-of-risk") return activeCostOfRiskDefinitionDisplayMode;
   if (activeCostOfRiskTab === "contributions") return activeCostOfRiskMovementDisplayMode;
   if (activeCostOfRiskTab === "stage-transfers") return activeCostOfRiskStageTransferDisplayMode;
   return activeCostOfRiskDisplayMode;
@@ -2288,6 +2563,26 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         }
       ],
       hint: "Click a table cell to focus the time chart on that metric."
+    },
+    "cost-of-risk": {
+      eyebrow: "Risk charge",
+      title: "Cost of Risk",
+      lead: "This view focuses on the actual cost of risk measure. It lets you compare a direct F02 definition with a selected F12 component-based definition.",
+      sections: [
+        {
+          title: "Definitions",
+          body: "F02 impairment uses F_02.00 row 460. F12 selected components sums F_12.01 columns 020, 040, 050, 070, 090, 110 and 120 on the selected perimeter."
+        },
+        {
+          title: "Display",
+          body: "Absolute value mode shows the quarterly amount. Basis-points mode divides that amount by the previous-quarter exposure denominator, consistent with the other variation views."
+        },
+        {
+          title: "Drivers",
+          body: "The upper panel ranks the largest F12 component × detailed FINREP row combinations for the selected quarter, so drivers can point to stage, counterparty and instrument type when that granularity is available."
+        }
+      ],
+      hint: "Use the definition switch to compare F02 and F12 views, then use the time chart for benchmark context."
     },
     "stage-ratio": {
       eyebrow: "Stage mix",

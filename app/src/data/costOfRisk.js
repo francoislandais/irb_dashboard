@@ -87,6 +87,21 @@ const COST_OF_RISK_F02_Y_AXIS_CODE = "0460";
 const COST_OF_RISK_TOTAL_Y_AXIS_CODE = "0520";
 export const COST_OF_RISK_WATERFALL_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090"];
 export const COST_OF_RISK_F12_RECONCILIATION_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0080", "0090", "0110", "0120", "0125"];
+export const COST_OF_RISK_DEFINITION_F12_X_CODES = ["0020", "0040", "0050", "0070", "0090", "0110", "0120"];
+export const COST_OF_RISK_DEFINITION_OPTIONS = [
+  {
+    id: "f02-impairment",
+    label: "F02 impairment",
+    source: "F_02.00 r0460",
+    description: "Direct impairment contribution reported in FINREP F_02.00 row 460."
+  },
+  {
+    id: "f12-selected-components",
+    label: "F12 selected components",
+    source: "F_12.01 c020+c040+c050+c070+c090+c110+c120",
+    description: "Sum of selected F_12.01 allowance and direct P&L components."
+  }
+];
 export const COST_OF_RISK_STAGE_TRANSFER_STAGE_OPTIONS = [
   { label: "Stage 1", value: "1" },
   { label: "Stage 2", value: "2" },
@@ -504,6 +519,231 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
     }),
     status: ""
   };
+}
+
+export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-selected-components", filters = {}, referenceDate = "", selectedDriverCode = "") {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === definitionId)
+    ?? COST_OF_RISK_DEFINITION_OPTIONS[1];
+
+  if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
+    return {
+      benchmarkSeries: [],
+      definition,
+      denominator: null,
+      denominatorLabel: "",
+      drivers: [],
+      ratioBasisPoints: null,
+      referenceDate: "",
+      series: [],
+      status: "Load a CSV and select a JST.",
+      value: null
+    };
+  }
+
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst);
+  const selectedPoint = series[referenceIndex] ?? null;
+  const drivers = buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex);
+  const selectedDriver = drivers.find((driver) => driver.code === selectedDriverCode) ?? null;
+  const chartSeries = selectedDriver
+    ? buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedDriver.code, state.selectedJst)
+    : series;
+
+  return {
+    benchmarkSeries: buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definition.id, filters, selectedDriver?.code ?? ""),
+    chartSeries,
+    definition,
+    denominator: selectedPoint?.denominator ?? null,
+    denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
+    drivers,
+    ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
+    referenceDate: selectedPoint?.label ?? "",
+    selectedDriver,
+    series,
+    status: "",
+    value: selectedPoint?.value ?? null
+  };
+}
+
+function buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode = "") {
+  return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+    jstCode,
+    points: selectedDriverCode
+      ? buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
+      : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode)
+  }));
+}
+
+function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode) {
+  return definitionId === "f02-impairment"
+    ? buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode)
+    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode);
+}
+
+function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, driverCode, jstCode) {
+  if (!driverCode || definitionId === "f02-impairment") {
+    return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode);
+  }
+
+  const [xCode, yCode] = String(driverCode).split(":");
+  if (!xCode || !yCode) return [];
+
+  const rawValueSeries = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+    xCode,
+    yCode,
+    zCode: ""
+  }, jstCode);
+  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+
+  return referenceColumns.map((referenceColumn, index) => {
+    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? null);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+
+    return {
+      date: referenceColumn.date,
+      denominator,
+      label: referenceColumn.label,
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      value
+    };
+  });
+}
+
+function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode) {
+  const rawValueSeries = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_F02_TABLE_ID, {
+    xCode: COST_OF_RISK_F02_X_AXIS_CODE,
+    yCode: COST_OF_RISK_F02_Y_AXIS_CODE,
+    zCode: ""
+  }, jstCode);
+  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+
+  return referenceColumns.map((referenceColumn, index) => {
+    const rawValue = quarterlyValueSeries[index] ?? null;
+    const displayedValue = formatCostOfRiskAllowanceMovementDisplayValue(rawValue);
+    const value = Number.isFinite(displayedValue) ? -displayedValue : displayedValue;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+
+    return {
+      date: referenceColumn.date,
+      denominator,
+      label: referenceColumn.label,
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      value
+    };
+  });
+}
+
+function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode) {
+  const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
+  const rawValueSeries = createEmptySeries(referenceColumns.length);
+  COST_OF_RISK_DEFINITION_F12_X_CODES.forEach((xCode) => {
+    selectedOption.points.forEach((yCode) => {
+      addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+        xCode,
+        yCode,
+        zCode: ""
+      }, jstCode));
+    });
+  });
+
+  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+
+  return referenceColumns.map((referenceColumn, index) => {
+    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? null);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+
+    return {
+      date: referenceColumn.date,
+      denominator,
+      label: referenceColumn.label,
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      value
+    };
+  });
+}
+
+function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definitionId, filters, referenceIndex) {
+  if (definitionId === "f02-impairment") {
+    const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst)[referenceIndex];
+    return [{
+      code: "F02:0460",
+      label: "F02 impairment contribution",
+      ratioBasisPoints: point?.ratioBasisPoints ?? null,
+      source: `${COST_OF_RISK_F02_TABLE_ID} / x ${COST_OF_RISK_F02_X_AXIS_CODE} / y ${COST_OF_RISK_F02_Y_AXIS_CODE}`,
+      value: point?.value ?? null
+    }];
+  }
+
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
+  const xLabels = getCostOfRiskXAxisFullLabelMap(state);
+  const granularDescriptors = getCostOfRiskDefinitionGranularDriverDescriptors(state, filters);
+  const selectedYCodes = granularDescriptors.length > 0
+    ? granularDescriptors.map((descriptor) => descriptor.code)
+    : buildCostOfRiskSelectionFromFilters(state, filters).points;
+  const descriptorByCode = new Map(granularDescriptors.map((descriptor) => [descriptor.code, descriptor]));
+
+  return COST_OF_RISK_DEFINITION_F12_X_CODES.flatMap((xCode) => selectedYCodes.map((yCode) => {
+    const rawValueSeries = createEmptySeries(referenceColumns.length);
+    addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+      xCode,
+      yCode,
+      zCode: ""
+    }, state.selectedJst));
+    const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[referenceIndex] ?? null);
+    const descriptor = descriptorByCode.get(yCode) ?? null;
+    const scopeLabel = descriptor ? createCostOfRiskDefinitionDriverScopeLabel(descriptor) : "Selected perimeter";
+    const movementLabel = xLabels.get(xCode) ?? xCode;
+
+    return {
+      code: `${xCode}:${yCode}`,
+      label: `${formatCostOfRiskDefinitionMovementLabel(movementLabel)} - ${scopeLabel}`,
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / y ${yCode}`,
+      value
+    };
+  }))
+    .filter((driver) => Number.isFinite(driver.value))
+    .sort((left, right) => Math.abs(right.value) - Math.abs(left.value))
+    .slice(0, 6);
+}
+
+function getCostOfRiskDefinitionGranularDriverDescriptors(state, filters = {}) {
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  return getCostOfRiskBalanceSheetAllowanceDescriptors(state)
+    .filter((descriptor) => matchesCostOfRiskFilterDescriptor(descriptor, normalizedFilters))
+    .filter(isCostOfRiskDefinitionGranularDriverDescriptor);
+}
+
+function isCostOfRiskDefinitionGranularDriverDescriptor(descriptor) {
+  return Boolean(
+    descriptor.stage
+    && descriptor.asset
+    && descriptor.counterparty
+    && isCostOfRiskCounterpartyLabel(descriptor.terminal, descriptor.counterparty)
+  );
+}
+
+function createCostOfRiskDefinitionDriverScopeLabel(descriptor) {
+  return [
+    formatCostOfRiskStageLabel(descriptor.stage),
+    formatCostOfRiskCounterpartyLabel(descriptor.counterparty),
+    formatCostOfRiskAssetLabel(descriptor.asset)
+  ].filter(Boolean).join(" / ");
+}
+
+function formatCostOfRiskDefinitionMovementLabel(label) {
+  return String(label ?? "")
+    .replace(/^Movements\//i, "")
+    .replace(/^P&L impacts\//i, "")
+    .replace(/\s*\(net\)$/i, "")
+    .trim();
 }
 
 export function buildCostOfRiskMovementContributionAudit(state, filters, xCode = COST_OF_RISK_X_AXIS_CODE) {
