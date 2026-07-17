@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-allowances-group-tab";
+} from "../data/costOfRisk.js?v=20260717-peer-panel";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

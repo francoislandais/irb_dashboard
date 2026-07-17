@@ -36,21 +36,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-allowances-group-tab";
+} from "../data/costOfRisk.js?v=20260717-peer-panel";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskStageTransfers.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-peer-panel";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskChartUtils.js?v=20260717-peer-panel";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -58,7 +58,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -66,13 +66,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-allowances-group-tab";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-peer-panel";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -80,7 +80,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskStageRatioView.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -88,50 +88,50 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskCoverageRatioView.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-peer-panel";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskTreemapView.js?v=20260717-peer-panel";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-peer-panel";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-allowances-group-tab";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-peer-panel";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-peer-panel";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskControlsView.js?v=20260717-peer-panel";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-allowances-group-tab";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-allowances-group-tab";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskAuditTableView.js?v=20260717-peer-panel";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-peer-panel";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-peer-panel";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskTabsView.js?v=20260717-peer-panel";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskModelCache.js?v=20260717-peer-panel";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskFilterRules.js?v=20260717-peer-panel";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -139,12 +139,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-peer-panel";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-allowances-group-tab";
+} from "./costOfRiskCoreSelection.js?v=20260717-peer-panel";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -188,6 +188,7 @@ let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
 let costOfRiskWaterfallChart = null;
+let costOfRiskPeerSelectionActions = null;
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
   asset: COST_OF_RISK_FILTER_ALL,
@@ -1081,6 +1082,12 @@ export function showCostOfRiskPeerDisplayHelp(peerDisplayMode) {
   renderCostOfRiskHelpPanel();
 }
 
+export function showCostOfRiskPeerSelection(actions) {
+  costOfRiskPeerSelectionActions = actions;
+  setCostOfRiskHelpTopic("peer-selection");
+  renderCostOfRiskHelpPanel();
+}
+
 function renderCostOfRiskTabEmpty(message) {
   renderCostOfRiskTabEmptyView({
     activeTab: activeCostOfRiskTab,
@@ -1683,6 +1690,11 @@ function renderCostOfRiskAuditPanelIntro() {
 function renderCostOfRiskHelpPanel() {
   if (!elements.costOfRiskAuditPanel) return false;
 
+  if (activeCostOfRiskHelpTopic === "peer-selection") {
+    renderCostOfRiskPeerSelectionPanel();
+    return true;
+  }
+
   const content = getCostOfRiskHelpPanelContent(activeCostOfRiskHelpTopic);
   if (!content) return false;
 
@@ -1732,6 +1744,96 @@ function renderCostOfRiskPanelArticle(content) {
   intro.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function renderCostOfRiskPeerSelectionPanel() {
+  const state = costOfRiskPeerSelectionActions?.getState?.() ?? getLatestState();
+  const jstOptions = state?.jstOptions ?? [];
+  const selectedPeers = new Set((state?.peerJstCodes ?? jstOptions) ?? []);
+  const selectedCount = jstOptions.filter((jstCode) => selectedPeers.has(jstCode)).length;
+
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro cost-of-risk-peer-selection-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = "Benchmark peers";
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = "Peers";
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = jstOptions.length > 0
+    ? `${selectedCount} of ${jstOptions.length} JST selected for benchmark views. Changes are applied immediately.`
+    : "Load a dataset to choose the JST included in benchmark views.";
+
+  intro.append(eyebrow, title, summary);
+
+  if (jstOptions.length > 0) {
+    const actions = document.createElement("div");
+    actions.className = "cost-of-risk-peer-selection-actions";
+    actions.append(
+      createCostOfRiskPeerSelectionButton("Select all", () => updateCostOfRiskPeerSelection(jstOptions)),
+      createCostOfRiskPeerSelectionButton("Deselect all", () => updateCostOfRiskPeerSelection([]))
+    );
+
+    const list = document.createElement("div");
+    list.className = "cost-of-risk-peer-selection-list";
+    jstOptions.forEach((jstCode) => {
+      const row = document.createElement("label");
+      row.className = "cost-of-risk-peer-selection-row";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = jstCode;
+      checkbox.checked = selectedPeers.has(jstCode);
+      checkbox.addEventListener("change", (event) => {
+        const nextPeers = new Set(selectedPeers);
+        if (event.target.checked) {
+          nextPeers.add(jstCode);
+        } else {
+          nextPeers.delete(jstCode);
+        }
+        updateCostOfRiskPeerSelection([...nextPeers]);
+      });
+
+      const label = document.createElement("span");
+      label.textContent = jstCode;
+      row.append(checkbox, label);
+      list.append(row);
+    });
+
+    intro.append(actions, list);
+  }
+
+  intro.append(createCostOfRiskAuditInfoSection("How it is used", [
+    "The selected JST always remains visible in benchmark charts.",
+    "The peers selected here define the comparison population for explicit peer curves and anonymized percentile distributions.",
+    "Leaving no peer selected means the benchmark population is empty until peers are selected again."
+  ]));
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "Use Select all or individual checkboxes to adjust the peer set; charts refresh as soon as the selection changes.";
+  intro.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function createCostOfRiskPeerSelectionButton(label, onClick) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "cost-of-risk-peer-selection-button";
+  button.textContent = label;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function updateCostOfRiskPeerSelection(peerJstCodes) {
+  if (!costOfRiskPeerSelectionActions?.updatePeerJstCodes) return;
+  costOfRiskPeerSelectionActions.updatePeerJstCodes(peerJstCodes);
 }
 
 function renderCostOfRiskSmoothingHelpControl(windowSize) {

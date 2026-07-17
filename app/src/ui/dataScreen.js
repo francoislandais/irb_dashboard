@@ -1,12 +1,10 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, showCostOfRiskPeerDisplayHelp, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260717-allowances-group-tab";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260717-allowances-group-tab";
+import { renderCostOfRisk, showCostOfRiskPeerDisplayHelp, showCostOfRiskPeerSelection, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260717-peer-panel";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260717-peer-panel";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
-let peersDialog = null;
-
 const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
@@ -35,7 +33,10 @@ export function wireUi(actions) {
   elements.reloadFileButton?.addEventListener("click", actions.reloadFile);
   elements.forgetFileButton?.addEventListener("click", actions.forgetFile);
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
-  elements.peersButton?.addEventListener("click", () => showPeersDialog(actions));
+  elements.peersButton?.addEventListener("click", () => {
+    actions.setActiveModule("cost-of-risk");
+    showCostOfRiskPeerSelection(actions);
+  });
   elements.peerDisplayButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const peerDisplayMode = button.dataset.peerDisplayMode;
@@ -75,9 +76,6 @@ export function wireUi(actions) {
   });
   elements.moduleButtons.forEach((button) => {
     button.addEventListener("click", () => actions.setActiveModule(button.dataset.moduleTarget));
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") hidePeersDialog();
   });
   wireCostOfRiskUi(actions, renderAppState);
   wireExplorerUi(actions, renderAppState);
@@ -214,92 +212,6 @@ function renderJstSelect(jstOptions, selectedJst) {
     elements.jstSelect.append(new Option(jstCode, jstCode, false, jstCode === selectedJst));
   });
   elements.jstSelect.disabled = false;
-}
-
-function showPeersDialog(actions) {
-  hidePeersDialog();
-
-  const state = actions.getState();
-  if ((state.jstOptions ?? []).length === 0) return;
-
-  peersDialog = createPeersDialog(state, actions);
-  document.body.append(peersDialog);
-}
-
-function hidePeersDialog() {
-  if (!peersDialog) return;
-  peersDialog.remove();
-  peersDialog = null;
-}
-
-function createPeersDialog(state, actions) {
-  const overlay = document.createElement("div");
-  overlay.className = "peers-overlay";
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) hidePeersDialog();
-  });
-
-  const dialog = document.createElement("section");
-  dialog.className = "peers-dialog";
-  dialog.setAttribute("role", "dialog");
-  dialog.setAttribute("aria-modal", "true");
-  dialog.setAttribute("aria-label", "Peers selection");
-
-  const header = document.createElement("div");
-  header.className = "peers-header";
-  const title = document.createElement("strong");
-  title.textContent = "Peers";
-  const subtitle = document.createElement("span");
-  subtitle.textContent = "Select JST used in benchmark views.";
-  const closeButton = document.createElement("button");
-  closeButton.type = "button";
-  closeButton.setAttribute("aria-label", "Close");
-  closeButton.textContent = "×";
-  closeButton.addEventListener("click", hidePeersDialog);
-  const headerText = document.createElement("div");
-  headerText.append(title, subtitle);
-  header.append(headerText, closeButton);
-
-  const selectedPeers = new Set(
-    (state.peerJstCodes?.length ? state.peerJstCodes : state.jstOptions) ?? []
-  );
-  const list = document.createElement("div");
-  list.className = "peers-list";
-  (state.jstOptions ?? []).forEach((jstCode) => {
-    const row = document.createElement("label");
-    row.className = "peers-row";
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = jstCode;
-    checkbox.checked = selectedPeers.has(jstCode);
-    const label = document.createElement("span");
-    label.textContent = jstCode;
-    row.append(checkbox, label);
-    list.append(row);
-  });
-
-  const actionsRow = document.createElement("div");
-  actionsRow.className = "peers-actions";
-  const cancelButton = document.createElement("button");
-  cancelButton.type = "button";
-  cancelButton.className = "peers-secondary-button";
-  cancelButton.textContent = "Cancel";
-  cancelButton.addEventListener("click", hidePeersDialog);
-  const applyButton = document.createElement("button");
-  applyButton.type = "button";
-  applyButton.className = "peers-primary-button";
-  applyButton.textContent = "Apply";
-  applyButton.addEventListener("click", () => {
-    const checkedCodes = [...list.querySelectorAll('input[type="checkbox"]:checked')]
-      .map((checkbox) => checkbox.value);
-    actions.updatePeerJstCodes(checkedCodes.length > 0 ? checkedCodes : state.jstOptions);
-    hidePeersDialog();
-  });
-  actionsRow.append(cancelButton, applyButton);
-
-  dialog.append(header, list, actionsRow);
-  overlay.append(dialog);
-  return overlay;
 }
 
 function renderPeerDisplayControl(peerDisplayMode, hasPeers) {

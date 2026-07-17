@@ -12,7 +12,7 @@ export function getExplorerSelectionsForAxisCode(context, activeAxis, axisCode) 
 
 export function getPeerBenchmarkJstCodes(state) {
   const jstOptions = state?.jstOptions ?? [];
-  const peers = state?.peerJstCodes?.length ? state.peerJstCodes : jstOptions;
+  const peers = state?.peerJstCodes ?? jstOptions;
   const requested = [state?.selectedJst, ...peers].filter(Boolean);
 
   return requested.filter((jstCode, index) => (

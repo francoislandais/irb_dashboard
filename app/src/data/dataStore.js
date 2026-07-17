@@ -31,8 +31,7 @@ function createDatasetId(source) {
 
 function normalizePeerJstCodes(peerJstCodes, jstOptions) {
   const allowed = new Set(jstOptions ?? []);
-  const normalized = (peerJstCodes ?? []).filter((jstCode) => allowed.has(jstCode));
-  return normalized.length > 0 || allowed.size === 0 ? normalized : [...allowed];
+  return (peerJstCodes ?? []).filter((jstCode) => allowed.has(jstCode));
 }
 
 export function createDataStore() {
