@@ -61,6 +61,7 @@
             <div id="explorer-empty" class="notice" hidden></div>
 
             <div class="explorer-workspace">
+              <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information"></aside>
               <div class="explorer-main-pane">
                 <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
                   <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="template">
@@ -91,7 +92,6 @@
                   <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
                 </div>
               </div>
-              <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information"></aside>
             </div>
           </article>
         </section>
@@ -162,6 +162,9 @@
                   <span>Smoothing <output id="cost-of-risk-smoothing-value">4Q</output></span>
                   <input id="cost-of-risk-smoothing" type="range" min="1" max="4" step="1" value="4">
                 </label>
+              </aside>
+              <aside id="cost-of-risk-audit-panel" class="cost-of-risk-audit-panel" aria-label="Audit trail">
+                <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
               </aside>
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
@@ -326,9 +329,6 @@
                 </div>
                 </div>
               </div>
-              <aside id="cost-of-risk-audit-panel" class="cost-of-risk-audit-panel" aria-label="Audit trail">
-                <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
-              </aside>
             </div>
           </article>
         </section>

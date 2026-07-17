@@ -196,7 +196,7 @@ let latestCostOfRiskFilterOptions = null;
 
 // Filter chips (instrument/counterparty/stage/definition) no longer open an
 // inline dropdown: clicking a chip shows its options as a "filter-selection"
-// help topic in the right-hand context panel, so selection stays visible
+// help topic in the context panel, so selection stays visible
 // instead of covering the rows below it.
 const COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX = "filter-selection:";
 
