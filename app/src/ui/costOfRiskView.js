@@ -36,21 +36,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-peer-panel";
+} from "../data/costOfRisk.js?v=20260717-standalone-export";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-peer-panel";
+} from "./costOfRiskStageTransfers.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-peer-panel";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-standalone-export";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-peer-panel";
+} from "./costOfRiskChartUtils.js?v=20260717-standalone-export";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -58,7 +58,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-peer-panel";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -66,13 +66,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-peer-panel";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-peer-panel";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-standalone-export";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-peer-panel";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -80,7 +80,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260717-peer-panel";
+} from "./costOfRiskStageRatioView.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -88,50 +88,50 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260717-peer-panel";
+} from "./costOfRiskCoverageRatioView.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-peer-panel";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-standalone-export";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-peer-panel";
+} from "./costOfRiskTreemapView.js?v=20260717-standalone-export";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-peer-panel";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-standalone-export";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-peer-panel";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-peer-panel";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-standalone-export";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-standalone-export";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-peer-panel";
+} from "./costOfRiskControlsView.js?v=20260717-standalone-export";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-peer-panel";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-peer-panel";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-peer-panel";
+} from "./costOfRiskAuditTableView.js?v=20260717-standalone-export";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-standalone-export";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-standalone-export";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-peer-panel";
+} from "./costOfRiskTabsView.js?v=20260717-standalone-export";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-peer-panel";
+} from "./costOfRiskModelCache.js?v=20260717-standalone-export";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-peer-panel";
+} from "./costOfRiskFilterRules.js?v=20260717-standalone-export";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -139,12 +139,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-peer-panel";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-standalone-export";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-peer-panel";
+} from "./costOfRiskCoreSelection.js?v=20260717-standalone-export";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
@@ -162,8 +162,8 @@ let activeCostOfRiskMovementXCodes = new Set(COST_OF_RISK_WATERFALL_X_CODES);
 let activeCostOfRiskF2F12XCodes = new Set(COST_OF_RISK_F12_RECONCILIATION_X_CODES);
 let activeCostOfRiskAuditSeries = "f12";
 let activeCostOfRiskDisplayMode = "ratio";
-let activeCostOfRiskMovementDisplayMode = "amount";
-let activeCostOfRiskStageTransferDisplayMode = "amount";
+let activeCostOfRiskMovementDisplayMode = "ratio";
+let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
 let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
 let activeCostOfRiskCounterpartySummaryOtherOpen = false;

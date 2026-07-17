@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-peer-panel";
+} from "../data/costOfRisk.js?v=20260717-standalone-export";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 

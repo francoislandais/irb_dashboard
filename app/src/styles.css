@@ -2533,6 +2533,10 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.explorer-context-item p {
+  white-space: pre-line;
+}
+
 .explorer-context-range {
   background: #f1f4f2;
   border-radius: 7px;

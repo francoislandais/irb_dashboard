@@ -15,8 +15,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260717-peer-panel";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260717-peer-panel";
+import { createDataStore } from "./data/dataStore.js?v=20260717-standalone-export";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260717-standalone-export";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -24,44 +24,6 @@ const MODULE_URL_PARAM = "module";
 const DATASET_URL_PARAM = "dataset";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
 const MODULE_URL_VALUES = new Set(["explorer", "cet-1", "cost-of-risk"]);
-const STANDALONE_MODULE_PATHS = [
-  "src/data/csvParser.js",
-  "src/data/cet1.js",
-  "src/data/costOfRisk.js",
-  "src/data/core/axisCode.js",
-  "src/data/core/axisColumns.js",
-  "src/data/core/formatting.js",
-  "src/data/core/referenceColumns.js",
-  "src/data/dataIndex.js",
-  "src/data/dataStore.js",
-  "src/data/dimensionMapping.js",
-  "src/data/localFileSource.js",
-  "src/data/explorer.js",
-  "src/data/explorerBenchmark.js",
-  "src/data/explorerConfig.js",
-  "src/data/peerDistribution.js",
-  "src/data/timeSeries.js",
-  "src/ui/appState.js",
-  "src/ui/auditTrailDialog.js",
-  "src/ui/benchmarkLineChart.js",
-  "src/ui/cet1View.js",
-  "src/ui/contextMenu.js",
-  "src/ui/costOfRiskF2VsF12ChartView.js",
-  "src/ui/costOfRiskChartUtils.js",
-  "src/ui/costOfRiskStageReconciliationView.js",
-  "src/ui/costOfRiskStageTransferAuditView.js",
-  "src/ui/costOfRiskStageTransferFlowView.js",
-  "src/ui/costOfRiskStageTransferTimeSeriesView.js",
-  "src/ui/costOfRiskStageTransfers.js",
-  "src/ui/costOfRiskSummaryChartsView.js",
-  "src/ui/costOfRiskSummaryTablesView.js",
-  "src/ui/costOfRiskTreemapView.js",
-  "src/ui/costOfRiskView.js",
-  "src/ui/dataScreen.js",
-  "src/ui/explorerView.js",
-  "src/ui/theme.js",
-  "src/main.js"
-];
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";
 let currentCsvFileName = standaloneData?.fileName ?? "";
@@ -383,13 +345,13 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, mappingCsv, highchartsJs, highchartsTreemapJs, moduleEntries] = await Promise.all([
+  const [indexHtml, stylesCss, mappingCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
     fetchAppText("vendor/highcharts.js"),
     fetchAppText("vendor/highcharts-treemap.js"),
-    Promise.all(STANDALONE_MODULE_PATHS.map(async (path) => [path, await fetchAppText(path)]))
+    collectStandaloneModuleSources("src/main.js")
   ]);
 
   return {
@@ -399,7 +361,7 @@ async function getStandaloneBundle() {
     highchartsJs,
     highchartsTreemapJs,
     indexHtml,
-    moduleSources: Object.fromEntries(moduleEntries),
+    moduleSources,
     stylesCss
   };
 }
@@ -410,6 +372,44 @@ async function fetchAppText(path) {
     throw new Error(`Impossible de préparer l'export portable : ${path} est introuvable.`);
   }
   return response.text();
+}
+
+async function collectStandaloneModuleSources(entryPath) {
+  const sources = new Map();
+  await collectStandaloneModuleSource(entryPath, sources);
+  return Object.fromEntries(sources);
+}
+
+async function collectStandaloneModuleSource(path, sources) {
+  if (sources.has(path)) return;
+
+  const source = await fetchAppText(path);
+  sources.set(path, source);
+
+  const dependencies = getStandaloneModuleDependencies(path, source);
+  await Promise.all(dependencies.map((dependencyPath) => collectStandaloneModuleSource(dependencyPath, sources)));
+}
+
+function getStandaloneModuleDependencies(fromPath, source) {
+  const dependencies = new Set();
+  [
+    /\bfrom\s*["']([^"']+)["']/g,
+    /\bimport\s*["']([^"']+)["']/g,
+    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g
+  ].forEach((pattern) => {
+    let match;
+    while ((match = pattern.exec(source)) !== null) {
+      const dependencyPath = resolveStandaloneModulePath(fromPath, match[1]);
+      if (dependencyPath) dependencies.add(dependencyPath);
+    }
+  });
+  return [...dependencies];
+}
+
+function resolveStandaloneModulePath(fromPath, specifier) {
+  const cleanSpecifier = String(specifier ?? "").split("?")[0].split("#")[0];
+  if (!cleanSpecifier.startsWith(".")) return "";
+  return new URL(cleanSpecifier, `https://standalone.local/${fromPath}`).pathname.slice(1);
 }
 
 function buildStandaloneHtml(bundle, activeDataset) {
@@ -469,6 +469,9 @@ function getModuleUrl(path) {
       return \`\${prefix}\${getModuleUrl(resolveModulePath(path, specifier))}\${suffix}\`;
     })
     .replace(/(\\bimport\\s*["'])([^"']+)(["'])/g, (match, prefix, specifier, suffix) => {
+      return \`\${prefix}\${getModuleUrl(resolveModulePath(path, specifier))}\${suffix}\`;
+    })
+    .replace(/(\\bimport\\s*\\(\\s*["'])([^"']+)(["']\\s*\\))/g, (match, prefix, specifier, suffix) => {
       return \`\${prefix}\${getModuleUrl(resolveModulePath(path, specifier))}\${suffix}\`;
     });
 

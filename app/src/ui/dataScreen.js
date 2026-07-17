@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, showCostOfRiskPeerDisplayHelp, showCostOfRiskPeerSelection, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260717-peer-panel";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260717-peer-panel";
+import { renderCostOfRisk, showCostOfRiskPeerDisplayHelp, showCostOfRiskPeerSelection, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260717-standalone-export";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260717-standalone-export";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -34,8 +34,12 @@ export function wireUi(actions) {
   elements.forgetFileButton?.addEventListener("click", actions.forgetFile);
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
   elements.peersButton?.addEventListener("click", () => {
-    actions.setActiveModule("cost-of-risk");
-    showCostOfRiskPeerSelection(actions);
+    const activeModule = actions.getState().activeModule;
+    if (activeModule === "cost-of-risk") {
+      showCostOfRiskPeerSelection(actions);
+    } else if (activeModule === "explorer") {
+      showExplorerPeerSelection(actions);
+    }
   });
   elements.peerDisplayButtons.forEach((button) => {
     button.addEventListener("click", () => {

@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-peer-panel";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-standalone-export";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

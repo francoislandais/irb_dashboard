@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-peer-panel";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-standalone-export";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-peer-panel";
+} from "./benchmarkLineChart.js?v=20260717-standalone-export";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -87,6 +87,8 @@ let explorerCellDrag = null;
 let explorerCellRanges = [];
 let explorerCellRangePreview = null;
 let suppressNextExplorerRowClick = false;
+let explorerContextTopic = "";
+let explorerPeerSelectionActions = null;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -118,6 +120,7 @@ export function wireExplorerUi(actions, rerender) {
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       explorerBenchmarkViewActive = false;
+      clearExplorerContextTopic();
       getActiveExplorerContext().activeAxis = button.getAttribute("data-explorer-axis") || "y";
       rerenderApp(actions.getState());
     });
@@ -142,7 +145,10 @@ export function wireExplorerUi(actions, rerender) {
     }
 
     const row = event.target.closest("tbody tr[data-point-code]");
-    if (row) selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
+    if (row) {
+      clearExplorerContextTopic();
+      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
+    }
   });
   elements.explorerTable.addEventListener("contextmenu", (event) => {
     const row = event.target.closest("tbody tr[data-normalized-path]");
@@ -164,6 +170,7 @@ export function wireExplorerUi(actions, rerender) {
     if (!row) return;
 
     event.preventDefault();
+    clearExplorerContextTopic();
     selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
   });
   document.addEventListener("click", hideExplorerContextMenu);
@@ -173,6 +180,16 @@ export function wireExplorerUi(actions, rerender) {
       hideExplorerContextMenu();
     }
   });
+}
+
+export function showExplorerPeerSelection(actions) {
+  explorerPeerSelectionActions = actions;
+  explorerContextTopic = "peer-selection";
+  renderExplorerContextPanel(actions.getState());
+}
+
+function clearExplorerContextTopic() {
+  explorerContextTopic = "";
 }
 
 function createExplorerTemplateContext() {
@@ -1288,6 +1305,11 @@ function renderExplorerAxisTabs() {
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
 
+  if (explorerContextTopic === "peer-selection") {
+    renderExplorerPeerSelectionPanel(state);
+    return;
+  }
+
   const captions = getExplorerAxisCaptions();
   const activeAxis = getActiveExplorerAxis();
   const activeTemplate = getActiveExplorerTemplate();
@@ -1335,6 +1357,95 @@ function renderExplorerContextPanel(state) {
   article.append(hint);
 
   elements.explorerContextPanel.replaceChildren(article);
+}
+
+function renderExplorerPeerSelectionPanel(state) {
+  const jstOptions = state?.jstOptions ?? [];
+  const selectedPeers = new Set((state?.peerJstCodes ?? jstOptions) ?? []);
+  const selectedCount = jstOptions.filter((jstCode) => selectedPeers.has(jstCode)).length;
+
+  const article = document.createElement("article");
+  article.className = "explorer-context-article cost-of-risk-peer-selection-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "explorer-context-eyebrow";
+  eyebrow.textContent = "Benchmark peers";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Peers";
+
+  const lead = document.createElement("p");
+  lead.className = "explorer-context-lead";
+  lead.textContent = jstOptions.length > 0
+    ? `${selectedCount} of ${jstOptions.length} JST selected for benchmark views. Changes are applied immediately.`
+    : "Load a dataset to choose the JST included in benchmark views.";
+
+  article.append(eyebrow, title, lead);
+
+  if (jstOptions.length > 0) {
+    const actions = document.createElement("div");
+    actions.className = "cost-of-risk-peer-selection-actions";
+    actions.append(
+      createExplorerPeerSelectionButton("Select all", () => updateExplorerPeerSelection(jstOptions)),
+      createExplorerPeerSelectionButton("Deselect all", () => updateExplorerPeerSelection([]))
+    );
+
+    const list = document.createElement("div");
+    list.className = "cost-of-risk-peer-selection-list";
+    jstOptions.forEach((jstCode) => {
+      const row = document.createElement("label");
+      row.className = "cost-of-risk-peer-selection-row";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = jstCode;
+      checkbox.checked = selectedPeers.has(jstCode);
+      checkbox.addEventListener("change", (event) => {
+        const nextPeers = new Set(selectedPeers);
+        if (event.target.checked) {
+          nextPeers.add(jstCode);
+        } else {
+          nextPeers.delete(jstCode);
+        }
+        updateExplorerPeerSelection([...nextPeers]);
+      });
+
+      const label = document.createElement("span");
+      label.textContent = jstCode;
+      row.append(checkbox, label);
+      list.append(row);
+    });
+
+    article.append(actions, list);
+  }
+
+  article.append(createExplorerContextItem("How it is used", [
+    "The selected JST always remains visible in benchmark charts.",
+    "The peers selected here define the comparison population for explicit peer curves and anonymized percentile distributions.",
+    "Leaving no peer selected means the benchmark population is empty until peers are selected again."
+  ].join("\n")));
+
+  const hint = document.createElement("p");
+  hint.className = "explorer-context-hint";
+  hint.textContent = "Use Select all or individual checkboxes to adjust the peer set; charts refresh as soon as the selection changes.";
+  article.append(hint);
+
+  elements.explorerContextPanel.replaceChildren(article);
+}
+
+function createExplorerPeerSelectionButton(label, onClick) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "cost-of-risk-peer-selection-button";
+  button.textContent = label;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function updateExplorerPeerSelection(peerJstCodes) {
+  if (!explorerPeerSelectionActions?.updatePeerJstCodes) return;
+  explorerPeerSelectionActions.updatePeerJstCodes(peerJstCodes);
 }
 
 function createExplorerReturnButton(target) {

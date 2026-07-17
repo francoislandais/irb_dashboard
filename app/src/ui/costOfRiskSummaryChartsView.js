@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-peer-panel";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-standalone-export";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-peer-panel";
+} from "./benchmarkLineChart.js?v=20260717-standalone-export";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,11 +20,11 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260717-peer-panel";
+} from "./costOfRiskChartUtils.js?v=20260717-standalone-export";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260717-peer-panel";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-standalone-export";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;
