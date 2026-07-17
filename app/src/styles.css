@@ -970,13 +970,15 @@ button:focus-visible {
   padding: 7px 12px;
 }
 
-.cost-of-risk-staging-tab-wrap {
+.cost-of-risk-staging-tab-wrap,
+.cost-of-risk-allowances-tab-wrap {
   display: inline-flex;
   flex: 0 0 auto;
   position: relative;
 }
 
-.cost-of-risk-staging-tab {
+.cost-of-risk-staging-tab,
+.cost-of-risk-allowances-tab {
   align-items: center;
   display: inline-flex;
   gap: 5px;
@@ -985,7 +987,8 @@ button:focus-visible {
   padding: 7px 12px;
 }
 
-.cost-of-risk-staging-tab-menu-toggle {
+.cost-of-risk-staging-tab-menu-toggle,
+.cost-of-risk-allowances-tab-menu-toggle {
   align-items: center;
   background: #f7f8f7;
   border: 0;
@@ -999,36 +1002,43 @@ button:focus-visible {
   padding: 0 9px;
 }
 
-.cost-of-risk-staging-tab-label {
+.cost-of-risk-staging-tab-label,
+.cost-of-risk-allowances-tab-label {
   font-weight: 700;
 }
 
-.cost-of-risk-staging-tab-caret {
+.cost-of-risk-staging-tab-caret,
+.cost-of-risk-allowances-tab-caret {
   display: inline-block;
   font-size: 0.86rem;
   line-height: 1;
   transform: translateY(-1px);
 }
 
-.cost-of-risk-staging-tab-wrap.is-active .cost-of-risk-staging-tab-menu-toggle {
+.cost-of-risk-staging-tab-wrap.is-active .cost-of-risk-staging-tab-menu-toggle,
+.cost-of-risk-allowances-tab-wrap.is-active .cost-of-risk-allowances-tab-menu-toggle {
   background: var(--primary-dark);
   border-color: rgba(255, 255, 255, 0.24);
   color: #ffffff;
 }
 
 .cost-of-risk-staging-tab-menu-toggle:hover,
-.cost-of-risk-staging-tab-wrap.is-open .cost-of-risk-staging-tab-menu-toggle {
+.cost-of-risk-staging-tab-wrap.is-open .cost-of-risk-staging-tab-menu-toggle,
+.cost-of-risk-allowances-tab-menu-toggle:hover,
+.cost-of-risk-allowances-tab-wrap.is-open .cost-of-risk-allowances-tab-menu-toggle {
   background: #eef3f0;
   color: var(--primary-dark);
 }
 
-.cost-of-risk-staging-tab-wrap.is-active.is-open .cost-of-risk-staging-tab-menu-toggle {
+.cost-of-risk-staging-tab-wrap.is-active.is-open .cost-of-risk-staging-tab-menu-toggle,
+.cost-of-risk-allowances-tab-wrap.is-active.is-open .cost-of-risk-allowances-tab-menu-toggle {
   background: var(--primary-dark);
   border-color: rgba(255, 255, 255, 0.24);
   color: #ffffff;
 }
 
-.cost-of-risk-staging-tab-menu {
+.cost-of-risk-staging-tab-menu,
+.cost-of-risk-allowances-tab-menu {
   background: #ffffff;
   border: 1px solid #d8dfdb;
   border-radius: 7px;
@@ -1044,11 +1054,13 @@ button:focus-visible {
   z-index: 90;
 }
 
-.cost-of-risk-staging-tab-menu[hidden] {
+.cost-of-risk-staging-tab-menu[hidden],
+.cost-of-risk-allowances-tab-menu[hidden] {
   display: none;
 }
 
-.cost-of-risk-staging-tab-option {
+.cost-of-risk-staging-tab-option,
+.cost-of-risk-allowances-tab-option {
   background: transparent;
   border: 0;
   border-radius: 5px;
@@ -1061,17 +1073,21 @@ button:focus-visible {
 }
 
 .cost-of-risk-staging-tab-option:hover,
-.cost-of-risk-staging-tab-option.is-active {
+.cost-of-risk-staging-tab-option.is-active,
+.cost-of-risk-allowances-tab-option:hover,
+.cost-of-risk-allowances-tab-option.is-active {
   background: #eef3f0;
 }
 
-.cost-of-risk-staging-tab-option-title {
+.cost-of-risk-staging-tab-option-title,
+.cost-of-risk-allowances-tab-option-title {
   color: var(--primary-dark);
   font-size: 0.78rem;
   font-weight: 700;
 }
 
-.cost-of-risk-staging-tab-option-text {
+.cost-of-risk-staging-tab-option-text,
+.cost-of-risk-allowances-tab-option-text {
   color: #66736d;
   font-size: 0.68rem;
   font-weight: 400;
