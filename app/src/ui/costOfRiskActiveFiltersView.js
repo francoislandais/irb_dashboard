@@ -1,4 +1,5 @@
 import {
+  COST_OF_RISK_DEFINITION_OPTIONS,
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
@@ -9,6 +10,8 @@ export function renderCostOfRiskActiveFiltersView({
   activeTab,
   contributionDisplayMenuOpen,
   container,
+  costOfRiskDefinitionId,
+  costOfRiskDefinitionMenuOpen,
   displayMode,
   summaryDisplayMenuOpen,
   stageTransferDisplayMenuOpen,
@@ -24,6 +27,8 @@ export function renderCostOfRiskActiveFiltersView({
   const renderKey = serializeCostOfRiskActiveFiltersPart({
     activeTab,
     contributionDisplayMenuOpen,
+    costOfRiskDefinitionId,
+    costOfRiskDefinitionMenuOpen,
     displayMode,
     filters,
     labels: {
@@ -69,6 +74,23 @@ export function renderCostOfRiskActiveFiltersView({
         name: "contribution"
       })]
       : []),
+    ...(activeTab === "cost-of-risk"
+      ? [
+        createCostOfRiskDefinitionChip(costOfRiskDefinitionId, costOfRiskDefinitionMenuOpen),
+        createCostOfRiskDisplayModeChip({
+          displayMode,
+          isOpen: contributionDisplayMenuOpen,
+          labels: {
+            absolute: "Absolute value",
+            relative: "Basis points",
+            switchToAbsolute: "Switch to Absolute value",
+            switchToRelative: "Switch to Basis points"
+          },
+          menuLabel: "Cost of risk display",
+          name: "costOfRiskDefinition"
+        })
+      ]
+      : []),
     ...(activeTab === "summary"
       ? [createCostOfRiskDisplayModeChip({
         displayMode,
@@ -101,6 +123,54 @@ export function renderCostOfRiskActiveFiltersView({
 
   container.replaceChildren(...chips);
   container.classList.toggle("is-empty", activeItems.length === 0);
+}
+
+function createCostOfRiskDefinitionChip(definitionId, isOpen) {
+  const activeDefinition = COST_OF_RISK_DEFINITION_OPTIONS.find((definition) => definition.id === definitionId)
+    ?? COST_OF_RISK_DEFINITION_OPTIONS[0];
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--definition";
+  chip.classList.toggle("is-open", Boolean(isOpen));
+
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskDefinitionFilterToggle = "true";
+  toggle.setAttribute("aria-haspopup", "listbox");
+  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  toggle.setAttribute("aria-label", "Change cost of risk definition");
+
+  const prefix = document.createElement("span");
+  prefix.className = "cost-of-risk-filter-chip-prefix";
+  prefix.textContent = "Cost of risk: ";
+  const value = document.createElement("span");
+  value.className = "cost-of-risk-filter-chip-value";
+  value.textContent = activeDefinition.label;
+  toggle.append(prefix, value);
+  chip.append(toggle);
+
+  if (isOpen) {
+    const menu = document.createElement("div");
+    menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-definition-filter-menu";
+    menu.setAttribute("role", "listbox");
+    menu.setAttribute("aria-label", "Cost of risk definition");
+    COST_OF_RISK_DEFINITION_OPTIONS.forEach((definition) => {
+      const button = document.createElement("button");
+      const isActive = definition.id === activeDefinition.id;
+      button.className = "cost-of-risk-stage-filter-option";
+      button.classList.toggle("is-active", isActive);
+      button.type = "button";
+      button.dataset.costOfRiskDefinitionOption = definition.id;
+      button.setAttribute("role", "option");
+      button.setAttribute("aria-selected", String(isActive));
+      button.textContent = definition.label;
+      button.title = definition.description;
+      menu.append(button);
+    });
+    chip.append(menu);
+  }
+
+  return chip;
 }
 
 function createCostOfRiskReferenceDateChip(referenceDate) {

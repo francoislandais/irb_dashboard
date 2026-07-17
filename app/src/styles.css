@@ -1108,6 +1108,7 @@ button:focus-visible {
 
 .cost-of-risk-filter-chip-toggle:hover,
 .cost-of-risk-filter-chip--contribution-display.is-open .cost-of-risk-filter-chip-toggle,
+.cost-of-risk-filter-chip--definition.is-open .cost-of-risk-filter-chip-toggle,
 .cost-of-risk-filter-chip--instrument.is-open .cost-of-risk-filter-chip-toggle,
 .cost-of-risk-filter-chip--counterparty.is-open .cost-of-risk-filter-chip-toggle,
 .cost-of-risk-filter-chip--stage.is-open .cost-of-risk-filter-chip-toggle {
@@ -1174,6 +1175,10 @@ button:focus-visible {
 
 .cost-of-risk-contribution-display-menu {
   min-width: 220px;
+}
+
+.cost-of-risk-definition-filter-menu {
+  min-width: 190px;
 }
 
 .cost-of-risk-stage-filter-option {
@@ -1623,64 +1628,47 @@ button:focus-visible {
   align-content: start;
   display: grid;
   gap: 14px;
+  grid-template-columns: minmax(190px, 260px) minmax(0, 1fr);
   min-width: 0;
 }
 
-.cost-of-risk-definition-control,
 .cost-of-risk-definition-cards {
   align-items: start;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: grid;
+  gap: 8px;
   min-width: 0;
-}
-
-.cost-of-risk-definition-switch,
-.cost-of-risk-definition-display {
-  display: inline-flex;
-  min-width: 0;
-}
-
-.cost-of-risk-definition-switch-button,
-.cost-of-risk-definition-display-button {
-  background: #ffffff;
-  border: 1px solid #d8dfdb;
-  color: #516059;
-  cursor: pointer;
-  font-size: 0.72rem;
-  height: 30px;
-  padding: 0 10px;
-  white-space: nowrap;
-}
-
-.cost-of-risk-definition-switch-button:first-child,
-.cost-of-risk-definition-display-button:first-child {
-  border-bottom-left-radius: 6px;
-  border-right: 0;
-  border-top-left-radius: 6px;
-}
-
-.cost-of-risk-definition-switch-button:last-child,
-.cost-of-risk-definition-display-button:last-child {
-  border-bottom-right-radius: 6px;
-  border-top-right-radius: 6px;
-}
-
-.cost-of-risk-definition-switch-button.is-active,
-.cost-of-risk-definition-display-button.is-active {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-  color: #ffffff;
 }
 
 .cost-of-risk-definition-card {
   background: #f7f8f7;
+  border: 0;
   border-radius: 7px;
+  color: inherit;
   display: grid;
   gap: 5px;
-  min-height: 78px;
-  min-width: 180px;
-  padding: 10px 12px;
+  min-height: 68px;
+  min-width: 0;
+  padding: 9px 11px;
+  text-align: left;
+}
+
+.cost-of-risk-definition-card.is-clickable {
+  cursor: pointer;
+}
+
+.cost-of-risk-definition-card.is-clickable:hover {
+  background: #eef2ef;
+}
+
+.cost-of-risk-definition-card.is-active,
+.cost-of-risk-definition-card.is-active:hover {
+  background: var(--primary-dark);
+}
+
+.cost-of-risk-definition-card.is-active .cost-of-risk-definition-card-label,
+.cost-of-risk-definition-card.is-active .cost-of-risk-definition-card-value,
+.cost-of-risk-definition-card.is-active .cost-of-risk-definition-card-context {
+  color: #ffffff;
 }
 
 .cost-of-risk-definition-card-label,
@@ -1706,7 +1694,7 @@ button:focus-visible {
 
 .cost-of-risk-definition-drivers {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -1719,7 +1707,7 @@ button:focus-visible {
   display: grid;
   gap: 10px;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 28px;
+  min-height: 26px;
   padding: 0 7px;
   text-align: left;
 }

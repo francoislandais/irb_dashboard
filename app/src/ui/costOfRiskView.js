@@ -2,7 +2,6 @@ import {
   COST_OF_RISK_FILTER_ALL,
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
-  COST_OF_RISK_DEFINITION_OPTIONS,
   DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_F12_RECONCILIATION_X_CODES,
@@ -167,6 +166,7 @@ let activeCostOfRiskDisplayMode = "ratio";
 let activeCostOfRiskDefinitionDisplayMode = "ratio";
 let activeCostOfRiskDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionDriverCode = "";
+let activeCostOfRiskDefinitionMenuOpen = false;
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -403,6 +403,8 @@ export function wireCostOfRiskUi(actions, rerender) {
         activeCostOfRiskStageTransferDisplayMode = nextMode;
       } else if (scope === "summaryVariation") {
         activeCostOfRiskSummaryDisplayMode = nextMode;
+      } else if (scope === "costOfRiskDefinition") {
+        activeCostOfRiskDefinitionDisplayMode = nextMode;
       } else {
         activeCostOfRiskMovementDisplayMode = nextMode;
       }
@@ -417,7 +419,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.preventDefault();
       event.stopPropagation();
       const scope = displayModeToggle.dataset.costOfRiskDisplayModeToggle;
-      activeCostOfRiskContributionDisplayMenuOpen = scope === "contribution"
+      activeCostOfRiskContributionDisplayMenuOpen = scope === "contribution" || scope === "costOfRiskDefinition"
         ? !activeCostOfRiskContributionDisplayMenuOpen
         : false;
       activeCostOfRiskStageTransferDisplayMenuOpen = scope === "stageTransfer"
@@ -426,6 +428,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskSummaryDisplayMenuOpen = scope === "summaryVariation"
         ? !activeCostOfRiskSummaryDisplayMenuOpen
         : false;
+      activeCostOfRiskDefinitionMenuOpen = false;
       activeCostOfRiskInstrumentFilterMenuOpen = false;
       activeCostOfRiskCounterpartyFilterMenuOpen = false;
       activeCostOfRiskStageFilterMenuOpen = false;
@@ -433,8 +436,37 @@ export function wireCostOfRiskUi(actions, rerender) {
         ? activeCostOfRiskStageTransferDisplayMode
         : scope === "summaryVariation"
           ? activeCostOfRiskSummaryDisplayMode
-          : activeCostOfRiskMovementDisplayMode;
+          : scope === "costOfRiskDefinition"
+            ? activeCostOfRiskDefinitionDisplayMode
+            : activeCostOfRiskMovementDisplayMode;
       setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, currentMode));
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const definitionOption = event.target.closest?.("[data-cost-of-risk-definition-option]");
+    if (definitionOption) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      activeCostOfRiskDefinitionId = definitionOption.dataset.costOfRiskDefinitionOption || "f12-selected-components";
+      activeCostOfRiskDefinitionDriverCode = "";
+      clearCostOfRiskHelpTopic();
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const definitionToggle = event.target.closest?.("[data-cost-of-risk-definition-filter-toggle]");
+    if (definitionToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      activeCostOfRiskDefinitionMenuOpen = !activeCostOfRiskDefinitionMenuOpen;
+      activeCostOfRiskContributionDisplayMenuOpen = false;
+      activeCostOfRiskStageTransferDisplayMenuOpen = false;
+      activeCostOfRiskSummaryDisplayMenuOpen = false;
+      activeCostOfRiskInstrumentFilterMenuOpen = false;
+      activeCostOfRiskCounterpartyFilterMenuOpen = false;
+      activeCostOfRiskStageFilterMenuOpen = false;
       rerenderApp(actions.getState());
       return;
     }
@@ -458,6 +490,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskContributionDisplayMenuOpen = false;
       activeCostOfRiskStageTransferDisplayMenuOpen = false;
       activeCostOfRiskSummaryDisplayMenuOpen = false;
+      activeCostOfRiskDefinitionMenuOpen = false;
       activeCostOfRiskCounterpartyFilterMenuOpen = false;
       activeCostOfRiskStageFilterMenuOpen = false;
       rerenderApp(actions.getState());
@@ -483,6 +516,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskContributionDisplayMenuOpen = false;
       activeCostOfRiskStageTransferDisplayMenuOpen = false;
       activeCostOfRiskSummaryDisplayMenuOpen = false;
+      activeCostOfRiskDefinitionMenuOpen = false;
       activeCostOfRiskInstrumentFilterMenuOpen = false;
       activeCostOfRiskStageFilterMenuOpen = false;
       rerenderApp(actions.getState());
@@ -507,6 +541,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskContributionDisplayMenuOpen = false;
       activeCostOfRiskStageTransferDisplayMenuOpen = false;
       activeCostOfRiskSummaryDisplayMenuOpen = false;
+      activeCostOfRiskDefinitionMenuOpen = false;
       activeCostOfRiskInstrumentFilterMenuOpen = false;
       activeCostOfRiskCounterpartyFilterMenuOpen = false;
       rerenderApp(actions.getState());
@@ -568,6 +603,15 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.preventDefault();
       const nextDriverCode = definitionDriverButton.dataset.costOfRiskDefinitionDriver || "";
       activeCostOfRiskDefinitionDriverCode = activeCostOfRiskDefinitionDriverCode === nextDriverCode ? "" : nextDriverCode;
+      clearCostOfRiskHelpTopic();
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const definitionBenchmarkTarget = event.target.closest?.("[data-cost-of-risk-definition-benchmark-target]");
+    if (definitionBenchmarkTarget) {
+      event.preventDefault();
+      activeCostOfRiskDefinitionDriverCode = "";
       clearCostOfRiskHelpTopic();
       rerenderApp(actions.getState());
       return;
@@ -1292,50 +1336,9 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
   const root = document.createElement("div");
   root.className = "cost-of-risk-definition-grid";
 
-  const control = document.createElement("div");
-  control.className = "cost-of-risk-definition-control";
-  const definitionSwitch = document.createElement("div");
-  definitionSwitch.className = "cost-of-risk-definition-switch";
-  COST_OF_RISK_DEFINITION_OPTIONS.forEach((definition) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "cost-of-risk-definition-switch-button";
-    button.classList.toggle("is-active", definition.id === activeCostOfRiskDefinitionId);
-    button.dataset.costOfRiskDefinition = definition.id;
-    button.textContent = definition.label;
-    button.title = definition.description;
-    definitionSwitch.append(button);
-  });
-
-  const displaySwitch = document.createElement("div");
-  displaySwitch.className = "cost-of-risk-definition-display";
-  [
-    ["amount", "Absolute value"],
-    ["ratio", "Basis points"]
-  ].forEach(([mode, label]) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "cost-of-risk-definition-display-button";
-    button.classList.toggle("is-active", activeCostOfRiskDefinitionDisplayMode === mode);
-    button.dataset.costOfRiskDefinitionDisplay = mode;
-    button.textContent = label;
-    displaySwitch.append(button);
-  });
-  control.append(definitionSwitch, displaySwitch);
-
   const cards = document.createElement("div");
   cards.className = "cost-of-risk-definition-cards";
   cards.append(
-    createCostOfRiskDefinitionCard(
-      "Selected definition",
-      definitionModel.definition.label,
-      definitionModel.definition.source
-    ),
-    createCostOfRiskDefinitionCard(
-      "Benchmarked item",
-      definitionModel.selectedDriver?.label ?? "Total cost of risk",
-      definitionModel.selectedDriver?.source ?? definitionModel.definition.description
-    ),
     createCostOfRiskDefinitionCard(
       activeCostOfRiskDefinitionDisplayMode === "ratio" ? "Cost of risk" : "Cost of risk amount",
       formatCostOfRiskDisplayValue(
@@ -1346,7 +1349,11 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
         selectedUnit,
         true
       ),
-      `${definitionModel.referenceDate || "-"} - ${activeCostOfRiskDefinitionDisplayMode === "ratio" ? definitionModel.denominatorLabel : "amount"}`
+      `${definitionModel.referenceDate || "-"} - ${activeCostOfRiskDefinitionDisplayMode === "ratio" ? definitionModel.denominatorLabel : "amount"}`,
+      {
+        active: !activeCostOfRiskDefinitionDriverCode,
+        benchmarkTarget: "total"
+      }
     ),
     createCostOfRiskDefinitionCard(
       "Denominator",
@@ -1390,7 +1397,7 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
     });
   }
 
-  root.append(control, cards, drivers);
+  root.append(cards, drivers);
   elements.costOfRiskDefinitionPanel.replaceChildren(root);
 }
 
@@ -1401,9 +1408,15 @@ function createCostOfRiskDefinitionEmpty(message) {
   return empty;
 }
 
-function createCostOfRiskDefinitionCard(labelText, valueText, contextText) {
-  const card = document.createElement("div");
+function createCostOfRiskDefinitionCard(labelText, valueText, contextText, options = {}) {
+  const card = document.createElement(options.benchmarkTarget ? "button" : "div");
   card.className = "cost-of-risk-definition-card";
+  card.classList.toggle("is-clickable", Boolean(options.benchmarkTarget));
+  card.classList.toggle("is-active", Boolean(options.active));
+  if (options.benchmarkTarget) {
+    card.type = "button";
+    card.dataset.costOfRiskDefinitionBenchmarkTarget = options.benchmarkTarget;
+  }
   const label = document.createElement("div");
   label.className = "cost-of-risk-definition-card-label";
   label.textContent = labelText;
@@ -1553,6 +1566,8 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     contributionDisplayMenuOpen: activeCostOfRiskContributionDisplayMenuOpen,
     container: elements.costOfRiskActiveFilters,
     counterpartyMenuOpen: activeCostOfRiskCounterpartyFilterMenuOpen,
+    costOfRiskDefinitionId: activeCostOfRiskDefinitionId,
+    costOfRiskDefinitionMenuOpen: activeCostOfRiskDefinitionMenuOpen,
     displayMode: getActiveCostOfRiskDisplayMode(),
     instrumentMenuOpen: activeCostOfRiskInstrumentFilterMenuOpen,
     filterOptions,
@@ -1576,6 +1591,7 @@ function hasOpenCostOfRiskFilterMenu() {
   return activeCostOfRiskContributionDisplayMenuOpen
     || activeCostOfRiskStageTransferDisplayMenuOpen
     || activeCostOfRiskSummaryDisplayMenuOpen
+    || activeCostOfRiskDefinitionMenuOpen
     || activeCostOfRiskInstrumentFilterMenuOpen
     || activeCostOfRiskCounterpartyFilterMenuOpen
     || activeCostOfRiskStageFilterMenuOpen;
@@ -1586,6 +1602,7 @@ function closeCostOfRiskFilterMenus() {
   activeCostOfRiskContributionDisplayMenuOpen = false;
   activeCostOfRiskStageTransferDisplayMenuOpen = false;
   activeCostOfRiskSummaryDisplayMenuOpen = false;
+  activeCostOfRiskDefinitionMenuOpen = false;
   activeCostOfRiskInstrumentFilterMenuOpen = false;
   activeCostOfRiskCounterpartyFilterMenuOpen = false;
   activeCostOfRiskStageFilterMenuOpen = false;
@@ -2304,6 +2321,7 @@ function getCostOfRiskDisplayModeHelpTopic(scope, mode) {
   const normalizedMode = mode === "ratio" ? "relative" : "absolute";
   if (scope === "stageTransfer") return `stage-transfer-${normalizedMode}`;
   if (scope === "summaryVariation") return `summary-${normalizedMode}`;
+  if (scope === "costOfRiskDefinition") return `cost-risk-${normalizedMode}`;
   return `movement-${normalizedMode}`;
 }
 
@@ -2428,6 +2446,42 @@ function getCostOfRiskHelpPanelContent(topic) {
         }
       ],
       hint: "This is a contribution-to-exposure measure, not a growth rate of allowances."
+    },
+    "cost-risk-absolute": {
+      eyebrow: "Cost of risk display",
+      title: "Absolute Value",
+      lead: "Absolute value shows the selected cost of risk definition as a quarterly amount.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The value is either the direct F_02.00 impairment line or the selected sum of F_12.01 components, depending on the active cost of risk definition."
+        },
+        {
+          title: "Unit",
+          body: "Values are displayed in the selected monetary unit. No exposure denominator is applied."
+        }
+      ],
+      hint: "Switch to Basis points to compare the intensity of cost of risk across JSTs and over time."
+    },
+    "cost-risk-relative": {
+      eyebrow: "Cost of risk display",
+      title: "Basis Points",
+      lead: "Basis points express the selected cost of risk definition relative to the exposure base.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is the selected quarterly cost of risk amount, after applying the active definition and perimeter filters."
+        },
+        {
+          title: "Denominator",
+          body: "The denominator is the previous-quarter exposure base used elsewhere in this module for movement-style measures."
+        },
+        {
+          title: "Formula",
+          body: "Cost of risk in basis points = selected cost of risk amount divided by the exposure denominator."
+        }
+      ],
+      hint: "This mode is generally better suited for benchmarking."
     },
     "summary-absolute": {
       eyebrow: "Summary display",
