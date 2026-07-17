@@ -32,21 +32,21 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
+} from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskStageTransfers.js?v=20260717-explorer-multi-range-sum";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskStageReconciliationView.js?v=20260717-explorer-multi-range-sum";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskChartUtils.js?v=20260717-explorer-multi-range-sum";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -54,7 +54,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskSummaryTablesView.js?v=20260717-explorer-multi-range-sum";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -62,56 +62,56 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260717-cost-risk-reference-date-help";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskSummaryChartsView.js?v=20260717-explorer-multi-range-sum";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260717-explorer-multi-range-sum";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260717-explorer-multi-range-sum";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260717-explorer-multi-range-sum";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskTreemapView.js?v=20260717-explorer-multi-range-sum";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260717-explorer-multi-range-sum";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260717-cost-risk-reference-date-help";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskCoreDefinitionView.js?v=20260717-explorer-multi-range-sum";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260717-explorer-multi-range-sum";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskControlsView.js?v=20260717-explorer-multi-range-sum";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260717-cost-risk-reference-date-help";
-import { openExplorerPoint } from "./explorerView.js?v=20260717-cost-risk-reference-date-help";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskAuditTableView.js?v=20260717-explorer-multi-range-sum";
+import { openExplorerPoint } from "./explorerView.js?v=20260717-explorer-multi-range-sum";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260717-explorer-multi-range-sum";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskTabsView.js?v=20260717-explorer-multi-range-sum";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskModelCache.js?v=20260717-explorer-multi-range-sum";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskFilterRules.js?v=20260717-explorer-multi-range-sum";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -119,12 +119,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskStageTransferSelection.js?v=20260717-explorer-multi-range-sum";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskCoreSelection.js?v=20260717-explorer-multi-range-sum";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";

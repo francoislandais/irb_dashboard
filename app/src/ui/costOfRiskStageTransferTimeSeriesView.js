@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
+} from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -14,7 +14,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-cost-risk-reference-date-help";
+} from "./benchmarkLineChart.js?v=20260717-explorer-multi-range-sum";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -23,7 +23,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-reference-date-help";
+} from "./costOfRiskChartUtils.js?v=20260717-explorer-multi-range-sum";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;

@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -23,7 +23,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-cost-risk-reference-date-help";
+} from "./benchmarkLineChart.js?v=20260717-explorer-multi-range-sum";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -83,6 +83,10 @@ let explorerBenchmarkViewActive = false;
 let explorerBenchmarkChart = null;
 let explorerReturnTarget = null;
 let shouldFocusOpenedExplorerPoint = false;
+let explorerCellDrag = null;
+let explorerCellRanges = [];
+let explorerCellRangePreview = null;
+let suppressNextExplorerRowClick = false;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -119,8 +123,15 @@ export function wireExplorerUi(actions, rerender) {
   elements.explorerBenchmarkBack?.addEventListener("click", hideExplorerBenchmarkView);
   elements.explorerTableWrap?.addEventListener("scroll", scheduleExplorerStickyParentsUpdate, { passive: true });
   elements.explorerTableWrap?.addEventListener("scroll", hideExplorerContextMenu, { passive: true });
+  elements.explorerTable.addEventListener("pointerdown", startExplorerCellRangeSelection);
+  elements.explorerTable.addEventListener("pointerover", updateExplorerCellRangeSelection);
   elements.explorerTable.addEventListener("click", (event) => {
     hideExplorerContextMenu();
+    if (suppressNextExplorerRowClick) {
+      suppressNextExplorerRowClick = false;
+      event.preventDefault();
+      return;
+    }
 
     const toggle = event.target.closest("[data-toggle-path]");
     if (toggle) {
@@ -154,6 +165,7 @@ export function wireExplorerUi(actions, rerender) {
     selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
   });
   document.addEventListener("click", hideExplorerContextMenu);
+  document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       hideExplorerContextMenu();
@@ -385,6 +397,7 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 }
 
 export function renderExplorer(state) {
+  clearExplorerCellRangeSelection();
   ensureActiveExplorerTemplate(state);
   const context = getActiveExplorerContext();
   const template = getActiveExplorerTemplate();
@@ -610,6 +623,7 @@ function getExplorerTemplateSelections(state = getLatestState()) {
 
 function renderExplorerTable(series, selectedUnit) {
   hideExplorerContextMenu();
+  clearExplorerCellRangeSelection();
   const activeAxis = getActiveExplorerAxis();
   const orderedDates = [...series.dateColumns].reverse();
   const tableRows = series.rows.map(normalizeExplorerSeriesRow);
@@ -644,7 +658,7 @@ function renderExplorerTable(series, selectedUnit) {
     headerRow.append(th);
   });
 
-  displayRows.forEach((seriesRow) => {
+  displayRows.forEach((seriesRow, rowIndex) => {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
@@ -697,11 +711,20 @@ function renderExplorerTable(series, selectedUnit) {
       const contributionValue = isContributionChild
         ? getExplorerContributionRatio(point.value, reversedBaseValues[index]?.value)
         : null;
+      const displayValue = contributionValue === null ? point.value : contributionValue;
       td.textContent = seriesRow.isVirtual || point.value === null
         ? "-"
         : contributionValue === null
           ? formatMetricValue(point.value, selectedUnit, seriesRow.format)
           : formatContributionPercentValue(contributionValue);
+      if (!seriesRow.isVirtual && Number.isFinite(displayValue)) {
+        td.dataset.explorerCellValue = String(displayValue);
+        td.dataset.explorerCellRow = String(rowIndex);
+        td.dataset.explorerCellColumn = String(index);
+        td.dataset.explorerCellKind = contributionValue === null ? "amount" : "ratio";
+        td.dataset.explorerCellDate = orderedDates[index]?.label ?? "";
+        td.dataset.explorerCellLabel = seriesRow.description || seriesRow.code || "";
+      }
       valueRow.append(td);
     });
 
@@ -775,6 +798,192 @@ function getExplorerDenominatorValues(base, activeAxis, axisCode) {
       ? null
       : rows.reduce((total, row) => total + parseNumericValue(row[dateColumn.index]), 0)
   }));
+}
+
+function startExplorerCellRangeSelection(event) {
+  if (event.button !== 0) return;
+
+  const cell = getExplorerValueCell(event.target);
+  if (!cell) return;
+
+  explorerCellDrag = {
+    isAdditive: event.metaKey || event.ctrlKey,
+    currentCell: cell,
+    hasMoved: false,
+    pointerId: event.pointerId,
+    startCell: cell
+  };
+  suppressNextExplorerRowClick = false;
+}
+
+function updateExplorerCellRangeSelection(event) {
+  if (!explorerCellDrag) return;
+
+  const cell = getExplorerValueCell(event.target);
+  if (!cell || cell === explorerCellDrag.currentCell) return;
+
+  explorerCellDrag.currentCell = cell;
+  explorerCellDrag.hasMoved = true;
+  applyExplorerCellRangeSelection(explorerCellDrag.startCell, cell);
+  event.preventDefault();
+}
+
+function finishExplorerCellRangeSelection() {
+  if (!explorerCellDrag) return;
+
+  if (explorerCellDrag.hasMoved) {
+    commitExplorerCellRangeSelection();
+    suppressNextExplorerRowClick = true;
+  } else if (explorerCellDrag.isAdditive) {
+    applyExplorerCellRangeSelection(explorerCellDrag.startCell, explorerCellDrag.startCell);
+    commitExplorerCellRangeSelection();
+    suppressNextExplorerRowClick = true;
+  } else {
+    clearExplorerCellRangeSelection();
+  }
+
+  explorerCellDrag = null;
+}
+
+function getExplorerValueCell(target) {
+  return target?.closest?.("td[data-explorer-cell-value]");
+}
+
+function applyExplorerCellRangeSelection(startCell, endCell) {
+  if (!explorerCellDrag?.isAdditive) explorerCellRanges = [];
+
+  const cells = getExplorerCellRangeCells(startCell, endCell);
+  if (cells.length === 0) {
+    explorerCellRangePreview = null;
+    renderExplorerCellRangeHighlights();
+    renderExplorerContextPanel(getLatestState());
+    return;
+  }
+
+  explorerCellRangePreview = buildExplorerCellRangeSummary(cells);
+  renderExplorerCellRangeHighlights();
+  renderExplorerContextPanel(getLatestState());
+}
+
+function commitExplorerCellRangeSelection() {
+  if (!explorerCellRangePreview) return;
+
+  if (explorerCellDrag?.isAdditive) {
+    explorerCellRanges = [...explorerCellRanges, explorerCellRangePreview];
+  } else {
+    explorerCellRanges = [explorerCellRangePreview];
+  }
+  explorerCellRangePreview = null;
+  renderExplorerCellRangeHighlights();
+  renderExplorerContextPanel(getLatestState());
+}
+
+function clearExplorerCellRangeSelection() {
+  clearExplorerCellRangeHighlight();
+  explorerCellRanges = [];
+  explorerCellRangePreview = null;
+}
+
+function clearExplorerCellRangeHighlight() {
+  elements.explorerTable
+    ?.querySelectorAll("td.is-cell-range-selected")
+    .forEach((cell) => cell.classList.remove("is-cell-range-selected"));
+}
+
+function renderExplorerCellRangeHighlights() {
+  clearExplorerCellRangeHighlight();
+  getActiveExplorerCellRanges().forEach((range) => {
+    range.cells.forEach((cell) => cell.classList.add("is-cell-range-selected"));
+  });
+}
+
+function getExplorerCellRangeCells(startCell, endCell) {
+  const start = getExplorerCellCoordinates(startCell);
+  const end = getExplorerCellCoordinates(endCell);
+  if (!start || !end) return [];
+
+  const rowDelta = Math.abs(end.row - start.row);
+  const columnDelta = Math.abs(end.column - start.column);
+  const mode = start.row === end.row || columnDelta >= rowDelta ? "row" : "column";
+  const rowMin = Math.min(start.row, end.row);
+  const rowMax = Math.max(start.row, end.row);
+  const columnMin = Math.min(start.column, end.column);
+  const columnMax = Math.max(start.column, end.column);
+
+  return [...elements.explorerTable.querySelectorAll("td[data-explorer-cell-value]")]
+    .filter((cell) => {
+      const row = cell.closest("tr");
+      if (!row || row.hidden) return false;
+
+      const coordinates = getExplorerCellCoordinates(cell);
+      if (!coordinates) return false;
+
+      return mode === "row"
+        ? coordinates.row === start.row && coordinates.column >= columnMin && coordinates.column <= columnMax
+        : coordinates.column === start.column && coordinates.row >= rowMin && coordinates.row <= rowMax;
+    })
+    .sort((left, right) => (
+      mode === "row"
+        ? Number(left.dataset.explorerCellColumn) - Number(right.dataset.explorerCellColumn)
+        : Number(left.dataset.explorerCellRow) - Number(right.dataset.explorerCellRow)
+    ));
+}
+
+function getExplorerCellCoordinates(cell) {
+  const row = Number(cell?.dataset?.explorerCellRow);
+  const column = Number(cell?.dataset?.explorerCellColumn);
+  if (!Number.isFinite(row) || !Number.isFinite(column)) return null;
+
+  return { column, row };
+}
+
+function buildExplorerCellRangeSummary(cells) {
+  const values = cells
+    .map((cell) => Number(cell.dataset.explorerCellValue))
+    .filter(Number.isFinite);
+  const firstCell = cells[0];
+  const lastCell = cells[cells.length - 1];
+  const kinds = new Set(cells.map((cell) => cell.dataset.explorerCellKind));
+  const firstCoordinates = getExplorerCellCoordinates(firstCell);
+  const lastCoordinates = getExplorerCellCoordinates(lastCell);
+  const orientation = firstCoordinates?.row === lastCoordinates?.row ? "row" : "column";
+
+  return {
+    cells,
+    count: values.length,
+    endDate: lastCell?.dataset.explorerCellDate || "",
+    endLabel: lastCell?.dataset.explorerCellLabel || "",
+    kind: kinds.size === 1 ? [...kinds][0] : "mixed",
+    orientation,
+    startDate: firstCell?.dataset.explorerCellDate || "",
+    startLabel: firstCell?.dataset.explorerCellLabel || "",
+    sum: values.reduce((total, value) => total + value, 0)
+  };
+}
+
+function getActiveExplorerCellRanges() {
+  return [...explorerCellRanges, explorerCellRangePreview].filter(Boolean);
+}
+
+function buildExplorerCellRangeAggregate() {
+  const ranges = getActiveExplorerCellRanges();
+  if (ranges.length === 0) return null;
+
+  const kinds = new Set(ranges.map((range) => range.kind));
+  const count = ranges.reduce((total, range) => total + range.count, 0);
+  if (count === 0) return null;
+
+  return {
+    count,
+    endDate: ranges.at(-1)?.endDate || "",
+    endLabel: ranges.at(-1)?.endLabel || "",
+    kind: kinds.size === 1 ? [...kinds][0] : "mixed",
+    orientation: ranges.length === 1 ? ranges[0].orientation : "multiple",
+    rangeCount: ranges.length,
+    startDate: ranges[0]?.startDate || "",
+    startLabel: ranges[0]?.startLabel || "",
+    sum: ranges.reduce((total, range) => total + range.sum, 0)
+  };
 }
 
 function getExplorerPropagatedContribution(activeAxis) {
@@ -1101,6 +1310,10 @@ function renderExplorerContextPanel(state) {
     : "Explorer lets you inspect source regulatory datapoints by template, row, column and tab.";
 
   article.append(eyebrow, title, lead);
+  const cellRangeAggregate = buildExplorerCellRangeAggregate();
+  if (cellRangeAggregate?.count > 0) {
+    article.append(createExplorerCellRangeContext(cellRangeAggregate, state?.selectedUnit));
+  }
 
   [
     ["Template", `${activeTemplate?.tableId || activeExplorerTemplateId} - ${activeTemplate?.label || ""}`.trim()],
@@ -1113,7 +1326,7 @@ function renderExplorerContextPanel(state) {
 
   const hint = document.createElement("p");
   hint.className = "explorer-context-hint";
-  hint.textContent = "Use the compact axis buttons to switch the table dimension. Right-click a row to use it as a denominator or benchmark it.";
+  hint.textContent = "Use the compact axis buttons to switch the table dimension. Drag across numeric cells for a quick sum; hold Command on Mac or Ctrl on Windows/Linux to add another range.";
   article.append(hint);
 
   elements.explorerContextPanel.replaceChildren(article);
@@ -1130,6 +1343,40 @@ function createExplorerReturnButton(target) {
     if (moduleName) setActiveModule(moduleName);
   });
   return button;
+}
+
+function createExplorerCellRangeContext(range, selectedUnit) {
+  const section = document.createElement("section");
+  section.className = "explorer-context-item explorer-context-range";
+
+  const title = document.createElement("h3");
+  title.textContent = "Quick sum";
+
+  const value = document.createElement("p");
+  value.className = "explorer-context-range-value";
+  value.textContent = formatExplorerCellRangeValue(range, selectedUnit);
+
+  const detail = document.createElement("p");
+  const rangeLabel = getExplorerCellRangeLabel(range);
+  const rangeCountLabel = range.rangeCount > 1 ? ` across ${range.rangeCount} ranges` : "";
+  detail.textContent = `${range.count} selected values${rangeCountLabel}${rangeLabel ? ` - ${rangeLabel}` : ""}.`;
+
+  section.append(title, value, detail);
+  return section;
+}
+
+function formatExplorerCellRangeValue(range, selectedUnit) {
+  if (range.kind === "ratio") return formatContributionPercentValue(range.sum);
+
+  return formatMetricValue(range.sum, selectedUnit);
+}
+
+function getExplorerCellRangeLabel(range) {
+  if (range.orientation === "multiple") return "";
+
+  return range.orientation === "row"
+    ? [range.startDate, range.endDate].filter(Boolean).join(" to ")
+    : [range.startLabel, range.endLabel].filter(Boolean).join(" to ");
 }
 
 function createExplorerContextItem(label, value) {

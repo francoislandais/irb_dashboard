@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

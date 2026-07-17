@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260717-cost-risk-reference-date-help";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260717-explorer-multi-range-sum";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 
