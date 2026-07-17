@@ -23,33 +23,33 @@ import {
 } from "./costOfRiskChartUtils.js?v=20260717-staging-main-stable";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
-let costOfRiskStageRatioChart = null;
+let costOfRiskCoverageRatioChart = null;
 
-export function getCostOfRiskStageRatioChart() {
-  return costOfRiskStageRatioChart;
+export function getCostOfRiskCoverageRatioChart() {
+  return costOfRiskCoverageRatioChart;
 }
 
-export function destroyCostOfRiskStageRatioChart() {
-  if (!costOfRiskStageRatioChart) return;
-  costOfRiskStageRatioChart.destroy();
-  costOfRiskStageRatioChart = null;
+export function destroyCostOfRiskCoverageRatioChart() {
+  if (!costOfRiskCoverageRatioChart) return;
+  costOfRiskCoverageRatioChart.destroy();
+  costOfRiskCoverageRatioChart = null;
 }
 
-export function renderCostOfRiskStageRatioTable({
+export function renderCostOfRiskCoverageRatioTable({
   activeCellKey,
   container,
   onCellSelect,
-  stageRatio
+  coverageRatio
 }) {
   if (!container) return;
 
   const table = document.createElement("table");
   table.className = "cost-of-risk-stage-summary-grid cost-of-risk-stage-ratio-grid";
-  table.append(createCostOfRiskStageRatioColGroup());
-  table.append(createCostOfRiskStageRatioHead());
+  table.append(createCostOfRiskCoverageRatioColGroup());
+  table.append(createCostOfRiskCoverageRatioHead());
 
   const tbody = document.createElement("tbody");
-  (stageRatio.rows ?? []).forEach((row) => {
+  (coverageRatio.rows ?? []).forEach((row) => {
     const tr = document.createElement("tr");
     tr.className = "cost-of-risk-stage-summary-row";
 
@@ -66,7 +66,7 @@ export function renderCostOfRiskStageRatioTable({
       button.className = "cost-of-risk-stage-summary-cell";
       button.classList.toggle("is-active", key === activeCellKey);
       button.type = "button";
-      button.textContent = formatCostOfRiskStageRatioCellValue(row.cells?.[metric]?.value, metric);
+      button.textContent = formatCostOfRiskCoverageRatioCellValue(row.cells?.[metric]?.value, metric);
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         onCellSelect(key);
@@ -82,7 +82,7 @@ export function renderCostOfRiskStageRatioTable({
   container.replaceChildren(table);
 }
 
-export function renderCostOfRiskStageRatioChart({
+export function renderCostOfRiskCoverageRatioChart({
   activeReferenceDate,
   container,
   focusSelectedYAxis = false,
@@ -108,8 +108,8 @@ export function renderCostOfRiskStageRatioChart({
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
 
   if (!selectedCell || series.length === 0) {
-    destroyCostOfRiskStageRatioChart();
-    renderTabEmpty(model.status || "No stage ratio time series is available for the current selection.");
+    destroyCostOfRiskCoverageRatioChart();
+    renderTabEmpty(model.status || "No coverage ratio time series is available for the current selection.");
     return;
   }
 
@@ -119,7 +119,7 @@ export function renderCostOfRiskStageRatioChart({
   const selectedReferencePoint = model.benchmarkSeries
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeReferenceDate);
-  const titleText = `${getCostOfRiskStageRatioMetricLabel(selectedCell.metric)} - ${getCostOfRiskStageRatioRowLabel(model, selectedCell.stageKey)} - time evolution`;
+  const titleText = `${getCostOfRiskCoverageRatioMetricLabel(selectedCell.metric)} - ${getCostOfRiskCoverageRatioRowLabel(model, selectedCell.stageKey)} - time evolution`;
 
   const options = {
     chart: {
@@ -154,7 +154,7 @@ export function renderCostOfRiskStageRatioChart({
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageRatioCellValue(this.y, selectedCell.metric)}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskCoverageRatioCellValue(this.y, selectedCell.metric)}`;
       },
       shared: false,
       split: false,
@@ -186,7 +186,7 @@ export function renderCostOfRiskStageRatioChart({
       gridLineColor: "#edf0ee",
       labels: {
         formatter() {
-          return formatCostOfRiskStageRatioCellValue(this.value, selectedCell.metric);
+          return formatCostOfRiskCoverageRatioCellValue(this.value, selectedCell.metric);
         },
         style: { color: "#5f6b65" }
       },
@@ -201,39 +201,39 @@ export function renderCostOfRiskStageRatioChart({
     }
   };
 
-  if (hasBenchmarkChartModeChanged(costOfRiskStageRatioChart, chartModel.peerDisplayMode)) destroyCostOfRiskStageRatioChart();
-  if (costOfRiskStageRatioChart) {
-    clearBenchmarkEndpointLabels(costOfRiskStageRatioChart);
-    costOfRiskStageRatioChart.update(options, true, true, false);
-    markBenchmarkChartMode(costOfRiskStageRatioChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(costOfRiskStageRatioChart, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+  if (hasBenchmarkChartModeChanged(costOfRiskCoverageRatioChart, chartModel.peerDisplayMode)) destroyCostOfRiskCoverageRatioChart();
+  if (costOfRiskCoverageRatioChart) {
+    clearBenchmarkEndpointLabels(costOfRiskCoverageRatioChart);
+    costOfRiskCoverageRatioChart.update(options, true, true, false);
+    markBenchmarkChartMode(costOfRiskCoverageRatioChart, chartModel.peerDisplayMode);
+    scheduleBenchmarkEndpointLabels(costOfRiskCoverageRatioChart, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
   } else {
-    costOfRiskStageRatioChart = window.Highcharts.chart(container, options);
-    markBenchmarkChartMode(costOfRiskStageRatioChart, chartModel.peerDisplayMode);
+    costOfRiskCoverageRatioChart = window.Highcharts.chart(container, options);
+    markBenchmarkChartMode(costOfRiskCoverageRatioChart, chartModel.peerDisplayMode);
   }
 }
 
-export function formatCostOfRiskStageRatioCellValue(value, metric) {
+export function formatCostOfRiskCoverageRatioCellValue(value, metric) {
   if (!Number.isFinite(value)) return "-";
   return metric === "ratio"
     ? formatContributionPercentValue(value / 10000)
     : formatBasisPointsValue(value);
 }
 
-export function getCostOfRiskStageRatioMetricLabel(metric) {
+export function getCostOfRiskCoverageRatioMetricLabel(metric) {
   return {
     denominator: "Denominator effect",
     numerator: "Numerator effect",
-    ratio: "Stage ratio",
+    ratio: "Coverage ratio",
     variation: "Ratio variation"
   }[metric] ?? metric;
 }
 
-function getCostOfRiskStageRatioRowLabel(model, stageKey) {
+function getCostOfRiskCoverageRatioRowLabel(model, stageKey) {
   return (model.rows ?? []).find((row) => row.key === stageKey)?.label ?? stageKey;
 }
 
-function createCostOfRiskStageRatioColGroup() {
+function createCostOfRiskCoverageRatioColGroup() {
   const colgroup = document.createElement("colgroup");
   [
     "cost-of-risk-stage-summary-col-label",
@@ -249,7 +249,7 @@ function createCostOfRiskStageRatioColGroup() {
   return colgroup;
 }
 
-function createCostOfRiskStageRatioHead() {
+function createCostOfRiskCoverageRatioHead() {
   const thead = document.createElement("thead");
   const tr = document.createElement("tr");
   ["", "Ratio", "Variation", "Numerator effect", "Denominator effect"].forEach((label) => {

@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-staging-menu-tab";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260717-staging-main-stable";
 
 export const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
 

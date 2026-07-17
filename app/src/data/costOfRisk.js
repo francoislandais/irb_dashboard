@@ -54,6 +54,7 @@ const COST_OF_RISK_STAGE_SUMMARY_ROWS = [
 ];
 export const DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL = "gca:level:all";
 export const DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL = "stage2:ratio";
+export const DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL = "stage3:ratio";
 const COST_OF_RISK_ALLOWANCE_STAGE_X_CODES = {
   "": ["0130"],
   "POCI": ["0143", "0952"],
@@ -1653,6 +1654,102 @@ export function buildCostOfRiskStageRatioModel(state, filters, referenceDate = "
   };
 }
 
+export function buildCostOfRiskCoverageRatioModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const ratioFilters = { ...filters, stage: COST_OF_RISK_FILTER_ALL };
+
+  if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
+    return { benchmarkSeries: [], rows: [], selectedCell: null, status: "Load a CSV and select a JST." };
+  }
+
+  const ySelection = getCostOfRiskStageBoxYSelection(state, ratioFilters);
+  if (ySelection.codes.length === 0) {
+    return {
+      benchmarkSeries: [],
+      rows: [],
+      selectedCell: null,
+      status: "No matching F_18.00 Y-axis point is available for the selected filters."
+    };
+  }
+
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const referenceLabel = referenceColumns[referenceIndex]?.label ?? "";
+  const selectedCell = parseCostOfRiskCoverageRatioCellKey(selectedCellKey)
+    ?? parseCostOfRiskCoverageRatioCellKey(DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL);
+  const rows = buildCostOfRiskCoverageRatioRowsForJst(state, indexes, referenceColumns, ySelection, state.selectedJst, referenceIndex);
+
+  return {
+    benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+      jstCode,
+      points: buildCostOfRiskCoverageRatioPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell)
+    })),
+    filterLabel: ySelection.label,
+    referenceDate: referenceLabel,
+    rows,
+    selectedCell,
+    status: ""
+  };
+}
+
+function buildCostOfRiskCoverageRatioRowsForJst(state, indexes, referenceColumns, ySelection, jstCode, referenceIndex) {
+  return getCostOfRiskCoverageRatioDefinitions().map((stageDefinition) => {
+    const points = buildCostOfRiskCoverageRatioPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, {
+      metric: "ratio",
+      stageKey: stageDefinition.key
+    });
+    const point = points[referenceIndex] ?? {};
+
+    return {
+      cells: {
+        denominator: createCostOfRiskStageRatioCell(point.denominatorEffectBasisPoints),
+        numerator: createCostOfRiskStageRatioCell(point.numeratorEffectBasisPoints),
+        ratio: createCostOfRiskStageRatioCell(point.ratioBasisPoints),
+        variation: createCostOfRiskStageRatioCell(point.variationBasisPoints)
+      },
+      currentDenominator: point.denominator ?? null,
+      currentNumerator: point.numerator ?? null,
+      key: stageDefinition.key,
+      label: stageDefinition.label,
+      previousDenominator: point.previousDenominator ?? null,
+      previousNumerator: point.previousNumerator ?? null
+    };
+  });
+}
+
+function buildCostOfRiskCoverageRatioPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell) {
+  const stageDefinition = getCostOfRiskCoverageRatioDefinitions().find((candidate) => candidate.key === selectedCell.stageKey)
+    ?? getCostOfRiskCoverageRatioDefinitions()[2];
+  const numeratorSeries = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", stageDefinition.stageKey);
+  const denominatorSeries = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", stageDefinition.stageKey);
+
+  return referenceColumns.map((column, index) => {
+    const numerator = numeratorSeries[index] ?? null;
+    const denominator = denominatorSeries[index] ?? null;
+    const previousNumerator = index > 0 ? numeratorSeries[index - 1] ?? null : null;
+    const previousDenominator = index > 0 ? denominatorSeries[index - 1] ?? null : null;
+    const decomposition = decomposeCostOfRiskStageRatioChange(numerator, denominator, previousNumerator, previousDenominator);
+    const ratioBasisPoints = Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0
+      ? (numerator / denominator) * 10000
+      : null;
+    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, ratioBasisPoints, decomposition);
+
+    return {
+      date: column.date,
+      denominator,
+      denominatorEffectBasisPoints: decomposition.denominatorEffectBasisPoints,
+      label: column.label,
+      numerator,
+      numeratorEffectBasisPoints: decomposition.numeratorEffectBasisPoints,
+      previousDenominator,
+      previousNumerator,
+      ratioBasisPoints: metricValue,
+      value: metricValue,
+      variationBasisPoints: decomposition.variationBasisPoints
+    };
+  });
+}
+
 function buildCostOfRiskStageRatioRowsForJst(state, indexes, referenceColumns, filters, jstCode, referenceIndex) {
   return getCostOfRiskStageRatioDefinitions().map((stageDefinition) => {
     const points = buildCostOfRiskStageRatioPointsForJst(state, indexes, referenceColumns, filters, jstCode, {
@@ -1763,6 +1860,14 @@ function getCostOfRiskStageRatioDefinitions() {
     { key: "stage1", label: "Stage 1 ratio", stageFilter: "Stage 1" },
     { key: "stage2", label: "Stage 2 ratio", stageFilter: "Stage 2" },
     { key: "stage3", label: "Stage 3 ratio", stageFilter: "Stage 3" }
+  ];
+}
+
+function getCostOfRiskCoverageRatioDefinitions() {
+  return [
+    { key: "stage1", label: "Stage 1 coverage", stageKey: "stage1" },
+    { key: "stage2", label: "Stage 2 coverage", stageKey: "stage2" },
+    { key: "stage3", label: "Stage 3 coverage", stageKey: "stage3" }
   ];
 }
 
@@ -2057,6 +2162,13 @@ export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
 export function parseCostOfRiskStageRatioCellKey(cellKey) {
   const [stageKey, metric] = String(cellKey ?? "").split(":");
   const isStage = getCostOfRiskStageRatioDefinitions().some((row) => row.key === stageKey);
+  const isMetric = ["ratio", "variation", "numerator", "denominator"].includes(metric);
+  return isStage && isMetric ? { key: `${stageKey}:${metric}`, metric, stageKey } : null;
+}
+
+export function parseCostOfRiskCoverageRatioCellKey(cellKey) {
+  const [stageKey, metric] = String(cellKey ?? "").split(":");
+  const isStage = getCostOfRiskCoverageRatioDefinitions().some((row) => row.key === stageKey);
   const isMetric = ["ratio", "variation", "numerator", "denominator"].includes(metric);
   return isStage && isMetric ? { key: `${stageKey}:${metric}`, metric, stageKey } : null;
 }

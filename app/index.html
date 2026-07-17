@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260717-staging-menu-tab">
+    <link rel="stylesheet" href="./src/styles.css?v=20260717-staging-main-stable">
   </head>
   <body>
     <div class="app-shell">
@@ -175,9 +175,11 @@
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
                   <div class="cost-of-risk-staging-tab-wrap" data-cost-of-risk-tab-group="staging">
-                    <button id="cost-of-risk-staging-tab-toggle" class="cost-of-risk-tab cost-of-risk-staging-tab" type="button" role="tab" aria-selected="false" aria-haspopup="menu" aria-expanded="false">
+                    <button id="cost-of-risk-staging-tab-main" class="cost-of-risk-tab cost-of-risk-staging-tab" type="button" role="tab" aria-selected="false">
                       <span>Staging:</span>
                       <span id="cost-of-risk-staging-tab-label" class="cost-of-risk-staging-tab-label">Ratio</span>
+                    </button>
+                    <button id="cost-of-risk-staging-tab-toggle" class="cost-of-risk-staging-tab-menu-toggle" type="button" aria-label="Choose staging view" aria-haspopup="menu" aria-expanded="false">
                       <span class="cost-of-risk-staging-tab-caret" aria-hidden="true">▾</span>
                     </button>
                     <div id="cost-of-risk-staging-tab-menu" class="cost-of-risk-staging-tab-menu" role="menu" hidden>
@@ -191,6 +193,7 @@
                       </button>
                     </div>
                   </div>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="coverage-ratio">Coverage Ratio</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Movement in allowance</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation">Stage Reconciliation</button>
@@ -220,6 +223,14 @@
                   </div>
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-stage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Stage ratio time series"></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="coverage-ratio" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-coverage-ratio-table" class="cost-of-risk-stage-summary-table cost-of-risk-stage-ratio-table" aria-label="Coverage ratio decomposition table"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-coverage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Coverage ratio time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="f2-vs-f12" hidden>
@@ -309,6 +320,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260717-staging-menu-tab"></script>
+    <script type="module" src="./src/main.js?v=20260717-staging-main-stable"></script>
   </body>
 </html>
