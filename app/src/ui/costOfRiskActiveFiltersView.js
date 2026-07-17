@@ -136,7 +136,6 @@ function createCostOfRiskDefinitionChip(definitionId, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskDefinitionFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change cost of risk definition");
 
@@ -148,36 +147,6 @@ function createCostOfRiskDefinitionChip(definitionId, isOpen) {
   value.textContent = activeDefinition.label;
   toggle.append(prefix, value);
   chip.append(toggle);
-
-  if (isOpen) {
-    const menu = document.createElement("div");
-    menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-definition-filter-menu";
-    menu.setAttribute("role", "listbox");
-    menu.setAttribute("aria-label", "Cost of risk definition");
-    COST_OF_RISK_DEFINITION_OPTIONS.forEach((definition) => {
-      const button = document.createElement("button");
-      const isActive = definition.id === activeDefinition.id;
-      button.className = "cost-of-risk-definition-filter-option";
-      button.classList.toggle("is-active", isActive);
-      button.type = "button";
-      button.dataset.costOfRiskDefinitionOption = definition.id;
-      button.setAttribute("role", "option");
-      button.setAttribute("aria-selected", String(isActive));
-      button.title = definition.description;
-      const title = document.createElement("span");
-      title.className = "cost-of-risk-definition-filter-option-title";
-      title.textContent = definition.label;
-      const description = document.createElement("span");
-      description.className = "cost-of-risk-definition-filter-option-description";
-      description.textContent = definition.description;
-      const source = document.createElement("span");
-      source.className = "cost-of-risk-definition-filter-option-source";
-      source.textContent = definition.source;
-      button.append(title, description, source);
-      menu.append(button);
-    });
-    chip.append(menu);
-  }
 
   return chip;
 }
@@ -269,7 +238,6 @@ function createCostOfRiskInstrumentFilterChip(value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskInstrumentFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change instruments filter");
 
@@ -299,33 +267,7 @@ function createCostOfRiskInstrumentFilterChip(value, options, isOpen) {
     chip.append(button);
   }
 
-  if (isOpen) {
-    chip.append(createCostOfRiskInstrumentFilterMenu(value, options));
-  }
-
   return chip;
-}
-
-function createCostOfRiskInstrumentFilterMenu(value, options) {
-  const menu = document.createElement("div");
-  menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-instrument-filter-menu";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", "Instruments filter");
-
-  (options ?? []).forEach((option) => {
-    const button = document.createElement("button");
-    const isActive = option.value === value || (!value && option.value === COST_OF_RISK_FILTER_ALL);
-    button.className = "cost-of-risk-stage-filter-option";
-    button.classList.toggle("is-active", isActive);
-    button.type = "button";
-    button.dataset.costOfRiskInstrumentFilterOption = option.value;
-    button.setAttribute("role", "option");
-    button.setAttribute("aria-selected", String(isActive));
-    button.textContent = option.value === COST_OF_RISK_FILTER_ALL ? "All Instruments" : option.label;
-    menu.append(button);
-  });
-
-  return menu;
 }
 
 function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
@@ -339,7 +281,6 @@ function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskCounterpartyFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change counterparty filter");
 
@@ -369,33 +310,7 @@ function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
     chip.append(button);
   }
 
-  if (isOpen) {
-    chip.append(createCostOfRiskCounterpartyFilterMenu(value, options));
-  }
-
   return chip;
-}
-
-function createCostOfRiskCounterpartyFilterMenu(value, options) {
-  const menu = document.createElement("div");
-  menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-counterparty-filter-menu";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", "Counterparty filter");
-
-  (options ?? []).forEach((option) => {
-    const button = document.createElement("button");
-    const isActive = option.value === value || (!value && option.value === COST_OF_RISK_FILTER_ALL);
-    button.className = "cost-of-risk-stage-filter-option";
-    button.classList.toggle("is-active", isActive);
-    button.type = "button";
-    button.dataset.costOfRiskCounterpartyFilterOption = option.value;
-    button.setAttribute("role", "option");
-    button.setAttribute("aria-selected", String(isActive));
-    button.textContent = option.value === COST_OF_RISK_FILTER_ALL ? "All Counterparties" : option.label;
-    menu.append(button);
-  });
-
-  return menu;
 }
 
 function createCostOfRiskStageFilterChip(value, options, isOpen) {
@@ -409,7 +324,6 @@ function createCostOfRiskStageFilterChip(value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskStageFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change stage filter");
 
@@ -439,33 +353,7 @@ function createCostOfRiskStageFilterChip(value, options, isOpen) {
     chip.append(button);
   }
 
-  if (isOpen) {
-    chip.append(createCostOfRiskStageFilterMenu(value, options));
-  }
-
   return chip;
-}
-
-function createCostOfRiskStageFilterMenu(value, options) {
-  const menu = document.createElement("div");
-  menu.className = "cost-of-risk-stage-filter-menu";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", "Stage filter");
-
-  (options ?? []).forEach((option) => {
-    const button = document.createElement("button");
-    const isActive = option.value === value || (!value && option.value === COST_OF_RISK_FILTER_ALL);
-    button.className = "cost-of-risk-stage-filter-option";
-    button.classList.toggle("is-active", isActive);
-    button.type = "button";
-    button.dataset.costOfRiskStageFilterOption = option.value;
-    button.setAttribute("role", "option");
-    button.setAttribute("aria-selected", String(isActive));
-    button.textContent = option.value === COST_OF_RISK_FILTER_ALL ? "All Stage" : option.label;
-    menu.append(button);
-  });
-
-  return menu;
 }
 
 function createCostOfRiskActiveFilterChip(filterName, filterLabel, value, options) {

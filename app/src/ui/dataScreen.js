@@ -1,6 +1,6 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260718-url-state";
+import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260719-context-panel-filters";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260717-cost-risk-tab";
 
 const ADD_DATASET_OPTION = "__add_dataset__";

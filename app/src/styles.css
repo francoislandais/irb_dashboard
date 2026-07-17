@@ -712,6 +712,76 @@ button:focus-visible {
   white-space: nowrap;
 }
 
+.cost-of-risk-filter-selection-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.cost-of-risk-filter-selection-row td {
+  padding: 0;
+}
+
+.cost-of-risk-filter-selection-option {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #eef2ef;
+  color: var(--text);
+  cursor: pointer;
+  display: block;
+  font-size: 0.78rem;
+  min-height: 32px;
+  padding: 7px 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.cost-of-risk-filter-selection-row:first-child .cost-of-risk-filter-selection-option {
+  border-top: 1px solid #eef2ef;
+}
+
+.cost-of-risk-filter-selection-option:hover {
+  background: #eef2ef;
+}
+
+.cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.cost-of-risk-filter-selection-option--definition {
+  display: grid;
+  gap: 3px;
+  min-height: 0;
+}
+
+.cost-of-risk-filter-selection-option-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.cost-of-risk-filter-selection-option-description,
+.cost-of-risk-filter-selection-option-source {
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.cost-of-risk-filter-selection-option-description {
+  color: #5f6b65;
+}
+
+.cost-of-risk-filter-selection-option-source {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-description,
+.cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-source {
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .cost-of-risk-audit-panel .cost-of-risk-audit-title {
   font-size: 0.78rem;
   font-weight: 500;
@@ -1165,21 +1235,8 @@ button:focus-visible {
   z-index: 25;
 }
 
-.cost-of-risk-counterparty-filter-menu {
-  min-width: 210px;
-}
-
-.cost-of-risk-instrument-filter-menu {
-  min-width: 170px;
-}
-
 .cost-of-risk-contribution-display-menu {
   min-width: 220px;
-}
-
-.cost-of-risk-definition-filter-menu {
-  gap: 3px;
-  min-width: 285px;
 }
 
 .cost-of-risk-stage-filter-option {
@@ -1202,53 +1259,6 @@ button:focus-visible {
 .cost-of-risk-stage-filter-option.is-active {
   background: var(--primary-dark);
   color: #ffffff;
-}
-
-.cost-of-risk-definition-filter-option {
-  background: transparent;
-  border: 0;
-  border-radius: 5px;
-  color: var(--text);
-  cursor: pointer;
-  display: grid;
-  gap: 3px;
-  padding: 7px 8px;
-  text-align: left;
-}
-
-.cost-of-risk-definition-filter-option:hover {
-  background: #eef2ef;
-}
-
-.cost-of-risk-definition-filter-option.is-active {
-  background: var(--primary-dark);
-  color: #ffffff;
-}
-
-.cost-of-risk-definition-filter-option-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.cost-of-risk-definition-filter-option-description,
-.cost-of-risk-definition-filter-option-source {
-  font-size: 0.7rem;
-  line-height: 1.2;
-}
-
-.cost-of-risk-definition-filter-option-description {
-  color: #5f6b65;
-}
-
-.cost-of-risk-definition-filter-option-source {
-  color: var(--primary-dark);
-  font-weight: 600;
-}
-
-.cost-of-risk-definition-filter-option.is-active .cost-of-risk-definition-filter-option-description,
-.cost-of-risk-definition-filter-option.is-active .cost-of-risk-definition-filter-option-source {
-  color: rgba(255, 255, 255, 0.82);
 }
 
 .cost-of-risk-scroll {
