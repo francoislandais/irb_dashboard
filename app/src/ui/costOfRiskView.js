@@ -196,6 +196,21 @@ let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_F
 let costOfRiskWaterfallChart = null;
 let costOfRiskPeerSelectionActions = null;
 let costOfRiskDatasetInfoActions = null;
+
+// URL persistence: for the tabs listed in COST_OF_RISK_URL_TABS, the active
+// tab, reference date, and the "selected benchmark element" (the clicked
+// cell/driver/flow that drives the benchmark chart on that tab) round-trip
+// through the URL, so a page refresh restores exactly what the user was
+// looking at. Other tabs (F2 vs F12, Stage Reconciliation, Core Definition,
+// Analysis) are intentionally out of scope and never read from or written
+// to the URL.
+const COST_OF_RISK_TAB_URL_PARAM = "cor_tab";
+const COST_OF_RISK_DATE_URL_PARAM = "cor_date";
+const COST_OF_RISK_VIEW_URL_PARAM = "cor_view";
+const COST_OF_RISK_CELL_URL_PARAM = "cor_cell";
+const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "stage-ratio", "stage-transfers", "coverage-ratio", "contributions"]);
+
+applyCostOfRiskUrlState();
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
   asset: COST_OF_RISK_FILTER_ALL,
@@ -278,6 +293,129 @@ function renderCostOfRiskRatioDenominatorControls(state) {
     state,
     tooltipElement: elements.costOfRiskRatioTooltip
   });
+}
+
+// Reads cor_tab/cor_date/cor_view/cor_cell from the URL once, at module
+// load time, and uses them to override the hardcoded defaults above. Runs
+// before any data is loaded, so it only ever sets opaque string state -
+// anything stale or invalid (e.g. a cell key from a filter combination that
+// no longer applies) is harmless: the render-time normalizers already used
+// throughout this module simply won't find a matching row/option.
+function applyCostOfRiskUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get(COST_OF_RISK_TAB_URL_PARAM);
+  if (tab && COST_OF_RISK_URL_TABS.has(tab)) {
+    activeCostOfRiskTab = tab;
+    if (tab === "stage-ratio" || tab === "stage-transfers") activeCostOfRiskStagingTabKey = tab;
+    if (tab === "coverage-ratio" || tab === "contributions") activeCostOfRiskAllowancesTabKey = tab;
+  }
+
+  const date = params.get(COST_OF_RISK_DATE_URL_PARAM);
+  if (date) activeCostOfRiskReferenceDate = date;
+
+  const view = params.get(COST_OF_RISK_VIEW_URL_PARAM);
+  if (view === "counterparty" || view === "stage") activeCostOfRiskSummaryBreakdown = view;
+
+  const cell = params.get(COST_OF_RISK_CELL_URL_PARAM);
+  if (cell) applyCostOfRiskUrlSelection(activeCostOfRiskTab, cell);
+}
+
+// The "selected benchmark element" concept is different per tab (a summary
+// grid cell, a cost-of-risk definition + driver, a stage-ratio/coverage-
+// ratio cell, or a stage-transfer flow); these two functions are the single
+// place that knows how to read/write that element for whichever tab is
+// active, so the URL only ever needs one generic cor_cell param.
+function getCostOfRiskUrlSelectionValue() {
+  switch (activeCostOfRiskTab) {
+    case "summary":
+      return activeCostOfRiskSummaryBreakdown === "counterparty"
+        ? activeCostOfRiskCounterpartySummaryCellKey
+        : activeCostOfRiskStageSummaryCellKey;
+    case "cost-of-risk":
+      return activeCostOfRiskDefinitionDriverCode
+        ? `${activeCostOfRiskDefinitionId}|${activeCostOfRiskDefinitionDriverCode}`
+        : activeCostOfRiskDefinitionId;
+    case "stage-ratio":
+      return activeCostOfRiskStageRatioCellKey;
+    case "stage-transfers":
+      return activeCostOfRiskStageTransferFlowKey;
+    case "coverage-ratio":
+      return activeCostOfRiskCoverageRatioCellKey;
+    case "contributions":
+      return activeCostOfRiskMovementAuditXCode;
+    default:
+      return "";
+  }
+}
+
+function applyCostOfRiskUrlSelection(tab, value) {
+  switch (tab) {
+    case "summary":
+      if (activeCostOfRiskSummaryBreakdown === "counterparty") {
+        activeCostOfRiskCounterpartySummaryCellKey = value;
+      } else {
+        activeCostOfRiskStageSummaryCellKey = value;
+      }
+      return;
+    case "cost-of-risk": {
+      const [definitionId, driverCode] = value.split("|");
+      if (definitionId) activeCostOfRiskDefinitionId = definitionId;
+      activeCostOfRiskDefinitionDriverCode = driverCode ?? "";
+      return;
+    }
+    case "stage-ratio":
+      activeCostOfRiskStageRatioCellKey = value;
+      return;
+    case "stage-transfers":
+      activeCostOfRiskStageTransferFlowKey = value;
+      return;
+    case "coverage-ratio":
+      activeCostOfRiskCoverageRatioCellKey = value;
+      return;
+    case "contributions":
+      activeCostOfRiskMovementAuditXCode = value;
+      return;
+    default:
+  }
+}
+
+// Called once per render (from dataScreen.js, right after renderCostOfRisk
+// returns) so the URL always reflects whatever is currently on screen,
+// regardless of which internal branch/early-return produced it.
+export function syncCostOfRiskUrlParams() {
+  const url = new URL(window.location.href);
+
+  if (!COST_OF_RISK_URL_TABS.has(activeCostOfRiskTab)) {
+    url.searchParams.delete(COST_OF_RISK_TAB_URL_PARAM);
+    url.searchParams.delete(COST_OF_RISK_DATE_URL_PARAM);
+    url.searchParams.delete(COST_OF_RISK_VIEW_URL_PARAM);
+    url.searchParams.delete(COST_OF_RISK_CELL_URL_PARAM);
+    window.history.replaceState({}, "", url);
+    return;
+  }
+
+  url.searchParams.set(COST_OF_RISK_TAB_URL_PARAM, activeCostOfRiskTab);
+
+  if (activeCostOfRiskReferenceDate) {
+    url.searchParams.set(COST_OF_RISK_DATE_URL_PARAM, activeCostOfRiskReferenceDate);
+  } else {
+    url.searchParams.delete(COST_OF_RISK_DATE_URL_PARAM);
+  }
+
+  if (activeCostOfRiskTab === "summary") {
+    url.searchParams.set(COST_OF_RISK_VIEW_URL_PARAM, activeCostOfRiskSummaryBreakdown);
+  } else {
+    url.searchParams.delete(COST_OF_RISK_VIEW_URL_PARAM);
+  }
+
+  const selection = getCostOfRiskUrlSelectionValue();
+  if (selection) {
+    url.searchParams.set(COST_OF_RISK_CELL_URL_PARAM, selection);
+  } else {
+    url.searchParams.delete(COST_OF_RISK_CELL_URL_PARAM);
+  }
+
+  window.history.replaceState({}, "", url);
 }
 
 export function wireCostOfRiskUi(actions, rerender) {
