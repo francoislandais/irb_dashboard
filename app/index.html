@@ -169,49 +169,15 @@
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-ratio">Staging Ratio</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Staging Transfer</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="coverage-ratio">Coverage Ratio</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Allowance Movement</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="cost-of-risk">Cost of Risk</button>
-                  <div class="cost-of-risk-staging-tab-wrap" data-cost-of-risk-tab-group="staging">
-                    <button id="cost-of-risk-staging-tab-main" class="cost-of-risk-tab cost-of-risk-staging-tab" type="button" role="tab" aria-selected="false">
-                      <span>Staging:</span>
-                      <span id="cost-of-risk-staging-tab-label" class="cost-of-risk-staging-tab-label">Ratio</span>
-                    </button>
-                    <button id="cost-of-risk-staging-tab-toggle" class="cost-of-risk-staging-tab-menu-toggle" type="button" aria-label="Choose staging view" aria-haspopup="menu" aria-expanded="false">
-                      <span class="cost-of-risk-staging-tab-caret" aria-hidden="true">▾</span>
-                    </button>
-                    <div id="cost-of-risk-staging-tab-menu" class="cost-of-risk-staging-tab-menu" role="menu" hidden>
-                      <button class="cost-of-risk-staging-tab-option" type="button" role="menuitemradio" data-cost-of-risk-staging-option="stage-ratio">
-                        <span class="cost-of-risk-staging-tab-option-title">Staging Ratio</span>
-                        <span class="cost-of-risk-staging-tab-option-text">Benchmark the share of exposures in each IFRS 9 stage.</span>
-                      </button>
-                      <button class="cost-of-risk-staging-tab-option" type="button" role="menuitemradio" data-cost-of-risk-staging-option="stage-transfers">
-                        <span class="cost-of-risk-staging-tab-option-title">Staging Transfer</span>
-                        <span class="cost-of-risk-staging-tab-option-text">Analyse flows moving exposures between stages.</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="cost-of-risk-allowances-tab-wrap" data-cost-of-risk-tab-group="allowances">
-                    <button id="cost-of-risk-allowances-tab-main" class="cost-of-risk-tab cost-of-risk-allowances-tab" type="button" role="tab" aria-selected="false">
-                      <span>Allowances:</span>
-                      <span id="cost-of-risk-allowances-tab-label" class="cost-of-risk-allowances-tab-label">Coverage</span>
-                    </button>
-                    <button id="cost-of-risk-allowances-tab-toggle" class="cost-of-risk-allowances-tab-menu-toggle" type="button" aria-label="Choose allowances view" aria-haspopup="menu" aria-expanded="false">
-                      <span class="cost-of-risk-allowances-tab-caret" aria-hidden="true">▾</span>
-                    </button>
-                    <div id="cost-of-risk-allowances-tab-menu" class="cost-of-risk-allowances-tab-menu" role="menu" hidden>
-                      <button class="cost-of-risk-allowances-tab-option" type="button" role="menuitemradio" data-cost-of-risk-allowances-option="coverage-ratio">
-                        <span class="cost-of-risk-allowances-tab-option-title">Allowances Coverage</span>
-                        <span class="cost-of-risk-allowances-tab-option-text">Benchmark allowance coverage ratios by IFRS 9 stage.</span>
-                      </button>
-                      <button class="cost-of-risk-allowances-tab-option" type="button" role="menuitemradio" data-cost-of-risk-allowances-option="contributions">
-                        <span class="cost-of-risk-allowances-tab-option-title">Allowances Movement</span>
-                        <span class="cost-of-risk-allowances-tab-option-text">Analyse the movements explaining the stock of allowances.</span>
-                      </button>
-                    </div>
-                  </div>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation">Stage Reconciliation</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12" hidden>F2 vs F12</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation" hidden>Stage Reconciliation</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition" hidden>Core Definition</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis" hidden>Analysis</button>
                 </div>
                 <div id="cost-of-risk-active-filters" class="cost-of-risk-active-filters" aria-label="Active cost of risk filters"></div>
                 <div class="cost-of-risk-scroll">

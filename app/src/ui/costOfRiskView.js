@@ -134,6 +134,7 @@ import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
 } from "./costOfRiskFilterRules.js?v=20260719-context-panel-filter-fixes";
+import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferStage,
@@ -178,10 +179,6 @@ let activeCostOfRiskSummaryDisplayMenuOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskStageRatioCellKey = DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL;
 let activeCostOfRiskCoverageRatioCellKey = DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL;
-let activeCostOfRiskStagingTabMenuOpen = false;
-let activeCostOfRiskStagingTabKey = "stage-ratio";
-let activeCostOfRiskAllowancesTabMenuOpen = false;
-let activeCostOfRiskAllowancesTabKey = "coverage-ratio";
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskAuditIntroTab = "";
 let activeCostOfRiskHelpTopic = "";
@@ -221,6 +218,7 @@ const COST_OF_RISK_DATE_URL_PARAM = "cor_date";
 const COST_OF_RISK_VIEW_URL_PARAM = "cor_view";
 const COST_OF_RISK_CELL_URL_PARAM = "cor_cell";
 const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "stage-ratio", "stage-transfers", "coverage-ratio", "contributions"]);
+const COST_OF_RISK_DISABLED_TABS = new Set(["f2-vs-f12", "stage-reconciliation", "core-definition", "analysis"]);
 
 applyCostOfRiskUrlState();
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
@@ -235,11 +233,6 @@ const elements = {
   costOfRiskAsset: document.querySelector("#cost-of-risk-asset"),
   costOfRiskAudit: document.querySelector("#cost-of-risk-audit"),
   costOfRiskAuditPanel: document.querySelector("#cost-of-risk-audit-panel"),
-  costOfRiskAllowancesTab: document.querySelector("[data-cost-of-risk-tab-group='allowances']"),
-  costOfRiskAllowancesTabLabel: document.querySelector("#cost-of-risk-allowances-tab-label"),
-  costOfRiskAllowancesTabMain: document.querySelector("#cost-of-risk-allowances-tab-main"),
-  costOfRiskAllowancesTabMenu: document.querySelector("#cost-of-risk-allowances-tab-menu"),
-  costOfRiskAllowancesTabToggle: document.querySelector("#cost-of-risk-allowances-tab-toggle"),
   costOfRiskCounterparty: document.querySelector("#cost-of-risk-counterparty"),
   costOfRiskCounterpartySummaryChart: document.querySelector("#cost-of-risk-counterparty-summary-chart"),
   costOfRiskCounterpartySummaryTable: document.querySelector("#cost-of-risk-counterparty-summary-table"),
@@ -280,11 +273,6 @@ const elements = {
   costOfRiskStageTransferFlowChartTitle: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-title"),
   costOfRiskStageTransferFlowChartWrap: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-wrap"),
   costOfRiskStageTransferTitle: document.querySelector("#cost-of-risk-stage-transfer-title"),
-  costOfRiskStagingTab: document.querySelector("[data-cost-of-risk-tab-group='staging']"),
-  costOfRiskStagingTabLabel: document.querySelector("#cost-of-risk-staging-tab-label"),
-  costOfRiskStagingTabMain: document.querySelector("#cost-of-risk-staging-tab-main"),
-  costOfRiskStagingTabMenu: document.querySelector("#cost-of-risk-staging-tab-menu"),
-  costOfRiskStagingTabToggle: document.querySelector("#cost-of-risk-staging-tab-toggle"),
   costOfRiskTabs: document.querySelector(".cost-of-risk-tabs"),
   costOfRiskTabButtons: [...document.querySelectorAll("[data-cost-of-risk-tab]")],
   costOfRiskTabPanels: [...document.querySelectorAll("[data-cost-of-risk-panel]")],
@@ -318,8 +306,6 @@ function applyCostOfRiskUrlState() {
   const tab = params.get(COST_OF_RISK_TAB_URL_PARAM);
   if (tab && COST_OF_RISK_URL_TABS.has(tab)) {
     activeCostOfRiskTab = tab;
-    if (tab === "stage-ratio" || tab === "stage-transfers") activeCostOfRiskStagingTabKey = tab;
-    if (tab === "coverage-ratio" || tab === "contributions") activeCostOfRiskAllowancesTabKey = tab;
   }
 
   const date = params.get(COST_OF_RISK_DATE_URL_PARAM);
@@ -330,6 +316,11 @@ function applyCostOfRiskUrlState() {
 
   const cell = params.get(COST_OF_RISK_CELL_URL_PARAM);
   if (cell) applyCostOfRiskUrlSelection(activeCostOfRiskTab, cell);
+}
+
+function normalizeActiveCostOfRiskTab() {
+  if (!COST_OF_RISK_DISABLED_TABS.has(activeCostOfRiskTab)) return;
+  activeCostOfRiskTab = "summary";
 }
 
 // The "selected benchmark element" concept is different per tab (a summary
@@ -458,67 +449,6 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskSmoothing?.addEventListener("input", (event) => {
     updateCostOfRiskSmoothingWindow(event.target.value);
   });
-  elements.costOfRiskStagingTabMain?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (activeCostOfRiskTab === "stage-ratio" || activeCostOfRiskTab === "stage-transfers") return;
-
-    activeCostOfRiskTab = activeCostOfRiskStagingTabKey;
-    activeCostOfRiskStagingTabMenuOpen = false;
-    closeCostOfRiskFilterMenus();
-    rerenderApp(actions.getState());
-  });
-  elements.costOfRiskStagingTabToggle?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    activeCostOfRiskStagingTabMenuOpen = !activeCostOfRiskStagingTabMenuOpen;
-    activeCostOfRiskAllowancesTabMenuOpen = false;
-    closeCostOfRiskFilterMenus();
-    renderCostOfRiskGroupedTabs();
-  });
-  elements.costOfRiskStagingTabMenu?.addEventListener("click", (event) => {
-    const option = event.target.closest?.("[data-cost-of-risk-staging-option]");
-    if (!option) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    activeCostOfRiskTab = option.dataset.costOfRiskStagingOption === "stage-transfers" ? "stage-transfers" : "stage-ratio";
-    activeCostOfRiskStagingTabKey = activeCostOfRiskTab;
-    activeCostOfRiskStagingTabMenuOpen = false;
-    activeCostOfRiskAllowancesTabMenuOpen = false;
-    closeCostOfRiskFilterMenus();
-    rerenderApp(actions.getState());
-  });
-  elements.costOfRiskAllowancesTabMain?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (activeCostOfRiskTab === "coverage-ratio" || activeCostOfRiskTab === "contributions") return;
-
-    activeCostOfRiskTab = activeCostOfRiskAllowancesTabKey;
-    activeCostOfRiskAllowancesTabMenuOpen = false;
-    closeCostOfRiskFilterMenus();
-    rerenderApp(actions.getState());
-  });
-  elements.costOfRiskAllowancesTabToggle?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    activeCostOfRiskAllowancesTabMenuOpen = !activeCostOfRiskAllowancesTabMenuOpen;
-    activeCostOfRiskStagingTabMenuOpen = false;
-    closeCostOfRiskFilterMenus();
-    renderCostOfRiskGroupedTabs();
-  });
-  elements.costOfRiskAllowancesTabMenu?.addEventListener("click", (event) => {
-    const option = event.target.closest?.("[data-cost-of-risk-allowances-option]");
-    if (!option) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    activeCostOfRiskTab = option.dataset.costOfRiskAllowancesOption === "contributions" ? "contributions" : "coverage-ratio";
-    activeCostOfRiskAllowancesTabKey = activeCostOfRiskTab;
-    activeCostOfRiskAllowancesTabMenuOpen = false;
-    closeCostOfRiskFilterMenus();
-    rerenderApp(actions.getState());
-  });
   elements.costOfRiskTabs?.addEventListener("scroll", updateCostOfRiskTabsFade, { passive: true });
   window.addEventListener("resize", updateCostOfRiskTabsFade);
   elements.costOfRiskActiveFilters?.addEventListener("click", (event) => {
@@ -629,31 +559,11 @@ export function wireCostOfRiskUi(actions, rerender) {
     rerenderApp(actions.getState());
   });
   document.addEventListener("click", (event) => {
-    if (activeCostOfRiskStagingTabMenuOpen && !elements.costOfRiskStagingTab?.contains(event.target)) {
-      activeCostOfRiskStagingTabMenuOpen = false;
-      renderCostOfRiskGroupedTabs();
-    }
-    if (activeCostOfRiskAllowancesTabMenuOpen && !elements.costOfRiskAllowancesTab?.contains(event.target)) {
-      activeCostOfRiskAllowancesTabMenuOpen = false;
-      renderCostOfRiskGroupedTabs();
-    }
     if (!hasOpenCostOfRiskFilterMenu()) return;
     if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
     if (closeCostOfRiskFilterMenus()) rerenderApp(actions.getState());
   });
   document.addEventListener("pointerdown", (event) => {
-    if (activeCostOfRiskStagingTabMenuOpen && !elements.costOfRiskStagingTab?.contains(event.target)) {
-      window.setTimeout(() => {
-        activeCostOfRiskStagingTabMenuOpen = false;
-        renderCostOfRiskGroupedTabs();
-      }, 0);
-    }
-    if (activeCostOfRiskAllowancesTabMenuOpen && !elements.costOfRiskAllowancesTab?.contains(event.target)) {
-      window.setTimeout(() => {
-        activeCostOfRiskAllowancesTabMenuOpen = false;
-        renderCostOfRiskGroupedTabs();
-      }, 0);
-    }
     if (!hasOpenCostOfRiskFilterMenu()) return;
     if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
     window.setTimeout(() => {
@@ -713,9 +623,9 @@ export function wireCostOfRiskUi(actions, rerender) {
   });
   elements.costOfRiskTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      activeCostOfRiskTab = button.dataset.costOfRiskTab || "contributions";
-      activeCostOfRiskStagingTabMenuOpen = false;
-      activeCostOfRiskAllowancesTabMenuOpen = false;
+      const nextTab = button.dataset.costOfRiskTab || "summary";
+      if (COST_OF_RISK_DISABLED_TABS.has(nextTab)) return;
+      activeCostOfRiskTab = nextTab;
       closeCostOfRiskFilterMenus();
       rerenderApp(actions.getState());
     });
@@ -724,6 +634,7 @@ export function wireCostOfRiskUi(actions, rerender) {
 
 export function renderCostOfRisk(state) {
   if (!elements.costOfRiskEmpty || !elements.costOfRiskDashboard) return;
+  normalizeActiveCostOfRiskTab();
   renderCostOfRiskTabs();
   clearCostOfRiskEmptyPanels();
 
@@ -1176,75 +1087,7 @@ function renderCostOfRiskTabs() {
     panels: elements.costOfRiskTabPanels,
     tabButtons: elements.costOfRiskTabButtons
   });
-  renderCostOfRiskGroupedTabs();
   window.requestAnimationFrame?.(updateCostOfRiskTabsFade);
-}
-
-function renderCostOfRiskGroupedTabs() {
-  renderCostOfRiskStagingTab();
-  renderCostOfRiskAllowancesTab();
-}
-
-function renderCostOfRiskStagingTab() {
-  const isStagingTab = activeCostOfRiskTab === "stage-ratio" || activeCostOfRiskTab === "stage-transfers";
-  const stagingTabKey = isStagingTab ? activeCostOfRiskTab : activeCostOfRiskStagingTabKey;
-  const activeStagingLabel = stagingTabKey === "stage-transfers" ? "Transfer" : "Ratio";
-  elements.costOfRiskStagingTab?.classList.toggle("is-active", isStagingTab);
-  elements.costOfRiskStagingTab?.classList.toggle("is-open", activeCostOfRiskStagingTabMenuOpen);
-  elements.costOfRiskStagingTabMain?.classList.toggle("is-active", isStagingTab);
-  elements.costOfRiskStagingTabMain?.setAttribute("aria-selected", String(isStagingTab));
-  elements.costOfRiskStagingTabToggle?.classList.toggle("is-active", isStagingTab);
-  elements.costOfRiskStagingTabToggle?.setAttribute("aria-expanded", String(activeCostOfRiskStagingTabMenuOpen));
-  if (elements.costOfRiskStagingTabLabel) elements.costOfRiskStagingTabLabel.textContent = activeStagingLabel;
-  if (elements.costOfRiskStagingTabMenu) {
-    elements.costOfRiskStagingTabMenu.hidden = !activeCostOfRiskStagingTabMenuOpen;
-    if (activeCostOfRiskStagingTabMenuOpen) positionCostOfRiskStagingMenu();
-  }
-  elements.costOfRiskStagingTabMenu?.querySelectorAll("[data-cost-of-risk-staging-option]").forEach((option) => {
-    const isActive = option.dataset.costOfRiskStagingOption === stagingTabKey;
-    option.classList.toggle("is-active", isActive);
-    option.setAttribute("aria-checked", String(isActive));
-  });
-}
-
-function renderCostOfRiskAllowancesTab() {
-  const isAllowancesTab = activeCostOfRiskTab === "coverage-ratio" || activeCostOfRiskTab === "contributions";
-  const allowancesTabKey = isAllowancesTab ? activeCostOfRiskTab : activeCostOfRiskAllowancesTabKey;
-  const activeAllowancesLabel = allowancesTabKey === "contributions" ? "Movement" : "Coverage";
-  elements.costOfRiskAllowancesTab?.classList.toggle("is-active", isAllowancesTab);
-  elements.costOfRiskAllowancesTab?.classList.toggle("is-open", activeCostOfRiskAllowancesTabMenuOpen);
-  elements.costOfRiskAllowancesTabMain?.classList.toggle("is-active", isAllowancesTab);
-  elements.costOfRiskAllowancesTabMain?.setAttribute("aria-selected", String(isAllowancesTab));
-  elements.costOfRiskAllowancesTabToggle?.classList.toggle("is-active", isAllowancesTab);
-  elements.costOfRiskAllowancesTabToggle?.setAttribute("aria-expanded", String(activeCostOfRiskAllowancesTabMenuOpen));
-  if (elements.costOfRiskAllowancesTabLabel) elements.costOfRiskAllowancesTabLabel.textContent = activeAllowancesLabel;
-  if (elements.costOfRiskAllowancesTabMenu) {
-    elements.costOfRiskAllowancesTabMenu.hidden = !activeCostOfRiskAllowancesTabMenuOpen;
-    if (activeCostOfRiskAllowancesTabMenuOpen) positionCostOfRiskAllowancesMenu();
-  }
-  elements.costOfRiskAllowancesTabMenu?.querySelectorAll("[data-cost-of-risk-allowances-option]").forEach((option) => {
-    const isActive = option.dataset.costOfRiskAllowancesOption === allowancesTabKey;
-    option.classList.toggle("is-active", isActive);
-    option.setAttribute("aria-checked", String(isActive));
-  });
-}
-
-function positionCostOfRiskStagingMenu() {
-  const toggleRect = elements.costOfRiskStagingTabToggle?.getBoundingClientRect();
-  const wrapRect = elements.costOfRiskStagingTab?.getBoundingClientRect();
-  if (!toggleRect || !wrapRect || !elements.costOfRiskStagingTabMenu) return;
-
-  elements.costOfRiskStagingTabMenu.style.left = `${Math.max(8, wrapRect.left)}px`;
-  elements.costOfRiskStagingTabMenu.style.top = `${toggleRect.bottom}px`;
-}
-
-function positionCostOfRiskAllowancesMenu() {
-  const toggleRect = elements.costOfRiskAllowancesTabToggle?.getBoundingClientRect();
-  const wrapRect = elements.costOfRiskAllowancesTab?.getBoundingClientRect();
-  if (!toggleRect || !wrapRect || !elements.costOfRiskAllowancesTabMenu) return;
-
-  elements.costOfRiskAllowancesTabMenu.style.left = `${Math.max(8, wrapRect.left)}px`;
-  elements.costOfRiskAllowancesTabMenu.style.top = `${toggleRect.bottom}px`;
 }
 
 function updateCostOfRiskTabsFade() {
@@ -1254,8 +1097,6 @@ function updateCostOfRiskTabsFade() {
   const maxScrollLeft = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
   tabs.classList.toggle("can-scroll-left", tabs.scrollLeft > 1);
   tabs.classList.toggle("can-scroll-right", tabs.scrollLeft < maxScrollLeft - 1);
-  if (activeCostOfRiskStagingTabMenuOpen) positionCostOfRiskStagingMenu();
-  if (activeCostOfRiskAllowancesTabMenuOpen) positionCostOfRiskAllowancesMenu();
 }
 
 export function showCostOfRiskPeerDisplayHelp(peerDisplayMode) {
@@ -2054,6 +1895,11 @@ function renderCostOfRiskAuditPanelIntro() {
 function renderCostOfRiskHelpPanel() {
   if (!elements.costOfRiskAuditPanel) return false;
 
+  if (activeCostOfRiskHelpTopic === "reference-date") {
+    renderCostOfRiskReferenceDateSelectionPanel();
+    return true;
+  }
+
   if (activeCostOfRiskHelpTopic === "peer-selection") {
     renderCostOfRiskPeerSelectionPanel();
     return true;
@@ -2117,6 +1963,69 @@ function renderCostOfRiskPanelArticle(content) {
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
   hint.textContent = content.hint;
+  intro.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function renderCostOfRiskReferenceDateSelectionPanel() {
+  const state = getLatestState();
+  const referenceColumns = getReferenceColumns(state?.columns ?? []);
+
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro cost-of-risk-reference-date-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = "Reference date";
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = "Reference quarter";
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = referenceColumns.length > 0
+    ? "Choose the reporting quarter used by the upper view. This is synchronized with point selection on the temporal chart."
+    : "No reference date is available in the loaded dataset.";
+
+  intro.append(eyebrow, title, summary);
+
+  if (referenceColumns.length > 0) {
+    const table = document.createElement("table");
+    table.className = "cost-of-risk-filter-selection-table cost-of-risk-reference-date-table";
+    const tbody = document.createElement("tbody");
+
+    [...referenceColumns].reverse().forEach((column) => {
+      const isActive = column.label === activeCostOfRiskReferenceDate;
+      const row = document.createElement("tr");
+      row.className = "cost-of-risk-filter-selection-row";
+      row.classList.toggle("is-active", isActive);
+
+      const cell = document.createElement("td");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "cost-of-risk-filter-selection-option cost-of-risk-reference-date-option";
+      button.setAttribute("role", "option");
+      button.setAttribute("aria-selected", String(isActive));
+      button.addEventListener("click", () => selectCostOfRiskReferenceDate(column.label));
+
+      const label = document.createElement("span");
+      label.className = "cost-of-risk-filter-selection-option-label";
+      label.textContent = formatReferenceQuarterLabel(column.label);
+      button.append(label);
+      cell.append(button);
+      row.append(cell);
+      tbody.append(row);
+    });
+
+    table.append(tbody);
+    intro.append(table);
+  }
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "You can also change the same reference quarter by clicking a point in any temporal chart.";
   intro.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(intro);
