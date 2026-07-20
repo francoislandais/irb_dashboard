@@ -1,5 +1,5 @@
 import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
-import { formatBasisPointsValue, formatContributionPercentValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -39,47 +39,78 @@ export function renderCostOfRiskStageRatioTable({
   activeCellKey,
   container,
   onCellSelect,
+  selectedUnit,
   stageRatio
 }) {
   if (!container) return;
 
-  const table = document.createElement("table");
-  table.className = "cost-of-risk-stage-summary-grid cost-of-risk-stage-ratio-grid";
-  table.append(createCostOfRiskStageRatioColGroup());
-  table.append(createCostOfRiskStageRatioHead());
+  const row = stageRatio.rows?.[0] ?? null;
+  if (!row) {
+    container.replaceChildren();
+    return;
+  }
 
-  const tbody = document.createElement("tbody");
-  (stageRatio.rows ?? []).forEach((row) => {
-    const tr = document.createElement("tr");
-    tr.className = "cost-of-risk-stage-summary-row";
+  const wrap = document.createElement("section");
+  wrap.className = "cost-of-risk-stage-ratio-focus";
 
-    const label = document.createElement("th");
-    label.scope = "row";
-    label.className = "cost-of-risk-stage-summary-row-label";
-    label.textContent = row.label;
-    tr.append(label);
+  const hero = document.createElement("div");
+  hero.className = "cost-of-risk-stage-ratio-focus-hero";
+  const heroTitle = document.createElement("div");
+  heroTitle.className = "cost-of-risk-stage-ratio-focus-eyebrow";
+  heroTitle.textContent = `${row.label} ratio`;
+  const heroValue = createCostOfRiskStageRatioMetricButton({
+    activeCellKey,
+    label: "Stage ratio",
+    metric: "ratio",
+    onCellSelect,
+    row,
+    selectedUnit,
+    variant: "hero"
+  });
+  const heroVariation = createCostOfRiskStageRatioMetricButton({
+    activeCellKey,
+    label: "Quarter variation",
+    metric: "variation",
+    onCellSelect,
+    row,
+    selectedUnit,
+    variant: "inline"
+  });
+  const heroFormula = document.createElement("div");
+  heroFormula.className = "cost-of-risk-stage-ratio-focus-formula";
+  heroFormula.textContent = `${row.label} exposure / total exposure`;
+  hero.append(heroTitle, heroValue, heroVariation, heroFormula);
 
-    ["ratio", "variation", "numerator", "denominator"].forEach((metric) => {
-      const key = `${row.key}:${metric}`;
-      const td = document.createElement("td");
-      const button = document.createElement("button");
-      button.className = "cost-of-risk-stage-summary-cell";
-      button.classList.toggle("is-active", key === activeCellKey);
-      button.type = "button";
-      button.textContent = formatCostOfRiskStageRatioCellValue(row.cells?.[metric]?.value, metric);
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        onCellSelect(key);
-      });
-      td.append(button);
-      tr.append(td);
-    });
-
-    tbody.append(tr);
+  const numerator = createCostOfRiskStageRatioComponentCard({
+    activeCellKey,
+    metrics: [
+      { label: "Current stock", metric: "numeratorLevel" },
+      { label: "Delta", metric: "numeratorDelta" },
+      { label: "Effect", metric: "numeratorEffect" }
+    ],
+    onCellSelect,
+    row,
+    selectedUnit,
+    title: "Numerator",
+    subtitle: `${row.label} exposure`
   });
 
-  table.append(tbody);
-  container.replaceChildren(table);
+  const denominator = createCostOfRiskStageRatioComponentCard({
+    activeCellKey,
+    metrics: [
+      { label: "Current total", metric: "denominatorLevel" },
+      { label: "Delta", metric: "denominatorDelta" },
+      { label: "Effect", metric: "denominatorEffect" }
+    ],
+    onCellSelect,
+    row,
+    selectedUnit,
+    title: "Denominator",
+    subtitle: "Total exposure"
+  });
+
+  wrap.append(hero, numerator, denominator);
+  container.replaceChildren(wrap);
 }
 
 export function renderCostOfRiskStageRatioChart({
@@ -99,8 +130,9 @@ export function renderCostOfRiskStageRatioChart({
   if (!container || !window.Highcharts) return;
 
   const selectedCell = model.selectedCell;
+  const displayMode = isCostOfRiskStageRatioAmountMetric(selectedCell?.metric) ? "amount" : "ratio";
   const chartModel = buildBenchmarkChartModel(model.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: "ratio",
+    displayMode,
     peerDisplayMode: state.peerDisplayMode,
     smoothingWindow
   });
@@ -119,7 +151,7 @@ export function renderCostOfRiskStageRatioChart({
   const selectedReferencePoint = model.benchmarkSeries
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeReferenceDate);
-  const titleText = `${getCostOfRiskStageRatioMetricLabel(selectedCell.metric)} - ${getCostOfRiskStageRatioRowLabel(model, selectedCell.stageKey)} - time evolution`;
+  const titleText = `${getCostOfRiskStageRatioMetricLabel(selectedCell.metric)} - ${getCostOfRiskStageRatioStageLabel(selectedCell.stageKey)} - time evolution`;
 
   const options = {
     chart: {
@@ -154,7 +186,7 @@ export function renderCostOfRiskStageRatioChart({
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageRatioCellValue(this.y, selectedCell.metric)}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskStageRatioCellValue(this.y, selectedCell.metric, state.selectedUnit)}`;
       },
       shared: false,
       split: false,
@@ -186,7 +218,7 @@ export function renderCostOfRiskStageRatioChart({
       gridLineColor: "#edf0ee",
       labels: {
         formatter() {
-          return formatCostOfRiskStageRatioCellValue(this.value, selectedCell.metric);
+          return formatCostOfRiskStageRatioCellValue(this.value, selectedCell.metric, state.selectedUnit);
         },
         style: { color: "#5f6b65" }
       },
@@ -197,7 +229,7 @@ export function renderCostOfRiskStageRatioChart({
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: selectedCell.metric === "ratio" ? "Percent" : "Basis points" }
+      title: { text: getCostOfRiskStageRatioYAxisTitle(selectedCell.metric) }
     }
   };
 
@@ -213,34 +245,122 @@ export function renderCostOfRiskStageRatioChart({
   }
 }
 
-export function formatCostOfRiskStageRatioCellValue(value, metric) {
+export function formatCostOfRiskStageRatioCellValue(value, metric, selectedUnit) {
   if (!Number.isFinite(value)) return "-";
-  return metric === "ratio"
-    ? formatContributionPercentValue(value / 10000)
-    : formatBasisPointsValue(value);
+  if (metric === "ratio") return formatContributionPercentValue(value / 10000);
+  if (isCostOfRiskStageRatioAmountMetric(metric)) {
+    return metric.endsWith("Delta")
+      ? formatSignedMetricValue(value, selectedUnit)
+      : formatMetricValue(value, selectedUnit);
+  }
+  return formatCostOfRiskStageRatioSignedBasisPoints(value);
 }
 
 export function getCostOfRiskStageRatioMetricLabel(metric) {
   return {
-    denominator: "Denominator effect",
-    numerator: "Numerator effect",
+    denominatorDelta: "Denominator delta",
+    denominatorEffect: "Denominator effect",
+    denominatorLevel: "Denominator total",
+    numeratorDelta: "Numerator delta",
+    numeratorEffect: "Numerator effect",
+    numeratorLevel: "Numerator exposure",
     ratio: "Stage ratio",
     variation: "Ratio variation"
   }[metric] ?? metric;
 }
 
-function getCostOfRiskStageRatioRowLabel(model, stageKey) {
-  return (model.rows ?? []).find((row) => row.key === stageKey)?.label ?? stageKey;
+function getCostOfRiskStageRatioStageLabel(stageKey) {
+  return {
+    stage1: "Stage 1",
+    stage2: "Stage 2",
+    stage3: "Stage 3",
+    poci: "POCI"
+  }[stageKey] ?? stageKey;
+}
+
+function createCostOfRiskStageRatioComponentCard({
+  activeCellKey,
+  metrics,
+  onCellSelect,
+  row,
+  selectedUnit,
+  subtitle,
+  title
+}) {
+  const card = document.createElement("div");
+  card.className = "cost-of-risk-stage-ratio-focus-card";
+
+  const heading = document.createElement("div");
+  heading.className = "cost-of-risk-stage-ratio-focus-card-heading";
+  const titleNode = document.createElement("div");
+  titleNode.className = "cost-of-risk-stage-ratio-focus-card-title";
+  titleNode.textContent = title;
+  const subtitleNode = document.createElement("div");
+  subtitleNode.className = "cost-of-risk-stage-ratio-focus-card-subtitle";
+  subtitleNode.textContent = subtitle;
+  heading.append(titleNode, subtitleNode);
+
+  const list = document.createElement("div");
+  list.className = "cost-of-risk-stage-ratio-focus-metrics";
+  metrics.forEach((definition) => {
+    list.append(createCostOfRiskStageRatioMetricButton({
+      activeCellKey,
+      label: definition.label,
+      metric: definition.metric,
+      onCellSelect,
+      row,
+      selectedUnit,
+      variant: definition.metric.endsWith("Effect") ? "effect" : "row"
+    }));
+  });
+
+  card.append(heading, list);
+  return card;
+}
+
+function createCostOfRiskStageRatioMetricButton({
+  activeCellKey,
+  label,
+  metric,
+  onCellSelect,
+  row,
+  selectedUnit,
+  variant = "row"
+}) {
+  const key = `${row.stageKey}:${metric}`;
+  const button = document.createElement("button");
+  button.className = `cost-of-risk-stage-ratio-focus-metric cost-of-risk-stage-ratio-focus-metric--${variant}`;
+  button.classList.toggle("is-active", key === activeCellKey);
+  button.type = "button";
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onCellSelect(key);
+  });
+
+  const labelNode = document.createElement("span");
+  labelNode.className = "cost-of-risk-stage-ratio-focus-metric-label";
+  labelNode.textContent = label;
+  const valueNode = document.createElement("span");
+  valueNode.className = "cost-of-risk-stage-ratio-focus-metric-value";
+  valueNode.textContent = formatCostOfRiskStageRatioCellValue(row.cells?.[metric]?.value, metric, selectedUnit);
+  button.append(labelNode, valueNode);
+  return button;
 }
 
 function createCostOfRiskStageRatioColGroup() {
   const colgroup = document.createElement("colgroup");
   [
     "cost-of-risk-stage-summary-col-label",
-    "cost-of-risk-stage-ratio-col-value",
-    "cost-of-risk-stage-ratio-col-value",
-    "cost-of-risk-stage-ratio-col-value",
-    "cost-of-risk-stage-ratio-col-value"
+    "cost-of-risk-stage-ratio-col-ratio",
+    "cost-of-risk-stage-ratio-col-variation",
+    "cost-of-risk-stage-ratio-col-gap",
+    "cost-of-risk-stage-ratio-col-amount",
+    "cost-of-risk-stage-ratio-col-delta",
+    "cost-of-risk-stage-ratio-col-effect",
+    "cost-of-risk-stage-ratio-col-gap",
+    "cost-of-risk-stage-ratio-col-amount",
+    "cost-of-risk-stage-ratio-col-delta",
+    "cost-of-risk-stage-ratio-col-effect"
   ].forEach((className) => {
     const col = document.createElement("col");
     col.className = className;
@@ -251,13 +371,72 @@ function createCostOfRiskStageRatioColGroup() {
 
 function createCostOfRiskStageRatioHead() {
   const thead = document.createElement("thead");
-  const tr = document.createElement("tr");
-  ["", "Ratio", "Variation", "Numerator effect", "Denominator effect"].forEach((label) => {
+  const groupRow = document.createElement("tr");
+  [
+    { label: "", rowSpan: 2 },
+    { label: "ratio", rowSpan: 2, className: "cost-of-risk-stage-ratio-direct-head is-primary" },
+    { label: "variation", rowSpan: 2, className: "cost-of-risk-stage-ratio-direct-head" },
+    { label: "", rowSpan: 2, className: "cost-of-risk-stage-ratio-gap" },
+    { label: "Numerator", colSpan: 3, className: "cost-of-risk-stage-ratio-group-head" },
+    { label: "", rowSpan: 2, className: "cost-of-risk-stage-ratio-gap" },
+    { label: "Denominator", colSpan: 3, className: "cost-of-risk-stage-ratio-group-head" }
+  ].forEach((definition) => {
     const th = document.createElement("th");
     th.scope = "col";
-    th.textContent = label;
-    tr.append(th);
+    if (definition.colSpan) th.colSpan = definition.colSpan;
+    if (definition.rowSpan) th.rowSpan = definition.rowSpan;
+    if (definition.className) th.className = definition.className;
+    th.textContent = definition.label;
+    groupRow.append(th);
   });
-  thead.append(tr);
+
+  const subRow = document.createElement("tr");
+  [
+    { label: "stock" },
+    { label: "delta" },
+    { label: "effect", className: "is-primary" },
+    { label: "total" },
+    { label: "delta" },
+    { label: "effect" }
+  ].forEach((definition) => {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.className = `cost-of-risk-stage-ratio-subhead ${definition.className ?? ""}`.trim();
+    th.textContent = definition.label;
+    subRow.append(th);
+  });
+
+  thead.append(groupRow, subRow);
   return thead;
+}
+
+function getCostOfRiskStageRatioTableMetrics() {
+  return [
+    "ratio",
+    "variation",
+    "gap",
+    "numeratorLevel",
+    "numeratorDelta",
+    "numeratorEffect",
+    "gap",
+    "denominatorLevel",
+    "denominatorDelta",
+    "denominatorEffect"
+  ];
+}
+
+function isCostOfRiskStageRatioAmountMetric(metric) {
+  return ["numeratorLevel", "numeratorDelta", "denominatorLevel", "denominatorDelta"].includes(metric);
+}
+
+function getCostOfRiskStageRatioYAxisTitle(metric) {
+  if (metric === "ratio") return "Percent";
+  if (isCostOfRiskStageRatioAmountMetric(metric)) return "Amount";
+  return "Basis points";
+}
+
+function formatCostOfRiskStageRatioSignedBasisPoints(value) {
+  if (!Number.isFinite(value)) return "-";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${formatBasisPointsValue(value)}`;
 }

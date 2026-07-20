@@ -792,6 +792,9 @@ export function renderCostOfRisk(state) {
       )
     );
     activeCostOfRiskReferenceDate = stageRatio.referenceDate || activeCostOfRiskReferenceDate;
+    if (stageRatio.needsStageSelection) {
+      setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter("stage"));
+    }
     renderCostOfRiskActiveFilters(filterOptions);
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
@@ -1163,9 +1166,10 @@ function renderCostOfRiskF18SummaryOnlyView(summary, state) {
 
 function renderCostOfRiskStageRatioView(stageRatio, state) {
   renderCostOfRiskStageRatioTable({
-    activeCellKey: activeCostOfRiskStageRatioCellKey,
+    activeCellKey: stageRatio.selectedCell?.key ?? activeCostOfRiskStageRatioCellKey,
     container: elements.costOfRiskStageRatioTable,
     onCellSelect: selectCostOfRiskStageRatioCell,
+    selectedUnit: state.selectedUnit,
     stageRatio
   });
   renderCostOfRiskStageRatioChart({
@@ -1461,7 +1465,7 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 }
 
 function renderCostOfRiskActiveFilters(filterOptions) {
-  const displayedFilters = ["coverage-ratio", "stage-ratio"].includes(activeCostOfRiskTab)
+  const displayedFilters = activeCostOfRiskTab === "coverage-ratio"
     ? { ...activeCostOfRiskFilters, stage: COST_OF_RISK_FILTER_ALL }
     : activeCostOfRiskFilters;
   renderCostOfRiskActiveFiltersView({
@@ -1693,14 +1697,14 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
 
   const lead = document.createElement("p");
   lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = `Selected value: ${formatCostOfRiskStageRatioCellValue(selectedValue, selectedCell.metric)}.`;
+  lead.textContent = `Selected value: ${formatCostOfRiskStageRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`;
 
   article.append(eyebrow, title, lead);
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(stageRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
     `Perimeter: ${stageRatio.filterLabel || "selected instruments and counterparties"}`,
-    "The global Stage filter is not applied here because the three stages are shown explicitly."
+    `Selected stage: ${row.label}`
   ]));
   article.append(createCostOfRiskAuditInfoSection("Ratio components", [
     `Current numerator: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
@@ -1716,7 +1720,7 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
 
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Click another cell in the upper table to benchmark and explain that stage-ratio component.";
+  hint.textContent = "Click another value in the upper panel to benchmark and explain that stage-ratio component.";
   article.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(article);
@@ -2857,11 +2861,11 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
     "stage-ratio": {
       eyebrow: "Stage mix",
       title: "Stage Ratio",
-      lead: "This view measures the share of the selected exposure perimeter that sits in Stage 1, Stage 2 or Stage 3.",
+      lead: "This view measures the share of the selected exposure perimeter that sits in Stage 1, Stage 2, Stage 3 or POCI.",
       sections: [
         {
           title: "What you see",
-          body: "The upper table shows each stage ratio, its quarter-on-quarter change, and a split of that change between numerator and denominator effects."
+          body: "The upper panel focuses on the selected stage. It shows the stage ratio, its quarter-on-quarter change, and the numerator and denominator components that explain the movement."
         },
         {
           title: "How it is calculated",
@@ -2869,10 +2873,10 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "Source",
-          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the global stage filter is ignored in this view because stages are displayed explicitly."
+          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the stage filter selects the stage analysed in this view."
         }
       ],
-      hint: "Click a table cell to benchmark the selected ratio or decomposition effect over time."
+      hint: "Click any value in the upper panel to benchmark the selected ratio or decomposition effect over time."
     },
     "coverage-ratio": {
       eyebrow: "Allowance coverage",

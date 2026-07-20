@@ -1209,12 +1209,12 @@ button:focus-visible {
 }
 
 .cost-of-risk-tab-empty {
-  color: var(--primary-dark);
-  font-size: 0.86rem;
-  font-weight: 600;
+  color: #9aa39e;
+  font-size: 0.8rem;
+  font-weight: 400;
   line-height: 1.35;
   max-width: 760px;
-  padding: 10px 0;
+  padding: 6px 0;
 }
 
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="summary"],
@@ -1827,8 +1827,32 @@ button:focus-visible {
   width: 80px;
 }
 
-.cost-of-risk-stage-ratio-col-value {
-  width: 132px;
+.cost-of-risk-stage-ratio-col-ratio {
+  width: 70px;
+}
+
+.cost-of-risk-stage-ratio-col-variation {
+  width: 82px;
+}
+
+.cost-of-risk-stage-ratio-col-amount {
+  width: 82px;
+}
+
+.cost-of-risk-stage-ratio-col-delta {
+  width: 70px;
+}
+
+.cost-of-risk-stage-ratio-col-effect {
+  width: 76px;
+}
+
+.cost-of-risk-stage-ratio-col-gap {
+  width: 12px;
+}
+
+.cost-of-risk-stage-ratio-grid .cost-of-risk-stage-summary-col-label {
+  width: 112px;
 }
 
 .cost-of-risk-stage-summary-col-gap {
@@ -2128,17 +2152,203 @@ button:focus-visible {
   padding-top: 0;
 }
 
+.cost-of-risk-stage-ratio-focus {
+  align-items: stretch;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 210px 250px 250px;
+  justify-content: start;
+  width: auto;
+}
+
+.cost-of-risk-stage-ratio-focus-hero,
+.cost-of-risk-stage-ratio-focus-card {
+  background: #ffffff;
+  border: 1px solid #e3e8e5;
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.cost-of-risk-stage-ratio-focus-hero {
+  display: grid;
+  gap: 8px;
+  padding: 14px 14px 12px;
+}
+
+.cost-of-risk-stage-ratio-focus-eyebrow,
+.cost-of-risk-stage-ratio-focus-card-title {
+  color: #1d2823;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.cost-of-risk-stage-ratio-focus-formula,
+.cost-of-risk-stage-ratio-focus-card-subtitle {
+  color: #7b8580;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.cost-of-risk-stage-ratio-focus-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.cost-of-risk-stage-ratio-focus-card-heading {
+  display: grid;
+  gap: 3px;
+}
+
+.cost-of-risk-stage-ratio-focus-metrics {
+  display: grid;
+  gap: 5px;
+}
+
+.cost-of-risk-stage-ratio-focus-metric {
+  align-items: baseline;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: #1d2823;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 10px;
+  justify-content: space-between;
+  min-height: 24px;
+  padding: 4px 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.cost-of-risk-stage-ratio-focus-metric:hover {
+  background: #f3f6f4;
+}
+
+.cost-of-risk-stage-ratio-focus-metric.is-active,
+.cost-of-risk-stage-ratio-focus-metric.is-active:hover {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.cost-of-risk-stage-ratio-focus-metric-label {
+  color: inherit;
+  font-size: 0.72rem;
+  line-height: 1.15;
+}
+
+.cost-of-risk-stage-ratio-focus-metric-value {
+  color: inherit;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--hero {
+  align-items: end;
+  display: grid;
+  gap: 3px;
+  justify-content: start;
+  padding: 6px 6px 7px;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--hero .cost-of-risk-stage-ratio-focus-metric-label {
+  color: #7b8580;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--hero .cost-of-risk-stage-ratio-focus-metric-value {
+  color: var(--primary-dark);
+  font-size: 1.65rem;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--hero.is-active .cost-of-risk-stage-ratio-focus-metric-label,
+.cost-of-risk-stage-ratio-focus-metric--hero.is-active .cost-of-risk-stage-ratio-focus-metric-value {
+  color: #ffffff;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--inline {
+  background: #f7f9f8;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--effect .cost-of-risk-stage-ratio-focus-metric-value {
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--effect.is-active .cost-of-risk-stage-ratio-focus-metric-value {
+  color: #ffffff;
+}
+
 .cost-of-risk-stage-ratio-grid {
-  width: 688px;
+  font-size: 0.8rem;
+  width: 744px;
 }
 
 .cost-of-risk-stage-ratio-grid thead th {
+  color: #4f5a55;
+  font-size: 0.78rem;
+  font-weight: 400;
+  height: 22px;
+  line-height: 1;
+  padding: 2px 6px;
   text-align: right;
+}
+
+.cost-of-risk-stage-ratio-grid thead th.is-primary {
+  color: var(--primary-dark);
+}
+
+.cost-of-risk-stage-ratio-grid thead .cost-of-risk-stage-ratio-direct-head {
+  background: #ffffff;
+  color: #1d2823;
+  font-size: 0.8rem;
+  vertical-align: bottom;
+}
+
+.cost-of-risk-stage-ratio-grid thead .cost-of-risk-stage-ratio-group-head,
+.cost-of-risk-stage-ratio-grid thead .cost-of-risk-stage-ratio-subhead {
+  background: #f4f5f4;
+}
+
+.cost-of-risk-stage-ratio-grid thead .cost-of-risk-stage-ratio-group-head {
+  border-radius: 4px 4px 0 0;
+  color: #1d2823;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.cost-of-risk-stage-ratio-grid thead .cost-of-risk-stage-ratio-subhead {
+  color: #78817d;
+  font-size: 0.74rem;
+}
+
+.cost-of-risk-stage-ratio-grid thead .cost-of-risk-stage-ratio-gap,
+.cost-of-risk-stage-ratio-grid tbody .cost-of-risk-stage-ratio-gap {
+  background: transparent;
+  padding: 0;
 }
 
 .cost-of-risk-stage-ratio-grid thead th:first-child,
 .cost-of-risk-stage-ratio-grid tbody th {
   text-align: left;
+}
+
+.cost-of-risk-stage-ratio-grid tbody th {
+  padding-right: 10px !important;
+}
+
+.cost-of-risk-stage-ratio-grid .cost-of-risk-stage-summary-cell {
+  height: 24px;
+  padding: 0 6px;
+}
+
+.cost-of-risk-stage-ratio-grid .cost-of-risk-stage-summary-cell.is-effect {
+  color: var(--primary-dark);
+  font-weight: 500;
 }
 
 .cost-of-risk-stage-ratio-grid .cost-of-risk-stage-summary-cell.is-active,

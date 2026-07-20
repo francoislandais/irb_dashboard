@@ -1896,10 +1896,24 @@ export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate =
 export function buildCostOfRiskStageRatioModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
-  const ratioFilters = { ...filters, stage: COST_OF_RISK_FILTER_ALL };
+  const ratioFilters = filters;
+  const selectedStageDefinition = getCostOfRiskStageRatioDefinitionForFilters(ratioFilters);
 
   if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
     return { benchmarkSeries: [], rows: [], selectedCell: null, status: "Load a CSV and select a JST." };
+  }
+
+  if (!selectedStageDefinition) {
+    const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+    return {
+      benchmarkSeries: [],
+      filterLabel: "",
+      needsStageSelection: true,
+      referenceDate: referenceColumns[referenceIndex]?.label ?? "",
+      rows: [],
+      selectedCell: null,
+      status: "Select Stage 1, Stage 2, Stage 3 or POCI to display the stage ratio analysis."
+    };
   }
 
   const ySelection = getCostOfRiskStageBoxYSelection(state, ratioFilters);
@@ -1914,8 +1928,9 @@ export function buildCostOfRiskStageRatioModel(state, filters, referenceDate = "
 
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const referenceLabel = referenceColumns[referenceIndex]?.label ?? "";
-  const selectedCell = parseCostOfRiskStageRatioCellKey(selectedCellKey)
+  const parsedSelectedCell = parseCostOfRiskStageRatioCellKey(selectedCellKey)
     ?? parseCostOfRiskStageRatioCellKey(DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL);
+  const selectedCell = normalizeCostOfRiskStageRatioCellForFilters(parsedSelectedCell, ratioFilters);
   const rows = buildCostOfRiskStageRatioRowsForJst(state, indexes, referenceColumns, ratioFilters, state.selectedJst, referenceIndex);
 
   return {
@@ -2009,7 +2024,13 @@ function buildCostOfRiskCoverageRatioPointsForJst(state, indexes, referenceColum
     const ratioBasisPoints = Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0
       ? (numerator / denominator) * 10000
       : null;
-    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, ratioBasisPoints, decomposition);
+    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
+      denominator,
+      denominatorDelta: Number.isFinite(denominator) && Number.isFinite(previousDenominator) ? denominator - previousDenominator : null,
+      numerator,
+      numeratorDelta: Number.isFinite(numerator) && Number.isFinite(previousNumerator) ? numerator - previousNumerator : null,
+      ratioBasisPoints
+    }, decomposition);
 
     return {
       date: column.date,
@@ -2028,28 +2049,40 @@ function buildCostOfRiskCoverageRatioPointsForJst(state, indexes, referenceColum
 }
 
 function buildCostOfRiskStageRatioRowsForJst(state, indexes, referenceColumns, filters, jstCode, referenceIndex) {
-  return getCostOfRiskStageRatioDefinitions().map((stageDefinition) => {
-    const points = buildCostOfRiskStageRatioPointsForJst(state, indexes, referenceColumns, filters, jstCode, {
-      metric: "ratio",
-      stageKey: stageDefinition.key
-    });
-    const point = points[referenceIndex] ?? {};
+  const stageDefinition = getCostOfRiskStageRatioDefinitionForFilters(filters);
+  if (!stageDefinition) return [];
 
-    return {
-      cells: {
-        denominator: createCostOfRiskStageRatioCell(point.denominatorEffectBasisPoints),
-        numerator: createCostOfRiskStageRatioCell(point.numeratorEffectBasisPoints),
-        ratio: createCostOfRiskStageRatioCell(point.ratioBasisPoints),
-        variation: createCostOfRiskStageRatioCell(point.variationBasisPoints)
-      },
-      currentDenominator: point.denominator ?? null,
-      currentNumerator: point.numerator ?? null,
-      key: stageDefinition.key,
-      label: stageDefinition.label,
-      previousDenominator: point.previousDenominator ?? null,
-      previousNumerator: point.previousNumerator ?? null
-    };
+  const points = buildCostOfRiskStageRatioPointsForJst(state, indexes, referenceColumns, filters, jstCode, {
+    metric: "ratio",
+    stageKey: stageDefinition.key
   });
+  const point = points[referenceIndex] ?? {};
+  const numeratorDelta = Number.isFinite(point.numerator) && Number.isFinite(point.previousNumerator)
+    ? point.numerator - point.previousNumerator
+    : null;
+  const denominatorDelta = Number.isFinite(point.denominator) && Number.isFinite(point.previousDenominator)
+    ? point.denominator - point.previousDenominator
+    : null;
+
+  return [{
+    cells: {
+      denominatorDelta: createCostOfRiskStageRatioCell(denominatorDelta),
+      denominatorEffect: createCostOfRiskStageRatioCell(point.denominatorEffectBasisPoints),
+      denominatorLevel: createCostOfRiskStageRatioCell(point.denominator),
+      numeratorDelta: createCostOfRiskStageRatioCell(numeratorDelta),
+      numeratorEffect: createCostOfRiskStageRatioCell(point.numeratorEffectBasisPoints),
+      numeratorLevel: createCostOfRiskStageRatioCell(point.numerator),
+      ratio: createCostOfRiskStageRatioCell(point.ratioBasisPoints),
+      variation: createCostOfRiskStageRatioCell(point.variationBasisPoints)
+    },
+    currentDenominator: point.denominator ?? null,
+    currentNumerator: point.numerator ?? null,
+    key: stageDefinition.key,
+    label: stageDefinition.rowLabel ?? stageDefinition.label,
+    previousDenominator: point.previousDenominator ?? null,
+    previousNumerator: point.previousNumerator ?? null,
+    stageKey: stageDefinition.key
+  }];
 }
 
 function buildCostOfRiskStageRatioPointsForJst(state, indexes, referenceColumns, filters, jstCode, selectedCell) {
@@ -2073,7 +2106,15 @@ function buildCostOfRiskStageRatioPointsForJst(state, indexes, referenceColumns,
     const ratioBasisPoints = Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0
       ? (numerator / denominator) * 10000
       : null;
-    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, ratioBasisPoints, decomposition);
+    const numeratorDelta = Number.isFinite(numerator) && Number.isFinite(previousNumerator) ? numerator - previousNumerator : null;
+    const denominatorDelta = Number.isFinite(denominator) && Number.isFinite(previousDenominator) ? denominator - previousDenominator : null;
+    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
+      denominator,
+      denominatorDelta,
+      numerator,
+      numeratorDelta,
+      ratioBasisPoints
+    }, decomposition);
 
     return {
       date: column.date,
@@ -2121,11 +2162,17 @@ function decomposeCostOfRiskStageRatioChange(currentNumerator, currentDenominato
   };
 }
 
-function getCostOfRiskStageRatioMetricValue(metric, ratioBasisPoints, decomposition) {
+function getCostOfRiskStageRatioMetricValue(metric, values, decomposition) {
   if (metric === "variation") return decomposition.variationBasisPoints;
   if (metric === "numerator") return decomposition.numeratorEffectBasisPoints;
+  if (metric === "numeratorLevel") return values.numerator;
+  if (metric === "numeratorDelta") return values.numeratorDelta;
+  if (metric === "numeratorEffect") return decomposition.numeratorEffectBasisPoints;
   if (metric === "denominator") return decomposition.denominatorEffectBasisPoints;
-  return ratioBasisPoints;
+  if (metric === "denominatorLevel") return values.denominator;
+  if (metric === "denominatorDelta") return values.denominatorDelta;
+  if (metric === "denominatorEffect") return decomposition.denominatorEffectBasisPoints;
+  return values.ratioBasisPoints;
 }
 
 function createCostOfRiskStageRatioCell(value) {
@@ -2134,10 +2181,30 @@ function createCostOfRiskStageRatioCell(value) {
 
 function getCostOfRiskStageRatioDefinitions() {
   return [
-    { key: "stage1", label: "Stage 1 ratio", stageFilter: "Stage 1" },
-    { key: "stage2", label: "Stage 2 ratio", stageFilter: "Stage 2" },
-    { key: "stage3", label: "Stage 3 ratio", stageFilter: "Stage 3" }
+    { key: "stage1", label: "Stage 1 ratio", rowLabel: "Stage 1", stageFilter: "Stage 1" },
+    { key: "stage2", label: "Stage 2 ratio", rowLabel: "Stage 2", stageFilter: "Stage 2" },
+    { key: "stage3", label: "Stage 3 ratio", rowLabel: "Stage 3", stageFilter: "Stage 3" },
+    { key: "poci", label: "POCI ratio", rowLabel: "POCI", stageFilter: "POCI" }
   ];
+}
+
+function normalizeCostOfRiskStageRatioCellForFilters(selectedCell, filters = {}) {
+  const selectedStage = getCostOfRiskStageRatioDefinitionForFilters(filters);
+  const stageKey = selectedStage?.key ?? (getCostOfRiskStageRatioDefinitions().some((definition) => definition.key === selectedCell?.stageKey)
+    ? selectedCell.stageKey
+    : "stage2");
+  const metric = selectedCell?.metric ?? "ratio";
+
+  return {
+    key: `${stageKey}:${metric}`,
+    metric,
+    stageKey
+  };
+}
+
+function getCostOfRiskStageRatioDefinitionForFilters(filters = {}) {
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  return getCostOfRiskStageRatioDefinitions().find((definition) => definition.stageFilter === normalizedFilters.stage) ?? null;
 }
 
 function getCostOfRiskCoverageRatioDefinitions() {
@@ -2437,9 +2504,24 @@ export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
 }
 
 export function parseCostOfRiskStageRatioCellKey(cellKey) {
-  const [stageKey, metric] = String(cellKey ?? "").split(":");
+  const parts = String(cellKey ?? "").split(":");
+  const [stageKey, metricOrRow, rawMetric] = parts;
+  const legacyMetricMap = {
+    denominator: "denominatorEffect",
+    numerator: "numeratorEffect"
+  };
+  const metric = legacyMetricMap[rawMetric ?? metricOrRow] ?? (rawMetric ?? metricOrRow);
   const isStage = getCostOfRiskStageRatioDefinitions().some((row) => row.key === stageKey);
-  const isMetric = ["ratio", "variation", "numerator", "denominator"].includes(metric);
+  const isMetric = [
+    "denominatorDelta",
+    "denominatorEffect",
+    "denominatorLevel",
+    "numeratorDelta",
+    "numeratorEffect",
+    "numeratorLevel",
+    "ratio",
+    "variation"
+  ].includes(metric);
   return isStage && isMetric ? { key: `${stageKey}:${metric}`, metric, stageKey } : null;
 }
 
