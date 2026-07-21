@@ -1,5 +1,5 @@
 import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
-import { formatBasisPointsValue, formatContributionPercentValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -39,47 +39,78 @@ export function renderCostOfRiskCoverageRatioTable({
   activeCellKey,
   container,
   onCellSelect,
+  selectedUnit,
   coverageRatio
 }) {
   if (!container) return;
 
-  const table = document.createElement("table");
-  table.className = "cost-of-risk-stage-summary-grid cost-of-risk-stage-ratio-grid";
-  table.append(createCostOfRiskCoverageRatioColGroup());
-  table.append(createCostOfRiskCoverageRatioHead());
+  const row = coverageRatio.rows?.[0] ?? null;
+  if (!row) {
+    container.replaceChildren();
+    return;
+  }
 
-  const tbody = document.createElement("tbody");
-  (coverageRatio.rows ?? []).forEach((row) => {
-    const tr = document.createElement("tr");
-    tr.className = "cost-of-risk-stage-summary-row";
+  const wrap = document.createElement("section");
+  wrap.className = "cost-of-risk-stage-ratio-focus cost-of-risk-coverage-ratio-focus";
 
-    const label = document.createElement("th");
-    label.scope = "row";
-    label.className = "cost-of-risk-stage-summary-row-label";
-    label.textContent = row.label;
-    tr.append(label);
+  const hero = document.createElement("div");
+  hero.className = "cost-of-risk-stage-ratio-focus-hero";
+  const heroTitle = document.createElement("div");
+  heroTitle.className = "cost-of-risk-stage-ratio-focus-eyebrow";
+  heroTitle.textContent = `${row.label} coverage`;
+  const heroValue = createCostOfRiskCoverageRatioMetricButton({
+    activeCellKey,
+    label: "Coverage ratio",
+    metric: "ratio",
+    onCellSelect,
+    row,
+    selectedUnit,
+    variant: "hero"
+  });
+  const heroVariation = createCostOfRiskCoverageRatioMetricButton({
+    activeCellKey,
+    label: "Quarter variation",
+    metric: "variation",
+    onCellSelect,
+    row,
+    selectedUnit,
+    variant: "inline"
+  });
+  const heroFormula = document.createElement("div");
+  heroFormula.className = "cost-of-risk-stage-ratio-focus-formula";
+  heroFormula.textContent = `${row.label} allowances / ${row.label} gross carrying amount`;
+  hero.append(heroTitle, heroValue, heroVariation, heroFormula);
 
-    ["ratio", "variation", "numerator", "denominator"].forEach((metric) => {
-      const key = `${row.key}:${metric}`;
-      const td = document.createElement("td");
-      const button = document.createElement("button");
-      button.className = "cost-of-risk-stage-summary-cell";
-      button.classList.toggle("is-active", key === activeCellKey);
-      button.type = "button";
-      button.textContent = formatCostOfRiskCoverageRatioCellValue(row.cells?.[metric]?.value, metric);
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        onCellSelect(key);
-      });
-      td.append(button);
-      tr.append(td);
-    });
-
-    tbody.append(tr);
+  const numerator = createCostOfRiskCoverageRatioComponentCard({
+    activeCellKey,
+    metrics: [
+      { label: "Current allowances", metric: "numeratorLevel" },
+      { label: "Delta", metric: "numeratorDelta" },
+      { label: "Effect", metric: "numeratorEffect" }
+    ],
+    onCellSelect,
+    row,
+    selectedUnit,
+    title: "Numerator",
+    subtitle: `${row.label} allowances`
   });
 
-  table.append(tbody);
-  container.replaceChildren(table);
+  const denominator = createCostOfRiskCoverageRatioComponentCard({
+    activeCellKey,
+    metrics: [
+      { label: "Current GCA", metric: "denominatorLevel" },
+      { label: "Delta", metric: "denominatorDelta" },
+      { label: "Effect", metric: "denominatorEffect" }
+    ],
+    onCellSelect,
+    row,
+    selectedUnit,
+    title: "Denominator",
+    subtitle: `${row.label} gross carrying amount`
+  });
+
+  wrap.append(hero, numerator, denominator);
+  container.replaceChildren(wrap);
 }
 
 export function renderCostOfRiskCoverageRatioChart({
@@ -99,8 +130,9 @@ export function renderCostOfRiskCoverageRatioChart({
   if (!container || !window.Highcharts) return;
 
   const selectedCell = model.selectedCell;
+  const displayMode = isCostOfRiskCoverageRatioAmountMetric(selectedCell?.metric) ? "amount" : "ratio";
   const chartModel = buildBenchmarkChartModel(model.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: "ratio",
+    displayMode,
     peerDisplayMode: state.peerDisplayMode,
     smoothingWindow
   });
@@ -154,7 +186,7 @@ export function renderCostOfRiskCoverageRatioChart({
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskCoverageRatioCellValue(this.y, selectedCell.metric)}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskCoverageRatioCellValue(this.y, selectedCell.metric, state.selectedUnit)}`;
       },
       shared: false,
       split: false,
@@ -186,7 +218,7 @@ export function renderCostOfRiskCoverageRatioChart({
       gridLineColor: "#edf0ee",
       labels: {
         formatter() {
-          return formatCostOfRiskCoverageRatioCellValue(this.value, selectedCell.metric);
+          return formatCostOfRiskCoverageRatioCellValue(this.value, selectedCell.metric, state.selectedUnit);
         },
         style: { color: "#5f6b65" }
       },
@@ -197,7 +229,7 @@ export function renderCostOfRiskCoverageRatioChart({
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: selectedCell.metric === "ratio" ? "Percent" : "Basis points" }
+      title: { text: getCostOfRiskCoverageRatioYAxisTitle(selectedCell.metric) }
     }
   };
 
@@ -213,17 +245,25 @@ export function renderCostOfRiskCoverageRatioChart({
   }
 }
 
-export function formatCostOfRiskCoverageRatioCellValue(value, metric) {
+export function formatCostOfRiskCoverageRatioCellValue(value, metric, selectedUnit) {
   if (!Number.isFinite(value)) return "-";
-  return metric === "ratio"
-    ? formatContributionPercentValue(value / 10000)
-    : formatBasisPointsValue(value);
+  if (metric === "ratio") return formatContributionPercentValue(value / 10000);
+  if (isCostOfRiskCoverageRatioAmountMetric(metric)) {
+    return metric.endsWith("Delta")
+      ? formatSignedMetricValue(value, selectedUnit)
+      : formatMetricValue(value, selectedUnit);
+  }
+  return formatCostOfRiskCoverageRatioSignedBasisPoints(value);
 }
 
 export function getCostOfRiskCoverageRatioMetricLabel(metric) {
   return {
-    denominator: "Denominator effect",
-    numerator: "Numerator effect",
+    denominatorDelta: "Denominator delta",
+    denominatorEffect: "Denominator effect",
+    denominatorLevel: "Denominator GCA",
+    numeratorDelta: "Numerator delta",
+    numeratorEffect: "Numerator effect",
+    numeratorLevel: "Numerator allowances",
     ratio: "Coverage ratio",
     variation: "Ratio variation"
   }[metric] ?? metric;
@@ -231,6 +271,91 @@ export function getCostOfRiskCoverageRatioMetricLabel(metric) {
 
 function getCostOfRiskCoverageRatioRowLabel(model, stageKey) {
   return (model.rows ?? []).find((row) => row.key === stageKey)?.label ?? stageKey;
+}
+
+function createCostOfRiskCoverageRatioComponentCard({
+  activeCellKey,
+  metrics,
+  onCellSelect,
+  row,
+  selectedUnit,
+  subtitle,
+  title
+}) {
+  const card = document.createElement("div");
+  card.className = "cost-of-risk-stage-ratio-focus-card";
+
+  const heading = document.createElement("div");
+  heading.className = "cost-of-risk-stage-ratio-focus-card-heading";
+  const titleNode = document.createElement("div");
+  titleNode.className = "cost-of-risk-stage-ratio-focus-card-title";
+  titleNode.textContent = title;
+  const subtitleNode = document.createElement("div");
+  subtitleNode.className = "cost-of-risk-stage-ratio-focus-card-subtitle";
+  subtitleNode.textContent = subtitle;
+  heading.append(titleNode, subtitleNode);
+
+  const list = document.createElement("div");
+  list.className = "cost-of-risk-stage-ratio-focus-metrics";
+  metrics.forEach((definition) => {
+    list.append(createCostOfRiskCoverageRatioMetricButton({
+      activeCellKey,
+      label: definition.label,
+      metric: definition.metric,
+      onCellSelect,
+      row,
+      selectedUnit,
+      variant: definition.metric.endsWith("Effect") ? "effect" : "row"
+    }));
+  });
+
+  card.append(heading, list);
+  return card;
+}
+
+function createCostOfRiskCoverageRatioMetricButton({
+  activeCellKey,
+  label,
+  metric,
+  onCellSelect,
+  row,
+  selectedUnit,
+  variant = "row"
+}) {
+  const key = `${row.stageKey}:${metric}`;
+  const button = document.createElement("button");
+  button.className = `cost-of-risk-stage-ratio-focus-metric cost-of-risk-stage-ratio-focus-metric--${variant}`;
+  button.classList.toggle("is-active", key === activeCellKey);
+  button.type = "button";
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onCellSelect(key);
+  });
+
+  const labelNode = document.createElement("span");
+  labelNode.className = "cost-of-risk-stage-ratio-focus-metric-label";
+  labelNode.textContent = label;
+  const valueNode = document.createElement("span");
+  valueNode.className = "cost-of-risk-stage-ratio-focus-metric-value";
+  valueNode.textContent = formatCostOfRiskCoverageRatioCellValue(row.cells?.[metric]?.value, metric, selectedUnit);
+  button.append(labelNode, valueNode);
+  return button;
+}
+
+function isCostOfRiskCoverageRatioAmountMetric(metric) {
+  return ["numeratorLevel", "numeratorDelta", "denominatorLevel", "denominatorDelta"].includes(metric);
+}
+
+function getCostOfRiskCoverageRatioYAxisTitle(metric) {
+  if (metric === "ratio") return "Percent";
+  if (isCostOfRiskCoverageRatioAmountMetric(metric)) return "Amount";
+  return "Basis points";
+}
+
+function formatCostOfRiskCoverageRatioSignedBasisPoints(value) {
+  if (!Number.isFinite(value)) return "-";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${formatBasisPointsValue(value)}`;
 }
 
 function createCostOfRiskCoverageRatioColGroup() {

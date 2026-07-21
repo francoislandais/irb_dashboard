@@ -781,7 +781,7 @@ export function renderCostOfRisk(state) {
   }
 
   if (activeCostOfRiskTab === "stage-ratio") {
-    const stageRatio = getCostOfRiskCachedModel(
+    const stageRatio = applyCostOfRiskUnavailableCounterpartyGuidance(getCostOfRiskCachedModel(
       state,
       createCostOfRiskModelCacheKey(state, "stage-ratio", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageRatioCellKey),
       () => buildCostOfRiskStageRatioModel(
@@ -790,7 +790,7 @@ export function renderCostOfRisk(state) {
         activeCostOfRiskReferenceDate,
         activeCostOfRiskStageRatioCellKey
       )
-    );
+    ));
     activeCostOfRiskReferenceDate = stageRatio.referenceDate || activeCostOfRiskReferenceDate;
     if (stageRatio.needsStageSelection) {
       setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter("stage"));
@@ -817,7 +817,7 @@ export function renderCostOfRisk(state) {
   }
 
   if (activeCostOfRiskTab === "coverage-ratio") {
-    const coverageRatio = getCostOfRiskCachedModel(
+    const coverageRatio = applyCostOfRiskUnavailableCounterpartyGuidance(getCostOfRiskCachedModel(
       state,
       createCostOfRiskModelCacheKey(state, "coverage-ratio", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskCoverageRatioCellKey),
       () => buildCostOfRiskCoverageRatioModel(
@@ -826,8 +826,11 @@ export function renderCostOfRisk(state) {
         activeCostOfRiskReferenceDate,
         activeCostOfRiskCoverageRatioCellKey
       )
-    );
+    ));
     activeCostOfRiskReferenceDate = coverageRatio.referenceDate || activeCostOfRiskReferenceDate;
+    if (coverageRatio.needsStageSelection) {
+      setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter("stage"));
+    }
     renderCostOfRiskActiveFilters(filterOptions);
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
@@ -912,10 +915,11 @@ export function renderCostOfRisk(state) {
   renderCostOfRiskActiveFilters(filterOptions);
 
   if (activeSelection.status) {
+    const guidedSelection = applyCostOfRiskUnavailableCounterpartyGuidance(activeSelection);
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
-    renderCostOfRiskTabEmpty(activeSelection.status);
+    renderCostOfRiskTabEmpty(guidedSelection.status);
     elements.costOfRiskValue.textContent = "-";
     elements.costOfRiskContext.textContent = "-";
     elements.costOfRiskDenominatorValue.textContent = "-";
@@ -933,6 +937,7 @@ export function renderCostOfRisk(state) {
     destroyCostOfRiskStageRatioChart();
     destroyCostOfRiskStageReconciliationChart();
     leaveCostOfRiskStageTransferTab();
+    renderCostOfRiskHelpPanel();
     return;
   }
 
@@ -1190,9 +1195,10 @@ function renderCostOfRiskStageRatioView(stageRatio, state) {
 
 function renderCostOfRiskCoverageRatioView(coverageRatio, state) {
   renderCostOfRiskCoverageRatioTable({
-    activeCellKey: activeCostOfRiskCoverageRatioCellKey,
+    activeCellKey: coverageRatio.selectedCell?.key ?? activeCostOfRiskCoverageRatioCellKey,
     container: elements.costOfRiskCoverageRatioTable,
     onCellSelect: selectCostOfRiskCoverageRatioCell,
+    selectedUnit: state.selectedUnit,
     coverageRatio
   });
   renderCostOfRiskCoverageRatioChart({
@@ -1465,9 +1471,7 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 }
 
 function renderCostOfRiskActiveFilters(filterOptions) {
-  const displayedFilters = activeCostOfRiskTab === "coverage-ratio"
-    ? { ...activeCostOfRiskFilters, stage: COST_OF_RISK_FILTER_ALL }
-    : activeCostOfRiskFilters;
+  const displayedFilters = activeCostOfRiskFilters;
   renderCostOfRiskActiveFiltersView({
     activeTab: activeCostOfRiskTab,
     contributionDisplayMenuOpen: activeCostOfRiskContributionDisplayMenuOpen,
@@ -1564,6 +1568,29 @@ function getCostOfRiskFilterParentValue(filterName, value) {
 
 function getCostOfRiskUnavailableMessage() {
   return getUnavailableMessage(activeCostOfRiskFilters);
+}
+
+function isCostOfRiskFineCounterpartySelected() {
+  const counterparty = activeCostOfRiskFilters.counterparty;
+  return Boolean(counterparty)
+    && counterparty !== COST_OF_RISK_FILTER_ALL
+    && getFilterParentValue("counterparty", counterparty) !== COST_OF_RISK_FILTER_ALL;
+}
+
+function shouldGuideCostOfRiskUnavailableCounterparty(model) {
+  return Boolean(model?.status)
+    && !model?.needsStageSelection
+    && isCostOfRiskFineCounterpartySelected()
+    && COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS.has(activeCostOfRiskTab);
+}
+
+function applyCostOfRiskUnavailableCounterpartyGuidance(model) {
+  if (!shouldGuideCostOfRiskUnavailableCounterparty(model)) return model;
+  setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter("counterparty"));
+  return {
+    ...model,
+    status: getCostOfRiskUnavailableMessage()
+  };
 }
 
 function renderCostOfRiskCoreDefinition(movementOptions, f2F12Options) {
@@ -1758,14 +1785,14 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
 
   const lead = document.createElement("p");
   lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = `Selected value: ${formatCostOfRiskCoverageRatioCellValue(selectedValue, selectedCell.metric)}.`;
+  lead.textContent = `Selected value: ${formatCostOfRiskCoverageRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`;
 
   article.append(eyebrow, title, lead);
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(coverageRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
     `Perimeter: ${coverageRatio.filterLabel || "selected instruments and counterparties"}`,
-    "The global Stage filter is not applied here because the three stages are shown explicitly."
+    `Selected stage: ${row.label}`
   ]));
   article.append(createCostOfRiskAuditInfoSection("Ratio components", [
     `Current numerator, allowances: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
@@ -1781,7 +1808,7 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
 
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Click another cell in the upper table to benchmark and explain that coverage-ratio component.";
+  hint.textContent = "Click another value in the upper panel to benchmark and explain that coverage-ratio component.";
   article.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(article);
@@ -2249,7 +2276,7 @@ function getCostOfRiskFilterSelectionOptionState(kind, option) {
   const isDisabled = isFineCounterparty && COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS.has(activeCostOfRiskTab);
   return {
     disabled: isDisabled,
-    disabledReason: isDisabled ? "Not available in this tab" : "",
+    disabledReason: isDisabled ? "This counterparty breakdown is not available in this tab." : "",
     indent: isFineCounterparty,
     label: formatCostOfRiskCounterpartySelectionLabel(option.label)
   };
@@ -2270,23 +2297,24 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
   row.classList.toggle("is-indented", Boolean(options.indent));
 
   const cell = document.createElement("td");
+  if (options.disabledReason) {
+    row.title = options.disabledReason;
+    cell.title = options.disabledReason;
+  }
   const button = document.createElement("button");
   button.type = "button";
   button.className = "cost-of-risk-filter-selection-option";
-  button.disabled = Boolean(options.disabled);
   button.setAttribute("role", "option");
   button.setAttribute("aria-selected", String(isActive));
-  if (options.disabled) button.setAttribute("aria-disabled", "true");
+  if (options.disabled) {
+    button.setAttribute("aria-disabled", "true");
+    button.tabIndex = -1;
+    if (options.disabledReason) button.title = options.disabledReason;
+  }
   const labelNode = document.createElement("span");
   labelNode.className = "cost-of-risk-filter-selection-option-label";
   labelNode.textContent = label;
   button.append(labelNode);
-  if (options.disabledReason) {
-    const reason = document.createElement("span");
-    reason.className = "cost-of-risk-filter-selection-option-reason";
-    reason.textContent = options.disabledReason;
-    button.append(reason);
-  }
   if (!options.disabled) button.addEventListener("click", onSelect);
   cell.append(button);
   row.append(cell);
@@ -2881,11 +2909,11 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
     "coverage-ratio": {
       eyebrow: "Allowance coverage",
       title: "Coverage Ratio",
-      lead: "This view measures allowances as a share of gross carrying amount for Stage 1, Stage 2 and Stage 3.",
+      lead: "This view measures allowances as a share of gross carrying amount for the selected stage.",
       sections: [
         {
           title: "What you see",
-          body: "The upper table shows each coverage ratio, its quarter-on-quarter change, and a split of that change between numerator and denominator effects."
+          body: "The upper panel focuses on the selected stage. It shows the coverage ratio, its quarter-on-quarter change, and the allowance and GCA components that explain the movement."
         },
         {
           title: "How it is calculated",
@@ -2893,10 +2921,10 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "Source",
-          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the global stage filter is ignored in this view because stages are displayed explicitly."
+          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the stage filter selects the stage analysed in this view."
         }
       ],
-      hint: "Click a table cell to benchmark the selected coverage ratio or decomposition effect over time."
+      hint: "Click any value in the upper panel to benchmark the selected coverage ratio or decomposition effect over time."
     },
     "stage-transfers": {
       eyebrow: "Flow analysis",
@@ -3241,13 +3269,14 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
 // diagram is always shown regardless of its value.
 function renderCostOfRiskStageTransferView(state) {
   ensureCostOfRiskStageTransferFlowSelection();
+  const flowDiagram = applyCostOfRiskUnavailableCounterpartyGuidance(getCostOfRiskCachedModel(
+    state,
+    createCostOfRiskModelCacheKey(state, "stage-transfer-flow-diagram", activeCostOfRiskFilters, activeCostOfRiskReferenceDate),
+    () => buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters)
+  ));
   renderCostOfRiskStageTransferFlowChart(
     state,
-    getCostOfRiskCachedModel(
-      state,
-      createCostOfRiskModelCacheKey(state, "stage-transfer-flow-diagram", activeCostOfRiskFilters, activeCostOfRiskReferenceDate),
-      () => buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters)
-    ),
+    flowDiagram,
     state.selectedUnit,
     getActiveCostOfRiskDisplayMode()
   );
@@ -3256,6 +3285,15 @@ function renderCostOfRiskStageTransferView(state) {
 function renderCostOfRiskStageTransferFlowChart(state, flowDiagram, selectedUnit, displayMode = "amount") {
   if (!elements.costOfRiskStageTransferChart) return;
   destroyCostOfRiskStageTransferChart();
+
+  if (flowDiagram?.status) {
+    elements.costOfRiskStageTransferChart.replaceChildren();
+    if (elements.costOfRiskStageTransferTitle) elements.costOfRiskStageTransferTitle.textContent = "Stage Transfer Flows";
+    destroyCostOfRiskStageTransferFlowChart();
+    if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
+    renderCostOfRiskTabEmpty(flowDiagram.status);
+    return;
+  }
 
   renderCostOfRiskStageTransferFlowView({
     container: elements.costOfRiskStageTransferChart,
