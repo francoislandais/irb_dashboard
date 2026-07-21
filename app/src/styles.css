@@ -504,6 +504,39 @@ button:focus-visible {
   line-height: 1.35;
 }
 
+.cost-of-risk-context-panel-nav {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  min-height: 20px;
+}
+
+.cost-of-risk-context-panel-nav-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid #dce3df;
+  color: var(--primary-dark);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.86rem;
+  height: 20px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 22px;
+}
+
+.cost-of-risk-context-panel-nav-button:hover:not(:disabled) {
+  background: #eef2ef;
+}
+
+.cost-of-risk-context-panel-nav-button:disabled {
+  color: #b5beba;
+  cursor: default;
+  opacity: 0.55;
+}
+
 .cost-of-risk-audit-intro {
   display: grid;
   gap: 10px;

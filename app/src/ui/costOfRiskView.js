@@ -190,6 +190,8 @@ let costOfRiskWaterfallChart = null;
 let costOfRiskPeerSelectionActions = null;
 let costOfRiskDatasetInfoActions = null;
 let latestCostOfRiskFilterOptions = null;
+let costOfRiskHelpTopicHistory = [""];
+let costOfRiskHelpTopicHistoryIndex = 0;
 
 // Filter chips (instrument/counterparty/stage/definition) no longer open an
 // inline dropdown: clicking a chip shows its options as a "filter-selection"
@@ -203,7 +205,7 @@ function isCostOfRiskFilterSelectionTopicOpen(kind) {
 
 function toggleCostOfRiskFilterSelectionTopic(kind) {
   const topic = `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}${kind}`;
-  activeCostOfRiskHelpTopic = activeCostOfRiskHelpTopic === topic ? "" : topic;
+  setCostOfRiskHelpTopic(activeCostOfRiskHelpTopic === topic ? "" : topic);
 }
 
 // URL persistence: for the tabs listed in COST_OF_RISK_URL_TABS, the active
@@ -1434,7 +1436,7 @@ function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {
   hint.textContent = "Use the method selector to switch definition. The value and time chart are recomputed immediately.";
   article.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(article);
+  replaceCostOfRiskAuditPanelContent(article);
 }
 
 function selectCostOfRiskStageRatioCell(cellKey) {
@@ -1797,7 +1799,7 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
   hint.textContent = "Click another value in the upper panel to benchmark and explain that exposure-ratio component.";
   article.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(article);
+  replaceCostOfRiskAuditPanelContent(article);
 }
 
 function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options = {}) {
@@ -1858,7 +1860,7 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
   hint.textContent = "Click another value in the upper panel to benchmark and explain that coverage-ratio component.";
   article.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(article);
+  replaceCostOfRiskAuditPanelContent(article);
 }
 
 function createCostOfRiskAuditInfoSection(titleText, lines) {
@@ -1892,7 +1894,7 @@ function renderCostOfRiskAuditPanelPlaceholder() {
   const placeholder = document.createElement("div");
   placeholder.className = "cost-of-risk-audit-placeholder";
   placeholder.textContent = "Select a data point to display its audit trail.";
-  elements.costOfRiskAuditPanel.replaceChildren(placeholder);
+  replaceCostOfRiskAuditPanelContent(placeholder);
 }
 
 function isCostOfRiskAuditIntroVisible() {
@@ -1909,11 +1911,62 @@ function hideCostOfRiskAuditIntro() {
 }
 
 function clearCostOfRiskHelpTopic() {
-  activeCostOfRiskHelpTopic = "";
+  setCostOfRiskHelpTopic("");
 }
 
 function setCostOfRiskHelpTopic(topic) {
-  activeCostOfRiskHelpTopic = topic || "";
+  const nextTopic = topic || "";
+  activeCostOfRiskHelpTopic = nextTopic;
+  recordCostOfRiskHelpTopic(nextTopic);
+}
+
+function recordCostOfRiskHelpTopic(topic) {
+  if (costOfRiskHelpTopicHistory[costOfRiskHelpTopicHistoryIndex] === topic) return;
+  costOfRiskHelpTopicHistory = costOfRiskHelpTopicHistory.slice(0, costOfRiskHelpTopicHistoryIndex + 1);
+  costOfRiskHelpTopicHistory.push(topic);
+  costOfRiskHelpTopicHistoryIndex = costOfRiskHelpTopicHistory.length - 1;
+}
+
+function navigateCostOfRiskHelpTopicHistory(delta) {
+  const nextIndex = costOfRiskHelpTopicHistoryIndex + delta;
+  if (nextIndex < 0 || nextIndex >= costOfRiskHelpTopicHistory.length) return;
+  costOfRiskHelpTopicHistoryIndex = nextIndex;
+  activeCostOfRiskHelpTopic = costOfRiskHelpTopicHistory[costOfRiskHelpTopicHistoryIndex] || "";
+  if (!renderCostOfRiskHelpPanel()) renderCostOfRiskAuditPanelIntro();
+}
+
+function replaceCostOfRiskAuditPanelContent(...nodes) {
+  if (!elements.costOfRiskAuditPanel) return;
+  elements.costOfRiskAuditPanel.replaceChildren(createCostOfRiskContextPanelNavigation(), ...nodes);
+}
+
+function createCostOfRiskContextPanelNavigation() {
+  const nav = document.createElement("nav");
+  nav.className = "cost-of-risk-context-panel-nav";
+  nav.setAttribute("aria-label", "Context panel navigation");
+
+  const previous = createCostOfRiskContextPanelNavigationButton("previous", "‹", "Previous context panel", () => {
+    navigateCostOfRiskHelpTopicHistory(-1);
+  });
+  previous.disabled = costOfRiskHelpTopicHistoryIndex <= 0;
+
+  const next = createCostOfRiskContextPanelNavigationButton("next", "›", "Next context panel", () => {
+    navigateCostOfRiskHelpTopicHistory(1);
+  });
+  next.disabled = costOfRiskHelpTopicHistoryIndex >= costOfRiskHelpTopicHistory.length - 1;
+
+  nav.append(previous, next);
+  return nav;
+}
+
+function createCostOfRiskContextPanelNavigationButton(direction, label, ariaLabel, onClick) {
+  const button = document.createElement("button");
+  button.className = `cost-of-risk-context-panel-nav-button cost-of-risk-context-panel-nav-button--${direction}`;
+  button.type = "button";
+  button.textContent = label;
+  button.setAttribute("aria-label", ariaLabel);
+  button.addEventListener("click", onClick);
+  return button;
 }
 
 function renderCostOfRiskAuditPanelIntro() {
@@ -1967,7 +2020,7 @@ function renderCostOfRiskAuditPanelIntro() {
   hint.textContent = content.hint;
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function renderCostOfRiskHelpPanel() {
@@ -2043,7 +2096,7 @@ function renderCostOfRiskPanelArticle(content) {
   hint.textContent = content.hint;
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function renderCostOfRiskReferenceDateSelectionPanel() {
@@ -2106,7 +2159,7 @@ function renderCostOfRiskReferenceDateSelectionPanel() {
   hint.textContent = "You can also change the same reference quarter by clicking a point in any temporal chart.";
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function renderCostOfRiskPeerSelectionPanel() {
@@ -2184,7 +2237,7 @@ function renderCostOfRiskPeerSelectionPanel() {
   hint.textContent = "Use Select all or individual checkboxes to adjust the peer set; charts refresh as soon as the selection changes.";
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function renderCostOfRiskPeerDisplayControl(state) {
@@ -2315,7 +2368,7 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   hint.textContent = "Selecting a row updates the perimeter across every chart on this tab right away.";
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function renderCostOfRiskStageSelectionPanel() {
@@ -2358,7 +2411,7 @@ function renderCostOfRiskStageSelectionPanel() {
   hint.textContent = "The performance status breakdown is an alternative F_18.00 view, not an additional stage.";
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function createCostOfRiskStageSelectionGroup(titleText, options, activeValue) {
@@ -2523,7 +2576,7 @@ function renderCostOfRiskDefinitionSelectionPanel() {
   hint.textContent = "Selecting a definition updates the ratio, driver breakdown, and audit trail right away.";
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function renderCostOfRiskDatasetInfoPanel() {
@@ -2567,7 +2620,7 @@ function renderCostOfRiskDatasetInfoPanel() {
   hint.textContent = "Use the Dataset dropdown in the header to switch to another loaded dataset or add a new one.";
   intro.append(hint);
 
-  elements.costOfRiskAuditPanel.replaceChildren(intro);
+  replaceCostOfRiskAuditPanelContent(intro);
 }
 
 function formatCostOfRiskDatasetSource(source) {
