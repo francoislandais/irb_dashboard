@@ -1130,17 +1130,80 @@ function renderCostOfRiskTabEmpty(message) {
 }
 
 function resolveCostOfRiskTabEmptyMessage(message) {
-  if (!message) return getCostOfRiskUnavailableMessage();
+  const resolvedMessage = !message
+    || String(message).startsWith("No matching F")
+    || String(message).startsWith("No F_")
+    ? getCostOfRiskUnavailableMessage()
+    : message;
+
+  if (String(resolvedMessage).startsWith("FINREP data does not support this level of detail with a breakdown by performing status")) {
+    return createCostOfRiskRemoveStatusFilterMessage();
+  }
+  if (String(resolvedMessage).startsWith("FINREP data does not support this level of detail for")) {
+    const counterpartyAction = createCostOfRiskFineCounterpartyMessage(resolvedMessage);
+    if (counterpartyAction) return counterpartyAction;
+  }
   if (
     (activeCostOfRiskTab === "stage-ratio" || activeCostOfRiskTab === "coverage-ratio")
-    && String(message).startsWith("This tab is stage or performing status specific")
+    && String(resolvedMessage).startsWith("This tab is stage or performing status specific")
   ) {
-    return createCostOfRiskRatioStatusSelectionEmpty(message);
+    return createCostOfRiskRatioStatusSelectionEmpty(resolvedMessage);
   }
-  if (String(message).startsWith("No matching F") || String(message).startsWith("No F_")) {
-    return getCostOfRiskUnavailableMessage();
-  }
-  return message;
+  return resolvedMessage;
+}
+
+function createCostOfRiskFineCounterpartyMessage(message) {
+  const counterparty = activeCostOfRiskFilters.counterparty;
+  const parent = getFilterParentValue("counterparty", counterparty);
+  if (!counterparty || counterparty === COST_OF_RISK_FILTER_ALL || parent === COST_OF_RISK_FILTER_ALL) return null;
+
+  const counterpartyLabel = getCostOfRiskCounterpartyFilterLabel(counterparty);
+  const parentLabel = getCostOfRiskCounterpartyFilterLabel(parent);
+  const wrap = document.createElement("span");
+  wrap.className = "cost-of-risk-tab-empty-inline-action";
+  wrap.append(document.createTextNode(`${message.replace(/ Select .*$/i, "")} `));
+
+  const removeButton = createCostOfRiskTabEmptyActionButton(`Remove ${counterpartyLabel} filter`, () => {
+    applyCostOfRiskEmptyMessageFilterSelection("counterparty", COST_OF_RISK_FILTER_ALL);
+  });
+  const parentButton = createCostOfRiskTabEmptyActionButton(`Select ${parentLabel}`, () => {
+    applyCostOfRiskEmptyMessageFilterSelection("counterparty", parent);
+  });
+
+  wrap.append(removeButton, document.createTextNode(" or "), parentButton, document.createTextNode("."));
+  return wrap;
+}
+
+function createCostOfRiskRemoveStatusFilterMessage() {
+  const wrap = document.createElement("span");
+  wrap.className = "cost-of-risk-tab-empty-inline-action";
+  wrap.append(document.createTextNode("FINREP data does not support this level of detail with a breakdown by performing status. "));
+
+  const button = createCostOfRiskTabEmptyActionButton("Remove this filter", () => {
+    applyCostOfRiskEmptyMessageFilterSelection("stage", COST_OF_RISK_FILTER_ALL);
+  });
+  wrap.append(button);
+  wrap.append(document.createTextNode("."));
+  return wrap;
+}
+
+function createCostOfRiskTabEmptyActionButton(label, onClick) {
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-tab-empty-action";
+  button.type = "button";
+  button.textContent = label;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function applyCostOfRiskEmptyMessageFilterSelection(filterKey, value) {
+  clearCostOfRiskHelpTopic();
+  applyCostOfRiskFilterSelection(filterKey, value);
+}
+
+function getCostOfRiskCounterpartyFilterLabel(value) {
+  const option = latestCostOfRiskFilterOptions?.counterparties?.find((candidate) => candidate.value === value);
+  return formatCostOfRiskCounterpartySelectionLabel(option?.label ?? value);
 }
 
 function createCostOfRiskRatioStatusSelectionEmpty(message) {

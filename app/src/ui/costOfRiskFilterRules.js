@@ -26,18 +26,24 @@ const COST_OF_RISK_FILTER_PARENT_LABELS = {
 };
 
 const COST_OF_RISK_UNAVAILABLE_MESSAGE = "FINREP data does not support this level of detail for the current selection.";
+const COST_OF_RISK_PERFORMANCE_STATUS_VALUES = new Set(["Performing", "Non-performing"]);
 
 export function getCostOfRiskFilterParentValue(filterName, value) {
   return COST_OF_RISK_FILTER_PARENT_VALUES[filterName]?.[value] ?? COST_OF_RISK_FILTER_ALL;
 }
 
 export function getCostOfRiskUnavailableMessage(filters) {
+  const stage = filters.stage;
+  if (COST_OF_RISK_PERFORMANCE_STATUS_VALUES.has(stage)) {
+    return "FINREP data does not support this level of detail with a breakdown by performing status. Remove this filter.";
+  }
+
   const counterparty = filters.counterparty;
   const parent = getCostOfRiskFilterParentValue("counterparty", counterparty);
   if (parent !== COST_OF_RISK_FILTER_ALL) {
     const detailLabel = COST_OF_RISK_FILTER_UNAVAILABLE_LABELS.counterparty[counterparty] ?? counterparty;
     const parentLabel = COST_OF_RISK_FILTER_PARENT_LABELS.counterparty[parent] ?? parent;
-    return `FINREP data does not support this level of detail for ${detailLabel}. Select ${parentLabel} instead.`;
+    return `FINREP data does not support this level of detail for ${detailLabel}. Select ${parentLabel} or higher.`;
   }
 
   return COST_OF_RISK_UNAVAILABLE_MESSAGE;

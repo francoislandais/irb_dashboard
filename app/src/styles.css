@@ -1262,6 +1262,28 @@ button:focus-visible {
   padding: 6px 0;
 }
 
+.cost-of-risk-tab-empty-inline-action {
+  align-items: baseline;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cost-of-risk-tab-empty-action {
+  background: transparent;
+  border: 0;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cost-of-risk-tab-empty-action:hover {
+  color: #26332d;
+}
+
 .cost-of-risk-ratio-status-empty {
   display: grid;
   gap: 12px;
