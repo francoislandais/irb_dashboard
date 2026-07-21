@@ -1,5 +1,6 @@
 import {
   COST_OF_RISK_DEFINITION_OPTIONS,
+  COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
@@ -18,6 +19,7 @@ export function renderCostOfRiskActiveFiltersView({
   filterOptions,
   filters,
   counterpartyMenuOpen,
+  balanceScopeMenuOpen,
   instrumentMenuOpen,
   referenceDate,
   stageMenuOpen
@@ -33,10 +35,12 @@ export function renderCostOfRiskActiveFiltersView({
     filters,
     labels: {
       asset: getCostOfRiskFilterOptionLabel(filterOptions.assets, filters.asset),
+      balanceScope: getCostOfRiskFilterOptionLabel(filterOptions.balanceScopes, filters.balanceScope),
       counterparty: getCostOfRiskFilterOptionLabel(filterOptions.counterparties, filters.counterparty),
       stage: getCostOfRiskFilterOptionLabel(filterOptions.stages, filters.stage)
     },
     counterpartyMenuOpen,
+    balanceScopeMenuOpen,
     instrumentMenuOpen,
     referenceDate,
     summaryDisplayMenuOpen,
@@ -46,6 +50,7 @@ export function renderCostOfRiskActiveFiltersView({
   if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
   lastCostOfRiskActiveFiltersRenderKey = renderKey;
 
+  const balanceScopeItem = createCostOfRiskBalanceScopeFilterChip(filters.balanceScope, filterOptions.balanceScopes, balanceScopeMenuOpen);
   const instrumentItem = createCostOfRiskInstrumentFilterChip(filters.asset, filterOptions.assets, instrumentMenuOpen);
   const counterpartyItem = createCostOfRiskCounterpartyFilterChip(filters.counterparty, filterOptions.counterparties, counterpartyMenuOpen);
   const stageItem = createCostOfRiskStageFilterChip(filters.stage, filterOptions.stages, stageMenuOpen);
@@ -57,6 +62,7 @@ export function renderCostOfRiskActiveFiltersView({
   const activeItems = remainingActiveItems.filter((item) => !item.dataset.costOfRiskAllFilter);
   const chips = [
     createCostOfRiskReferenceDateChip(referenceDate),
+    balanceScopeItem,
     ...(remainingActiveItems.length > 0
       ? remainingActiveItems
       : activeItems.length === 0 ? [createCostOfRiskNoFilterChip()] : []),
@@ -222,6 +228,46 @@ function createCostOfRiskDisplayModeChip({
       : labels.switchToRelative;
     menu.append(option);
     chip.append(menu);
+  }
+
+  return chip;
+}
+
+function createCostOfRiskBalanceScopeFilterChip(value, options, isOpen) {
+  const activeValue = value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
+  const isInBalance = activeValue === COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--balance-scope";
+  chip.classList.toggle("is-open", Boolean(isOpen));
+  if (isInBalance) chip.dataset.costOfRiskAllFilter = "true";
+
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskBalanceScopeFilterToggle = "true";
+  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  toggle.setAttribute("aria-label", "Change balance-sheet perimeter");
+
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label";
+  const labelPrefix = document.createElement("span");
+  labelPrefix.className = "cost-of-risk-filter-chip-prefix";
+  labelPrefix.textContent = "Perimeter: ";
+  const labelValue = document.createElement("span");
+  labelValue.className = "cost-of-risk-filter-chip-value";
+  labelValue.textContent = getCostOfRiskFilterOptionLabel(options, activeValue);
+  label.append(labelPrefix, labelValue);
+  toggle.append(label);
+  chip.append(toggle);
+
+  if (!isInBalance) {
+    const button = document.createElement("button");
+    button.className = "cost-of-risk-filter-chip-close";
+    button.type = "button";
+    button.dataset.costOfRiskClearFilter = "balanceScope";
+    button.setAttribute("aria-label", `Reset perimeter to In-balance`);
+    button.textContent = "×";
+    chip.append(button);
   }
 
   return chip;

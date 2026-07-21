@@ -1,5 +1,6 @@
 import {
   COST_OF_RISK_FILTER_ALL,
+  COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_DEFINITION_OPTIONS,
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
@@ -226,6 +227,7 @@ applyCostOfRiskUrlState();
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
   asset: COST_OF_RISK_FILTER_ALL,
+  balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
 };
@@ -542,6 +544,16 @@ export function wireCostOfRiskUi(actions, rerender) {
       return;
     }
 
+    const balanceScopeToggle = event.target.closest?.("[data-cost-of-risk-balance-scope-filter-toggle]");
+    if (balanceScopeToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      toggleCostOfRiskFilterSelectionTopic("balanceScope");
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const stageToggle = event.target.closest?.("[data-cost-of-risk-stage-filter-toggle]");
     if (stageToggle) {
       event.preventDefault();
@@ -648,6 +660,7 @@ export function renderCostOfRisk(state) {
   normalizeActiveCostOfRiskCoreDefinition(waterfallXAxisOptions, "movement");
   normalizeActiveCostOfRiskCoreDefinition(f2F12XAxisOptions, "f2-f12");
   normalizeActiveCostOfRiskFilter("asset", filterOptions.assets);
+  normalizeActiveCostOfRiskFilter("balanceScope", filterOptions.balanceScopes);
   normalizeActiveCostOfRiskFilter("counterparty", filterOptions.counterparties);
   normalizeActiveCostOfRiskFilter("stage", filterOptions.stages);
   const selectedMovementXCodes = getActiveCostOfRiskCoreXCodes(waterfallXAxisOptions, "movement");
@@ -1139,6 +1152,12 @@ function resolveCostOfRiskTabEmptyMessage(message) {
   if (String(resolvedMessage).startsWith("FINREP data does not support this level of detail with a breakdown by performing status")) {
     return createCostOfRiskRemoveStatusFilterMessage();
   }
+  if (
+    String(resolvedMessage).startsWith("FINREP data does not support this level of detail for off-balance")
+    || String(resolvedMessage).startsWith("FINREP data does not support this level of detail for the combined")
+  ) {
+    return createCostOfRiskSelectInBalanceMessage(resolvedMessage);
+  }
   if (String(resolvedMessage).startsWith("FINREP data does not support this level of detail for")) {
     const counterpartyAction = createCostOfRiskFineCounterpartyMessage(resolvedMessage);
     if (counterpartyAction) return counterpartyAction;
@@ -1150,6 +1169,17 @@ function resolveCostOfRiskTabEmptyMessage(message) {
     return createCostOfRiskRatioStatusSelectionEmpty(resolvedMessage);
   }
   return resolvedMessage;
+}
+
+function createCostOfRiskSelectInBalanceMessage(message) {
+  const wrap = document.createElement("span");
+  wrap.className = "cost-of-risk-tab-empty-inline-action";
+  wrap.append(document.createTextNode(`${message.replace(/ Select In-balance\\.?$/i, "")} `));
+  wrap.append(createCostOfRiskTabEmptyActionButton("Select In-balance", () => {
+    applyCostOfRiskEmptyMessageFilterSelection("balanceScope", COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE);
+  }));
+  wrap.append(document.createTextNode("."));
+  return wrap;
 }
 
 function createCostOfRiskFineCounterpartyMessage(message) {
@@ -1586,6 +1616,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
   const displayedFilters = activeCostOfRiskFilters;
   renderCostOfRiskActiveFiltersView({
     activeTab: activeCostOfRiskTab,
+    balanceScopeMenuOpen: isCostOfRiskFilterSelectionTopicOpen("balanceScope"),
     contributionDisplayMenuOpen: activeCostOfRiskContributionDisplayMenuOpen,
     container: elements.costOfRiskActiveFilters,
     counterpartyMenuOpen: isCostOfRiskFilterSelectionTopicOpen("counterparty"),
@@ -1669,6 +1700,7 @@ function clearActiveCostOfRiskFilter(filterName) {
 
 function getCostOfRiskFilterSelectionTopicForFilter(filterName) {
   if (filterName === "asset") return `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}instrument`;
+  if (filterName === "balanceScope") return `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}balanceScope`;
   if (filterName === "counterparty") return `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}counterparty`;
   if (filterName === "stage") return `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}stage`;
   return "";
@@ -2358,6 +2390,7 @@ function updateCostOfRiskPeerSelection(peerJstCodes) {
 }
 
 const COST_OF_RISK_FILTER_SELECTION_META = {
+  balanceScope: { allLabel: "In-balance", filterKey: "balanceScope", label: "Perimeter", optionsKey: "balanceScopes" },
   counterparty: { allLabel: "All Counterparties", filterKey: "counterparty", label: "Counterparty", optionsKey: "counterparties" },
   instrument: { allLabel: "All Instruments", filterKey: "asset", label: "Instruments", optionsKey: "assets" },
   stage: { allLabel: "All Stage", filterKey: "stage", label: "Stage", optionsKey: "stages" }
@@ -2379,6 +2412,11 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
 
   if (kind === "stage") {
     renderCostOfRiskStageSelectionPanel();
+    return;
+  }
+
+  if (kind === "balanceScope") {
+    renderCostOfRiskBalanceScopeSelectionPanel();
     return;
   }
 
@@ -2429,6 +2467,46 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
   hint.textContent = "Selecting a row updates the perimeter across every chart on this tab right away.";
+  intro.append(hint);
+
+  replaceCostOfRiskAuditPanelContent(intro);
+}
+
+function renderCostOfRiskBalanceScopeSelectionPanel() {
+  const meta = COST_OF_RISK_FILTER_SELECTION_META.balanceScope;
+  const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
+  const activeValue = activeCostOfRiskFilters.balanceScope || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
+
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = "Filter";
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = "Perimeter";
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = "Choose whether the view focuses on in-balance sheet exposures, off-balance sheet commitments and guarantees, or both where FINREP provides that detail.";
+  intro.append(eyebrow, title, summary);
+
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-filter-selection-table";
+  const tbody = document.createElement("tbody");
+  options.forEach((option) => {
+    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === activeValue, () => {
+      applyCostOfRiskFilterSelection("balanceScope", option.value);
+    }));
+  });
+  table.append(tbody);
+  intro.append(table);
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "In-balance is the default perimeter. Some tabs cannot reproduce the same granularity for off-balance exposures.";
   intro.append(hint);
 
   replaceCostOfRiskAuditPanelContent(intro);

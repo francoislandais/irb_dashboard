@@ -5,6 +5,14 @@ import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } fr
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
 export const COST_OF_RISK_FILTER_ALL = "__all__";
+export const COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE = "in-balance";
+export const COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE = "off-balance";
+export const COST_OF_RISK_BALANCE_SCOPE_TOTAL = "total";
+export const COST_OF_RISK_BALANCE_SCOPE_OPTIONS = [
+  { label: "In-balance", value: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE },
+  { label: "Off-balance", value: COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE },
+  { label: "Total", value: COST_OF_RISK_BALANCE_SCOPE_TOTAL }
+];
 export const COST_OF_RISK_TREEMAP_STAGE_OPTIONS = [
   { label: "Stage 1", value: "Stage 1" },
   { label: "Stage 2", value: "Stage 2" },
@@ -86,6 +94,14 @@ const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS = [
 export const DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL = "gca:level:nfc";
 const COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX = "Debt instruments other than held for trading";
 const COST_OF_RISK_BALANCE_SHEET_ALLOWANCE_PREFIX = "Total allowance for debt instruments";
+const COST_OF_RISK_OFF_BALANCE_ALLOWANCE_PREFIX = "Total  provisions on commitments and financial guarantees given";
+const COST_OF_RISK_OFF_BALANCE_ALLOWANCE_Y_CODES = {
+  "": ["0570"],
+  "POCI": ["0565"],
+  "Stage 1": ["0530"],
+  "Stage 2": ["0540"],
+  "Stage 3": ["0560"]
+};
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
 export const COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE = "__total_contribution__";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
@@ -232,12 +248,8 @@ const COST_OF_RISK_DENOMINATOR_CASH_Y_CODE = "0005";
 // stage filter to its F_18.00 column(s).
 function getCostOfRiskDenominatorComposition(state, filters = {}) {
   const normalized = normalizeCostOfRiskFilters(filters);
-  const ySelection = getCostOfRiskStageAxisYSelection(state, filters, {
-    descriptionPrefix: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX,
-    tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
-    totalLabel: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX
-  });
-  const excludeCash = !normalized.asset && !normalized.counterparty;
+  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+  const excludeCash = normalized.balanceScope !== COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE && !normalized.asset && !normalized.counterparty;
   const xCodes = COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[normalized.stage] ?? COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[""];
 
   const labelParts = [excludeCash ? `${ySelection.label} (excl. cash at central banks)` : ySelection.label];
@@ -347,6 +359,7 @@ export function getCostOfRiskFilterOptions(state) {
 
   return {
     assets: createCostOfRiskFilterOptions(ASSET_LABELS, formatCostOfRiskAssetLabel),
+    balanceScopes: COST_OF_RISK_BALANCE_SCOPE_OPTIONS,
     counterparties: createCostOfRiskCounterpartyFilterOptions(),
     stages: createCostOfRiskFilterOptions(getAvailableCostOfRiskStages(descriptors), formatCostOfRiskStageLabel)
   };
@@ -3016,6 +3029,36 @@ function isCostOfRiskBalanceSheetAllowanceDescriptor(descriptor) {
 }
 
 function getCostOfRiskStageTransferYSelection(state, filters = {}) {
+  const normalized = normalizeCostOfRiskFilters(filters);
+  if (normalized.balanceScope === COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE) {
+    return getCostOfRiskStageAxisYSelection(state, filters, {
+      descriptionPrefix: "Commitments and financial guarantees given",
+      requiresUnfilteredPerimeter: true,
+      tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
+      totalLabel: "Commitments and financial guarantees given"
+    });
+  }
+  if (normalized.balanceScope === COST_OF_RISK_BALANCE_SCOPE_TOTAL) {
+    if (normalized.asset || normalized.counterparty) {
+      return {
+        codes: [],
+        label: "Total in-balance and off-balance is only available without instrument or counterparty detail"
+      };
+    }
+    return combineCostOfRiskStageAxisYSelections([
+      getCostOfRiskStageAxisYSelection(state, { ...filters, balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE }, {
+        descriptionPrefix: "Total debt instruments",
+        tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
+        totalLabel: "Total debt instruments"
+      }),
+      getCostOfRiskStageAxisYSelection(state, { ...filters, balanceScope: COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE }, {
+        descriptionPrefix: "Commitments and financial guarantees given",
+        requiresUnfilteredPerimeter: true,
+        tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
+        totalLabel: "Commitments and financial guarantees given"
+      })
+    ], "Total in-balance and off-balance", { requireEverySelection: true });
+  }
   return getCostOfRiskStageAxisYSelection(state, filters, {
     descriptionPrefix: "Total debt instruments",
     tableId: COST_OF_RISK_STAGE_TRANSFER_TABLE_ID,
@@ -3031,6 +3074,34 @@ function getCostOfRiskStageTransferYSelection(state, filters = {}) {
 // unrelated "Off-balance sheet exposures" section, which reuses the same
 // counterparty names and would otherwise be picked up by mistake.
 function getCostOfRiskStageBoxYSelection(state, filters = {}) {
+  const normalized = normalizeCostOfRiskFilters(filters);
+  if (normalized.balanceScope === COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE) {
+    return getCostOfRiskStageAxisYSelection(state, filters, {
+      descriptionPrefix: "Off-balance sheet exposures",
+      tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
+      totalLabel: "Off-balance sheet exposures"
+    });
+  }
+  if (normalized.balanceScope === COST_OF_RISK_BALANCE_SCOPE_TOTAL) {
+    if (normalized.asset) {
+      return {
+        codes: [],
+        label: "Total in-balance and off-balance is not available with instrument detail"
+      };
+    }
+    return combineCostOfRiskStageAxisYSelections([
+      getCostOfRiskStageAxisYSelection(state, { ...filters, balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE }, {
+        descriptionPrefix: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX,
+        tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
+        totalLabel: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX
+      }),
+      getCostOfRiskStageAxisYSelection(state, { ...filters, balanceScope: COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE }, {
+        descriptionPrefix: "Off-balance sheet exposures",
+        tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
+        totalLabel: "Off-balance sheet exposures"
+      })
+    ], "Total in-balance and off-balance", { requireEverySelection: true });
+  }
   return getCostOfRiskStageAxisYSelection(state, filters, {
     descriptionPrefix: COST_OF_RISK_STAGE_BOX_DESCRIPTION_PREFIX,
     tableId: COST_OF_RISK_STAGE_BOX_TABLE_ID,
@@ -3045,6 +3116,13 @@ function getCostOfRiskStageAxisYSelection(state, filters = {}, config) {
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
   const asset = normalizedFilters.asset;
   const counterparty = normalizedFilters.counterparty;
+
+  if (config.requiresUnfilteredPerimeter && (asset || counterparty)) {
+    return {
+      codes: [],
+      label: `${config.totalLabel} is only available without instrument or counterparty detail`
+    };
+  }
 
   if (!asset && !counterparty) {
     const total = descriptors.find((descriptor) => descriptor.terminal === config.totalLabel);
@@ -3063,6 +3141,20 @@ function getCostOfRiskStageAxisYSelection(state, filters = {}, config) {
   return {
     codes: matchingDescriptors.map((descriptor) => descriptor.code),
     label: createCostOfRiskStageAxisSelectionLabel({ asset, counterparty })
+  };
+}
+
+function combineCostOfRiskStageAxisYSelections(selections, label, options = {}) {
+  if (options.requireEverySelection && selections.some((selection) => (selection.codes ?? []).length === 0)) {
+    return {
+      codes: [],
+      label
+    };
+  }
+  const codes = selections.flatMap((selection) => selection.codes ?? []);
+  return {
+    codes: [...new Set(codes)],
+    label
   };
 }
 
@@ -3155,8 +3247,15 @@ function getAvailableCostOfRiskStages(descriptors) {
 }
 
 function buildCostOfRiskSelectionFromFilters(state, filters = {}) {
-  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  if (normalizedFilters.balanceScope === COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE) {
+    return buildCostOfRiskOffBalanceSelectionFromFilters(normalizedFilters);
+  }
+  if (normalizedFilters.balanceScope === COST_OF_RISK_BALANCE_SCOPE_TOTAL) {
+    return buildCostOfRiskTotalBalanceSelectionFromFilters(state, normalizedFilters);
+  }
+
+  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
   if (isCostOfRiskTotalFilter(normalizedFilters)) {
     const totalDescriptor = descriptors.find((descriptor) => descriptor.code === COST_OF_RISK_TOTAL_Y_AXIS_CODE);
     return {
@@ -3182,16 +3281,72 @@ function buildCostOfRiskSelectionFromFilters(state, filters = {}) {
   };
 }
 
+function buildCostOfRiskOffBalanceSelectionFromFilters(filters) {
+  if (filters.asset || filters.counterparty) {
+    return createEmptyCostOfRiskFilteredSelection(filters, "Off-balance data is not available with instrument or counterparty detail");
+  }
+  const points = COST_OF_RISK_OFF_BALANCE_ALLOWANCE_Y_CODES[filters.stage] ?? [];
+  return {
+    filters,
+    id: `filters:off-balance:${filters.stage || "all"}`,
+    kind: "filtered",
+    label: filters.stage
+      ? `Off-balance provisions / ${formatCostOfRiskStageLabel(filters.stage)}`
+      : "Total provisions on commitments and financial guarantees given",
+    points
+  };
+}
+
+function buildCostOfRiskTotalBalanceSelectionFromFilters(state, filters) {
+  if (filters.asset || filters.counterparty) {
+    return createEmptyCostOfRiskFilteredSelection(filters, "Total in-balance and off-balance data is not available with instrument or counterparty detail");
+  }
+  const balanceSelection = buildCostOfRiskSelectionFromFilters(state, {
+    ...filters,
+    balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE
+  });
+  const offBalanceSelection = buildCostOfRiskOffBalanceSelectionFromFilters({
+    ...filters,
+    balanceScope: COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE
+  });
+  return {
+    filters,
+    id: `filters:total-balance:${filters.stage || "all"}`,
+    kind: "filtered",
+    label: filters.stage
+      ? `Total in-balance and off-balance / ${formatCostOfRiskStageLabel(filters.stage)}`
+      : "Total in-balance and off-balance",
+    points: [...new Set([...(balanceSelection.points ?? []), ...(offBalanceSelection.points ?? [])])]
+  };
+}
+
+function createEmptyCostOfRiskFilteredSelection(filters, label) {
+  return {
+    filters,
+    id: `filters:empty:${filters.balanceScope}:${filters.asset}:${filters.counterparty}:${filters.stage}`,
+    kind: "filtered",
+    label,
+    points: []
+  };
+}
+
 function normalizeCostOfRiskFilters(filters) {
   return {
     asset: filters.asset && filters.asset !== COST_OF_RISK_FILTER_ALL ? filters.asset : "",
+    balanceScope: normalizeCostOfRiskBalanceScope(filters.balanceScope),
     counterparty: filters.counterparty && filters.counterparty !== COST_OF_RISK_FILTER_ALL ? filters.counterparty : "",
     stage: filters.stage && filters.stage !== COST_OF_RISK_FILTER_ALL ? filters.stage : ""
   };
 }
 
 function isCostOfRiskTotalFilter(filters) {
-  return !filters.asset && !filters.counterparty && !filters.stage;
+  return filters.balanceScope === COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE && !filters.asset && !filters.counterparty && !filters.stage;
+}
+
+function normalizeCostOfRiskBalanceScope(balanceScope) {
+  return COST_OF_RISK_BALANCE_SCOPE_OPTIONS.some((option) => option.value === balanceScope)
+    ? balanceScope
+    : COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
 }
 
 function matchesCostOfRiskFilterDescriptor(descriptor, filters) {
