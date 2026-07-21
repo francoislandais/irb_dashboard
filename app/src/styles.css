@@ -772,6 +772,18 @@ button:focus-visible {
   border-top: 1px solid #eef2ef;
 }
 
+.cost-of-risk-filter-selection-group {
+  margin-top: 12px;
+}
+
+.cost-of-risk-filter-selection-group-title {
+  color: var(--primary-dark);
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin: 0 0 5px;
+  text-transform: uppercase;
+}
+
 .cost-of-risk-filter-selection-option:hover {
   background: #eef2ef;
 }
@@ -1215,6 +1227,50 @@ button:focus-visible {
   line-height: 1.35;
   max-width: 760px;
   padding: 6px 0;
+}
+
+.cost-of-risk-ratio-status-empty {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+}
+
+.cost-of-risk-ratio-status-empty-text {
+  color: #7c8781;
+  margin: 0;
+}
+
+.cost-of-risk-ratio-status-empty-group {
+  display: grid;
+  gap: 6px;
+}
+
+.cost-of-risk-ratio-status-empty-title {
+  color: var(--primary-dark);
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.cost-of-risk-ratio-status-empty-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cost-of-risk-ratio-status-empty-option {
+  background: #ffffff;
+  border: 1px solid #c6cec8;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: 0.76rem;
+  min-height: 28px;
+  padding: 5px 9px;
+}
+
+.cost-of-risk-ratio-status-empty-option:hover {
+  background: #eef2ef;
 }
 
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="summary"],

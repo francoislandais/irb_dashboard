@@ -52,11 +52,18 @@ const COST_OF_RISK_STAGE_SUMMARY_ROWS = [
   { key: "stage3", label: "Stage 3", gcaXCodes: ["0121"], allowanceXCodes: ["0951"] },
   { key: "poci", label: "POCI", gcaXCodes: ["0058", "0900"], allowanceXCodes: ["0143", "0952"] }
 ];
+const COST_OF_RISK_STAGE_SERIES_DEFINITIONS = [
+  ...COST_OF_RISK_STAGE_SUMMARY_ROWS,
+  { key: "performing", label: "Performing", gcaXCodes: ["0020"], allowanceXCodes: ["0140"] },
+  { key: "nonperforming", label: "Non-performing", gcaXCodes: ["0060"], allowanceXCodes: ["0150"] }
+];
 export const DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL = "gca:level:all";
 export const DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL = "stage2:ratio";
 export const DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL = "stage3:ratio";
 const COST_OF_RISK_ALLOWANCE_STAGE_X_CODES = {
   "": ["0130"],
+  "Non-performing": ["0150"],
+  "Performing": ["0140"],
   "POCI": ["0143", "0952"],
   "Stage 1": ["0141"],
   "Stage 2": ["0142", "0950"],
@@ -196,6 +203,8 @@ const COST_OF_RISK_SERIES_CACHE = new WeakMap();
 // "All stages" uses x=0010, the report's own total column.
 const COST_OF_RISK_DENOMINATOR_STAGE_X_CODES = {
   "": ["0010"],
+  "Non-performing": ["0060"],
+  "Performing": ["0020"],
   "POCI": ["0058", "0900"],
   "Stage 1": ["0056"],
   "Stage 2": ["0057", "0109"],
@@ -279,6 +288,7 @@ export const COST_OF_RISK_CONFIG = {
   }
 };
 
+const COST_OF_RISK_PERFORMANCE_STATUS_VALUES = ["Performing", "Non-performing"];
 const STAGE_LABELS = ["Stage 1", "Stage 2", "Stage 3", "Purchased or originated credit-impaired"];
 const ASSET_LABELS = ["Debt securities", "Loans and advances"];
 const COUNTERPARTY_LABELS = [
@@ -302,6 +312,8 @@ const COUNTERPARTY_SHORT_LABELS = new Map([
   ["Households", "Households"]
 ]);
 const STAGE_SHORT_LABELS = new Map([
+  ["Non-performing", "Non-performing"],
+  ["Performing", "Performing"],
   ["Stage 1", "Stage 1"],
   ["Stage 2", "Stage 2"],
   ["Stage 3", "Stage 3"],
@@ -1912,7 +1924,7 @@ export function buildCostOfRiskStageRatioModel(state, filters, referenceDate = "
       referenceDate: referenceColumns[referenceIndex]?.label ?? "",
       rows: [],
       selectedCell: null,
-      status: "Select Stage 1, Stage 2, Stage 3 or POCI to display the stage ratio analysis."
+      status: "This tab is stage or performing status specific. Select one of the following:"
     };
   }
 
@@ -1965,7 +1977,7 @@ export function buildCostOfRiskCoverageRatioModel(state, filters, referenceDate 
       referenceDate: referenceColumns[referenceIndex]?.label ?? "",
       rows: [],
       selectedCell: null,
-      status: "Select Stage 1, Stage 2, Stage 3 or POCI to display the coverage ratio analysis."
+      status: "This tab is stage or performing status specific. Select one of the following:"
     };
   }
 
@@ -2210,7 +2222,9 @@ function getCostOfRiskStageRatioDefinitions() {
     { key: "stage1", label: "Stage 1 ratio", rowLabel: "Stage 1", stageFilter: "Stage 1" },
     { key: "stage2", label: "Stage 2 ratio", rowLabel: "Stage 2", stageFilter: "Stage 2" },
     { key: "stage3", label: "Stage 3 ratio", rowLabel: "Stage 3", stageFilter: "Stage 3" },
-    { key: "poci", label: "POCI ratio", rowLabel: "POCI", stageFilter: "POCI" }
+    { key: "poci", label: "POCI ratio", rowLabel: "POCI", stageFilter: "POCI" },
+    { key: "performing", label: "Performing ratio", rowLabel: "Performing", stageFilter: "Performing" },
+    { key: "nonperforming", label: "Non-performing ratio", rowLabel: "Non-performing", stageFilter: "Non-performing" }
   ];
 }
 
@@ -2238,7 +2252,9 @@ function getCostOfRiskCoverageRatioDefinitions() {
     { key: "stage1", label: "Stage 1 coverage", rowLabel: "Stage 1", stageFilter: "Stage 1", stageKey: "stage1" },
     { key: "stage2", label: "Stage 2 coverage", rowLabel: "Stage 2", stageFilter: "Stage 2", stageKey: "stage2" },
     { key: "stage3", label: "Stage 3 coverage", rowLabel: "Stage 3", stageFilter: "Stage 3", stageKey: "stage3" },
-    { key: "poci", label: "POCI coverage", rowLabel: "POCI", stageFilter: "POCI", stageKey: "poci" }
+    { key: "poci", label: "POCI coverage", rowLabel: "POCI", stageFilter: "POCI", stageKey: "poci" },
+    { key: "performing", label: "Performing coverage", rowLabel: "Performing", stageFilter: "Performing", stageKey: "performing" },
+    { key: "nonperforming", label: "Non-performing coverage", rowLabel: "Non-performing", stageFilter: "Non-performing", stageKey: "nonperforming" }
   ];
 }
 
@@ -2317,8 +2333,8 @@ function buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumn
 }
 
 function buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey) {
-  const rowDefinition = COST_OF_RISK_STAGE_SUMMARY_ROWS.find((candidate) => candidate.key === stageKey)
-    ?? COST_OF_RISK_STAGE_SUMMARY_ROWS[0];
+  const rowDefinition = COST_OF_RISK_STAGE_SERIES_DEFINITIONS.find((candidate) => candidate.key === stageKey)
+    ?? COST_OF_RISK_STAGE_SERIES_DEFINITIONS[0];
   const xCodes = metric === "allowances" ? rowDefinition.allowanceXCodes : rowDefinition.gcaXCodes;
   const values = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
 
@@ -3132,7 +3148,10 @@ function createCostOfRiskCounterpartyFilterOptions() {
 
 function getAvailableCostOfRiskStages(descriptors) {
   const stages = ["Stage 1", "Stage 2", "Stage 3", "POCI"];
-  return stages.filter((stage) => descriptors.some((descriptor) => descriptor.stage === stage));
+  return [
+    ...stages.filter((stage) => descriptors.some((descriptor) => descriptor.stage === stage)),
+    ...COST_OF_RISK_PERFORMANCE_STATUS_VALUES
+  ];
 }
 
 function buildCostOfRiskSelectionFromFilters(state, filters = {}) {

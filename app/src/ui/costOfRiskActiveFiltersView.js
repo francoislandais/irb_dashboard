@@ -334,7 +334,7 @@ function createCostOfRiskStageFilterChip(value, options, isOpen) {
   } else {
     const labelPrefix = document.createElement("span");
     labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-    labelPrefix.textContent = "Stage: ";
+    labelPrefix.textContent = "Status: ";
     const labelValue = document.createElement("span");
     labelValue.className = "cost-of-risk-filter-chip-value";
     labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);

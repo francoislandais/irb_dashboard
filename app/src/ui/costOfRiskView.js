@@ -792,9 +792,6 @@ export function renderCostOfRisk(state) {
       )
     ));
     activeCostOfRiskReferenceDate = stageRatio.referenceDate || activeCostOfRiskReferenceDate;
-    if (stageRatio.needsStageSelection) {
-      setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter("stage"));
-    }
     renderCostOfRiskActiveFilters(filterOptions);
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
@@ -804,7 +801,7 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskDenominatorValue.textContent = "-";
     elements.costOfRiskDenominatorContext.textContent = "-";
     elements.costOfRiskRatioValue.textContent = "-";
-    elements.costOfRiskRatioContext.textContent = "F_18.00 stage ratios";
+    elements.costOfRiskRatioContext.textContent = "F_18.00 exposure ratios";
     elements.costOfRiskF02Value.textContent = "-";
     elements.costOfRiskF02Context.textContent = "-";
     elements.costOfRiskPoints.textContent = "-";
@@ -828,9 +825,6 @@ export function renderCostOfRisk(state) {
       )
     ));
     activeCostOfRiskReferenceDate = coverageRatio.referenceDate || activeCostOfRiskReferenceDate;
-    if (coverageRatio.needsStageSelection) {
-      setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter("stage"));
-    }
     renderCostOfRiskActiveFilters(filterOptions);
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
@@ -1135,10 +1129,63 @@ function renderCostOfRiskTabEmpty(message) {
 
 function resolveCostOfRiskTabEmptyMessage(message) {
   if (!message) return getCostOfRiskUnavailableMessage();
+  if (
+    (activeCostOfRiskTab === "stage-ratio" || activeCostOfRiskTab === "coverage-ratio")
+    && String(message).startsWith("This tab is stage or performing status specific")
+  ) {
+    return createCostOfRiskRatioStatusSelectionEmpty(message);
+  }
   if (String(message).startsWith("No matching F") || String(message).startsWith("No F_")) {
     return getCostOfRiskUnavailableMessage();
   }
   return message;
+}
+
+function createCostOfRiskRatioStatusSelectionEmpty(message) {
+  const wrap = document.createElement("div");
+  wrap.className = "cost-of-risk-ratio-status-empty";
+
+  const text = document.createElement("p");
+  text.className = "cost-of-risk-ratio-status-empty-text";
+  text.textContent = message;
+  wrap.append(text);
+
+  const options = latestCostOfRiskFilterOptions?.stages ?? [];
+  wrap.append(createCostOfRiskRatioStatusOptionGroup(
+    "Staging status",
+    options.filter((option) => isCostOfRiskIfrsStageFilterValue(option.value))
+  ));
+  wrap.append(createCostOfRiskRatioStatusOptionGroup(
+    "Performance status",
+    options.filter((option) => isCostOfRiskPerformanceStatusFilterValue(option.value))
+  ));
+
+  return wrap;
+}
+
+function createCostOfRiskRatioStatusOptionGroup(titleText, options) {
+  const group = document.createElement("section");
+  group.className = "cost-of-risk-ratio-status-empty-group";
+
+  const title = document.createElement("h3");
+  title.className = "cost-of-risk-ratio-status-empty-title";
+  title.textContent = titleText;
+  group.append(title);
+
+  const optionWrap = document.createElement("div");
+  optionWrap.className = "cost-of-risk-ratio-status-empty-options";
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.className = "cost-of-risk-ratio-status-empty-option";
+    button.type = "button";
+    button.textContent = option.label;
+    button.addEventListener("click", () => {
+      applyCostOfRiskFilterSelection("stage", option.value);
+    });
+    optionWrap.append(button);
+  });
+  group.append(optionWrap);
+  return group;
 }
 
 function clearCostOfRiskEmptyPanels() {
@@ -1716,7 +1763,7 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
 
   const eyebrow = document.createElement("div");
   eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Stage ratio audit trail";
+  eyebrow.textContent = "Exposure ratio audit trail";
 
   const title = document.createElement("h2");
   title.className = "cost-of-risk-audit-intro-title";
@@ -1731,7 +1778,7 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
     `Reference date: ${formatReferenceQuarterLabel(stageRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
     `Perimeter: ${stageRatio.filterLabel || "selected instruments and counterparties"}`,
-    `Selected stage: ${row.label}`
+    `${isCostOfRiskPerformanceStatusFilterValue(activeCostOfRiskFilters.stage) ? "Selected status" : "Selected stage"}: ${row.label}`
   ]));
   article.append(createCostOfRiskAuditInfoSection("Ratio components", [
     `Current numerator: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
@@ -1747,7 +1794,7 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
 
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Click another value in the upper panel to benchmark and explain that stage-ratio component.";
+  hint.textContent = "Click another value in the upper panel to benchmark and explain that exposure-ratio component.";
   article.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(article);
@@ -1792,7 +1839,7 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
     `Reference date: ${formatReferenceQuarterLabel(coverageRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
     `Perimeter: ${coverageRatio.filterLabel || "selected instruments and counterparties"}`,
-    `Selected stage: ${row.label}`
+    `${isCostOfRiskPerformanceStatusFilterValue(activeCostOfRiskFilters.stage) ? "Selected status" : "Selected stage"}: ${row.label}`
   ]));
   article.append(createCostOfRiskAuditInfoSection("Ratio components", [
     `Current numerator, allowances: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
@@ -2214,6 +2261,11 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
     return;
   }
 
+  if (kind === "stage") {
+    renderCostOfRiskStageSelectionPanel();
+    return;
+  }
+
   const meta = COST_OF_RISK_FILTER_SELECTION_META[kind];
   if (!meta) {
     renderCostOfRiskAuditPanelPlaceholder();
@@ -2264,6 +2316,79 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   intro.append(hint);
 
   elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function renderCostOfRiskStageSelectionPanel() {
+  const meta = COST_OF_RISK_FILTER_SELECTION_META.stage;
+  const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
+  const activeValue = activeCostOfRiskFilters[meta.filterKey];
+
+  const intro = document.createElement("article");
+  intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = "Filter";
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = meta.label;
+
+  const summary = document.createElement("p");
+  summary.className = "cost-of-risk-audit-intro-lead";
+  summary.textContent = "Choose either an IFRS stage perimeter or the F_18.00 performing / non-performing breakdown. The change applies immediately.";
+
+  intro.append(eyebrow, title, summary);
+
+  const allTable = document.createElement("table");
+  allTable.className = "cost-of-risk-filter-selection-table";
+  const allBody = document.createElement("tbody");
+  const isAllActive = !activeValue || activeValue === COST_OF_RISK_FILTER_ALL;
+  allBody.append(createCostOfRiskFilterSelectionRow(meta.allLabel, isAllActive, () => {
+    applyCostOfRiskFilterSelection(meta.filterKey, COST_OF_RISK_FILTER_ALL);
+  }));
+  allTable.append(allBody);
+  intro.append(allTable);
+
+  intro.append(createCostOfRiskStageSelectionGroup("Staging status", options.filter((option) => isCostOfRiskIfrsStageFilterValue(option.value)), activeValue));
+  intro.append(createCostOfRiskStageSelectionGroup("Performance status", options.filter((option) => isCostOfRiskPerformanceStatusFilterValue(option.value)), activeValue));
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = "The performance status breakdown is an alternative F_18.00 view, not an additional stage.";
+  intro.append(hint);
+
+  elements.costOfRiskAuditPanel.replaceChildren(intro);
+}
+
+function createCostOfRiskStageSelectionGroup(titleText, options, activeValue) {
+  const group = document.createElement("section");
+  group.className = "cost-of-risk-filter-selection-group";
+
+  const title = document.createElement("h3");
+  title.className = "cost-of-risk-filter-selection-group-title";
+  title.textContent = titleText;
+  group.append(title);
+
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-filter-selection-table";
+  const tbody = document.createElement("tbody");
+  options.forEach((option) => {
+    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === activeValue, () => {
+      applyCostOfRiskFilterSelection("stage", option.value);
+    }));
+  });
+  table.append(tbody);
+  group.append(table);
+  return group;
+}
+
+function isCostOfRiskPerformanceStatusFilterValue(value) {
+  return value === "Performing" || value === "Non-performing";
+}
+
+function isCostOfRiskIfrsStageFilterValue(value) {
+  return ["Stage 1", "Stage 2", "Stage 3", "POCI"].includes(value);
 }
 
 function getCostOfRiskFilterSelectionOptionState(kind, option) {
@@ -2888,20 +3013,20 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
     },
     "stage-ratio": {
       eyebrow: "Stage mix",
-      title: "Stage Ratio",
-      lead: "This view measures the share of the selected exposure perimeter that sits in Stage 1, Stage 2, Stage 3 or POCI.",
+      title: "Exposure Ratio",
+      lead: "This view measures the share of the selected exposure perimeter that sits in a selected IFRS stage or in the F_18.00 performing / non-performing breakdown.",
       sections: [
         {
           title: "What you see",
-          body: "The upper panel focuses on the selected stage. It shows the stage ratio, its quarter-on-quarter change, and the numerator and denominator components that explain the movement."
+          body: "The upper panel focuses on the selected category. It shows the exposure ratio, its quarter-on-quarter change, and the numerator and denominator components that explain the movement."
         },
         {
           title: "How it is calculated",
-          body: "Stage ratio = gross carrying amount of the stage divided by total gross carrying amount of the perimeter. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
+          body: "Exposure ratio = gross carrying amount of the selected category divided by total gross carrying amount of the perimeter. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
         },
         {
           title: "Source",
-          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the stage filter selects the stage analysed in this view."
+          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the stage selector can target either an IFRS stage or the performing / non-performing status."
         }
       ],
       hint: "Click any value in the upper panel to benchmark the selected ratio or decomposition effect over time."
@@ -2909,11 +3034,11 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
     "coverage-ratio": {
       eyebrow: "Allowance coverage",
       title: "Coverage Ratio",
-      lead: "This view measures allowances as a share of gross carrying amount for the selected stage.",
+      lead: "This view measures allowances as a share of gross carrying amount for the selected stage or performing status.",
       sections: [
         {
           title: "What you see",
-          body: "The upper panel focuses on the selected stage. It shows the coverage ratio, its quarter-on-quarter change, and the allowance and GCA components that explain the movement."
+          body: "The upper panel focuses on the selected category. It shows the coverage ratio, its quarter-on-quarter change, and the allowance and GCA components that explain the movement."
         },
         {
           title: "How it is calculated",
@@ -2921,7 +3046,7 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "Source",
-          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the stage filter selects the stage analysed in this view."
+          body: "Figures are built from FINREP F_18.00. Instruments and counterparty filters define the perimeter; the stage selector can target either an IFRS stage or the performing / non-performing status."
         }
       ],
       hint: "Click any value in the upper panel to benchmark the selected coverage ratio or decomposition effect over time."

@@ -60,7 +60,7 @@ export function renderCostOfRiskStageRatioTable({
   heroTitle.textContent = `${row.label} ratio`;
   const heroValue = createCostOfRiskStageRatioMetricButton({
     activeCellKey,
-    label: "Stage ratio",
+    label: "Exposure ratio",
     metric: "ratio",
     onCellSelect,
     row,
@@ -264,13 +264,15 @@ export function getCostOfRiskStageRatioMetricLabel(metric) {
     numeratorDelta: "Numerator delta",
     numeratorEffect: "Numerator effect",
     numeratorLevel: "Numerator exposure",
-    ratio: "Stage ratio",
+    ratio: "Exposure ratio",
     variation: "Ratio variation"
   }[metric] ?? metric;
 }
 
 function getCostOfRiskStageRatioStageLabel(stageKey) {
   return {
+    nonperforming: "Non-performing",
+    performing: "Performing",
     stage1: "Stage 1",
     stage2: "Stage 2",
     stage3: "Stage 3",
