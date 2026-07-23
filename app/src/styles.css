@@ -510,11 +510,11 @@ button:focus-visible {
 }
 
 .cost-of-risk-audit-panel.is-attention-pulse {
-  animation: cost-of-risk-context-panel-glow 520ms ease-out;
+  animation: cost-of-risk-context-panel-glow 280ms ease-out;
 }
 
 .cost-of-risk-audit-panel.is-attention-pulse::after {
-  animation: cost-of-risk-context-panel-shine 520ms ease-out;
+  animation: cost-of-risk-context-panel-shine 280ms ease-out;
 }
 
 @keyframes cost-of-risk-context-panel-shine {

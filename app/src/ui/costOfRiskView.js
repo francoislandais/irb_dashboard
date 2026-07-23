@@ -230,7 +230,7 @@ function pulseCostOfRiskContextPanel() {
   panel.classList.add("is-attention-pulse");
   window.setTimeout(() => {
     panel.classList.remove("is-attention-pulse");
-  }, 520);
+  }, 280);
 }
 
 // URL persistence: for the tabs listed in COST_OF_RISK_URL_TABS, the active
