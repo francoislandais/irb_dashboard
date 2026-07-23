@@ -496,6 +496,66 @@ button:focus-visible {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 12px;
+  position: relative;
+}
+
+.cost-of-risk-audit-panel::after {
+  background: rgba(217, 236, 247, 0.58);
+  content: "";
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.cost-of-risk-audit-panel.is-attention-pulse {
+  animation: cost-of-risk-context-panel-glow 520ms ease-out;
+}
+
+.cost-of-risk-audit-panel.is-attention-pulse::after {
+  animation: cost-of-risk-context-panel-shine 520ms ease-out;
+}
+
+@keyframes cost-of-risk-context-panel-shine {
+  0% {
+    opacity: 0;
+  }
+  24% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cost-of-risk-context-panel-glow {
+  0% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  24% {
+    border-color: #bfdbea;
+    box-shadow:
+      0 0 0 3px rgba(217, 236, 247, 0.95),
+      0 0 22px rgba(103, 164, 196, 0.32);
+  }
+  100% {
+    border-color: var(--line);
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cost-of-risk-audit-panel.is-attention-pulse,
+  .cost-of-risk-audit-panel.is-attention-pulse::after {
+    animation: none;
+  }
+
+  .cost-of-risk-audit-panel.is-attention-pulse {
+    border-color: #bfdbea;
+    box-shadow: 0 0 0 2px rgba(217, 236, 247, 0.95);
+  }
 }
 
 .cost-of-risk-audit-placeholder {
@@ -1506,8 +1566,9 @@ button:focus-visible {
 }
 
 .cost-of-risk-chart-smoothing-badge.is-smoothed {
-  border-color: var(--smoothing-badge-fill);
-  color: #ffffff;
+  --smoothing-badge-fill: #d9ecf7;
+  border-color: #bfdbea;
+  color: #1d2823;
 }
 
 .cost-of-risk-chart-y-focus-badge {

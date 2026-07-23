@@ -77,9 +77,6 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   const host = chart?.renderTo;
   if (!host || !Number.isFinite(windowSize)) return;
 
-  const primaryDark = getComputedStyle(document.documentElement)
-    .getPropertyValue("--primary-dark")
-    .trim() || "#0c4c42";
   const titleBox = chart.title?.getBBox?.();
   const titleX = chart.title?.alignAttr?.x ?? chart.plotLeft ?? 12;
   const titleY = chart.title?.alignAttr?.y ?? 8;
@@ -94,7 +91,6 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   badge.classList.toggle("is-smoothed", isSmoothed);
   badge.style.left = `${badgeX}px`;
   badge.style.top = `${badgeY}px`;
-  if (isSmoothed) badge.style.setProperty("--smoothing-badge-fill", primaryDark);
 
   const toggle = document.createElement("button");
   toggle.className = "cost-of-risk-chart-smoothing-badge-toggle";

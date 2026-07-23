@@ -222,6 +222,17 @@ function toggleCostOfRiskFilterSelectionTopic(kind) {
   setCostOfRiskHelpTopic(activeCostOfRiskHelpTopic === topic ? "" : topic);
 }
 
+function pulseCostOfRiskContextPanel() {
+  const panel = elements.costOfRiskAuditPanel;
+  if (!panel) return;
+  panel.classList.remove("is-attention-pulse");
+  void panel.offsetWidth;
+  panel.classList.add("is-attention-pulse");
+  window.setTimeout(() => {
+    panel.classList.remove("is-attention-pulse");
+  }, 520);
+}
+
 // URL persistence: for the tabs listed in COST_OF_RISK_URL_TABS, the active
 // tab, reference date, and the "selected benchmark element" (the clicked
 // cell/driver/flow that drives the benchmark chart on that tab) round-trip
@@ -482,6 +493,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       setCostOfRiskHelpTopic("reference-date");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -504,6 +516,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       }
       setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, nextMode));
       if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -530,6 +543,7 @@ export function wireCostOfRiskUi(actions, rerender) {
             ? activeCostOfRiskDefinitionDisplayMode
             : activeCostOfRiskMovementDisplayMode;
       setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, currentMode));
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -540,6 +554,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       toggleCostOfRiskFilterSelectionTopic("definition");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -550,6 +565,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       toggleCostOfRiskFilterSelectionTopic("instrument");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -560,6 +576,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       toggleCostOfRiskFilterSelectionTopic("counterparty");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -570,6 +587,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       toggleCostOfRiskFilterSelectionTopic("balanceScope");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -580,6 +598,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       toggleCostOfRiskFilterSelectionTopic("stage");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -590,6 +609,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     closeCostOfRiskFilterMenus();
     clearActiveCostOfRiskFilter(button.dataset.costOfRiskClearFilter);
     setCostOfRiskHelpTopic(getCostOfRiskFilterSelectionTopicForFilter(button.dataset.costOfRiskClearFilter));
+    pulseCostOfRiskContextPanel();
     rerenderApp(actions.getState());
   });
   document.addEventListener("click", (event) => {
