@@ -411,6 +411,8 @@ function createCostOfRiskSummaryDataButton({
   const displayValue = formatCostOfRiskStageSummaryCell(row.cells?.[metric], metric, kind, selectedUnit, displayMode);
   button.className = "cost-of-risk-stage-summary-cell";
   button.classList.toggle("is-active", cellKey === activeCellKey);
+  button.dataset.costOfRiskCalculationDetail = "summary-cell";
+  button.dataset.costOfRiskCalculationValue = cellKey;
   button.type = "button";
   button.textContent = displayValue;
   button.title = createCostOfRiskSummaryCellTooltip({

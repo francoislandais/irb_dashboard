@@ -71,6 +71,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   flowArrowColor,
   flowDiagram,
   formatValue,
+  onShowCalculationDetails,
   onSelectFlow,
   primaryDark,
   selectedFlowKey,
@@ -135,6 +136,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addStageBox(svg, 40, 160, "Stage 1", stageFill, stageStroke, {
     flowKey: "stagebox:1",
     isSelected: selectedFlowKey === "stagebox:1",
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("1"), formatValue, selectedUnit)
@@ -142,6 +144,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addStageBox(svg, 600, 160, "Stage 2", stageFill, stageStroke, {
     flowKey: "stagebox:2",
     isSelected: selectedFlowKey === "stagebox:2",
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("2"), formatValue, selectedUnit)
@@ -149,6 +152,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   addStageBox(svg, 1160, 160, "Stage 3", stageFill, stageStroke, {
     flowKey: "stagebox:3",
     isSelected: selectedFlowKey === "stagebox:3",
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("3"), formatValue, selectedUnit)
@@ -170,6 +174,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:1-2",
     labelY: 130,
     maxFlow,
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "1", "2"),
@@ -185,6 +190,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:2-1",
     labelY: 270,
     maxFlow,
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "2", "1"),
@@ -196,6 +202,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     flowKey: "net:1-2",
     from: "1",
     isSelected: selectedFlowKey === "net:1-2",
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     reverseValue: getFlowValue(displayFlows, "2", "1"),
@@ -212,6 +219,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:2-3",
     labelY: 130,
     maxFlow,
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "2", "3"),
@@ -227,6 +235,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     isSelected: selectedFlowKey === "transfer:3-2",
     labelY: 270,
     maxFlow,
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     value: getFlowValue(displayFlows, "3", "2"),
@@ -238,6 +247,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     flowKey: "net:2-3",
     from: "2",
     isSelected: selectedFlowKey === "net:2-3",
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     reverseValue: getFlowValue(displayFlows, "3", "2"),
@@ -252,6 +262,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     fromStage1Value: getFlowValue(displayFlows, "1", "3"),
     fromStage3Value: getFlowValue(displayFlows, "3", "1"),
     maxFlow,
+    onShowCalculationDetails,
     onSelectFlow,
     primaryDark,
     selectedStage,
@@ -262,6 +273,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     flowKey: "net:1-3",
     from: "1",
     isSelected: selectedFlowKey === "net:1-3",
+    onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
     reverseValue: getFlowValue(displayFlows, "3", "1"),
@@ -292,6 +304,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
       label: ["Other", "movements"],
       labelSide: "left",
       maxFlow,
+      onShowCalculationDetails,
       onSelect: onSelectFlow,
       primaryDark,
       value: residual?.displayValue,
@@ -308,6 +321,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
       label: "Write-off",
       labelSide: "right",
       maxFlow,
+      onShowCalculationDetails,
       onSelect: onSelectFlow,
       primaryDark,
       value: writeOff?.displayValue,
@@ -421,6 +435,12 @@ function addNetFlowLabel(svg, config, formatValue, displayMode, selectedUnit) {
       event.stopPropagation();
       config.onSelect(config.flowKey);
     });
+    group.addEventListener("contextmenu", (event) => {
+      event.stopPropagation();
+      if (typeof config.onShowCalculationDetails === "function") {
+        config.onShowCalculationDetails(event, config.flowKey);
+      }
+    });
   }
 
   if (config.isSelected) {
@@ -494,6 +514,12 @@ function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
     [rect, text, value].filter(Boolean).forEach((element) => {
       element.style.cursor = "pointer";
       element.addEventListener("click", () => config.onSelect(config.flowKey));
+      element.addEventListener("contextmenu", (event) => {
+        event.stopPropagation();
+        if (typeof config.onShowCalculationDetails === "function") {
+          config.onShowCalculationDetails(event, config.flowKey);
+        }
+      });
     });
   }
 }
@@ -562,6 +588,7 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
     isSelected: config.selectedFlowKey === "transfer:1-3",
     labelY: 38,
     maxFlow: config.maxFlow,
+    onShowCalculationDetails: config.onShowCalculationDetails,
     onSelect: config.onSelectFlow,
     primaryDark: config.primaryDark,
     value: config.fromStage1Value,
@@ -578,6 +605,7 @@ function addDirectFlow(svg, config, formatValue, displayMode, selectedUnit) {
     isSelected: config.selectedFlowKey === "transfer:3-1",
     labelY: 116,
     maxFlow: config.maxFlow,
+    onShowCalculationDetails: config.onShowCalculationDetails,
     onSelect: config.onSelectFlow,
     primaryDark: config.primaryDark,
     value: config.fromStage3Value,
@@ -673,6 +701,12 @@ function appendFlowHitArea(svg, bounds, config) {
   });
   hitArea.style.cursor = "pointer";
   hitArea.addEventListener("click", () => config.onSelect(config.flowKey));
+  hitArea.addEventListener("contextmenu", (event) => {
+    event.stopPropagation();
+    if (typeof config.onShowCalculationDetails === "function") {
+      config.onShowCalculationDetails(event, config.flowKey);
+    }
+  });
   svg.append(hitArea);
 }
 
@@ -683,6 +717,12 @@ function makeFlowElementClickable(element, config) {
   element.addEventListener("click", (event) => {
     event.stopPropagation();
     config.onSelect(config.flowKey);
+  });
+  element.addEventListener("contextmenu", (event) => {
+    event.stopPropagation();
+    if (typeof config.onShowCalculationDetails === "function") {
+      config.onShowCalculationDetails(event, config.flowKey);
+    }
   });
 }
 

@@ -333,6 +333,8 @@ function createCostOfRiskStageRatioMetricButton({
   const button = document.createElement("button");
   button.className = `cost-of-risk-stage-ratio-focus-metric cost-of-risk-stage-ratio-focus-metric--${variant}`;
   button.classList.toggle("is-active", key === activeCellKey);
+  button.dataset.costOfRiskCalculationDetail = "stage-ratio";
+  button.dataset.costOfRiskCalculationValue = key;
   button.type = "button";
   button.addEventListener("click", (event) => {
     event.stopPropagation();

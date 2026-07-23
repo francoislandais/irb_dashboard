@@ -1331,6 +1331,7 @@ button:focus-visible {
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="summary"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="cost-of-risk"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="coverage-ratio"],
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="collateral-ratio"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-ratio"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"],

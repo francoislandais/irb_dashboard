@@ -171,6 +171,7 @@
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-ratio">Exposure Ratio</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="coverage-ratio">Coverage Ratio</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="collateral-ratio">Collateral</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Staging Transfer</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">Allowance Movement</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="cost-of-risk">Cost of Risk</button>
@@ -218,6 +219,14 @@
                   </div>
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-coverage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Coverage ratio time series"></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="collateral-ratio" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-collateral-ratio-table" class="cost-of-risk-stage-summary-table cost-of-risk-stage-ratio-table" aria-label="Collateral ratio decomposition table"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-collateral-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Collateral ratio time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="f2-vs-f12" hidden>
