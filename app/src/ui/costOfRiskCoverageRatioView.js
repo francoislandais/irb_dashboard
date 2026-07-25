@@ -38,6 +38,7 @@ export function destroyCostOfRiskCoverageRatioChart() {
 export function renderCostOfRiskCoverageRatioTable({
   activeCellKey,
   container,
+  onBackToSummary,
   onCellSelect,
   selectedUnit,
   coverageRatio
@@ -52,6 +53,7 @@ export function renderCostOfRiskCoverageRatioTable({
 
   const wrap = document.createElement("section");
   wrap.className = "cost-of-risk-stage-ratio-focus cost-of-risk-coverage-ratio-focus";
+  wrap.append(createCostOfRiskRatioSummaryShortcut(onBackToSummary));
 
   const hero = document.createElement("div");
   hero.className = "cost-of-risk-stage-ratio-focus-hero";
@@ -83,6 +85,7 @@ export function renderCostOfRiskCoverageRatioTable({
 
   const numerator = createCostOfRiskCoverageRatioComponentCard({
     activeCellKey,
+    effectDrivers: row.numeratorDrivers,
     metrics: [
       { label: "Current allowances", metric: "numeratorLevel" },
       { label: "Delta", metric: "numeratorDelta" },
@@ -97,6 +100,7 @@ export function renderCostOfRiskCoverageRatioTable({
 
   const denominator = createCostOfRiskCoverageRatioComponentCard({
     activeCellKey,
+    effectDrivers: row.denominatorDrivers,
     metrics: [
       { label: "Current GCA", metric: "denominatorLevel" },
       { label: "Delta", metric: "denominatorDelta" },
@@ -111,6 +115,16 @@ export function renderCostOfRiskCoverageRatioTable({
 
   wrap.append(hero, numerator, denominator);
   container.replaceChildren(wrap);
+}
+
+function createCostOfRiskRatioSummaryShortcut(onBackToSummary) {
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-ratio-summary-shortcut";
+  button.type = "button";
+  button.textContent = "Back to Summary";
+  button.title = "Back to Summary";
+  button.addEventListener("click", () => onBackToSummary?.());
+  return button;
 }
 
 export function renderCostOfRiskCoverageRatioChart({
@@ -275,6 +289,7 @@ function getCostOfRiskCoverageRatioRowLabel(model, stageKey) {
 
 function createCostOfRiskCoverageRatioComponentCard({
   activeCellKey,
+  effectDrivers,
   metrics,
   onCellSelect,
   row,
@@ -307,6 +322,15 @@ function createCostOfRiskCoverageRatioComponentCard({
       selectedUnit,
       variant: definition.metric.endsWith("Effect") ? "effect" : "row"
     }));
+    if (definition.metric.endsWith("Effect")) {
+      const driverList = createCostOfRiskCoverageRatioEffectDrivers(effectDrivers, {
+        activeCellKey,
+        metric: definition.metric,
+        onCellSelect,
+        row
+      });
+      if (driverList) list.append(driverList);
+    }
   });
 
   card.append(heading, list);
@@ -342,6 +366,32 @@ function createCostOfRiskCoverageRatioMetricButton({
   valueNode.textContent = formatCostOfRiskCoverageRatioCellValue(row.cells?.[metric]?.value, metric, selectedUnit);
   button.append(labelNode, valueNode);
   return button;
+}
+
+function createCostOfRiskCoverageRatioEffectDrivers(drivers = [], {
+  activeCellKey,
+  metric,
+  onCellSelect,
+  row
+} = {}) {
+  const validDrivers = drivers.filter((driver) => Number.isFinite(driver?.effectBasisPoints)).slice(0, 3);
+  if (validDrivers.length === 0) return null;
+  const list = document.createElement("div");
+  list.className = "cost-of-risk-stage-ratio-effect-drivers";
+  validDrivers.forEach((driver) => {
+    const key = `${row.stageKey}:${metric}:driver:${driver.effectType}:${driver.counterpartyKey}:${driver.assetKey}`;
+    const item = document.createElement("button");
+    item.className = "cost-of-risk-stage-ratio-effect-driver";
+    item.classList.toggle("is-active", key === activeCellKey);
+    item.type = "button";
+    item.textContent = `${driver.label} ${formatCostOfRiskCoverageRatioSignedBasisPoints(driver.effectBasisPoints)}`;
+    item.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onCellSelect?.(key);
+    });
+    list.append(item);
+  });
+  return list;
 }
 
 function isCostOfRiskCoverageRatioAmountMetric(metric) {

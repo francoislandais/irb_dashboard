@@ -58,14 +58,16 @@ const COST_OF_RISK_STAGE_SUMMARY_ROWS = [
   { key: "stage1", label: "Stage 1", gcaXCodes: ["0056"], allowanceXCodes: ["0141"] },
   { key: "stage2", label: "Stage 2", gcaXCodes: ["0057", "0109"], allowanceXCodes: ["0142", "0950"] },
   { key: "stage3", label: "Stage 3", gcaXCodes: ["0121"], allowanceXCodes: ["0951"] },
-  { key: "poci", label: "POCI", gcaXCodes: ["0058", "0900"], allowanceXCodes: ["0143", "0952"] }
+  { key: "poci", label: "POCI", gcaXCodes: ["0058", "0900"], allowanceXCodes: ["0143", "0952"] },
+  { key: "performing", label: "Performing", gcaXCodes: ["0020"], allowanceXCodes: ["0140"], collateralXCodes: ["0201"] },
+  { key: "nonperforming", label: "Non-performing", gcaXCodes: ["0060"], allowanceXCodes: ["0150"], collateralXCodes: ["0200"] }
 ];
 const COST_OF_RISK_STAGE_SERIES_DEFINITIONS = [
   ...COST_OF_RISK_STAGE_SUMMARY_ROWS,
   { key: "performing", label: "Performing", gcaXCodes: ["0020"], allowanceXCodes: ["0140"] },
   { key: "nonperforming", label: "Non-performing", gcaXCodes: ["0060"], allowanceXCodes: ["0150"] }
 ];
-export const DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL = "gca:level:all";
+export const DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL = "gca:ratio:stage2";
 export const DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL = "stage2:ratio";
 export const DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL = "stage3:ratio";
 export const DEFAULT_COST_OF_RISK_COLLATERAL_RATIO_CELL = "all:ratio";
@@ -316,6 +318,11 @@ const ASSET_SHORT_LABELS = new Map([
   ["Debt securities", "Debt securities"],
   ["Loans and advances", "L&A"]
 ]);
+const ASSET_KEY_BY_LABEL = new Map([
+  ["Debt securities", "debt"],
+  ["Loans and advances", "loans"]
+]);
+const ASSET_LABEL_BY_KEY = new Map([...ASSET_KEY_BY_LABEL.entries()].map(([label, key]) => [key, label]));
 const COUNTERPARTY_SHORT_LABELS = new Map([
   ["Central banks", "Central banks"],
   ["General governments", "Governments"],
@@ -1886,7 +1893,15 @@ export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
 export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
-  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const selectedCell = parseCostOfRiskCounterpartySummaryCellKey(selectedCellKey)
+    ?? parseCostOfRiskStageSummaryCellKey(selectedCellKey)
+    ?? parseCostOfRiskStageSummaryCellKey(DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL);
+  const stageNeutralFilters = {
+    ...normalizedFilters,
+    stage: COST_OF_RISK_FILTER_ALL
+  };
+  const ySelection = getCostOfRiskStageBoxYSelection(state, stageNeutralFilters);
 
   if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
     return { rows: [], selectedCell: null, status: "Load a CSV and select a JST." };
@@ -1902,21 +1917,42 @@ export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate =
 
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const referenceLabel = referenceColumns[referenceIndex]?.label ?? "";
-  const selectedCell = parseCostOfRiskStageSummaryCellKey(selectedCellKey)
-    ?? parseCostOfRiskStageSummaryCellKey(DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL);
-  const rows = buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, state.selectedJst, referenceIndex);
+  const rows = buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, stageNeutralFilters, state.selectedJst, referenceIndex);
+  const selectedStatusFilter = selectedCell.stageKey
+    ? getCostOfRiskStageSummaryFilterForRowKey(selectedCell.stageKey)
+    : normalizedFilters.stage;
+  const counterpartyRowsFilters = {
+    ...normalizedFilters,
+    stage: selectedStatusFilter || COST_OF_RISK_FILTER_ALL
+  };
+  const counterpartyRows = buildCostOfRiskCounterpartySummaryRowsForJst(
+    state,
+    indexes,
+    referenceColumns,
+    counterpartyRowsFilters,
+    state.selectedJst,
+    referenceIndex
+  ).filter((row) => row.type === "row");
 
   return {
     benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
       jstCode,
-      points: buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell)
+      points: selectedCell.rowKey
+        ? buildCostOfRiskCounterpartySummaryPointsForJst(state, indexes, referenceColumns, counterpartyRowsFilters, jstCode, selectedCell)
+        : buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumns, ySelection, stageNeutralFilters, jstCode, selectedCell)
     })),
+    counterpartyRows,
     filterLabel: ySelection.label,
     referenceDate: referenceLabel,
     rows,
     selectedCell,
     status: ""
   };
+}
+
+function getCostOfRiskStageSummaryFilterForRowKey(rowKey) {
+  if (rowKey === "all") return COST_OF_RISK_FILTER_ALL;
+  return COST_OF_RISK_STAGE_SUMMARY_ROWS.find((row) => row.key === rowKey)?.label ?? COST_OF_RISK_FILTER_ALL;
 }
 
 export function buildCostOfRiskStageRatioModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL) {
@@ -2119,8 +2155,30 @@ function buildCostOfRiskCoverageRatioRowsForJst(state, indexes, referenceColumns
     },
     currentDenominator: point.denominator ?? null,
     currentNumerator: point.numerator ?? null,
+    denominatorDrivers: buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, {
+      ...filters,
+      stage: selectedStage.stageFilter
+    }, jstCode, referenceIndex, "gca", {
+      aggregateEffectBasisPoints: point.denominatorEffectBasisPoints,
+      currentDenominator: point.denominator,
+      currentNumerator: point.numerator,
+      effectType: "denominator",
+      previousDenominator: point.previousDenominator,
+      previousNumerator: point.previousNumerator
+    }),
     key: selectedStage.key,
     label: selectedStage.rowLabel ?? selectedStage.label,
+    numeratorDrivers: buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, {
+      ...filters,
+      stage: selectedStage.stageFilter
+    }, jstCode, referenceIndex, "allowances", {
+      aggregateEffectBasisPoints: point.numeratorEffectBasisPoints,
+      currentDenominator: point.denominator,
+      currentNumerator: point.numerator,
+      effectType: "numerator",
+      previousDenominator: point.previousDenominator,
+      previousNumerator: point.previousNumerator
+    }),
     previousDenominator: point.previousDenominator ?? null,
     previousNumerator: point.previousNumerator ?? null,
     stageKey: selectedStage.key
@@ -2142,7 +2200,22 @@ function buildCostOfRiskCoverageRatioPointsForJst(state, indexes, referenceColum
     const ratioBasisPoints = Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0
       ? (numerator / denominator) * 10000
       : null;
-    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
+    const driverValue = selectedCell.driver
+      ? getCostOfRiskRatioDriverPointValue(state, indexes, referenceColumns, {
+        ...filters,
+        stage: stageDefinition.stageFilter
+      }, jstCode, index, selectedCell.driver.effectType === "denominator" ? "gca" : "allowances", selectedCell.driver, {
+        aggregateEffectBasisPoints: selectedCell.driver.effectType === "denominator"
+          ? decomposition.denominatorEffectBasisPoints
+          : decomposition.numeratorEffectBasisPoints,
+        currentDenominator: denominator,
+        currentNumerator: numerator,
+        effectType: selectedCell.driver.effectType,
+        previousDenominator,
+        previousNumerator
+      })
+      : null;
+    const metricValue = selectedCell.driver ? driverValue : getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
       denominator,
       denominatorDelta: Number.isFinite(denominator) && Number.isFinite(previousDenominator) ? denominator - previousDenominator : null,
       numerator,
@@ -2195,12 +2268,116 @@ function buildCostOfRiskCollateralRatioRowsForJst(state, indexes, referenceColum
     },
     currentDenominator: point.denominator ?? null,
     currentNumerator: point.numerator ?? null,
+    denominatorDrivers: buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, {
+      ...filters,
+      stage: selectedStatus.stageFilter
+    }, jstCode, referenceIndex, "gca", {
+      aggregateEffectBasisPoints: point.denominatorEffectBasisPoints,
+      currentDenominator: point.denominator,
+      currentNumerator: point.numerator,
+      effectType: "denominator",
+      previousDenominator: point.previousDenominator,
+      previousNumerator: point.previousNumerator
+    }),
     key: selectedStatus.key,
     label: selectedStatus.rowLabel ?? selectedStatus.label,
+    numeratorDrivers: buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, {
+      ...filters,
+      stage: selectedStatus.stageFilter
+    }, jstCode, referenceIndex, "collateral", {
+      aggregateEffectBasisPoints: point.numeratorEffectBasisPoints,
+      currentDenominator: point.denominator,
+      currentNumerator: point.numerator,
+      effectType: "numerator",
+      previousDenominator: point.previousDenominator,
+      previousNumerator: point.previousNumerator
+    }),
     previousDenominator: point.previousDenominator ?? null,
     previousNumerator: point.previousNumerator ?? null,
     stageKey: selectedStatus.key
   }];
+}
+
+function buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, filters, jstCode, referenceIndex, metric, effectContext = {}) {
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const candidateKeys = getCostOfRiskRatioDriverCounterpartyKeys(normalizedFilters.counterparty);
+  const candidateAssets = normalizedFilters.asset ? [normalizedFilters.asset] : ASSET_LABELS;
+  const candidates = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS
+    .filter((row) => row.type === "row" && candidateKeys.includes(row.key))
+    .flatMap((row) => candidateAssets.map((asset) => ({
+      asset,
+      assetKey: ASSET_KEY_BY_LABEL.get(asset) ?? asset,
+      counterparty: row.value,
+      counterpartyKey: row.key,
+      key: `${row.key}:${asset}`,
+      label: `${row.label} / ${formatCostOfRiskAssetLabel(asset)}`
+    })));
+  const rawDrivers = candidates
+    .map((candidate) => {
+      const series = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, {
+        ...normalizedFilters,
+        asset: candidate.asset
+      }, jstCode, metric, candidate.counterparty);
+      const value = series[referenceIndex] ?? null;
+      const previousValue = referenceIndex > 0 ? series[referenceIndex - 1] ?? null : null;
+      const effectBasisPoints = getCostOfRiskRatioDriverEffectBasisPoints(value, previousValue, effectContext);
+      return {
+        ...candidate,
+        componentMetric: metric,
+        effectType: effectContext.effectType,
+        effectBasisPoints,
+        value
+      };
+    });
+  const drivers = rawDrivers
+    .filter((driver) => Number.isFinite(driver.effectBasisPoints) && driver.effectBasisPoints !== 0)
+    .sort((left, right) => Math.abs(right.effectBasisPoints) - Math.abs(left.effectBasisPoints))
+    .slice(0, 5);
+  const max = Math.max(...drivers.map((driver) => Math.abs(driver.effectBasisPoints)), 0);
+  return drivers.map((driver) => ({
+    ...driver,
+    weight: max > 0 ? Math.abs(driver.effectBasisPoints) / max : 0
+  }));
+}
+
+function getCostOfRiskRatioDriverCounterpartyKeys(counterpartyValue) {
+  if (!counterpartyValue || counterpartyValue === COST_OF_RISK_FILTER_ALL) {
+    return ["nfc", "households", "central-banks", "governments", "credit-institutions", "other-financials"];
+  }
+  const selected = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((row) => row.type === "row" && row.value === counterpartyValue);
+  return selected ? [selected.key] : ["all"];
+}
+
+function getCostOfRiskRatioDriverPointValue(state, indexes, referenceColumns, filters, jstCode, index, metric, driver, effectContext) {
+  const series = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, {
+    ...filters,
+    asset: driver.asset
+  }, jstCode, metric, driver.counterpartyValue);
+  const value = series[index] ?? null;
+  const previousValue = index > 0 ? series[index - 1] ?? null : null;
+  return getCostOfRiskRatioDriverEffectBasisPoints(value, previousValue, effectContext);
+}
+
+function getCostOfRiskRatioDriverEffectBasisPoints(value, previousValue, effectContext) {
+  if (!Number.isFinite(value) || !Number.isFinite(previousValue)) return null;
+  const delta = value - previousValue;
+  if (!Number.isFinite(delta) || delta === 0) return null;
+  if (effectContext.effectType === "numerator") {
+    const previousDenominator = effectContext.previousDenominator;
+    const currentDenominator = effectContext.currentDenominator;
+    if (!Number.isFinite(previousDenominator) || previousDenominator === 0 || !Number.isFinite(currentDenominator) || currentDenominator === 0) return null;
+    return delta * 0.5 * ((1 / previousDenominator) + (1 / currentDenominator)) * 10000;
+  }
+  if (effectContext.effectType === "denominator") {
+    const previousDenominator = effectContext.previousDenominator;
+    const currentDenominator = effectContext.currentDenominator;
+    const totalDelta = Number.isFinite(previousDenominator) && Number.isFinite(currentDenominator)
+      ? currentDenominator - previousDenominator
+      : null;
+    if (!Number.isFinite(totalDelta) || totalDelta === 0 || !Number.isFinite(effectContext.aggregateEffectBasisPoints)) return null;
+    return effectContext.aggregateEffectBasisPoints * (delta / totalDelta);
+  }
+  return null;
 }
 
 function buildCostOfRiskCollateralRatioPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell) {
@@ -2229,7 +2406,22 @@ function buildCostOfRiskCollateralRatioPointsForJst(state, indexes, referenceCol
     const ratioBasisPoints = Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0
       ? (numerator / denominator) * 10000
       : null;
-    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
+    const driverValue = selectedCell.driver
+      ? getCostOfRiskRatioDriverPointValue(state, indexes, referenceColumns, {
+        ...filters,
+        stage: statusDefinition.stageFilter
+      }, jstCode, index, selectedCell.driver.effectType === "denominator" ? "gca" : "collateral", selectedCell.driver, {
+        aggregateEffectBasisPoints: selectedCell.driver.effectType === "denominator"
+          ? decomposition.denominatorEffectBasisPoints
+          : decomposition.numeratorEffectBasisPoints,
+        currentDenominator: denominator,
+        currentNumerator: numerator,
+        effectType: selectedCell.driver.effectType,
+        previousDenominator,
+        previousNumerator
+      })
+      : null;
+    const metricValue = selectedCell.driver ? driverValue : getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
       denominator,
       denominatorDelta: Number.isFinite(denominator) && Number.isFinite(previousDenominator) ? denominator - previousDenominator : null,
       numerator,
@@ -2282,8 +2474,30 @@ function buildCostOfRiskStageRatioRowsForJst(state, indexes, referenceColumns, f
     },
     currentDenominator: point.denominator ?? null,
     currentNumerator: point.numerator ?? null,
+    denominatorDrivers: buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, {
+      ...filters,
+      stage: COST_OF_RISK_FILTER_ALL
+    }, jstCode, referenceIndex, "gca", {
+      aggregateEffectBasisPoints: point.denominatorEffectBasisPoints,
+      currentDenominator: point.denominator,
+      currentNumerator: point.numerator,
+      effectType: "denominator",
+      previousDenominator: point.previousDenominator,
+      previousNumerator: point.previousNumerator
+    }),
     key: stageDefinition.key,
     label: stageDefinition.rowLabel ?? stageDefinition.label,
+    numeratorDrivers: buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, {
+      ...filters,
+      stage: stageDefinition.stageFilter
+    }, jstCode, referenceIndex, "gca", {
+      aggregateEffectBasisPoints: point.numeratorEffectBasisPoints,
+      currentDenominator: point.denominator,
+      currentNumerator: point.numerator,
+      effectType: "numerator",
+      previousDenominator: point.previousDenominator,
+      previousNumerator: point.previousNumerator
+    }),
     previousDenominator: point.previousDenominator ?? null,
     previousNumerator: point.previousNumerator ?? null,
     stageKey: stageDefinition.key
@@ -2313,7 +2527,22 @@ function buildCostOfRiskStageRatioPointsForJst(state, indexes, referenceColumns,
       : null;
     const numeratorDelta = Number.isFinite(numerator) && Number.isFinite(previousNumerator) ? numerator - previousNumerator : null;
     const denominatorDelta = Number.isFinite(denominator) && Number.isFinite(previousDenominator) ? denominator - previousDenominator : null;
-    const metricValue = getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
+    const driverValue = selectedCell.driver
+      ? getCostOfRiskRatioDriverPointValue(state, indexes, referenceColumns, {
+        ...filters,
+        stage: selectedCell.driver.effectType === "denominator" ? COST_OF_RISK_FILTER_ALL : stageDefinition.stageFilter
+      }, jstCode, index, "gca", selectedCell.driver, {
+        aggregateEffectBasisPoints: selectedCell.driver.effectType === "denominator"
+          ? decomposition.denominatorEffectBasisPoints
+          : decomposition.numeratorEffectBasisPoints,
+        currentDenominator: denominator,
+        currentNumerator: numerator,
+        effectType: selectedCell.driver.effectType,
+        previousDenominator,
+        previousNumerator
+      })
+      : null;
+    const metricValue = selectedCell.driver ? driverValue : getCostOfRiskStageRatioMetricValue(selectedCell.metric, {
       denominator,
       denominatorDelta,
       numerator,
@@ -2403,7 +2632,8 @@ function normalizeCostOfRiskStageRatioCellForFilters(selectedCell, filters = {})
   const metric = selectedCell?.metric ?? "ratio";
 
   return {
-    key: `${stageKey}:${metric}`,
+    driver: selectedCell?.driver ?? null,
+    key: selectedCell?.driver ? createCostOfRiskRatioDriverCellKey(stageKey, metric, selectedCell.driver) : `${stageKey}:${metric}`,
     metric,
     stageKey
   };
@@ -2433,7 +2663,8 @@ function normalizeCostOfRiskCoverageRatioCellForFilters(selectedCell, filters = 
   const metric = selectedCell?.metric ?? "ratio";
 
   return {
-    key: `${stageKey}:${metric}`,
+    driver: selectedCell?.driver ?? null,
+    key: selectedCell?.driver ? createCostOfRiskRatioDriverCellKey(stageKey, metric, selectedCell.driver) : `${stageKey}:${metric}`,
     metric,
     stageKey
   };
@@ -2460,8 +2691,9 @@ function normalizeCostOfRiskCollateralRatioCellForFilters(selectedCell, filters 
   const metric = selectedCell?.metric ?? "ratio";
 
   return {
+    driver: selectedCell?.driver ?? null,
     filters,
-    key: `${stageKey}:${metric}`,
+    key: selectedCell?.driver ? createCostOfRiskRatioDriverCellKey(stageKey, metric, selectedCell.driver) : `${stageKey}:${metric}`,
     metric,
     stageKey
   };
@@ -2476,19 +2708,26 @@ function getCostOfRiskCollateralRatioDefinitionForFilters(filters = {}) {
   return getCostOfRiskCollateralRatioDefinitions().find((definition) => definition.stageFilter === selectedStage) ?? null;
 }
 
-function buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, jstCode, referenceIndex) {
-  const totalGca = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", "all");
+function buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, filters, jstCode, referenceIndex) {
+  const totalGca = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
+    ...filters,
+    stage: COST_OF_RISK_FILTER_ALL
+  });
   const totalAllowances = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", "all");
 
   return COST_OF_RISK_STAGE_SUMMARY_ROWS.map((rowDefinition) => {
-    const gca = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", rowDefinition.key);
+    const gca = buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, rowDefinition.key);
     const allowances = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", rowDefinition.key);
     const coverage = buildCostOfRiskCoverageSeries(gca, allowances);
+    const collateralAmount = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "collateral", rowDefinition.key);
+    const collateral = buildCostOfRiskCoverageSeries(gca, collateralAmount);
     return {
       key: rowDefinition.key,
       label: rowDefinition.label,
       cells: {
         allowances: createCostOfRiskStageSummaryCellValues(allowances, totalAllowances, referenceIndex),
+        collateral: createCostOfRiskCoverageCellValues(collateral, referenceIndex),
+        collateralAmount: createCostOfRiskStageSummaryCellValues(collateralAmount, totalGca, referenceIndex),
         coverage: createCostOfRiskCoverageCellValues(coverage, referenceIndex),
         gca: createCostOfRiskStageSummaryCellValues(gca, totalGca, referenceIndex)
       }
@@ -2496,10 +2735,17 @@ function buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns,
   });
 }
 
-function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumns, ySelection, jstCode, selectedCell) {
-  const metricSeries = buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, jstCode, selectedCell.metric, selectedCell.stageKey);
+function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumns, ySelection, filters, jstCode, selectedCell) {
+  const metricSeries = selectedCell.metric === "gca"
+    ? buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.stageKey)
+    : buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, filters, jstCode, selectedCell.metric, selectedCell.stageKey);
   const totalSeries = selectedCell.metric === "gca" || selectedCell.metric === "allowances"
-    ? buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, selectedCell.metric, "all")
+    ? selectedCell.metric === "gca" && selectedCell.kind === "ratio"
+      ? getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
+        ...filters,
+        stage: COST_OF_RISK_FILTER_ALL
+      })
+      : buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, selectedCell.metric, "all")
     : null;
 
   return referenceColumns.map((column, index) => {
@@ -2520,20 +2766,38 @@ function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumn
   });
 }
 
-function buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey) {
+function buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, filters, jstCode, metric, stageKey) {
   if (metric === "coverage") {
     return buildCostOfRiskCoverageSeries(
-      buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "gca", stageKey),
+      buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, stageKey),
       buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", stageKey)
+    );
+  }
+  if (metric === "collateral") {
+    return buildCostOfRiskCoverageSeries(
+      buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, stageKey),
+      buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "collateral", stageKey)
     );
   }
 
   return buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey);
 }
 
+function buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, stageKey) {
+  return getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
+    ...filters,
+    stage: getCostOfRiskStageSummaryFilterForRowKey(stageKey)
+  });
+}
+
 function buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, metric, stageKey) {
   const rowDefinition = COST_OF_RISK_STAGE_SERIES_DEFINITIONS.find((candidate) => candidate.key === stageKey)
     ?? COST_OF_RISK_STAGE_SERIES_DEFINITIONS[0];
+  if (metric === "collateral") {
+    const xCodes = rowDefinition.collateralXCodes ?? (rowDefinition.key === "all" ? ["0201", "0200"] : []);
+    if (xCodes.length === 0) return referenceColumns.map(() => null);
+    return resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
+  }
   const xCodes = metric === "allowances" ? rowDefinition.allowanceXCodes : rowDefinition.gcaXCodes;
   const values = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, ySelection.codes);
 
@@ -2581,21 +2845,25 @@ export function buildCostOfRiskCounterpartySummaryModel(state, filters, referenc
 }
 
 function buildCostOfRiskCounterpartySummaryRowsForJst(state, indexes, referenceColumns, filters, jstCode, referenceIndex) {
-  const totalGca = buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, "gca");
   const totalAllowances = buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, "allowances");
 
   return COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.map((rowDefinition) => {
     if (rowDefinition.type === "group") return { ...rowDefinition };
 
     const gca = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "gca", rowDefinition.value);
+    const gcaRatioBase = buildCostOfRiskCounterpartySummaryRatioBaseSeries(state, indexes, referenceColumns, filters, jstCode, rowDefinition.value);
     const allowances = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "allowances", rowDefinition.value);
     const coverage = buildCostOfRiskCoverageSeries(gca, allowances);
+    const collateralAmount = buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "collateral", rowDefinition.value);
+    const collateral = buildCostOfRiskCoverageSeries(gca, collateralAmount);
     return {
       ...rowDefinition,
       cells: {
         allowances: createCostOfRiskStageSummaryCellValues(allowances, totalAllowances, referenceIndex),
+        collateral: createCostOfRiskCoverageCellValues(collateral, referenceIndex),
+        collateralAmount: createCostOfRiskStageSummaryCellValues(collateralAmount, gcaRatioBase, referenceIndex),
         coverage: createCostOfRiskCoverageCellValues(coverage, referenceIndex),
-        gca: createCostOfRiskStageSummaryCellValues(gca, totalGca, referenceIndex)
+        gca: createCostOfRiskStageSummaryCellValues(gca, gcaRatioBase, referenceIndex)
       }
     };
   });
@@ -2604,7 +2872,9 @@ function buildCostOfRiskCounterpartySummaryRowsForJst(state, indexes, referenceC
 function buildCostOfRiskCounterpartySummaryPointsForJst(state, indexes, referenceColumns, filters, jstCode, selectedCell) {
   const metricSeries = buildCostOfRiskCounterpartySummaryMetricSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric, selectedCell.rowKey);
   const totalSeries = selectedCell.metric === "gca" || selectedCell.metric === "allowances"
-    ? buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric)
+    ? selectedCell.metric === "gca" && selectedCell.kind === "ratio"
+      ? buildCostOfRiskCounterpartySummaryRatioBaseSeries(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskCounterpartySummaryValueForRowKey(selectedCell.rowKey))
+      : buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric)
     : null;
 
   return referenceColumns.map((column, index) => {
@@ -2635,11 +2905,23 @@ function buildCostOfRiskCounterpartySummaryMetricSeries(state, indexes, referenc
       buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "allowances", rowDefinition.value)
     );
   }
+  if (metric === "collateral") {
+    return buildCostOfRiskCoverageSeries(
+      buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "gca", rowDefinition.value),
+      buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "collateral", rowDefinition.value)
+    );
+  }
 
   return buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, metric, rowDefinition.value);
 }
 
 function buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, metric, counterpartyValue) {
+  if (metric === "gca") {
+    return getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
+      ...filters,
+      counterparty: counterpartyValue
+    });
+  }
   const ySelection = getCostOfRiskStageBoxYSelection(state, {
     ...filters,
     counterparty: counterpartyValue
@@ -2662,6 +2944,19 @@ function buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, reference
   return buildCostOfRiskCounterpartySummarySeriesFromYCodes(state, indexes, referenceColumns, filters, jstCode, metric, ySelection.codes);
 }
 
+function buildCostOfRiskCounterpartySummaryRatioBaseSeries(state, indexes, referenceColumns, filters, jstCode, counterpartyValue) {
+  return getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
+    ...filters,
+    counterparty: counterpartyValue,
+    stage: COST_OF_RISK_FILTER_ALL
+  });
+}
+
+function getCostOfRiskCounterpartySummaryValueForRowKey(rowKey) {
+  return COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((row) => row.type === "row" && row.key === rowKey)?.value
+    ?? COST_OF_RISK_FILTER_ALL;
+}
+
 function buildCostOfRiskCounterpartySummarySeriesFromYCodes(state, indexes, referenceColumns, filters, jstCode, metric, yCodes) {
   const xCodes = getCostOfRiskCounterpartySummaryXCodes(metric, filters.stage);
   const values = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, yCodes);
@@ -2673,6 +2968,12 @@ function buildCostOfRiskCounterpartySummarySeriesFromYCodes(state, indexes, refe
 
 function getCostOfRiskCounterpartySummaryXCodes(metric, stage) {
   const normalizedStage = stage && stage !== COST_OF_RISK_FILTER_ALL ? stage : "";
+  if (metric === "collateral") {
+    if (normalizedStage === "Performing") return ["0201"];
+    if (normalizedStage === "Non-performing") return ["0200"];
+    if (!normalizedStage) return ["0201", "0200"];
+    return [];
+  }
   if (metric === "allowances") return COST_OF_RISK_ALLOWANCE_STAGE_X_CODES[normalizedStage] ?? COST_OF_RISK_ALLOWANCE_STAGE_X_CODES[""];
   return COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[normalizedStage] ?? COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[""];
 }
@@ -2690,16 +2991,22 @@ function createCostOfRiskStageSummaryCellValues(series, totalSeries, referenceIn
   const value = series[referenceIndex] ?? null;
   const previousValue = referenceIndex > 0 ? series[referenceIndex - 1] : null;
   const total = totalSeries[referenceIndex] ?? null;
+  const previousTotal = referenceIndex > 0 ? totalSeries[referenceIndex - 1] : null;
   const ratio = Number.isFinite(value) && Number.isFinite(total) && total !== 0 ? value / total : null;
+  const previousRatio = Number.isFinite(previousValue) && Number.isFinite(previousTotal) && previousTotal !== 0 ? previousValue / previousTotal : null;
   const mom = getFiniteDelta(value, previousValue);
   const momRatioBasisPoints = Number.isFinite(mom) && Number.isFinite(previousValue) && previousValue !== 0
     ? (mom / previousValue) * 10000
+    : null;
+  const ratioMomBasisPoints = Number.isFinite(ratio) && Number.isFinite(previousRatio)
+    ? (ratio - previousRatio) * 10000
     : null;
 
   return {
     mom,
     momRatioBasisPoints,
     ratio,
+    ratioMomBasisPoints,
     value
   };
 }
@@ -2721,7 +3028,7 @@ function getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selected
   const value = metricSeries[index] ?? null;
   const previousValue = index > 0 ? metricSeries[index - 1] : null;
 
-  if (selectedCell.metric === "coverage") {
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral") {
     if (selectedCell.kind === "mom") {
       const delta = getFiniteDelta(value, previousValue);
       return delta === null ? null : delta * 10000;
@@ -2750,18 +3057,21 @@ function getFiniteDelta(currentValue, previousValue) {
 
 export function parseCostOfRiskStageSummaryCellKey(cellKey) {
   const [metric, kind, stageKey] = String(cellKey ?? "").split(":");
-  const isMetric = ["gca", "allowances", "coverage"].includes(metric);
-  const isKind = ["level", "mom"].includes(kind);
+  const isMetric = ["gca", "allowances", "coverage", "collateral"].includes(metric);
+  const isKind = ["level", "mom", "ratio"].includes(kind);
   const isStage = COST_OF_RISK_STAGE_SUMMARY_ROWS.some((row) => row.key === stageKey);
   return isMetric && isKind && isStage ? { key: `${metric}:${kind}:${stageKey}`, kind, metric, stageKey } : null;
 }
 
 export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
-  const [metric, kind, rowKey] = String(cellKey ?? "").split(":");
-  const isMetric = ["gca", "allowances", "coverage"].includes(metric);
-  const isKind = ["level", "mom"].includes(kind);
+  const parts = String(cellKey ?? "").split(":");
+  const [metric, kind, rowKey] = parts[0] === "counterparty"
+    ? [parts[1], parts[2], parts[3]]
+    : parts;
+  const isMetric = ["gca", "allowances", "coverage", "collateral"].includes(metric);
+  const isKind = ["level", "mom", "ratio"].includes(kind);
   const isRow = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.some((row) => row.type === "row" && row.key === rowKey);
-  return isMetric && isKind && isRow ? { key: `${metric}:${kind}:${rowKey}`, kind, metric, rowKey } : null;
+  return isMetric && isKind && isRow ? { key: `counterparty:${metric}:${kind}:${rowKey}`, kind, metric, rowKey } : null;
 }
 
 export function parseCostOfRiskStageRatioCellKey(cellKey) {
@@ -2771,7 +3081,9 @@ export function parseCostOfRiskStageRatioCellKey(cellKey) {
     denominator: "denominatorEffect",
     numerator: "numeratorEffect"
   };
-  const metric = legacyMetricMap[rawMetric ?? metricOrRow] ?? (rawMetric ?? metricOrRow);
+  const driver = parseCostOfRiskRatioDriverCellParts(parts);
+  const metricSource = driver ? metricOrRow : (rawMetric ?? metricOrRow);
+  const metric = legacyMetricMap[metricSource] ?? metricSource;
   const isStage = getCostOfRiskStageRatioDefinitions().some((row) => row.key === stageKey);
   const isMetric = [
     "denominatorDelta",
@@ -2783,16 +3095,24 @@ export function parseCostOfRiskStageRatioCellKey(cellKey) {
     "ratio",
     "variation"
   ].includes(metric);
-  return isStage && isMetric ? { key: `${stageKey}:${metric}`, metric, stageKey } : null;
+  if (!isStage || !isMetric) return null;
+  return {
+    driver,
+    key: driver ? createCostOfRiskRatioDriverCellKey(stageKey, metric, driver) : `${stageKey}:${metric}`,
+    metric,
+    stageKey
+  };
 }
 
 export function parseCostOfRiskCoverageRatioCellKey(cellKey) {
-  const [stageKey, metric] = String(cellKey ?? "").split(":");
+  const parts = String(cellKey ?? "").split(":");
+  const [stageKey, metric] = parts;
   const legacyMetricMap = {
     denominator: "denominatorEffect",
     numerator: "numeratorEffect"
   };
   const normalizedMetric = legacyMetricMap[metric] ?? metric;
+  const driver = parseCostOfRiskRatioDriverCellParts(parts);
   const isStage = getCostOfRiskCoverageRatioDefinitions().some((row) => row.key === stageKey);
   const isMetric = [
     "denominatorDelta",
@@ -2804,16 +3124,24 @@ export function parseCostOfRiskCoverageRatioCellKey(cellKey) {
     "ratio",
     "variation"
   ].includes(normalizedMetric);
-  return isStage && isMetric ? { key: `${stageKey}:${normalizedMetric}`, metric: normalizedMetric, stageKey } : null;
+  if (!isStage || !isMetric) return null;
+  return {
+    driver,
+    key: driver ? createCostOfRiskRatioDriverCellKey(stageKey, normalizedMetric, driver) : `${stageKey}:${normalizedMetric}`,
+    metric: normalizedMetric,
+    stageKey
+  };
 }
 
 export function parseCostOfRiskCollateralRatioCellKey(cellKey) {
-  const [stageKey, metric] = String(cellKey ?? "").split(":");
+  const parts = String(cellKey ?? "").split(":");
+  const [stageKey, metric] = parts;
   const legacyMetricMap = {
     denominator: "denominatorEffect",
     numerator: "numeratorEffect"
   };
   const normalizedMetric = legacyMetricMap[metric] ?? metric;
+  const driver = parseCostOfRiskRatioDriverCellParts(parts);
   const isStage = getCostOfRiskCollateralRatioDefinitions().some((row) => row.key === stageKey);
   const isMetric = [
     "denominatorDelta",
@@ -2825,7 +3153,36 @@ export function parseCostOfRiskCollateralRatioCellKey(cellKey) {
     "ratio",
     "variation"
   ].includes(normalizedMetric);
-  return isStage && isMetric ? { key: `${stageKey}:${normalizedMetric}`, metric: normalizedMetric, stageKey } : null;
+  if (!isStage || !isMetric) return null;
+  return {
+    driver,
+    key: driver ? createCostOfRiskRatioDriverCellKey(stageKey, normalizedMetric, driver) : `${stageKey}:${normalizedMetric}`,
+    metric: normalizedMetric,
+    stageKey
+  };
+}
+
+function parseCostOfRiskRatioDriverCellParts(parts) {
+  if (parts[2] !== "driver") return null;
+  const effectType = parts[3];
+  const counterpartyKey = parts[4];
+  const assetKey = parts[5];
+  const counterpartyDefinition = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((row) => row.type === "row" && row.key === counterpartyKey);
+  const asset = ASSET_LABEL_BY_KEY.get(assetKey);
+  if (!["denominator", "numerator"].includes(effectType) || !counterpartyDefinition || !asset) return null;
+  return {
+    asset,
+    assetKey,
+    componentMetric: "",
+    counterpartyKey,
+    counterpartyValue: counterpartyDefinition.value,
+    effectType,
+    label: `${counterpartyDefinition.label} / ${formatCostOfRiskAssetLabel(asset)}`
+  };
+}
+
+function createCostOfRiskRatioDriverCellKey(stageKey, metric, driver) {
+  return `${stageKey}:${metric}:driver:${driver.effectType}:${driver.counterpartyKey}:${driver.assetKey}`;
 }
 
 function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, stage, jstCode, filters = {}) {

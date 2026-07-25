@@ -74,7 +74,9 @@ export function renderCostOfRiskStageSummaryChart({
     displayMode,
     focusSelectedYAxis,
     getChart: () => costOfRiskStageSummaryChart,
-    getPointRowLabel: (stageSummary, selectedCell) => getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey),
+    getPointRowLabel: (stageSummary, selectedCell) => selectedCell.rowKey
+      ? getCostOfRiskCounterpartySummaryRowLabel({ rows: stageSummary.counterpartyRows ?? [] }, selectedCell.rowKey)
+      : getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey),
     missingMessage: "No stage summary time series is available for the current selection.",
     model,
     onChartCreated: (chart) => { costOfRiskStageSummaryChart = chart; },
@@ -177,7 +179,7 @@ function renderCostOfRiskSummaryChart({
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeReferenceDate);
   const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getPointRowLabel(model, selectedCell)} - time evolution`;
-  const ratioIsPercent = selectedCell.metric === "coverage" && selectedCell.kind === "level";
+  const ratioIsPercent = ["coverage", "collateral"].includes(selectedCell.metric) || selectedCell.kind === "ratio";
 
   const options = {
     chart: {
@@ -275,7 +277,7 @@ function renderCostOfRiskSummaryChart({
 
 function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode, selectedUnit) {
   if (!Number.isFinite(value)) return "-";
-  if (selectedCell.metric === "coverage") {
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral" || selectedCell.kind === "ratio") {
     return selectedCell.kind === "mom"
       ? formatBasisPointsValue(value)
       : formatContributionPercentValue(value / 10000);
@@ -290,7 +292,7 @@ function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode
 
 function getCostOfRiskSummaryChartDisplayMode(selectedCell, displayMode) {
   if (!selectedCell) return "amount";
-  if (selectedCell.metric === "coverage") return "ratio";
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral" || selectedCell.kind === "ratio") return "ratio";
   if (selectedCell.kind === "level") return "amount";
   return displayMode;
 }

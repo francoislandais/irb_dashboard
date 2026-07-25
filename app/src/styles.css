@@ -2099,6 +2099,10 @@ button:focus-visible {
   margin-right: 4px;
 }
 
+.cost-of-risk-summary-display-control:empty {
+  display: none;
+}
+
 .cost-of-risk-summary-switch {
   align-items: center;
   background: transparent;
@@ -2325,6 +2329,279 @@ button:focus-visible {
   padding-top: 0;
 }
 
+.cost-of-risk-summary-mosaic {
+  align-content: start;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 900px);
+}
+
+.cost-of-risk-summary-scope-grid {
+  align-content: start;
+  display: grid;
+  column-gap: 18px;
+  row-gap: 8px;
+  grid-template-columns: 320px 540px;
+  justify-content: start;
+  justify-self: start;
+  max-width: 878px;
+  width: 100%;
+}
+
+.cost-of-risk-summary-scope-panel {
+  background: #f7f8f7;
+  border-radius: 14px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 12px 18px 14px;
+}
+
+.cost-of-risk-summary-scope-panel--counterparty {
+  padding-right: 18px;
+}
+
+.cost-of-risk-summary-scope-panel--status {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.cost-of-risk-summary-scope-overview {
+  color: #6f7872;
+  font-size: 0.86rem;
+  font-weight: 400;
+  grid-column: 1 / -1;
+  line-height: 1.15;
+  margin: 0;
+  padding: 0 2px 2px;
+}
+
+.cost-of-risk-summary-scope-overview span {
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.cost-of-risk-summary-scope-overview small {
+  color: inherit;
+  font: inherit;
+  margin-left: 4px;
+}
+
+.cost-of-risk-summary-scope-overview-detail {
+  color: inherit;
+  font: inherit;
+  margin-left: 10px;
+}
+
+.cost-of-risk-summary-scope-table {
+  border-collapse: collapse;
+  color: #2b302d;
+  font-size: 0.82rem;
+  line-height: 1.12;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.cost-of-risk-summary-scope-col-label {
+  width: 58%;
+}
+
+.cost-of-risk-summary-scope-col-counterparty-value {
+  width: 42%;
+}
+
+.cost-of-risk-summary-scope-col-status-label {
+  width: 27%;
+}
+
+.cost-of-risk-summary-scope-col-status-value {
+  width: 24.333%;
+}
+
+.cost-of-risk-summary-counterparty-scope-table .cost-of-risk-summary-scope-head-row,
+.cost-of-risk-summary-counterparty-scope-table .cost-of-risk-summary-scope-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  min-width: 0;
+}
+
+.cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-head-row,
+.cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) repeat(3, minmax(82px, 1fr));
+  min-width: 0;
+}
+
+.cost-of-risk-summary-scope-header,
+.cost-of-risk-summary-scope-label,
+.cost-of-risk-summary-scope-cell {
+  border: 0;
+  font-weight: 400;
+  min-width: 0;
+  padding: 2px 6px;
+}
+
+.cost-of-risk-summary-scope-header {
+  color: #202823;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
+  background: #dce8f4;
+  border-radius: 4px;
+}
+
+.cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text,
+.cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-label.is-coordinate-row .cost-of-risk-summary-scope-text {
+  font-weight: 600;
+}
+
+.cost-of-risk-summary-scope-label {
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cost-of-risk-summary-scope-label--level-1 {
+  padding-left: 20px !important;
+}
+
+.cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-label .cost-of-risk-summary-scope-text {
+  background: #dfeaf4;
+  border-radius: 4px;
+}
+
+.cost-of-risk-summary-scope-cell {
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cost-of-risk-summary-scope-cell.is-empty-cell {
+  cursor: default;
+  pointer-events: none;
+}
+
+.cost-of-risk-summary-scope-label.is-coordinate-row .cost-of-risk-summary-scope-text {
+  background: #dce8f4;
+  border-radius: 4px;
+}
+
+.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value,
+.cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  color: #ffffff;
+}
+
+.cost-of-risk-summary-scope-value {
+  display: inline-block;
+  min-width: 44px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.cost-of-risk-summary-scope-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 8px;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.cost-of-risk-summary-counterparty-scope-table .cost-of-risk-summary-scope-value {
+  min-width: 0;
+}
+
+.cost-of-risk-summary-scope-spacer-row td {
+  height: 14px;
+  padding: 0;
+}
+
+.cost-of-risk-summary-scope-spacer-row {
+  height: 14px;
+}
+
+.cost-of-risk-summary-mosaic-group {
+  background: #ffffff;
+  border: 1px solid #e3e8e5;
+  border-radius: 6px;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px;
+}
+
+.cost-of-risk-summary-mosaic-group h3 {
+  color: #1d2823;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.cost-of-risk-summary-mosaic-cards {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cost-of-risk-summary-ratio-card {
+  background: #f7f9f8;
+  border: 0;
+  border-radius: 5px;
+  color: #1d2823;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 2px;
+  min-height: 54px;
+  padding: 7px;
+  padding-right: 24px;
+  position: relative;
+  text-align: left;
+}
+
+.cost-of-risk-summary-ratio-card:hover {
+  background: #eef2ef;
+}
+
+.cost-of-risk-summary-ratio-card.is-active,
+.cost-of-risk-summary-ratio-card.is-active:hover {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.cost-of-risk-summary-ratio-card-label {
+  color: inherit;
+  font-size: 0.66rem;
+  line-height: 1.15;
+  opacity: 0.76;
+}
+
+.cost-of-risk-summary-ratio-card-value {
+  color: inherit;
+  font-size: 0.98rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.cost-of-risk-summary-ratio-card-variation {
+  color: inherit;
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  opacity: 0.76;
+}
+
 .cost-of-risk-stage-ratio-focus {
   align-items: stretch;
   display: grid;
@@ -2332,6 +2609,26 @@ button:focus-visible {
   grid-template-columns: 210px 250px 250px;
   justify-content: start;
   width: auto;
+}
+
+.cost-of-risk-ratio-summary-shortcut {
+  align-self: start;
+  background: transparent;
+  border: 0;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  grid-column: 1 / -1;
+  justify-self: start;
+  line-height: 1.1;
+  padding: 2px 0 0;
+}
+
+.cost-of-risk-ratio-summary-shortcut:hover,
+.cost-of-risk-ratio-summary-shortcut:focus-visible {
+  text-decoration: underline;
+  outline: none;
 }
 
 .cost-of-risk-stage-ratio-focus-hero,
@@ -2453,6 +2750,48 @@ button:focus-visible {
 }
 
 .cost-of-risk-stage-ratio-focus-metric--effect.is-active .cost-of-risk-stage-ratio-focus-metric-value {
+  color: #ffffff;
+}
+
+.cost-of-risk-stage-ratio-focus-metric--effect {
+  align-items: start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.cost-of-risk-stage-ratio-effect-drivers {
+  color: #66736d;
+  display: grid;
+  gap: 2px;
+  margin: -2px 6px 2px;
+  min-width: 0;
+}
+
+.cost-of-risk-stage-ratio-effect-driver {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-size: 0.65rem;
+  line-height: 1.12;
+  overflow: hidden;
+  padding: 2px 4px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cost-of-risk-stage-ratio-effect-driver:hover,
+.cost-of-risk-stage-ratio-effect-driver:focus-visible {
+  background: #eef3f8;
+  outline: none;
+}
+
+.cost-of-risk-stage-ratio-effect-driver.is-active {
+  background: var(--primary-dark);
   color: #ffffff;
 }
 

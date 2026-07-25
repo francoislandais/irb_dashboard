@@ -244,7 +244,7 @@ const COST_OF_RISK_TAB_URL_PARAM = "cor_tab";
 const COST_OF_RISK_DATE_URL_PARAM = "cor_date";
 const COST_OF_RISK_VIEW_URL_PARAM = "cor_view";
 const COST_OF_RISK_CELL_URL_PARAM = "cor_cell";
-const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "stage-ratio", "stage-transfers", "coverage-ratio", "collateral-ratio", "contributions"]);
+const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "stage-transfers", "contributions"]);
 const COST_OF_RISK_DISABLED_TABS = new Set(["f2-vs-f12", "stage-reconciliation", "core-definition", "analysis"]);
 
 applyCostOfRiskUrlState();
@@ -361,9 +361,7 @@ function normalizeActiveCostOfRiskTab() {
 function getCostOfRiskUrlSelectionValue() {
   switch (activeCostOfRiskTab) {
     case "summary":
-      return activeCostOfRiskSummaryBreakdown === "counterparty"
-        ? activeCostOfRiskCounterpartySummaryCellKey
-        : activeCostOfRiskStageSummaryCellKey;
+      return activeCostOfRiskStageSummaryCellKey;
     case "cost-of-risk":
       return activeCostOfRiskDefinitionDriverCode
         ? `${activeCostOfRiskDefinitionId}|${activeCostOfRiskDefinitionDriverCode}`
@@ -386,11 +384,7 @@ function getCostOfRiskUrlSelectionValue() {
 function applyCostOfRiskUrlSelection(tab, value) {
   switch (tab) {
     case "summary":
-      if (activeCostOfRiskSummaryBreakdown === "counterparty") {
-        activeCostOfRiskCounterpartySummaryCellKey = value;
-      } else {
-        activeCostOfRiskStageSummaryCellKey = value;
-      }
+      activeCostOfRiskStageSummaryCellKey = value;
       return;
     case "cost-of-risk": {
       const [definitionId, driverCode] = value.split("|");
@@ -813,30 +807,19 @@ export function renderCostOfRisk(state) {
   }
 
   if (activeCostOfRiskTab === "summary") {
-    const summary = activeCostOfRiskSummaryBreakdown === "counterparty"
-      ? getCostOfRiskCachedModel(
+    const summary = getCostOfRiskCachedModel(
+      state,
+      createCostOfRiskModelCacheKey(state, "summary-ratios", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
+      () => buildCostOfRiskStageSummaryModel(
         state,
-        createCostOfRiskModelCacheKey(state, "counterparty-summary", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskCounterpartySummaryCellKey),
-        () => buildCostOfRiskCounterpartySummaryModel(
-          state,
-          activeCostOfRiskFilters,
-          activeCostOfRiskReferenceDate,
-          activeCostOfRiskCounterpartySummaryCellKey
-        )
+        activeCostOfRiskFilters,
+        activeCostOfRiskReferenceDate,
+        activeCostOfRiskStageSummaryCellKey
       )
-      : getCostOfRiskCachedModel(
-        state,
-        createCostOfRiskModelCacheKey(state, "stage-summary", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
-        () => buildCostOfRiskStageSummaryModel(
-          state,
-          activeCostOfRiskFilters,
-          activeCostOfRiskReferenceDate,
-          activeCostOfRiskStageSummaryCellKey
-        )
-      );
+    );
     activeCostOfRiskReferenceDate = summary.referenceDate || activeCostOfRiskReferenceDate;
     renderCostOfRiskActiveFilters(filterOptions);
-    renderCostOfRiskSummaryDisplayControl();
+    if (elements.costOfRiskSummaryDisplayControl) elements.costOfRiskSummaryDisplayControl.replaceChildren();
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
@@ -950,6 +933,16 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
     clearCostOfRiskAuditTable();
+    if (isCostOfRiskPerformanceStatusFilterValue(activeCostOfRiskFilters.stage)) {
+      destroyCostOfRiskStageTransferChart();
+      destroyCostOfRiskStageTransferFlowChart();
+      if (elements.costOfRiskStageTransferChart) elements.costOfRiskStageTransferChart.replaceChildren();
+      if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
+      renderCostOfRiskTabEmpty("FINREP data does not support this level of detail with a breakdown by performing status. Remove this filter.");
+      renderCostOfRiskHelpPanel();
+      scheduleCostOfRiskChartReflow();
+      return;
+    }
     renderCostOfRiskStageTransferView(state);
     renderCostOfRiskStageTransferAuditPanel(state, { allowDataAudit: consumeCostOfRiskDataAuditRequest() });
     scheduleCostOfRiskChartReflow();
@@ -1167,9 +1160,7 @@ function scheduleCostOfRiskChartReflow() {
 
 function getActiveCostOfRiskCharts() {
   if (activeCostOfRiskTab === "summary") {
-    return activeCostOfRiskSummaryBreakdown === "counterparty"
-      ? [getCostOfRiskCounterpartySummaryChart()]
-      : [getCostOfRiskStageSummaryChart()];
+    return [getCostOfRiskStageSummaryChart()];
   }
   if (activeCostOfRiskTab === "cost-of-risk") return [getCostOfRiskMovementChart()];
   if (activeCostOfRiskTab === "stage-ratio") return [getCostOfRiskStageRatioChart()];
@@ -1398,7 +1389,7 @@ function clearCostOfRiskEmptyPanels() {
 }
 
 function renderCostOfRiskF18SummaryOnlyView(summary, state) {
-  renderCostOfRiskSummaryBreakdownSwitch();
+  if (elements.costOfRiskSummaryDisplayControl) elements.costOfRiskSummaryDisplayControl.replaceChildren();
   elements.costOfRiskValue.textContent = "-";
   elements.costOfRiskContext.textContent = "-";
   elements.costOfRiskDenominatorValue.textContent = "-";
@@ -1409,13 +1400,6 @@ function renderCostOfRiskF18SummaryOnlyView(summary, state) {
   elements.costOfRiskF02Context.textContent = "-";
   elements.costOfRiskPoints.textContent = "-";
 
-  if (activeCostOfRiskSummaryBreakdown === "counterparty") {
-    leaveCostOfRiskStageTransferTab();
-    clearCostOfRiskAuditTable();
-    renderCostOfRiskCounterpartySummaryView(summary, state);
-    return;
-  }
-
   leaveCostOfRiskStageTransferTab();
   clearCostOfRiskAuditTable();
   renderCostOfRiskStageSummaryView(summary, state);
@@ -1425,6 +1409,7 @@ function renderCostOfRiskStageRatioView(stageRatio, state) {
   renderCostOfRiskStageRatioTable({
     activeCellKey: stageRatio.selectedCell?.key ?? activeCostOfRiskStageRatioCellKey,
     container: elements.costOfRiskStageRatioTable,
+    onBackToSummary: returnToCostOfRiskSummary,
     onCellSelect: selectCostOfRiskStageRatioCell,
     selectedUnit: state.selectedUnit,
     stageRatio
@@ -1449,6 +1434,7 @@ function renderCostOfRiskCoverageRatioView(coverageRatio, state) {
   renderCostOfRiskCoverageRatioTable({
     activeCellKey: coverageRatio.selectedCell?.key ?? activeCostOfRiskCoverageRatioCellKey,
     container: elements.costOfRiskCoverageRatioTable,
+    onBackToSummary: returnToCostOfRiskSummary,
     onCellSelect: selectCostOfRiskCoverageRatioCell,
     selectedUnit: state.selectedUnit,
     coverageRatio
@@ -1474,6 +1460,7 @@ function renderCostOfRiskCollateralRatioView(collateralRatio, state) {
     activeCellKey: collateralRatio.selectedCell?.key ?? activeCostOfRiskCollateralRatioCellKey,
     collateralRatio,
     container: elements.costOfRiskCollateralRatioTable,
+    onBackToSummary: returnToCostOfRiskSummary,
     onCellSelect: selectCostOfRiskCollateralRatioCell,
     selectedUnit: state.selectedUnit
   });
@@ -1676,6 +1663,13 @@ function selectCostOfRiskStageRatioCell(cellKey) {
 
 function selectCostOfRiskCoverageRatioCell(cellKey) {
   activeCostOfRiskCoverageRatioCellKey = cellKey;
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function returnToCostOfRiskSummary() {
+  activeCostOfRiskTab = "summary";
+  closeCostOfRiskFilterMenus();
+  clearCostOfRiskHelpTopic();
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
@@ -2168,8 +2162,10 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
   if (!options.allowDataAudit) return;
 
   const selectedCell = summary.selectedCell;
-  const rowKey = activeCostOfRiskSummaryBreakdown === "counterparty" ? selectedCell?.rowKey : selectedCell?.stageKey;
-  const row = (summary.rows ?? []).find((candidate) => candidate.key === rowKey);
+  const isCounterpartyCell = Boolean(selectedCell?.rowKey);
+  const rowKey = isCounterpartyCell ? selectedCell?.rowKey : selectedCell?.stageKey;
+  const rowSource = isCounterpartyCell ? summary.counterpartyRows : summary.rows;
+  const row = (rowSource ?? []).find((candidate) => candidate.key === rowKey);
   if (activeCostOfRiskTab !== "summary" || !selectedCell || !row) {
     renderCostOfRiskAuditPanelIntro();
     return;
@@ -2197,7 +2193,7 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(summary.referenceDate)}`,
     `JST: ${state.selectedJst}`,
-    `Breakdown: ${activeCostOfRiskSummaryBreakdown === "counterparty" ? "counterparty" : "staging status"}`,
+    `Breakdown: ${isCounterpartyCell ? "counterparty" : "staging status"}`,
     `Selected row: ${row.label}`,
     `Perimeter: ${summary.filterLabel || "selected instruments, counterparties and status"}`
   ]));
@@ -2215,10 +2211,13 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
 }
 
 function formatCostOfRiskSummaryAuditValue(cell, selectedCell, selectedUnit) {
-  if (selectedCell.metric === "coverage") {
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral") {
     return selectedCell.kind === "mom"
       ? formatBasisPointsValue(cell.momRatioBasisPoints)
       : formatContributionPercentValue(cell.value);
+  }
+  if (selectedCell.kind === "ratio") {
+    return formatContributionPercentValue(cell.ratio);
   }
   if (selectedCell.kind === "mom") {
     return formatCostOfRiskDisplayValue(cell.momRatioBasisPoints, "ratio", selectedUnit, true);
@@ -2229,18 +2228,27 @@ function formatCostOfRiskSummaryAuditValue(cell, selectedCell, selectedUnit) {
 function getCostOfRiskSummaryAuditMetricLabel(selectedCell) {
   const metricLabels = {
     allowances: "Allowances",
+    collateral: "Collateral",
     coverage: "Coverage",
     gca: "Gross carrying amount"
   };
-  const kindLabel = selectedCell.kind === "mom" ? "variation" : "stock";
+  const kindLabel = selectedCell.kind === "mom"
+    ? "variation"
+    : selectedCell.kind === "ratio"
+      ? "ratio"
+      : "stock";
   return `${metricLabels[selectedCell.metric] ?? selectedCell.metric} ${kindLabel}`;
 }
 
 function getCostOfRiskSummaryAuditDefinition(selectedCell) {
-  if (selectedCell.metric === "coverage") {
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral") {
+    const label = selectedCell.metric === "collateral" ? "Collateral ratio" : "Coverage ratio";
     return selectedCell.kind === "mom"
-      ? "Variation is the quarter-on-quarter change in the coverage ratio, expressed in basis points."
-      : "Coverage ratio equals allowances divided by gross carrying amount for the selected row.";
+      ? `Variation is the quarter-on-quarter change in the ${label.toLowerCase()}, expressed in basis points.`
+      : `${label} equals ${selectedCell.metric === "collateral" ? "collateral received" : "allowances"} divided by gross carrying amount for the selected row.`;
+  }
+  if (selectedCell.kind === "ratio") {
+    return "Exposure ratio equals gross carrying amount for the selected row divided by total gross carrying amount for the perimeter.";
   }
   if (selectedCell.kind === "mom") {
     return "Variation is the quarter-on-quarter change in the selected stock, expressed as a growth rate versus the previous quarter when relative mode is active.";
@@ -2322,11 +2330,12 @@ function showCostOfRiskCalculationDetails(scope, value) {
   }
 
   if (scope === "summary-cell" && value) {
-    if (activeCostOfRiskSummaryBreakdown === "counterparty") {
-      const rowKey = getCostOfRiskSummaryCellRowKey(value);
-      selectCostOfRiskCounterpartySummaryCell(value, getCostOfRiskCounterpartySummaryValue(rowKey));
+    const rowKey = getCostOfRiskSummaryCellRowKey(value);
+    const counterpartyValue = getCostOfRiskCounterpartySummaryValue(rowKey);
+    if (counterpartyValue) {
+      selectCostOfRiskSummaryCounterpartyFilter(counterpartyValue, rowKey);
     } else {
-      selectCostOfRiskStageSummaryCell(value, getCostOfRiskSummaryCellRowKey(value));
+      selectCostOfRiskStageSummaryCell(value, rowKey);
     }
     return;
   }
@@ -3410,39 +3419,39 @@ function getCostOfRiskHelpPanelContent(topic) {
     },
     "summary-absolute": {
       eyebrow: "Summary display",
-      title: "Absolute Variation",
-      lead: "Absolute variation shows the quarter-on-quarter movement in amount for the selected summary row.",
+      title: "Absolute Value",
+      lead: "Absolute value shows the underlying amount behind each Summary ratio.",
       sections: [
         {
-          title: "Numerator",
-          body: "The value is the current-quarter stock minus the previous-quarter stock for the selected stage or counterparty line."
+          title: "Displayed values",
+          body: "Exposure ratio is shown as gross carrying amount, coverage as allowances, and collateral as collateral received."
         },
         {
           title: "Unit",
-          body: "Values are displayed in the selected monetary unit."
+          body: "Values are displayed in the unit selected in the application header."
         }
       ],
-      hint: "Switch to Relative Variation to read the same movement as a growth rate."
+      hint: "Switch to Ratio to read the same cells as percentages."
     },
     "summary-relative": {
       eyebrow: "Summary display",
-      title: "Relative Variation",
-      lead: "Relative variation is a growth rate for the selected summary row.",
+      title: "Ratio",
+      lead: "Ratio displays the Summary cells as percentages.",
       sections: [
         {
-          title: "Numerator",
-          body: "The numerator is the quarter-on-quarter variation of the selected row and metric."
+          title: "Exposure ratio",
+          body: "Gross carrying amount for the selected row is divided by the gross carrying amount of the selected perimeter."
         },
         {
-          title: "Denominator",
-          body: "The denominator is the previous-quarter value of that same row and metric, after applying the active perimeter filters."
+          title: "Coverage and collateral",
+          body: "Coverage is allowances divided by gross carrying amount. Collateral is collateral received divided by gross carrying amount."
         },
         {
-          title: "Formula",
-          body: "Relative variation = quarterly variation divided by previous-quarter value, displayed as a percentage."
+          title: "Format",
+          body: "Values are displayed as percentages for quick cross-sectional reading."
         }
       ],
-      hint: "Use this mode when the question is how fast the selected stock is growing or shrinking."
+      hint: "Switch to Absolute Value to see the underlying amounts."
     },
     "y-focus-on": {
       eyebrow: "Chart scale",
@@ -3530,18 +3539,18 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
       sections: [
         {
           title: "What you see",
-          body: "The upper table decomposes gross carrying amount, allowances and coverage either by stage or by counterparty. Stock measures stay in amount, while variation columns can be displayed as absolute or relative movements."
+          body: "The upper panel is a mosaic of key ratios for the selected reference date: exposure mix by stage and performing status, coverage ratios, and collateralisation ratios."
         },
         {
           title: "How to use it",
-          body: "Use the display switch to move between stage and counterparty breakdowns. Clicking a row updates the global filter, and clicking a cell drives the time evolution chart below."
+          body: "Click a card to benchmark that ratio in the time chart below. Each card shows the current ratio and its quarter-on-quarter variation."
         },
         {
           title: "Source",
-          body: "Figures are built from F_18.00, with the active instruments, counterparty and stage filters applied where the regulatory template supports that level of detail."
+          body: "Figures are built from F_18.00, with the active instruments, counterparty, staging status and balance-scope filters applied where the regulatory template supports that level of detail."
         }
       ],
-      hint: "Click a table cell to focus the time chart on that metric."
+      hint: "The Summary is designed as a quick cross-sectional reading before moving into the specialised tabs."
     },
     "cost-of-risk": {
       eyebrow: "Risk charge",
@@ -3692,11 +3701,52 @@ function renderCostOfRiskStageSummaryTable(stageSummary, selectedUnit = "million
     formatReferenceQuarterLabel,
     onCellSelect: selectCostOfRiskStageSummaryCell,
     onColumnSelect: selectCostOfRiskStageSummaryColumn,
+    onCounterpartySelect: selectCostOfRiskSummaryCounterpartyFilter,
+    onOpenDetailTab: openCostOfRiskSummaryDetailTab,
     onRowSelect: selectCostOfRiskStageSummaryRow,
     referenceDate: activeCostOfRiskReferenceDate,
     selectedUnit,
     stageSummary
   });
+}
+
+function selectCostOfRiskSummaryCounterpartyFilter(counterpartyValue = "", rowKey = "") {
+  let shouldRerender = false;
+  if (rowKey) {
+    const columnKey = getCostOfRiskSummaryCellColumnKey(activeCostOfRiskStageSummaryCellKey) || "gca:ratio";
+    activeCostOfRiskCounterpartySummaryCellKey = `counterparty:${columnKey}:${rowKey}`;
+  }
+  activeCostOfRiskSummaryBreakdown = "stage";
+  if (updateCostOfRiskCounterpartyFromSummaryRow(counterpartyValue)) shouldRerender = true;
+  if (!shouldRerender) return;
+  clearCostOfRiskHelpTopic();
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function openCostOfRiskSummaryDetailTab(tab, rowKey) {
+  if (!["stage-ratio", "coverage-ratio", "collateral-ratio"].includes(tab) || !rowKey) return;
+  if (!isCostOfRiskSummaryDetailTabAvailable(tab, rowKey)) return;
+  const stageValue = getCostOfRiskStageSummaryFilterValue(rowKey);
+  if (stageValue) setActiveCostOfRiskStageFilter(stageValue);
+  if (tab === "stage-ratio") activeCostOfRiskStageRatioCellKey = `${rowKey}:ratio`;
+  if (tab === "coverage-ratio") activeCostOfRiskCoverageRatioCellKey = `${rowKey}:ratio`;
+  if (tab === "collateral-ratio") activeCostOfRiskCollateralRatioCellKey = `${rowKey}:ratio`;
+  activeCostOfRiskTab = tab;
+  activeCostOfRiskDataAuditRequested = true;
+  hideCostOfRiskAuditIntro();
+  closeCostOfRiskFilterMenus();
+  clearCostOfRiskHelpTopic();
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function isCostOfRiskSummaryDetailTabAvailable(tab, rowKey) {
+  if (tab === "stage-ratio" || tab === "coverage-ratio") {
+    return ["stage1", "stage2", "stage3", "poci", "performing", "nonperforming"].includes(rowKey);
+  }
+  if (tab === "collateral-ratio") {
+    return ["all", "performing", "nonperforming"].includes(rowKey);
+  }
+  return false;
 }
 
 function renderCostOfRiskStageSummaryChart(stageSummary, state) {
@@ -3727,6 +3777,7 @@ function selectCostOfRiskStageSummaryCell(cellKey, rowKey = "") {
   let shouldRerender = false;
   if (cellKey && cellKey !== activeCostOfRiskStageSummaryCellKey) {
     activeCostOfRiskStageSummaryCellKey = cellKey;
+    activeCostOfRiskSummaryBreakdown = "stage";
     shouldRerender = true;
   }
   if (updateCostOfRiskStageFromSummaryRow(rowKey)) shouldRerender = true;
@@ -4044,7 +4095,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
   }
 
   const isStageBoxSelection = activeCostOfRiskStageTransferFlowKey.startsWith("stagebox:");
-  const chartDisplayMode = isStageBoxSelection ? "amount" : displayMode;
+  const chartDisplayMode = displayMode;
   const flowSeries = isStageBoxSelection
     ? getCostOfRiskCachedModel(
       state,
@@ -4062,6 +4113,7 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     container: elements.costOfRiskStageTransferFlowChart,
     focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
     flowSeries,
+    isStageBoxSelection,
     onClearSmoothing: clearCostOfRiskSmoothing,
     onChangeSmoothing: updateCostOfRiskSmoothingWindow,
     onSelectJst: selectCostOfRiskChartJst,

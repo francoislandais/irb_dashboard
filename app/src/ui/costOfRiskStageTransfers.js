@@ -105,7 +105,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   ].filter((value) => Number.isFinite(value));
   const displayStageBalances = stageBalances.map((item) => ({
     ...item,
-    displayValue: item.value
+    displayValue: getStageTransferStageBoxDisplayValue(item.value, item.ratioDenominator, displayMode)
   }));
   const stageBalanceByStage = new Map(displayStageBalances.map((item) => [item.stage, item.displayValue]));
   const hasStageBalance = stageBalances.some((item) => Number.isFinite(item.value));
@@ -139,7 +139,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
-    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("1"), formatValue, selectedUnit)
+    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("1"), formatValue, displayMode, selectedUnit)
   });
   addStageBox(svg, 600, 160, "Stage 2", stageFill, stageStroke, {
     flowKey: "stagebox:2",
@@ -147,7 +147,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
-    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("2"), formatValue, selectedUnit)
+    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("2"), formatValue, displayMode, selectedUnit)
   });
   addStageBox(svg, 1160, 160, "Stage 3", stageFill, stageStroke, {
     flowKey: "stagebox:3",
@@ -155,7 +155,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
-    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("3"), formatValue, selectedUnit)
+    valueLabel: formatStageBoxValueLabel(stageBalanceByStage.get("3"), formatValue, displayMode, selectedUnit)
   });
 
   addStage1ToStage3Junction(svg, {
@@ -524,9 +524,23 @@ function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
   }
 }
 
-function formatStageBoxValueLabel(value, formatValue, selectedUnit) {
+function getStageTransferStageBoxDisplayValue(value, denominator, displayMode) {
+  if (!Number.isFinite(value)) return null;
+  if (displayMode !== "ratio") return value;
+  return Number.isFinite(denominator) && denominator !== 0 ? (value / denominator) * 100 : null;
+}
+
+function formatStageBoxValueLabel(value, formatValue, displayMode, selectedUnit) {
   if (!Number.isFinite(value)) return "-";
+  if (displayMode === "ratio") return `${formatStageBoxPercentValue(value)}%`;
   return formatValue(value, "amount", selectedUnit, false);
+}
+
+function formatStageBoxPercentValue(value) {
+  return new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0
+  }).format(value);
 }
 
 function addHorizontalFlow(svg, config, formatValue, displayMode, selectedUnit) {

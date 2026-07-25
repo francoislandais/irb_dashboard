@@ -97,20 +97,6 @@ export function renderCostOfRiskActiveFiltersView({
         })
       ]
       : []),
-    ...(activeTab === "summary"
-      ? [createCostOfRiskDisplayModeChip({
-        displayMode,
-        isOpen: summaryDisplayMenuOpen,
-        labels: {
-          absolute: "Absolute Variation",
-          relative: "Relative Variation",
-          switchToAbsolute: "Switch to Absolute Variation",
-          switchToRelative: "Switch to Relative Variation"
-        },
-        menuLabel: "Variation display",
-        name: "summaryVariation"
-      })]
-      : []),
     ...(activeTab === "stage-transfers"
       ? [createCostOfRiskDisplayModeChip({
         displayMode,
@@ -123,6 +109,20 @@ export function renderCostOfRiskActiveFiltersView({
         },
         menuLabel: "Transfer display",
         name: "stageTransfer"
+      })]
+      : []),
+    ...(activeTab === "summary"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: summaryDisplayMenuOpen,
+        labels: {
+          absolute: "Absolute Value",
+          relative: "Ratio",
+          switchToAbsolute: "Switch to Absolute Value",
+          switchToRelative: "Switch to Ratio"
+        },
+        menuLabel: "Summary display",
+        name: "summaryVariation"
       })]
       : [])
   ];
