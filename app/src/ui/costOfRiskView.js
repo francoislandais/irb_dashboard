@@ -180,6 +180,7 @@ let activeCostOfRiskDisplayMode = "ratio";
 let activeCostOfRiskDefinitionDisplayMode = "ratio";
 let activeCostOfRiskDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionDriverCode = "";
+let activeCostOfRiskDefinitionPanelTab = "drivers";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -637,6 +638,21 @@ export function wireCostOfRiskUi(actions, rerender) {
       return;
     }
 
+    const definitionPanelTabButton = event.target.closest?.("[data-cost-of-risk-definition-panel-tab]");
+    if (definitionPanelTabButton) {
+      event.preventDefault();
+      activeCostOfRiskDefinitionPanelTab = definitionPanelTabButton.dataset.costOfRiskDefinitionPanelTab === "components"
+        ? "components"
+        : "drivers";
+      const isComponentSelection = String(activeCostOfRiskDefinitionDriverCode).startsWith("component:");
+      if ((activeCostOfRiskDefinitionPanelTab === "drivers" && isComponentSelection)
+        || (activeCostOfRiskDefinitionPanelTab === "components" && activeCostOfRiskDefinitionDriverCode && !isComponentSelection)) {
+        activeCostOfRiskDefinitionDriverCode = "";
+      }
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const definitionBenchmarkTarget = event.target.closest?.("[data-cost-of-risk-definition-benchmark-target]");
     if (definitionBenchmarkTarget) {
       event.preventDefault();
@@ -1074,7 +1090,7 @@ export function renderCostOfRisk(state) {
   if (activeCostOfRiskTab === "contributions") {
     const activeWaterfall = getWaterfall();
     const selectedWaterfallPoint = (activeWaterfall.points ?? []).find((point) => point.code === activeCostOfRiskXAxisCode);
-    renderCostOfRiskWaterfallTitle(activeWaterfall.referenceDate);
+    renderCostOfRiskWaterfallTitle(displayMode, activeWaterfall.denominator, state.selectedUnit);
     renderCostOfRiskChartTitle(selectedWaterfallPoint, xAxisOptions, activeCostOfRiskXAxisCode);
     renderCostOfRiskWaterfallChart(activeWaterfall, state.selectedJst, displayMode, state.selectedUnit);
     renderCostOfRiskMovementAuditPanel(state, { allowDataAudit: consumeCostOfRiskDataAuditRequest() });
@@ -1544,45 +1560,72 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
     )
   );
 
-  const drivers = document.createElement("div");
-  drivers.className = "cost-of-risk-definition-drivers";
-  const driversTitle = document.createElement("div");
-  driversTitle.className = "cost-of-risk-definition-drivers-title";
-  driversTitle.textContent = "Main drivers";
-  drivers.append(driversTitle);
-  if ((definitionModel.drivers ?? []).length === 0) {
+  const detail = document.createElement("div");
+  detail.className = "cost-of-risk-definition-drivers";
+  detail.append(createCostOfRiskDefinitionPanelTabs());
+  const activeItems = activeCostOfRiskDefinitionPanelTab === "components"
+    ? definitionModel.components ?? []
+    : definitionModel.drivers ?? [];
+  if (activeItems.length === 0) {
     const empty = document.createElement("div");
     empty.className = "cost-of-risk-definition-driver-empty";
-    empty.textContent = "No significant driver is available for the selected definition.";
-    drivers.append(empty);
+    empty.textContent = activeCostOfRiskDefinitionPanelTab === "components"
+      ? "No F12 component is available for the selected definition."
+      : "No significant driver is available for the selected definition.";
+    detail.append(empty);
   } else {
-    definitionModel.drivers.forEach((driver) => {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "cost-of-risk-definition-driver";
-      row.classList.toggle("is-active", driver.code === activeCostOfRiskDefinitionDriverCode);
-      row.dataset.costOfRiskDefinitionDriver = driver.code;
-      row.dataset.costOfRiskCalculationDetail = "cost-of-risk-driver";
-      row.dataset.costOfRiskCalculationValue = driver.code;
-      const label = document.createElement("div");
-      label.className = "cost-of-risk-definition-driver-label";
-      label.textContent = driver.label;
-      label.title = driver.source;
-      const value = document.createElement("div");
-      value.className = "cost-of-risk-definition-driver-value";
-      value.textContent = formatCostOfRiskDisplayValue(
-        activeCostOfRiskDefinitionDisplayMode === "ratio" ? driver.ratioBasisPoints : driver.value,
-        activeCostOfRiskDefinitionDisplayMode,
-        selectedUnit,
-        true
-      );
-      row.append(label, value);
-      drivers.append(row);
+    activeItems.forEach((item) => {
+      detail.append(createCostOfRiskDefinitionDetailRow(item, selectedUnit, activeCostOfRiskDefinitionPanelTab));
     });
   }
 
-  root.append(cards, drivers);
+  root.append(cards, detail);
   elements.costOfRiskDefinitionPanel.replaceChildren(root);
+}
+
+function createCostOfRiskDefinitionPanelTabs() {
+  const tabs = document.createElement("div");
+  tabs.className = "cost-of-risk-definition-detail-tabs";
+  [
+    { key: "drivers", label: "Main drivers" },
+    { key: "components", label: "Components" }
+  ].forEach((tab) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "cost-of-risk-definition-detail-tab";
+    button.classList.toggle("is-active", activeCostOfRiskDefinitionPanelTab === tab.key);
+    button.dataset.costOfRiskDefinitionPanelTab = tab.key;
+    button.textContent = tab.label;
+    tabs.append(button);
+  });
+  return tabs;
+}
+
+function createCostOfRiskDefinitionDetailRow(item, selectedUnit, panelTab) {
+  const row = document.createElement("button");
+  row.type = "button";
+  row.className = "cost-of-risk-definition-driver";
+  row.classList.toggle("is-active", item.code === activeCostOfRiskDefinitionDriverCode);
+  row.dataset.costOfRiskDefinitionDriver = item.code;
+  row.dataset.costOfRiskCalculationDetail = "cost-of-risk-driver";
+  row.dataset.costOfRiskCalculationValue = item.code;
+
+  const label = document.createElement("div");
+  label.className = "cost-of-risk-definition-driver-label";
+  label.textContent = item.label;
+  label.title = item.source;
+
+  const value = document.createElement("div");
+  value.className = "cost-of-risk-definition-driver-value";
+  value.textContent = formatCostOfRiskDisplayValue(
+    activeCostOfRiskDefinitionDisplayMode === "ratio" ? item.ratioBasisPoints : item.value,
+    activeCostOfRiskDefinitionDisplayMode,
+    selectedUnit,
+    true
+  );
+
+  row.append(label, value);
+  return row;
 }
 
 function createCostOfRiskDefinitionEmpty(message) {
@@ -1898,9 +1941,21 @@ function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {
   if (elements.costOfRiskChartTitle) elements.costOfRiskChartTitle.textContent = activeCostOfRiskChartTitleText;
 }
 
-function renderCostOfRiskWaterfallTitle() {
-  activeCostOfRiskWaterfallTitleText = "Movement in the stock of allowance";
+function renderCostOfRiskWaterfallTitle(displayMode = "amount", denominator = null, selectedUnit = "millions") {
+  const baseTitle = "Movement in the stock of allowances and provisions";
+  activeCostOfRiskWaterfallTitleText = displayMode === "ratio" && Number.isFinite(denominator)
+    ? `${baseTitle} over a previous-quarter exposure base of ${formatMetricValue(denominator, selectedUnit)} ${getCostOfRiskUnitLongLabel(selectedUnit)}`
+    : baseTitle;
   if (elements.costOfRiskWaterfallTitle) elements.costOfRiskWaterfallTitle.textContent = activeCostOfRiskWaterfallTitleText;
+}
+
+function getCostOfRiskUnitLongLabel(selectedUnit) {
+  return {
+    billions: "EUR billion",
+    euros: "EUR",
+    millions: "EUR million",
+    thousands: "EUR thousand"
+  }[selectedUnit] ?? "EUR million";
 }
 
 function renderCostOfRiskMovementAuditPanel(state, options = {}) {
@@ -3653,9 +3708,9 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
       hint: "Click any flow or stage block to replace this introduction with a detailed audit trail."
     },
     contributions: {
-      eyebrow: "Allowance movement",
-      title: "Movement in Allowance",
-      lead: "This view reconciles the movement in the stock of allowances and helps identify which FINREP components explain the quarterly change.",
+      eyebrow: "ECL movements",
+      title: "ECL movements",
+      lead: "This view reconciles movements in expected credit loss allowances and provisions, covering both in-balance exposures and off-balance commitments when that perimeter is selected.",
       sections: [
         {
           title: "What you see",
@@ -3971,7 +4026,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
       name: "Contribution",
       showInLegend: false
     }],
-    title: createCostOfRiskHighchartsTitle(activeCostOfRiskWaterfallTitleText),
+    title: createCostOfRiskHighchartsTitle(activeCostOfRiskWaterfallTitleText, undefined, { color: "#7c8580" }),
     tooltip: { enabled: false },
     xAxis: {
       categories: waterfallData.items.map((item) => item.name),

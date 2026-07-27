@@ -56,7 +56,7 @@ function extractCostOfRiskFiniteYValues(series) {
     .filter((value) => Number.isFinite(value));
 }
 
-export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CHART_TITLE_POSITION) {
+export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CHART_TITLE_POSITION, styleOverrides = {}) {
   return {
     align: "left",
     margin: position.margin,
@@ -66,7 +66,8 @@ export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CH
     style: {
       color: "#26332d",
       fontSize: "13px",
-      fontWeight: "400"
+      fontWeight: "400",
+      ...styleOverrides
     }
   };
 }

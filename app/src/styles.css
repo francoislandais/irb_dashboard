@@ -1847,6 +1847,36 @@ button:focus-visible {
   min-width: 0;
 }
 
+.cost-of-risk-definition-detail-tabs {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.cost-of-risk-definition-detail-tab {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #66736d;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.15;
+  min-height: 24px;
+  padding: 3px 8px;
+}
+
+.cost-of-risk-definition-detail-tab:hover {
+  background: #f4f6f5;
+}
+
+.cost-of-risk-definition-detail-tab.is-active,
+.cost-of-risk-definition-detail-tab.is-active:hover {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
 .cost-of-risk-definition-driver {
   align-items: center;
   background: transparent;

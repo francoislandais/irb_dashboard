@@ -105,6 +105,9 @@ const COST_OF_RISK_OFF_BALANCE_ALLOWANCE_Y_CODES = {
   "Stage 2": ["0540"],
   "Stage 3": ["0560"]
 };
+const COST_OF_RISK_OFF_BALANCE_ALLOWANCE_Y_CODE_SET = new Set(
+  Object.values(COST_OF_RISK_OFF_BALANCE_ALLOWANCE_Y_CODES).flat()
+);
 export const COST_OF_RISK_X_AXIS_CODE = "0020";
 export const COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE = "__total_contribution__";
 const COST_OF_RISK_F02_TABLE_ID = "F_02.00";
@@ -345,6 +348,31 @@ function formatCostOfRiskAllowanceMovementDisplayValue(value) {
   return Number.isFinite(value) ? -value : value;
 }
 
+function getCostOfRiskAllowanceMovementSign(yCode) {
+  const normalizedYCode = normalizeAxisCode(yCode, "y");
+  return COST_OF_RISK_OFF_BALANCE_ALLOWANCE_Y_CODE_SET.has(normalizedYCode) ? 1 : -1;
+}
+
+function addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceColumns, targetSeries, xCode, yCode, jstCode) {
+  const sign = getCostOfRiskAllowanceMovementSign(yCode);
+  const sourceSeries = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
+    xCode,
+    yCode,
+    zCode: ""
+  }, jstCode).map((value) => (Number.isFinite(value) ? value * sign : value));
+  addSeriesValues(targetSeries, sourceSeries);
+}
+
+function getCostOfRiskAllowanceMovementQuarterlySeries(state, indexes, referenceColumns, xCodes, yCodes, jstCode) {
+  const valueSeries = createEmptySeries(referenceColumns.length);
+  xCodes.forEach((xCode) => {
+    yCodes.forEach((yCode) => {
+      addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceColumns, valueSeries, xCode, yCode, jstCode);
+    });
+  });
+  return decumulateQuarterlySeries(referenceColumns, valueSeries);
+}
+
 export function getCostOfRiskSelectionOptions(state) {
   const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
   const aggregateOptions = buildCostOfRiskAggregateOptions(descriptors);
@@ -520,16 +548,15 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex) ?? 0;
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const points = COST_OF_RISK_WATERFALL_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)).map((xCode) => {
-    const rawValueSeries = createEmptySeries(referenceColumns.length);
-    selectedOption.points.forEach((yCode) => {
-      addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, state.selectedJst));
-    });
-    const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[referenceIndex] ?? 0);
+    const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+      state,
+      indexes,
+      referenceColumns,
+      [xCode],
+      selectedOption.points,
+      state.selectedJst
+    );
+    const value = quarterlyValueSeries[referenceIndex] ?? 0;
 
     return {
       code: xCode,
@@ -556,23 +583,19 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
     return { points: [], status: "Load a CSV and select a core definition." };
   }
 
-  const rawValueSeries = createEmptySeries(referenceColumns.length);
-  COST_OF_RISK_F12_RECONCILIATION_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)).forEach((xCode) => {
-    selectedOption.points.forEach((yCode) => {
-      addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, state.selectedJst));
-    });
-  });
-
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    state,
+    indexes,
+    referenceColumns,
+    COST_OF_RISK_F12_RECONCILIATION_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)),
+    selectedOption.points,
+    state.selectedJst
+  );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
-      const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? null);
+      const value = quarterlyValueSeries[index] ?? null;
       const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
       return {
@@ -599,6 +622,7 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
       definition,
       denominator: null,
       denominatorLabel: "",
+      components: [],
       drivers: [],
       ratioBasisPoints: null,
       referenceDate: "",
@@ -611,15 +635,20 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst);
   const selectedPoint = series[referenceIndex] ?? null;
+  const components = buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex);
   const drivers = buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex);
-  const selectedDriver = drivers.find((driver) => driver.code === selectedDriverCode) ?? null;
+  const selectedComponent = components.find((component) => component.code === selectedDriverCode) ?? null;
+  const selectedDriver = selectedComponent ? null : drivers.find((driver) => driver.code === selectedDriverCode) ?? null;
   const chartSeries = selectedDriver
     ? buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedDriver.code, state.selectedJst)
+    : selectedComponent
+      ? buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedComponent.code, state.selectedJst)
     : series;
 
   return {
-    benchmarkSeries: buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definition.id, filters, selectedDriver?.code ?? ""),
+    benchmarkSeries: buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definition.id, filters, selectedDriver?.code ?? selectedComponent?.code ?? ""),
     chartSeries,
+    components,
     definition,
     denominator: selectedPoint?.denominator ?? null,
     denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
@@ -637,9 +666,15 @@ function buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColum
   return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
     jstCode,
     points: selectedDriverCode
-      ? buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
+      ? buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
       : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode)
   }));
+}
+
+function buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode) {
+  return String(selectedCode).startsWith("component:")
+    ? buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode)
+    : buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode);
 }
 
 function getCostOfRiskDefinitionXCodes(definitionId) {
@@ -660,16 +695,18 @@ function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceCo
   const [xCode, yCode] = String(driverCode).split(":");
   if (!xCode || !yCode) return [];
 
-  const rawValueSeries = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-    xCode,
-    yCode,
-    zCode: ""
-  }, jstCode);
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    state,
+    indexes,
+    referenceColumns,
+    [xCode],
+    [yCode],
+    jstCode
+  );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
-    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? null);
+    const value = quarterlyValueSeries[index] ?? null;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
     return {
@@ -680,6 +717,16 @@ function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceCo
       value
     };
   });
+}
+
+function buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, componentCode, jstCode) {
+  if (definitionId === "f02-impairment") {
+    return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode);
+  }
+
+  const xCode = String(componentCode ?? "").replace(/^component:/, "");
+  if (!xCode) return [];
+  return buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, [xCode]);
 }
 
 function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode) {
@@ -709,22 +756,18 @@ function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColum
 
 function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, xCodes = COST_OF_RISK_DEFINITION_F12_X_CODES) {
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
-  const rawValueSeries = createEmptySeries(referenceColumns.length);
-  xCodes.forEach((xCode) => {
-    selectedOption.points.forEach((yCode) => {
-      addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, jstCode));
-    });
-  });
-
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    state,
+    indexes,
+    referenceColumns,
+    xCodes,
+    selectedOption.points,
+    jstCode
+  );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
-    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? null);
+    const value = quarterlyValueSeries[index] ?? null;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
     return {
@@ -759,14 +802,15 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
   const descriptorByCode = new Map(granularDescriptors.map((descriptor) => [descriptor.code, descriptor]));
 
   return getCostOfRiskDefinitionXCodes(definitionId).flatMap((xCode) => selectedYCodes.map((yCode) => {
-    const rawValueSeries = createEmptySeries(referenceColumns.length);
-    addSeriesValues(rawValueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-      xCode,
-      yCode,
-      zCode: ""
-    }, state.selectedJst));
-    const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
-    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[referenceIndex] ?? null);
+    const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+      state,
+      indexes,
+      referenceColumns,
+      [xCode],
+      [yCode],
+      state.selectedJst
+    );
+    const value = quarterlyValueSeries[referenceIndex] ?? null;
     const descriptor = descriptorByCode.get(yCode) ?? null;
     const scopeLabel = descriptor ? createCostOfRiskDefinitionDriverScopeLabel(descriptor) : "Selected perimeter";
     const movementLabel = xLabels.get(xCode) ?? xCode;
@@ -782,6 +826,43 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
     .filter((driver) => Number.isFinite(driver.value))
     .sort((left, right) => Math.abs(right.value) - Math.abs(left.value))
     .slice(0, 6);
+}
+
+function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definitionId, filters, referenceIndex) {
+  if (definitionId === "f02-impairment") {
+    const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst)[referenceIndex];
+    return [{
+      code: "component:f02-impairment",
+      label: "F02 impairment / reversal",
+      ratioBasisPoints: point?.ratioBasisPoints ?? null,
+      source: `${COST_OF_RISK_F02_TABLE_ID} / x ${COST_OF_RISK_F02_X_AXIS_CODE} / y ${COST_OF_RISK_F02_Y_AXIS_CODE}`,
+      value: point?.value ?? null
+    }];
+  }
+
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
+  const xLabels = getCostOfRiskXAxisFullLabelMap(state);
+
+  return getCostOfRiskDefinitionXCodes(definitionId).map((xCode) => {
+    const point = buildCostOfRiskF12SelectedComponentPointsForJst(
+      state,
+      indexes,
+      referenceColumns,
+      filters,
+      state.selectedJst,
+      [xCode]
+    )[referenceIndex];
+    const value = point?.value ?? null;
+
+    return {
+      code: `component:${xCode}`,
+      label: formatCostOfRiskDefinitionMovementLabel(xLabels.get(xCode) ?? xCode),
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / selected Y scope`,
+      value
+    };
+  }).filter((component) => Number.isFinite(component.value));
 }
 
 function getCostOfRiskDefinitionGranularDriverDescriptors(state, filters = {}) {
@@ -907,16 +988,14 @@ function buildCostOfRiskMovementTotalContributionAuditRows(state, indexes, refer
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
 
   return COST_OF_RISK_WATERFALL_X_CODES.map((xCode) => {
-    const rawSeries = createEmptySeries(referenceColumns.length);
-    yCodes.forEach((yCode) => {
-      addSeriesValues(rawSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, state.selectedJst));
-    });
-    const values = decumulateQuarterlySeries(referenceColumns, rawSeries)
-      .map(formatCostOfRiskAllowanceMovementDisplayValue);
+    const values = getCostOfRiskAllowanceMovementQuarterlySeries(
+      state,
+      indexes,
+      referenceColumns,
+      [xCode],
+      yCodes,
+      state.selectedJst
+    );
 
     return {
       label: xLabels.get(xCode) ?? xCode,
@@ -967,11 +1046,14 @@ function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColu
       zCode: ""
     };
     const rows = getCostOfRiskPointRows(state, indexes, COST_OF_RISK_TABLE_ID, point, state.selectedJst);
+    const sign = getCostOfRiskAllowanceMovementSign(yCode);
     const rawSeries = referenceColumns.map((column) => (
       rows.reduce((total, row) => total + parseNumericValue(row[column.index]), 0)
     ));
-    const values = decumulateQuarterlySeries(referenceColumns, rawSeries)
-      .map(formatCostOfRiskAllowanceMovementDisplayValue);
+    const values = decumulateQuarterlySeries(
+      referenceColumns,
+      rawSeries.map((value) => (Number.isFinite(value) ? value * sign : value))
+    );
     const normalizedYCode = normalizeAxisCode(yCode, "y");
     const rowLabel = rows.length === 1 ? "1 row" : `${rows.length} rows`;
 
@@ -1025,16 +1107,14 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const selectedXList = COST_OF_RISK_F12_RECONCILIATION_X_CODES.filter((xCode) => selectedCodeSet.has(xCode));
   const f12Rows = selectedXList.map((xCode) => {
-    const rawSeries = createEmptySeries(referenceColumns.length);
-    selectedOption.points.forEach((yCode) => {
-      addSeriesValues(rawSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, state.selectedJst));
-    });
-    const quarterlyValues = decumulateQuarterlySeries(referenceColumns, rawSeries)
-      .map(formatCostOfRiskAllowanceMovementDisplayValue);
+    const quarterlyValues = getCostOfRiskAllowanceMovementQuarterlySeries(
+      state,
+      indexes,
+      referenceColumns,
+      [xCode],
+      selectedOption.points,
+      state.selectedJst
+    );
 
     return {
       label: xLabels.get(xCode) ?? xCode,
@@ -4167,18 +4247,18 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
     return buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters);
   }
 
-  const valueSeries = createEmptySeries(referenceColumns.length);
-  selectedOption.points.forEach((yCode) => {
-    addSeriesValues(valueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode: xAxisCode,
-        yCode
-      }, jstCode));
-  });
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
+  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    state,
+    indexes,
+    referenceColumns,
+    [xAxisCode],
+    selectedOption.points,
+    jstCode
+  );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((column, index) => {
-    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? 0);
+    const value = quarterlyValueSeries[index] ?? 0;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
     return {
       date: column.date,
@@ -4191,22 +4271,18 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
 }
 
 function buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters = {}) {
-  const valueSeries = createEmptySeries(referenceColumns.length);
-  COST_OF_RISK_WATERFALL_X_CODES.forEach((xCode) => {
-    selectedOption.points.forEach((yCode) => {
-      addSeriesValues(valueSeries, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_TABLE_ID, {
-        xCode,
-        yCode,
-        zCode: ""
-      }, jstCode));
-    });
-  });
-
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
+  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    state,
+    indexes,
+    referenceColumns,
+    COST_OF_RISK_WATERFALL_X_CODES,
+    selectedOption.points,
+    jstCode
+  );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((column, index) => {
-    const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[index] ?? 0);
+    const value = quarterlyValueSeries[index] ?? 0;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
     return {
       date: column.date,
