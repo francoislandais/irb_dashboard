@@ -1,6 +1,7 @@
 import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
+  COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
   COST_OF_RISK_DEFINITION_OPTIONS,
   DEFAULT_COST_OF_RISK_COLLATERAL_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL,
@@ -181,6 +182,7 @@ let activeCostOfRiskDefinitionDisplayMode = "ratio";
 let activeCostOfRiskDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionDriverCode = "";
 let activeCostOfRiskDefinitionPanelTab = "components";
+let activeCostOfRiskCustomDefinitionXCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -221,6 +223,23 @@ function isCostOfRiskFilterSelectionTopicOpen(kind) {
 function toggleCostOfRiskFilterSelectionTopic(kind) {
   const topic = `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}${kind}`;
   setCostOfRiskHelpTopic(activeCostOfRiskHelpTopic === topic ? "" : topic);
+}
+
+function getActiveCostOfRiskCustomDefinitionXCodes() {
+  const allowedCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
+  return COST_OF_RISK_DEFINITION_CUSTOM_X_CODES.filter((code) => (
+    allowedCodes.has(code) && activeCostOfRiskCustomDefinitionXCodes.has(code)
+  ));
+}
+
+function toggleCostOfRiskCustomDefinitionComponent(xCode) {
+  const normalizedCode = String(xCode ?? "").padStart(4, "0");
+  if (!COST_OF_RISK_DEFINITION_CUSTOM_X_CODES.includes(normalizedCode)) return;
+  if (activeCostOfRiskCustomDefinitionXCodes.has(normalizedCode)) {
+    activeCostOfRiskCustomDefinitionXCodes.delete(normalizedCode);
+  } else {
+    activeCostOfRiskCustomDefinitionXCodes.add(normalizedCode);
+  }
 }
 
 function pulseCostOfRiskContextPanel() {
@@ -640,6 +659,16 @@ export function wireCostOfRiskUi(actions, rerender) {
       return;
     }
 
+    const customComponentToggle = event.target.closest?.("[data-cost-of-risk-custom-definition-component]");
+    if (customComponentToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleCostOfRiskCustomDefinitionComponent(customComponentToggle.dataset.costOfRiskCustomDefinitionComponent || "");
+      activeCostOfRiskDefinitionDriverCode = "";
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const definitionDriverButton = event.target.closest?.("[data-cost-of-risk-definition-driver]");
     if (definitionDriverButton) {
       event.preventDefault();
@@ -809,15 +838,17 @@ export function renderCostOfRisk(state) {
   renderCostOfRiskCoreDefinition(waterfallXAxisOptions, f2F12XAxisOptions);
 
   if (activeCostOfRiskTab === "cost-of-risk") {
+    const customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes();
     const definitionModel = getCostOfRiskCachedModel(
       state,
-      createCostOfRiskModelCacheKey(state, "cost-of-risk-definition", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskDefinitionId, activeCostOfRiskDefinitionDriverCode),
+      createCostOfRiskModelCacheKey(state, "cost-of-risk-definition", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskDefinitionId, activeCostOfRiskDefinitionDriverCode, customDefinitionCodes.join(",")),
       () => buildCostOfRiskDefinitionModel(
         state,
         activeCostOfRiskDefinitionId,
         activeCostOfRiskFilters,
         activeCostOfRiskReferenceDate,
-        activeCostOfRiskDefinitionDriverCode
+        activeCostOfRiskDefinitionDriverCode,
+        customDefinitionCodes
       )
     );
     activeCostOfRiskReferenceDate = definitionModel.referenceDate || activeCostOfRiskReferenceDate;
@@ -1630,10 +1661,22 @@ function createCostOfRiskDefinitionDetailRow(item, selectedUnit, panelTab) {
   const row = document.createElement("button");
   row.type = "button";
   row.className = "cost-of-risk-definition-driver";
+  const showsCustomCheckbox = panelTab === "components" && activeCostOfRiskDefinitionId === "f12-custom-components";
+  row.classList.toggle("has-checkbox", showsCustomCheckbox);
   row.classList.toggle("is-active", item.code === activeCostOfRiskDefinitionDriverCode);
   row.dataset.costOfRiskDefinitionDriver = item.code;
   row.dataset.costOfRiskCalculationDetail = "cost-of-risk-driver";
   row.dataset.costOfRiskCalculationValue = item.code;
+
+  if (showsCustomCheckbox) {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "cost-of-risk-definition-component-checkbox";
+    checkbox.checked = item.included !== false;
+    checkbox.dataset.costOfRiskCustomDefinitionComponent = String(item.code ?? "").replace(/^component:/, "");
+    checkbox.setAttribute("aria-label", `${checkbox.checked ? "Remove" : "Include"} ${item.label}`);
+    row.append(checkbox);
+  }
 
   const label = document.createElement("div");
   label.className = "cost-of-risk-definition-driver-label";

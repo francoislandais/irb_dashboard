@@ -120,6 +120,7 @@ export const COST_OF_RISK_DEFINITION_F12_X_CODES = ["0020", "0040", "0050", "007
 // Same components as the EBA definition, plus c030 (decrease due to
 // derecognition, repayments and disposals).
 export const COST_OF_RISK_DEFINITION_ACPR_X_CODES = ["0020", "0030", "0040", "0050", "0070", "0090", "0110", "0120"];
+export const COST_OF_RISK_DEFINITION_CUSTOM_X_CODES = [...COST_OF_RISK_F12_RECONCILIATION_X_CODES];
 export const COST_OF_RISK_DEFINITION_OPTIONS = [
   {
     id: "f02-impairment",
@@ -161,6 +162,17 @@ export const COST_OF_RISK_DEFINITION_OPTIONS = [
       "c090 - Changes due to updates in the institution's methodology for estimation",
       "c110 - Foreign exchange and other movements",
       "c120 - Changes due to modifications without derecognition"
+    ]
+  },
+  {
+    id: "f12-custom-components",
+    label: "Custom definition",
+    source: "F_12.01 user-selected components",
+    description: "Custom cost of risk definition built by selecting which F_12.01 components should be included.",
+    components: [
+      "User-selected F_12.01 movement columns",
+      "All candidate components are selected by default",
+      "The Components view controls which columns are retained"
     ]
   }
 ];
@@ -610,7 +622,7 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
   };
 }
 
-export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-selected-components", filters = {}, referenceDate = "", selectedDriverCode = "") {
+export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-selected-components", filters = {}, referenceDate = "", selectedDriverCode = "", customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === definitionId)
@@ -633,10 +645,10 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
   }
 
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst);
+  const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst, customXCodes);
   const selectedPoint = series[referenceIndex] ?? null;
-  const components = buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex);
-  const drivers = buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex);
+  const components = buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes);
+  const drivers = buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes);
   const selectedComponent = components.find((component) => component.code === selectedDriverCode) ?? null;
   const selectedDriver = selectedComponent ? null : drivers.find((driver) => driver.code === selectedDriverCode) ?? null;
   const chartSeries = selectedDriver
@@ -646,7 +658,7 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
     : series;
 
   return {
-    benchmarkSeries: buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definition.id, filters, selectedDriver?.code ?? selectedComponent?.code ?? ""),
+    benchmarkSeries: buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definition.id, filters, selectedDriver?.code ?? selectedComponent?.code ?? "", customXCodes),
     chartSeries,
     components,
     definition,
@@ -662,12 +674,12 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
   };
 }
 
-function buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode = "") {
+function buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode = "", customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
   return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
     jstCode,
     points: selectedDriverCode
       ? buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
-      : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode)
+      : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes)
   }));
 }
 
@@ -677,14 +689,16 @@ function buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, reference
     : buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode);
 }
 
-function getCostOfRiskDefinitionXCodes(definitionId) {
-  return definitionId === "f12-acpr-components" ? COST_OF_RISK_DEFINITION_ACPR_X_CODES : COST_OF_RISK_DEFINITION_F12_X_CODES;
+function getCostOfRiskDefinitionXCodes(definitionId, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+  if (definitionId === "f12-acpr-components") return COST_OF_RISK_DEFINITION_ACPR_X_CODES;
+  if (definitionId === "f12-custom-components") return normalizeCostOfRiskDefinitionCustomXCodes(customXCodes);
+  return COST_OF_RISK_DEFINITION_F12_X_CODES;
 }
 
-function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode) {
+function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
   return definitionId === "f02-impairment"
     ? buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode)
-    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskDefinitionXCodes(definitionId));
+    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskDefinitionXCodes(definitionId, customXCodes));
 }
 
 function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, driverCode, jstCode) {
@@ -780,7 +794,7 @@ function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referen
   });
 }
 
-function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definitionId, filters, referenceIndex) {
+function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definitionId, filters, referenceIndex, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
   if (definitionId === "f02-impairment") {
     const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst)[referenceIndex];
     return [{
@@ -801,7 +815,7 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
     : buildCostOfRiskSelectionFromFilters(state, filters).points;
   const descriptorByCode = new Map(granularDescriptors.map((descriptor) => [descriptor.code, descriptor]));
 
-  return getCostOfRiskDefinitionXCodes(definitionId).flatMap((xCode) => selectedYCodes.map((yCode) => {
+  return getCostOfRiskDefinitionXCodes(definitionId, customXCodes).flatMap((xCode) => selectedYCodes.map((yCode) => {
     const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
       state,
       indexes,
@@ -828,7 +842,7 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
     .slice(0, 6);
 }
 
-function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definitionId, filters, referenceIndex) {
+function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definitionId, filters, referenceIndex, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
   if (definitionId === "f02-impairment") {
     const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst)[referenceIndex];
     return [{
@@ -844,7 +858,12 @@ function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, d
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
 
-  return getCostOfRiskDefinitionXCodes(definitionId).map((xCode) => {
+  const includedCodes = new Set(getCostOfRiskDefinitionXCodes(definitionId, customXCodes));
+  const componentCodes = definitionId === "f12-custom-components"
+    ? COST_OF_RISK_DEFINITION_CUSTOM_X_CODES
+    : getCostOfRiskDefinitionXCodes(definitionId, customXCodes);
+
+  return componentCodes.map((xCode) => {
     const point = buildCostOfRiskF12SelectedComponentPointsForJst(
       state,
       indexes,
@@ -857,12 +876,21 @@ function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, d
 
     return {
       code: `component:${xCode}`,
+      included: includedCodes.has(xCode),
       label: formatCostOfRiskDefinitionMovementLabel(xLabels.get(xCode) ?? xCode),
       ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
       source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / selected Y scope`,
       value
     };
   }).filter((component) => Number.isFinite(component.value));
+}
+
+function normalizeCostOfRiskDefinitionCustomXCodes(customXCodes) {
+  if (!Array.isArray(customXCodes)) return COST_OF_RISK_DEFINITION_CUSTOM_X_CODES;
+  const allowedCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
+  return customXCodes
+    .map((code) => normalizeAxisCode(code, "x"))
+    .filter((code, index, array) => allowedCodes.has(code) && array.indexOf(code) === index);
 }
 
 function getCostOfRiskDefinitionGranularDriverDescriptors(state, filters = {}) {
