@@ -180,7 +180,7 @@ let activeCostOfRiskDisplayMode = "ratio";
 let activeCostOfRiskDefinitionDisplayMode = "ratio";
 let activeCostOfRiskDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionDriverCode = "";
-let activeCostOfRiskDefinitionPanelTab = "drivers";
+let activeCostOfRiskDefinitionPanelTab = "components";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -620,6 +620,17 @@ export function wireCostOfRiskUi(actions, rerender) {
     }, 0);
   }, true);
   elements.costOfRiskDashboard?.addEventListener("click", (event) => {
+    const definitionToggle = event.target.closest?.("[data-cost-of-risk-definition-filter-toggle]");
+    if (definitionToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      toggleCostOfRiskFilterSelectionTopic("definition");
+      pulseCostOfRiskContextPanel();
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const definitionButton = event.target.closest?.("[data-cost-of-risk-definition]");
     if (definitionButton) {
       event.preventDefault();
@@ -1532,33 +1543,8 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
   }
 
   const root = document.createElement("div");
-  root.className = "cost-of-risk-definition-grid";
-
-  const cards = document.createElement("div");
-  cards.className = "cost-of-risk-definition-cards";
-  cards.append(
-    createCostOfRiskDefinitionCard(
-      activeCostOfRiskDefinitionDisplayMode === "ratio" ? "Cost of risk" : "Cost of risk amount",
-      formatCostOfRiskDisplayValue(
-        activeCostOfRiskDefinitionDisplayMode === "ratio"
-          ? definitionModel.ratioBasisPoints
-          : definitionModel.value,
-        activeCostOfRiskDefinitionDisplayMode,
-        selectedUnit,
-        true
-      ),
-      `${definitionModel.referenceDate || "-"} - ${activeCostOfRiskDefinitionDisplayMode === "ratio" ? definitionModel.denominatorLabel : "amount"}`,
-      {
-        active: !activeCostOfRiskDefinitionDriverCode,
-        benchmarkTarget: "total"
-      }
-    ),
-    createCostOfRiskDefinitionCard(
-      "Denominator",
-      formatMetricValue(definitionModel.denominator, selectedUnit),
-      definitionModel.denominatorLabel || "Not available"
-    )
-  );
+  root.className = "cost-of-risk-definition-grid cost-of-risk-definition-grid--compact";
+  root.append(createCostOfRiskDefinitionHeader(definitionModel, selectedUnit));
 
   const detail = document.createElement("div");
   detail.className = "cost-of-risk-definition-drivers";
@@ -1579,16 +1565,55 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
     });
   }
 
-  root.append(cards, detail);
+  root.append(detail);
   elements.costOfRiskDefinitionPanel.replaceChildren(root);
+}
+
+function createCostOfRiskDefinitionHeader(definitionModel, selectedUnit) {
+  const header = document.createElement("div");
+  header.className = "cost-of-risk-definition-header";
+
+  const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === activeCostOfRiskDefinitionId)
+    ?? definitionModel.definition
+    ?? COST_OF_RISK_DEFINITION_OPTIONS[0];
+  const definitionButton = document.createElement("button");
+  definitionButton.type = "button";
+  definitionButton.className = "cost-of-risk-definition-local-chip";
+  definitionButton.dataset.costOfRiskDefinitionFilterToggle = "true";
+  definitionButton.setAttribute("aria-label", "Change cost of risk definition");
+  const definitionPrefix = document.createElement("span");
+  definitionPrefix.className = "cost-of-risk-definition-local-chip-prefix";
+  definitionPrefix.textContent = "Cost of risk:";
+  const definitionValue = document.createElement("span");
+  definitionValue.className = "cost-of-risk-definition-local-chip-value";
+  definitionValue.textContent = definition?.label ?? "Definition";
+  definitionButton.append(definitionPrefix, definitionValue);
+
+  const valueButton = document.createElement("button");
+  valueButton.type = "button";
+  valueButton.className = "cost-of-risk-definition-headline-value";
+  valueButton.classList.toggle("is-active", !activeCostOfRiskDefinitionDriverCode);
+  valueButton.dataset.costOfRiskDefinitionBenchmarkTarget = "total";
+  valueButton.dataset.costOfRiskCalculationDetail = "cost-of-risk-total";
+  valueButton.textContent = formatCostOfRiskDisplayValue(
+    activeCostOfRiskDefinitionDisplayMode === "ratio"
+      ? definitionModel.ratioBasisPoints
+      : definitionModel.value,
+    activeCostOfRiskDefinitionDisplayMode,
+    selectedUnit,
+    true
+  );
+
+  header.append(definitionButton, valueButton);
+  return header;
 }
 
 function createCostOfRiskDefinitionPanelTabs() {
   const tabs = document.createElement("div");
   tabs.className = "cost-of-risk-definition-detail-tabs";
   [
-    { key: "drivers", label: "Main drivers" },
-    { key: "components", label: "Components" }
+    { key: "components", label: "Components" },
+    { key: "drivers", label: "Main drivers" }
   ].forEach((tab) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -1633,29 +1658,6 @@ function createCostOfRiskDefinitionEmpty(message) {
   empty.className = "cost-of-risk-definition-empty";
   empty.textContent = resolveCostOfRiskTabEmptyMessage(message);
   return empty;
-}
-
-function createCostOfRiskDefinitionCard(labelText, valueText, contextText, options = {}) {
-  const card = document.createElement(options.benchmarkTarget ? "button" : "div");
-  card.className = "cost-of-risk-definition-card";
-  card.classList.toggle("is-clickable", Boolean(options.benchmarkTarget));
-  card.classList.toggle("is-active", Boolean(options.active));
-  if (options.benchmarkTarget) {
-    card.type = "button";
-    card.dataset.costOfRiskDefinitionBenchmarkTarget = options.benchmarkTarget;
-    card.dataset.costOfRiskCalculationDetail = "cost-of-risk-total";
-  }
-  const label = document.createElement("div");
-  label.className = "cost-of-risk-definition-card-label";
-  label.textContent = labelText;
-  const value = document.createElement("div");
-  value.className = "cost-of-risk-definition-card-value";
-  value.textContent = valueText;
-  const context = document.createElement("div");
-  context.className = "cost-of-risk-definition-card-context";
-  context.textContent = contextText;
-  card.append(label, value, context);
-  return card;
 }
 
 function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {

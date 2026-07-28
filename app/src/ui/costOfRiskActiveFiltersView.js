@@ -82,7 +82,6 @@ export function renderCostOfRiskActiveFiltersView({
       : []),
     ...(activeTab === "cost-of-risk"
       ? [
-        createCostOfRiskDefinitionChip(costOfRiskDefinitionId, costOfRiskDefinitionMenuOpen),
         createCostOfRiskDisplayModeChip({
           displayMode,
           isOpen: contributionDisplayMenuOpen,
