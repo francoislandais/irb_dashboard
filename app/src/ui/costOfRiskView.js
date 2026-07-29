@@ -33,6 +33,7 @@ import {
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
   clampCostOfRiskSmoothingWindow,
+  createCostOfRiskChartData,
   formatCostOfRiskDisplayValue,
   formatCostOfRiskSmoothingLabel,
   formatReferenceQuarterLabel,
@@ -41,22 +42,26 @@ import {
   getCostOfRiskPointDisplayValue,
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
-  getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
+  getCostOfRiskYAxisBounds,
+  getSelectedSmoothedCostOfRiskPoint,
+  smoothCostOfRiskPoints
+} from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskStageTransfers.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskStageReconciliationView.js?v=20260729-cor-definition-comparison";
 import {
   createCostOfRiskHighchartsTitle,
-  escapeHtml
-} from "./costOfRiskChartUtils.js?v=20260719-context-panel-filter-fixes";
+  escapeHtml,
+  formatCostOfRiskQuarterAxisLabel,
+  getCostOfRiskAxisTickPositions
+} from "./costOfRiskChartUtils.js?v=20260729-cor-definition-comparison";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -64,7 +69,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskSummaryTablesView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -72,13 +77,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260719-context-panel-filter-fixes";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskSummaryChartsView.js?v=20260729-cor-definition-comparison";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -86,7 +91,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskStageRatioView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -94,7 +99,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskCoverageRatioView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -102,50 +107,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskCollateralRatioView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260729-cor-definition-comparison";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskTreemapView.js?v=20260729-cor-definition-comparison";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260729-cor-definition-comparison";
+import {
+  renderBenchmarkEndpointLabels,
+  scheduleBenchmarkEndpointLabels
+} from "./benchmarkLineChart.js?v=20260729-cor-definition-comparison";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260719-context-panel-filter-fixes";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskCoreDefinitionView.js?v=20260729-cor-definition-comparison";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260729-cor-definition-comparison";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskControlsView.js?v=20260729-cor-definition-comparison";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260719-context-panel-filter-fixes";
-import { openExplorerPoint } from "./explorerView.js?v=20260719-context-panel-filter-fixes";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskAuditTableView.js?v=20260729-cor-definition-comparison";
+import { openExplorerPoint } from "./explorerView.js?v=20260729-cor-definition-comparison";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260729-cor-definition-comparison";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskTabsView.js?v=20260729-cor-definition-comparison";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskModelCache.js?v=20260729-cor-definition-comparison";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskFilterRules.js?v=20260729-cor-definition-comparison";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -154,12 +163,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskStageTransferSelection.js?v=20260729-cor-definition-comparison";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskCoreSelection.js?v=20260729-cor-definition-comparison";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -183,6 +192,7 @@ let activeCostOfRiskDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionDriverCode = "";
 let activeCostOfRiskDefinitionPanelTab = "components";
 let activeCostOfRiskCustomDefinitionXCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
+let activeCostOfRiskComparisonBenchmarkDefinitionId = "f12-selected-components";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -203,6 +213,7 @@ let activeCostOfRiskMovementAuditXCode = "";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
+let costOfRiskDefinitionComparisonChart = null;
 let costOfRiskWaterfallChart = null;
 let costOfRiskPeerSelectionActions = null;
 let costOfRiskDatasetInfoActions = null;
@@ -215,6 +226,13 @@ let costOfRiskHelpTopicHistoryIndex = 0;
 // help topic in the context panel, so selection stays visible
 // instead of covering the rows below it.
 const COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX = "filter-selection:";
+const COST_OF_RISK_COMPARISON_DEFINITION_ID = "definitions-comparison";
+const COST_OF_RISK_COMPARISON_METHOD_IDS = [
+  "f02-impairment",
+  "f12-selected-components",
+  "f12-acpr-components",
+  "f12-custom-components"
+];
 
 function isCostOfRiskFilterSelectionTopicOpen(kind) {
   return activeCostOfRiskHelpTopic === `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}${kind}`;
@@ -839,24 +857,29 @@ export function renderCostOfRisk(state) {
 
   if (activeCostOfRiskTab === "cost-of-risk") {
     const customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes();
-    const definitionModel = getCostOfRiskCachedModel(
+    const isComparisonDefinition = activeCostOfRiskDefinitionId === COST_OF_RISK_COMPARISON_DEFINITION_ID;
+    const benchmarkDefinitionId = isComparisonDefinition
+      ? activeCostOfRiskComparisonBenchmarkDefinitionId
+      : activeCostOfRiskDefinitionId;
+    const definitionModel = getCostOfRiskDefinitionModelForId(
       state,
-      createCostOfRiskModelCacheKey(state, "cost-of-risk-definition", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskDefinitionId, activeCostOfRiskDefinitionDriverCode, customDefinitionCodes.join(",")),
-      () => buildCostOfRiskDefinitionModel(
-        state,
-        activeCostOfRiskDefinitionId,
-        activeCostOfRiskFilters,
-        activeCostOfRiskReferenceDate,
-        activeCostOfRiskDefinitionDriverCode,
-        customDefinitionCodes
-      )
+      benchmarkDefinitionId,
+      activeCostOfRiskDefinitionDriverCode,
+      customDefinitionCodes
     );
     activeCostOfRiskReferenceDate = definitionModel.referenceDate || activeCostOfRiskReferenceDate;
     renderCostOfRiskActiveFilters(filterOptions);
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
-    renderCostOfRiskDefinitionView(definitionModel, state);
+    if (isComparisonDefinition) {
+      const comparisonModels = COST_OF_RISK_COMPARISON_METHOD_IDS.map((definitionId) => (
+        getCostOfRiskDefinitionModelForId(state, definitionId, "", customDefinitionCodes)
+      ));
+      renderCostOfRiskDefinitionComparisonView(comparisonModels, definitionModel, state);
+    } else {
+      renderCostOfRiskDefinitionView(definitionModel, state);
+    }
     renderCostOfRiskDefinitionAuditPanel(definitionModel, { allowDefaultRender: consumeCostOfRiskDataAuditRequest() });
     leaveCostOfRiskStageTransferTab();
     clearCostOfRiskAuditTable();
@@ -1539,6 +1562,7 @@ function renderCostOfRiskCollateralRatioView(collateralRatio, state) {
 }
 
 function renderCostOfRiskDefinitionView(definitionModel, state) {
+  destroyCostOfRiskDefinitionComparisonChart();
   renderCostOfRiskDefinitionPanel(definitionModel, state.selectedUnit);
   if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
     destroyCostOfRiskMovementChart();
@@ -1563,6 +1587,46 @@ function renderCostOfRiskDefinitionView(definitionModel, state) {
     },
     smoothingWindow: activeCostOfRiskSmoothingWindow,
     titleText: "Cost of Risk - Time Evolution"
+  });
+}
+
+function getCostOfRiskDefinitionModelForId(state, definitionId, selectedDriverCode = "", customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes()) {
+  return getCostOfRiskCachedModel(
+    state,
+    createCostOfRiskModelCacheKey(state, "cost-of-risk-definition", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, definitionId, selectedDriverCode, customDefinitionCodes.join(",")),
+    () => buildCostOfRiskDefinitionModel(
+      state,
+      definitionId,
+      activeCostOfRiskFilters,
+      activeCostOfRiskReferenceDate,
+      selectedDriverCode,
+      customDefinitionCodes
+    )
+  );
+}
+
+function renderCostOfRiskDefinitionComparisonView(comparisonModels, benchmarkModel, state) {
+  renderCostOfRiskDefinitionComparisonPanel(comparisonModels, benchmarkModel, state);
+  if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
+    destroyCostOfRiskMovementChart();
+  }
+  renderMovementTimeSeriesChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    container: elements.costOfRiskDefinitionChart,
+    displayMode: activeCostOfRiskDefinitionDisplayMode,
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
+    jstCode: state.selectedJst,
+    onClearSmoothing: clearCostOfRiskSmoothing,
+    onChangeSmoothing: updateCostOfRiskSmoothingWindow,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
+    peerDisplayMode: state.peerDisplayMode,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    selectedUnit: state.selectedUnit,
+    selection: benchmarkModel,
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    titleText: `Cost of Risk - ${benchmarkModel.definition?.label ?? "Selected definition"} Benchmark`
   });
 }
 
@@ -1598,6 +1662,183 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
 
   root.append(detail);
   elements.costOfRiskDefinitionPanel.replaceChildren(root);
+}
+
+function renderCostOfRiskDefinitionComparisonPanel(comparisonModels, benchmarkModel, state) {
+  if (!elements.costOfRiskDefinitionPanel) return;
+  if (!window.Highcharts) return;
+  destroyCostOfRiskDefinitionComparisonChart();
+
+  const root = document.createElement("div");
+  root.className = "cost-of-risk-definition-comparison";
+  root.append(createCostOfRiskDefinitionHeader(benchmarkModel, state.selectedUnit));
+  const chartContainer = document.createElement("div");
+  chartContainer.className = "cost-of-risk-definition-comparison-chart";
+  root.append(chartContainer);
+  elements.costOfRiskDefinitionPanel.replaceChildren(root);
+
+  const palette = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
+  const dashStyles = ["ShortDash", "ShortDot", "Dash", "Dot"];
+  const series = comparisonModels.map((model, index) => {
+    const definitionId = model.definition?.id ?? "";
+    const isActive = definitionId === activeCostOfRiskComparisonBenchmarkDefinitionId;
+    const color = isActive ? primaryDark : palette[index % palette.length];
+    const chartData = createCostOfRiskChartData(smoothCostOfRiskPoints(model.series ?? [], activeCostOfRiskSmoothingWindow), activeCostOfRiskDefinitionDisplayMode);
+    return {
+      clip: false,
+      color,
+      custom: {
+        benchmarkLabel: model.definition?.label ?? definitionId,
+        definitionId
+      },
+      dashStyle: isActive ? "Solid" : dashStyles[index % dashStyles.length],
+      data: chartData,
+      fillColor: isActive ? "rgba(140, 148, 144, 0.12)" : "transparent",
+      lineWidth: isActive ? 3.6 : 1.45,
+      marker: {
+        fillColor: isActive ? "#ffffff" : color,
+        enabled: isActive,
+        lineColor: color,
+        lineWidth: isActive ? 1.5 : 0,
+        radius: isActive ? 5 : 0,
+        symbol: "circle"
+      },
+      name: definitionId,
+      opacity: isActive ? 1 : 0.78,
+      states: {
+        hover: {
+          enabled: true,
+          halo: { size: isActive ? 9 : 0 },
+          lineWidth: isActive ? 4 : 2.1,
+          lineWidthPlus: 0
+        },
+        inactive: {
+          opacity: isActive ? 1 : 0.42
+        }
+      },
+      threshold: 0,
+      type: isActive ? "area" : "line",
+      zIndex: isActive ? 100 : 1
+    };
+  }).filter((serie) => serie.data.length > 0);
+  if (series.length === 0) {
+    chartContainer.textContent = "No cost of risk definition time series is available for the current selection.";
+    return;
+  }
+  const yBounds = getCostOfRiskYAxisBounds(series);
+  const selectedReferencePoint = benchmarkModel.series?.find((point) => point.label === activeCostOfRiskReferenceDate);
+
+  const options = {
+    chart: {
+      animation: false,
+      backgroundColor: "transparent",
+      events: {
+        render() {
+          renderBenchmarkEndpointLabels(this, activeCostOfRiskComparisonBenchmarkDefinitionId, selectCostOfRiskComparisonDefinition);
+        }
+      },
+      spacingRight: 128,
+      type: "line",
+      zooming: { type: "xy" },
+      zoomType: "xy"
+    },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    plotOptions: {
+      series: {
+        animation: false,
+        cursor: "pointer",
+        events: {
+          click() {
+            const definitionId = this.userOptions?.custom?.definitionId ?? "";
+            selectCostOfRiskComparisonDefinition(definitionId);
+          }
+        },
+        point: {
+          events: {
+            click() {
+              const definitionId = this.series?.userOptions?.custom?.definitionId ?? "";
+              setTimeout(() => selectCostOfRiskComparisonDefinition(definitionId, this.referenceLabel), 0);
+            }
+          }
+        }
+      }
+    },
+    series,
+    title: { text: "" },
+    tooltip: {
+      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
+      pointFormatter() {
+          const label = this.series.userOptions?.custom?.benchmarkLabel ?? this.series.name;
+          return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(label)}</b>: ${formatCostOfRiskDisplayValue(this.y, activeCostOfRiskDefinitionDisplayMode, state.selectedUnit)}`;
+      },
+      shared: false,
+      split: false,
+      stickOnContact: true,
+      xDateFormat: "%d/%m/%Y"
+    },
+    xAxis: {
+      labels: {
+        formatter() {
+          return formatCostOfRiskQuarterAxisLabel(this.value);
+        },
+        rotation: -45,
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#c2cac5",
+      lineWidth: 1,
+      plotLines: selectedReferencePoint?.date instanceof Date ? [{
+        color: "#7f8984",
+        dashStyle: "ShortDash",
+        value: selectedReferencePoint.date.getTime(),
+        width: 1,
+        zIndex: 3
+      }] : [],
+      tickColor: "#d9dedb",
+      tickPositions: getCostOfRiskAxisTickPositions(comparisonModels.flatMap((model) => model.series ?? [])),
+      type: "datetime"
+    },
+    yAxis: {
+      gridLineColor: "#edf0ee",
+      labels: {
+        formatter() {
+          return activeCostOfRiskDefinitionDisplayMode === "ratio"
+            ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
+            : formatMetricValue(this.value, state.selectedUnit);
+        },
+        style: { color: "#5f6b65" }
+      },
+      max: yBounds.max,
+      min: yBounds.min,
+      lineColor: "#aeb8b2",
+      lineWidth: 1,
+      startOnTick: false,
+      endOnTick: false,
+      tickAmount: 6,
+      title: { text: activeCostOfRiskDefinitionDisplayMode === "ratio" ? "Cost of risk (bp)" : "Amount" }
+    }
+  };
+
+  costOfRiskDefinitionComparisonChart = window.Highcharts.chart(chartContainer, options);
+  scheduleBenchmarkEndpointLabels(
+    costOfRiskDefinitionComparisonChart,
+    activeCostOfRiskComparisonBenchmarkDefinitionId,
+    selectCostOfRiskComparisonDefinition
+  );
+}
+
+function destroyCostOfRiskDefinitionComparisonChart() {
+  if (!costOfRiskDefinitionComparisonChart) return;
+  costOfRiskDefinitionComparisonChart.destroy();
+  costOfRiskDefinitionComparisonChart = null;
+}
+
+function selectCostOfRiskComparisonDefinition(definitionId, referenceLabel = "") {
+  if (!COST_OF_RISK_COMPARISON_METHOD_IDS.includes(definitionId)) return;
+  activeCostOfRiskComparisonBenchmarkDefinitionId = definitionId;
+  activeCostOfRiskDefinitionDriverCode = "";
+  if (referenceLabel) activeCostOfRiskReferenceDate = referenceLabel;
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 function createCostOfRiskDefinitionHeader(definitionModel, selectedUnit) {

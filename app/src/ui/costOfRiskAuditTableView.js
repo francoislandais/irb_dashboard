@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
+} from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

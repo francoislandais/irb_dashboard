@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260719-context-panel-filter-fixes";
+} from "./benchmarkLineChart.js?v=20260729-cor-definition-comparison";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,7 +20,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
   renderCostOfRiskYAxisFocusBadge
-} from "./costOfRiskChartUtils.js?v=20260719-context-panel-filter-fixes";
+} from "./costOfRiskChartUtils.js?v=20260729-cor-definition-comparison";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCollateralRatioChart = null;

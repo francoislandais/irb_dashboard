@@ -1786,6 +1786,22 @@ button:focus-visible {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.cost-of-risk-definition-comparison {
+  align-content: stretch;
+  display: grid;
+  gap: 8px;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.cost-of-risk-definition-comparison-chart {
+  height: 100%;
+  min-height: 220px;
+  min-width: 0;
+}
+
 .cost-of-risk-definition-header {
   align-items: center;
   display: grid;

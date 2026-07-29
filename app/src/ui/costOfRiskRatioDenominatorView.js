@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

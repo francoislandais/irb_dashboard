@@ -3,7 +3,7 @@ import {
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260719-context-panel-filter-fixes";
+} from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
