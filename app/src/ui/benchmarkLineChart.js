@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260730-cor-compact-layout";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260730-cor-compact-layout";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260730-cor-benchmark-vs-f02";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260730-cor-benchmark-vs-f02";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
@@ -11,6 +11,7 @@ const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
 export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, primaryDark, {
   displayMode = "amount",
   selectedAreaFill = true,
+  selectedAreaSeriesName = "",
   smoothingWindow = 1
 } = {}) {
   return (benchmarkSeries ?? [])
@@ -20,7 +21,11 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
       const color = isSelected ? primaryDark : BENCHMARK_LINE_GRAYS[index % BENCHMARK_LINE_GRAYS.length];
       const dashStyle = isSelected ? "Solid" : BENCHMARK_LINE_DASHES[index % BENCHMARK_LINE_DASHES.length];
       const chartData = createCostOfRiskChartData(points, displayMode);
-      const shouldFillSelectedArea = isSelected && selectedAreaFill;
+      const shouldFillSelectedArea = selectedAreaFill && (
+        selectedAreaSeriesName
+          ? benchmark.jstCode === selectedAreaSeriesName
+          : isSelected
+      );
       return {
         // Selected series render as an area down to y=0, so the reader can
         // immediately see whether it sits above or below zero. The fill is a

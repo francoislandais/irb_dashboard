@@ -45,23 +45,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260730-cor-compact-layout";
+} from "../data/costOfRisk.js?v=20260730-cor-benchmark-vs-f02";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskStageTransfers.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskStageReconciliationView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskChartUtils.js?v=20260730-cor-benchmark-vs-f02";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -69,7 +69,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskSummaryTablesView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -77,13 +77,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260730-cor-compact-layout";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskSummaryChartsView.js?v=20260730-cor-benchmark-vs-f02";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -91,7 +91,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskStageRatioView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -99,7 +99,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskCoverageRatioView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -107,54 +107,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskCollateralRatioView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskTreemapView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260730-cor-compact-layout";
+} from "./benchmarkLineChart.js?v=20260730-cor-benchmark-vs-f02";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260730-cor-compact-layout";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskCoreDefinitionView.js?v=20260730-cor-benchmark-vs-f02";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskControlsView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260730-cor-compact-layout";
-import { openExplorerPoint } from "./explorerView.js?v=20260730-cor-compact-layout";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskAuditTableView.js?v=20260730-cor-benchmark-vs-f02";
+import { openExplorerPoint } from "./explorerView.js?v=20260730-cor-benchmark-vs-f02";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskTabsView.js?v=20260730-cor-benchmark-vs-f02";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskModelCache.js?v=20260730-cor-benchmark-vs-f02";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskFilterRules.js?v=20260730-cor-benchmark-vs-f02";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -163,12 +163,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskStageTransferSelection.js?v=20260730-cor-benchmark-vs-f02";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260730-cor-compact-layout";
+} from "./costOfRiskCoreSelection.js?v=20260730-cor-benchmark-vs-f02";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -193,6 +193,7 @@ let activeCostOfRiskDefinitionDriverCode = "";
 let activeCostOfRiskDefinitionPanelTab = "components";
 let activeCostOfRiskCustomDefinitionXCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
 let activeCostOfRiskComparisonBenchmarkDefinitionId = "f12-selected-components";
+let activeCostOfRiskDefinitionBenchmarkMode = "benchmark";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
@@ -1567,27 +1568,70 @@ function renderCostOfRiskDefinitionView(definitionModel, state) {
   if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
     destroyCostOfRiskMovementChart();
   }
+  const isTotalDefinitionSelected = !activeCostOfRiskDefinitionDriverCode;
+  const chartSelection = isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
+    ? buildCostOfRiskDefinitionVsF02ChartSelection(definitionModel, state)
+    : {
+        ...definitionModel,
+        series: definitionModel.chartSeries ?? definitionModel.series
+      };
+  const chartSelectedSeriesName = isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
+    ? getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel)
+    : state.selectedJst;
   renderMovementTimeSeriesChart({
     activeReferenceDate: activeCostOfRiskReferenceDate,
     container: elements.costOfRiskDefinitionChart,
     displayMode: activeCostOfRiskDefinitionDisplayMode,
     focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
-    jstCode: state.selectedJst,
+    jstCode: chartSelectedSeriesName,
+    benchmarkMode: activeCostOfRiskDefinitionBenchmarkMode,
     onClearSmoothing: clearCostOfRiskSmoothing,
     onChangeSmoothing: updateCostOfRiskSmoothingWindow,
-    onSelectJst: selectCostOfRiskChartJst,
+    onSelectJst: isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
+      ? () => {}
+      : selectCostOfRiskChartJst,
     onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleBenchmarkMode: setCostOfRiskDefinitionBenchmarkMode,
     onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
-    peerDisplayMode: state.peerDisplayMode,
+    peerDisplayMode: isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
+      ? "explicit"
+      : state.peerDisplayMode,
     renderTabEmpty: renderCostOfRiskTabEmpty,
     selectedUnit: state.selectedUnit,
-    selection: {
-      ...definitionModel,
-      series: definitionModel.chartSeries ?? definitionModel.series
-    },
+    selection: chartSelection,
+    showBenchmarkModeToggle: isTotalDefinitionSelected,
     smoothingWindow: activeCostOfRiskSmoothingWindow,
     titleText: "Cost of Risk - Time Evolution"
   });
+}
+
+function buildCostOfRiskDefinitionVsF02ChartSelection(definitionModel, state) {
+  const f02Model = getCostOfRiskDefinitionModelForId(
+    state,
+    "f02-impairment",
+    "",
+    getActiveCostOfRiskCustomDefinitionXCodes()
+  );
+  const currentSeriesName = getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel);
+  return {
+    ...definitionModel,
+    benchmarkSeries: [
+      {
+        jstCode: currentSeriesName,
+        points: definitionModel.series ?? []
+      },
+      {
+        jstCode: "F02",
+        points: f02Model.series ?? []
+      }
+    ],
+    selectedAreaSeriesName: "F02",
+    series: definitionModel.series ?? []
+  };
+}
+
+function getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel) {
+  return definitionModel.definition?.label ?? "Current definition";
 }
 
 function getCostOfRiskDefinitionModelForId(state, definitionId, selectedDriverCode = "", customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes()) {
@@ -1610,21 +1654,30 @@ function renderCostOfRiskDefinitionComparisonView(comparisonModels, benchmarkMod
   if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
     destroyCostOfRiskMovementChart();
   }
+  const chartSelection = activeCostOfRiskDefinitionBenchmarkMode === "f02"
+    ? buildCostOfRiskDefinitionVsF02ChartSelection(benchmarkModel, state)
+    : benchmarkModel;
+  const chartSelectedSeriesName = activeCostOfRiskDefinitionBenchmarkMode === "f02"
+    ? getCostOfRiskDefinitionVsF02CurrentSeriesName(benchmarkModel)
+    : state.selectedJst;
   renderMovementTimeSeriesChart({
     activeReferenceDate: activeCostOfRiskReferenceDate,
     container: elements.costOfRiskDefinitionChart,
     displayMode: activeCostOfRiskDefinitionDisplayMode,
     focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
-    jstCode: state.selectedJst,
+    jstCode: chartSelectedSeriesName,
+    benchmarkMode: activeCostOfRiskDefinitionBenchmarkMode,
     onClearSmoothing: clearCostOfRiskSmoothing,
     onChangeSmoothing: updateCostOfRiskSmoothingWindow,
-    onSelectJst: selectCostOfRiskChartJst,
+    onSelectJst: activeCostOfRiskDefinitionBenchmarkMode === "f02" ? () => {} : selectCostOfRiskChartJst,
     onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleBenchmarkMode: setCostOfRiskDefinitionBenchmarkMode,
     onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
-    peerDisplayMode: state.peerDisplayMode,
+    peerDisplayMode: activeCostOfRiskDefinitionBenchmarkMode === "f02" ? "explicit" : state.peerDisplayMode,
     renderTabEmpty: renderCostOfRiskTabEmpty,
     selectedUnit: state.selectedUnit,
-    selection: benchmarkModel,
+    selection: chartSelection,
+    showBenchmarkModeToggle: true,
     smoothingWindow: activeCostOfRiskSmoothingWindow,
     titleText: `Cost of Risk - ${benchmarkModel.definition?.label ?? "Selected definition"} Benchmark`
   });
@@ -5137,6 +5190,13 @@ function clearCostOfRiskSmoothing() {
 function toggleCostOfRiskFocusedYAxis() {
   activeCostOfRiskFocusSelectedYAxis = !activeCostOfRiskFocusSelectedYAxis;
   setCostOfRiskHelpTopic(activeCostOfRiskFocusSelectedYAxis ? "y-focus-on" : "y-focus-off");
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function setCostOfRiskDefinitionBenchmarkMode(mode) {
+  const nextMode = mode === "f02" ? "f02" : "benchmark";
+  if (activeCostOfRiskDefinitionBenchmarkMode === nextMode) return;
+  activeCostOfRiskDefinitionBenchmarkMode = nextMode;
   if (getLatestState()) rerenderApp(getLatestState());
 }
 

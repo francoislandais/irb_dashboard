@@ -1593,6 +1593,41 @@ button:focus-visible {
   color: #ffffff;
 }
 
+.cost-of-risk-chart-benchmark-mode {
+  position: absolute;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  border: 1px solid #d2d9d5;
+  border-radius: 5px;
+  background: #eef1ef;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.cost-of-risk-chart-benchmark-mode-option {
+  min-height: 17px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #52615a;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
+.cost-of-risk-chart-benchmark-mode-option + .cost-of-risk-chart-benchmark-mode-option {
+  border-left: 1px solid #d2d9d5;
+}
+
+.cost-of-risk-chart-benchmark-mode-option.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
 .cost-of-risk-chart-smoothing-badge-toggle,
 .cost-of-risk-chart-smoothing-badge-clear {
   border: 0;
@@ -1915,7 +1950,7 @@ button:focus-visible {
 .cost-of-risk-definition-drivers {
   align-content: start;
   display: grid;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
 }
 
@@ -1923,7 +1958,7 @@ button:focus-visible {
   align-items: center;
   display: flex;
   gap: 7px;
-  margin-bottom: 1px;
+  margin-bottom: 0;
 }
 
 .cost-of-risk-definition-detail-tab {
@@ -1956,10 +1991,10 @@ button:focus-visible {
   border-radius: 6px;
   cursor: pointer;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 23px;
-  padding: 0 5px;
+  min-height: 19px;
+  padding: 0 4px;
   text-align: left;
 }
 
@@ -1987,7 +2022,7 @@ button:focus-visible {
 .cost-of-risk-definition-driver-empty {
   color: #26332d;
   font-size: 0.7rem;
-  line-height: 1.25;
+  line-height: 1.12;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2003,6 +2038,7 @@ button:focus-visible {
   color: var(--primary-dark);
   font-size: 0.7rem;
   font-weight: 500;
+  line-height: 1.12;
   text-align: right;
   white-space: nowrap;
 }

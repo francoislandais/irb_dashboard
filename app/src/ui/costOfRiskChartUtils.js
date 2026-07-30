@@ -175,6 +175,51 @@ export function clearCostOfRiskYAxisFocusBadge(chart) {
   if (chart) chart.customCostOfRiskYAxisFocusBadge = [];
 }
 
+export function renderCostOfRiskBenchmarkModeBadge(chart, mode, onToggleMode, options = {}) {
+  clearCostOfRiskBenchmarkModeBadge(chart);
+  const host = chart?.renderTo;
+  if (!host || typeof onToggleMode !== "function" || options.visible === false) return;
+
+  const titleY = chart.title?.alignAttr?.y ?? 8;
+  const badgeY = Math.max(8, titleY - 4);
+  const badgeX = Math.max(8, chart.chartWidth - 350);
+  const activeMode = mode === "f02" ? "f02" : "benchmark";
+
+  host.style.position = host.style.position || "relative";
+  const wrapper = document.createElement("div");
+  wrapper.className = "cost-of-risk-chart-benchmark-mode";
+  wrapper.style.left = `${badgeX}px`;
+  wrapper.style.top = `${badgeY}px`;
+
+  [
+    { key: "benchmark", label: "benchmark" },
+    { key: "f02", label: "vs F02" }
+  ].forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "cost-of-risk-chart-benchmark-mode-option";
+    button.classList.toggle("is-active", item.key === activeMode);
+    button.textContent = item.label;
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (item.key !== activeMode) onToggleMode(item.key);
+    });
+    wrapper.append(button);
+  });
+
+  ["click", "pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
+    wrapper.addEventListener(eventName, (event) => event.stopPropagation());
+  });
+  host.append(wrapper);
+  chart.customCostOfRiskBenchmarkModeBadge = [wrapper];
+}
+
+export function clearCostOfRiskBenchmarkModeBadge(chart) {
+  chart?.customCostOfRiskBenchmarkModeBadge?.forEach((element) => element?.remove?.());
+  if (chart) chart.customCostOfRiskBenchmarkModeBadge = [];
+}
+
 export function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
