@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260730-cor-compact-layout";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 let costOfRiskSummaryMosaicClickTimer = null;

@@ -1786,6 +1786,13 @@ button:focus-visible {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.cost-of-risk-definition-grid--side {
+  align-content: stretch;
+  gap: 24px;
+  grid-template-columns: minmax(190px, 29%) minmax(0, 1fr);
+  height: 100%;
+}
+
 .cost-of-risk-definition-comparison {
   align-content: stretch;
   display: grid;
@@ -1810,6 +1817,14 @@ button:focus-visible {
   min-width: 0;
 }
 
+.cost-of-risk-definition-summary {
+  align-content: start;
+  display: grid;
+  gap: 13px;
+  justify-items: start;
+  min-width: 0;
+}
+
 .cost-of-risk-definition-local-chip {
   align-items: baseline;
   background: #f1f4f2;
@@ -1823,6 +1838,7 @@ button:focus-visible {
   justify-self: start;
   line-height: 1.1;
   min-width: 0;
+  max-width: 100%;
   padding: 5px 8px;
 }
 
@@ -1849,10 +1865,10 @@ button:focus-visible {
   border-radius: 0;
   color: var(--primary-dark);
   cursor: pointer;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 600;
   line-height: 1.1;
-  padding: 6px 9px;
+  padding: 7px 10px;
   text-align: right;
   white-space: nowrap;
 }
@@ -1865,9 +1881,41 @@ button:focus-visible {
   background: #f7f8f7;
 }
 
-.cost-of-risk-definition-drivers {
+.cost-of-risk-definition-scope-details {
   display: grid;
-  gap: 4px;
+  gap: 2px;
+  margin-top: 8px;
+  min-width: 0;
+}
+
+.cost-of-risk-definition-scope-row {
+  align-items: baseline;
+  color: #26332d;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-width: 0;
+}
+
+.cost-of-risk-definition-scope-label {
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.cost-of-risk-definition-scope-value {
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cost-of-risk-definition-drivers {
+  align-content: start;
+  display: grid;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -1910,8 +1958,8 @@ button:focus-visible {
   display: grid;
   gap: 8px;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 24px;
-  padding: 0 6px;
+  min-height: 23px;
+  padding: 0 5px;
   text-align: left;
 }
 
@@ -1938,7 +1986,7 @@ button:focus-visible {
 .cost-of-risk-definition-driver-label,
 .cost-of-risk-definition-driver-empty {
   color: #26332d;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   line-height: 1.25;
   min-width: 0;
   overflow: hidden;
@@ -1953,7 +2001,7 @@ button:focus-visible {
 
 .cost-of-risk-definition-driver-value {
   color: var(--primary-dark);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 500;
   text-align: right;
   white-space: nowrap;

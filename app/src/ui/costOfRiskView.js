@@ -45,23 +45,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260729-cor-definition-comparison";
+} from "../data/costOfRisk.js?v=20260730-cor-compact-layout";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskStageTransfers.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskStageReconciliationView.js?v=20260730-cor-compact-layout";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskChartUtils.js?v=20260730-cor-compact-layout";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -69,7 +69,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskSummaryTablesView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -77,13 +77,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260729-cor-definition-comparison";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskSummaryChartsView.js?v=20260730-cor-compact-layout";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -91,7 +91,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskStageRatioView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -99,7 +99,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskCoverageRatioView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -107,54 +107,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskCollateralRatioView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260730-cor-compact-layout";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskTreemapView.js?v=20260730-cor-compact-layout";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260730-cor-compact-layout";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260729-cor-definition-comparison";
+} from "./benchmarkLineChart.js?v=20260730-cor-compact-layout";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260729-cor-definition-comparison";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskCoreDefinitionView.js?v=20260730-cor-compact-layout";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260730-cor-compact-layout";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskControlsView.js?v=20260730-cor-compact-layout";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260729-cor-definition-comparison";
-import { openExplorerPoint } from "./explorerView.js?v=20260729-cor-definition-comparison";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskAuditTableView.js?v=20260730-cor-compact-layout";
+import { openExplorerPoint } from "./explorerView.js?v=20260730-cor-compact-layout";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260730-cor-compact-layout";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskTabsView.js?v=20260730-cor-compact-layout";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskModelCache.js?v=20260730-cor-compact-layout";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskFilterRules.js?v=20260730-cor-compact-layout";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -163,12 +163,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskStageTransferSelection.js?v=20260730-cor-compact-layout";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260729-cor-definition-comparison";
+} from "./costOfRiskCoreSelection.js?v=20260730-cor-compact-layout";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -1638,8 +1638,8 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
   }
 
   const root = document.createElement("div");
-  root.className = "cost-of-risk-definition-grid cost-of-risk-definition-grid--compact";
-  root.append(createCostOfRiskDefinitionHeader(definitionModel, selectedUnit));
+  root.className = "cost-of-risk-definition-grid cost-of-risk-definition-grid--side";
+  root.append(createCostOfRiskDefinitionSummary(definitionModel, selectedUnit));
 
   const detail = document.createElement("div");
   detail.className = "cost-of-risk-definition-drivers";
@@ -1662,6 +1662,17 @@ function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millio
 
   root.append(detail);
   elements.costOfRiskDefinitionPanel.replaceChildren(root);
+}
+
+function createCostOfRiskDefinitionSummary(definitionModel, selectedUnit) {
+  const summary = document.createElement("div");
+  summary.className = "cost-of-risk-definition-summary";
+  summary.append(
+    createCostOfRiskDefinitionButton(definitionModel),
+    createCostOfRiskDefinitionValueButton(definitionModel, selectedUnit),
+    createCostOfRiskDefinitionScopeDetails(definitionModel, selectedUnit)
+  );
+  return summary;
 }
 
 function renderCostOfRiskDefinitionComparisonPanel(comparisonModels, benchmarkModel, state) {
@@ -1844,7 +1855,14 @@ function selectCostOfRiskComparisonDefinition(definitionId, referenceLabel = "")
 function createCostOfRiskDefinitionHeader(definitionModel, selectedUnit) {
   const header = document.createElement("div");
   header.className = "cost-of-risk-definition-header";
+  header.append(
+    createCostOfRiskDefinitionButton(definitionModel),
+    createCostOfRiskDefinitionValueButton(definitionModel, selectedUnit)
+  );
+  return header;
+}
 
+function createCostOfRiskDefinitionButton(definitionModel) {
   const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === activeCostOfRiskDefinitionId)
     ?? definitionModel.definition
     ?? COST_OF_RISK_DEFINITION_OPTIONS[0];
@@ -1860,7 +1878,10 @@ function createCostOfRiskDefinitionHeader(definitionModel, selectedUnit) {
   definitionValue.className = "cost-of-risk-definition-local-chip-value";
   definitionValue.textContent = definition?.label ?? "Definition";
   definitionButton.append(definitionPrefix, definitionValue);
+  return definitionButton;
+}
 
+function createCostOfRiskDefinitionValueButton(definitionModel, selectedUnit) {
   const valueButton = document.createElement("button");
   valueButton.type = "button";
   valueButton.className = "cost-of-risk-definition-headline-value";
@@ -1876,8 +1897,38 @@ function createCostOfRiskDefinitionHeader(definitionModel, selectedUnit) {
     true
   );
 
-  header.append(definitionButton, valueButton);
-  return header;
+  return valueButton;
+}
+
+function createCostOfRiskDefinitionScopeDetails(definitionModel, selectedUnit) {
+  const details = document.createElement("div");
+  details.className = "cost-of-risk-definition-scope-details";
+  [
+    {
+      label: "Numerator",
+      value: formatMetricValue(definitionModel.value, selectedUnit)
+    },
+    {
+      label: "Denominator",
+      value: formatMetricValue(definitionModel.denominator, selectedUnit)
+    }
+  ].forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "cost-of-risk-definition-scope-row";
+
+    const label = document.createElement("span");
+    label.className = "cost-of-risk-definition-scope-label";
+    label.textContent = `${item.label}:`;
+
+    const value = document.createElement("span");
+    value.className = "cost-of-risk-definition-scope-value";
+    value.textContent = item.value;
+
+    row.append(label, value);
+    details.append(row);
+  });
+
+  return details;
 }
 
 function createCostOfRiskDefinitionPanelTabs() {
