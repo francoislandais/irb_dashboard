@@ -46,23 +46,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260731-global-display-switch";
+} from "../data/costOfRisk.js?v=20260731-compact-smoothing-help";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260731-global-display-switch";
+} from "./costOfRiskStageTransfers.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260731-global-display-switch";
+} from "./costOfRiskStageReconciliationView.js?v=20260731-compact-smoothing-help";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260731-global-display-switch";
+} from "./costOfRiskChartUtils.js?v=20260731-compact-smoothing-help";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -70,7 +70,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260731-global-display-switch";
+} from "./costOfRiskSummaryTablesView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -78,13 +78,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260731-global-display-switch";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260731-global-display-switch";
+} from "./costOfRiskSummaryChartsView.js?v=20260731-compact-smoothing-help";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260731-global-display-switch";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -92,7 +92,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260731-global-display-switch";
+} from "./costOfRiskStageRatioView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -100,7 +100,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260731-global-display-switch";
+} from "./costOfRiskCoverageRatioView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -108,54 +108,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260731-global-display-switch";
+} from "./costOfRiskCollateralRatioView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260731-global-display-switch";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260731-compact-smoothing-help";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260731-global-display-switch";
+} from "./costOfRiskTreemapView.js?v=20260731-compact-smoothing-help";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260731-global-display-switch";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260731-compact-smoothing-help";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260731-global-display-switch";
+} from "./benchmarkLineChart.js?v=20260731-compact-smoothing-help";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260731-global-display-switch";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260731-global-display-switch";
+} from "./costOfRiskCoreDefinitionView.js?v=20260731-compact-smoothing-help";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260731-compact-smoothing-help";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260731-global-display-switch";
+} from "./costOfRiskControlsView.js?v=20260731-compact-smoothing-help";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260731-global-display-switch";
-import { openExplorerPoint } from "./explorerView.js?v=20260731-global-display-switch";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260731-global-display-switch";
+} from "./costOfRiskAuditTableView.js?v=20260731-compact-smoothing-help";
+import { openExplorerPoint } from "./explorerView.js?v=20260731-compact-smoothing-help";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260731-compact-smoothing-help";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260731-global-display-switch";
+} from "./costOfRiskTabsView.js?v=20260731-compact-smoothing-help";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260731-global-display-switch";
+} from "./costOfRiskModelCache.js?v=20260731-compact-smoothing-help";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260731-global-display-switch";
+} from "./costOfRiskFilterRules.js?v=20260731-compact-smoothing-help";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -164,12 +164,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260731-global-display-switch";
+} from "./costOfRiskStageTransferSelection.js?v=20260731-compact-smoothing-help";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260731-global-display-switch";
+} from "./costOfRiskCoreSelection.js?v=20260731-compact-smoothing-help";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -180,6 +180,7 @@ let setActiveModule = () => {};
 let updateSelectedJst = () => {};
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
+let activeCostOfRiskLastSmoothingWindow = 4;
 let activeCostOfRiskReferenceDate = "";
 let activeCostOfRiskFocusSelectedYAxis = false;
 let activeCostOfRiskTab = "summary";
@@ -3068,6 +3069,9 @@ function renderCostOfRiskAuditPanelIntro() {
 
   const summary = document.createElement("p");
   summary.className = "cost-of-risk-audit-intro-lead";
+  if (content.control?.type === "smoothing") {
+    summary.classList.add("cost-of-risk-audit-intro-lead--smoothing");
+  }
   summary.textContent = content.lead;
 
   intro.append(eyebrow, title, summary);
@@ -3144,6 +3148,9 @@ function renderCostOfRiskPanelArticle(content) {
 
   const summary = document.createElement("p");
   summary.className = "cost-of-risk-audit-intro-lead";
+  if (content.control?.type === "smoothing") {
+    summary.classList.add("cost-of-risk-audit-intro-lead--smoothing");
+  }
   summary.textContent = content.lead;
 
   intro.append(eyebrow, title, summary);
@@ -3882,8 +3889,8 @@ function getCostOfRiskHelpPanelContent(topic) {
       eyebrow: "Time series option",
       title: windowSize > 1 ? `Smoothing ${windowSize}Q` : "Raw figures",
       lead: windowSize > 1
-        ? `The time chart is displayed as a rolling ${windowSize}-quarter average.`
-        : "The time chart is displayed without smoothing.",
+        ? `Rolling ${windowSize}Q average.`
+        : "Raw figures, no smoothing.",
       sections: [
         {
           title: "How it is calculated",
@@ -5395,13 +5402,18 @@ function selectCostOfRiskReferenceDate(referenceDate) {
 }
 
 function updateCostOfRiskSmoothingWindow(value) {
-  const nextWindow = clampCostOfRiskSmoothingWindow(value);
+  const nextWindow = value === "toggle"
+    ? activeCostOfRiskSmoothingWindow > 1
+      ? 1
+      : activeCostOfRiskLastSmoothingWindow
+    : clampCostOfRiskSmoothingWindow(value);
   setCostOfRiskHelpTopic(`smoothing:${nextWindow}`);
   if (activeCostOfRiskSmoothingWindow === nextWindow) {
     renderCostOfRiskHelpPanel();
     return;
   }
   activeCostOfRiskSmoothingWindow = nextWindow;
+  if (nextWindow > 1) activeCostOfRiskLastSmoothingWindow = nextWindow;
   if (elements.costOfRiskSmoothing) elements.costOfRiskSmoothing.value = String(nextWindow);
   if (elements.costOfRiskSmoothingValue) elements.costOfRiskSmoothingValue.textContent = formatCostOfRiskSmoothingLabel(nextWindow);
   if (getLatestState()) rerenderApp(getLatestState());
@@ -5414,7 +5426,6 @@ function clearCostOfRiskSmoothing() {
 
 function toggleCostOfRiskFocusedYAxis() {
   activeCostOfRiskFocusSelectedYAxis = !activeCostOfRiskFocusSelectedYAxis;
-  setCostOfRiskHelpTopic(activeCostOfRiskFocusSelectedYAxis ? "y-focus-on" : "y-focus-off");
   if (getLatestState()) rerenderApp(getLatestState());
 }
 

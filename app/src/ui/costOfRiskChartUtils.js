@@ -100,7 +100,7 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   toggle.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (typeof onChangeSmoothing === "function") onChangeSmoothing(windowSize);
+    if (typeof onChangeSmoothing === "function") onChangeSmoothing("toggle");
   });
 
   badge.append(toggle);
@@ -142,9 +142,6 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
   const host = chart?.renderTo;
   if (!host || typeof onToggleFocus !== "function") return;
 
-  const primaryDark = getComputedStyle(document.documentElement)
-    .getPropertyValue("--primary-dark")
-    .trim() || "#0c4c42";
   const badgeX = Math.max(8, chart.chartWidth - 232);
   const titleY = chart.title?.alignAttr?.y ?? 8;
   const badgeY = Math.max(8, titleY - 4);
@@ -157,7 +154,6 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
   badge.textContent = "focus JST axis";
   badge.style.left = `${badgeX}px`;
   badge.style.top = `${badgeY}px`;
-  if (isFocused) badge.style.setProperty("--y-focus-badge-fill", primaryDark);
   badge.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();

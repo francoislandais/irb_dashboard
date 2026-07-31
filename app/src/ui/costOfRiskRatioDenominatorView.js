@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260731-global-display-switch";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260731-compact-smoothing-help";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

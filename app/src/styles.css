@@ -631,6 +631,10 @@ button:focus-visible {
   word-break: normal;
 }
 
+.cost-of-risk-audit-intro-lead--smoothing {
+  min-height: 1.12rem;
+}
+
 .cost-of-risk-audit-intro-section {
   display: grid;
   gap: 4px;
@@ -1699,8 +1703,9 @@ button:focus-visible {
 }
 
 .cost-of-risk-chart-y-focus-badge.is-focused {
-  border-color: var(--y-focus-badge-fill);
-  color: #ffffff;
+  --y-focus-badge-fill: #d9ecf7;
+  border-color: #bfdbea;
+  color: #1d2823;
 }
 
 .cost-of-risk-chart-benchmark-mode {
@@ -1734,8 +1739,8 @@ button:focus-visible {
 }
 
 .cost-of-risk-chart-benchmark-mode-option.is-active {
-  background: var(--primary-dark);
-  color: #ffffff;
+  background: #d9ecf7;
+  color: #1d2823;
 }
 
 .cost-of-risk-chart-smoothing-badge-toggle,

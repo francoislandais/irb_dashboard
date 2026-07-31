@@ -3,7 +3,7 @@ import {
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260731-global-display-switch";
+} from "../data/costOfRisk.js?v=20260731-compact-smoothing-help";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
