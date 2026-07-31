@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_X_AXIS_CODE,
   formatCostOfRiskSmoothingLabel
-} from "../data/costOfRisk.js?v=20260731-subtle-main-tabs";
+} from "../data/costOfRisk.js?v=20260731-summary-white-panel";
 
 const lastCostOfRiskFilterSelectRenderKeys = new WeakMap();
 let lastCostOfRiskSmoothingRenderKey = "";

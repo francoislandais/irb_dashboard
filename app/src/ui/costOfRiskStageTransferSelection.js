@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260731-subtle-main-tabs";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260731-summary-white-panel";
 
 export const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
 

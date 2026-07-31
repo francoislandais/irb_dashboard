@@ -46,23 +46,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260731-subtle-main-tabs";
+} from "../data/costOfRisk.js?v=20260731-summary-white-panel";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskStageTransfers.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskStageReconciliationView.js?v=20260731-summary-white-panel";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskChartUtils.js?v=20260731-summary-white-panel";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -70,7 +70,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskSummaryTablesView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -78,13 +78,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260731-subtle-main-tabs";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskSummaryChartsView.js?v=20260731-summary-white-panel";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -92,7 +92,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskStageRatioView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -100,7 +100,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskCoverageRatioView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -108,54 +108,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskCollateralRatioView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260731-summary-white-panel";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskTreemapView.js?v=20260731-summary-white-panel";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260731-summary-white-panel";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260731-subtle-main-tabs";
+} from "./benchmarkLineChart.js?v=20260731-summary-white-panel";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260731-subtle-main-tabs";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskCoreDefinitionView.js?v=20260731-summary-white-panel";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260731-summary-white-panel";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskControlsView.js?v=20260731-summary-white-panel";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260731-subtle-main-tabs";
-import { openExplorerPoint } from "./explorerView.js?v=20260731-subtle-main-tabs";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskAuditTableView.js?v=20260731-summary-white-panel";
+import { openExplorerPoint } from "./explorerView.js?v=20260731-summary-white-panel";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260731-summary-white-panel";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskTabsView.js?v=20260731-summary-white-panel";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskModelCache.js?v=20260731-summary-white-panel";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskFilterRules.js?v=20260731-summary-white-panel";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -164,12 +164,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskStageTransferSelection.js?v=20260731-summary-white-panel";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260731-subtle-main-tabs";
+} from "./costOfRiskCoreSelection.js?v=20260731-summary-white-panel";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
