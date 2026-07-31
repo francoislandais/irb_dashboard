@@ -15,8 +15,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260731-compact-smoothing-help";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260731-compact-smoothing-help";
+import { createDataStore } from "./data/dataStore.js?v=20260731-subtle-cor-detail-tabs";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260731-subtle-cor-detail-tabs";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
