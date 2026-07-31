@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260730-cor-benchmark-vs-f02";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

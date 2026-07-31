@@ -23,6 +23,7 @@ import {
   buildCostOfRiskF2VsF12Audit,
   buildCostOfRiskFilteredSelectionValue,
   buildCostOfRiskMovementContributionAudit,
+  buildCostOfRiskNplFlowsModel,
   buildCostOfRiskStageBoxTimeSeries,
   buildCostOfRiskStageRatioModel,
   buildCostOfRiskStageReconciliationModel,
@@ -45,23 +46,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260730-cor-benchmark-vs-f02";
+} from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskStageTransfers.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskStageReconciliationView.js?v=20260730-npl-flows-tab";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskChartUtils.js?v=20260730-npl-flows-tab";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -69,7 +70,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskSummaryTablesView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -77,13 +78,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260730-cor-benchmark-vs-f02";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskSummaryChartsView.js?v=20260730-npl-flows-tab";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -91,7 +92,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskStageRatioView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -99,7 +100,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskCoverageRatioView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -107,54 +108,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskCollateralRatioView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260730-npl-flows-tab";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskTreemapView.js?v=20260730-npl-flows-tab";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260730-npl-flows-tab";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260730-cor-benchmark-vs-f02";
+} from "./benchmarkLineChart.js?v=20260730-npl-flows-tab";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260730-cor-benchmark-vs-f02";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskCoreDefinitionView.js?v=20260730-npl-flows-tab";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260730-npl-flows-tab";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskControlsView.js?v=20260730-npl-flows-tab";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260730-cor-benchmark-vs-f02";
-import { openExplorerPoint } from "./explorerView.js?v=20260730-cor-benchmark-vs-f02";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskAuditTableView.js?v=20260730-npl-flows-tab";
+import { openExplorerPoint } from "./explorerView.js?v=20260730-npl-flows-tab";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260730-npl-flows-tab";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskTabsView.js?v=20260730-npl-flows-tab";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskModelCache.js?v=20260730-npl-flows-tab";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskFilterRules.js?v=20260730-npl-flows-tab";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -163,12 +164,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskStageTransferSelection.js?v=20260730-npl-flows-tab";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskCoreSelection.js?v=20260730-npl-flows-tab";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -196,11 +197,13 @@ let activeCostOfRiskComparisonBenchmarkDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionBenchmarkMode = "benchmark";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
+let activeCostOfRiskNplFlowsDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
 let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
 let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskContributionDisplayMenuOpen = false;
 let activeCostOfRiskStageTransferDisplayMenuOpen = false;
+let activeCostOfRiskNplFlowsDisplayMenuOpen = false;
 let activeCostOfRiskSummaryDisplayMenuOpen = false;
 let activeCostOfRiskStageSummaryCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL;
 let activeCostOfRiskStageRatioCellKey = DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL;
@@ -214,6 +217,7 @@ let activeCostOfRiskMovementAuditXCode = "";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
 let activeCostOfRiskStageTransferFlowKey = DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY;
+let activeCostOfRiskNplFlowKey = "net";
 let costOfRiskDefinitionComparisonChart = null;
 let costOfRiskWaterfallChart = null;
 let costOfRiskPeerSelectionActions = null;
@@ -283,7 +287,7 @@ const COST_OF_RISK_TAB_URL_PARAM = "cor_tab";
 const COST_OF_RISK_DATE_URL_PARAM = "cor_date";
 const COST_OF_RISK_VIEW_URL_PARAM = "cor_view";
 const COST_OF_RISK_CELL_URL_PARAM = "cor_cell";
-const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "stage-transfers", "contributions"]);
+const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "npl-flows", "stage-transfers", "contributions"]);
 const COST_OF_RISK_DISABLED_TABS = new Set(["f2-vs-f12", "stage-reconciliation", "core-definition", "analysis"]);
 
 applyCostOfRiskUrlState();
@@ -318,6 +322,8 @@ const elements = {
   costOfRiskF2VsF12Chart: document.querySelector("#cost-of-risk-f2-f12-chart"),
   costOfRiskF02Context: document.querySelector("#cost-of-risk-f02-context"),
   costOfRiskF02Value: document.querySelector("#cost-of-risk-f02-value"),
+  costOfRiskNplFlowsChart: document.querySelector("#cost-of-risk-npl-flows-chart"),
+  costOfRiskNplFlowsPanel: document.querySelector("#cost-of-risk-npl-flows-panel"),
   costOfRiskPoints: document.querySelector("#cost-of-risk-points"),
   costOfRiskRatioContext: document.querySelector("#cost-of-risk-ratio-context"),
   costOfRiskRatioInfo: document.querySelector("#cost-of-risk-ratio-info"),
@@ -405,6 +411,8 @@ function getCostOfRiskUrlSelectionValue() {
       return activeCostOfRiskDefinitionDriverCode
         ? `${activeCostOfRiskDefinitionId}|${activeCostOfRiskDefinitionDriverCode}`
         : activeCostOfRiskDefinitionId;
+    case "npl-flows":
+      return activeCostOfRiskNplFlowKey;
     case "stage-ratio":
       return activeCostOfRiskStageRatioCellKey;
     case "stage-transfers":
@@ -431,6 +439,9 @@ function applyCostOfRiskUrlSelection(tab, value) {
       activeCostOfRiskDefinitionDriverCode = driverCode ?? "";
       return;
     }
+    case "npl-flows":
+      activeCostOfRiskNplFlowKey = ["inflow", "outflow", "net"].includes(value) ? value : "net";
+      return;
     case "stage-ratio":
       activeCostOfRiskStageRatioCellKey = value;
       return;
@@ -506,7 +517,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     rerenderApp(actions.getState());
   });
   elements.costOfRiskDisplayMode?.addEventListener("change", (event) => {
-    if (["contributions", "coverage-ratio", "collateral-ratio", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) return;
+    if (["contributions", "coverage-ratio", "collateral-ratio", "npl-flows", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) return;
     activeCostOfRiskDisplayMode = event.target.value === "amount" ? "amount" : "ratio";
     rerenderApp(actions.getState());
   });
@@ -540,6 +551,8 @@ export function wireCostOfRiskUi(actions, rerender) {
       const nextMode = value === "ratio" ? "ratio" : "amount";
       if (scope === "stageTransfer") {
         activeCostOfRiskStageTransferDisplayMode = nextMode;
+      } else if (scope === "nplFlows") {
+        activeCostOfRiskNplFlowsDisplayMode = nextMode;
       } else if (scope === "summaryVariation") {
         activeCostOfRiskSummaryDisplayMode = nextMode;
       } else if (scope === "costOfRiskDefinition") {
@@ -565,16 +578,21 @@ export function wireCostOfRiskUi(actions, rerender) {
       activeCostOfRiskStageTransferDisplayMenuOpen = scope === "stageTransfer"
         ? !activeCostOfRiskStageTransferDisplayMenuOpen
         : false;
+      activeCostOfRiskNplFlowsDisplayMenuOpen = scope === "nplFlows"
+        ? !activeCostOfRiskNplFlowsDisplayMenuOpen
+        : false;
       activeCostOfRiskSummaryDisplayMenuOpen = scope === "summaryVariation"
         ? !activeCostOfRiskSummaryDisplayMenuOpen
         : false;
       const currentMode = scope === "stageTransfer"
         ? activeCostOfRiskStageTransferDisplayMode
-        : scope === "summaryVariation"
-          ? activeCostOfRiskSummaryDisplayMode
-          : scope === "costOfRiskDefinition"
-            ? activeCostOfRiskDefinitionDisplayMode
-            : activeCostOfRiskMovementDisplayMode;
+        : scope === "nplFlows"
+          ? activeCostOfRiskNplFlowsDisplayMode
+          : scope === "summaryVariation"
+            ? activeCostOfRiskSummaryDisplayMode
+            : scope === "costOfRiskDefinition"
+              ? activeCostOfRiskDefinitionDisplayMode
+              : activeCostOfRiskMovementDisplayMode;
       setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, currentMode));
       pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
@@ -730,6 +748,23 @@ export function wireCostOfRiskUi(actions, rerender) {
       return;
     }
 
+    const nplFlowButton = event.target.closest?.("[data-cost-of-risk-npl-flow]");
+    if (nplFlowButton) {
+      event.preventDefault();
+      activeCostOfRiskNplFlowKey = ["inflow", "outflow", "net"].includes(nplFlowButton.dataset.costOfRiskNplFlow)
+        ? nplFlowButton.dataset.costOfRiskNplFlow
+        : "net";
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const nplCounterpartyButton = event.target.closest?.("[data-cost-of-risk-npl-counterparty]");
+    if (nplCounterpartyButton) {
+      event.preventDefault();
+      applyCostOfRiskFilterSelection("counterparty", nplCounterpartyButton.dataset.costOfRiskNplCounterparty || COST_OF_RISK_FILTER_ALL);
+      return;
+    }
+
     const button = event.target.closest?.("[data-cost-of-risk-summary-breakdown]");
     if (!button) return;
 
@@ -831,7 +866,7 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   renderCostOfRiskActiveFilters(filterOptions);
-  if (!["contributions", "cost-of-risk", "coverage-ratio", "collateral-ratio", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskHelpPanel();
+  if (!["contributions", "cost-of-risk", "coverage-ratio", "collateral-ratio", "npl-flows", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskHelpPanel();
   const displayMode = getActiveCostOfRiskDisplayMode();
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = displayMode;
   if (elements.costOfRiskDisplayMode) {
@@ -839,6 +874,7 @@ export function renderCostOfRisk(state) {
       || activeCostOfRiskTab === "cost-of-risk"
       || activeCostOfRiskTab === "coverage-ratio"
       || activeCostOfRiskTab === "collateral-ratio"
+      || activeCostOfRiskTab === "npl-flows"
       || activeCostOfRiskTab === "stage-ratio"
       || activeCostOfRiskTab === "stage-transfers"
       || activeCostOfRiskTab === "summary";
@@ -855,6 +891,39 @@ export function renderCostOfRisk(state) {
     windowSize: activeCostOfRiskSmoothingWindow
   });
   renderCostOfRiskCoreDefinition(waterfallXAxisOptions, f2F12XAxisOptions);
+
+  if (activeCostOfRiskTab === "npl-flows") {
+    const nplFlows = getCostOfRiskCachedModel(
+      state,
+      createCostOfRiskModelCacheKey(state, "npl-flows", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskNplFlowKey),
+      () => buildCostOfRiskNplFlowsModel(
+        state,
+        activeCostOfRiskFilters,
+        activeCostOfRiskReferenceDate,
+        activeCostOfRiskNplFlowKey
+      )
+    );
+    activeCostOfRiskReferenceDate = nplFlows.referenceDate || activeCostOfRiskReferenceDate;
+    renderCostOfRiskActiveFilters(filterOptions);
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    leaveCostOfRiskStageTransferTab();
+    clearCostOfRiskAuditTable();
+    if (nplFlows.status) {
+      if (elements.costOfRiskNplFlowsPanel) elements.costOfRiskNplFlowsPanel.replaceChildren();
+      if (elements.costOfRiskNplFlowsChart) elements.costOfRiskNplFlowsChart.replaceChildren();
+      destroyCostOfRiskMovementChart();
+      renderCostOfRiskTabEmpty(nplFlows.status);
+      renderCostOfRiskHelpPanel();
+      scheduleCostOfRiskChartReflow();
+      return;
+    }
+    renderCostOfRiskNplFlowsView(nplFlows, state);
+    renderCostOfRiskHelpPanel();
+    scheduleCostOfRiskChartReflow();
+    return;
+  }
 
   if (activeCostOfRiskTab === "cost-of-risk") {
     const customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes();
@@ -1245,6 +1314,7 @@ function getActiveCostOfRiskCharts() {
     return [getCostOfRiskStageSummaryChart()];
   }
   if (activeCostOfRiskTab === "cost-of-risk") return [getCostOfRiskMovementChart()];
+  if (activeCostOfRiskTab === "npl-flows") return [getCostOfRiskMovementChart()];
   if (activeCostOfRiskTab === "stage-ratio") return [getCostOfRiskStageRatioChart()];
   if (activeCostOfRiskTab === "coverage-ratio") return [getCostOfRiskCoverageRatioChart()];
   if (activeCostOfRiskTab === "collateral-ratio") return [getCostOfRiskCollateralRatioChart()];
@@ -1560,6 +1630,109 @@ function renderCostOfRiskCollateralRatioView(collateralRatio, state) {
     smoothingWindow: activeCostOfRiskSmoothingWindow,
     state
   });
+}
+
+function renderCostOfRiskNplFlowsView(model, state) {
+  renderCostOfRiskNplFlowsPanel(model, state.selectedUnit);
+  if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskNplFlowsChart) {
+    destroyCostOfRiskMovementChart();
+  }
+  renderMovementTimeSeriesChart({
+    activeReferenceDate: activeCostOfRiskReferenceDate,
+    container: elements.costOfRiskNplFlowsChart,
+    displayMode: activeCostOfRiskNplFlowsDisplayMode,
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
+    jstCode: state.selectedJst,
+    onClearSmoothing: clearCostOfRiskSmoothing,
+    onChangeSmoothing: updateCostOfRiskSmoothingWindow,
+    onSelectJst: selectCostOfRiskChartJst,
+    onSelectReferenceDate: selectCostOfRiskReferenceDate,
+    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
+    peerDisplayMode: state.peerDisplayMode,
+    renderTabEmpty: renderCostOfRiskTabEmpty,
+    selectedUnit: state.selectedUnit,
+    selection: model,
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    titleText: `NPL ${model.flow?.shortLabel ?? "Flow"} - Time Evolution`
+  });
+}
+
+function renderCostOfRiskNplFlowsPanel(model, selectedUnit = "millions") {
+  if (!elements.costOfRiskNplFlowsPanel) return;
+
+  const root = document.createElement("div");
+  root.className = "cost-of-risk-npl-flows-grid";
+
+  const metrics = document.createElement("section");
+  metrics.className = "cost-of-risk-npl-flow-metrics";
+  const metricsTitle = document.createElement("h3");
+  metricsTitle.className = "cost-of-risk-npl-flow-title";
+  metricsTitle.textContent = "NPL flows";
+  metrics.append(metricsTitle);
+
+  (model.metrics ?? []).forEach((metric) => {
+    const button = document.createElement("button");
+    button.className = "cost-of-risk-npl-flow-card";
+    button.classList.toggle("is-active", metric.key === model.flow?.key);
+    button.type = "button";
+    button.dataset.costOfRiskNplFlow = metric.key;
+
+    const label = document.createElement("span");
+    label.className = "cost-of-risk-npl-flow-card-label";
+    label.textContent = metric.label;
+    const value = document.createElement("span");
+    value.className = "cost-of-risk-npl-flow-card-value";
+    value.textContent = formatCostOfRiskDisplayValue(
+      activeCostOfRiskNplFlowsDisplayMode === "ratio" ? metric.ratioBasisPoints : metric.value,
+      activeCostOfRiskNplFlowsDisplayMode,
+      selectedUnit,
+      true
+    );
+    button.append(label, value);
+    metrics.append(button);
+  });
+
+  const context = document.createElement("p");
+  context.className = "cost-of-risk-npl-flow-context";
+  context.textContent = activeCostOfRiskNplFlowsDisplayMode === "ratio"
+    ? `Relative flow over previous-quarter loans and advances exposure denominator (${model.denominatorLabel}).`
+    : "Absolute quarterly movement in gross carrying amount of non-performing loans and advances.";
+  metrics.append(context);
+
+  const drivers = document.createElement("section");
+  drivers.className = "cost-of-risk-npl-flow-drivers";
+  const driversTitle = document.createElement("h3");
+  driversTitle.className = "cost-of-risk-npl-flow-title";
+  driversTitle.textContent = `${model.flow?.label ?? "Net flow"} by counterparty`;
+  drivers.append(driversTitle);
+
+  const list = document.createElement("div");
+  list.className = "cost-of-risk-npl-flow-driver-list";
+  (model.drivers ?? []).forEach((driver) => {
+    const row = document.createElement("button");
+    row.className = "cost-of-risk-npl-flow-driver";
+    row.disabled = String(driver.value ?? "").startsWith("__");
+    row.type = "button";
+    if (!row.disabled) row.dataset.costOfRiskNplCounterparty = driver.value;
+
+    const label = document.createElement("span");
+    label.className = "cost-of-risk-npl-flow-driver-label";
+    label.textContent = driver.label;
+    const value = document.createElement("span");
+    value.className = "cost-of-risk-npl-flow-driver-value";
+    value.textContent = formatCostOfRiskDisplayValue(
+      activeCostOfRiskNplFlowsDisplayMode === "ratio" ? driver.ratioBasisPoints : driver.value,
+      activeCostOfRiskNplFlowsDisplayMode,
+      selectedUnit,
+      true
+    );
+    row.append(label, value);
+    list.append(row);
+  });
+  drivers.append(list);
+
+  root.append(metrics, drivers);
+  elements.costOfRiskNplFlowsPanel.replaceChildren(root);
 }
 
 function renderCostOfRiskDefinitionView(definitionModel, state) {
@@ -2195,6 +2368,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     instrumentMenuOpen: isCostOfRiskFilterSelectionTopicOpen("instrument"),
     filterOptions,
     filters: displayedFilters,
+    nplFlowsDisplayMenuOpen: activeCostOfRiskNplFlowsDisplayMenuOpen,
     referenceDate: activeCostOfRiskReferenceDate,
     stageMenuOpen: isCostOfRiskFilterSelectionTopicOpen("stage"),
     summaryDisplayMenuOpen: activeCostOfRiskSummaryDisplayMenuOpen,
@@ -2206,6 +2380,7 @@ function getActiveCostOfRiskDisplayMode() {
   if (activeCostOfRiskTab === "summary") return activeCostOfRiskSummaryDisplayMode;
   if (activeCostOfRiskTab === "cost-of-risk") return activeCostOfRiskDefinitionDisplayMode;
   if (activeCostOfRiskTab === "contributions") return activeCostOfRiskMovementDisplayMode;
+  if (activeCostOfRiskTab === "npl-flows") return activeCostOfRiskNplFlowsDisplayMode;
   if (activeCostOfRiskTab === "stage-transfers") return activeCostOfRiskStageTransferDisplayMode;
   return activeCostOfRiskDisplayMode;
 }
@@ -2213,6 +2388,7 @@ function getActiveCostOfRiskDisplayMode() {
 function hasOpenCostOfRiskFilterMenu() {
   return activeCostOfRiskContributionDisplayMenuOpen
     || activeCostOfRiskStageTransferDisplayMenuOpen
+    || activeCostOfRiskNplFlowsDisplayMenuOpen
     || activeCostOfRiskSummaryDisplayMenuOpen;
 }
 
@@ -2220,6 +2396,7 @@ function closeCostOfRiskFilterMenus() {
   const changed = hasOpenCostOfRiskFilterMenu();
   activeCostOfRiskContributionDisplayMenuOpen = false;
   activeCostOfRiskStageTransferDisplayMenuOpen = false;
+  activeCostOfRiskNplFlowsDisplayMenuOpen = false;
   activeCostOfRiskSummaryDisplayMenuOpen = false;
   return changed;
 }
@@ -3670,6 +3847,7 @@ function renderCostOfRiskSmoothingHelpControl(windowSize) {
 function getCostOfRiskDisplayModeHelpTopic(scope, mode) {
   const normalizedMode = mode === "ratio" ? "relative" : "absolute";
   if (scope === "stageTransfer") return `stage-transfer-${normalizedMode}`;
+  if (scope === "nplFlows") return `npl-flow-${normalizedMode}`;
   if (scope === "summaryVariation") return `summary-${normalizedMode}`;
   if (scope === "costOfRiskDefinition") return `cost-risk-${normalizedMode}`;
   return `movement-${normalizedMode}`;
@@ -3789,6 +3967,42 @@ function getCostOfRiskHelpPanelContent(topic) {
         }
       ],
       hint: "Use this mode to compare transfer intensity across JSTs and across time."
+    },
+    "npl-flow-absolute": {
+      eyebrow: "NPL flow display",
+      title: "Absolute Flow",
+      lead: "Absolute flow shows the quarterly amount of NPL inflows, outflows or net flow reported in F_18.01.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is read from F_18.01 for loans and advances: c010 for inflows and c020 for outflows. Outflows are displayed with a negative sign so the net flow is intuitive."
+        },
+        {
+          title: "Unit",
+          body: "Values are displayed in the selected monetary unit. No denominator is applied."
+        }
+      ],
+      hint: "Switch to Relative Flow to compare NPL flow intensity across JSTs."
+    },
+    "npl-flow-relative": {
+      eyebrow: "NPL flow display",
+      title: "Relative Flow",
+      lead: "Relative flow expresses NPL inflows, outflows or net flow against the exposure base.",
+      sections: [
+        {
+          title: "Numerator",
+          body: "The numerator is the selected F_18.01 NPL flow: inflow, outflow or net inflow minus outflow."
+        },
+        {
+          title: "Denominator",
+          body: "The denominator is the previous-quarter gross carrying amount of loans and advances on the selected counterparty perimeter."
+        },
+        {
+          title: "Formula",
+          body: "Relative flow = selected NPL flow divided by previous-quarter loans and advances exposure, displayed in basis points."
+        }
+      ],
+      hint: "This mode is best suited for benchmarking NPL formation and cure intensity."
     },
     "movement-absolute": {
       eyebrow: "Allowance movement display",
@@ -4116,6 +4330,26 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         }
       ],
       hint: "Click a waterfall component to display its selected scope and, in relative mode, its denominator."
+    },
+    "npl-flows": {
+      eyebrow: "Asset quality migration",
+      title: "NPL Flows",
+      lead: "This view focuses on inflows to and outflows from non-performing loans and advances.",
+      sections: [
+        {
+          title: "What you see",
+          body: "The upper panel shows inflows, outflows and net NPL flow for the selected reference date, with a compact counterparty split for the selected flow."
+        },
+        {
+          title: "How to read it",
+          body: "Click Inflows, Outflows or Net flow to benchmark that series over time. Click a counterparty line to apply the same counterparty filter across the module."
+        },
+        {
+          title: "Source",
+          body: "Figures are built from FINREP F_18.01. The template reports in-balance loans and advances, so debt securities, off-balance exposures and stage breakdowns are not available in this view."
+        }
+      ],
+      hint: "Relative Flow divides the selected NPL movement by the previous-quarter loans and advances exposure denominator."
     }
   };
 

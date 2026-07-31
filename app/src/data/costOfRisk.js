@@ -45,6 +45,28 @@ const COST_OF_RISK_COUNTERPARTY_FILTER_OPTIONS = [
 export const COST_OF_RISK_TABLE_ID = "F_12.01";
 export const COST_OF_RISK_STAGE_TRANSFER_TABLE_ID = "F_12.02";
 const COST_OF_RISK_STAGE_BOX_TABLE_ID = "F_18.00";
+const COST_OF_RISK_NPL_FLOW_TABLE_ID = "F_18.01";
+const COST_OF_RISK_NPL_FLOW_INFLOW_X_CODE = "0010";
+const COST_OF_RISK_NPL_FLOW_OUTFLOW_X_CODE = "0020";
+const COST_OF_RISK_NPL_FLOW_DEFINITION = [
+  { key: "inflow", label: "Inflows", shortLabel: "Inflow" },
+  { key: "outflow", label: "Outflows", shortLabel: "Outflow" },
+  { key: "net", label: "Net flow", shortLabel: "Net" }
+];
+const COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS = [
+  { key: "all", label: "All", value: COST_OF_RISK_FILTER_ALL, yCodes: ["0150"] },
+  { key: "nfc", label: "NFC", value: "Non-financial corporations", yCodes: ["0050"] },
+  { key: "nfc-smes", label: "SMEs", value: "NFC_SMES", parent: "Non-financial corporations", yCodes: ["0060"] },
+  { key: "nfc-cre", label: "collat. CRE", value: "NFC_CRE", parent: "Non-financial corporations", yCodes: ["0090"] },
+  { key: "households", label: "Households", value: "Households", yCodes: ["0100"] },
+  { key: "hh-consumption", label: "credit for consumption", value: "HH_CONSUMPTION", parent: "Households", yCodes: ["0120"] },
+  { key: "hh-rre", label: "collat. RRE", value: "HH_RRE", parent: "Households", yCodes: ["0110"] },
+  { key: "other", label: "Other", value: "__npl_other__", yCodes: ["0010", "0020", "0030", "0040"] },
+  { key: "central-banks", label: "Central banks", value: "Central banks", yCodes: ["0010"] },
+  { key: "governments", label: "General governments", value: "General governments", yCodes: ["0020"] },
+  { key: "credit-institutions", label: "Credit institutions", value: "Credit institutions", yCodes: ["0030"] },
+  { key: "other-financials", label: "Other financial corporations", value: "Other financial corporations", yCodes: ["0040"] }
+];
 // F_18.00 gross carrying amount, split by stage on the x-axis: stage 2 is
 // reported as two separate rows (performing / non-performing) that must be
 // summed to get the total stage 2 exposure.
@@ -2010,6 +2032,74 @@ export function buildCostOfRiskStageBoxTimeSeries(state, filters, stage) {
   };
 }
 
+export function buildCostOfRiskNplFlowsModel(state, filters = {}, referenceDate = "", selectedFlowKey = "net") {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const normalizedFilters = normalizeCostOfRiskFilters(filters);
+  const flowDefinition = COST_OF_RISK_NPL_FLOW_DEFINITION.find((flow) => flow.key === selectedFlowKey)
+    ?? COST_OF_RISK_NPL_FLOW_DEFINITION.find((flow) => flow.key === "net");
+
+  if (!indexes || !state.selectedJst) {
+    return { status: "Load a CSV and select a JST." };
+  }
+  if (referenceColumns.length === 0) {
+    return { status: "No reference date was found in the CSV." };
+  }
+  if (normalizedFilters.balanceScope !== COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE) {
+    return {
+      status: "F_18.01 reports NPL inflows and outflows for in-balance loans and advances only. Select In-balance to display this tab."
+    };
+  }
+  if (normalizedFilters.asset && normalizedFilters.asset !== "Loans and advances") {
+    return {
+      status: "F_18.01 reports NPL inflows and outflows for loans and advances only. Select All instruments or Loans and advances."
+    };
+  }
+  if (normalizedFilters.stage) {
+    return {
+      status: "F_18.01 does not provide NPL inflows and outflows with a breakdown by stage or performing status. Remove this filter."
+    };
+  }
+
+  const ySelection = getCostOfRiskNplFlowYSelection(filters);
+  if (ySelection.yCodes.length === 0) {
+    return {
+      status: "No matching F_18.01 counterparty point is available for the selected filters."
+    };
+  }
+
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const series = buildCostOfRiskNplFlowPointsForJst(state, indexes, referenceColumns, state.selectedJst, filters, ySelection.yCodes, flowDefinition.key);
+  const selectedPoint = series[referenceIndex] ?? null;
+  const metrics = COST_OF_RISK_NPL_FLOW_DEFINITION.map((flow) => {
+    const flowSeries = buildCostOfRiskNplFlowPointsForJst(state, indexes, referenceColumns, state.selectedJst, filters, ySelection.yCodes, flow.key);
+    const point = flowSeries[referenceIndex] ?? null;
+    return {
+      ...flow,
+      denominator: point?.denominator ?? null,
+      ratioBasisPoints: point?.ratioBasisPoints ?? null,
+      value: point?.value ?? null
+    };
+  });
+
+  return {
+    benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
+      jstCode,
+      points: buildCostOfRiskNplFlowPointsForJst(state, indexes, referenceColumns, jstCode, filters, ySelection.yCodes, flowDefinition.key)
+    })),
+    denominatorLabel: getCostOfRiskDenominatorComposition(state, getCostOfRiskNplFlowDenominatorFilters(filters)).label,
+    drivers: buildCostOfRiskNplFlowDriverRows(state, indexes, referenceColumns, filters, referenceIndex, flowDefinition.key),
+    flow: flowDefinition,
+    metrics,
+    referenceDate: selectedPoint?.label ?? referenceColumns[referenceIndex]?.label ?? "",
+    series,
+    source: "F_18.01 c010/c020",
+    status: "",
+    value: selectedPoint?.value ?? null,
+    ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null
+  };
+}
+
 export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
@@ -3340,6 +3430,125 @@ function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, s
       value
     };
   });
+}
+
+function getCostOfRiskNplFlowYSelection(filters = {}) {
+  const normalized = normalizeCostOfRiskFilters(filters);
+  const row = COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS.find((candidate) => candidate.value === normalized.counterparty)
+    ?? COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS[0];
+  return {
+    label: row.label,
+    row,
+    yCodes: row.yCodes
+  };
+}
+
+function getCostOfRiskNplFlowDenominatorFilters(filters = {}) {
+  return {
+    ...filters,
+    asset: "Loans and advances",
+    balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
+    stage: COST_OF_RISK_FILTER_ALL
+  };
+}
+
+function buildCostOfRiskNplFlowPointsForJst(state, indexes, referenceColumns, jstCode, filters = {}, yCodes = [], flowKey = "net") {
+  const inflowSeries = getCostOfRiskNplFlowRawSeries(
+    state,
+    indexes,
+    referenceColumns,
+    jstCode,
+    COST_OF_RISK_NPL_FLOW_INFLOW_X_CODE,
+    yCodes
+  );
+  const outflowRawSeries = getCostOfRiskNplFlowRawSeries(
+    state,
+    indexes,
+    referenceColumns,
+    jstCode,
+    COST_OF_RISK_NPL_FLOW_OUTFLOW_X_CODE,
+    yCodes
+  );
+  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(
+    state,
+    indexes,
+    referenceColumns,
+    jstCode,
+    getCostOfRiskNplFlowDenominatorFilters(filters)
+  );
+
+  return referenceColumns.map((column, index) => {
+    const inflow = inflowSeries[index] ?? 0;
+    const outflow = -Math.abs(outflowRawSeries[index] ?? 0);
+    const net = inflow + outflow;
+    const value = flowKey === "inflow"
+      ? inflow
+      : flowKey === "outflow"
+        ? outflow
+        : net;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+    return {
+      date: column.date,
+      denominator,
+      inflow,
+      label: column.label,
+      net,
+      outflow,
+      ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
+      value
+    };
+  });
+}
+
+function getCostOfRiskNplFlowRawSeries(state, indexes, referenceColumns, jstCode, xCode, yCodes = []) {
+  const values = createEmptySeries(referenceColumns.length);
+  yCodes.forEach((yCode) => {
+    addSeriesValues(values, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_NPL_FLOW_TABLE_ID, {
+      xCode,
+      yCode,
+      zCode: ""
+    }, jstCode));
+  });
+  return decumulateQuarterlySeries(referenceColumns, values);
+}
+
+function buildCostOfRiskNplFlowDriverRows(state, indexes, referenceColumns, filters = {}, referenceIndex = 0, flowKey = "net") {
+  const normalized = normalizeCostOfRiskFilters(filters);
+  const rows = getCostOfRiskNplFlowDriverDefinitions(normalized.counterparty);
+  return rows.map((row) => {
+    const series = buildCostOfRiskNplFlowPointsForJst(
+      state,
+      indexes,
+      referenceColumns,
+      state.selectedJst,
+      { ...filters, counterparty: row.value },
+      row.yCodes,
+      flowKey
+    );
+    const point = series[referenceIndex] ?? null;
+    return {
+      ...row,
+      denominator: point?.denominator ?? null,
+      ratioBasisPoints: point?.ratioBasisPoints ?? null,
+      value: point?.value ?? null
+    };
+  }).filter((row) => Number.isFinite(row.value) || Number.isFinite(row.ratioBasisPoints));
+}
+
+function getCostOfRiskNplFlowDriverDefinitions(counterparty = "") {
+  if (!counterparty) {
+    return COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS.filter((row) => (
+      ["nfc", "households", "central-banks", "governments", "credit-institutions", "other-financials"].includes(row.key)
+    ));
+  }
+  if (counterparty === "Non-financial corporations") {
+    return COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS.filter((row) => ["nfc", "nfc-smes", "nfc-cre"].includes(row.key));
+  }
+  if (counterparty === "Households") {
+    return COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS.filter((row) => ["households", "hh-consumption", "hh-rre"].includes(row.key));
+  }
+  const selected = COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS.find((row) => row.value === counterparty);
+  return selected ? [selected] : [];
 }
 
 export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowKey) {

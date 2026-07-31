@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260730-cor-benchmark-vs-f02";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -8,7 +8,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260730-cor-benchmark-vs-f02";
+} from "./costOfRiskChartUtils.js?v=20260730-npl-flows-tab";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -20,7 +20,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260730-cor-benchmark-vs-f02";
+} from "./benchmarkLineChart.js?v=20260730-npl-flows-tab";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageReconciliationChart = null;

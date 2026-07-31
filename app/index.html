@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260730-cor-benchmark-vs-f02">
+    <link rel="stylesheet" href="./src/styles.css?v=20260730-npl-flows-tab">
   </head>
   <body>
     <div class="app-shell">
@@ -171,6 +171,7 @@
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Staging Transfer</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">ECL movements</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="npl-flows">NPL Flows</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="cost-of-risk">Cost of Risk</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-ratio" hidden>Exposure Ratio</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="coverage-ratio" hidden>Coverage</button>
@@ -195,6 +196,14 @@
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-stage-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 stage summary time series"></div>
                     <div id="cost-of-risk-counterparty-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 counterparty summary time series" hidden></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="npl-flows" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-npl-flows-panel" class="cost-of-risk-npl-flows-panel" aria-label="NPL inflows and outflows"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-npl-flows-chart" class="cost-of-risk-chart" aria-label="NPL flows benchmark time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="cost-of-risk" hidden>
@@ -313,6 +322,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260730-cor-benchmark-vs-f02"></script>
+    <script type="module" src="./src/main.js?v=20260730-npl-flows-tab"></script>
   </body>
 </html>

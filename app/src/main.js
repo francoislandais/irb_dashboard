@@ -15,8 +15,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260730-cor-benchmark-vs-f02";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260730-cor-benchmark-vs-f02";
+import { createDataStore } from "./data/dataStore.js?v=20260730-npl-flows-tab";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260730-npl-flows-tab";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
