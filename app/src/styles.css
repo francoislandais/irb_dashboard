@@ -1091,11 +1091,12 @@ button:focus-visible {
 
 .cost-of-risk-tabs {
   display: inline-flex;
-  align-items: stretch;
+  align-items: flex-end;
   max-width: min(100%, 900px);
   width: min(100%, 900px);
-  border: 1px solid #d8dfdb;
-  border-radius: 6px;
+  border: 0;
+  border-bottom: 1px solid #d8dfdb;
+  border-radius: 0;
   background: #ffffff;
   overflow-x: auto;
   overflow-y: hidden;
@@ -1135,22 +1136,26 @@ button:focus-visible {
   flex: 0 0 auto;
   min-width: max-content;
   border: 0;
-  border-right: 1px solid #d8dfdb;
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: #5f6b65;
   cursor: pointer;
   font-size: 0.78rem;
-  font-weight: 600;
-  padding: 7px 12px;
+  font-weight: 500;
+  min-height: 34px;
+  padding: 8px 13px 7px;
 }
 
-.cost-of-risk-tab:last-child {
-  border-right: 0;
+.cost-of-risk-tab:hover {
+  background: #f5f7f6;
+  color: var(--primary-dark);
 }
 
 .cost-of-risk-tab.is-active {
-  background: var(--primary-dark);
-  color: #ffffff;
+  background: transparent;
+  border-bottom-color: var(--primary-dark);
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .cost-of-risk-active-filters {

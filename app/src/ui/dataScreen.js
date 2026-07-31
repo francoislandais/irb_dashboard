@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
-import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260731-subtle-cor-detail-tabs";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260731-subtle-cor-detail-tabs";
+import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260731-subtle-main-tabs";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260731-subtle-main-tabs";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";

@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260731-subtle-cor-detail-tabs";
+} from "../data/costOfRisk.js?v=20260731-subtle-main-tabs";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,
