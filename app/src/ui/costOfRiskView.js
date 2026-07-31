@@ -46,23 +46,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
+} from "../data/costOfRisk.js?v=20260731-global-display-switch";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskStageTransfers.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskStageReconciliationView.js?v=20260731-global-display-switch";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskChartUtils.js?v=20260731-global-display-switch";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -70,7 +70,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskSummaryTablesView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -78,13 +78,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260730-npl-flows-tab";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskSummaryChartsView.js?v=20260731-global-display-switch";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -92,7 +92,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskStageRatioView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -100,7 +100,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskCoverageRatioView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -108,54 +108,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskCollateralRatioView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260731-global-display-switch";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskTreemapView.js?v=20260731-global-display-switch";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260731-global-display-switch";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260730-npl-flows-tab";
+} from "./benchmarkLineChart.js?v=20260731-global-display-switch";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260730-npl-flows-tab";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskCoreDefinitionView.js?v=20260731-global-display-switch";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260731-global-display-switch";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskControlsView.js?v=20260731-global-display-switch";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260730-npl-flows-tab";
-import { openExplorerPoint } from "./explorerView.js?v=20260730-npl-flows-tab";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskAuditTableView.js?v=20260731-global-display-switch";
+import { openExplorerPoint } from "./explorerView.js?v=20260731-global-display-switch";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260731-global-display-switch";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskTabsView.js?v=20260731-global-display-switch";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskModelCache.js?v=20260731-global-display-switch";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskFilterRules.js?v=20260731-global-display-switch";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -164,12 +164,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskStageTransferSelection.js?v=20260731-global-display-switch";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260730-npl-flows-tab";
+} from "./costOfRiskCoreSelection.js?v=20260731-global-display-switch";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -263,6 +263,17 @@ function toggleCostOfRiskCustomDefinitionComponent(xCode) {
   } else {
     activeCostOfRiskCustomDefinitionXCodes.add(normalizedCode);
   }
+}
+
+function setCostOfRiskGlobalDisplayMode(mode) {
+  const nextMode = mode === "amount" ? "amount" : "ratio";
+  activeCostOfRiskDisplayMode = nextMode;
+  activeCostOfRiskDefinitionDisplayMode = nextMode;
+  activeCostOfRiskMovementDisplayMode = nextMode;
+  activeCostOfRiskStageTransferDisplayMode = nextMode;
+  activeCostOfRiskNplFlowsDisplayMode = nextMode;
+  activeCostOfRiskSummaryDisplayMode = nextMode;
+  closeCostOfRiskFilterMenus();
 }
 
 function pulseCostOfRiskContextPanel() {
@@ -518,7 +529,7 @@ export function wireCostOfRiskUi(actions, rerender) {
   });
   elements.costOfRiskDisplayMode?.addEventListener("change", (event) => {
     if (["contributions", "coverage-ratio", "collateral-ratio", "npl-flows", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) return;
-    activeCostOfRiskDisplayMode = event.target.value === "amount" ? "amount" : "ratio";
+    setCostOfRiskGlobalDisplayMode(event.target.value === "amount" ? "amount" : "ratio");
     rerenderApp(actions.getState());
   });
   elements.costOfRiskXAxis?.addEventListener("change", (event) => {
@@ -549,17 +560,7 @@ export function wireCostOfRiskUi(actions, rerender) {
       closeCostOfRiskFilterMenus();
       const [scope, value] = String(displayModeOption.dataset.costOfRiskDisplayModeOption ?? "").split(":");
       const nextMode = value === "ratio" ? "ratio" : "amount";
-      if (scope === "stageTransfer") {
-        activeCostOfRiskStageTransferDisplayMode = nextMode;
-      } else if (scope === "nplFlows") {
-        activeCostOfRiskNplFlowsDisplayMode = nextMode;
-      } else if (scope === "summaryVariation") {
-        activeCostOfRiskSummaryDisplayMode = nextMode;
-      } else if (scope === "costOfRiskDefinition") {
-        activeCostOfRiskDefinitionDisplayMode = nextMode;
-      } else {
-        activeCostOfRiskMovementDisplayMode = nextMode;
-      }
+      setCostOfRiskGlobalDisplayMode(nextMode);
       setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, nextMode));
       if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
       pulseCostOfRiskContextPanel();
@@ -572,18 +573,6 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.preventDefault();
       event.stopPropagation();
       const scope = displayModeToggle.dataset.costOfRiskDisplayModeToggle;
-      activeCostOfRiskContributionDisplayMenuOpen = scope === "contribution" || scope === "costOfRiskDefinition"
-        ? !activeCostOfRiskContributionDisplayMenuOpen
-        : false;
-      activeCostOfRiskStageTransferDisplayMenuOpen = scope === "stageTransfer"
-        ? !activeCostOfRiskStageTransferDisplayMenuOpen
-        : false;
-      activeCostOfRiskNplFlowsDisplayMenuOpen = scope === "nplFlows"
-        ? !activeCostOfRiskNplFlowsDisplayMenuOpen
-        : false;
-      activeCostOfRiskSummaryDisplayMenuOpen = scope === "summaryVariation"
-        ? !activeCostOfRiskSummaryDisplayMenuOpen
-        : false;
       const currentMode = scope === "stageTransfer"
         ? activeCostOfRiskStageTransferDisplayMode
         : scope === "nplFlows"
@@ -593,7 +582,9 @@ export function wireCostOfRiskUi(actions, rerender) {
             : scope === "costOfRiskDefinition"
               ? activeCostOfRiskDefinitionDisplayMode
               : activeCostOfRiskMovementDisplayMode;
-      setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, currentMode));
+      const nextMode = currentMode === "ratio" ? "amount" : "ratio";
+      setCostOfRiskGlobalDisplayMode(nextMode);
+      setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, nextMode));
       pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
@@ -741,9 +732,9 @@ export function wireCostOfRiskUi(actions, rerender) {
     const definitionDisplayButton = event.target.closest?.("[data-cost-of-risk-definition-display]");
     if (definitionDisplayButton) {
       event.preventDefault();
-      activeCostOfRiskDefinitionDisplayMode = definitionDisplayButton.dataset.costOfRiskDefinitionDisplay === "amount"
+      setCostOfRiskGlobalDisplayMode(definitionDisplayButton.dataset.costOfRiskDefinitionDisplay === "amount"
         ? "amount"
-        : "ratio";
+        : "ratio");
       rerenderApp(actions.getState());
       return;
     }

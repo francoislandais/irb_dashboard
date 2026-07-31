@@ -3,7 +3,7 @@ import {
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
+} from "../data/costOfRisk.js?v=20260731-global-display-switch";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -206,7 +206,6 @@ function createCostOfRiskDisplayModeChip({
   name
 }) {
   const isRelative = displayMode === "ratio";
-  const kebabName = name.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
   const chip = document.createElement("div");
   chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--contribution-display";
   chip.classList.toggle("is-open", Boolean(isOpen));
@@ -215,8 +214,7 @@ function createCostOfRiskDisplayModeChip({
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskDisplayModeToggle = name;
-  toggle.setAttribute("aria-haspopup", "listbox");
-  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  toggle.setAttribute("aria-pressed", String(isRelative));
   toggle.setAttribute("aria-label", `Change ${menuLabel.toLowerCase()}`);
 
   const label = document.createElement("span");
@@ -224,26 +222,6 @@ function createCostOfRiskDisplayModeChip({
   label.textContent = isRelative ? labels.relative : labels.absolute;
   toggle.append(label);
   chip.append(toggle);
-
-  if (isOpen) {
-    const menu = document.createElement("div");
-    menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-contribution-display-menu";
-    menu.setAttribute("role", "listbox");
-    menu.setAttribute("aria-label", menuLabel);
-
-    const option = document.createElement("button");
-    option.className = "cost-of-risk-stage-filter-option";
-    option.type = "button";
-    option.dataset.costOfRiskDisplayModeOption = `${name}:${isRelative ? "amount" : "ratio"}`;
-    option.dataset.costOfRiskDisplayModeScope = kebabName;
-    option.setAttribute("role", "option");
-    option.setAttribute("aria-selected", "false");
-    option.textContent = isRelative
-      ? labels.switchToAbsolute
-      : labels.switchToRelative;
-    menu.append(option);
-    chip.append(menu);
-  }
 
   return chip;
 }

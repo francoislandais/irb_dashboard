@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260731-global-display-switch";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

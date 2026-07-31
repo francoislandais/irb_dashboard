@@ -1,5 +1,5 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260730-npl-flows-tab";
-import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260730-npl-flows-tab";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260731-global-display-switch";
+import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260731-global-display-switch";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
 const BENCHMARK_LINE_DASHES = ["ShortDash", "ShortDot", "Dash", "Dot"];
