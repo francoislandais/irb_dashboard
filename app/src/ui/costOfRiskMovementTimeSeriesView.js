@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260731-summary-centered-cells";
+} from "../data/costOfRisk.js?v=20260802-selected-data-all-tabs";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -12,7 +12,7 @@ import {
   renderCostOfRiskBenchmarkModeBadge,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260731-summary-centered-cells";
+} from "./costOfRiskChartUtils.js?v=20260802-selected-data-all-tabs";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -24,7 +24,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260731-summary-centered-cells";
+} from "./benchmarkLineChart.js?v=20260802-selected-data-all-tabs";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskMovementChart = null;

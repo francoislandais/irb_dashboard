@@ -484,9 +484,9 @@ button:focus-visible {
   align-self: stretch;
   align-content: start;
   box-sizing: border-box;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #ffffff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: grid;
   gap: 10px;
   height: 100%;
@@ -495,106 +495,14 @@ button:focus-visible {
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px;
+  padding: 0;
   position: relative;
-}
-
-.cost-of-risk-audit-panel::after {
-  background: rgba(217, 236, 247, 0.58);
-  content: "";
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  z-index: 2;
-}
-
-.cost-of-risk-audit-panel.is-attention-pulse {
-  animation: cost-of-risk-context-panel-glow 280ms ease-out;
-}
-
-.cost-of-risk-audit-panel.is-attention-pulse::after {
-  animation: cost-of-risk-context-panel-shine 280ms ease-out;
-}
-
-@keyframes cost-of-risk-context-panel-shine {
-  0% {
-    opacity: 0;
-  }
-  24% {
-    opacity: 0.82;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes cost-of-risk-context-panel-glow {
-  0% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-  24% {
-    border-color: #bfdbea;
-    box-shadow:
-      0 0 0 3px rgba(217, 236, 247, 0.95),
-      0 0 22px rgba(103, 164, 196, 0.32);
-  }
-  100% {
-    border-color: var(--line);
-    box-shadow: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cost-of-risk-audit-panel.is-attention-pulse,
-  .cost-of-risk-audit-panel.is-attention-pulse::after {
-    animation: none;
-  }
-
-  .cost-of-risk-audit-panel.is-attention-pulse {
-    border-color: #bfdbea;
-    box-shadow: 0 0 0 2px rgba(217, 236, 247, 0.95);
-  }
 }
 
 .cost-of-risk-audit-placeholder {
   color: #66736d;
   font-size: 0.78rem;
   line-height: 1.35;
-}
-
-.cost-of-risk-context-panel-nav {
-  align-items: center;
-  display: flex;
-  gap: 4px;
-  justify-content: flex-end;
-  min-height: 20px;
-}
-
-.cost-of-risk-context-panel-nav-button {
-  align-items: center;
-  background: transparent;
-  border: 1px solid #dce3df;
-  color: var(--primary-dark);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 0.86rem;
-  height: 20px;
-  justify-content: center;
-  line-height: 1;
-  padding: 0;
-  width: 22px;
-}
-
-.cost-of-risk-context-panel-nav-button:hover:not(:disabled) {
-  background: #eef2ef;
-}
-
-.cost-of-risk-context-panel-nav-button:disabled {
-  color: #b5beba;
-  cursor: default;
-  opacity: 0.55;
 }
 
 .cost-of-risk-audit-intro {
@@ -633,6 +541,65 @@ button:focus-visible {
 
 .cost-of-risk-audit-intro-lead--smoothing {
   min-height: 1.12rem;
+}
+
+.cost-of-risk-selected-data-summary {
+  align-content: start;
+  background: #f6f8f7;
+  border-radius: 7px;
+  display: block;
+  height: 100px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.cost-of-risk-selected-data-summary-label {
+  color: var(--primary-dark);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-right: 5px;
+}
+
+.cost-of-risk-selected-data-summary-description {
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.cost-of-risk-selected-data-summary-emphasis {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.cost-of-risk-context-layout {
+  display: grid;
+  gap: 12px;
+  grid-template-rows: 118px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.cost-of-risk-context-selected-pane,
+.cost-of-risk-context-detail-pane {
+  background: #ffffff;
+  border: 1px solid #dfe6e1;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.cost-of-risk-context-selected-pane {
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.cost-of-risk-context-detail-pane {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px;
 }
 
 .cost-of-risk-audit-intro-section {
@@ -1097,7 +1064,7 @@ button:focus-visible {
   border: 0;
   border-bottom: 1px solid #d8dfdb;
   border-radius: 0;
-  background: #ffffff;
+  background: var(--bg);
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-color: #c8d0cb transparent;
@@ -1147,7 +1114,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-tab:hover {
-  background: #f5f7f6;
+  background: #eef2ef;
   color: var(--primary-dark);
 }
 

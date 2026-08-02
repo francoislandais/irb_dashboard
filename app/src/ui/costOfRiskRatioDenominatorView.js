@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260731-summary-centered-cells";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260802-selected-data-all-tabs";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

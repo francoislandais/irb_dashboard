@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260731-summary-centered-cells";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260802-selected-data-all-tabs";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 let costOfRiskSummaryMosaicClickTimer = null;
@@ -148,14 +148,6 @@ function renderCostOfRiskSummaryRatioMosaic({
 }) {
   const wrap = document.createElement("section");
   wrap.className = "cost-of-risk-summary-scope-grid";
-  wrap.append(createCostOfRiskSummaryScopeHeader({
-    activeCellKey,
-    filters,
-    rows: stageSummary.counterpartyRows ?? [],
-    statusRows: stageSummary.rows ?? [],
-    selectedUnit
-  }));
-
   wrap.append(createCostOfRiskSummaryCounterpartyScope({
     activeCellKey,
     displayMode,
