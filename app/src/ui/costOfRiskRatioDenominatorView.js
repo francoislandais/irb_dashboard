@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260802-context-panel-right";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 
@@ -27,7 +27,7 @@ export function renderCostOfRiskRatioDenominatorControls({
   lastCostOfRiskRatioDenominatorRenderKey = renderKey;
 
   if (activeTab === "contributions") {
-    tooltipElement.textContent = "Rate denominator: previous-quarter FINREP F 18.00 gross carrying amount for the current Instruments / Counterparty / Stage filters.";
+    tooltipElement.textContent = "Rate denominator: previous-quarter FINREP F 18.00 GCA for the current Instruments / Counterparty / Stage filters.";
     return;
   }
 

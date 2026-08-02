@@ -67,7 +67,7 @@ const COST_OF_RISK_NPL_FLOW_COUNTERPARTY_ROWS = [
   { key: "credit-institutions", label: "Credit institutions", value: "Credit institutions", yCodes: ["0030"] },
   { key: "other-financials", label: "Other financial corporations", value: "Other financial corporations", yCodes: ["0040"] }
 ];
-// F_18.00 gross carrying amount, split by stage on the x-axis: stage 2 is
+// F_18.00 GCA, split by stage on the x-axis: stage 2 is
 // reported as two separate rows (performing / non-performing) that must be
 // summed to get the total stage 2 exposure.
 const COST_OF_RISK_STAGE_BOX_X_CODES = {
@@ -255,13 +255,13 @@ const COST_OF_RISK_SERIES_CACHE = new WeakMap();
 
 // The ratio denominator now follows the sidebar filters (Accounting type,
 // Counterparty, Stage) instead of a fixed user-picked option: it is always
-// the FINREP F_18.00 gross carrying amount for exactly the same
+// the FINREP F_18.00 GCA for exactly the same
 // asset/counterparty/stage perimeter currently selected, so the denominator
 // always matches what the numerator is scoped to.
 //
 // Coordinates confirmed against assets/ITS_all_dimension_mapping.csv
 // (raw codes; normalizeAxisCode() pads them to 4 digits). F_18.00 has no
-// z-axis; x=0010 is the "Gross carrying amount" total column.
+// z-axis; x=0010 is the "GCA" total column.
 //
 // Stage lives on the x-axis and is sometimes split across two columns:
 // Stage 1 = x=0056 only; Stage 2 = x=0057 (performing) + x=0109
@@ -3396,7 +3396,7 @@ function createCostOfRiskRatioDriverCellKey(stageKey, metric, driver) {
 }
 
 function buildCostOfRiskStageBoxPointsForJst(state, indexes, referenceColumns, stage, jstCode, filters = {}) {
-  // Gross carrying amount is a stock (balance sheet) figure, not a flow, so
+  // GCA is a stock (balance sheet) figure, not a flow, so
   // — unlike F_12.01/F_12.02 — it is used as-is, with no quarterly
   // decumulation. Use the same perimeter as the stage boxes in the flow
   // diagram, including the systematic exclusion of cash balances at central

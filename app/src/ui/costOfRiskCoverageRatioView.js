@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260802-context-panel-right";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260802-context-panel-right";
+} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,7 +20,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
   renderCostOfRiskYAxisFocusBadge
-} from "./costOfRiskChartUtils.js?v=20260802-context-panel-right";
+} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCoverageRatioChart = null;
@@ -80,7 +80,7 @@ export function renderCostOfRiskCoverageRatioTable({
   });
   const heroFormula = document.createElement("div");
   heroFormula.className = "cost-of-risk-stage-ratio-focus-formula";
-  heroFormula.textContent = `${row.label} allowances / ${row.label} gross carrying amount`;
+  heroFormula.textContent = `${row.label} allowances / ${row.label} GCA`;
   hero.append(heroTitle, heroValue, heroVariation, heroFormula);
 
   const numerator = createCostOfRiskCoverageRatioComponentCard({
@@ -110,7 +110,7 @@ export function renderCostOfRiskCoverageRatioTable({
     row,
     selectedUnit,
     title: "Denominator",
-    subtitle: `${row.label} gross carrying amount`
+    subtitle: `${row.label} GCA`
   });
 
   wrap.append(hero, numerator, denominator);

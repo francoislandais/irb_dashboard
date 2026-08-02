@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260802-context-panel-right";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260802-context-panel-right";
+} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,7 +20,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
   renderCostOfRiskYAxisFocusBadge
-} from "./costOfRiskChartUtils.js?v=20260802-context-panel-right";
+} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCollateralRatioChart = null;
@@ -80,7 +80,7 @@ export function renderCostOfRiskCollateralRatioTable({
   });
   const heroFormula = document.createElement("div");
   heroFormula.className = "cost-of-risk-stage-ratio-focus-formula";
-  heroFormula.textContent = "Collateral received / gross carrying amount";
+  heroFormula.textContent = "Collateral received / GCA";
   hero.append(heroTitle, heroValue, heroVariation, heroFormula);
 
   const numerator = createCostOfRiskCollateralRatioComponentCard({
@@ -110,7 +110,7 @@ export function renderCostOfRiskCollateralRatioTable({
     row,
     selectedUnit,
     title: "Denominator",
-    subtitle: "Gross carrying amount"
+    subtitle: "GCA"
   });
 
   wrap.append(hero, numerator, denominator);

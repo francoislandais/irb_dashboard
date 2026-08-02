@@ -548,7 +548,7 @@ button:focus-visible {
   background: #f6f8f7;
   border-radius: 7px;
   display: block;
-  height: 100px;
+  height: 114px;
   overflow: hidden;
   padding: 10px;
 }
@@ -573,10 +573,14 @@ button:focus-visible {
   font-weight: 700;
 }
 
+.cost-of-risk-selected-data-summary-detail {
+  color: #8b9691;
+}
+
 .cost-of-risk-context-layout {
   display: grid;
   gap: 12px;
-  grid-template-rows: 118px minmax(0, 1fr);
+  grid-template-rows: 132px minmax(0, 1fr);
   height: 100%;
   min-height: 0;
 }

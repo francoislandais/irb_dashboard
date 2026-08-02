@@ -46,23 +46,23 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260802-context-panel-right";
+} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260802-context-panel-right";
+} from "./costOfRiskStageTransfers.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260802-context-panel-right";
+} from "./costOfRiskStageReconciliationView.js?v=20260802-readable-selection-phrases";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260802-context-panel-right";
+} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -70,7 +70,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260802-context-panel-right";
+} from "./costOfRiskSummaryTablesView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -78,13 +78,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260802-context-panel-right";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260802-context-panel-right";
+} from "./costOfRiskSummaryChartsView.js?v=20260802-readable-selection-phrases";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260802-context-panel-right";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -92,7 +92,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260802-context-panel-right";
+} from "./costOfRiskStageRatioView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -100,7 +100,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260802-context-panel-right";
+} from "./costOfRiskCoverageRatioView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -108,54 +108,54 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260802-context-panel-right";
+} from "./costOfRiskCollateralRatioView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260802-context-panel-right";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260802-readable-selection-phrases";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260802-context-panel-right";
+} from "./costOfRiskTreemapView.js?v=20260802-readable-selection-phrases";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260802-context-panel-right";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260802-readable-selection-phrases";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260802-context-panel-right";
+} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
 import {
   getCostOfRiskCoreSectionLabel,
   renderCostOfRiskCoreDefinitionTables
-} from "./costOfRiskCoreDefinitionView.js?v=20260802-context-panel-right";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260802-context-panel-right";
+} from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260802-readable-selection-phrases";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260802-context-panel-right";
+} from "./costOfRiskControlsView.js?v=20260802-readable-selection-phrases";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260802-context-panel-right";
-import { openExplorerPoint } from "./explorerView.js?v=20260802-context-panel-right";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-context-panel-right";
+} from "./costOfRiskAuditTableView.js?v=20260802-readable-selection-phrases";
+import { openExplorerPoint } from "./explorerView.js?v=20260802-readable-selection-phrases";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-readable-selection-phrases";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
-} from "./costOfRiskTabsView.js?v=20260802-context-panel-right";
+} from "./costOfRiskTabsView.js?v=20260802-readable-selection-phrases";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
-} from "./costOfRiskModelCache.js?v=20260802-context-panel-right";
+} from "./costOfRiskModelCache.js?v=20260802-readable-selection-phrases";
 import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260802-context-panel-right";
+} from "./costOfRiskFilterRules.js?v=20260802-readable-selection-phrases";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -164,12 +164,12 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260802-context-panel-right";
+} from "./costOfRiskStageTransferSelection.js?v=20260802-readable-selection-phrases";
 import {
   getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
-} from "./costOfRiskCoreSelection.js?v=20260802-context-panel-right";
+} from "./costOfRiskCoreSelection.js?v=20260802-readable-selection-phrases";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
@@ -1001,7 +1001,7 @@ export function renderCostOfRisk(state) {
       metricLabel: getCostOfRiskStageRatioMetricLabel,
       ratioName: "exposure ratio",
       numeratorName: "selected exposure",
-      denominatorName: "total gross carrying amount"
+      denominatorName: "total GCA"
     });
     renderCostOfRiskStageRatioAuditPanel(stageRatio, state, { allowDataAudit: consumeCostOfRiskDataAuditRequest() });
     scheduleCostOfRiskChartReflow();
@@ -1041,7 +1041,7 @@ export function renderCostOfRisk(state) {
       metricLabel: getCostOfRiskCoverageRatioMetricLabel,
       ratioName: "coverage ratio",
       numeratorName: "allowances and provisions",
-      denominatorName: "gross carrying amount"
+      denominatorName: "GCA"
     });
     renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, { allowDataAudit: consumeCostOfRiskDataAuditRequest() });
     scheduleCostOfRiskChartReflow();
@@ -1081,7 +1081,7 @@ export function renderCostOfRisk(state) {
       metricLabel: getCostOfRiskCollateralRatioMetricLabel,
       ratioName: "collateralisation ratio",
       numeratorName: "eligible collateral received",
-      denominatorName: "gross carrying amount"
+      denominatorName: "GCA"
     });
     renderCostOfRiskCollateralRatioAuditPanel(collateralRatio, state, { allowDataAudit: consumeCostOfRiskDataAuditRequest() });
     scheduleCostOfRiskChartReflow();
@@ -1707,7 +1707,7 @@ function renderCostOfRiskNplFlowsPanel(model, selectedUnit = "millions") {
   context.className = "cost-of-risk-npl-flow-context";
   context.textContent = activeCostOfRiskNplFlowsDisplayMode === "ratio"
     ? `Relative flow over previous-quarter loans and advances exposure denominator (${model.denominatorLabel}).`
-    : "Absolute quarterly movement in gross carrying amount of non-performing loans and advances.";
+    : "Absolute quarterly movement in GCA of non-performing loans and advances.";
   metrics.append(context);
 
   const drivers = document.createElement("section");
@@ -2609,6 +2609,27 @@ function createCostOfRiskSelectedDataDescription(text, highlightedValue = "") {
   return block;
 }
 
+function createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, highlightedValue = "") {
+  const block = document.createElement("section");
+  block.className = "cost-of-risk-selected-data-summary";
+
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-selected-data-summary-label";
+  label.textContent = "Selection";
+
+  const description = document.createElement("span");
+  description.className = "cost-of-risk-selected-data-summary-description";
+  appendCostOfRiskHighlightedSelectionText(description, text, highlightedValue);
+
+  const detailNode = document.createElement("span");
+  detailNode.className = "cost-of-risk-selected-data-summary-detail";
+  detailNode.textContent = ` (${detail})`;
+
+  description.append(detailNode);
+  block.append(label, description);
+  return block;
+}
+
 function getCostOfRiskAuditReferenceIndex(audit, referenceDate = activeCostOfRiskReferenceDate) {
   const dates = audit?.dates ?? [];
   const index = dates.findIndex((date) => date.label === referenceDate);
@@ -2678,13 +2699,34 @@ function setCostOfRiskStageTransferSelectedDataSummary(state) {
   const denominatorLabel = formatCostOfRiskSelectedAmount(denominator, state.selectedUnit);
   const referenceLabel = formatReferenceQuarterLabel(activeCostOfRiskReferenceDate || audit.dates?.[0]?.label);
   const scopePhrase = getCostOfRiskSelectedPerimeterPhrase({ omitStage: true });
-  const title = audit.title || "the selected stage transfer";
+  const title = getCostOfRiskReadableStageTransferSelectionTitle(audit.title, audit.type);
   const text = isStageBox
-    ? `At ${referenceLabel}, for ${scopePhrase}, ${title} contains ${formattedValue} of gross carrying amount.`
+    ? `At ${referenceLabel}, for ${scopePhrase}, ${title} contains ${formattedValue} of GCA.`
     : displayMode === "ratio"
-      ? `At ${referenceLabel}, for ${scopePhrase}, ${title} is ${formattedValue}, calculated from a quarterly transfer of ${amountLabel} over a previous-quarter exposure base of ${denominatorLabel}.`
+      ? `At ${referenceLabel}, for ${scopePhrase}, ${title} is ${formattedValue}`
       : `At ${referenceLabel}, for ${scopePhrase}, ${title} represents a quarterly transfer of ${formattedValue}.`;
-  setCostOfRiskSelectedDataSummary(createCostOfRiskSelectedDataDescription(text, formattedValue));
+  const detail = `from a quarterly transfer of ${amountLabel} over a previous-quarter exposure base of ${denominatorLabel}.`;
+  setCostOfRiskSelectedDataSummary(displayMode === "ratio" && !isStageBox
+    ? createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, formattedValue)
+    : createCostOfRiskSelectedDataDescription(text, formattedValue));
+}
+
+function getCostOfRiskReadableStageTransferSelectionTitle(title) {
+  const cleanTitle = String(title || "the selected stage transfer")
+    .replace(/^\d{4}\s*-\s*/u, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (/^to stage/i.test(cleanTitle)) {
+    return `transfer ${cleanTitle.charAt(0).toLowerCase()}${cleanTitle.slice(1)}`;
+  }
+  const netMatch = cleanTitle.match(/^Net\s+Stage\s+(\d)\s*→\s*Stage\s+(\d)$/i);
+  if (netMatch) {
+    return `net transfer from stage ${netMatch[1]} to stage ${netMatch[2]}`;
+  }
+  if (/^Net\s+/i.test(cleanTitle)) {
+    return cleanTitle.replace(/^Net\s+/i, "net transfer ");
+  }
+  return cleanTitle.charAt(0).toLowerCase() + cleanTitle.slice(1);
 }
 
 function renderCostOfRiskMovementAuditPanel(state, options = {}) {
@@ -2940,12 +2982,12 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
   ]));
   article.append(createCostOfRiskAuditInfoSection("Ratio components", [
     `Current numerator, allowances: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
-    `Current denominator, gross carrying amount: ${formatMetricValue(row.currentDenominator, state.selectedUnit)}`,
+    `Current denominator, GCA: ${formatMetricValue(row.currentDenominator, state.selectedUnit)}`,
     `Previous numerator, allowances: ${formatMetricValue(row.previousNumerator, state.selectedUnit)}`,
-    `Previous denominator, gross carrying amount: ${formatMetricValue(row.previousDenominator, state.selectedUnit)}`
+    `Previous denominator, GCA: ${formatMetricValue(row.previousDenominator, state.selectedUnit)}`
   ]));
   article.append(createCostOfRiskAuditInfoSection("Decomposition method", [
-    "Coverage ratio = allowances for the stage divided by gross carrying amount for the same stage.",
+    "Coverage ratio = allowances for the stage divided by GCA for the same stage.",
     "The change in the ratio is decomposed with a two-factor Shapley method.",
     "The displayed numerator and denominator effects are the average of the numerator-first and denominator-first paths, so their sum equals the total ratio variation."
   ]));
@@ -3001,12 +3043,12 @@ function renderCostOfRiskCollateralRatioAuditPanel(collateralRatio, state, optio
   ]));
   article.append(createCostOfRiskAuditInfoSection("Ratio components", [
     `Current numerator, collateral received: ${formatMetricValue(row.currentNumerator, state.selectedUnit)}`,
-    `Current denominator, gross carrying amount: ${formatMetricValue(row.currentDenominator, state.selectedUnit)}`,
+    `Current denominator, GCA: ${formatMetricValue(row.currentDenominator, state.selectedUnit)}`,
     `Previous numerator, collateral received: ${formatMetricValue(row.previousNumerator, state.selectedUnit)}`,
-    `Previous denominator, gross carrying amount: ${formatMetricValue(row.previousDenominator, state.selectedUnit)}`
+    `Previous denominator, GCA: ${formatMetricValue(row.previousDenominator, state.selectedUnit)}`
   ]));
   article.append(createCostOfRiskAuditInfoSection("Decomposition method", [
-    "Collateral ratio = maximum amount of collateral received that can be considered divided by gross carrying amount.",
+    "Collateral ratio = maximum amount of collateral received that can be considered divided by GCA.",
     "F_18.00 reports collateral on performing and non-performing exposures, so Stage 1 / Stage 2 / Stage 3 detail is not used here.",
     "The change in the ratio is decomposed with the same two-factor Shapley method used in the exposure and coverage ratio tabs."
   ]));
@@ -3152,15 +3194,15 @@ function getCostOfRiskSummarySelectionDescription({
   const displayedSelectionValue = getCostOfRiskSummarySelectedDataEmphasisValue(row, cell, selectedCell, selectedUnit);
 
   if (selectedCell.metric === "gca" && selectedCell.kind === "ratio") {
-    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} represents ${formatContributionPercentValue(cell.ratio)} (${numeratorLabel}) of total gross carrying amount${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
+    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} represents ${formatContributionPercentValue(cell.ratio)} (${numeratorLabel}) of total GCA${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
   }
 
   if (selectedCell.metric === "coverage" && selectedCell.kind !== "mom") {
-    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} coverage is ${formatContributionPercentValue(cell.value)} (${numeratorLabel}) over gross carrying amount${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
+    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} coverage is ${formatContributionPercentValue(cell.value)} (${numeratorLabel}) over GCA${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
   }
 
   if (selectedCell.metric === "collateral" && selectedCell.kind !== "mom") {
-    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} collateralisation is ${formatContributionPercentValue(cell.value)} (${numeratorLabel}) over gross carrying amount${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
+    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} collateralisation is ${formatContributionPercentValue(cell.value)} (${numeratorLabel}) over GCA${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
   }
 
   if (selectedCell.kind === "mom") {
@@ -3225,16 +3267,21 @@ function getCostOfRiskSelectedPerimeterPhrase(options = {}) {
   const counterparty = getCostOfRiskActiveFilterLabel("counterparties", activeCostOfRiskFilters.counterparty) || "All Counterparties";
   const status = getCostOfRiskActiveFilterLabel("stages", activeCostOfRiskFilters.stage) || "All Stage";
   const normalizedBalanceScope = balanceScope.toLowerCase();
-  const normalizedInstrument = instrument === "All Instruments" ? "all instruments" : instrument;
-  const parts = [`${normalizedBalanceScope} ${normalizedInstrument}`];
+  const isAllInstrument = ["All", "All Instruments"].includes(instrument);
+  const isAllCounterparty = ["All", "All Counterparties"].includes(counterparty);
+  const isAllStatus = ["All", "All Stage"].includes(status);
+  const normalizedInstrument = isAllInstrument
+    ? `all ${normalizedBalanceScope} instruments`
+    : `${normalizedBalanceScope} ${instrument}`;
+  const parts = [normalizedInstrument];
 
-  if (!options.omitCounterparty && counterparty !== "All Counterparties") {
+  if (!options.omitCounterparty && !isAllCounterparty) {
     parts.push(`to ${counterparty}`);
-  } else if (!options.omitCounterparty) {
+  } else if (!options.omitCounterparty && options.includeAllCounterparties) {
     parts.push("across all counterparties");
   }
 
-  if (!options.omitStage && status !== "All Stage") {
+  if (!options.omitStage && !isAllStatus) {
     parts.push(`in ${status}`);
   }
 
@@ -3268,7 +3315,7 @@ function getCostOfRiskSummaryAuditMetricLabel(selectedCell) {
     allowances: "Allowances",
     collateral: "Collateral",
     coverage: "Coverage",
-    gca: "Gross carrying amount"
+    gca: "GCA"
   };
   const kindLabel = selectedCell.kind === "mom"
     ? "variation"
@@ -3283,10 +3330,10 @@ function getCostOfRiskSummaryAuditDefinition(selectedCell) {
     const label = selectedCell.metric === "collateral" ? "Collateral ratio" : "Coverage ratio";
     return selectedCell.kind === "mom"
       ? `Variation is the quarter-on-quarter change in the ${label.toLowerCase()}, expressed in basis points.`
-      : `${label} equals ${selectedCell.metric === "collateral" ? "collateral received" : "allowances"} divided by gross carrying amount for the selected row.`;
+      : `${label} equals ${selectedCell.metric === "collateral" ? "collateral received" : "allowances"} divided by GCA for the selected row.`;
   }
   if (selectedCell.kind === "ratio") {
-    return "Exposure ratio equals gross carrying amount for the selected row divided by total gross carrying amount for the perimeter.";
+    return "Exposure ratio equals GCA for the selected row divided by total GCA for the perimeter.";
   }
   if (selectedCell.kind === "mom") {
     return "Variation is the quarter-on-quarter change in the selected stock, expressed as a growth rate versus the previous quarter when relative mode is active.";
@@ -4392,7 +4439,7 @@ function getCostOfRiskHelpPanelContent(topic) {
         },
         {
           title: "Denominator",
-          body: "The denominator is the previous-quarter gross carrying amount from F_18.00 on the selected instruments and counterparty perimeter, taken across all stages and excluding central bank cash where relevant."
+          body: "The denominator is the previous-quarter GCA from F_18.00 on the selected instruments and counterparty perimeter, taken across all stages and excluding central bank cash where relevant."
         },
         {
           title: "Formula",
@@ -4428,7 +4475,7 @@ function getCostOfRiskHelpPanelContent(topic) {
         },
         {
           title: "Denominator",
-          body: "The denominator is the previous-quarter gross carrying amount of loans and advances on the selected counterparty perimeter."
+          body: "The denominator is the previous-quarter GCA of loans and advances on the selected counterparty perimeter."
         },
         {
           title: "Formula",
@@ -4516,7 +4563,7 @@ function getCostOfRiskHelpPanelContent(topic) {
       sections: [
         {
           title: "Displayed values",
-          body: "Exposure ratio is shown as gross carrying amount, coverage as allowances, and collateral as collateral received."
+          body: "Exposure ratio is shown as GCA, coverage as allowances, and collateral as collateral received."
         },
         {
           title: "Unit",
@@ -4532,11 +4579,11 @@ function getCostOfRiskHelpPanelContent(topic) {
       sections: [
         {
           title: "Exposure ratio",
-          body: "Gross carrying amount for the selected row is divided by the gross carrying amount of the selected perimeter."
+          body: "GCA for the selected row is divided by the GCA of the selected perimeter."
         },
         {
           title: "Coverage and collateral",
-          body: "Coverage is allowances divided by gross carrying amount. Collateral is collateral received divided by gross carrying amount."
+          body: "Coverage is allowances divided by GCA. Collateral is collateral received divided by GCA."
         },
         {
           title: "Format",
@@ -4675,7 +4722,7 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "How it is calculated",
-          body: "Exposure ratio = gross carrying amount of the selected category divided by total gross carrying amount of the perimeter. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
+          body: "Exposure ratio = GCA of the selected category divided by total GCA of the perimeter. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
         },
         {
           title: "Source",
@@ -4687,7 +4734,7 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
     "coverage-ratio": {
       eyebrow: "Allowance coverage",
       title: "Coverage Ratio",
-      lead: "This view measures allowances as a share of gross carrying amount for the selected stage or performing status.",
+      lead: "This view measures allowances as a share of GCA for the selected stage or performing status.",
       sections: [
         {
           title: "What you see",
@@ -4695,7 +4742,7 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "How it is calculated",
-          body: "Coverage ratio = allowances for the stage divided by gross carrying amount for the same stage. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
+          body: "Coverage ratio = allowances for the stage divided by GCA for the same stage. The variation is decomposed with a two-factor Shapley method, averaging the numerator-first and denominator-first paths."
         },
         {
           title: "Source",
@@ -4715,7 +4762,7 @@ function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "How it is calculated",
-          body: "Collateral ratio = maximum amount of collateral received that can be considered divided by gross carrying amount. The variation is decomposed with the same two-factor Shapley method used in the ratio tabs."
+          body: "Collateral ratio = maximum amount of collateral received that can be considered divided by GCA. The variation is decomposed with the same two-factor Shapley method used in the ratio tabs."
         },
         {
           title: "Source",
