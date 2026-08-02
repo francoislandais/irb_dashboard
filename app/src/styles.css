@@ -482,18 +482,19 @@ button:focus-visible {
 
 .cost-of-risk-audit-panel {
   align-self: stretch;
-  align-content: start;
+  align-content: stretch;
   box-sizing: border-box;
   border: 0;
   border-radius: 0;
   background: transparent;
   display: grid;
   gap: 10px;
+  grid-template-rows: minmax(0, 1fr);
   height: 100%;
   max-height: 100%;
   min-height: 0;
   min-width: 0;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   padding: 0;
   position: relative;
@@ -578,11 +579,12 @@ button:focus-visible {
 }
 
 .cost-of-risk-context-layout {
+  align-self: stretch;
   display: grid;
   gap: 12px;
   grid-template-rows: 132px minmax(0, 1fr);
   height: 100%;
-  min-height: 0;
+  min-height: 100%;
 }
 
 .cost-of-risk-context-selected-pane,

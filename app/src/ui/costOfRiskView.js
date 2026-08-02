@@ -552,12 +552,10 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.preventDefault();
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
-      const [scope, value] = String(displayModeOption.dataset.costOfRiskDisplayModeOption ?? "").split(":");
+      const [, value] = String(displayModeOption.dataset.costOfRiskDisplayModeOption ?? "").split(":");
       const nextMode = value === "ratio" ? "ratio" : "amount";
       setCostOfRiskGlobalDisplayMode(nextMode);
-      setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, nextMode));
       if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
-      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -566,20 +564,18 @@ export function wireCostOfRiskUi(actions, rerender) {
     if (displayModeToggle) {
       event.preventDefault();
       event.stopPropagation();
-      const scope = displayModeToggle.dataset.costOfRiskDisplayModeToggle;
-      const currentMode = scope === "stageTransfer"
+      const displayModeScope = displayModeToggle.dataset.costOfRiskDisplayModeToggle;
+      const currentMode = displayModeScope === "stageTransfer"
         ? activeCostOfRiskStageTransferDisplayMode
-        : scope === "nplFlows"
+        : displayModeScope === "nplFlows"
           ? activeCostOfRiskNplFlowsDisplayMode
-          : scope === "summaryVariation"
+          : displayModeScope === "summaryVariation"
             ? activeCostOfRiskSummaryDisplayMode
-            : scope === "costOfRiskDefinition"
+            : displayModeScope === "costOfRiskDefinition"
               ? activeCostOfRiskDefinitionDisplayMode
               : activeCostOfRiskMovementDisplayMode;
       const nextMode = currentMode === "ratio" ? "amount" : "ratio";
       setCostOfRiskGlobalDisplayMode(nextMode);
-      setCostOfRiskHelpTopic(getCostOfRiskDisplayModeHelpTopic(scope, nextMode));
-      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -3718,11 +3714,6 @@ function renderCostOfRiskReferenceDateSelectionPanel() {
     intro.append(table);
   }
 
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "You can also change the same reference quarter by clicking a point in any temporal chart.";
-  intro.append(hint);
-
   replaceCostOfRiskAuditPanelContent(intro);
 }
 
@@ -3933,11 +3924,6 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   table.append(tbody);
   intro.append(table);
 
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Selecting a row updates the perimeter across every chart on this tab right away.";
-  intro.append(hint);
-
   replaceCostOfRiskAuditPanelContent(intro);
 }
 
@@ -3972,11 +3958,6 @@ function renderCostOfRiskBalanceScopeSelectionPanel() {
   });
   table.append(tbody);
   intro.append(table);
-
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "In-balance is the default perimeter. Some tabs cannot reproduce the same granularity for off-balance exposures.";
-  intro.append(hint);
 
   replaceCostOfRiskAuditPanelContent(intro);
 }
@@ -4015,11 +3996,6 @@ function renderCostOfRiskStageSelectionPanel() {
 
   intro.append(createCostOfRiskStageSelectionGroup("Staging status", options.filter((option) => isCostOfRiskIfrsStageFilterValue(option.value)), activeValue));
   intro.append(createCostOfRiskStageSelectionGroup("Performance status", options.filter((option) => isCostOfRiskPerformanceStatusFilterValue(option.value)), activeValue));
-
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "The performance status breakdown is an alternative F_18.00 view, not an additional stage.";
-  intro.append(hint);
 
   replaceCostOfRiskAuditPanelContent(intro);
 }
@@ -4180,11 +4156,6 @@ function renderCostOfRiskDefinitionSelectionPanel() {
 
   table.append(tbody);
   intro.append(table);
-
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Selecting a definition updates the ratio, driver breakdown, and audit trail right away.";
-  intro.append(hint);
 
   replaceCostOfRiskAuditPanelContent(intro);
 }
