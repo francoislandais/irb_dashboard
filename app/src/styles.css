@@ -450,7 +450,7 @@ button:focus-visible {
 
 .cost-of-risk-dashboard {
   display: grid;
-  grid-template-columns: 300px minmax(0, 900px);
+  grid-template-columns: minmax(0, 900px) 300px;
   gap: 16px;
   height: 100%;
   justify-content: start;

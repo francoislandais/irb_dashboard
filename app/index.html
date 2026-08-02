@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260802-selected-data-all-tabs">
+    <link rel="stylesheet" href="./src/styles.css?v=20260802-context-panel-right">
   </head>
   <body>
     <div class="app-shell">
@@ -163,9 +163,6 @@
                   <input id="cost-of-risk-smoothing" type="range" min="1" max="4" step="1" value="4">
                 </label>
               </aside>
-              <aside id="cost-of-risk-audit-panel" class="cost-of-risk-audit-panel" aria-label="Audit trail">
-                <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
-              </aside>
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
@@ -313,6 +310,9 @@
                 </div>
                 </div>
               </div>
+              <aside id="cost-of-risk-audit-panel" class="cost-of-risk-audit-panel" aria-label="Audit trail">
+                <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
+              </aside>
             </div>
           </article>
         </section>
@@ -322,6 +322,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260802-selected-data-all-tabs"></script>
+    <script type="module" src="./src/main.js?v=20260802-context-panel-right"></script>
   </body>
 </html>
