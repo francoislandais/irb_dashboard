@@ -809,8 +809,9 @@ button:focus-visible {
   color: var(--text);
   cursor: pointer;
   display: grid;
-  gap: 2px;
+  column-gap: 8px;
   font-size: 0.78rem;
+  grid-template-columns: minmax(0, 1fr) auto;
   max-width: 100%;
   min-height: 32px;
   min-width: 0;
@@ -825,6 +826,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-filter-selection-option-label,
+.cost-of-risk-filter-selection-option-value,
 .cost-of-risk-filter-selection-option-reason {
   display: block;
   line-height: 1.22;
@@ -833,9 +835,17 @@ button:focus-visible {
   white-space: normal;
 }
 
+.cost-of-risk-filter-selection-option-value {
+  color: var(--primary-dark);
+  font-weight: 600;
+  justify-self: end;
+  white-space: nowrap;
+}
+
 .cost-of-risk-filter-selection-option-reason {
   color: #7c8781;
   font-size: 0.68rem;
+  grid-column: 1 / -1;
 }
 
 .cost-of-risk-filter-selection-row:first-child .cost-of-risk-filter-selection-option {
@@ -865,10 +875,18 @@ button:focus-visible {
   font-weight: 700;
 }
 
+.cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-value {
+  color: #ffffff;
+}
+
 .cost-of-risk-filter-selection-row.is-disabled .cost-of-risk-filter-selection-option {
   background: #f7f8f7;
   color: #9aa39e;
   cursor: default;
+}
+
+.cost-of-risk-filter-selection-row.is-disabled .cost-of-risk-filter-selection-option-value {
+  color: #9aa39e;
 }
 
 .cost-of-risk-filter-selection-row.is-disabled .cost-of-risk-filter-selection-option:hover {
@@ -877,7 +895,7 @@ button:focus-visible {
 
 .cost-of-risk-filter-selection-option--definition {
   display: grid;
-  gap: 3px;
+  row-gap: 3px;
   min-height: 0;
 }
 
@@ -885,11 +903,13 @@ button:focus-visible {
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.15;
+  min-width: 0;
 }
 
 .cost-of-risk-filter-selection-option-description,
 .cost-of-risk-filter-selection-option-source {
   font-size: 0.7rem;
+  grid-column: 1 / -1;
   line-height: 1.2;
 }
 
@@ -2584,21 +2604,21 @@ button:focus-visible {
 .cost-of-risk-summary-scope-grid {
   align-content: start;
   display: grid;
-  column-gap: 18px;
   row-gap: 8px;
-  grid-template-columns: 320px 540px;
+  grid-template-columns: minmax(720px, 1fr);
   justify-content: start;
   justify-self: start;
-  max-width: 878px;
+  max-width: 100%;
   width: 100%;
 }
 
 .cost-of-risk-summary-scope-panel {
   background: #ffffff;
-  border-radius: 14px;
+  border: 1px solid #e4ebe7;
+  border-radius: 8px;
   min-width: 0;
   overflow: hidden;
-  padding: 12px 18px 14px;
+  padding: 7px 20px 10px;
 }
 
 .cost-of-risk-summary-scope-panel--counterparty {
@@ -2640,9 +2660,9 @@ button:focus-visible {
 
 .cost-of-risk-summary-scope-table {
   border-collapse: collapse;
-  color: #2b302d;
-  font-size: 0.82rem;
-  line-height: 1.12;
+  color: #24352d;
+  font-size: 0.8rem;
+  line-height: 1.1;
   table-layout: fixed;
   width: 100%;
 }
@@ -2675,12 +2695,13 @@ button:focus-visible {
 .cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-row {
   align-items: center;
   display: grid;
-  grid-template-columns: minmax(0, 0.72fr) repeat(3, minmax(82px, 1fr));
+  grid-template-columns: minmax(180px, 1.05fr) repeat(3, minmax(150px, 1fr));
   min-width: 0;
 }
 
 .cost-of-risk-summary-scope-row {
-  border-bottom: 1px solid #eef2f0;
+  border-bottom: 1px solid #e8eeeb;
+  min-height: 25px;
 }
 
 .cost-of-risk-summary-scope-header,
@@ -2689,18 +2710,20 @@ button:focus-visible {
   border: 0;
   font-weight: 400;
   min-width: 0;
-  padding: 3px 6px;
+  padding: 3px 9px;
 }
 
 .cost-of-risk-summary-scope-header {
-  color: #202823;
-  font-size: 0.88rem;
+  color: #223a5e;
+  font-size: 0.79rem;
+  font-weight: 650;
+  min-height: 24px;
   text-align: center;
 }
 
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
-  background: #dce8f4;
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 0;
 }
 
 .cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text,
@@ -2709,7 +2732,11 @@ button:focus-visible {
 }
 
 .cost-of-risk-summary-scope-label {
+  align-items: center;
   cursor: pointer;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 6px;
   overflow: hidden;
   text-align: left;
   text-overflow: ellipsis;
@@ -2721,8 +2748,8 @@ button:focus-visible {
 }
 
 .cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-label .cost-of-risk-summary-scope-text {
-  background: #dfeaf4;
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 0;
 }
 
 .cost-of-risk-summary-scope-cell {
@@ -2730,10 +2757,10 @@ button:focus-visible {
   cursor: pointer;
   display: flex;
   font-variant-numeric: tabular-nums;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: hidden;
   position: relative;
-  text-align: center;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -2743,30 +2770,135 @@ button:focus-visible {
 }
 
 .cost-of-risk-summary-scope-label.is-coordinate-row .cost-of-risk-summary-scope-text {
-  background: #dce8f4;
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 0;
 }
 
 .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value,
 .cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value {
-  background: var(--primary-dark);
-  border-radius: 4px;
-  color: #ffffff;
+  background: transparent;
+  border-radius: 0;
+  color: inherit;
 }
 
 .cost-of-risk-summary-scope-value {
-  display: inline-block;
-  min-width: 44px;
-  padding: 2px 12px;
+  align-items: center;
+  display: grid;
+  grid-template-columns: 72px minmax(44px, 96px);
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.cost-of-risk-summary-scope-value-text {
+  color: #223a5e;
+  justify-self: end;
+}
+
+.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value-text {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.cost-of-risk-summary-scope-bar {
+  background: #e8ecef;
+  border-radius: 999px;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.cost-of-risk-summary-scope-bar-fill {
+  background: #116cc8;
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  min-width: 3px;
 }
 
 .cost-of-risk-summary-scope-text {
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
-  padding: 2px 8px;
+  padding: 2px 0;
   text-overflow: ellipsis;
   vertical-align: top;
+}
+
+.cost-of-risk-summary-scope-unit {
+  color: #87918b;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.cost-of-risk-summary-scope-info {
+  align-items: center;
+  border: 1px solid #aeb9b4;
+  border-radius: 999px;
+  color: #87918b;
+  display: inline-flex;
+  font-size: 0.66rem;
+  height: 14px;
+  justify-content: center;
+  margin-left: 6px;
+  width: 14px;
+}
+
+.cost-of-risk-summary-category-marker {
+  align-items: center;
+  border-radius: 4px;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  height: 16px;
+  justify-content: center;
+  justify-self: center;
+  line-height: 1;
+  width: 16px;
+}
+
+.cost-of-risk-summary-category-marker--all {
+  background: transparent;
+  color: #216fd0;
+  font-size: 0.86rem;
+}
+
+.cost-of-risk-summary-category-marker--stage1 {
+  background: #dff5eb;
+  color: #44b68b;
+}
+
+.cost-of-risk-summary-category-marker--stage2 {
+  background: #fff2ca;
+  color: #e5ae24;
+}
+
+.cost-of-risk-summary-category-marker--stage3 {
+  background: #ffe3e3;
+  color: #ff6464;
+}
+
+.cost-of-risk-summary-category-marker--poci {
+  background: #f2defc;
+  color: #b956e2;
+}
+
+.cost-of-risk-summary-category-marker--performing {
+  background: #dff5eb;
+  border: 1px solid #70c9ad;
+  color: #44b68b;
+}
+
+.cost-of-risk-summary-category-marker--nonperforming {
+  background: #ffe3e3;
+  border: 1px solid #ff7777;
+  color: #ff5555;
+}
+
+.cost-of-risk-summary-scope-row.is-selected-row {
+  background: #edf5ff;
 }
 
 .cost-of-risk-summary-counterparty-scope-table .cost-of-risk-summary-scope-value {
