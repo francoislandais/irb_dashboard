@@ -32,10 +32,26 @@ const COST_OF_RISK_FILTER_PARENT_LABELS = {
 
 const COST_OF_RISK_UNAVAILABLE_MESSAGE = "FINREP data does not support this level of detail for the current selection.";
 const COST_OF_RISK_PERFORMANCE_STATUS_VALUES = new Set(["Performing", "Non-performing"]);
+const COST_OF_RISK_IFRS_STAGE_VALUES = new Set(["Stage 1", "Stage 2", "Stage 3", "POCI"]);
 
 export function getCostOfRiskFilterParentValue(filterName, value) {
   if (filterName === "balanceScope") return COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
   return COST_OF_RISK_FILTER_PARENT_VALUES[filterName]?.[value] ?? COST_OF_RISK_FILTER_ALL;
+}
+
+export function isCostOfRiskPerformanceStatusFilterValue(value) {
+  return COST_OF_RISK_PERFORMANCE_STATUS_VALUES.has(value);
+}
+
+export function isCostOfRiskIfrsStageFilterValue(value) {
+  return COST_OF_RISK_IFRS_STAGE_VALUES.has(value);
+}
+
+export function formatCostOfRiskCounterpartySelectionLabel(label) {
+  return String(label ?? "")
+    .replace(/^o\/w\s+/i, "")
+    .replace(/^of which[:\s]+/i, "")
+    .trim();
 }
 
 export function getCostOfRiskUnavailableMessage(filters) {

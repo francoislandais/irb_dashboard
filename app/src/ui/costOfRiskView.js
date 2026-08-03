@@ -147,14 +147,18 @@ import {
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
 } from "./costOfRiskTabsView.js?v=20260802-readable-selection-phrases";
+import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260803-refactor-cleanup";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
 } from "./costOfRiskModelCache.js?v=20260802-readable-selection-phrases";
 import {
+  formatCostOfRiskCounterpartySelectionLabel,
   getCostOfRiskFilterParentValue as getFilterParentValue,
-  getCostOfRiskUnavailableMessage as getUnavailableMessage
-} from "./costOfRiskFilterRules.js?v=20260802-readable-selection-phrases";
+  getCostOfRiskUnavailableMessage as getUnavailableMessage,
+  isCostOfRiskIfrsStageFilterValue,
+  isCostOfRiskPerformanceStatusFilterValue
+} from "./costOfRiskFilterRules.js?v=20260803-refactor-cleanup";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -1300,174 +1304,18 @@ function renderCostOfRiskTabEmpty(message) {
     activeTab: activeCostOfRiskTab,
     message,
     panels: elements.costOfRiskTabPanels,
-    resolveMessage: resolveCostOfRiskTabEmptyMessage
+    resolveMessage: (rawMessage) => resolveCostOfRiskTabEmptyMessage(rawMessage, {
+      activeTab: activeCostOfRiskTab,
+      filterOptions: latestCostOfRiskFilterOptions,
+      filters: activeCostOfRiskFilters,
+      onSelectFilter: applyCostOfRiskEmptyMessageFilterSelection
+    })
   });
-}
-
-function resolveCostOfRiskTabEmptyMessage(message) {
-  const resolvedMessage = !message
-    || String(message).startsWith("No matching F")
-    || String(message).startsWith("No F_")
-    ? getCostOfRiskUnavailableMessage()
-    : message;
-
-  if (String(resolvedMessage).startsWith("FINREP data does not support this level of detail with a breakdown by performing status")) {
-    return createCostOfRiskRemoveStatusFilterMessage();
-  }
-  if (
-    String(resolvedMessage).startsWith("FINREP data does not support this level of detail for off-balance")
-    || String(resolvedMessage).startsWith("FINREP data does not support this level of detail for the combined")
-    || String(resolvedMessage).startsWith("FINREP data does not support this level of detail for collateral analysis outside")
-  ) {
-    return createCostOfRiskSelectInBalanceMessage(resolvedMessage);
-  }
-  if (String(resolvedMessage).startsWith("FINREP data does not support this level of detail for")) {
-    const counterpartyAction = createCostOfRiskFineCounterpartyMessage(resolvedMessage);
-    if (counterpartyAction) return counterpartyAction;
-  }
-  if (
-    activeCostOfRiskTab === "collateral-ratio"
-    && String(resolvedMessage).startsWith("Collateral information in F_18.00")
-  ) {
-    return createCostOfRiskCollateralStatusSelectionEmpty(resolvedMessage);
-  }
-  if (
-    (activeCostOfRiskTab === "stage-ratio" || activeCostOfRiskTab === "coverage-ratio")
-    && String(resolvedMessage).startsWith("This tab is stage or performing status specific")
-  ) {
-    return createCostOfRiskRatioStatusSelectionEmpty(resolvedMessage);
-  }
-  return resolvedMessage;
-}
-
-function createCostOfRiskSelectInBalanceMessage(message) {
-  const wrap = document.createElement("span");
-  wrap.className = "cost-of-risk-tab-empty-inline-action";
-  wrap.append(document.createTextNode(`${message.replace(/ Select In-balance\\.?$/i, "")} `));
-  wrap.append(createCostOfRiskTabEmptyActionButton("Select In-balance", () => {
-    applyCostOfRiskEmptyMessageFilterSelection("balanceScope", COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE);
-  }));
-  wrap.append(document.createTextNode("."));
-  return wrap;
-}
-
-function createCostOfRiskFineCounterpartyMessage(message) {
-  const counterparty = activeCostOfRiskFilters.counterparty;
-  const parent = getFilterParentValue("counterparty", counterparty);
-  if (!counterparty || counterparty === COST_OF_RISK_FILTER_ALL || parent === COST_OF_RISK_FILTER_ALL) return null;
-
-  const counterpartyLabel = getCostOfRiskCounterpartyFilterLabel(counterparty);
-  const parentLabel = getCostOfRiskCounterpartyFilterLabel(parent);
-  const wrap = document.createElement("span");
-  wrap.className = "cost-of-risk-tab-empty-inline-action";
-  wrap.append(document.createTextNode(`${message.replace(/ Select .*$/i, "")} `));
-
-  const removeButton = createCostOfRiskTabEmptyActionButton(`Remove ${counterpartyLabel} filter`, () => {
-    applyCostOfRiskEmptyMessageFilterSelection("counterparty", COST_OF_RISK_FILTER_ALL);
-  });
-  const parentButton = createCostOfRiskTabEmptyActionButton(`Select ${parentLabel}`, () => {
-    applyCostOfRiskEmptyMessageFilterSelection("counterparty", parent);
-  });
-
-  wrap.append(removeButton, document.createTextNode(" or "), parentButton, document.createTextNode("."));
-  return wrap;
-}
-
-function createCostOfRiskRemoveStatusFilterMessage() {
-  const wrap = document.createElement("span");
-  wrap.className = "cost-of-risk-tab-empty-inline-action";
-  wrap.append(document.createTextNode("FINREP data does not support this level of detail with a breakdown by performing status. "));
-
-  const button = createCostOfRiskTabEmptyActionButton("Remove this filter", () => {
-    applyCostOfRiskEmptyMessageFilterSelection("stage", COST_OF_RISK_FILTER_ALL);
-  });
-  wrap.append(button);
-  wrap.append(document.createTextNode("."));
-  return wrap;
-}
-
-function createCostOfRiskTabEmptyActionButton(label, onClick) {
-  const button = document.createElement("button");
-  button.className = "cost-of-risk-tab-empty-action";
-  button.type = "button";
-  button.textContent = label;
-  button.addEventListener("click", onClick);
-  return button;
 }
 
 function applyCostOfRiskEmptyMessageFilterSelection(filterKey, value) {
   clearCostOfRiskHelpTopic();
   applyCostOfRiskFilterSelection(filterKey, value);
-}
-
-function getCostOfRiskCounterpartyFilterLabel(value) {
-  const option = latestCostOfRiskFilterOptions?.counterparties?.find((candidate) => candidate.value === value);
-  return formatCostOfRiskCounterpartySelectionLabel(option?.label ?? value);
-}
-
-function createCostOfRiskRatioStatusSelectionEmpty(message) {
-  const wrap = document.createElement("div");
-  wrap.className = "cost-of-risk-ratio-status-empty";
-
-  const text = document.createElement("p");
-  text.className = "cost-of-risk-ratio-status-empty-text";
-  text.textContent = message;
-  wrap.append(text);
-
-  const options = latestCostOfRiskFilterOptions?.stages ?? [];
-  wrap.append(createCostOfRiskRatioStatusOptionGroup(
-    "Staging status",
-    options.filter((option) => isCostOfRiskIfrsStageFilterValue(option.value))
-  ));
-  wrap.append(createCostOfRiskRatioStatusOptionGroup(
-    "Performance status",
-    options.filter((option) => isCostOfRiskPerformanceStatusFilterValue(option.value))
-  ));
-
-  return wrap;
-}
-
-function createCostOfRiskCollateralStatusSelectionEmpty(message) {
-  const wrap = document.createElement("div");
-  wrap.className = "cost-of-risk-ratio-status-empty";
-
-  const text = document.createElement("p");
-  text.className = "cost-of-risk-ratio-status-empty-text";
-  text.textContent = message;
-  wrap.append(text);
-
-  const options = latestCostOfRiskFilterOptions?.stages ?? [];
-  wrap.append(createCostOfRiskRatioStatusOptionGroup(
-    "Collateral status",
-    options.filter((option) => option.value === COST_OF_RISK_FILTER_ALL || isCostOfRiskPerformanceStatusFilterValue(option.value))
-  ));
-
-  return wrap;
-}
-
-function createCostOfRiskRatioStatusOptionGroup(titleText, options) {
-  const group = document.createElement("section");
-  group.className = "cost-of-risk-ratio-status-empty-group";
-
-  const title = document.createElement("h3");
-  title.className = "cost-of-risk-ratio-status-empty-title";
-  title.textContent = titleText;
-  group.append(title);
-
-  const optionWrap = document.createElement("div");
-  optionWrap.className = "cost-of-risk-ratio-status-empty-options";
-  options.forEach((option) => {
-    const button = document.createElement("button");
-    button.className = "cost-of-risk-ratio-status-empty-option";
-    button.type = "button";
-    button.textContent = option.label;
-    button.addEventListener("click", () => {
-      applyCostOfRiskFilterSelection("stage", option.value);
-    });
-    optionWrap.append(button);
-  });
-  group.append(optionWrap);
-  return group;
 }
 
 function clearCostOfRiskEmptyPanels() {
@@ -2182,7 +2030,17 @@ function createCostOfRiskDefinitionDetailRow(item, selectedUnit, panelTab) {
 function createCostOfRiskDefinitionEmpty(message) {
   const empty = document.createElement("div");
   empty.className = "cost-of-risk-definition-empty";
-  empty.textContent = resolveCostOfRiskTabEmptyMessage(message);
+  const resolvedMessage = resolveCostOfRiskTabEmptyMessage(message, {
+    activeTab: activeCostOfRiskTab,
+    filterOptions: latestCostOfRiskFilterOptions,
+    filters: activeCostOfRiskFilters,
+    onSelectFilter: applyCostOfRiskEmptyMessageFilterSelection
+  });
+  if (resolvedMessage instanceof Node) {
+    empty.append(resolvedMessage);
+  } else {
+    empty.textContent = resolvedMessage;
+  }
   return empty;
 }
 
@@ -3620,14 +3478,6 @@ function createCostOfRiskStageSelectionGroup(titleText, options, activeValue, pr
   return group;
 }
 
-function isCostOfRiskPerformanceStatusFilterValue(value) {
-  return value === "Performing" || value === "Non-performing";
-}
-
-function isCostOfRiskIfrsStageFilterValue(value) {
-  return ["Stage 1", "Stage 2", "Stage 3", "POCI"].includes(value);
-}
-
 function getCostOfRiskFilterSelectionOptionState(kind, option) {
   if (kind !== "counterparty") {
     return { disabled: false, indent: false, label: option.label };
@@ -3642,13 +3492,6 @@ function getCostOfRiskFilterSelectionOptionState(kind, option) {
     indent: isFineCounterparty,
     label: formatCostOfRiskCounterpartySelectionLabel(option.label)
   };
-}
-
-function formatCostOfRiskCounterpartySelectionLabel(label) {
-  return String(label ?? "")
-    .replace(/^o\/w\s+/i, "")
-    .replace(/^of which[:\s]+/i, "")
-    .trim();
 }
 
 function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options = {}) {
