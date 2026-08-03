@@ -184,6 +184,13 @@ import {
   readCostOfRiskUrlState,
   writeCostOfRiskUrlState
 } from "./costOfRiskUrlState.js";
+import {
+  COST_OF_RISK_COMPARISON_DEFINITION_ID,
+  COST_OF_RISK_COMPARISON_METHOD_IDS,
+  COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
+  COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
+  COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE
+} from "./costOfRiskTabConfig.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
@@ -247,28 +254,6 @@ let costOfRiskFilterPreviewRenderToken = 0;
 // inline dropdown: clicking a chip shows its options as a "filter-selection"
 // help topic in the context panel, so selection stays visible
 // instead of covering the rows below it.
-const COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX = "filter-selection:";
-const COST_OF_RISK_COMPARISON_DEFINITION_ID = "definitions-comparison";
-const COST_OF_RISK_COMPARISON_METHOD_IDS = [
-  "f02-impairment",
-  "f12-selected-components",
-  "f12-acpr-components",
-  "f12-custom-components"
-];
-const COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE = new Set([
-  "collateral-ratio",
-  "contributions",
-  "coverage-ratio",
-  "npl-flows",
-  "stage-ratio",
-  "stage-transfers",
-  "summary"
-]);
-const COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER = new Set([
-  ...COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE,
-  "cost-of-risk"
-]);
-
 function isCostOfRiskFilterSelectionTopicOpen(kind) {
   return activeCostOfRiskHelpTopic === `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}${kind}`;
 }
