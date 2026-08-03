@@ -827,11 +827,12 @@ button:focus-visible {
 }
 
 .cost-of-risk-filter-selection-option-bar {
-  background: rgba(17, 108, 200, 0.12);
-  bottom: 0;
+  background: linear-gradient(to right, rgba(17, 108, 200, 0.18), rgba(17, 108, 200, 0));
+  border-radius: 999px;
+  bottom: 6px;
   right: 0;
   position: absolute;
-  top: 0;
+  top: 6px;
   transition: width 0.2s ease;
   width: 0;
   z-index: 0;

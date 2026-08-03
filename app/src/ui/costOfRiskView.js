@@ -187,7 +187,7 @@ import {
 import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
-} from "./costOfRiskFilterPreviewRenderer.js?v=20260803-bar-rtl-half";
+} from "./costOfRiskFilterPreviewRenderer.js?v=20260803-bar-fade";
 import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260803-refactor-cleanup";
 import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260803-refactor-cleanup";
 import {
