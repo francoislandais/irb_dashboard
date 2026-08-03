@@ -1,5 +1,5 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
-import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransfers.js?v=20260802-readable-selection-phrases";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 

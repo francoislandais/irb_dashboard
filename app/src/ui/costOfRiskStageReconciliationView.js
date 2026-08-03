@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -8,7 +8,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,

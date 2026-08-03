@@ -1,8 +1,8 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskPointDisplayValue
-} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
-import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260716-cost-risk-tab-order-view";
+} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 
 let costOfRiskTreemapChart = null;
 
@@ -10,7 +10,7 @@ export function getCostOfRiskTreemapChart() {
   return costOfRiskTreemapChart;
 }
 
-export function destroyCostOfRiskTreemapChart() {
+function destroyCostOfRiskTreemapChart() {
   if (!costOfRiskTreemapChart) return;
   costOfRiskTreemapChart.destroy();
   costOfRiskTreemapChart = null;

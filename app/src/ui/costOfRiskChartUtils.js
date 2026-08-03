@@ -126,7 +126,7 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   chart.customCostOfRiskSmoothingBadge = [badge];
 }
 
-export function clearCostOfRiskSmoothingBadge(chart) {
+function clearCostOfRiskSmoothingBadge(chart) {
   chart?.customCostOfRiskSmoothingBadge?.forEach((element) => {
     if (typeof element?.destroy === "function") {
       element.destroy();
@@ -166,7 +166,7 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
   chart.customCostOfRiskYAxisFocusBadge = [badge];
 }
 
-export function clearCostOfRiskYAxisFocusBadge(chart) {
+function clearCostOfRiskYAxisFocusBadge(chart) {
   chart?.customCostOfRiskYAxisFocusBadge?.forEach((element) => element?.remove?.());
   if (chart) chart.customCostOfRiskYAxisFocusBadge = [];
 }
@@ -211,7 +211,7 @@ export function renderCostOfRiskBenchmarkModeBadge(chart, mode, onToggleMode, op
   chart.customCostOfRiskBenchmarkModeBadge = [wrapper];
 }
 
-export function clearCostOfRiskBenchmarkModeBadge(chart) {
+function clearCostOfRiskBenchmarkModeBadge(chart) {
   chart?.customCostOfRiskBenchmarkModeBadge?.forEach((element) => element?.remove?.());
   if (chart) chart.customCostOfRiskBenchmarkModeBadge = [];
 }

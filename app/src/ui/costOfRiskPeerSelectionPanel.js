@@ -1,4 +1,4 @@
-import { createCostOfRiskAuditInfoSection } from "./costOfRiskAuditPanelNodes.js";
+import { createCostOfRiskAuditInfoSection } from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
 
 export function createCostOfRiskPeerSelectionPanel(
   state,

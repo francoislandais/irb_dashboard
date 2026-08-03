@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 
 export const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
 

@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 let costOfRiskSummaryMosaicClickTimer = null;
@@ -31,7 +31,7 @@ const COST_OF_RISK_SUMMARY_STATUS_METRICS = [
   { key: "collateral", kind: "level", label: "Collateralisation", targetTab: "collateral-ratio" }
 ];
 
-export const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES = {
+const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES = {
   all: COST_OF_RISK_FILTER_ALL,
   "central-banks": "Central banks",
   "credit-institutions": "Credit institutions",
@@ -762,7 +762,7 @@ export function renderCostOfRiskCounterpartySummaryTable({
   container.replaceChildren(table);
 }
 
-export function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit, displayMode) {
+function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit, displayMode) {
   if (!cell) return "-";
   if (metric === "coverage" || metric === "collateral") {
     return kind === "mom"
@@ -775,7 +775,7 @@ export function formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUni
   return formatSignedGrowthPercentValue(cell.momRatioBasisPoints);
 }
 
-export function formatSignedBasisPointsValue(value) {
+function formatSignedBasisPointsValue(value) {
   if (value === null || value === undefined || !Number.isFinite(value)) return "-";
 
   return `${new Intl.NumberFormat("en-US", {

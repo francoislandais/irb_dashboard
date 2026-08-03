@@ -1,6 +1,6 @@
-import { COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import { formatBasisPointsValue } from "../data/core/formatting.js?v=20260710-bp-format";
-import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
+import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 import { getCostOfRiskCoreSectionLabel } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
@@ -197,7 +197,7 @@ export function wireCostOfRiskWaterfallAxisLabels(chart, options = {}) {
   chart.renderTo.addEventListener("click", chart.customCostOfRiskAxisLabelClickHandler, true);
 }
 
-export function clearManualCostOfRiskWaterfall(chart) {
+function clearManualCostOfRiskWaterfall(chart) {
   if (!Array.isArray(chart.customCostOfRiskWaterfall)) return;
 
   chart.customCostOfRiskWaterfall.forEach((element) => element.destroy());

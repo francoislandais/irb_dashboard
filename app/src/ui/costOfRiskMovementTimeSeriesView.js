@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -12,7 +12,7 @@ import {
   renderCostOfRiskBenchmarkModeBadge,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,

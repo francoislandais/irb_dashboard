@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

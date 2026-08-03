@@ -46,7 +46,7 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -62,7 +62,7 @@ import {
   escapeHtml,
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -173,46 +173,46 @@ import {
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
-import { costOfRiskElements as elements } from "./costOfRiskElements.js";
+import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260803-refactor-cleanup";
 import {
   COST_OF_RISK_FILTER_SELECTION_META,
   COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS
-} from "./costOfRiskFilterSelectionConfig.js";
+} from "./costOfRiskFilterSelectionConfig.js?v=20260803-refactor-cleanup";
 import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
-} from "./costOfRiskFilterPreviewRenderer.js";
-import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js";
-import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js";
-import { createCostOfRiskReferenceDatePanel } from "./costOfRiskReferenceDatePanel.js";
+} from "./costOfRiskFilterPreviewRenderer.js?v=20260803-refactor-cleanup";
+import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260803-refactor-cleanup";
+import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260803-refactor-cleanup";
+import { createCostOfRiskReferenceDatePanel } from "./costOfRiskReferenceDatePanel.js?v=20260803-refactor-cleanup";
 import {
   COST_OF_RISK_DISABLED_TABS,
   readCostOfRiskUrlState,
   writeCostOfRiskUrlState
-} from "./costOfRiskUrlState.js";
+} from "./costOfRiskUrlState.js?v=20260803-refactor-cleanup";
 import {
   COST_OF_RISK_COMPARISON_DEFINITION_ID,
   COST_OF_RISK_COMPARISON_METHOD_IDS,
   COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
   COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
   COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE
-} from "./costOfRiskTabConfig.js";
+} from "./costOfRiskTabConfig.js?v=20260803-refactor-cleanup";
 import {
   getCostOfRiskAuditPanelIntroContent,
   getCostOfRiskHelpPanelContent
-} from "./costOfRiskPanelContent.js";
+} from "./costOfRiskPanelContent.js?v=20260803-refactor-cleanup";
 import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js";
+} from "./costOfRiskManualWaterfall.js?v=20260803-refactor-cleanup";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,
   createCostOfRiskSelectedDataDescription,
   createCostOfRiskSelectedDataDescriptionWithDetail,
   createCostOfRiskSelectedDataPlaceholder
-} from "./costOfRiskAuditPanelNodes.js";
+} from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
@@ -1280,11 +1280,6 @@ function updateCostOfRiskTabsFade() {
   const maxScrollLeft = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
   tabs.classList.toggle("can-scroll-left", tabs.scrollLeft > 1);
   tabs.classList.toggle("can-scroll-right", tabs.scrollLeft < maxScrollLeft - 1);
-}
-
-export function showCostOfRiskPeerDisplayHelp(peerDisplayMode) {
-  setCostOfRiskHelpTopic(peerDisplayMode === "anonymised" ? "peer-anonymised" : "peer-explicit");
-  renderCostOfRiskHelpPanel();
 }
 
 export function showCostOfRiskPeerSelection(actions) {

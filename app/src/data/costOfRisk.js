@@ -134,23 +134,6 @@ function getCostOfRiskAllowanceMovementQuarterlySeries(state, indexes, reference
   return quarterlySeries;
 }
 
-export function getCostOfRiskSelectionOptions(state) {
-  const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
-  const aggregateOptions = buildCostOfRiskAggregateOptions(descriptors);
-  const individualOptions = descriptors.map((descriptor) => ({
-    groupLabel: getCostOfRiskOptionGroupLabel(descriptor, "individual"),
-    id: `point:${descriptor.code}`,
-    kind: "point",
-    label: createCostOfRiskOptionLabel(descriptor),
-    points: [descriptor.code]
-  }));
-
-  return [
-    ...aggregateOptions,
-    ...individualOptions
-  ];
-}
-
 export function getCostOfRiskFilterOptions(state) {
   const descriptors = getCostOfRiskBalanceSheetAllowanceDescriptors(state);
 
@@ -187,45 +170,6 @@ function getCostOfRiskXAxisOptionsForCodes(state, codes) {
     code,
     label: xLabels.get(code) ?? code
   }));
-}
-
-export function buildCostOfRiskSelectionValue(state, selectionId, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "", filters = {}) {
-  const indexes = getRequiredIndexes(state.columns);
-  const referenceColumns = getReferenceColumns(state.columns);
-  const options = getCostOfRiskSelectionOptions(state);
-  const selectedOption = options.find((option) => option.id === selectionId) ?? options[0] ?? null;
-  const selectedXCode = normalizeAxisCode(xAxisCode || COST_OF_RISK_X_AXIS_CODE, "x");
-
-  if (!state.dimensionMapping?.list) {
-    return { status: "Internal dimension mapping is loading." };
-  }
-
-  if (!indexes || !state.selectedJst) {
-    return { status: "Load a CSV and select a JST." };
-  }
-
-  if (referenceColumns.length === 0) {
-    return { status: "No reference date was found in the CSV." };
-  }
-
-  if (!selectedOption) {
-    return { status: "No F_12.01 Y-axis point is available in the internal mapping." };
-  }
-
-  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst, filters);
-  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const selectedPoint = series[referenceIndex];
-
-  return {
-    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, filters),
-    denominator: selectedPoint?.denominator ?? null,
-    denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
-    option: selectedOption,
-    ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
-    referenceDate: selectedPoint?.label ?? "",
-    series,
-    value: selectedPoint?.value ?? null
-  };
 }
 
 export function buildCostOfRiskFilteredSelectionValue(state, filters, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "") {
@@ -1325,14 +1269,12 @@ function computeCostOfRiskAllowanceComponentQuarterlySeries(state, indexes, refe
   return decumulateQuarterlySeries(referenceColumns, raw);
 }
 
-// Generic audit trail: given the same flowKey used to select an arrow in the
-// stage transfer flow diagram, reconstructs every raw data point (code,
-// description, previous/current cumulative value, quarterly movement) that
-// contributed to the displayed value, for the currently selected reference
-// date. This is what powers the "Where does it come from?" right-click
-// feature — kept fully separate from the chart-building functions above so
-// it can be reused by any other flow-diagram-like view later.
-export function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowKey, referenceDate = "") {
+// Given the same flowKey used to select an arrow in the stage transfer flow
+// diagram, reconstructs every raw data point (code, description,
+// previous/current cumulative value, quarterly movement) that contributed to
+// the displayed value, for the currently selected reference date. Feeds the
+// stage transfer panel audit trail below.
+function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowKey, referenceDate = "") {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const descriptor = parseCostOfRiskFlowKey(flowKey);
@@ -3020,7 +2962,7 @@ function getFiniteDelta(currentValue, previousValue) {
     : null;
 }
 
-export function parseCostOfRiskStageSummaryCellKey(cellKey) {
+function parseCostOfRiskStageSummaryCellKey(cellKey) {
   const [metric, kind, stageKey] = String(cellKey ?? "").split(":");
   const isMetric = ["gca", "allowances", "coverage", "collateral"].includes(metric);
   const isKind = ["level", "mom", "ratio"].includes(kind);
@@ -3028,7 +2970,7 @@ export function parseCostOfRiskStageSummaryCellKey(cellKey) {
   return isMetric && isKind && isStage ? { key: `${metric}:${kind}:${stageKey}`, kind, metric, stageKey } : null;
 }
 
-export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
+function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
   const parts = String(cellKey ?? "").split(":");
   const [metric, kind, rowKey] = parts[0] === "counterparty"
     ? [parts[1], parts[2], parts[3]]
@@ -3039,7 +2981,7 @@ export function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
   return isMetric && isKind && isRow ? { key: `counterparty:${metric}:${kind}:${rowKey}`, kind, metric, rowKey } : null;
 }
 
-export function parseCostOfRiskStageRatioCellKey(cellKey) {
+function parseCostOfRiskStageRatioCellKey(cellKey) {
   const parts = String(cellKey ?? "").split(":");
   const [stageKey, metricOrRow, rawMetric] = parts;
   const legacyMetricMap = {
@@ -3069,7 +3011,7 @@ export function parseCostOfRiskStageRatioCellKey(cellKey) {
   };
 }
 
-export function parseCostOfRiskCoverageRatioCellKey(cellKey) {
+function parseCostOfRiskCoverageRatioCellKey(cellKey) {
   const parts = String(cellKey ?? "").split(":");
   const [stageKey, metric] = parts;
   const legacyMetricMap = {
@@ -3098,7 +3040,7 @@ export function parseCostOfRiskCoverageRatioCellKey(cellKey) {
   };
 }
 
-export function parseCostOfRiskCollateralRatioCellKey(cellKey) {
+function parseCostOfRiskCollateralRatioCellKey(cellKey) {
   const parts = String(cellKey ?? "").split(":");
   const [stageKey, metric] = parts;
   const legacyMetricMap = {
@@ -3626,42 +3568,6 @@ function getCostOfRiskReferenceIndex(referenceColumns, referenceDate = "") {
   return index >= 0 ? index : Math.max(0, referenceColumns.length - 1);
 }
 
-export function buildCostOfRiskModel(state, config = COST_OF_RISK_CONFIG) {
-  const indexes = getRequiredIndexes(state.columns);
-  const referenceColumns = getReferenceColumns(state.columns);
-
-  if (!indexes || !state.selectedJst) {
-    return { status: "Load a CSV and select a JST." };
-  }
-
-  if (referenceColumns.length === 0) {
-    return { status: "No reference date was found in the CSV." };
-  }
-
-  if (!hasConfiguredPoints(config.numerator)) {
-    return {
-      benchmarkRows: [],
-      denominator: null,
-      numerator: null,
-      ratio: null,
-      referenceColumns,
-      status: "Cost of risk configuration is ready. Add numerator points to compute the ratio."
-    };
-  }
-
-  const numerator = buildConfiguredAggregate(state, indexes, referenceColumns, config.numerator, state.selectedJst);
-  const denominator = buildCostOfRiskRatioDenominatorAggregate(state, indexes, referenceColumns, state.selectedJst);
-
-  return {
-    benchmarkRows: buildCostOfRiskBenchmarkRows(state, indexes, referenceColumns, config),
-    denominator,
-    numerator,
-    ratio: buildRatioSeries(referenceColumns, numerator, denominator),
-    referenceColumns,
-    status: ""
-  };
-}
-
 function getCostOfRiskYMappings(state) {
   return state.dimensionMapping?.list?.(COST_OF_RISK_TABLE_ID, "y_axis_rc_code") ?? [];
 }
@@ -4035,28 +3941,6 @@ function createCostOfRiskFilteredSelectionLabel(filters) {
   ].join(" / ");
 }
 
-function createCostOfRiskOptionLabel(descriptor) {
-  const segments = [
-    descriptor.asset ? formatCostOfRiskAssetLabel(descriptor.asset) : "",
-    descriptor.counterparty ? formatCostOfRiskCounterpartyLabel(descriptor.counterparty) : "",
-    descriptor.stage ? formatCostOfRiskStageLabel(descriptor.stage) : "",
-    getCostOfRiskResidualLabel(descriptor)
-  ].filter(Boolean);
-
-  return segments.length > 0
-    ? `${segments.join(" / ")} (${descriptor.code})`
-    : `${descriptor.terminal || descriptor.description} (${descriptor.code})`;
-}
-
-function getCostOfRiskResidualLabel(descriptor) {
-  if (!descriptor.terminal) return "";
-  if (descriptor.terminal === descriptor.asset) return "";
-  if (descriptor.terminal === descriptor.counterparty) return "";
-  if (descriptor.terminal === descriptor.stage) return "";
-  if (descriptor.terminal === "Allowances for purchased or originated credit-impaired financial assets") return "POCI";
-  return descriptor.terminal.replace(/^Of which:\s*/i, "Of which ");
-}
-
 function formatCostOfRiskAssetLabel(asset) {
   return ASSET_SHORT_LABELS.get(asset) ?? asset;
 }
@@ -4073,100 +3957,6 @@ function getCostOfRiskCounterpartyDefinition(value) {
 
 function formatCostOfRiskStageLabel(stage) {
   return STAGE_SHORT_LABELS.get(stage) ?? stage;
-}
-
-function getCostOfRiskOptionGroupLabel(descriptor, kind) {
-  const prefix = kind === "aggregate" ? "Aggregations" : "Individual points";
-  if (descriptor.asset) return `${prefix} - ${formatCostOfRiskAssetLabel(descriptor.asset)}`;
-  if (descriptor.stage) return `${prefix} - ${formatCostOfRiskStageLabel(descriptor.stage)}`;
-  return `${prefix} - totals and other`;
-}
-
-function buildCostOfRiskAggregateOptions(descriptors) {
-  const options = [
-    buildCostOfRiskTotalAggregateOption(descriptors)
-  ];
-
-  ASSET_LABELS.forEach((asset) => {
-    options.push(buildAggregateOption(descriptors, {
-      asset,
-      counterparty: "",
-      label: `${asset} - ${ALL_STAGES_LABEL}`,
-      stage: ""
-    }));
-
-    COUNTERPARTY_LABELS.forEach((counterparty) => {
-      options.push(buildAggregateOption(descriptors, {
-        asset,
-        counterparty,
-        label: `${asset} / ${counterparty} - ${ALL_STAGES_LABEL}`,
-        stage: ""
-      }));
-    });
-  });
-
-  return options
-    .filter((option) => option.points.length > 0)
-    .filter(dedupeAggregateOptions);
-}
-
-function buildCostOfRiskTotalAggregateOption(descriptors) {
-  const totalDescriptor = descriptors.find((descriptor) => descriptor.code === COST_OF_RISK_TOTAL_Y_AXIS_CODE);
-  return {
-    groupLabel: "Aggregations - all instruments",
-    id: "aggregate:total",
-    kind: "aggregate",
-    label: totalDescriptor?.terminal || "Total allowance for debt instruments",
-    points: [COST_OF_RISK_TOTAL_Y_AXIS_CODE]
-  };
-}
-
-function buildAggregateOption(descriptors, criteria) {
-  const points = descriptors
-    .filter((descriptor) => (
-      (!criteria.stage || descriptor.stage === criteria.stage)
-      && (!criteria.asset || descriptor.asset === criteria.asset)
-      && (!criteria.counterparty || descriptor.counterparty === criteria.counterparty)
-      && matchesAggregateTerminal(descriptor, criteria)
-    ))
-    .map((descriptor) => descriptor.code);
-
-  return {
-    groupLabel: getCostOfRiskAggregateGroupLabel(criteria),
-    id: `aggregate:${criteria.stage || "all"}:${criteria.asset || "all"}:${criteria.counterparty || "all"}`,
-    kind: "aggregate",
-    label: createCostOfRiskAggregateLabel(criteria),
-    points
-  };
-}
-
-function getCostOfRiskAggregateGroupLabel(criteria) {
-  if (criteria.asset) return `Aggregations - ${formatCostOfRiskAssetLabel(criteria.asset)}`;
-  return "Aggregations - all instruments";
-}
-
-function createCostOfRiskAggregateLabel(criteria) {
-  const segments = [
-    criteria.asset ? formatCostOfRiskAssetLabel(criteria.asset) : "All instruments",
-    criteria.counterparty ? formatCostOfRiskCounterpartyLabel(criteria.counterparty) : "All counterparties",
-    criteria.stage ? formatCostOfRiskStageLabel(criteria.stage) : ALL_STAGES_LABEL
-  ];
-
-  return segments.join(" / ");
-}
-
-function matchesAggregateTerminal(descriptor, criteria) {
-  if (criteria.counterparty) return descriptor.terminal === criteria.counterparty;
-  if (criteria.asset) return descriptor.terminal === criteria.asset;
-  return descriptor.stage && (
-    descriptor.terminal === descriptor.stage
-    || descriptor.terminal === "Allowances for purchased or originated credit-impaired financial assets"
-  );
-}
-
-function dedupeAggregateOptions(option, index, options) {
-  const pointsKey = option.points.join("|");
-  return options.findIndex((candidate) => candidate.points.join("|") === pointsKey) === index;
 }
 
 function dedupeCostOfRiskAxisOptions(option, index, options) {
@@ -4211,22 +4001,6 @@ function getCostOfRiskShortAxisLabel(description, fallback) {
     .filter(Boolean);
 
   return parts.at(-1) || fallback;
-}
-
-export function buildCostOfRiskBenchmarkRows(state, indexes, referenceColumns, config = COST_OF_RISK_CONFIG) {
-  if (!hasConfiguredPoints(config.numerator)) return [];
-
-  return getCostOfRiskPeerJstCodes(state).map((jstCode) => {
-    const numerator = buildConfiguredAggregate(state, indexes, referenceColumns, config.numerator, jstCode);
-    const denominator = buildCostOfRiskRatioDenominatorAggregate(state, indexes, referenceColumns, jstCode);
-
-    return {
-      denominator,
-      jstCode,
-      numerator,
-      ratio: buildRatioSeries(referenceColumns, numerator, denominator)
-    };
-  });
 }
 
 function buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, filters = {}) {
@@ -4739,16 +4513,6 @@ export function createCostOfRiskChartData(points, displayMode = "ratio") {
       referenceLabel: point.label,
       x: point.date.getTime(),
       y: displayMode === "ratio" ? point.smoothedRatioBasisPoints : point.smoothedValue
-    }));
-}
-
-export function createCostOfRiskRatioChartData(points, displayMode = "ratio") {
-  return (points ?? [])
-    .filter((point) => point.date instanceof Date && Number.isFinite(getCostOfRiskPointDisplayValue(point, displayMode)))
-    .map((point) => ({
-      referenceLabel: point.label,
-      x: point.date.getTime(),
-      y: getCostOfRiskPointDisplayValue(point, displayMode)
     }));
 }
 

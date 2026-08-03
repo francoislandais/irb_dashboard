@@ -1,4 +1,4 @@
-import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { createCostOfRiskChartData, smoothCostOfRiskPoints } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import { buildPeerDistributionByDate } from "../data/peerDistribution.js?v=20260802-readable-selection-phrases";
 
 const BENCHMARK_LINE_GRAYS = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];

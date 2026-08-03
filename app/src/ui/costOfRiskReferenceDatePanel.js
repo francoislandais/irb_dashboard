@@ -1,4 +1,4 @@
-import { formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 
 export function createCostOfRiskReferenceDatePanel({
   activeReferenceDate = "",

@@ -1,4 +1,4 @@
-import { COST_OF_RISK_DEFINITION_OPTIONS } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
+import { COST_OF_RISK_DEFINITION_OPTIONS } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 
 export function getCostOfRiskHelpPanelContent(topic, activeCostOfRiskDefinitionId = "f12-selected-components") {
   if (!topic) return null;
