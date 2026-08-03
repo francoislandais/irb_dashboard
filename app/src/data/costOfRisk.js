@@ -410,13 +410,19 @@ function addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceCol
 }
 
 function getCostOfRiskAllowanceMovementQuarterlySeries(state, indexes, referenceColumns, xCodes, yCodes, jstCode) {
+  const cache = getCostOfRiskSeriesCache(state);
+  const key = makeCostOfRiskAllowanceMovementSeriesKey(xCodes, yCodes, jstCode, referenceColumns);
+  if (cache.allowanceMovementSeries.has(key)) return cache.allowanceMovementSeries.get(key);
+
   const valueSeries = createEmptySeries(referenceColumns.length);
   xCodes.forEach((xCode) => {
     yCodes.forEach((yCode) => {
       addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceColumns, valueSeries, xCode, yCode, jstCode);
     });
   });
-  return decumulateQuarterlySeries(referenceColumns, valueSeries);
+  const quarterlySeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
+  cache.allowanceMovementSeries.set(key, quarterlySeries);
+  return quarterlySeries;
 }
 
 export function getCostOfRiskSelectionOptions(state) {
@@ -656,11 +662,22 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
   };
 }
 
-export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-selected-components", filters = {}, referenceDate = "", selectedDriverCode = "", customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+export function buildCostOfRiskDefinitionModel(
+  state,
+  definitionId = "f12-selected-components",
+  filters = {},
+  referenceDate = "",
+  selectedDriverCode = "",
+  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  options = {}
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === definitionId)
     ?? COST_OF_RISK_DEFINITION_OPTIONS[1];
+  const includeComponents = options.includeComponents !== false;
+  const includeDrivers = options.includeDrivers !== false;
+  const includeBenchmarkSeries = options.includeBenchmarkSeries !== false;
 
   if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
     return {
@@ -681,8 +698,12 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst, customXCodes);
   const selectedPoint = series[referenceIndex] ?? null;
-  const components = buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes);
-  const drivers = buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes);
+  const components = includeComponents
+    ? buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes)
+    : [];
+  const drivers = includeDrivers
+    ? buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes)
+    : [];
   const selectedComponent = components.find((component) => component.code === selectedDriverCode) ?? null;
   const selectedDriver = selectedComponent ? null : drivers.find((driver) => driver.code === selectedDriverCode) ?? null;
   const chartSeries = selectedDriver
@@ -692,7 +713,18 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
     : series;
 
   return {
-    benchmarkSeries: buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definition.id, filters, selectedDriver?.code ?? selectedComponent?.code ?? "", customXCodes),
+    benchmarkSeries: includeBenchmarkSeries
+      ? buildCostOfRiskDefinitionBenchmarkSeries(
+        state,
+        indexes,
+        referenceColumns,
+        definition.id,
+        filters,
+        selectedDriver?.code ?? selectedComponent?.code ?? "",
+        customXCodes,
+        chartSeries
+      )
+      : [],
     chartSeries,
     components,
     definition,
@@ -708,12 +740,23 @@ export function buildCostOfRiskDefinitionModel(state, definitionId = "f12-select
   };
 }
 
-function buildCostOfRiskDefinitionBenchmarkSeries(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode = "", customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+function buildCostOfRiskDefinitionBenchmarkSeries(
+  state,
+  indexes,
+  referenceColumns,
+  definitionId,
+  filters,
+  selectedDriverCode = "",
+  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  selectedJstSeries = null
+) {
   return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
     jstCode,
-    points: selectedDriverCode
-      ? buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
-      : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes)
+    points: jstCode === state.selectedJst && Array.isArray(selectedJstSeries)
+      ? selectedJstSeries
+      : selectedDriverCode
+        ? buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
+        : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes)
   }));
 }
 
@@ -2100,7 +2143,7 @@ export function buildCostOfRiskNplFlowsModel(state, filters = {}, referenceDate 
   };
 }
 
-export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL) {
+export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate = "", selectedCellKey = DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL, options = {}) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
@@ -2128,6 +2171,7 @@ export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate =
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const referenceLabel = referenceColumns[referenceIndex]?.label ?? "";
   const rows = buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns, ySelection, stageNeutralFilters, state.selectedJst, referenceIndex);
+  const includeCounterpartyRows = options.includeCounterpartyRows !== false;
   const selectedStatusFilter = selectedCell.stageKey
     ? getCostOfRiskStageSummaryFilterForRowKey(selectedCell.stageKey)
     : normalizedFilters.stage;
@@ -2135,14 +2179,16 @@ export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate =
     ...normalizedFilters,
     stage: selectedStatusFilter || COST_OF_RISK_FILTER_ALL
   };
-  const counterpartyRows = buildCostOfRiskCounterpartySummaryRowsForJst(
-    state,
-    indexes,
-    referenceColumns,
-    counterpartyRowsFilters,
-    state.selectedJst,
-    referenceIndex
-  ).filter((row) => row.type === "row");
+  const counterpartyRows = includeCounterpartyRows
+    ? buildCostOfRiskCounterpartySummaryRowsForJst(
+      state,
+      indexes,
+      referenceColumns,
+      counterpartyRowsFilters,
+      state.selectedJst,
+      referenceIndex
+    ).filter((row) => row.type === "row")
+    : [];
 
   return {
     benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
@@ -4624,16 +4670,26 @@ function sumConfiguredPointSeriesValues(state, indexes, referenceColumns, tableI
 function resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, jstCode, xCode, yCode) {
   if (!indexes) return referenceColumns.map(() => null);
 
+  const cache = getCostOfRiskSeriesCache(state);
+  const key = makeCostOfRiskDenominatorCellSeriesKey(jstCode, xCode, yCode, referenceColumns);
+  if (cache.denominatorCellSeries.has(key)) return cache.denominatorCellSeries.get(key);
+
   const rows = getCostOfRiskPointRows(state, indexes, COST_OF_RISK_STAGE_BOX_TABLE_ID, { xCode, yCode, zCode: "" }, jstCode);
-  if (rows.length !== 1) return referenceColumns.map(() => null);
+  if (rows.length !== 1) {
+    const emptySeries = referenceColumns.map(() => null);
+    cache.denominatorCellSeries.set(key, emptySeries);
+    return emptySeries;
+  }
 
   const [row] = rows;
-  return referenceColumns.map((column) => {
+  const values = referenceColumns.map((column) => {
     const raw = row[column.index];
     if (raw === undefined || raw === null || String(raw).trim() === "") return null;
     const parsed = parseNumericValue(raw, NaN);
     return Number.isFinite(parsed) ? parsed : null;
   });
+  cache.denominatorCellSeries.set(key, values);
+  return values;
 }
 
 // Sums every available (xCode, yCode) cell in the cross product into one
@@ -4642,6 +4698,10 @@ function resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns
 function resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, xCodes, yCodes) {
   if (!indexes || xCodes.length === 0 || yCodes.length === 0) return referenceColumns.map(() => null);
 
+  const cache = getCostOfRiskSeriesCache(state);
+  const key = makeCostOfRiskDenominatorPointsSeriesKey(jstCode, xCodes, yCodes, referenceColumns);
+  if (cache.denominatorPointsSeries.has(key)) return cache.denominatorPointsSeries.get(key);
+
   const cellSeriesList = [];
   xCodes.forEach((xCode) => {
     yCodes.forEach((yCode) => {
@@ -4649,7 +4709,7 @@ function resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColum
     });
   });
 
-  return referenceColumns.map((_, index) => {
+  const values = referenceColumns.map((_, index) => {
     let total = 0;
     let availableCount = 0;
     for (const series of cellSeriesList) {
@@ -4660,6 +4720,8 @@ function resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColum
     }
     return availableCount > 0 ? total : null;
   });
+  cache.denominatorPointsSeries.set(key, values);
+  return values;
 }
 
 // The denominator for the current sidebar filters: sums every matching
@@ -4771,11 +4833,49 @@ function getCostOfRiskSeriesCache(state) {
   const rowsKey = state.rows ?? [];
   if (!COST_OF_RISK_SERIES_CACHE.has(rowsKey)) {
     COST_OF_RISK_SERIES_CACHE.set(rowsKey, {
+      allowanceMovementSeries: new Map(),
+      denominatorCellSeries: new Map(),
+      denominatorPointsSeries: new Map(),
       pointSeries: new Map()
     });
   }
 
-  return COST_OF_RISK_SERIES_CACHE.get(rowsKey);
+  const cache = COST_OF_RISK_SERIES_CACHE.get(rowsKey);
+  if (!cache.allowanceMovementSeries) cache.allowanceMovementSeries = new Map();
+  if (!cache.denominatorCellSeries) cache.denominatorCellSeries = new Map();
+  if (!cache.denominatorPointsSeries) cache.denominatorPointsSeries = new Map();
+  if (!cache.pointSeries) cache.pointSeries = new Map();
+  return cache;
+}
+
+function makeCostOfRiskAllowanceMovementSeriesKey(xCodes, yCodes, jstCode, referenceColumns) {
+  return [
+    "allowance-movement",
+    jstCode,
+    xCodes.map((code) => normalizeAxisCode(code, "x")).sort().join(","),
+    yCodes.map((code) => normalizeAxisCode(code, "y")).sort().join(","),
+    referenceColumns.map((column) => column.index).join(",")
+  ].join(CACHE_KEY_SEPARATOR);
+}
+
+function makeCostOfRiskDenominatorCellSeriesKey(jstCode, xCode, yCode, referenceColumns) {
+  return [
+    "denominator-cell",
+    jstCode,
+    normalizeAxisCode(xCode, "x"),
+    normalizeAxisCode(yCode, "y"),
+    referenceColumns.map((column) => column.index).join(",")
+  ].join(CACHE_KEY_SEPARATOR);
+}
+
+function makeCostOfRiskDenominatorPointsSeriesKey(jstCode, xCodes, yCodes, referenceColumns) {
+  return [
+    "denominator-points",
+    jstCode,
+    xCodes.map((code) => normalizeAxisCode(code, "x")).sort().join(","),
+    yCodes.map((code) => normalizeAxisCode(code, "y")).sort().join(","),
+    referenceColumns.map((column) => column.index).join(",")
+  ].join(CACHE_KEY_SEPARATOR);
 }
 
 function makeCostOfRiskPointSeriesKey(tableId, point, jstCode, referenceColumns) {

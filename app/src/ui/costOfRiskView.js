@@ -916,11 +916,19 @@ export function renderCostOfRisk(state) {
     const benchmarkDefinitionId = isComparisonDefinition
       ? activeCostOfRiskComparisonBenchmarkDefinitionId
       : activeCostOfRiskDefinitionId;
+    const definitionModelOptions = isComparisonDefinition
+      ? {
+        includeBenchmarkSeries: true,
+        includeComponents: false,
+        includeDrivers: false
+      }
+      : getCostOfRiskDefinitionModelOptions();
     const definitionModel = getCostOfRiskDefinitionModelForId(
       state,
       benchmarkDefinitionId,
       activeCostOfRiskDefinitionDriverCode,
-      customDefinitionCodes
+      customDefinitionCodes,
+      definitionModelOptions
     );
     activeCostOfRiskReferenceDate = definitionModel.referenceDate || activeCostOfRiskReferenceDate;
     renderCostOfRiskActiveFilters(filterOptions);
@@ -929,7 +937,11 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskDashboard.hidden = false;
     if (isComparisonDefinition) {
       const comparisonModels = COST_OF_RISK_COMPARISON_METHOD_IDS.map((definitionId) => (
-        getCostOfRiskDefinitionModelForId(state, definitionId, "", customDefinitionCodes)
+        getCostOfRiskDefinitionModelForId(state, definitionId, "", customDefinitionCodes, {
+          includeBenchmarkSeries: false,
+          includeComponents: false,
+          includeDrivers: false
+        })
       ));
       renderCostOfRiskDefinitionComparisonView(comparisonModels, definitionModel, state);
     } else {
@@ -951,7 +963,8 @@ export function renderCostOfRisk(state) {
         state,
         activeCostOfRiskFilters,
         activeCostOfRiskReferenceDate,
-        activeCostOfRiskStageSummaryCellKey
+        activeCostOfRiskStageSummaryCellKey,
+        { includeCounterpartyRows: false }
       )
     );
     activeCostOfRiskReferenceDate = summary.referenceDate || activeCostOfRiskReferenceDate;
@@ -1792,7 +1805,12 @@ function buildCostOfRiskDefinitionVsF02ChartSelection(definitionModel, state) {
     state,
     "f02-impairment",
     "",
-    getActiveCostOfRiskCustomDefinitionXCodes()
+    getActiveCostOfRiskCustomDefinitionXCodes(),
+    {
+      includeBenchmarkSeries: false,
+      includeComponents: false,
+      includeDrivers: false
+    }
   );
   const currentSeriesName = getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel);
   return {
@@ -1816,19 +1834,45 @@ function getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel) {
   return definitionModel.definition?.label ?? "Current definition";
 }
 
-function getCostOfRiskDefinitionModelForId(state, definitionId, selectedDriverCode = "", customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes()) {
+function getCostOfRiskDefinitionModelForId(
+  state,
+  definitionId,
+  selectedDriverCode = "",
+  customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes(),
+  options = {}
+) {
   return getCostOfRiskCachedModel(
     state,
-    createCostOfRiskModelCacheKey(state, "cost-of-risk-definition", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, definitionId, selectedDriverCode, customDefinitionCodes.join(",")),
+    createCostOfRiskModelCacheKey(
+      state,
+      "cost-of-risk-definition",
+      activeCostOfRiskFilters,
+      activeCostOfRiskReferenceDate,
+      definitionId,
+      selectedDriverCode,
+      customDefinitionCodes.join(","),
+      options
+    ),
     () => buildCostOfRiskDefinitionModel(
       state,
       definitionId,
       activeCostOfRiskFilters,
       activeCostOfRiskReferenceDate,
       selectedDriverCode,
-      customDefinitionCodes
+      customDefinitionCodes,
+      options
     )
   );
+}
+
+function getCostOfRiskDefinitionModelOptions() {
+  const selectedCode = String(activeCostOfRiskDefinitionDriverCode ?? "");
+  const selectedComponent = selectedCode.startsWith("component:");
+  return {
+    includeBenchmarkSeries: true,
+    includeComponents: activeCostOfRiskDefinitionPanelTab === "components" || selectedComponent,
+    includeDrivers: activeCostOfRiskDefinitionPanelTab === "drivers" || (Boolean(selectedCode) && !selectedComponent)
+  };
 }
 
 function renderCostOfRiskDefinitionComparisonView(comparisonModels, benchmarkModel, state) {
@@ -4234,7 +4278,9 @@ function getCostOfRiskSummaryPreviewValue(state, filters, kind = "", value = "")
 function getCostOfRiskSummaryFilteredPreviewValue(state, filters) {
   const model = getCostOfRiskFilterPreviewCachedValue(
     createCostOfRiskFilterPreviewCacheKey("summary-model", filters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
-    () => buildCostOfRiskStageSummaryModel(state, filters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey)
+    () => buildCostOfRiskStageSummaryModel(state, filters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey, {
+      includeCounterpartyRows: Boolean(activeCostOfRiskStageSummaryCellKey?.startsWith("counterparty:"))
+    })
   );
   const selectedCell = model.selectedCell;
   if (!selectedCell) return "";
@@ -4259,7 +4305,8 @@ function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value) {
       state,
       activeCostOfRiskFilters,
       activeCostOfRiskReferenceDate,
-      activeCostOfRiskStageSummaryCellKey
+      activeCostOfRiskStageSummaryCellKey,
+      { includeCounterpartyRows: kind === "counterparty" }
     )
   );
   const rowSource = kind === "counterparty" ? model.counterpartyRows : model.rows;
@@ -4361,7 +4408,12 @@ function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = acti
       filters,
       activeCostOfRiskReferenceDate,
       activeCostOfRiskDefinitionDriverCode,
-      customCodes
+      customCodes,
+      {
+        includeBenchmarkSeries: false,
+        includeComponents: Boolean(activeCostOfRiskDefinitionDriverCode?.startsWith("component:")),
+        includeDrivers: Boolean(activeCostOfRiskDefinitionDriverCode && !activeCostOfRiskDefinitionDriverCode.startsWith("component:"))
+      }
     )
   );
   if (model?.status) return "";
