@@ -3598,7 +3598,7 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
     if (options.disabledReason) button.title = options.disabledReason;
   }
   let barNode = null;
-  if (options.preview && !isActive) {
+  if (options.preview) {
     barNode = document.createElement("span");
     barNode.className = "cost-of-risk-filter-selection-option-bar";
     barNode.setAttribute("aria-hidden", "true");
@@ -3952,13 +3952,10 @@ function renderCostOfRiskDefinitionSelectionPanel() {
     button.setAttribute("aria-selected", String(isActive));
     button.title = definition.description;
 
-    let barNode = null;
-    if (!isActive) {
-      barNode = document.createElement("span");
-      barNode.className = "cost-of-risk-filter-selection-option-bar";
-      barNode.setAttribute("aria-hidden", "true");
-      button.append(barNode);
-    }
+    const barNode = document.createElement("span");
+    barNode.className = "cost-of-risk-filter-selection-option-bar";
+    barNode.setAttribute("aria-hidden", "true");
+    button.append(barNode);
     const optionTitle = document.createElement("span");
     optionTitle.className = "cost-of-risk-filter-selection-option-title";
     optionTitle.textContent = definition.label;
