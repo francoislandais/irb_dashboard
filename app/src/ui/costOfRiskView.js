@@ -737,7 +737,10 @@ export function renderCostOfRisk(state) {
   ) {
     activeCostOfRiskXAxisCode = selectedMovementXCodes[0];
   }
-  if (!xAxisOptions.some((option) => option.code === activeCostOfRiskXAxisCode)) {
+  if (
+    activeCostOfRiskXAxisCode !== COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE
+    && !xAxisOptions.some((option) => option.code === activeCostOfRiskXAxisCode)
+  ) {
     activeCostOfRiskXAxisCode = xAxisOptions.some((option) => option.code === COST_OF_RISK_X_AXIS_CODE)
       ? COST_OF_RISK_X_AXIS_CODE
       : xAxisOptions[0]?.code ?? COST_OF_RISK_X_AXIS_CODE;
