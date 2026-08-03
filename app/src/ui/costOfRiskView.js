@@ -3688,7 +3688,6 @@ function getCostOfRiskMovementPreviewValue(state, filters) {
     () => buildCostOfRiskMovementContributionAudit(
       state,
       filters,
-      activeCostOfRiskReferenceDate,
       activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode
     )
   );
