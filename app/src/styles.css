@@ -2777,18 +2777,18 @@ button:focus-visible {
 .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value,
 .cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value {
   background: var(--primary-dark);
-  border-radius: 6px;
   color: #ffffff;
-  padding: 2px 8px;
 }
 
 .cost-of-risk-summary-scope-value {
   align-items: center;
+  background: transparent;
+  border-radius: 6px;
   display: grid;
   grid-template-columns: 72px minmax(44px, 96px);
   gap: 10px;
   min-width: 0;
-  padding: 0;
+  padding: 2px 8px;
   width: 100%;
 }
 
