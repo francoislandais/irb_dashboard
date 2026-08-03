@@ -209,7 +209,7 @@ import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js?v=20260803-compact-waterfall-labels";
+} from "./costOfRiskManualWaterfall.js?v=20260803-tighter-waterfall";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,
@@ -4254,7 +4254,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
           });
         }
       },
-      marginBottom: 78,
+      marginBottom: 64,
       type: "line"
     },
     credits: { enabled: false },

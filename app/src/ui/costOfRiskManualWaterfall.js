@@ -283,7 +283,7 @@ function renderCostOfRiskWaterfallAxisLabel(chart, item, xCenter, slotWidth, opt
   if (lines.length === 0) return null;
 
   const label = chart.renderer
-    .text(lines.map(escapeHtml).join("<br/>"), xCenter, chart.plotTop + chart.plotHeight + 24)
+    .text(lines.map(escapeHtml).join("<br/>"), xCenter, chart.plotTop + chart.plotHeight + 16)
     .css({
       ...textStyle,
       cursor: item.code ? "pointer" : "default",
