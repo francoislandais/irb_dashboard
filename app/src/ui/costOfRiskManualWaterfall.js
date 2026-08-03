@@ -389,7 +389,7 @@ function getCostOfRiskWaterfallLabelLines(value) {
 
   words.forEach((word) => {
     const candidate = currentLine ? `${currentLine} ${word}` : word;
-    if (candidate.length > 12 && currentLine) {
+    if (candidate.length > 18 && currentLine) {
       lines.push(currentLine);
       currentLine = word;
     } else {

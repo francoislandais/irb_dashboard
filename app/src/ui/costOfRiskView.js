@@ -209,7 +209,7 @@ import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskManualWaterfall.js?v=20260803-compact-waterfall-labels";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,
@@ -4197,6 +4197,21 @@ function showCostOfRiskMovementCalculationDetails(event, code) {
   });
 }
 
+// Trims the redundant "increases/decreases/changes due to" boilerplate and
+// the trailing "(net)" from F12.01 movement descriptions, so the waterfall
+// arrow labels stay short enough to wrap onto few lines and leave room for
+// the chart itself. The direction is already conveyed by the arrow.
+function getCostOfRiskWaterfallCategoryLabel(label) {
+  const text = String(label ?? "")
+    .replace(/\s*\(net\)\s*$/i, "")
+    .replace(/^Increases?\s+due to\s+/i, "")
+    .replace(/^Decreases?\s+due to\s+/i, "")
+    .replace(/^Changes?\s+due to\s+/i, "")
+    .replace(/^Decrease in allowance account due to\s+/i, "")
+    .trim();
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : String(label ?? "");
+}
+
 function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio", selectedUnit = "millions") {
   if (!elements.costOfRiskWaterfall || !window.Highcharts) return;
 
@@ -4205,7 +4220,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
     .map((point) => ({
       color: flowArrowColor,
       code: point.code,
-      name: `${point.code} - ${point.label}`,
+      name: `${point.code} - ${getCostOfRiskWaterfallCategoryLabel(point.label)}`,
       y: getCostOfRiskPointDisplayValue(point, displayMode)
     }));
 
@@ -4218,8 +4233,8 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   const waterfallData = createManualWaterfallData(contributions);
   waterfallData.valueFormatter = (value) => formatCostOfRiskDisplayValue(value, displayMode, selectedUnit, true);
   waterfallData.selectedCode = activeCostOfRiskXAxisCode;
-  waterfallData.axisLabelFontSize = "11px";
-  waterfallData.axisLabelLineHeight = "13px";
+  waterfallData.axisLabelFontSize = "10px";
+  waterfallData.axisLabelLineHeight = "11px";
   waterfallData.valueLabelFontSize = "12px";
   const options = {
     chart: {
