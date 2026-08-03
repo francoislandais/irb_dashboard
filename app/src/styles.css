@@ -2776,9 +2776,10 @@ button:focus-visible {
 
 .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value,
 .cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value {
-  background: transparent;
-  border-radius: 0;
-  color: inherit;
+  background: var(--primary-dark);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 2px 8px;
 }
 
 .cost-of-risk-summary-scope-value {
@@ -2797,7 +2798,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value-text {
-  color: var(--primary-dark);
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -2816,6 +2817,14 @@ button:focus-visible {
   display: block;
   height: 100%;
   min-width: 3px;
+}
+
+.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-bar {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-bar-fill {
+  background: #ffffff;
 }
 
 .cost-of-risk-summary-scope-text {
