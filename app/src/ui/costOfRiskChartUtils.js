@@ -56,7 +56,7 @@ function extractCostOfRiskFiniteYValues(series) {
     .filter((value) => Number.isFinite(value));
 }
 
-export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CHART_TITLE_POSITION) {
+export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CHART_TITLE_POSITION, styleOverrides = {}) {
   return {
     align: "left",
     margin: position.margin,
@@ -66,7 +66,8 @@ export function createCostOfRiskHighchartsTitle(text, position = COST_OF_RISK_CH
     style: {
       color: "#26332d",
       fontSize: "13px",
-      fontWeight: "400"
+      fontWeight: "400",
+      ...styleOverrides
     }
   };
 }
@@ -77,9 +78,6 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   const host = chart?.renderTo;
   if (!host || !Number.isFinite(windowSize)) return;
 
-  const primaryDark = getComputedStyle(document.documentElement)
-    .getPropertyValue("--primary-dark")
-    .trim() || "#0c4c42";
   const titleBox = chart.title?.getBBox?.();
   const titleX = chart.title?.alignAttr?.x ?? chart.plotLeft ?? 12;
   const titleY = chart.title?.alignAttr?.y ?? 8;
@@ -94,7 +92,6 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   badge.classList.toggle("is-smoothed", isSmoothed);
   badge.style.left = `${badgeX}px`;
   badge.style.top = `${badgeY}px`;
-  if (isSmoothed) badge.style.setProperty("--smoothing-badge-fill", primaryDark);
 
   const toggle = document.createElement("button");
   toggle.className = "cost-of-risk-chart-smoothing-badge-toggle";
@@ -103,7 +100,7 @@ export function renderCostOfRiskSmoothingBadge(chart, smoothingWindow, onClearSm
   toggle.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (typeof onChangeSmoothing === "function") onChangeSmoothing(windowSize);
+    if (typeof onChangeSmoothing === "function") onChangeSmoothing("toggle");
   });
 
   badge.append(toggle);
@@ -145,9 +142,6 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
   const host = chart?.renderTo;
   if (!host || typeof onToggleFocus !== "function") return;
 
-  const primaryDark = getComputedStyle(document.documentElement)
-    .getPropertyValue("--primary-dark")
-    .trim() || "#0c4c42";
   const badgeX = Math.max(8, chart.chartWidth - 232);
   const titleY = chart.title?.alignAttr?.y ?? 8;
   const badgeY = Math.max(8, titleY - 4);
@@ -160,7 +154,6 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
   badge.textContent = "focus JST axis";
   badge.style.left = `${badgeX}px`;
   badge.style.top = `${badgeY}px`;
-  if (isFocused) badge.style.setProperty("--y-focus-badge-fill", primaryDark);
   badge.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -176,6 +169,51 @@ export function renderCostOfRiskYAxisFocusBadge(chart, isFocused, onToggleFocus)
 export function clearCostOfRiskYAxisFocusBadge(chart) {
   chart?.customCostOfRiskYAxisFocusBadge?.forEach((element) => element?.remove?.());
   if (chart) chart.customCostOfRiskYAxisFocusBadge = [];
+}
+
+export function renderCostOfRiskBenchmarkModeBadge(chart, mode, onToggleMode, options = {}) {
+  clearCostOfRiskBenchmarkModeBadge(chart);
+  const host = chart?.renderTo;
+  if (!host || typeof onToggleMode !== "function" || options.visible === false) return;
+
+  const titleY = chart.title?.alignAttr?.y ?? 8;
+  const badgeY = Math.max(8, titleY - 4);
+  const badgeX = Math.max(8, chart.chartWidth - 350);
+  const activeMode = mode === "f02" ? "f02" : "benchmark";
+
+  host.style.position = host.style.position || "relative";
+  const wrapper = document.createElement("div");
+  wrapper.className = "cost-of-risk-chart-benchmark-mode";
+  wrapper.style.left = `${badgeX}px`;
+  wrapper.style.top = `${badgeY}px`;
+
+  [
+    { key: "benchmark", label: "benchmark" },
+    { key: "f02", label: "vs F02" }
+  ].forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "cost-of-risk-chart-benchmark-mode-option";
+    button.classList.toggle("is-active", item.key === activeMode);
+    button.textContent = item.label;
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (item.key !== activeMode) onToggleMode(item.key);
+    });
+    wrapper.append(button);
+  });
+
+  ["click", "pointerdown", "mousedown", "touchstart"].forEach((eventName) => {
+    wrapper.addEventListener(eventName, (event) => event.stopPropagation());
+  });
+  host.append(wrapper);
+  chart.customCostOfRiskBenchmarkModeBadge = [wrapper];
+}
+
+export function clearCostOfRiskBenchmarkModeBadge(chart) {
+  chart?.customCostOfRiskBenchmarkModeBadge?.forEach((element) => element?.remove?.());
+  if (chart) chart.customCostOfRiskBenchmarkModeBadge = [];
 }
 
 export function escapeHtml(value) {

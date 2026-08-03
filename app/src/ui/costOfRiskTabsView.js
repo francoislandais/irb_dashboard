@@ -29,7 +29,12 @@ export function renderCostOfRiskTabEmptyView({
   panel.querySelectorAll(".cost-of-risk-tab-empty").forEach((node) => node.remove());
   const empty = document.createElement("div");
   empty.className = "cost-of-risk-tab-empty";
-  empty.textContent = resolveMessage(message);
+  const resolvedMessage = resolveMessage(message);
+  if (resolvedMessage instanceof Node) {
+    empty.append(resolvedMessage);
+  } else {
+    empty.textContent = resolvedMessage;
+  }
   panel.prepend(empty);
 }
 

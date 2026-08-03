@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
+} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -9,9 +9,10 @@ import {
   formatCostOfRiskQuarterAxisLabel,
   getCostOfRiskAxisTickPositions,
   getCostOfRiskFocusedYAxisBounds,
+  renderCostOfRiskBenchmarkModeBadge,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -23,7 +24,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-cost-risk-tab";
+} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskMovementChart = null;
@@ -49,16 +50,24 @@ export function renderCostOfRiskMovementTimeSeriesChart({
   onClearSmoothing,
   onChangeSmoothing,
   onToggleYAxisFocus,
+  onToggleBenchmarkMode,
   peerDisplayMode = "explicit",
   renderTabEmpty,
   selectedUnit = "millions",
   selection,
+  showBenchmarkModeToggle = false,
   smoothingWindow,
+  benchmarkMode = "benchmark",
   titleText
 }) {
   if (!container || !window.Highcharts) return;
 
-  const chartModel = buildBenchmarkChartModel(selection.benchmarkSeries, jstCode, primaryDark, { displayMode, peerDisplayMode, smoothingWindow });
+  const chartModel = buildBenchmarkChartModel(selection.benchmarkSeries, jstCode, primaryDark, {
+    displayMode,
+    peerDisplayMode,
+    selectedAreaSeriesName: selection.selectedAreaSeriesName,
+    smoothingWindow
+  });
   const series = chartModel.series;
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
   const yBounds = focusSelectedYAxis
@@ -86,6 +95,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
           renderBenchmarkEndpointLabels(this, jstCode, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
           renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
           renderCostOfRiskYAxisFocusBadge(this, focusSelectedYAxis, onToggleYAxisFocus);
+          renderCostOfRiskBenchmarkModeBadge(this, benchmarkMode, onToggleBenchmarkMode, { visible: showBenchmarkModeToggle });
         }
       },
       spacingRight: 128,

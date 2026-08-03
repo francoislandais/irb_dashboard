@@ -4,7 +4,7 @@ import {
   buildCostOfRiskStageTransferFlowAudit,
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
+} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import { showAuditTrailDialog } from "./auditTrailDialog.js?v=20260710-audit-trail";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 
@@ -64,7 +64,7 @@ function appendCostOfRiskRatioDenominatorSection(view, audit, state, filters, se
   const ratioBasisPoints = isRatioAvailable ? (audit.value / denominatorDetail.value) * 10000 : null;
   const rawValueLabel = view.valueLabel;
 
-  view.definition = `${view.definition} Shown in growth-rate mode as this amount divided by the previous-quarter F_18.00 gross carrying amount for the current Instruments / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
+  view.definition = `${view.definition} Shown in growth-rate mode as this amount divided by the previous-quarter F_18.00 GCA for the current Instruments / Counterparty filters, all stages combined (${denominatorDetail.label}).`;
   view.valueLabel = isRatioAvailable
     ? `${formatCostOfRiskAuditValue(ratioBasisPoints, "bp")} (${rawValueLabel} raw)`
     : `Growth rate unavailable (${rawValueLabel} raw)`;
@@ -100,7 +100,7 @@ function buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit) {
 
   if (audit.type === "transfer") {
     return {
-      definition: `Sum, over every matching F_12.02 y-axis point, of the quarter-on-quarter change in x=${audit.xCode} (${audit.xLabel}) - the gross carrying amount reported as transferred by this movement during the reference quarter.`,
+      definition: `Sum, over every matching F_12.02 y-axis point, of the quarter-on-quarter change in x=${audit.xCode} (${audit.xLabel}) - the GCA reported as transferred by this movement during the reference quarter.`,
       sections: [{
         columns: [
           { header: "Code", key: "code" },
@@ -156,7 +156,7 @@ function buildCostOfRiskStageTransferFlowAuditTrailView(audit, selectedUnit) {
 
   if (audit.type === "stagebox") {
     return {
-      definition: `Gross carrying amount for ${audit.stageLabel}, using the same F_18.00 perimeter as the stage box displayed in the flow diagram.`,
+      definition: `GCA for ${audit.stageLabel}, using the same F_18.00 perimeter as the stage box displayed in the flow diagram.`,
       sections: [{
         columns: [
           { header: "Source", key: "source" },

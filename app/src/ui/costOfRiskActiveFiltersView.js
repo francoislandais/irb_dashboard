@@ -1,8 +1,9 @@
 import {
   COST_OF_RISK_DEFINITION_OPTIONS,
+  COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
+} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -15,9 +16,11 @@ export function renderCostOfRiskActiveFiltersView({
   displayMode,
   summaryDisplayMenuOpen,
   stageTransferDisplayMenuOpen,
+  nplFlowsDisplayMenuOpen,
   filterOptions,
   filters,
   counterpartyMenuOpen,
+  balanceScopeMenuOpen,
   instrumentMenuOpen,
   referenceDate,
   stageMenuOpen
@@ -33,19 +36,23 @@ export function renderCostOfRiskActiveFiltersView({
     filters,
     labels: {
       asset: getCostOfRiskFilterOptionLabel(filterOptions.assets, filters.asset),
+      balanceScope: getCostOfRiskFilterOptionLabel(filterOptions.balanceScopes, filters.balanceScope),
       counterparty: getCostOfRiskFilterOptionLabel(filterOptions.counterparties, filters.counterparty),
       stage: getCostOfRiskFilterOptionLabel(filterOptions.stages, filters.stage)
     },
     counterpartyMenuOpen,
+    balanceScopeMenuOpen,
     instrumentMenuOpen,
     referenceDate,
     summaryDisplayMenuOpen,
+    nplFlowsDisplayMenuOpen,
     stageMenuOpen,
     stageTransferDisplayMenuOpen
   });
   if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
   lastCostOfRiskActiveFiltersRenderKey = renderKey;
 
+  const balanceScopeItem = createCostOfRiskBalanceScopeFilterChip(filters.balanceScope, filterOptions.balanceScopes, balanceScopeMenuOpen);
   const instrumentItem = createCostOfRiskInstrumentFilterChip(filters.asset, filterOptions.assets, instrumentMenuOpen);
   const counterpartyItem = createCostOfRiskCounterpartyFilterChip(filters.counterparty, filterOptions.counterparties, counterpartyMenuOpen);
   const stageItem = createCostOfRiskStageFilterChip(filters.stage, filterOptions.stages, stageMenuOpen);
@@ -57,6 +64,7 @@ export function renderCostOfRiskActiveFiltersView({
   const activeItems = remainingActiveItems.filter((item) => !item.dataset.costOfRiskAllFilter);
   const chips = [
     createCostOfRiskReferenceDateChip(referenceDate),
+    balanceScopeItem,
     ...(remainingActiveItems.length > 0
       ? remainingActiveItems
       : activeItems.length === 0 ? [createCostOfRiskNoFilterChip()] : []),
@@ -76,7 +84,6 @@ export function renderCostOfRiskActiveFiltersView({
       : []),
     ...(activeTab === "cost-of-risk"
       ? [
-        createCostOfRiskDefinitionChip(costOfRiskDefinitionId, costOfRiskDefinitionMenuOpen),
         createCostOfRiskDisplayModeChip({
           displayMode,
           isOpen: contributionDisplayMenuOpen,
@@ -91,20 +98,6 @@ export function renderCostOfRiskActiveFiltersView({
         })
       ]
       : []),
-    ...(activeTab === "summary"
-      ? [createCostOfRiskDisplayModeChip({
-        displayMode,
-        isOpen: summaryDisplayMenuOpen,
-        labels: {
-          absolute: "Absolute Variation",
-          relative: "Relative Variation",
-          switchToAbsolute: "Switch to Absolute Variation",
-          switchToRelative: "Switch to Relative Variation"
-        },
-        menuLabel: "Variation display",
-        name: "summaryVariation"
-      })]
-      : []),
     ...(activeTab === "stage-transfers"
       ? [createCostOfRiskDisplayModeChip({
         displayMode,
@@ -117,6 +110,34 @@ export function renderCostOfRiskActiveFiltersView({
         },
         menuLabel: "Transfer display",
         name: "stageTransfer"
+      })]
+      : []),
+    ...(activeTab === "npl-flows"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: nplFlowsDisplayMenuOpen,
+        labels: {
+          absolute: "Absolute Flow",
+          relative: "Relative Flow",
+          switchToAbsolute: "Switch to Absolute Flow",
+          switchToRelative: "Switch to Relative Flow"
+        },
+        menuLabel: "NPL flow display",
+        name: "nplFlows"
+      })]
+      : []),
+    ...(activeTab === "summary"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: summaryDisplayMenuOpen,
+        labels: {
+          absolute: "Absolute Value",
+          relative: "Ratio",
+          switchToAbsolute: "Switch to Absolute Value",
+          switchToRelative: "Switch to Ratio"
+        },
+        menuLabel: "Summary display",
+        name: "summaryVariation"
       })]
       : [])
   ];
@@ -136,7 +157,6 @@ function createCostOfRiskDefinitionChip(definitionId, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskDefinitionFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change cost of risk definition");
 
@@ -148,36 +168,6 @@ function createCostOfRiskDefinitionChip(definitionId, isOpen) {
   value.textContent = activeDefinition.label;
   toggle.append(prefix, value);
   chip.append(toggle);
-
-  if (isOpen) {
-    const menu = document.createElement("div");
-    menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-definition-filter-menu";
-    menu.setAttribute("role", "listbox");
-    menu.setAttribute("aria-label", "Cost of risk definition");
-    COST_OF_RISK_DEFINITION_OPTIONS.forEach((definition) => {
-      const button = document.createElement("button");
-      const isActive = definition.id === activeDefinition.id;
-      button.className = "cost-of-risk-definition-filter-option";
-      button.classList.toggle("is-active", isActive);
-      button.type = "button";
-      button.dataset.costOfRiskDefinitionOption = definition.id;
-      button.setAttribute("role", "option");
-      button.setAttribute("aria-selected", String(isActive));
-      button.title = definition.description;
-      const title = document.createElement("span");
-      title.className = "cost-of-risk-definition-filter-option-title";
-      title.textContent = definition.label;
-      const description = document.createElement("span");
-      description.className = "cost-of-risk-definition-filter-option-description";
-      description.textContent = definition.description;
-      const source = document.createElement("span");
-      source.className = "cost-of-risk-definition-filter-option-source";
-      source.textContent = definition.source;
-      button.append(title, description, source);
-      menu.append(button);
-    });
-    chip.append(menu);
-  }
 
   return chip;
 }
@@ -216,7 +206,6 @@ function createCostOfRiskDisplayModeChip({
   name
 }) {
   const isRelative = displayMode === "ratio";
-  const kebabName = name.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
   const chip = document.createElement("div");
   chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--contribution-display";
   chip.classList.toggle("is-open", Boolean(isOpen));
@@ -225,8 +214,7 @@ function createCostOfRiskDisplayModeChip({
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskDisplayModeToggle = name;
-  toggle.setAttribute("aria-haspopup", "listbox");
-  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  toggle.setAttribute("aria-pressed", String(isRelative));
   toggle.setAttribute("aria-label", `Change ${menuLabel.toLowerCase()}`);
 
   const label = document.createElement("span");
@@ -235,24 +223,44 @@ function createCostOfRiskDisplayModeChip({
   toggle.append(label);
   chip.append(toggle);
 
-  if (isOpen) {
-    const menu = document.createElement("div");
-    menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-contribution-display-menu";
-    menu.setAttribute("role", "listbox");
-    menu.setAttribute("aria-label", menuLabel);
+  return chip;
+}
 
-    const option = document.createElement("button");
-    option.className = "cost-of-risk-stage-filter-option";
-    option.type = "button";
-    option.dataset.costOfRiskDisplayModeOption = `${name}:${isRelative ? "amount" : "ratio"}`;
-    option.dataset.costOfRiskDisplayModeScope = kebabName;
-    option.setAttribute("role", "option");
-    option.setAttribute("aria-selected", "false");
-    option.textContent = isRelative
-      ? labels.switchToAbsolute
-      : labels.switchToRelative;
-    menu.append(option);
-    chip.append(menu);
+function createCostOfRiskBalanceScopeFilterChip(value, options, isOpen) {
+  const activeValue = value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
+  const isInBalance = activeValue === COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--balance-scope";
+  chip.classList.toggle("is-open", Boolean(isOpen));
+  if (isInBalance) chip.dataset.costOfRiskAllFilter = "true";
+
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskBalanceScopeFilterToggle = "true";
+  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+  toggle.setAttribute("aria-label", "Change balance-sheet perimeter");
+
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label";
+  const labelPrefix = document.createElement("span");
+  labelPrefix.className = "cost-of-risk-filter-chip-prefix";
+  labelPrefix.textContent = "Perimeter: ";
+  const labelValue = document.createElement("span");
+  labelValue.className = "cost-of-risk-filter-chip-value";
+  labelValue.textContent = getCostOfRiskFilterOptionLabel(options, activeValue);
+  label.append(labelPrefix, labelValue);
+  toggle.append(label);
+  chip.append(toggle);
+
+  if (!isInBalance) {
+    const button = document.createElement("button");
+    button.className = "cost-of-risk-filter-chip-close";
+    button.type = "button";
+    button.dataset.costOfRiskClearFilter = "balanceScope";
+    button.setAttribute("aria-label", `Reset perimeter to In-balance`);
+    button.textContent = "×";
+    chip.append(button);
   }
 
   return chip;
@@ -269,7 +277,6 @@ function createCostOfRiskInstrumentFilterChip(value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskInstrumentFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change instruments filter");
 
@@ -299,33 +306,7 @@ function createCostOfRiskInstrumentFilterChip(value, options, isOpen) {
     chip.append(button);
   }
 
-  if (isOpen) {
-    chip.append(createCostOfRiskInstrumentFilterMenu(value, options));
-  }
-
   return chip;
-}
-
-function createCostOfRiskInstrumentFilterMenu(value, options) {
-  const menu = document.createElement("div");
-  menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-instrument-filter-menu";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", "Instruments filter");
-
-  (options ?? []).forEach((option) => {
-    const button = document.createElement("button");
-    const isActive = option.value === value || (!value && option.value === COST_OF_RISK_FILTER_ALL);
-    button.className = "cost-of-risk-stage-filter-option";
-    button.classList.toggle("is-active", isActive);
-    button.type = "button";
-    button.dataset.costOfRiskInstrumentFilterOption = option.value;
-    button.setAttribute("role", "option");
-    button.setAttribute("aria-selected", String(isActive));
-    button.textContent = option.value === COST_OF_RISK_FILTER_ALL ? "All Instruments" : option.label;
-    menu.append(button);
-  });
-
-  return menu;
 }
 
 function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
@@ -339,7 +320,6 @@ function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskCounterpartyFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change counterparty filter");
 
@@ -369,33 +349,7 @@ function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
     chip.append(button);
   }
 
-  if (isOpen) {
-    chip.append(createCostOfRiskCounterpartyFilterMenu(value, options));
-  }
-
   return chip;
-}
-
-function createCostOfRiskCounterpartyFilterMenu(value, options) {
-  const menu = document.createElement("div");
-  menu.className = "cost-of-risk-stage-filter-menu cost-of-risk-counterparty-filter-menu";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", "Counterparty filter");
-
-  (options ?? []).forEach((option) => {
-    const button = document.createElement("button");
-    const isActive = option.value === value || (!value && option.value === COST_OF_RISK_FILTER_ALL);
-    button.className = "cost-of-risk-stage-filter-option";
-    button.classList.toggle("is-active", isActive);
-    button.type = "button";
-    button.dataset.costOfRiskCounterpartyFilterOption = option.value;
-    button.setAttribute("role", "option");
-    button.setAttribute("aria-selected", String(isActive));
-    button.textContent = option.value === COST_OF_RISK_FILTER_ALL ? "All Counterparties" : option.label;
-    menu.append(button);
-  });
-
-  return menu;
 }
 
 function createCostOfRiskStageFilterChip(value, options, isOpen) {
@@ -409,7 +363,6 @@ function createCostOfRiskStageFilterChip(value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskStageFilterToggle = "true";
-  toggle.setAttribute("aria-haspopup", "listbox");
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change stage filter");
 
@@ -420,7 +373,7 @@ function createCostOfRiskStageFilterChip(value, options, isOpen) {
   } else {
     const labelPrefix = document.createElement("span");
     labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-    labelPrefix.textContent = "Stage: ";
+    labelPrefix.textContent = "Status: ";
     const labelValue = document.createElement("span");
     labelValue.className = "cost-of-risk-filter-chip-value";
     labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
@@ -439,33 +392,7 @@ function createCostOfRiskStageFilterChip(value, options, isOpen) {
     chip.append(button);
   }
 
-  if (isOpen) {
-    chip.append(createCostOfRiskStageFilterMenu(value, options));
-  }
-
   return chip;
-}
-
-function createCostOfRiskStageFilterMenu(value, options) {
-  const menu = document.createElement("div");
-  menu.className = "cost-of-risk-stage-filter-menu";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", "Stage filter");
-
-  (options ?? []).forEach((option) => {
-    const button = document.createElement("button");
-    const isActive = option.value === value || (!value && option.value === COST_OF_RISK_FILTER_ALL);
-    button.className = "cost-of-risk-stage-filter-option";
-    button.classList.toggle("is-active", isActive);
-    button.type = "button";
-    button.dataset.costOfRiskStageFilterOption = option.value;
-    button.setAttribute("role", "option");
-    button.setAttribute("aria-selected", String(isActive));
-    button.textContent = option.value === COST_OF_RISK_FILTER_ALL ? "All Stage" : option.label;
-    menu.append(button);
-  });
-
-  return menu;
 }
 
 function createCostOfRiskActiveFilterChip(filterName, filterLabel, value, options) {

@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-cost-risk-tab";
+} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -20,11 +20,11 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskSummaryTablesView.js?v=20260802-readable-selection-phrases";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;
@@ -74,7 +74,9 @@ export function renderCostOfRiskStageSummaryChart({
     displayMode,
     focusSelectedYAxis,
     getChart: () => costOfRiskStageSummaryChart,
-    getPointRowLabel: (stageSummary, selectedCell) => getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey),
+    getPointRowLabel: (stageSummary, selectedCell) => selectedCell.rowKey
+      ? getCostOfRiskCounterpartySummaryRowLabel({ rows: stageSummary.counterpartyRows ?? [] }, selectedCell.rowKey)
+      : getCostOfRiskStageSummaryStageLabel(stageSummary, selectedCell.stageKey),
     missingMessage: "No stage summary time series is available for the current selection.",
     model,
     onChartCreated: (chart) => { costOfRiskStageSummaryChart = chart; },
@@ -177,7 +179,7 @@ function renderCostOfRiskSummaryChart({
     .find((benchmark) => benchmark.jstCode === state.selectedJst)
     ?.points?.find((point) => point.label === activeReferenceDate);
   const titleText = `${getCostOfRiskStageSummaryMetricLabel(selectedCell)} - ${getPointRowLabel(model, selectedCell)} - time evolution`;
-  const ratioIsPercent = selectedCell.metric === "coverage" && selectedCell.kind === "level";
+  const ratioIsPercent = ["coverage", "collateral"].includes(selectedCell.metric) || selectedCell.kind === "ratio";
 
   const options = {
     chart: {
@@ -275,7 +277,7 @@ function renderCostOfRiskSummaryChart({
 
 function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode, selectedUnit) {
   if (!Number.isFinite(value)) return "-";
-  if (selectedCell.metric === "coverage") {
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral" || selectedCell.kind === "ratio") {
     return selectedCell.kind === "mom"
       ? formatBasisPointsValue(value)
       : formatContributionPercentValue(value / 10000);
@@ -290,7 +292,7 @@ function formatCostOfRiskStageSummaryChartValue(value, selectedCell, displayMode
 
 function getCostOfRiskSummaryChartDisplayMode(selectedCell, displayMode) {
   if (!selectedCell) return "amount";
-  if (selectedCell.metric === "coverage") return "ratio";
+  if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral" || selectedCell.kind === "ratio") return "ratio";
   if (selectedCell.kind === "level") return "amount";
   return displayMode;
 }

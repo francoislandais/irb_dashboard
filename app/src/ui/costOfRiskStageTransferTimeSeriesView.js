@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260717-cost-risk-tab";
+} from "../data/costOfRisk.js?v=20260802-readable-selection-phrases";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -14,7 +14,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260717-cost-risk-tab";
+} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
@@ -23,7 +23,7 @@ import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260717-cost-risk-tab";
+} from "./costOfRiskChartUtils.js?v=20260802-readable-selection-phrases";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageTransferFlowChart = null;
@@ -44,6 +44,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
   container,
   focusSelectedYAxis = false,
   flowSeries,
+  isStageBoxSelection = false,
   onSelectJst,
   onSelectReferenceDate,
   onClearSmoothing,
@@ -59,6 +60,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
   if (!container) return;
 
   if (wrapElement) wrapElement.hidden = false;
+  const isStageBoxRatioMode = isStageBoxSelection && chartDisplayMode === "ratio";
   const titleText = `${flowSeries.label} - time evolution`;
   if (titleElement) titleElement.textContent = titleText;
 
@@ -121,7 +123,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatCostOfRiskDisplayValue(this.y, chartDisplayMode, selectedUnit)}`;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(this.series.name)}</b>: ${formatStageTransferTimeSeriesValue(this.y, chartDisplayMode, selectedUnit, isStageBoxRatioMode)}`;
       },
       shared: false,
       split: false,
@@ -153,9 +155,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
       gridLineColor: "#edf0ee",
       labels: {
         formatter() {
-          return chartDisplayMode === "ratio"
-            ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
-            : formatMetricValue(this.value, selectedUnit);
+          return formatStageTransferTimeSeriesAxisValue(this.value, chartDisplayMode, selectedUnit, isStageBoxRatioMode);
         },
         style: { color: "#5f6b65" }
       },
@@ -166,7 +166,7 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
       startOnTick: false,
       endOnTick: false,
       tickAmount: 6,
-      title: { text: chartDisplayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
+      title: { text: chartDisplayMode === "ratio" ? (isStageBoxRatioMode ? "Percent" : "Growth rate (bp)") : "Amount" }
     }
   };
 
@@ -180,4 +180,23 @@ export function renderCostOfRiskStageTransferFlowTimeSeriesChart({
     costOfRiskStageTransferFlowChart = window.Highcharts.chart(container, options);
     markBenchmarkChartMode(costOfRiskStageTransferFlowChart, chartModel.peerDisplayMode);
   }
+}
+
+function formatStageTransferTimeSeriesValue(value, chartDisplayMode, selectedUnit, isStageBoxRatioMode) {
+  if (isStageBoxRatioMode) return formatStageTransferStageRatioPercent(value);
+  return formatCostOfRiskDisplayValue(value, chartDisplayMode, selectedUnit);
+}
+
+function formatStageTransferTimeSeriesAxisValue(value, chartDisplayMode, selectedUnit, isStageBoxRatioMode) {
+  if (isStageBoxRatioMode) return formatStageTransferStageRatioPercent(value);
+  if (chartDisplayMode === "ratio") return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(value);
+  return formatMetricValue(value, selectedUnit);
+}
+
+function formatStageTransferStageRatioPercent(value) {
+  if (!Number.isFinite(value)) return "-";
+  return `${new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0
+  }).format(value / 100)}%`;
 }

@@ -153,7 +153,7 @@ const EXPLORER_TEMPLATE_LABELS = {
 
   "F_12.00": "Movements in loss allowances",
   "F_12.01": "Stage transfers",
-  "F_12.02": "Changes in gross carrying amount",
+  "F_12.02": "Changes in GCA",
 
   "F_13.01": "Collateral and guarantees received",
   "F_13.02": "Collateral by type",

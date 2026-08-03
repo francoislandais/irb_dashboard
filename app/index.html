@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260717-cost-risk-tab">
+    <link rel="stylesheet" href="./src/styles.css?v=20260802-readable-selection-phrases">
   </head>
   <body>
     <div class="app-shell">
@@ -61,6 +61,7 @@
             <div id="explorer-empty" class="notice" hidden></div>
 
             <div class="explorer-workspace">
+              <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information"></aside>
               <div class="explorer-main-pane">
                 <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
                   <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="template">
@@ -91,7 +92,6 @@
                   <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
                 </div>
               </div>
-              <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information"></aside>
             </div>
           </article>
         </section>
@@ -150,7 +150,7 @@
                     Variation display
                     <button type="button" id="cost-of-risk-ratio-info" class="cost-of-risk-info-button" aria-label="Information about the growth rate denominator" hidden>
                       <span aria-hidden="true">?</span>
-                      <span id="cost-of-risk-ratio-tooltip" class="cost-of-risk-info-tooltip" role="tooltip">Rate denominator: previous-quarter FINREP F 18.00 gross carrying amount for the current filters.</span>
+                      <span id="cost-of-risk-ratio-tooltip" class="cost-of-risk-info-tooltip" role="tooltip">Rate denominator: previous-quarter FINREP F 18.00 GCA for the current filters.</span>
                     </button>
                   </span>
                   <select id="cost-of-risk-display-mode">
@@ -166,49 +166,17 @@
               <div class="cost-of-risk-main">
                 <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Staging Transfer</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">ECL movements</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="npl-flows">NPL Flows</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="cost-of-risk">Cost of Risk</button>
-                  <div class="cost-of-risk-staging-tab-wrap" data-cost-of-risk-tab-group="staging">
-                    <button id="cost-of-risk-staging-tab-main" class="cost-of-risk-tab cost-of-risk-staging-tab" type="button" role="tab" aria-selected="false">
-                      <span>Staging:</span>
-                      <span id="cost-of-risk-staging-tab-label" class="cost-of-risk-staging-tab-label">Ratio</span>
-                    </button>
-                    <button id="cost-of-risk-staging-tab-toggle" class="cost-of-risk-staging-tab-menu-toggle" type="button" aria-label="Choose staging view" aria-haspopup="menu" aria-expanded="false">
-                      <span class="cost-of-risk-staging-tab-caret" aria-hidden="true">▾</span>
-                    </button>
-                    <div id="cost-of-risk-staging-tab-menu" class="cost-of-risk-staging-tab-menu" role="menu" hidden>
-                      <button class="cost-of-risk-staging-tab-option" type="button" role="menuitemradio" data-cost-of-risk-staging-option="stage-ratio">
-                        <span class="cost-of-risk-staging-tab-option-title">Staging Ratio</span>
-                        <span class="cost-of-risk-staging-tab-option-text">Benchmark the share of exposures in each IFRS 9 stage.</span>
-                      </button>
-                      <button class="cost-of-risk-staging-tab-option" type="button" role="menuitemradio" data-cost-of-risk-staging-option="stage-transfers">
-                        <span class="cost-of-risk-staging-tab-option-title">Staging Transfer</span>
-                        <span class="cost-of-risk-staging-tab-option-text">Analyse flows moving exposures between stages.</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="cost-of-risk-allowances-tab-wrap" data-cost-of-risk-tab-group="allowances">
-                    <button id="cost-of-risk-allowances-tab-main" class="cost-of-risk-tab cost-of-risk-allowances-tab" type="button" role="tab" aria-selected="false">
-                      <span>Allowances:</span>
-                      <span id="cost-of-risk-allowances-tab-label" class="cost-of-risk-allowances-tab-label">Coverage</span>
-                    </button>
-                    <button id="cost-of-risk-allowances-tab-toggle" class="cost-of-risk-allowances-tab-menu-toggle" type="button" aria-label="Choose allowances view" aria-haspopup="menu" aria-expanded="false">
-                      <span class="cost-of-risk-allowances-tab-caret" aria-hidden="true">▾</span>
-                    </button>
-                    <div id="cost-of-risk-allowances-tab-menu" class="cost-of-risk-allowances-tab-menu" role="menu" hidden>
-                      <button class="cost-of-risk-allowances-tab-option" type="button" role="menuitemradio" data-cost-of-risk-allowances-option="coverage-ratio">
-                        <span class="cost-of-risk-allowances-tab-option-title">Allowances Coverage</span>
-                        <span class="cost-of-risk-allowances-tab-option-text">Benchmark allowance coverage ratios by IFRS 9 stage.</span>
-                      </button>
-                      <button class="cost-of-risk-allowances-tab-option" type="button" role="menuitemradio" data-cost-of-risk-allowances-option="contributions">
-                        <span class="cost-of-risk-allowances-tab-option-title">Allowances Movement</span>
-                        <span class="cost-of-risk-allowances-tab-option-text">Analyse the movements explaining the stock of allowances.</span>
-                      </button>
-                    </div>
-                  </div>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12">F2 vs F12</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation">Stage Reconciliation</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition">Core Definition</button>
-                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis">Analysis</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-ratio" hidden>Exposure Ratio</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="coverage-ratio" hidden>Coverage</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="collateral-ratio" hidden>Collateral</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="f2-vs-f12" hidden>F2 vs F12</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-reconciliation" hidden>Stage Reconciliation</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition" hidden>Core Definition</button>
+                  <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis" hidden>Analysis</button>
                 </div>
                 <div id="cost-of-risk-active-filters" class="cost-of-risk-active-filters" aria-label="Active cost of risk filters"></div>
                 <div class="cost-of-risk-scroll">
@@ -227,6 +195,14 @@
                     <div id="cost-of-risk-counterparty-summary-chart" class="cost-of-risk-chart cost-of-risk-stage-summary-chart" aria-label="F18 counterparty summary time series" hidden></div>
                   </div>
                 </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="npl-flows" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-npl-flows-panel" class="cost-of-risk-npl-flows-panel" aria-label="NPL inflows and outflows"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-npl-flows-chart" class="cost-of-risk-chart" aria-label="NPL flows benchmark time series"></div>
+                  </div>
+                </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="cost-of-risk" hidden>
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-definition-panel" class="cost-of-risk-definition-panel" aria-label="Cost of risk definition and drivers"></div>
@@ -237,10 +213,10 @@
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="stage-ratio" hidden>
                   <div class="cost-of-risk-split-section">
-                    <div id="cost-of-risk-stage-ratio-table" class="cost-of-risk-stage-summary-table cost-of-risk-stage-ratio-table" aria-label="Stage ratio decomposition table"></div>
+                    <div id="cost-of-risk-stage-ratio-table" class="cost-of-risk-stage-summary-table cost-of-risk-stage-ratio-table" aria-label="Exposure ratio decomposition table"></div>
                   </div>
                   <div class="cost-of-risk-split-section">
-                    <div id="cost-of-risk-stage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Stage ratio time series"></div>
+                    <div id="cost-of-risk-stage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Exposure ratio time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="coverage-ratio" hidden>
@@ -249,6 +225,14 @@
                   </div>
                   <div class="cost-of-risk-split-section">
                     <div id="cost-of-risk-coverage-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Coverage ratio time series"></div>
+                  </div>
+                </div>
+                <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="collateral-ratio" hidden>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-collateral-ratio-table" class="cost-of-risk-stage-summary-table cost-of-risk-stage-ratio-table" aria-label="Collateral ratio decomposition table"></div>
+                  </div>
+                  <div class="cost-of-risk-split-section">
+                    <div id="cost-of-risk-collateral-ratio-chart" class="cost-of-risk-chart cost-of-risk-stage-ratio-chart" aria-label="Collateral ratio time series"></div>
                   </div>
                 </div>
                 <div class="cost-of-risk-tab-panel" data-cost-of-risk-panel="f2-vs-f12" hidden>
@@ -305,7 +289,7 @@
                     </div>
                     <div class="cost-of-risk-card">
                       <div class="cet1-card-label">Denominator</div>
-                      <div id="cost-of-risk-denominator-context" class="cet1-card-context">F_18.00 / total gross carrying amount</div>
+                      <div id="cost-of-risk-denominator-context" class="cet1-card-context">F_18.00 / total GCA</div>
                       <div id="cost-of-risk-denominator-value" class="cet1-metric-value">-</div>
                     </div>
                     <div class="cost-of-risk-card">
@@ -338,6 +322,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260718-url-state"></script>
+    <script type="module" src="./src/main.js?v=20260802-readable-selection-phrases"></script>
   </body>
 </html>
