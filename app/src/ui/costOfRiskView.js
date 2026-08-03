@@ -3649,11 +3649,11 @@ function getCostOfRiskPreviewFiltersForSelection(kind, value) {
   return filters;
 }
 
-function getCostOfRiskSummaryPreviewValue(state, filters, kind = "", value = "") {
+function getCostOfRiskSummaryPreviewValue(state, filters, kind = "", value = "", referenceDate = activeCostOfRiskReferenceDate) {
   if (kind === "stage" || kind === "counterparty") {
-    return getCostOfRiskSummaryDimensionPreviewValue(state, kind, value);
+    return getCostOfRiskSummaryDimensionPreviewValue(state, kind, value, referenceDate);
   }
-  return getCostOfRiskSummaryFilteredPreviewValue(state, filters);
+  return getCostOfRiskSummaryFilteredPreviewValue(state, filters, referenceDate);
 }
 
 function getCostOfRiskSummaryFilteredPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
