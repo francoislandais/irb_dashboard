@@ -51,3 +51,10 @@ Ou directement :
 ```text
 http://127.0.0.1:4173/app/
 ```
+
+## Organisation du code
+
+- `app/src/data/` contient le modele de donnees, le parsing CSV, les index et les calculs metier.
+- `app/src/data/costOfRisk/definitions.js` regroupe les constantes FINREP et les definitions du module Cost of risk.
+- `app/src/ui/` contient les vues, le cablage des controles et le rendu des graphiques/tableaux.
+- `app/src/data/csvSchema.js` centralise les validations minimales attendues pour un CSV exploitable.

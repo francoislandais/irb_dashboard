@@ -1,4 +1,5 @@
 import { parseCsv } from "./data/csvParser.js";
+import { validateCsvDataset } from "./data/csvSchema.js";
 import { buildDataIndexes } from "./data/dataIndex.js";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadExplorerPoints } from "./data/explorerConfig.js";
@@ -168,6 +169,7 @@ async function loadFile(file, handle, options = {}) {
 
 async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const parsed = parseCsv(text);
+  validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
   const jstOptions = getUniqueValues(parsed.columns, parsed.rows, "jst_code");
   const extractionTimestamp = getExtractionTimestamp(parsed.columns, parsed.rows);
