@@ -2,6 +2,7 @@ import {
   COST_OF_RISK_DEFINITION_OPTIONS,
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
+  COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 
@@ -17,6 +18,7 @@ export function renderCostOfRiskActiveFiltersView({
   summaryDisplayMenuOpen,
   stageTransferDisplayMenuOpen,
   nplFlowsDisplayMenuOpen,
+  periodMode,
   filterOptions,
   filters,
   counterpartyMenuOpen,
@@ -46,6 +48,7 @@ export function renderCostOfRiskActiveFiltersView({
     referenceDate,
     summaryDisplayMenuOpen,
     nplFlowsDisplayMenuOpen,
+    periodMode,
     stageMenuOpen,
     stageTransferDisplayMenuOpen
   });
@@ -81,6 +84,9 @@ export function renderCostOfRiskActiveFiltersView({
         menuLabel: "Contribution display",
         name: "contribution"
       })]
+      : []),
+    ...(shouldShowCostOfRiskPeriodModeChip(activeTab)
+      ? [createCostOfRiskPeriodModeChip(periodMode)]
       : []),
     ...(activeTab === "cost-of-risk"
       ? [
@@ -144,6 +150,12 @@ export function renderCostOfRiskActiveFiltersView({
 
   container.replaceChildren(...chips);
   container.classList.toggle("is-empty", activeItems.length === 0);
+}
+
+function shouldShowCostOfRiskPeriodModeChip(activeTab) {
+  return activeTab === "contributions"
+    || activeTab === "stage-transfers"
+    || activeTab === "cost-of-risk";
 }
 
 function createCostOfRiskDefinitionChip(definitionId, isOpen) {
@@ -221,6 +233,30 @@ function createCostOfRiskDisplayModeChip({
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
   label.textContent = isRelative ? labels.relative : labels.absolute;
   toggle.append(label);
+  chip.append(toggle);
+
+  return chip;
+}
+
+function createCostOfRiskPeriodModeChip(periodMode) {
+  const isYtd = periodMode === COST_OF_RISK_PERIOD_MODE_YTD;
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--period-mode";
+
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskPeriodModeToggle = "true";
+  toggle.setAttribute("aria-pressed", String(isYtd));
+  toggle.setAttribute("aria-label", "Switch period view");
+
+  const prefix = document.createElement("span");
+  prefix.className = "cost-of-risk-filter-chip-prefix";
+  prefix.textContent = "Period: ";
+  const value = document.createElement("span");
+  value.className = "cost-of-risk-filter-chip-value";
+  value.textContent = isYtd ? "Year to date" : "Quarterly flow";
+  toggle.append(prefix, value);
   chip.append(toggle);
 
   return chip;

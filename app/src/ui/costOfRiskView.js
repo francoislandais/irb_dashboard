@@ -9,6 +9,8 @@ import {
   DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_F12_RECONCILIATION_X_CODES,
+  COST_OF_RISK_PERIOD_MODE_QUARTERLY,
+  COST_OF_RISK_PERIOD_MODE_YTD,
   COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE,
   COST_OF_RISK_WATERFALL_X_CODES,
   COST_OF_RISK_X_AXIS_CODE,
@@ -244,6 +246,7 @@ let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskNplFlowsDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
+let activeCostOfRiskPeriodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY;
 let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
 let activeCostOfRiskCounterpartySummaryOtherOpen = false;
 let activeCostOfRiskContributionDisplayMenuOpen = false;
@@ -313,6 +316,13 @@ function setCostOfRiskGlobalDisplayMode(mode) {
   activeCostOfRiskStageTransferDisplayMode = nextMode;
   activeCostOfRiskNplFlowsDisplayMode = nextMode;
   activeCostOfRiskSummaryDisplayMode = nextMode;
+  closeCostOfRiskFilterMenus();
+}
+
+function toggleCostOfRiskPeriodMode() {
+  activeCostOfRiskPeriodMode = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? COST_OF_RISK_PERIOD_MODE_QUARTERLY
+    : COST_OF_RISK_PERIOD_MODE_YTD;
   closeCostOfRiskFilterMenus();
 }
 
@@ -505,6 +515,15 @@ export function wireCostOfRiskUi(actions, rerender) {
               : activeCostOfRiskMovementDisplayMode;
       const nextMode = currentMode === "ratio" ? "amount" : "ratio";
       setCostOfRiskGlobalDisplayMode(nextMode);
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const periodModeToggle = event.target.closest?.("[data-cost-of-risk-period-mode-toggle]");
+    if (periodModeToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleCostOfRiskPeriodMode();
       rerenderApp(actions.getState());
       return;
     }
@@ -751,12 +770,20 @@ export function renderCostOfRisk(state) {
     if (!selection) {
       selection = getCostOfRiskCachedModel(
         state,
-        createCostOfRiskModelCacheKey(state, "selection", activeCostOfRiskFilters, activeCostOfRiskXAxisCode, activeCostOfRiskReferenceDate),
+        createCostOfRiskModelCacheKey(
+          state,
+          "selection",
+          activeCostOfRiskFilters,
+          activeCostOfRiskXAxisCode,
+          activeCostOfRiskReferenceDate,
+          activeCostOfRiskTab === "contributions" ? activeCostOfRiskPeriodMode : COST_OF_RISK_PERIOD_MODE_QUARTERLY
+        ),
         () => buildCostOfRiskFilteredSelectionValue(
           state,
           activeCostOfRiskFilters,
           activeCostOfRiskXAxisCode,
-          activeCostOfRiskReferenceDate
+          activeCostOfRiskReferenceDate,
+          activeCostOfRiskTab === "contributions" ? activeCostOfRiskPeriodMode : COST_OF_RISK_PERIOD_MODE_QUARTERLY
         )
       );
       activeCostOfRiskReferenceDate = selection.referenceDate || activeCostOfRiskReferenceDate;
@@ -768,8 +795,8 @@ export function renderCostOfRisk(state) {
     if (!waterfall) {
       waterfall = getCostOfRiskCachedModel(
         state,
-        createCostOfRiskModelCacheKey(state, "waterfall", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedMovementXCodes),
-        () => buildCostOfRiskWaterfall(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedMovementXCodes)
+        createCostOfRiskModelCacheKey(state, "waterfall", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedMovementXCodes, activeCostOfRiskPeriodMode),
+        () => buildCostOfRiskWaterfall(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, selectedMovementXCodes, activeCostOfRiskPeriodMode)
       );
     }
     return waterfall;
@@ -1152,7 +1179,7 @@ export function renderCostOfRisk(state) {
   );
   elements.costOfRiskRatioContext.textContent = isGrowthRateModeMissingDenominator
     ? `Growth rate unavailable: ${activeSelection.denominatorLabel.toLowerCase()} is not available.`
-    : `${state.selectedJst} - ${activeSelection.referenceDate} - ${displayMode === "ratio" ? `${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)} growth rate` : "amount"}`;
+    : `${state.selectedJst} - ${activeSelection.referenceDate} - ${displayMode === "ratio" ? `${formatCostOfRiskSmoothingLabel(activeCostOfRiskSmoothingWindow)} growth rate` : getActiveCostOfRiskPeriodLabel()}`;
   if (f02Ratio) {
     elements.costOfRiskF02Value.textContent = formatCostOfRiskDisplayValue(
       displayMode === "ratio" ? f02Ratio.ratioBasisPoints : f02Ratio.value,
@@ -1613,7 +1640,8 @@ function getCostOfRiskDefinitionModelForId(
       definitionId,
       selectedDriverCode,
       customDefinitionCodes.join(","),
-      options
+      options,
+      activeCostOfRiskPeriodMode
     ),
     () => buildCostOfRiskDefinitionModel(
       state,
@@ -1622,7 +1650,10 @@ function getCostOfRiskDefinitionModelForId(
       activeCostOfRiskReferenceDate,
       selectedDriverCode,
       customDefinitionCodes,
-      options
+      {
+        ...options,
+        periodMode: activeCostOfRiskPeriodMode
+      }
     )
   );
 }
@@ -2102,9 +2133,10 @@ function setCostOfRiskDefinitionSelectedDataSummary(definitionModel, state) {
   const amountLabel = formatCostOfRiskSelectedAmount(value, state.selectedUnit, true);
   const denominatorLabel = formatCostOfRiskSelectedAmount(definitionModel.denominator, state.selectedUnit);
   const definitionLabel = definitionModel.definition?.label ?? "selected definition";
+  const periodAmountPhrase = getActiveCostOfRiskPeriodAmountPhrase();
   const text = activeCostOfRiskDefinitionDisplayMode === "ratio"
-    ? `At ${referenceLabel}, for ${scopePhrase}, ${itemLabel} contributes ${formattedValue} under the ${definitionLabel}, calculated from ${amountLabel} over an exposure base of ${denominatorLabel}.`
-    : `At ${referenceLabel}, for ${scopePhrase}, ${itemLabel} contributes ${formattedValue} under the ${definitionLabel}.`;
+    ? `At ${referenceLabel}, for ${scopePhrase}, ${itemLabel} contributes ${formattedValue} under the ${definitionLabel}, calculated from ${amountLabel} as a ${periodAmountPhrase} over an exposure base of ${denominatorLabel}.`
+    : `At ${referenceLabel}, for ${scopePhrase}, ${itemLabel} contributes ${formattedValue} as a ${periodAmountPhrase} under the ${definitionLabel}.`;
   setCostOfRiskSelectedDataSummary(createCostOfRiskSelectedDataDescription(text, formattedValue));
 }
 
@@ -2240,6 +2272,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     filterOptions,
     filters: displayedFilters,
     nplFlowsDisplayMenuOpen: activeCostOfRiskNplFlowsDisplayMenuOpen,
+    periodMode: activeCostOfRiskPeriodMode,
     referenceDate: activeCostOfRiskReferenceDate,
     stageMenuOpen: isCostOfRiskFilterSelectionTopicOpen("stage"),
     summaryDisplayMenuOpen: activeCostOfRiskSummaryDisplayMenuOpen,
@@ -2254,6 +2287,18 @@ function getActiveCostOfRiskDisplayMode() {
   if (activeCostOfRiskTab === "npl-flows") return activeCostOfRiskNplFlowsDisplayMode;
   if (activeCostOfRiskTab === "stage-transfers") return activeCostOfRiskStageTransferDisplayMode;
   return activeCostOfRiskDisplayMode;
+}
+
+function getActiveCostOfRiskPeriodLabel() {
+  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? "Year to date"
+    : "Quarterly flow";
+}
+
+function getActiveCostOfRiskPeriodAmountPhrase() {
+  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? "year-to-date amount"
+    : "quarterly flow";
 }
 
 function hasOpenCostOfRiskFilterMenu() {
@@ -2424,7 +2469,8 @@ function setCostOfRiskMovementSelectedDataSummary(state) {
   const audit = buildCostOfRiskMovementContributionAudit(
     state,
     activeCostOfRiskFilters,
-    selectedCode
+    selectedCode,
+    activeCostOfRiskPeriodMode
   );
   const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed contribution");
   const relative = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Relative contribution");
@@ -2442,7 +2488,7 @@ function setCostOfRiskMovementSelectedDataSummary(state) {
   const componentLabel = getCostOfRiskReadableMovementComponentLabel(audit.title);
   const scopePhrase = getCostOfRiskSelectedPerimeterPhrase();
   const text = activeCostOfRiskMovementDisplayMode === "amount" && Number.isFinite(amount)
-    ? `At ${referenceLabel}, for ${scopePhrase}, ${componentLabel} ${amount < 0 ? "reduces" : "increases"} ECL by ${formatCostOfRiskSelectedAmount(Math.abs(amount), state.selectedUnit)}.`
+    ? `At ${referenceLabel}, for ${scopePhrase}, ${componentLabel} ${amount < 0 ? "reduces" : "increases"} ECL by ${formatCostOfRiskSelectedAmount(Math.abs(amount), state.selectedUnit)} as a ${getActiveCostOfRiskPeriodAmountPhrase()}.`
     : `At ${referenceLabel}, for ${scopePhrase}, the contribution from ${componentLabel} to ECL movements is ${formattedValue}.`;
   const detail = `from ${amountLabel} over ${denominatorLabel} previous-quarter exposure`;
   setCostOfRiskSelectedDataSummary(activeCostOfRiskMovementDisplayMode === "ratio"
@@ -2477,7 +2523,8 @@ function setCostOfRiskStageTransferSelectedDataSummary(state) {
     state,
     activeCostOfRiskFilters,
     activeCostOfRiskStageTransferFlowKey,
-    activeCostOfRiskReferenceDate
+    activeCostOfRiskReferenceDate,
+    activeCostOfRiskPeriodMode
   );
   const isStageBox = activeCostOfRiskStageTransferFlowKey.startsWith("stagebox:");
   const displayMode = isStageBox ? "amount" : activeCostOfRiskStageTransferDisplayMode;
@@ -2495,8 +2542,8 @@ function setCostOfRiskStageTransferSelectedDataSummary(state) {
     ? `At ${referenceLabel}, for ${scopePhrase}, ${title} contains ${formattedValue} of GCA.`
     : displayMode === "ratio"
       ? `At ${referenceLabel}, for ${scopePhrase}, ${title} is ${formattedValue}`
-      : `At ${referenceLabel}, for ${scopePhrase}, ${title} represents a quarterly transfer of ${formattedValue}.`;
-  const detail = `from a quarterly transfer of ${amountLabel} over a previous-quarter exposure base of ${denominatorLabel}.`;
+      : `At ${referenceLabel}, for ${scopePhrase}, ${title} represents a ${getActiveCostOfRiskPeriodAmountPhrase()} of ${formattedValue}.`;
+  const detail = `from a ${getActiveCostOfRiskPeriodAmountPhrase()} of ${amountLabel} over a previous-quarter exposure base of ${denominatorLabel}.`;
   setCostOfRiskSelectedDataSummary(displayMode === "ratio" && !isStageBox
     ? createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, formattedValue)
     : createCostOfRiskSelectedDataDescription(text, formattedValue));
@@ -2540,7 +2587,8 @@ function renderCostOfRiskMovementAuditPanel(state, options = {}) {
   const audit = buildCostOfRiskMovementContributionAudit(
     state,
     activeCostOfRiskFilters,
-    activeCostOfRiskMovementAuditXCode
+    activeCostOfRiskMovementAuditXCode,
+    activeCostOfRiskPeriodMode
   );
   renderCostOfRiskAuditTableView({
     activeDateLabel: activeCostOfRiskReferenceDate,
@@ -2577,7 +2625,8 @@ function renderCostOfRiskStageTransferAuditPanel(state, options = {}) {
     state,
     activeCostOfRiskFilters,
     activeCostOfRiskStageTransferFlowKey,
-    activeCostOfRiskReferenceDate
+    activeCostOfRiskReferenceDate,
+    activeCostOfRiskPeriodMode
   );
 
   renderCostOfRiskAuditTableView({
@@ -3605,7 +3654,8 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
       activeCostOfRiskMovementDisplayMode,
       activeCostOfRiskStageTransferDisplayMode,
       activeCostOfRiskNplFlowsDisplayMode,
-      activeCostOfRiskSummaryDisplayMode
+      activeCostOfRiskSummaryDisplayMode,
+      activeCostOfRiskPeriodMode
     ),
     () => {
       try {
@@ -3724,11 +3774,12 @@ function getCostOfRiskRatioPreviewValue(state, filters, config, referenceDate = 
 
 function getCostOfRiskMovementPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
   const audit = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("movement-audit", filters, activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode),
+    createCostOfRiskFilterPreviewCacheKey("movement-audit", filters, activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode, activeCostOfRiskPeriodMode),
     () => buildCostOfRiskMovementContributionAudit(
       state,
       filters,
-      activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode
+      activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode,
+      activeCostOfRiskPeriodMode
     )
   );
   const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed contribution", referenceDate);
@@ -3757,12 +3808,13 @@ function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value
   }
 
   const audit = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("stage-transfer-audit", filters, referenceDate, flowKey),
+    createCostOfRiskFilterPreviewCacheKey("stage-transfer-audit", filters, referenceDate, flowKey, activeCostOfRiskPeriodMode),
     () => buildCostOfRiskStageTransferPanelAudit(
       state,
       filters,
       flowKey,
-      referenceDate
+      referenceDate,
+      activeCostOfRiskPeriodMode
     )
   );
   const isStageBox = flowKey.startsWith("stagebox:");
@@ -3790,7 +3842,7 @@ function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = acti
   if (definitionId === COST_OF_RISK_COMPARISON_DEFINITION_ID) return "";
   const customCodes = getActiveCostOfRiskCustomDefinitionXCodes();
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("definition-model", definitionId, filters, referenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(",")),
+    createCostOfRiskFilterPreviewCacheKey("definition-model", definitionId, filters, referenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(","), activeCostOfRiskPeriodMode),
     () => buildCostOfRiskDefinitionModel(
       state,
       definitionId,
@@ -3801,7 +3853,8 @@ function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = acti
       {
         includeBenchmarkSeries: false,
         includeComponents: Boolean(activeCostOfRiskDefinitionDriverCode?.startsWith("component:")),
-        includeDrivers: Boolean(activeCostOfRiskDefinitionDriverCode && !activeCostOfRiskDefinitionDriverCode.startsWith("component:"))
+        includeDrivers: Boolean(activeCostOfRiskDefinitionDriverCode && !activeCostOfRiskDefinitionDriverCode.startsWith("component:")),
+        periodMode: activeCostOfRiskPeriodMode
       }
     )
   );
@@ -4397,8 +4450,8 @@ function renderCostOfRiskStageTransferView(state) {
   ensureCostOfRiskStageTransferFlowSelection();
   const flowDiagram = applyCostOfRiskUnavailableCounterpartyGuidance(getCostOfRiskCachedModel(
     state,
-    createCostOfRiskModelCacheKey(state, "stage-transfer-flow-diagram", activeCostOfRiskFilters, activeCostOfRiskReferenceDate),
-    () => buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters)
+    createCostOfRiskModelCacheKey(state, "stage-transfer-flow-diagram", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskPeriodMode),
+    () => buildCostOfRiskStageTransferFlowDiagram(state, activeCostOfRiskReferenceDate, activeCostOfRiskFilters, activeCostOfRiskPeriodMode)
   ));
   renderCostOfRiskStageTransferFlowChart(
     state,
@@ -4482,8 +4535,8 @@ function renderCostOfRiskStageTransferFlowTimeSeriesChart(state, displayMode, se
     )
     : getCostOfRiskCachedModel(
       state,
-      createCostOfRiskModelCacheKey(state, "stage-transfer-flow-time-series", activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey),
-      () => buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey)
+      createCostOfRiskModelCacheKey(state, "stage-transfer-flow-time-series", activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey, activeCostOfRiskPeriodMode),
+      () => buildCostOfRiskStageTransferFlowTimeSeries(state, activeCostOfRiskFilters, activeCostOfRiskStageTransferFlowKey, activeCostOfRiskPeriodMode)
     );
   renderStageTransferFlowTimeSeriesChart({
     activeReferenceDate: activeCostOfRiskReferenceDate,

@@ -71,6 +71,8 @@ export * from "./costOfRisk/definitions.js";
 
 const CACHE_KEY_SEPARATOR = "\u001f";
 const COST_OF_RISK_SERIES_CACHE = new WeakMap();
+export const COST_OF_RISK_PERIOD_MODE_QUARTERLY = "quarterly";
+export const COST_OF_RISK_PERIOD_MODE_YTD = "ytd";
 
 // The ratio denominator follows the sidebar filters: it is always the
 // FINREP F_18.00 GCA for the same asset/counterparty/stage perimeter as the
@@ -118,9 +120,22 @@ function addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceCol
   addSeriesValues(targetSeries, sourceSeries);
 }
 
-function getCostOfRiskAllowanceMovementQuarterlySeries(state, indexes, referenceColumns, xCodes, yCodes, jstCode) {
+function normalizeCostOfRiskPeriodMode(periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  return periodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? COST_OF_RISK_PERIOD_MODE_YTD
+    : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
+}
+
+function resolveCostOfRiskPeriodSeries(referenceColumns, values, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  return normalizeCostOfRiskPeriodMode(periodMode) === COST_OF_RISK_PERIOD_MODE_YTD
+    ? values
+    : decumulateQuarterlySeries(referenceColumns, values);
+}
+
+function getCostOfRiskAllowanceMovementPeriodSeries(state, indexes, referenceColumns, xCodes, yCodes, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const cache = getCostOfRiskSeriesCache(state);
-  const key = makeCostOfRiskAllowanceMovementSeriesKey(xCodes, yCodes, jstCode, referenceColumns);
+  const normalizedPeriodMode = normalizeCostOfRiskPeriodMode(periodMode);
+  const key = makeCostOfRiskAllowanceMovementSeriesKey(xCodes, yCodes, jstCode, referenceColumns, normalizedPeriodMode);
   if (cache.allowanceMovementSeries.has(key)) return cache.allowanceMovementSeries.get(key);
 
   const valueSeries = createEmptySeries(referenceColumns.length);
@@ -129,9 +144,21 @@ function getCostOfRiskAllowanceMovementQuarterlySeries(state, indexes, reference
       addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceColumns, valueSeries, xCode, yCode, jstCode);
     });
   });
-  const quarterlySeries = decumulateQuarterlySeries(referenceColumns, valueSeries);
-  cache.allowanceMovementSeries.set(key, quarterlySeries);
-  return quarterlySeries;
+  const periodSeries = resolveCostOfRiskPeriodSeries(referenceColumns, valueSeries, normalizedPeriodMode);
+  cache.allowanceMovementSeries.set(key, periodSeries);
+  return periodSeries;
+}
+
+function getCostOfRiskAllowanceMovementQuarterlySeries(state, indexes, referenceColumns, xCodes, yCodes, jstCode) {
+  return getCostOfRiskAllowanceMovementPeriodSeries(
+    state,
+    indexes,
+    referenceColumns,
+    xCodes,
+    yCodes,
+    jstCode,
+    COST_OF_RISK_PERIOD_MODE_QUARTERLY
+  );
 }
 
 export function getCostOfRiskFilterOptions(state) {
@@ -172,11 +199,29 @@ function getCostOfRiskXAxisOptionsForCodes(state, codes) {
   }));
 }
 
-export function buildCostOfRiskFilteredSelectionValue(state, filters, xAxisCode = COST_OF_RISK_X_AXIS_CODE, referenceDate = "") {
-  return buildCostOfRiskSelectionSnapshot(state, buildCostOfRiskSelectionFromFilters(state, filters), xAxisCode, referenceDate, filters);
+export function buildCostOfRiskFilteredSelectionValue(
+  state,
+  filters,
+  xAxisCode = COST_OF_RISK_X_AXIS_CODE,
+  referenceDate = "",
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
+  return buildCostOfRiskSelectionSnapshot(
+    state,
+    buildCostOfRiskSelectionFromFilters(state, filters),
+    xAxisCode,
+    referenceDate,
+    filters,
+    periodMode
+  );
 }
 
-export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "", filters = {}) {
+export function buildCostOfRiskF02ImpairmentRatio(
+  state,
+  referenceDate = "",
+  filters = {},
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
 
@@ -189,10 +234,10 @@ export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "", fil
     yCode: COST_OF_RISK_F02_Y_AXIS_CODE,
     zCode: ""
   }, state.selectedJst);
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const periodValueSeries = resolveCostOfRiskPeriodSeries(referenceColumns, rawValueSeries, periodMode);
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const value = formatCostOfRiskAllowanceMovementDisplayValue(quarterlyValueSeries[referenceIndex] ?? null);
+  const value = formatCostOfRiskAllowanceMovementDisplayValue(periodValueSeries[referenceIndex] ?? null);
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
 
   return {
@@ -204,7 +249,11 @@ export function buildCostOfRiskF02ImpairmentRatio(state, referenceDate = "", fil
   };
 }
 
-export function buildCostOfRiskF02ImpairmentSeries(state, filters = {}) {
+export function buildCostOfRiskF02ImpairmentSeries(
+  state,
+  filters = {},
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
 
@@ -217,12 +266,12 @@ export function buildCostOfRiskF02ImpairmentSeries(state, filters = {}) {
     yCode: COST_OF_RISK_F02_Y_AXIS_CODE,
     zCode: ""
   }, state.selectedJst);
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const periodValueSeries = resolveCostOfRiskPeriodSeries(referenceColumns, rawValueSeries, periodMode);
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
-      const value = quarterlyValueSeries[index] ?? null;
+      const value = periodValueSeries[index] ?? null;
       const signedValue = Number.isFinite(value) ? -value : value;
       const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
@@ -238,7 +287,13 @@ export function buildCostOfRiskF02ImpairmentSeries(state, filters = {}) {
   };
 }
 
-export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES) {
+export function buildCostOfRiskWaterfall(
+  state,
+  filters,
+  referenceDate = "",
+  selectedXCodes = COST_OF_RISK_WATERFALL_X_CODES,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
@@ -253,15 +308,16 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex) ?? 0;
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const points = COST_OF_RISK_WATERFALL_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)).map((xCode) => {
-    const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
       state,
       indexes,
       referenceColumns,
       [xCode],
       selectedOption.points,
-      state.selectedJst
+      state.selectedJst,
+      periodMode
     );
-    const value = quarterlyValueSeries[referenceIndex] ?? 0;
+    const value = periodValueSeries[referenceIndex] ?? 0;
 
     return {
       code: xCode,
@@ -278,7 +334,12 @@ export function buildCostOfRiskWaterfall(state, filters, referenceDate = "", sel
   };
 }
 
-export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCodes = COST_OF_RISK_F12_RECONCILIATION_X_CODES) {
+export function buildCostOfRiskF12ContributionSeries(
+  state,
+  filters,
+  selectedXCodes = COST_OF_RISK_F12_RECONCILIATION_X_CODES,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
@@ -288,19 +349,20 @@ export function buildCostOfRiskF12ContributionSeries(state, filters, selectedXCo
     return { points: [], status: "Load a CSV and select a core definition." };
   }
 
-  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+  const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
     state,
     indexes,
     referenceColumns,
     COST_OF_RISK_F12_RECONCILIATION_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)),
     selectedOption.points,
-    state.selectedJst
+    state.selectedJst,
+    periodMode
   );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
 
   return {
     points: referenceColumns.map((referenceColumn, index) => {
-      const value = quarterlyValueSeries[index] ?? null;
+      const value = periodValueSeries[index] ?? null;
       const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
       return {
@@ -331,6 +393,7 @@ export function buildCostOfRiskDefinitionModel(
   const includeComponents = options.includeComponents !== false;
   const includeDrivers = options.includeDrivers !== false;
   const includeBenchmarkSeries = options.includeBenchmarkSeries !== false;
+  const periodMode = normalizeCostOfRiskPeriodMode(options.periodMode);
 
   if (!indexes || !state.selectedJst || referenceColumns.length === 0) {
     return {
@@ -349,20 +412,20 @@ export function buildCostOfRiskDefinitionModel(
   }
 
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst, customXCodes);
+  const series = buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definition.id, filters, state.selectedJst, customXCodes, periodMode);
   const selectedPoint = series[referenceIndex] ?? null;
   const components = includeComponents
-    ? buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes)
+    ? buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes, periodMode)
     : [];
   const drivers = includeDrivers
-    ? buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes)
+    ? buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definition.id, filters, referenceIndex, customXCodes, periodMode)
     : [];
   const selectedComponent = components.find((component) => component.code === selectedDriverCode) ?? null;
   const selectedDriver = selectedComponent ? null : drivers.find((driver) => driver.code === selectedDriverCode) ?? null;
   const chartSeries = selectedDriver
-    ? buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedDriver.code, state.selectedJst)
+    ? buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedDriver.code, state.selectedJst, periodMode)
     : selectedComponent
-      ? buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedComponent.code, state.selectedJst)
+      ? buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definition.id, filters, selectedComponent.code, state.selectedJst, periodMode)
     : series;
 
   return {
@@ -375,7 +438,8 @@ export function buildCostOfRiskDefinitionModel(
         filters,
         selectedDriver?.code ?? selectedComponent?.code ?? "",
         customXCodes,
-        chartSeries
+        chartSeries,
+        periodMode
       )
       : [],
     chartSeries,
@@ -401,22 +465,23 @@ function buildCostOfRiskDefinitionBenchmarkSeries(
   filters,
   selectedDriverCode = "",
   customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
-  selectedJstSeries = null
+  selectedJstSeries = null,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
 ) {
   return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
     jstCode,
     points: jstCode === state.selectedJst && Array.isArray(selectedJstSeries)
       ? selectedJstSeries
       : selectedDriverCode
-        ? buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode)
-        : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes)
+        ? buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedDriverCode, jstCode, periodMode)
+        : buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes, periodMode)
   }));
 }
 
-function buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode) {
+function buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   return String(selectedCode).startsWith("component:")
-    ? buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode)
-    : buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode);
+    ? buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode, periodMode)
+    : buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode, periodMode);
 }
 
 function getCostOfRiskDefinitionXCodes(definitionId, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
@@ -425,32 +490,33 @@ function getCostOfRiskDefinitionXCodes(definitionId, customXCodes = COST_OF_RISK
   return COST_OF_RISK_DEFINITION_F12_X_CODES;
 }
 
-function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   return definitionId === "f02-impairment"
-    ? buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode)
-    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskDefinitionXCodes(definitionId, customXCodes));
+    ? buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode)
+    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskDefinitionXCodes(definitionId, customXCodes), periodMode);
 }
 
-function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, driverCode, jstCode) {
+function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, driverCode, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   if (!driverCode || definitionId === "f02-impairment") {
-    return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode);
+    return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode);
   }
 
   const [xCode, yCode] = String(driverCode).split(":");
   if (!xCode || !yCode) return [];
 
-  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+  const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
     state,
     indexes,
     referenceColumns,
     [xCode],
     [yCode],
-    jstCode
+    jstCode,
+    periodMode
   );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
-    const value = quarterlyValueSeries[index] ?? null;
+    const value = periodValueSeries[index] ?? null;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
     return {
@@ -463,27 +529,27 @@ function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceCo
   });
 }
 
-function buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, componentCode, jstCode) {
+function buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, componentCode, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   if (definitionId === "f02-impairment") {
-    return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode);
+    return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode);
   }
 
   const xCode = String(componentCode ?? "").replace(/^component:/, "");
   if (!xCode) return [];
-  return buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, [xCode]);
+  return buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, [xCode], periodMode);
 }
 
-function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode) {
+function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const rawValueSeries = getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_F02_TABLE_ID, {
     xCode: COST_OF_RISK_F02_X_AXIS_CODE,
     yCode: COST_OF_RISK_F02_Y_AXIS_CODE,
     zCode: ""
   }, jstCode);
-  const quarterlyValueSeries = decumulateQuarterlySeries(referenceColumns, rawValueSeries);
+  const periodValueSeries = resolveCostOfRiskPeriodSeries(referenceColumns, rawValueSeries, periodMode);
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
-    const rawValue = quarterlyValueSeries[index] ?? null;
+    const rawValue = periodValueSeries[index] ?? null;
     const displayedValue = formatCostOfRiskAllowanceMovementDisplayValue(rawValue);
     const value = Number.isFinite(displayedValue) ? -displayedValue : displayedValue;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
@@ -498,20 +564,21 @@ function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColum
   });
 }
 
-function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, xCodes = COST_OF_RISK_DEFINITION_F12_X_CODES) {
+function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, xCodes = COST_OF_RISK_DEFINITION_F12_X_CODES, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
-  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+  const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
     state,
     indexes,
     referenceColumns,
     xCodes,
     selectedOption.points,
-    jstCode
+    jstCode,
+    periodMode
   );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
-    const value = quarterlyValueSeries[index] ?? null;
+    const value = periodValueSeries[index] ?? null;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
 
     return {
@@ -524,9 +591,18 @@ function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referen
   });
 }
 
-function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, definitionId, filters, referenceIndex, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+function buildCostOfRiskDefinitionDrivers(
+  state,
+  indexes,
+  referenceColumns,
+  definitionId,
+  filters,
+  referenceIndex,
+  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   if (definitionId === "f02-impairment") {
-    const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst)[referenceIndex];
+    const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst, periodMode)[referenceIndex];
     return [{
       code: "F02:0460",
       label: "F02 impairment contribution",
@@ -546,15 +622,16 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
   const descriptorByCode = new Map(granularDescriptors.map((descriptor) => [descriptor.code, descriptor]));
 
   return getCostOfRiskDefinitionXCodes(definitionId, customXCodes).flatMap((xCode) => selectedYCodes.map((yCode) => {
-    const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+    const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
       state,
       indexes,
       referenceColumns,
       [xCode],
       [yCode],
-      state.selectedJst
+      state.selectedJst,
+      periodMode
     );
-    const value = quarterlyValueSeries[referenceIndex] ?? null;
+    const value = periodValueSeries[referenceIndex] ?? null;
     const descriptor = descriptorByCode.get(yCode) ?? null;
     const scopeLabel = descriptor ? createCostOfRiskDefinitionDriverScopeLabel(descriptor) : "Selected perimeter";
     const movementLabel = xLabels.get(xCode) ?? xCode;
@@ -572,9 +649,18 @@ function buildCostOfRiskDefinitionDrivers(state, indexes, referenceColumns, defi
     .slice(0, 6);
 }
 
-function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, definitionId, filters, referenceIndex, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+function buildCostOfRiskDefinitionComponents(
+  state,
+  indexes,
+  referenceColumns,
+  definitionId,
+  filters,
+  referenceIndex,
+  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   if (definitionId === "f02-impairment") {
-    const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst)[referenceIndex];
+    const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst, periodMode)[referenceIndex];
     return [{
       code: "component:f02-impairment",
       label: "F02 impairment / reversal",
@@ -600,7 +686,8 @@ function buildCostOfRiskDefinitionComponents(state, indexes, referenceColumns, d
       referenceColumns,
       filters,
       state.selectedJst,
-      [xCode]
+      [xCode],
+      periodMode
     )[referenceIndex];
     const value = point?.value ?? null;
 
@@ -655,7 +742,12 @@ function formatCostOfRiskDefinitionMovementLabel(label) {
     .trim();
 }
 
-export function buildCostOfRiskMovementContributionAudit(state, filters, xCode = COST_OF_RISK_X_AXIS_CODE) {
+export function buildCostOfRiskMovementContributionAudit(
+  state,
+  filters,
+  xCode = COST_OF_RISK_X_AXIS_CODE,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedOption = buildCostOfRiskSelectionFromFilters(state, filters);
@@ -675,7 +767,8 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
       indexes,
       referenceColumns,
       selectedOption.points,
-      "Selected scope"
+      "Selected scope",
+      periodMode
     )
     : buildCostOfRiskMovementAuditRowsForYCodes(
       state,
@@ -683,7 +776,8 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
       referenceColumns,
       normalizedXCode,
       selectedOption.points,
-      "Selected scope"
+      "Selected scope",
+      periodMode
     );
   const selectedTotal = createEmptySeries(referenceColumns.length);
   selectedRows.forEach((row) => addSeriesValues(selectedTotal, row.values));
@@ -742,17 +836,18 @@ export function buildCostOfRiskMovementContributionAudit(state, filters, xCode =
   };
 }
 
-function buildCostOfRiskMovementTotalContributionAuditRows(state, indexes, referenceColumns, yCodes, section) {
+function buildCostOfRiskMovementTotalContributionAuditRows(state, indexes, referenceColumns, yCodes, section, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
 
   return COST_OF_RISK_WATERFALL_X_CODES.map((xCode) => {
-    const values = getCostOfRiskAllowanceMovementQuarterlySeries(
+    const values = getCostOfRiskAllowanceMovementPeriodSeries(
       state,
       indexes,
       referenceColumns,
       [xCode],
       yCodes,
-      state.selectedJst
+      state.selectedJst,
+      periodMode
     );
 
     return {
@@ -796,7 +891,7 @@ function shiftCostOfRiskSeriesToPreviousReference(series) {
   return series.map((_, index) => (index > 0 ? series[index - 1] ?? null : null));
 }
 
-function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColumns, xCode, yCodes, section) {
+function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColumns, xCode, yCodes, section, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   return yCodes.map((yCode) => {
     const point = {
       xCode,
@@ -808,9 +903,10 @@ function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColu
     const rawSeries = referenceColumns.map((column) => (
       rows.reduce((total, row) => total + parseNumericValue(row[column.index]), 0)
     ));
-    const values = decumulateQuarterlySeries(
+    const values = resolveCostOfRiskPeriodSeries(
       referenceColumns,
-      rawSeries.map((value) => (Number.isFinite(value) ? value * sign : value))
+      rawSeries.map((value) => (Number.isFinite(value) ? value * sign : value)),
+      periodMode
     );
     const normalizedYCode = normalizeAxisCode(yCode, "y");
     const rowLabel = rows.length === 1 ? "1 row" : `${rows.length} rows`;
@@ -935,7 +1031,13 @@ export function buildCostOfRiskF2VsF12Audit(state, filters, selectedXCodes = COS
   };
 }
 
-export function buildCostOfRiskStageTransferWaterfall(state, stage = "3", referenceDate = "", filters = {}) {
+export function buildCostOfRiskStageTransferWaterfall(
+  state,
+  stage = "3",
+  referenceDate = "",
+  filters = {},
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedStage = COST_OF_RISK_STAGE_TRANSFER_MOVEMENTS[stage] ? stage : "3";
@@ -974,8 +1076,8 @@ export function buildCostOfRiskStageTransferWaterfall(state, stage = "3", refere
           yCode,
           zCode: ""
         }, state.selectedJst);
-        const quarterlySeries = decumulateQuarterlySeries(referenceColumns, series);
-        return total + (quarterlySeries[referenceIndex] ?? 0);
+        const periodSeries = resolveCostOfRiskPeriodSeries(referenceColumns, series, periodMode);
+        return total + (periodSeries[referenceIndex] ?? 0);
       }, 0);
 
       return {
@@ -992,7 +1094,12 @@ export function buildCostOfRiskStageTransferWaterfall(state, stage = "3", refere
   };
 }
 
-export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "", filters = {}) {
+export function buildCostOfRiskStageTransferFlowDiagram(
+  state,
+  referenceDate = "",
+  filters = {},
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
@@ -1033,8 +1140,8 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
         yCode,
         zCode: ""
       }, state.selectedJst);
-      const quarterlySeries = decumulateQuarterlySeries(referenceColumns, series);
-      return total + (quarterlySeries[referenceIndex] ?? 0);
+      const periodSeries = resolveCostOfRiskPeriodSeries(referenceColumns, series, periodMode);
+      return total + (periodSeries[referenceIndex] ?? 0);
     }, 0);
 
     return [movement.code, value];
@@ -1060,7 +1167,7 @@ export function buildCostOfRiskStageTransferFlowDiagram(state, referenceDate = "
     netTransfersByStage.set(movement.to, (netTransfersByStage.get(movement.to) ?? 0) + value);
   });
 
-  const writeOffsByStage = buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filters, referenceIndex);
+  const writeOffsByStage = buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filters, referenceIndex, periodMode);
   const writeOffMagnitudeByStage = new Map(writeOffsByStage.map((item) => [item.stage, item.magnitude]));
 
   return {
@@ -1274,7 +1381,13 @@ function computeCostOfRiskAllowanceComponentQuarterlySeries(state, indexes, refe
 // previous/current cumulative value, quarterly movement) that contributed to
 // the displayed value, for the currently selected reference date. Feeds the
 // stage transfer panel audit trail below.
-function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowKey, referenceDate = "") {
+function buildCostOfRiskStageTransferFlowAudit(
+  state,
+  filters = {},
+  flowKey,
+  referenceDate = "",
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const descriptor = parseCostOfRiskFlowKey(flowKey);
@@ -1285,22 +1398,28 @@ function buildCostOfRiskStageTransferFlowAudit(state, filters = {}, flowKey, ref
   if (!indexes || !descriptor || !state.selectedJst || !selectedReference) return null;
 
   if (descriptor.type === "transfer") {
-    return buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+    return buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode);
   }
   if (descriptor.type === "net") {
-    return buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+    return buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode);
   }
   if (descriptor.type === "stagebox") {
     return buildCostOfRiskStageBoxFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference);
   }
   if (descriptor.type === "writeoff") {
-    return buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+    return buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode);
   }
-  return buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference);
+  return buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode);
 }
 
-export function buildCostOfRiskStageTransferPanelAudit(state, filters = {}, flowKey, referenceDate = "") {
-  const audit = buildCostOfRiskStageTransferFlowAudit(state, filters, flowKey, referenceDate);
+export function buildCostOfRiskStageTransferPanelAudit(
+  state,
+  filters = {},
+  flowKey,
+  referenceDate = "",
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
+  const audit = buildCostOfRiskStageTransferFlowAudit(state, filters, flowKey, referenceDate, periodMode);
   if (!audit) return { dates: [], rows: [], title: "Stage Transfer" };
 
   const selectedValue = Number.isFinite(audit.value) ? audit.value : null;
@@ -1473,7 +1592,7 @@ function getCostOfRiskStageTransferAuditTitle(audit) {
   return `Other movements - Stage ${audit.stage}`;
 }
 
-function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
   const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
 
@@ -1485,7 +1604,7 @@ function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filt
     }, state.selectedJst);
     const currentCumulative = raw[referenceIndex] ?? null;
     const previousCumulative = raw[referenceIndex - 1] ?? null;
-    const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? null;
+    const quarterly = resolveCostOfRiskPeriodSeries(referenceColumns, raw, periodMode)[referenceIndex] ?? null;
 
     return {
       code: yCode,
@@ -1510,7 +1629,7 @@ function buildCostOfRiskTransferFlowAudit(state, indexes, referenceColumns, filt
   };
 }
 
-function buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+function buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const ySelection = getCostOfRiskStageTransferYSelection(state, filters);
   const xLabels = getCostOfRiskStageTransferXAxisLabelMap(state);
   const movements = [
@@ -1525,7 +1644,7 @@ function buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, f
         yCode,
         zCode: ""
       }, state.selectedJst);
-      const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? null;
+      const quarterly = resolveCostOfRiskPeriodSeries(referenceColumns, raw, periodMode)[referenceIndex] ?? null;
 
       return {
         description: getMappingDescription(state, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, "y_axis_rc_code", yCode),
@@ -1552,7 +1671,7 @@ function buildCostOfRiskNetTransferFlowAudit(state, indexes, referenceColumns, f
   };
 }
 
-function buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+function buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const { points } = getCostOfRiskWriteOffPointsByStage(state, filters).find((item) => item.stage === descriptor.stage) ?? { points: [] };
   const xLabels = getCostOfRiskXAxisLabelMap(state);
 
@@ -1565,7 +1684,7 @@ function buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filt
       }, state.selectedJst);
       const currentCumulative = raw[referenceIndex] ?? null;
       const previousCumulative = raw[referenceIndex - 1] ?? null;
-      const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? null;
+      const quarterly = resolveCostOfRiskPeriodSeries(referenceColumns, raw, periodMode)[referenceIndex] ?? null;
 
       return {
         currentCumulative,
@@ -1593,7 +1712,7 @@ function buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filt
   };
 }
 
-function buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference) {
+function buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns, filters, descriptor, referenceIndex, selectedReference, previousReference, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const exposureComponents = buildCostOfRiskStageExposureComponents(state, indexes, referenceColumns, filters, descriptor.stage, referenceIndex);
   const exposureDelta = exposureComponents.reduce((total, item) => total + (item.delta ?? 0), 0);
 
@@ -1610,7 +1729,7 @@ function buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns
           zCode: ""
         }, state.selectedJst));
       });
-      const quarterly = decumulateQuarterlySeries(referenceColumns, raw)[referenceIndex] ?? 0;
+      const quarterly = resolveCostOfRiskPeriodSeries(referenceColumns, raw, periodMode)[referenceIndex] ?? 0;
       const direction = movement.from === descriptor.stage ? "out" : "in";
 
       return {
@@ -1625,7 +1744,7 @@ function buildCostOfRiskOtherMovementsFlowAudit(state, indexes, referenceColumns
     });
   const netTransfers = transferComponents.reduce((total, item) => total + item.signedContribution, 0);
 
-  const writeOffAudit = buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, { stage: descriptor.stage, type: "writeoff" }, referenceIndex, selectedReference, previousReference);
+  const writeOffAudit = buildCostOfRiskWriteOffFlowAudit(state, indexes, referenceColumns, filters, { stage: descriptor.stage, type: "writeoff" }, referenceIndex, selectedReference, previousReference, periodMode);
   const writeOffMagnitude = Math.abs(writeOffAudit.value ?? 0);
 
   return {
@@ -3248,7 +3367,12 @@ function getCostOfRiskNplFlowDriverDefinitions(counterparty = "") {
   return selected ? [selected] : [];
 }
 
-export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowKey) {
+export function buildCostOfRiskStageTransferFlowTimeSeries(
+  state,
+  filters,
+  flowKey,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const descriptor = parseCostOfRiskFlowKey(flowKey);
@@ -3262,15 +3386,15 @@ export function buildCostOfRiskStageTransferFlowTimeSeries(state, filters, flowK
   return {
     benchmarkSeries: getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
       jstCode,
-      points: buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode)
+      points: buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode, periodMode)
     })),
     label: getCostOfRiskFlowLabel(descriptor),
     status: ""
   };
 }
 
-function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode) {
-  const rawValues = getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode);
+function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  const rawValues = getCostOfRiskFlowRawPeriodValues(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode, periodMode);
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(
     state,
     indexes,
@@ -3294,27 +3418,29 @@ function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descr
   });
 }
 
-function getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode) {
+function getCostOfRiskFlowRawPeriodValues(state, indexes, referenceColumns, descriptor, ySelection, filters, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   if (descriptor.type === "transfer") {
-    return computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, descriptor.code, jstCode);
+    return computeCostOfRiskTransferFlowPeriodSeries(state, indexes, referenceColumns, ySelection, descriptor.code, jstCode, periodMode);
   }
 
   if (descriptor.type === "net") {
-    const forwardSeries = computeCostOfRiskTransferFlowQuarterlySeries(
+    const forwardSeries = computeCostOfRiskTransferFlowPeriodSeries(
       state,
       indexes,
       referenceColumns,
       ySelection,
       descriptor.forwardMovement.code,
-      jstCode
+      jstCode,
+      periodMode
     );
-    const reverseSeries = computeCostOfRiskTransferFlowQuarterlySeries(
+    const reverseSeries = computeCostOfRiskTransferFlowPeriodSeries(
       state,
       indexes,
       referenceColumns,
       ySelection,
       descriptor.reverseMovement.code,
-      jstCode
+      jstCode,
+      periodMode
     );
     return referenceColumns.map((column, index) => {
       const forwardValue = forwardSeries[index] ?? 0;
@@ -3324,15 +3450,15 @@ function getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, d
   }
 
   if (descriptor.type === "writeoff") {
-    const magnitudes = computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode);
+    const magnitudes = computeCostOfRiskWriteOffPeriodSeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode, periodMode);
     return magnitudes.map((magnitude) => (magnitude > 0 ? -magnitude : 0));
   }
 
   const exposureLevels = computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, filters, descriptor.stage, jstCode);
-  const writeOffMagnitudes = computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode);
+  const writeOffMagnitudes = computeCostOfRiskWriteOffPeriodSeriesForStage(state, indexes, referenceColumns, filters, descriptor.stage, jstCode, periodMode);
   const movementQuarterlyByCode = new Map(COST_OF_RISK_STAGE_TRANSFER_FLOW_MOVEMENTS.map((movement) => [
     movement.code,
-    computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, movement.code, jstCode)
+    computeCostOfRiskTransferFlowPeriodSeries(state, indexes, referenceColumns, ySelection, movement.code, jstCode, periodMode)
   ]));
 
   return referenceColumns.map((column, index) => {
@@ -3353,7 +3479,7 @@ function getCostOfRiskFlowRawQuarterlyValues(state, indexes, referenceColumns, d
   });
 }
 
-function computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, movementCode, jstCode) {
+function computeCostOfRiskTransferFlowPeriodSeries(state, indexes, referenceColumns, ySelection, movementCode, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const raw = createEmptySeries(referenceColumns.length);
   ySelection.codes.forEach((yCode) => {
     addSeriesValues(raw, getPointSeriesValues(state, indexes, referenceColumns, COST_OF_RISK_STAGE_TRANSFER_TABLE_ID, {
@@ -3362,14 +3488,26 @@ function computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceC
       zCode: ""
     }, jstCode));
   });
-  return decumulateQuarterlySeries(referenceColumns, raw);
+  return resolveCostOfRiskPeriodSeries(referenceColumns, raw, periodMode);
+}
+
+function computeCostOfRiskTransferFlowQuarterlySeries(state, indexes, referenceColumns, ySelection, movementCode, jstCode) {
+  return computeCostOfRiskTransferFlowPeriodSeries(
+    state,
+    indexes,
+    referenceColumns,
+    ySelection,
+    movementCode,
+    jstCode,
+    COST_OF_RISK_PERIOD_MODE_QUARTERLY
+  );
 }
 
 function computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, filters, stage, jstCode) {
   return getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, getCostOfRiskStageScopedFilters(filters, stage));
 }
 
-function computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, stage, jstCode) {
+function computeCostOfRiskWriteOffPeriodSeriesForStage(state, indexes, referenceColumns, filters, stage, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const { points } = getCostOfRiskWriteOffPointsByStage(state, filters).find((item) => item.stage === stage) ?? { points: [] };
   if (!indexes || points.length === 0) return referenceColumns.map(() => 0);
 
@@ -3383,10 +3521,22 @@ function computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, refere
         zCode: ""
       }, jstCode));
     });
-    const quarterly = decumulateQuarterlySeries(referenceColumns, series);
-    quarterly.forEach((value, index) => { total[index] += Math.abs(value); });
+    const periodSeries = resolveCostOfRiskPeriodSeries(referenceColumns, series, periodMode);
+    periodSeries.forEach((value, index) => { total[index] += Math.abs(value); });
   });
   return total;
+}
+
+function computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, stage, jstCode) {
+  return computeCostOfRiskWriteOffPeriodSeriesForStage(
+    state,
+    indexes,
+    referenceColumns,
+    filters,
+    stage,
+    jstCode,
+    COST_OF_RISK_PERIOD_MODE_QUARTERLY
+  );
 }
 
 function parseCostOfRiskFlowKey(flowKey) {
@@ -3480,7 +3630,7 @@ function getCostOfRiskWriteOffPointsByStage(state, filters = {}) {
   });
 }
 
-function buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filters, referenceIndex) {
+function buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filters, referenceIndex, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   return getCostOfRiskWriteOffPointsByStage(state, filters).map(({ points, stage }) => {
     if (!indexes || points.length === 0) {
       return { magnitude: 0, stage };
@@ -3495,8 +3645,8 @@ function buildCostOfRiskWriteOffByStage(state, indexes, referenceColumns, filter
           zCode: ""
         }, state.selectedJst));
       });
-      const quarterlyValue = decumulateQuarterlySeries(referenceColumns, series)[referenceIndex] ?? 0;
-      return total + Math.abs(quarterlyValue);
+      const periodValue = resolveCostOfRiskPeriodSeries(referenceColumns, series, periodMode)[referenceIndex] ?? 0;
+      return total + Math.abs(periodValue);
     }, 0);
 
     return { magnitude, stage };
@@ -3526,7 +3676,14 @@ function buildCostOfRiskStageGlobalVariation(state, indexes, referenceColumns, f
   };
 }
 
-function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, referenceDate = "", filters = {}) {
+function buildCostOfRiskSelectionSnapshot(
+  state,
+  selectedOption,
+  xAxisCode,
+  referenceDate = "",
+  filters = {},
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const indexes = getRequiredIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedXCode = normalizeAxisCode(xAxisCode || COST_OF_RISK_X_AXIS_CODE, "x");
@@ -3547,12 +3704,12 @@ function buildCostOfRiskSelectionSnapshot(state, selectedOption, xAxisCode, refe
     return { status: "No F_12.01 Y-axis point matches the selected filters." };
   }
 
-  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst, filters);
+  const series = buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, state.selectedJst, filters, periodMode);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const selectedPoint = series[referenceIndex];
 
   return {
-    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, filters),
+    benchmarkSeries: buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, selectedXCode, filters, periodMode),
     denominator: selectedPoint?.denominator ?? null,
     denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
     option: selectedOption,
@@ -4003,10 +4160,10 @@ function getCostOfRiskShortAxisLabel(description, fallback) {
   return parts.at(-1) || fallback;
 }
 
-function buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, filters = {}) {
+function buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, filters = {}, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   return getCostOfRiskPeerJstCodes(state).map((jstCode) => ({
     jstCode,
-    points: buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, filters)
+    points: buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, filters, periodMode)
   }));
 }
 
@@ -4020,23 +4177,24 @@ function getCostOfRiskPeerJstCodes(state) {
   ));
 }
 
-function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, filters = {}) {
+function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, jstCode, filters = {}, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   if (xAxisCode === COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE) {
-    return buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters);
+    return buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters, periodMode);
   }
 
-  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+  const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
     state,
     indexes,
     referenceColumns,
     [xAxisCode],
     selectedOption.points,
-    jstCode
+    jstCode,
+    periodMode
   );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((column, index) => {
-    const value = quarterlyValueSeries[index] ?? 0;
+    const value = periodValueSeries[index] ?? 0;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
     return {
       date: column.date,
@@ -4048,19 +4206,20 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
   });
 }
 
-function buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters = {}) {
-  const quarterlyValueSeries = getCostOfRiskAllowanceMovementQuarterlySeries(
+function buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referenceColumns, selectedOption, jstCode, filters = {}, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
     state,
     indexes,
     referenceColumns,
     COST_OF_RISK_WATERFALL_X_CODES,
     selectedOption.points,
-    jstCode
+    jstCode,
+    periodMode
   );
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((column, index) => {
-    const value = quarterlyValueSeries[index] ?? 0;
+    const value = periodValueSeries[index] ?? 0;
     const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
     return {
       date: column.date,
@@ -4331,9 +4490,16 @@ function getCostOfRiskSeriesCache(state) {
   return cache;
 }
 
-function makeCostOfRiskAllowanceMovementSeriesKey(xCodes, yCodes, jstCode, referenceColumns) {
+function makeCostOfRiskAllowanceMovementSeriesKey(
+  xCodes,
+  yCodes,
+  jstCode,
+  referenceColumns,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   return [
     "allowance-movement",
+    normalizeCostOfRiskPeriodMode(periodMode),
     jstCode,
     xCodes.map((code) => normalizeAxisCode(code, "x")).sort().join(","),
     yCodes.map((code) => normalizeAxisCode(code, "y")).sort().join(","),
