@@ -174,6 +174,16 @@ import {
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
+import { costOfRiskElements as elements } from "./costOfRiskElements.js";
+import {
+  COST_OF_RISK_FILTER_SELECTION_META,
+  COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS
+} from "./costOfRiskFilterSelectionConfig.js";
+import {
+  COST_OF_RISK_DISABLED_TABS,
+  readCostOfRiskUrlState,
+  writeCostOfRiskUrlState
+} from "./costOfRiskUrlState.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
@@ -286,20 +296,6 @@ function setCostOfRiskGlobalDisplayMode(mode) {
 function pulseCostOfRiskContextPanel() {
 }
 
-// URL persistence: for the tabs listed in COST_OF_RISK_URL_TABS, the active
-// tab, reference date, and the "selected benchmark element" (the clicked
-// cell/driver/flow that drives the benchmark chart on that tab) round-trip
-// through the URL, so a page refresh restores exactly what the user was
-// looking at. Other tabs (F2 vs F12, Stage Reconciliation, Core Definition,
-// Analysis) are intentionally out of scope and never read from or written
-// to the URL.
-const COST_OF_RISK_TAB_URL_PARAM = "cor_tab";
-const COST_OF_RISK_DATE_URL_PARAM = "cor_date";
-const COST_OF_RISK_VIEW_URL_PARAM = "cor_view";
-const COST_OF_RISK_CELL_URL_PARAM = "cor_cell";
-const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "npl-flows", "stage-transfers", "contributions"]);
-const COST_OF_RISK_DISABLED_TABS = new Set(["f2-vs-f12", "stage-reconciliation", "core-definition", "analysis"]);
-
 applyCostOfRiskUrlState();
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
@@ -307,65 +303,6 @@ const activeCostOfRiskFilters = {
   balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
-};
-
-const elements = {
-  costOfRiskActiveFilters: document.querySelector("#cost-of-risk-active-filters"),
-  costOfRiskAsset: document.querySelector("#cost-of-risk-asset"),
-  costOfRiskAudit: document.querySelector("#cost-of-risk-audit"),
-  costOfRiskAuditPanel: document.querySelector("#cost-of-risk-audit-panel"),
-  costOfRiskCounterparty: document.querySelector("#cost-of-risk-counterparty"),
-  costOfRiskCounterpartySummaryChart: document.querySelector("#cost-of-risk-counterparty-summary-chart"),
-  costOfRiskCounterpartySummaryTable: document.querySelector("#cost-of-risk-counterparty-summary-table"),
-  costOfRiskCoreDefinition: document.querySelector("#cost-of-risk-core-definition"),
-  costOfRiskF2VsF12CoreDefinition: document.querySelector("#cost-of-risk-f2-f12-core-definition"),
-  costOfRiskContext: document.querySelector("#cost-of-risk-context"),
-  costOfRiskChart: document.querySelector("#cost-of-risk-chart"),
-  costOfRiskChartTitle: document.querySelector("#cost-of-risk-chart-title"),
-  costOfRiskDashboard: document.querySelector("#cost-of-risk-dashboard"),
-  costOfRiskDenominatorContext: document.querySelector("#cost-of-risk-denominator-context"),
-  costOfRiskDenominatorValue: document.querySelector("#cost-of-risk-denominator-value"),
-  costOfRiskDefinitionChart: document.querySelector("#cost-of-risk-definition-chart"),
-  costOfRiskDefinitionPanel: document.querySelector("#cost-of-risk-definition-panel"),
-  costOfRiskDisplayMode: document.querySelector("#cost-of-risk-display-mode"),
-  costOfRiskEmpty: document.querySelector("#cost-of-risk-empty"),
-  costOfRiskF2VsF12Chart: document.querySelector("#cost-of-risk-f2-f12-chart"),
-  costOfRiskF02Context: document.querySelector("#cost-of-risk-f02-context"),
-  costOfRiskF02Value: document.querySelector("#cost-of-risk-f02-value"),
-  costOfRiskNplFlowsChart: document.querySelector("#cost-of-risk-npl-flows-chart"),
-  costOfRiskNplFlowsPanel: document.querySelector("#cost-of-risk-npl-flows-panel"),
-  costOfRiskPoints: document.querySelector("#cost-of-risk-points"),
-  costOfRiskRatioContext: document.querySelector("#cost-of-risk-ratio-context"),
-  costOfRiskRatioInfo: document.querySelector("#cost-of-risk-ratio-info"),
-  costOfRiskRatioTooltip: document.querySelector("#cost-of-risk-ratio-tooltip"),
-  costOfRiskRatioValue: document.querySelector("#cost-of-risk-ratio-value"),
-  costOfRiskSmoothing: document.querySelector("#cost-of-risk-smoothing"),
-  costOfRiskSmoothingValue: document.querySelector("#cost-of-risk-smoothing-value"),
-  costOfRiskStage: document.querySelector("#cost-of-risk-stage"),
-  costOfRiskStageReconciliationChart: document.querySelector("#cost-of-risk-stage-reconciliation-chart"),
-  costOfRiskStageReconciliationSummary: document.querySelector("#cost-of-risk-stage-reconciliation-summary"),
-  costOfRiskCollateralRatioChart: document.querySelector("#cost-of-risk-collateral-ratio-chart"),
-  costOfRiskCollateralRatioTable: document.querySelector("#cost-of-risk-collateral-ratio-table"),
-  costOfRiskCoverageRatioChart: document.querySelector("#cost-of-risk-coverage-ratio-chart"),
-  costOfRiskCoverageRatioTable: document.querySelector("#cost-of-risk-coverage-ratio-table"),
-  costOfRiskStageRatioChart: document.querySelector("#cost-of-risk-stage-ratio-chart"),
-  costOfRiskStageRatioTable: document.querySelector("#cost-of-risk-stage-ratio-table"),
-  costOfRiskSummaryDisplayControl: document.querySelector("#cost-of-risk-summary-display-control"),
-  costOfRiskStageSummaryChart: document.querySelector("#cost-of-risk-stage-summary-chart"),
-  costOfRiskStageSummaryTable: document.querySelector("#cost-of-risk-stage-summary-table"),
-  costOfRiskStageTransferChart: document.querySelector("#cost-of-risk-stage-transfer-chart"),
-  costOfRiskStageTransferFlowChart: document.querySelector("#cost-of-risk-stage-transfer-flow-chart"),
-  costOfRiskStageTransferFlowChartTitle: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-title"),
-  costOfRiskStageTransferFlowChartWrap: document.querySelector("#cost-of-risk-stage-transfer-flow-chart-wrap"),
-  costOfRiskStageTransferTitle: document.querySelector("#cost-of-risk-stage-transfer-title"),
-  costOfRiskTabs: document.querySelector(".cost-of-risk-tabs"),
-  costOfRiskTabButtons: [...document.querySelectorAll("[data-cost-of-risk-tab]")],
-  costOfRiskTabPanels: [...document.querySelectorAll("[data-cost-of-risk-panel]")],
-  costOfRiskTreemap: document.querySelector("#cost-of-risk-treemap"),
-  costOfRiskValue: document.querySelector("#cost-of-risk-value"),
-  costOfRiskWaterfall: document.querySelector("#cost-of-risk-waterfall"),
-  costOfRiskWaterfallTitle: document.querySelector("#cost-of-risk-waterfall-title"),
-  costOfRiskXAxis: document.querySelector("#cost-of-risk-x-axis")
 };
 
 function renderCostOfRiskRatioDenominatorControls(state) {
@@ -387,20 +324,11 @@ function renderCostOfRiskRatioDenominatorControls(state) {
 // no longer applies) is harmless: the render-time normalizers already used
 // throughout this module simply won't find a matching row/option.
 function applyCostOfRiskUrlState() {
-  const params = new URLSearchParams(window.location.search);
-  const tab = params.get(COST_OF_RISK_TAB_URL_PARAM);
-  if (tab && COST_OF_RISK_URL_TABS.has(tab)) {
-    activeCostOfRiskTab = tab;
-  }
-
-  const date = params.get(COST_OF_RISK_DATE_URL_PARAM);
-  if (date) activeCostOfRiskReferenceDate = date;
-
-  const view = params.get(COST_OF_RISK_VIEW_URL_PARAM);
-  if (view === "counterparty" || view === "stage") activeCostOfRiskSummaryBreakdown = view;
-
-  const cell = params.get(COST_OF_RISK_CELL_URL_PARAM);
-  if (cell) applyCostOfRiskUrlSelection(activeCostOfRiskTab, cell);
+  const urlState = readCostOfRiskUrlState();
+  if (urlState.tab) activeCostOfRiskTab = urlState.tab;
+  if (urlState.referenceDate) activeCostOfRiskReferenceDate = urlState.referenceDate;
+  if (urlState.summaryBreakdown) activeCostOfRiskSummaryBreakdown = urlState.summaryBreakdown;
+  if (urlState.selection) applyCostOfRiskUrlSelection(activeCostOfRiskTab, urlState.selection);
 }
 
 function normalizeActiveCostOfRiskTab() {
@@ -475,39 +403,12 @@ function applyCostOfRiskUrlSelection(tab, value) {
 // returns) so the URL always reflects whatever is currently on screen,
 // regardless of which internal branch/early-return produced it.
 export function syncCostOfRiskUrlParams() {
-  const url = new URL(window.location.href);
-
-  if (!COST_OF_RISK_URL_TABS.has(activeCostOfRiskTab)) {
-    url.searchParams.delete(COST_OF_RISK_TAB_URL_PARAM);
-    url.searchParams.delete(COST_OF_RISK_DATE_URL_PARAM);
-    url.searchParams.delete(COST_OF_RISK_VIEW_URL_PARAM);
-    url.searchParams.delete(COST_OF_RISK_CELL_URL_PARAM);
-    window.history.replaceState({}, "", url);
-    return;
-  }
-
-  url.searchParams.set(COST_OF_RISK_TAB_URL_PARAM, activeCostOfRiskTab);
-
-  if (activeCostOfRiskReferenceDate) {
-    url.searchParams.set(COST_OF_RISK_DATE_URL_PARAM, activeCostOfRiskReferenceDate);
-  } else {
-    url.searchParams.delete(COST_OF_RISK_DATE_URL_PARAM);
-  }
-
-  if (activeCostOfRiskTab === "summary") {
-    url.searchParams.set(COST_OF_RISK_VIEW_URL_PARAM, activeCostOfRiskSummaryBreakdown);
-  } else {
-    url.searchParams.delete(COST_OF_RISK_VIEW_URL_PARAM);
-  }
-
-  const selection = getCostOfRiskUrlSelectionValue();
-  if (selection) {
-    url.searchParams.set(COST_OF_RISK_CELL_URL_PARAM, selection);
-  } else {
-    url.searchParams.delete(COST_OF_RISK_CELL_URL_PARAM);
-  }
-
-  window.history.replaceState({}, "", url);
+  writeCostOfRiskUrlState({
+    activeTab: activeCostOfRiskTab,
+    referenceDate: activeCostOfRiskReferenceDate,
+    selection: getCostOfRiskUrlSelectionValue(),
+    summaryBreakdown: activeCostOfRiskSummaryBreakdown
+  });
 }
 
 export function wireCostOfRiskUi(actions, rerender) {
@@ -3922,21 +3823,6 @@ function updateCostOfRiskPeerSelection(peerJstCodes) {
   if (!costOfRiskPeerSelectionActions?.updatePeerJstCodes) return;
   costOfRiskPeerSelectionActions.updatePeerJstCodes(peerJstCodes);
 }
-
-const COST_OF_RISK_FILTER_SELECTION_META = {
-  balanceScope: { allLabel: "In-balance", filterKey: "balanceScope", label: "Perimeter", optionsKey: "balanceScopes" },
-  counterparty: { allLabel: "All Counterparties", filterKey: "counterparty", label: "Counterparty", optionsKey: "counterparties" },
-  instrument: { allLabel: "All Instruments", filterKey: "asset", label: "Instruments", optionsKey: "assets" },
-  stage: { allLabel: "All Stage", filterKey: "stage", label: "Stage", optionsKey: "stages" }
-};
-const COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS = new Set([
-  "analysis",
-  "contributions",
-  "cost-of-risk",
-  "f2-vs-f12",
-  "stage-reconciliation",
-  "stage-transfers"
-]);
 
 function renderCostOfRiskFilterSelectionPanel(kind) {
   const previewToken = resetCostOfRiskFilterPreviewRenderQueue();
