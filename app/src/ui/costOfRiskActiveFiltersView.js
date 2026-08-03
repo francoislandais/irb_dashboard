@@ -4,7 +4,7 @@ import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+} from "../data/costOfRisk.js?v=20260803-ytd-denominator";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -172,13 +172,10 @@ function createCostOfRiskDefinitionChip(definitionId, isOpen) {
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", "Change cost of risk definition");
 
-  const prefix = document.createElement("span");
-  prefix.className = "cost-of-risk-filter-chip-prefix";
-  prefix.textContent = "Cost of risk: ";
   const value = document.createElement("span");
   value.className = "cost-of-risk-filter-chip-value";
   value.textContent = activeDefinition.label;
-  toggle.append(prefix, value);
+  toggle.append(value);
   chip.append(toggle);
 
   return chip;
@@ -250,13 +247,10 @@ function createCostOfRiskPeriodModeChip(periodMode) {
   toggle.setAttribute("aria-pressed", String(isYtd));
   toggle.setAttribute("aria-label", "Switch period view");
 
-  const prefix = document.createElement("span");
-  prefix.className = "cost-of-risk-filter-chip-prefix";
-  prefix.textContent = "Period: ";
   const value = document.createElement("span");
   value.className = "cost-of-risk-filter-chip-value";
   value.textContent = isYtd ? "Year to date" : "Quarterly flow";
-  toggle.append(prefix, value);
+  toggle.append(value);
   chip.append(toggle);
 
   return chip;
@@ -271,7 +265,6 @@ const COST_OF_RISK_PERIMETER_FILTER_CONFIGS = {
     clearFilterName: "balanceScope",
     closeAriaLabel: () => "Reset perimeter to In-balance",
     isDefaultValue: (value) => (value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE) === COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
-    labelPrefix: "Perimeter: ",
     normalizeValue: (value) => value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
     toggleAriaLabel: "Change balance-sheet perimeter",
     toggleDataset: "costOfRiskBalanceScopeFilterToggle"
@@ -281,7 +274,6 @@ const COST_OF_RISK_PERIMETER_FILTER_CONFIGS = {
     closeAriaLabel: (label) => `Remove ${label} filter`,
     defaultLabel: "All Counterparties",
     isDefaultValue: (value) => !value || value === COST_OF_RISK_FILTER_ALL,
-    labelPrefix: "Counterparty: ",
     toggleAriaLabel: "Change counterparty filter",
     toggleDataset: "costOfRiskCounterpartyFilterToggle"
   },
@@ -290,7 +282,6 @@ const COST_OF_RISK_PERIMETER_FILTER_CONFIGS = {
     closeAriaLabel: (label) => `Remove ${label} filter`,
     defaultLabel: "All Instruments",
     isDefaultValue: (value) => !value || value === COST_OF_RISK_FILTER_ALL,
-    labelPrefix: "Instruments: ",
     toggleAriaLabel: "Change instruments filter",
     toggleDataset: "costOfRiskInstrumentFilterToggle"
   },
@@ -299,7 +290,6 @@ const COST_OF_RISK_PERIMETER_FILTER_CONFIGS = {
     closeAriaLabel: (label) => `Remove ${label} filter`,
     defaultLabel: "All Stage",
     isDefaultValue: (value) => !value || value === COST_OF_RISK_FILTER_ALL,
-    labelPrefix: "Status: ",
     toggleAriaLabel: "Change stage filter",
     toggleDataset: "costOfRiskStageFilterToggle"
   }
@@ -324,17 +314,14 @@ function createCostOfRiskPerimeterFilterChip(kind, value, options, isOpen) {
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label";
   const resolvedLabel = getCostOfRiskFilterOptionLabel(options, normalizedValue);
+  const labelValue = document.createElement("span");
+  labelValue.className = "cost-of-risk-filter-chip-value";
   if (isDefault && config.defaultLabel) {
-    label.textContent = config.defaultLabel;
+    labelValue.textContent = config.defaultLabel;
   } else {
-    const labelPrefix = document.createElement("span");
-    labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-    labelPrefix.textContent = config.labelPrefix;
-    const labelValue = document.createElement("span");
-    labelValue.className = "cost-of-risk-filter-chip-value";
     labelValue.textContent = resolvedLabel;
-    label.append(labelPrefix, labelValue);
   }
+  label.append(labelValue);
   toggle.append(label);
   chip.append(toggle);
 

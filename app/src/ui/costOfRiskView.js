@@ -48,7 +48,7 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+} from "../data/costOfRisk.js?v=20260803-ytd-denominator";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -132,7 +132,7 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260803-refactor-cleanup";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260803-ytd-denominator";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -205,7 +205,7 @@ import {
 import {
   getCostOfRiskAuditPanelIntroContent,
   getCostOfRiskHelpPanelContent
-} from "./costOfRiskPanelContent.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskPanelContent.js?v=20260803-ytd-denominator";
 import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
@@ -2301,6 +2301,12 @@ function getActiveCostOfRiskPeriodAmountPhrase() {
     : "quarterly flow";
 }
 
+function getActiveCostOfRiskDenominatorPeriodPhrase() {
+  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? "first-quarter"
+    : "previous-quarter";
+}
+
 function hasOpenCostOfRiskFilterMenu() {
   return activeCostOfRiskContributionDisplayMenuOpen
     || activeCostOfRiskStageTransferDisplayMenuOpen
@@ -2427,7 +2433,7 @@ function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {
 function renderCostOfRiskWaterfallTitle(displayMode = "amount", denominator = null, selectedUnit = "millions") {
   const baseTitle = "Movement in the stock of allowances and provisions";
   activeCostOfRiskWaterfallTitleText = displayMode === "ratio" && Number.isFinite(denominator)
-    ? `${baseTitle} over a previous-quarter exposure base of ${formatMetricValue(denominator, selectedUnit)} ${getCostOfRiskUnitLongLabel(selectedUnit)}`
+    ? `${baseTitle} over a ${getActiveCostOfRiskDenominatorPeriodPhrase()} exposure base of ${formatMetricValue(denominator, selectedUnit)} ${getCostOfRiskUnitLongLabel(selectedUnit)}`
     : baseTitle;
   if (elements.costOfRiskWaterfallTitle) elements.costOfRiskWaterfallTitle.textContent = activeCostOfRiskWaterfallTitleText;
 }
@@ -2490,7 +2496,7 @@ function setCostOfRiskMovementSelectedDataSummary(state) {
   const text = activeCostOfRiskMovementDisplayMode === "amount" && Number.isFinite(amount)
     ? `At ${referenceLabel}, for ${scopePhrase}, ${componentLabel} ${amount < 0 ? "reduces" : "increases"} ECL by ${formatCostOfRiskSelectedAmount(Math.abs(amount), state.selectedUnit)} as a ${getActiveCostOfRiskPeriodAmountPhrase()}.`
     : `At ${referenceLabel}, for ${scopePhrase}, the contribution from ${componentLabel} to ECL movements is ${formattedValue}.`;
-  const detail = `from ${amountLabel} over ${denominatorLabel} previous-quarter exposure`;
+  const detail = `from ${amountLabel} over ${denominatorLabel} ${getActiveCostOfRiskDenominatorPeriodPhrase()} exposure`;
   setCostOfRiskSelectedDataSummary(activeCostOfRiskMovementDisplayMode === "ratio"
     ? createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, formattedValue)
     : createCostOfRiskSelectedDataDescription(text, formattedValue));
@@ -2543,7 +2549,7 @@ function setCostOfRiskStageTransferSelectedDataSummary(state) {
     : displayMode === "ratio"
       ? `At ${referenceLabel}, for ${scopePhrase}, ${title} is ${formattedValue}`
       : `At ${referenceLabel}, for ${scopePhrase}, ${title} represents a ${getActiveCostOfRiskPeriodAmountPhrase()} of ${formattedValue}.`;
-  const detail = `from a ${getActiveCostOfRiskPeriodAmountPhrase()} of ${amountLabel} over a previous-quarter exposure base of ${denominatorLabel}.`;
+  const detail = `from a ${getActiveCostOfRiskPeriodAmountPhrase()} of ${amountLabel} over a ${getActiveCostOfRiskDenominatorPeriodPhrase()} exposure base of ${denominatorLabel}.`;
   setCostOfRiskSelectedDataSummary(displayMode === "ratio" && !isStageBox
     ? createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, formattedValue)
     : createCostOfRiskSelectedDataDescription(text, formattedValue));

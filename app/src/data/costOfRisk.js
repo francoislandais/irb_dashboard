@@ -132,6 +132,12 @@ function resolveCostOfRiskPeriodSeries(referenceColumns, values, periodMode = CO
     : decumulateQuarterlySeries(referenceColumns, values);
 }
 
+function getCostOfRiskRatioDenominatorLabel(periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  return normalizeCostOfRiskPeriodMode(periodMode) === COST_OF_RISK_PERIOD_MODE_YTD
+    ? "first quarter of the year"
+    : "previous quarter";
+}
+
 function getCostOfRiskAllowanceMovementPeriodSeries(state, indexes, referenceColumns, xCodes, yCodes, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
   const cache = getCostOfRiskSeriesCache(state);
   const normalizedPeriodMode = normalizeCostOfRiskPeriodMode(periodMode);
@@ -238,7 +244,7 @@ export function buildCostOfRiskF02ImpairmentRatio(
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
   const value = formatCostOfRiskAllowanceMovementDisplayValue(periodValueSeries[referenceIndex] ?? null);
-  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, referenceIndex, periodMode);
 
   return {
     denominator,
@@ -273,7 +279,7 @@ export function buildCostOfRiskF02ImpairmentSeries(
     points: referenceColumns.map((referenceColumn, index) => {
       const value = periodValueSeries[index] ?? null;
       const signedValue = Number.isFinite(value) ? -value : value;
-      const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+      const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode);
 
       return {
         date: referenceColumn.date,
@@ -305,7 +311,7 @@ export function buildCostOfRiskWaterfall(
 
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
-  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex) ?? 0;
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, referenceIndex, periodMode) ?? 0;
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const points = COST_OF_RISK_WATERFALL_X_CODES.filter((xCode) => selectedCodeSet.has(xCode)).map((xCode) => {
     const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
@@ -363,7 +369,7 @@ export function buildCostOfRiskF12ContributionSeries(
   return {
     points: referenceColumns.map((referenceColumn, index) => {
       const value = periodValueSeries[index] ?? null;
-      const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+      const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode);
 
       return {
         date: referenceColumn.date,
@@ -517,7 +523,7 @@ function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceCo
 
   return referenceColumns.map((referenceColumn, index) => {
     const value = periodValueSeries[index] ?? null;
-    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode);
 
     return {
       date: referenceColumn.date,
@@ -552,7 +558,7 @@ function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColum
     const rawValue = periodValueSeries[index] ?? null;
     const displayedValue = formatCostOfRiskAllowanceMovementDisplayValue(rawValue);
     const value = Number.isFinite(displayedValue) ? -displayedValue : displayedValue;
-    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode);
 
     return {
       date: referenceColumn.date,
@@ -579,7 +585,7 @@ function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referen
 
   return referenceColumns.map((referenceColumn, index) => {
     const value = periodValueSeries[index] ?? null;
-    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode);
 
     return {
       date: referenceColumn.date,
@@ -613,7 +619,7 @@ function buildCostOfRiskDefinitionDrivers(
   }
 
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
-  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, referenceIndex, periodMode);
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const granularDescriptors = getCostOfRiskDefinitionGranularDriverDescriptors(state, filters);
   const selectedYCodes = granularDescriptors.length > 0
@@ -671,7 +677,7 @@ function buildCostOfRiskDefinitionComponents(
   }
 
   const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
-  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceIndex);
+  const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, referenceIndex, periodMode);
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
 
   const includedCodes = new Set(getCostOfRiskDefinitionXCodes(definitionId, customXCodes));
@@ -788,9 +794,11 @@ export function buildCostOfRiskMovementContributionAudit(
     state,
     indexes,
     referenceColumns,
-    denominatorComposition
+    denominatorComposition,
+    periodMode
   );
-  const denominatorValues = shiftCostOfRiskSeriesToPreviousReference(denominatorSeries);
+  const denominatorValues = resolveCostOfRiskRatioDenominatorPeriodSeries(referenceColumns, denominatorSeries, periodMode);
+  const denominatorLabel = getCostOfRiskRatioDenominatorLabel(periodMode);
   const relativeValues = selectedTotal.map((value, index) => {
     const denominator = denominatorValues[index];
     return Number.isFinite(value) && Number.isFinite(denominator) && denominator !== 0
@@ -817,7 +825,7 @@ export function buildCostOfRiskMovementContributionAudit(
       {
         label: "Denominator total",
         section: "Denominator",
-        source: `${denominatorComposition.label} / previous quarter`,
+        source: `${denominatorComposition.label} / ${denominatorLabel}`,
         type: "amount",
         values: denominatorValues
       },
@@ -827,7 +835,7 @@ export function buildCostOfRiskMovementContributionAudit(
         label: "Relative contribution",
         numeratorValues: selectedTotal,
         section: "Calculation",
-        source: "Displayed contribution / previous-quarter denominator",
+        source: `Displayed contribution / ${denominatorLabel} denominator`,
         type: "bp",
         values: relativeValues
       }
@@ -860,14 +868,22 @@ function buildCostOfRiskMovementTotalContributionAuditRows(state, indexes, refer
   });
 }
 
-function buildCostOfRiskMovementDenominatorAuditRows(state, indexes, referenceColumns, composition) {
+function buildCostOfRiskMovementDenominatorAuditRows(
+  state,
+  indexes,
+  referenceColumns,
+  composition,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
   const rows = composition.xCodes.flatMap((xCode) => composition.yCodes.map((yCode) => ({
     label: getMappingDescription(state, COST_OF_RISK_STAGE_BOX_TABLE_ID, "y_axis_rc_code", yCode),
     section: "Denominator",
     source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${yCode}`,
     type: "amount",
-    values: shiftCostOfRiskSeriesToPreviousReference(
-      resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, yCode)
+    values: resolveCostOfRiskRatioDenominatorPeriodSeries(
+      referenceColumns,
+      resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, yCode),
+      periodMode
     )
   })));
 
@@ -880,8 +896,10 @@ function buildCostOfRiskMovementDenominatorAuditRows(state, indexes, referenceCo
       section: "Denominator",
       source: `${COST_OF_RISK_STAGE_BOX_TABLE_ID} / x ${xCode} / y ${COST_OF_RISK_DENOMINATOR_CASH_Y_CODE}`,
       type: "amount",
-      values: shiftCostOfRiskSeriesToPreviousReference(
-        resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, COST_OF_RISK_DENOMINATOR_CASH_Y_CODE)
+      values: resolveCostOfRiskRatioDenominatorPeriodSeries(
+        referenceColumns,
+        resolveCostOfRiskDenominatorCellSeries(state, indexes, referenceColumns, state.selectedJst, xCode, COST_OF_RISK_DENOMINATOR_CASH_Y_CODE),
+        periodMode
       )
     }))
   ];
@@ -889,6 +907,46 @@ function buildCostOfRiskMovementDenominatorAuditRows(state, indexes, referenceCo
 
 function shiftCostOfRiskSeriesToPreviousReference(series) {
   return series.map((_, index) => (index > 0 ? series[index - 1] ?? null : null));
+}
+
+function resolveCostOfRiskRatioDenominatorPeriodSeries(
+  referenceColumns,
+  series,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
+  if (!Array.isArray(series)) return [];
+  if (normalizeCostOfRiskPeriodMode(periodMode) !== COST_OF_RISK_PERIOD_MODE_YTD) {
+    return shiftCostOfRiskSeriesToPreviousReference(series);
+  }
+  return series.map((_, index) => {
+    const denominatorIndex = getCostOfRiskRatioDenominatorReferenceIndex(referenceColumns, index, periodMode);
+    return denominatorIndex >= 0 ? series[denominatorIndex] ?? null : null;
+  });
+}
+
+function getCostOfRiskRatioDenominatorReferenceIndex(
+  referenceColumns,
+  index,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
+  if (!Number.isInteger(index) || index < 0) return -1;
+  if (normalizeCostOfRiskPeriodMode(periodMode) !== COST_OF_RISK_PERIOD_MODE_YTD) {
+    return index > 0 ? index - 1 : -1;
+  }
+  return getCostOfRiskFirstReferenceIndexOfYear(referenceColumns, index);
+}
+
+function getCostOfRiskFirstReferenceIndexOfYear(referenceColumns, index) {
+  const referenceDate = referenceColumns?.[index]?.date;
+  if (!(referenceDate instanceof Date) || Number.isNaN(referenceDate.getTime())) return -1;
+  const year = referenceDate.getFullYear();
+  const firstIndex = (referenceColumns ?? []).findIndex((column) => {
+    const columnDate = column?.date;
+    return columnDate instanceof Date
+      && !Number.isNaN(columnDate.getTime())
+      && columnDate.getFullYear() === year;
+  });
+  return firstIndex >= 0 ? firstIndex : index;
 }
 
 function buildCostOfRiskMovementAuditRowsForYCodes(state, indexes, referenceColumns, xCode, yCodes, section, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
@@ -1157,7 +1215,7 @@ export function buildCostOfRiskStageTransferFlowDiagram(
     state.selectedJst,
     getCostOfRiskStageTransferDenominatorFilters(filters)
   );
-  const ratioDenominator = getCostOfRiskMovementDenominator(ratioDenominatorSeries, referenceIndex);
+  const ratioDenominator = getCostOfRiskMovementDenominator(ratioDenominatorSeries, referenceColumns, referenceIndex, periodMode);
   const stageBalanceRatioDenominator = ratioDenominatorSeries[referenceIndex] ?? null;
 
   const netTransfersByStage = new Map([["1", 0], ["2", 0], ["3", 0]]);
@@ -1422,6 +1480,7 @@ export function buildCostOfRiskStageTransferPanelAudit(
   const audit = buildCostOfRiskStageTransferFlowAudit(state, filters, flowKey, referenceDate, periodMode);
   if (!audit) return { dates: [], rows: [], title: "Stage Transfer" };
 
+  const referenceColumns = getReferenceColumns(state.columns);
   const selectedValue = Number.isFinite(audit.value) ? audit.value : null;
   let relativeValue = null;
   const selectedRows = buildCostOfRiskStageTransferSelectedScopeRows(audit);
@@ -1446,10 +1505,16 @@ export function buildCostOfRiskStageTransferPanelAudit(
   ];
 
   if (audit.type !== "stagebox") {
+    const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, audit.referenceLabel);
+    const denominatorReferenceIndex = getCostOfRiskRatioDenominatorReferenceIndex(referenceColumns, referenceIndex, periodMode);
+    const denominatorReferenceLabel = denominatorReferenceIndex >= 0
+      ? referenceColumns[denominatorReferenceIndex]?.label ?? ""
+      : audit.previousReferenceLabel;
+    const denominatorPeriodLabel = getCostOfRiskRatioDenominatorLabel(periodMode);
     const denominatorDetail = buildCostOfRiskRatioDenominatorDetail(
       state,
       getCostOfRiskStageTransferDenominatorFilters(filters),
-      audit.previousReferenceLabel,
+      denominatorReferenceLabel,
       state.selectedJst
     );
     const denominatorValue = denominatorDetail.status === "available" ? denominatorDetail.value : null;
@@ -1461,7 +1526,7 @@ export function buildCostOfRiskStageTransferPanelAudit(
       {
         label: "Denominator total",
         section: "Denominator",
-        source: `${denominatorDetail.label} / ${formatReferenceQuarterLabel(audit.previousReferenceLabel)}`,
+        source: `${denominatorDetail.label} / ${denominatorPeriodLabel} (${formatReferenceQuarterLabel(denominatorReferenceLabel)})`,
         type: "amount",
         values: [denominatorValue]
       },
@@ -1477,7 +1542,7 @@ export function buildCostOfRiskStageTransferPanelAudit(
         label: "Relative transfer",
         numeratorValues: [selectedValue],
         section: "Calculation",
-        source: "Displayed value / previous-quarter denominator",
+        source: `Displayed value / ${denominatorPeriodLabel} denominator`,
         type: "bp",
         values: [relativeValue]
       }
@@ -3405,7 +3470,7 @@ function buildCostOfRiskFlowPointsForJst(state, indexes, referenceColumns, descr
 
   return referenceColumns.map((column, index) => {
     const value = rawValues[index] ?? null;
-    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index);
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode);
     return {
       date: column.date,
       denominator,
@@ -4195,7 +4260,7 @@ function buildCostOfRiskSelectionSeries(state, indexes, referenceColumns, select
 
   return referenceColumns.map((column, index) => {
     const value = periodValueSeries[index] ?? 0;
-    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode) ?? 0;
     return {
       date: column.date,
       denominator,
@@ -4220,7 +4285,7 @@ function buildCostOfRiskTotalContributionSelectionSeries(state, indexes, referen
 
   return referenceColumns.map((column, index) => {
     const value = periodValueSeries[index] ?? 0;
-    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, index) ?? 0;
+    const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, index, periodMode) ?? 0;
     return {
       date: column.date,
       denominator,
@@ -4286,9 +4351,20 @@ function buildRatioSeries(referenceColumns, numerator, denominator) {
   };
 }
 
-function getCostOfRiskMovementDenominator(denominatorSeries, index) {
-  if (!Array.isArray(denominatorSeries) || index <= 0) return null;
-  const denominator = denominatorSeries[index - 1];
+function getCostOfRiskMovementDenominator(
+  denominatorSeries,
+  referenceColumnsOrIndex,
+  indexOrPeriodMode,
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
+  if (!Array.isArray(denominatorSeries)) return null;
+  const usesLegacySignature = Number.isInteger(referenceColumnsOrIndex);
+  const referenceColumns = usesLegacySignature ? [] : referenceColumnsOrIndex;
+  const index = usesLegacySignature ? referenceColumnsOrIndex : indexOrPeriodMode;
+  const resolvedPeriodMode = usesLegacySignature ? indexOrPeriodMode : periodMode;
+  const denominatorIndex = getCostOfRiskRatioDenominatorReferenceIndex(referenceColumns, index, resolvedPeriodMode);
+  if (denominatorIndex < 0) return null;
+  const denominator = denominatorSeries[denominatorIndex];
   return Number.isFinite(denominator) ? denominator : null;
 }
 

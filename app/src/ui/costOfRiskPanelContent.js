@@ -102,15 +102,15 @@ export function getCostOfRiskHelpPanelContent(topic, activeCostOfRiskDefinitionI
       sections: [
         {
           title: "Numerator",
-          body: "The numerator is the quarterly transfer amount from F_12.02 for the selected flow."
+          body: "The numerator is the selected transfer amount from F_12.02, either as a quarterly flow or as a year-to-date amount."
         },
         {
           title: "Denominator",
-          body: "The denominator is the previous-quarter GCA from F_18.00 on the selected instruments and counterparty perimeter, taken across all stages and excluding central bank cash where relevant."
+          body: "The denominator is the GCA from F_18.00 on the selected instruments and counterparty perimeter, taken across all stages and excluding central bank cash where relevant. Quarterly flow uses the previous quarter; Year to date uses the first quarter of the year."
         },
         {
           title: "Formula",
-          body: "Relative transfer = transfer amount divided by previous-quarter exposure denominator, displayed in basis points."
+          body: "Relative transfer = transfer amount divided by the aligned exposure denominator, displayed in basis points."
         }
       ],
       hint: "Use this mode to compare transfer intensity across JSTs and across time."
@@ -174,15 +174,15 @@ export function getCostOfRiskHelpPanelContent(topic, activeCostOfRiskDefinitionI
       sections: [
         {
           title: "Numerator",
-          body: "The numerator is the selected F_12.01 allowance movement component."
+          body: "The numerator is the selected F_12.01 allowance movement component, either as a quarterly flow or as a year-to-date amount."
         },
         {
           title: "Denominator",
-          body: "The denominator is the previous-quarter exposure base from F_18.00, filtered by the selected instruments, counterparty and stage where available."
+          body: "The denominator is the exposure base from F_18.00, filtered by the selected instruments, counterparty and stage where available. Quarterly flow uses the previous quarter; Year to date uses the first quarter of the year."
         },
         {
           title: "Formula",
-          body: "Relative contribution = allowance movement divided by previous-quarter exposure denominator, displayed in basis points."
+          body: "Relative contribution = allowance movement divided by the aligned exposure denominator, displayed in basis points."
         }
       ],
       hint: "This is a contribution-to-exposure measure, not a growth rate of allowances."
@@ -369,7 +369,7 @@ export function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "Display",
-          body: "Absolute value mode shows the quarterly amount. Basis-points mode divides that amount by the previous-quarter exposure denominator, consistent with the other variation views."
+          body: "Absolute value mode shows either the quarterly amount or the year-to-date amount. Basis-points mode divides that amount by the aligned exposure denominator: previous quarter for quarterly flow, first quarter of the year for Year to date."
         },
         {
           title: "Drivers",
@@ -449,7 +449,7 @@ export function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "How to read it",
-          body: "Click a stage block or a flow to select it. The time chart tracks the same measure across reporting dates and peer institutions. Relative transfer mode expresses flows against the previous-quarter exposure denominator."
+          body: "Click a stage block or a flow to select it. The time chart tracks the same measure across reporting dates and peer institutions. Relative transfer mode expresses flows against the aligned exposure denominator."
         },
         {
           title: "Source",
@@ -469,7 +469,7 @@ export function getCostOfRiskAuditPanelIntroContent(tab) {
         },
         {
           title: "How to read it",
-          body: "Absolute contribution mode shows the movement in amount. Relative contribution mode divides the selected contribution by the exposure denominator of the same perimeter, using the previous quarter for variation measures."
+          body: "Absolute contribution mode shows the movement in amount. Relative contribution mode divides the selected contribution by the exposure denominator of the same perimeter: previous quarter for quarterly flow, first quarter of the year for Year to date."
         },
         {
           title: "Source",
