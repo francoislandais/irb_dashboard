@@ -229,6 +229,9 @@ let costOfRiskDatasetInfoActions = null;
 let latestCostOfRiskFilterOptions = null;
 let costOfRiskHelpTopicHistory = [""];
 let costOfRiskHelpTopicHistoryIndex = 0;
+let costOfRiskFilterPreviewQueue = [];
+let costOfRiskFilterPreviewQueueScheduled = false;
+let costOfRiskFilterPreviewRenderToken = 0;
 
 // Filter chips (instrument/counterparty/stage/definition) no longer open an
 // inline dropdown: clicking a chip shows its options as a "filter-selection"
@@ -3936,7 +3939,7 @@ const COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS = new Set([
 ]);
 
 function renderCostOfRiskFilterSelectionPanel(kind) {
-  resetCostOfRiskFilterPreviewCache();
+  const previewToken = resetCostOfRiskFilterPreviewRenderQueue();
 
   if (kind === "definition") {
     renderCostOfRiskDefinitionSelectionPanel();
@@ -3987,7 +3990,7 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   tbody.append(createCostOfRiskFilterSelectionRow(meta.allLabel, isAllActive, () => {
     applyCostOfRiskFilterSelection(meta.filterKey, COST_OF_RISK_FILTER_ALL);
   }, {
-    valueLabel: getCostOfRiskFilterSelectionPreviewValue(kind, COST_OF_RISK_FILTER_ALL)
+    preview: { kind, token: previewToken, value: COST_OF_RISK_FILTER_ALL }
   }));
   options.filter((option) => option.value !== COST_OF_RISK_FILTER_ALL).forEach((option) => {
     const optionState = getCostOfRiskFilterSelectionOptionState(kind, option);
@@ -3995,7 +3998,7 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
       applyCostOfRiskFilterSelection(meta.filterKey, option.value);
     }, {
       ...optionState,
-      valueLabel: optionState.disabled ? "" : getCostOfRiskFilterSelectionPreviewValue(kind, option.value)
+      preview: optionState.disabled ? null : { kind, token: previewToken, value: option.value }
     }));
   });
 
@@ -4006,6 +4009,7 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
 }
 
 function renderCostOfRiskBalanceScopeSelectionPanel() {
+  const previewToken = resetCostOfRiskFilterPreviewRenderQueue();
   const meta = COST_OF_RISK_FILTER_SELECTION_META.balanceScope;
   const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
   const activeValue = activeCostOfRiskFilters.balanceScope || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
@@ -4033,7 +4037,7 @@ function renderCostOfRiskBalanceScopeSelectionPanel() {
     tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === activeValue, () => {
       applyCostOfRiskFilterSelection("balanceScope", option.value);
     }, {
-      valueLabel: getCostOfRiskFilterSelectionPreviewValue("balanceScope", option.value)
+      preview: { kind: "balanceScope", token: previewToken, value: option.value }
     }));
   });
   table.append(tbody);
@@ -4043,6 +4047,7 @@ function renderCostOfRiskBalanceScopeSelectionPanel() {
 }
 
 function renderCostOfRiskStageSelectionPanel() {
+  const previewToken = resetCostOfRiskFilterPreviewRenderQueue();
   const meta = COST_OF_RISK_FILTER_SELECTION_META.stage;
   const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
   const activeValue = activeCostOfRiskFilters[meta.filterKey];
@@ -4071,18 +4076,18 @@ function renderCostOfRiskStageSelectionPanel() {
   allBody.append(createCostOfRiskFilterSelectionRow(meta.allLabel, isAllActive, () => {
     applyCostOfRiskFilterSelection(meta.filterKey, COST_OF_RISK_FILTER_ALL);
   }, {
-    valueLabel: getCostOfRiskFilterSelectionPreviewValue("stage", COST_OF_RISK_FILTER_ALL)
+    preview: { kind: "stage", token: previewToken, value: COST_OF_RISK_FILTER_ALL }
   }));
   allTable.append(allBody);
   intro.append(allTable);
 
-  intro.append(createCostOfRiskStageSelectionGroup("Staging status", options.filter((option) => isCostOfRiskIfrsStageFilterValue(option.value)), activeValue));
-  intro.append(createCostOfRiskStageSelectionGroup("Performance status", options.filter((option) => isCostOfRiskPerformanceStatusFilterValue(option.value)), activeValue));
+  intro.append(createCostOfRiskStageSelectionGroup("Staging status", options.filter((option) => isCostOfRiskIfrsStageFilterValue(option.value)), activeValue, previewToken));
+  intro.append(createCostOfRiskStageSelectionGroup("Performance status", options.filter((option) => isCostOfRiskPerformanceStatusFilterValue(option.value)), activeValue, previewToken));
 
   replaceCostOfRiskAuditPanelContent(intro);
 }
 
-function createCostOfRiskStageSelectionGroup(titleText, options, activeValue) {
+function createCostOfRiskStageSelectionGroup(titleText, options, activeValue, previewToken) {
   const group = document.createElement("section");
   group.className = "cost-of-risk-filter-selection-group";
 
@@ -4098,7 +4103,7 @@ function createCostOfRiskStageSelectionGroup(titleText, options, activeValue) {
     tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === activeValue, () => {
       applyCostOfRiskFilterSelection("stage", option.value);
     }, {
-      valueLabel: getCostOfRiskFilterSelectionPreviewValue("stage", option.value)
+      preview: { kind: "stage", token: previewToken, value: option.value }
     }));
   });
   table.append(tbody);
@@ -4163,11 +4168,12 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
   labelNode.className = "cost-of-risk-filter-selection-option-label";
   labelNode.textContent = label;
   button.append(labelNode);
-  if (options.valueLabel) {
+  if (options.valueLabel || options.preview) {
     const valueNode = document.createElement("span");
     valueNode.className = "cost-of-risk-filter-selection-option-value";
-    valueNode.textContent = options.valueLabel;
+    valueNode.textContent = options.valueLabel ?? "";
     button.append(valueNode);
+    if (options.preview) scheduleCostOfRiskFilterPreviewValue(valueNode, options.preview);
   }
   if (!options.disabled) button.addEventListener("click", onSelect);
   cell.append(button);
@@ -4175,13 +4181,40 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
   return row;
 }
 
-function resetCostOfRiskFilterPreviewCache() {
-  costOfRiskFilterPreviewCache = new Map();
+function resetCostOfRiskFilterPreviewRenderQueue() {
+  costOfRiskFilterPreviewQueue = [];
+  costOfRiskFilterPreviewQueueScheduled = false;
+  costOfRiskFilterPreviewRenderToken += 1;
+  return costOfRiskFilterPreviewRenderToken;
+}
+
+function scheduleCostOfRiskFilterPreviewValue(node, preview) {
+  node.textContent = "";
+  node.setAttribute("aria-busy", "true");
+  costOfRiskFilterPreviewQueue.push({ node, ...preview });
+  scheduleCostOfRiskFilterPreviewQueue();
+}
+
+function scheduleCostOfRiskFilterPreviewQueue() {
+  if (costOfRiskFilterPreviewQueueScheduled) return;
+  costOfRiskFilterPreviewQueueScheduled = true;
+  const runNext = () => {
+    costOfRiskFilterPreviewQueueScheduled = false;
+    const item = costOfRiskFilterPreviewQueue.shift();
+    if (!item) return;
+    if (item.token === costOfRiskFilterPreviewRenderToken && item.node.isConnected) {
+      item.node.textContent = getCostOfRiskFilterSelectionPreviewValue(item.kind, item.value);
+      item.node.removeAttribute("aria-busy");
+    }
+    if (costOfRiskFilterPreviewQueue.length > 0) scheduleCostOfRiskFilterPreviewQueue();
+  };
+  window.setTimeout(runNext, 35);
 }
 
 function getCostOfRiskFilterPreviewCachedValue(key, factory) {
   if (costOfRiskFilterPreviewCache.has(key)) return costOfRiskFilterPreviewCache.get(key);
   const value = factory();
+  if (costOfRiskFilterPreviewCache.size > 500) costOfRiskFilterPreviewCache.clear();
   costOfRiskFilterPreviewCache.set(key, value);
   return value;
 }
@@ -4196,6 +4229,11 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
   return getCostOfRiskFilterPreviewCachedValue(
     createCostOfRiskFilterPreviewCacheKey(
       "value",
+      state.activeDatasetId,
+      state.selectedJst,
+      state.selectedUnit,
+      state.rows?.length ?? 0,
+      (state.peerJstCodes ?? []).join(","),
       activeCostOfRiskTab,
       kind,
       value,
@@ -4444,6 +4482,7 @@ function applyCostOfRiskFilterSelection(filterKey, value) {
 }
 
 function renderCostOfRiskDefinitionSelectionPanel() {
+  const previewToken = resetCostOfRiskFilterPreviewRenderQueue();
   const intro = document.createElement("article");
   intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
 
@@ -4482,10 +4521,14 @@ function renderCostOfRiskDefinitionSelectionPanel() {
     const optionTitle = document.createElement("span");
     optionTitle.className = "cost-of-risk-filter-selection-option-title";
     optionTitle.textContent = definition.label;
-    const previewValue = getCostOfRiskFilterSelectionPreviewValue("definition", definition.id);
     const optionValue = document.createElement("span");
     optionValue.className = "cost-of-risk-filter-selection-option-value";
-    optionValue.textContent = previewValue;
+    optionValue.textContent = "";
+    scheduleCostOfRiskFilterPreviewValue(optionValue, {
+      kind: "definition",
+      token: previewToken,
+      value: definition.id
+    });
     const optionDescription = document.createElement("span");
     optionDescription.className = "cost-of-risk-filter-selection-option-description";
     optionDescription.textContent = definition.description;
@@ -4493,7 +4536,7 @@ function renderCostOfRiskDefinitionSelectionPanel() {
     optionSource.className = "cost-of-risk-filter-selection-option-source";
     optionSource.textContent = definition.source;
     button.append(optionTitle);
-    if (previewValue) button.append(optionValue);
+    button.append(optionValue);
     button.append(optionDescription, optionSource);
 
     button.addEventListener("click", () => {
