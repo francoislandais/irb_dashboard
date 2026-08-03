@@ -199,6 +199,13 @@ import {
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
 } from "./costOfRiskManualWaterfall.js";
+import {
+  appendCostOfRiskHighlightedSelectionText,
+  createCostOfRiskAuditInfoSection,
+  createCostOfRiskSelectedDataDescription,
+  createCostOfRiskSelectedDataDescriptionWithDetail,
+  createCostOfRiskSelectedDataPlaceholder
+} from "./costOfRiskAuditPanelNodes.js";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
@@ -2538,43 +2545,6 @@ function getCostOfRiskUnitLongLabel(selectedUnit) {
   }[selectedUnit] ?? "EUR million";
 }
 
-function createCostOfRiskSelectedDataDescription(text, highlightedValue = "") {
-  const block = document.createElement("section");
-  block.className = "cost-of-risk-selected-data-summary";
-
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-selected-data-summary-label";
-  label.textContent = "Selection";
-
-  const description = document.createElement("span");
-  description.className = "cost-of-risk-selected-data-summary-description";
-  appendCostOfRiskHighlightedSelectionText(description, text, highlightedValue);
-
-  block.append(label, description);
-  return block;
-}
-
-function createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, highlightedValue = "") {
-  const block = document.createElement("section");
-  block.className = "cost-of-risk-selected-data-summary";
-
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-selected-data-summary-label";
-  label.textContent = "Selection";
-
-  const description = document.createElement("span");
-  description.className = "cost-of-risk-selected-data-summary-description";
-  appendCostOfRiskHighlightedSelectionText(description, text, highlightedValue);
-
-  const detailNode = document.createElement("span");
-  detailNode.className = "cost-of-risk-selected-data-summary-detail";
-  detailNode.textContent = ` ${detail}`;
-
-  description.append(detailNode);
-  block.append(label, description);
-  return block;
-}
-
 function getCostOfRiskAuditReferenceIndex(audit, referenceDate = activeCostOfRiskReferenceDate) {
   const dates = audit?.dates ?? [];
   const index = dates.findIndex((date) => date.label === referenceDate);
@@ -3130,19 +3100,6 @@ function createCostOfRiskSummarySelectionDescription({
   return block;
 }
 
-function appendCostOfRiskHighlightedSelectionText(container, text, highlightedValue) {
-  if (!highlightedValue || !text.includes(highlightedValue)) {
-    container.textContent = text;
-    return;
-  }
-
-  const [before, after] = text.split(highlightedValue);
-  const value = document.createElement("span");
-  value.className = "cost-of-risk-selected-data-summary-emphasis";
-  value.textContent = highlightedValue;
-  container.append(document.createTextNode(before), value, document.createTextNode(after));
-}
-
 function getCostOfRiskSummarySelectionDescription({
   cell,
   isCounterpartyCell,
@@ -3311,20 +3268,6 @@ function getCostOfRiskSummaryAuditDefinition(selectedCell) {
   return "Stock value is read from F_18.00 for the selected row and perimeter.";
 }
 
-function createCostOfRiskAuditInfoSection(titleText, lines) {
-  const section = document.createElement("section");
-  section.className = "cost-of-risk-audit-intro-section";
-
-  const title = document.createElement("h3");
-  title.textContent = titleText;
-
-  const body = document.createElement("p");
-  body.textContent = lines.filter(Boolean).join("\n");
-
-  section.append(title, body);
-  return section;
-}
-
 function openCostOfRiskAuditSourceInExplorer(sourcePoint) {
   if (!openExplorerPoint({
     ...sourcePoint,
@@ -3479,22 +3422,6 @@ function clearCostOfRiskSelectedDataSummary() {
 
 function getCostOfRiskSelectedDataSummaryNode() {
   return activeCostOfRiskSelectedDataSummaryNode ?? createCostOfRiskSelectedDataPlaceholder();
-}
-
-function createCostOfRiskSelectedDataPlaceholder() {
-  const block = document.createElement("section");
-  block.className = "cost-of-risk-selected-data-summary cost-of-risk-selected-data-summary--empty";
-
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-selected-data-summary-label";
-  label.textContent = "Selection";
-
-  const description = document.createElement("span");
-  description.className = "cost-of-risk-selected-data-summary-description";
-  description.textContent = "Select a data point to display a short description here.";
-
-  block.append(label, description);
-  return block;
 }
 
 function renderCostOfRiskAuditPanelIntro() {
