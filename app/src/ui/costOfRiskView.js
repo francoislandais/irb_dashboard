@@ -3564,6 +3564,10 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
 function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
   const state = getLatestState();
   if (!state) return "";
+  // For a "referenceDate" preview, the queried date (value) fully determines
+  // the result on its own — the currently active reference date elsewhere
+  // is irrelevant. Leaving it out of the key means switching the active
+  // date doesn't invalidate every other date's already-cached preview.
   return costOfRiskFilterPreviewRenderer.getCachedValue(
     createCostOfRiskFilterPreviewCacheKey(
       "value",
@@ -3575,7 +3579,7 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
       activeCostOfRiskTab,
       kind,
       value,
-      activeCostOfRiskReferenceDate,
+      kind === "referenceDate" ? "" : activeCostOfRiskReferenceDate,
       activeCostOfRiskFilters,
       activeCostOfRiskStageSummaryCellKey,
       activeCostOfRiskCounterpartySummaryCellKey,
@@ -4636,6 +4640,7 @@ function destroyCostOfRiskWaterfallChart() {
 function selectCostOfRiskReferenceDate(referenceDate) {
   if (!referenceDate || referenceDate === activeCostOfRiskReferenceDate) return;
 
+  costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanel);
   activeCostOfRiskReferenceDate = referenceDate;
   if (getLatestState()) rerenderApp(getLatestState());
 }
