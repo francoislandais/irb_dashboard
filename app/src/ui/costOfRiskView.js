@@ -51,7 +51,7 @@ import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransfers.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskStageTransferFlowDiagramView.js?v=20260803-refactor-cleanup";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
@@ -79,7 +79,7 @@ import {
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
 } from "./costOfRiskSummaryChartsView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260802-readable-selection-phrases";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260803-refactor-cleanup";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
@@ -166,7 +166,7 @@ import {
   normalizeCostOfRiskStageFilterValue
 } from "./costOfRiskStageTransferSelection.js?v=20260802-readable-selection-phrases";
 import {
-  getActiveCostOfRiskCoreXCodes as getActiveCoreXCodes,
+  getActiveCostOfRiskCoreXCodes,
   normalizeCostOfRiskCoreSelection,
   updateCostOfRiskCoreSelection
 } from "./costOfRiskCoreSelection.js?v=20260802-readable-selection-phrases";
@@ -724,8 +724,8 @@ export function renderCostOfRisk(state) {
   normalizeActiveCostOfRiskFilter("balanceScope", filterOptions.balanceScopes);
   normalizeActiveCostOfRiskFilter("counterparty", filterOptions.counterparties);
   normalizeActiveCostOfRiskFilter("stage", filterOptions.stages);
-  const selectedMovementXCodes = getActiveCostOfRiskCoreXCodes(waterfallXAxisOptions, "movement");
-  const selectedF2F12XCodes = getActiveCostOfRiskCoreXCodes(f2F12XAxisOptions, "f2-f12");
+  const selectedMovementXCodes = getActiveCostOfRiskCoreXCodesForScope(waterfallXAxisOptions, "movement");
+  const selectedF2F12XCodes = getActiveCostOfRiskCoreXCodesForScope(f2F12XAxisOptions, "f2-f12");
   if (
     selectedMovementXCodes.length > 0
     && activeCostOfRiskXAxisCode !== COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE
@@ -2350,8 +2350,8 @@ function normalizeActiveCostOfRiskCoreDefinition(options, scope = "movement") {
   );
 }
 
-function getActiveCostOfRiskCoreXCodes(options, scope = "movement") {
-  return getActiveCoreXCodes(options, getCostOfRiskCoreSelection(scope));
+function getActiveCostOfRiskCoreXCodesForScope(options, scope = "movement") {
+  return getActiveCostOfRiskCoreXCodes(options, getCostOfRiskCoreSelection(scope));
 }
 
 function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
@@ -2498,10 +2498,10 @@ function renderCostOfRiskCoreDefinition(movementOptions, f2F12Options) {
   renderCostOfRiskCoreDefinitionTables({
     f2F12Container: elements.costOfRiskF2VsF12CoreDefinition,
     f2F12Options,
-    f2F12SelectedCodes: getActiveCostOfRiskCoreXCodes(f2F12Options, "f2-f12"),
+    f2F12SelectedCodes: getActiveCostOfRiskCoreXCodesForScope(f2F12Options, "f2-f12"),
     movementContainer: elements.costOfRiskCoreDefinition,
     movementOptions,
-    movementSelectedCodes: getActiveCostOfRiskCoreXCodes(movementOptions, "movement")
+    movementSelectedCodes: getActiveCostOfRiskCoreXCodesForScope(movementOptions, "movement")
   });
 }
 
