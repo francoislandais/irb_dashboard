@@ -188,7 +188,6 @@ import {
 } from "./costOfRiskFilterPreviewRenderer.js?v=20260803-refactor-cleanup";
 import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260803-refactor-cleanup";
 import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260803-refactor-cleanup";
-import { createCostOfRiskReferenceDatePanel } from "./costOfRiskReferenceDatePanel.js?v=20260803-refactor-cleanup";
 import {
   COST_OF_RISK_DISABLED_TABS,
   readCostOfRiskUrlState,
@@ -3313,13 +3312,37 @@ function renderCostOfRiskPanelArticle(content) {
 }
 
 function renderCostOfRiskReferenceDateSelectionPanel() {
+  const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
   const state = getLatestState();
   const referenceColumns = getReferenceColumns(state?.columns ?? []);
-  replaceCostOfRiskAuditPanelContent(createCostOfRiskReferenceDatePanel({
-    activeReferenceDate: activeCostOfRiskReferenceDate,
-    onSelectReferenceDate: selectCostOfRiskReferenceDate,
-    referenceColumns
-  }));
+
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-reference-date-panel",
+    eyebrow: "Reference date",
+    lead: referenceColumns.length > 0
+      ? "Choose the reporting quarter used by the upper view. This is synchronized with point selection on the temporal chart."
+      : "No reference date is available in the loaded dataset.",
+    title: "Reference quarter"
+  });
+
+  if (referenceColumns.length > 0) {
+    const table = document.createElement("table");
+    table.className = "cost-of-risk-filter-selection-table cost-of-risk-reference-date-table";
+    const tbody = document.createElement("tbody");
+    [...referenceColumns].reverse().forEach((column) => {
+      const isActive = column.label === activeCostOfRiskReferenceDate;
+      tbody.append(createCostOfRiskFilterSelectionRow(formatReferenceQuarterLabel(column.label), isActive, () => {
+        selectCostOfRiskReferenceDate(column.label);
+      }, {
+        preview: { kind: "referenceDate", token: previewToken, value: column.label }
+      }));
+    });
+    table.append(tbody);
+    intro.append(table);
+  }
+
+  replaceCostOfRiskAuditPanelContent(intro);
+  costOfRiskFilterPreviewRenderer.clearSnapshot();
 }
 
 function renderCostOfRiskPeerSelectionPanel() {
@@ -3573,6 +3596,7 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
     ),
     () => {
       try {
+        if (kind === "referenceDate") return getCostOfRiskReferenceDatePreviewValue(state, value);
         const filters = getCostOfRiskPreviewFiltersForSelection(kind, value);
         if (kind === "definition") return formatCostOfRiskFilterPreviewValue(getCostOfRiskDefinitionPreviewValue(state, value));
         if (activeCostOfRiskTab === "summary") return formatCostOfRiskFilterPreviewValue(getCostOfRiskSummaryPreviewValue(state, filters, kind, value));
@@ -3628,10 +3652,10 @@ function getCostOfRiskSummaryPreviewValue(state, filters, kind = "", value = "")
   return getCostOfRiskSummaryFilteredPreviewValue(state, filters);
 }
 
-function getCostOfRiskSummaryFilteredPreviewValue(state, filters) {
+function getCostOfRiskSummaryFilteredPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("summary-model", filters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
-    () => buildCostOfRiskStageSummaryModel(state, filters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey, {
+    createCostOfRiskFilterPreviewCacheKey("summary-model", filters, referenceDate, activeCostOfRiskStageSummaryCellKey),
+    () => buildCostOfRiskStageSummaryModel(state, filters, referenceDate, activeCostOfRiskStageSummaryCellKey, {
       includeCounterpartyRows: Boolean(activeCostOfRiskStageSummaryCellKey?.startsWith("counterparty:"))
     })
   );
@@ -3645,7 +3669,7 @@ function getCostOfRiskSummaryFilteredPreviewValue(state, filters) {
   return getCostOfRiskSummarySelectedDataEmphasisValue(row, cell, selectedCell, state.selectedUnit);
 }
 
-function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value) {
+function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value, referenceDate = activeCostOfRiskReferenceDate) {
   const selectedColumnKey = getCostOfRiskSummaryCellColumnKey(activeCostOfRiskStageSummaryCellKey)
     || getCostOfRiskSummaryCellColumnKey(activeCostOfRiskCounterpartySummaryCellKey)
     || getCostOfRiskSummaryCellColumnKey(DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL);
@@ -3653,11 +3677,11 @@ function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value) {
   if (!metric || !cellKind) return "";
 
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("summary-dimension-model", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
+    createCostOfRiskFilterPreviewCacheKey("summary-dimension-model", activeCostOfRiskFilters, referenceDate, activeCostOfRiskStageSummaryCellKey),
     () => buildCostOfRiskStageSummaryModel(
       state,
       activeCostOfRiskFilters,
-      activeCostOfRiskReferenceDate,
+      referenceDate,
       activeCostOfRiskStageSummaryCellKey,
       { includeCounterpartyRows: kind === "counterparty" }
     )
@@ -3673,10 +3697,10 @@ function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value) {
   return getCostOfRiskSummarySelectedDataEmphasisValue(row, cell, { metric, kind: cellKind }, state.selectedUnit);
 }
 
-function getCostOfRiskRatioPreviewValue(state, filters, config) {
+function getCostOfRiskRatioPreviewValue(state, filters, config, referenceDate = activeCostOfRiskReferenceDate) {
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("ratio-model", config.builder.name, filters, activeCostOfRiskReferenceDate, config.cellKey),
-    () => config.builder(state, filters, activeCostOfRiskReferenceDate, config.cellKey)
+    createCostOfRiskFilterPreviewCacheKey("ratio-model", config.builder.name, filters, referenceDate, config.cellKey),
+    () => config.builder(state, filters, referenceDate, config.cellKey)
   );
   const selectedCell = model.selectedCell;
   const row = (model.rows ?? []).find((candidate) => candidate.key === selectedCell?.stageKey);
@@ -3685,17 +3709,17 @@ function getCostOfRiskRatioPreviewValue(state, filters, config) {
   return formatCostOfRiskRatioSelectedCellValue(value, selectedCell.metric, state.selectedUnit, config.formatter);
 }
 
-function getCostOfRiskMovementPreviewValue(state, filters) {
+function getCostOfRiskMovementPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
   const audit = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("movement-audit", filters, activeCostOfRiskReferenceDate, activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode),
+    createCostOfRiskFilterPreviewCacheKey("movement-audit", filters, activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode),
     () => buildCostOfRiskMovementContributionAudit(
       state,
       filters,
       activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode
     )
   );
-  const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed contribution");
-  const relative = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Relative contribution");
+  const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed contribution", referenceDate);
+  const relative = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Relative contribution", referenceDate);
   return formatCostOfRiskSelectedDisplayValue(
     activeCostOfRiskMovementDisplayMode === "ratio" ? relative : amount,
     activeCostOfRiskMovementDisplayMode,
@@ -3704,7 +3728,7 @@ function getCostOfRiskMovementPreviewValue(state, filters) {
   );
 }
 
-function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value = "") {
+function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value = "", referenceDate = activeCostOfRiskReferenceDate) {
   let flowKey = activeCostOfRiskStageTransferFlowKey;
   if (kind === "stage") {
     const stageFlowKey = getCostOfRiskStageTransferFlowKeyForStageFilter(value);
@@ -3720,12 +3744,12 @@ function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value
   }
 
   const audit = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("stage-transfer-audit", filters, activeCostOfRiskReferenceDate, flowKey),
+    createCostOfRiskFilterPreviewCacheKey("stage-transfer-audit", filters, referenceDate, flowKey),
     () => buildCostOfRiskStageTransferPanelAudit(
       state,
       filters,
       flowKey,
-      activeCostOfRiskReferenceDate
+      referenceDate
     )
   );
   const isStageBox = flowKey.startsWith("stagebox:");
@@ -3735,10 +3759,10 @@ function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value
   return formatCostOfRiskSelectedDisplayValue(displayMode === "ratio" ? relative : amount, displayMode, state.selectedUnit, true);
 }
 
-function getCostOfRiskNplFlowsPreviewValue(state, filters) {
+function getCostOfRiskNplFlowsPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("npl-flows-model", filters, activeCostOfRiskReferenceDate, activeCostOfRiskNplFlowKey),
-    () => buildCostOfRiskNplFlowsModel(state, filters, activeCostOfRiskReferenceDate, activeCostOfRiskNplFlowKey)
+    createCostOfRiskFilterPreviewCacheKey("npl-flows-model", filters, referenceDate, activeCostOfRiskNplFlowKey),
+    () => buildCostOfRiskNplFlowsModel(state, filters, referenceDate, activeCostOfRiskNplFlowKey)
   );
   if (model?.status) return "";
   return formatCostOfRiskDisplayValue(
@@ -3749,16 +3773,16 @@ function getCostOfRiskNplFlowsPreviewValue(state, filters) {
   );
 }
 
-function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = activeCostOfRiskFilters) {
+function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = activeCostOfRiskFilters, referenceDate = activeCostOfRiskReferenceDate) {
   if (definitionId === COST_OF_RISK_COMPARISON_DEFINITION_ID) return "";
   const customCodes = getActiveCostOfRiskCustomDefinitionXCodes();
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("definition-model", definitionId, filters, activeCostOfRiskReferenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(",")),
+    createCostOfRiskFilterPreviewCacheKey("definition-model", definitionId, filters, referenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(",")),
     () => buildCostOfRiskDefinitionModel(
       state,
       definitionId,
       filters,
-      activeCostOfRiskReferenceDate,
+      referenceDate,
       activeCostOfRiskDefinitionDriverCode,
       customCodes,
       {
@@ -3782,6 +3806,39 @@ function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = acti
     state.selectedUnit,
     true
   );
+}
+
+// Reference-date preview: unlike the other filters, no new model needs to be
+// built per option. Every tab's underlying model/audit already spans every
+// reference date (that is what feeds its temporal chart) or is cheap to
+// rebuild through the same cached builders used above, just swapping which
+// date's column gets read out.
+function getCostOfRiskReferenceDatePreviewValue(state, referenceDate) {
+  const filters = activeCostOfRiskFilters;
+  if (activeCostOfRiskTab === "summary") return formatCostOfRiskFilterPreviewValue(getCostOfRiskSummaryPreviewValue(state, filters, "", "", referenceDate));
+  if (activeCostOfRiskTab === "stage-ratio") return getCostOfRiskRatioPreviewValue(state, filters, {
+    builder: buildCostOfRiskStageRatioModel,
+    cellKey: activeCostOfRiskStageRatioCellKey,
+    displayMode: "ratio",
+    formatter: formatCostOfRiskStageRatioCellValue
+  }, referenceDate);
+  if (activeCostOfRiskTab === "coverage-ratio") return getCostOfRiskRatioPreviewValue(state, filters, {
+    builder: buildCostOfRiskCoverageRatioModel,
+    cellKey: activeCostOfRiskCoverageRatioCellKey,
+    displayMode: "ratio",
+    formatter: formatCostOfRiskCoverageRatioCellValue
+  }, referenceDate);
+  if (activeCostOfRiskTab === "collateral-ratio") return getCostOfRiskRatioPreviewValue(state, filters, {
+    builder: buildCostOfRiskCollateralRatioModel,
+    cellKey: activeCostOfRiskCollateralRatioCellKey,
+    displayMode: "ratio",
+    formatter: formatCostOfRiskCollateralRatioCellValue
+  }, referenceDate);
+  if (activeCostOfRiskTab === "contributions") return formatCostOfRiskFilterPreviewValue(getCostOfRiskMovementPreviewValue(state, filters, referenceDate));
+  if (activeCostOfRiskTab === "stage-transfers") return formatCostOfRiskFilterPreviewValue(getCostOfRiskStageTransferPreviewValue(state, filters, "", "", referenceDate));
+  if (activeCostOfRiskTab === "npl-flows") return formatCostOfRiskFilterPreviewValue(getCostOfRiskNplFlowsPreviewValue(state, filters, referenceDate));
+  if (activeCostOfRiskTab === "cost-of-risk") return formatCostOfRiskFilterPreviewValue(getCostOfRiskDefinitionPreviewValue(state, activeCostOfRiskDefinitionId, filters, referenceDate));
+  return "";
 }
 
 function applyCostOfRiskFilterSelection(filterKey, value) {
