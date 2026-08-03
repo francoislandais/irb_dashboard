@@ -255,6 +255,19 @@ const COST_OF_RISK_COMPARISON_METHOD_IDS = [
   "f12-acpr-components",
   "f12-custom-components"
 ];
+const COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE = new Set([
+  "collateral-ratio",
+  "contributions",
+  "coverage-ratio",
+  "npl-flows",
+  "stage-ratio",
+  "stage-transfers",
+  "summary"
+]);
+const COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER = new Set([
+  ...COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE,
+  "cost-of-risk"
+]);
 
 function isCostOfRiskFilterSelectionTopicOpen(kind) {
   return activeCostOfRiskHelpTopic === `${COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX}${kind}`;
@@ -428,7 +441,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     rerenderApp(actions.getState());
   });
   elements.costOfRiskDisplayMode?.addEventListener("change", (event) => {
-    if (["contributions", "coverage-ratio", "collateral-ratio", "npl-flows", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) return;
+    if (COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE.has(activeCostOfRiskTab)) return;
     setCostOfRiskGlobalDisplayMode(event.target.value === "amount" ? "amount" : "ratio");
     rerenderApp(actions.getState());
   });
@@ -753,18 +766,11 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   renderCostOfRiskActiveFilters(filterOptions);
-  if (!["contributions", "cost-of-risk", "coverage-ratio", "collateral-ratio", "npl-flows", "stage-ratio", "stage-transfers", "summary"].includes(activeCostOfRiskTab)) renderCostOfRiskHelpPanel();
+  if (!COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER.has(activeCostOfRiskTab)) renderCostOfRiskHelpPanel();
   const displayMode = getActiveCostOfRiskDisplayMode();
   if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = displayMode;
   if (elements.costOfRiskDisplayMode) {
-    elements.costOfRiskDisplayMode.disabled = activeCostOfRiskTab === "contributions"
-      || activeCostOfRiskTab === "cost-of-risk"
-      || activeCostOfRiskTab === "coverage-ratio"
-      || activeCostOfRiskTab === "collateral-ratio"
-      || activeCostOfRiskTab === "npl-flows"
-      || activeCostOfRiskTab === "stage-ratio"
-      || activeCostOfRiskTab === "stage-transfers"
-      || activeCostOfRiskTab === "summary";
+    elements.costOfRiskDisplayMode.disabled = COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER.has(activeCostOfRiskTab);
   }
   renderCostOfRiskRatioDenominatorControls(state);
   renderXAxisOptions(
