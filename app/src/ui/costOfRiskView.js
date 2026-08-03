@@ -185,7 +185,7 @@ import {
 import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
-} from "./costOfRiskFilterPreviewRenderer.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskFilterPreviewRenderer.js?v=20260803-data-bars";
 import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260803-refactor-cleanup";
 import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260803-refactor-cleanup";
 import {
@@ -3542,6 +3542,13 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
     button.tabIndex = -1;
     if (options.disabledReason) button.title = options.disabledReason;
   }
+  let barNode = null;
+  if (options.preview && !isActive) {
+    barNode = document.createElement("span");
+    barNode.className = "cost-of-risk-filter-selection-option-bar";
+    barNode.setAttribute("aria-hidden", "true");
+    button.append(barNode);
+  }
   const labelNode = document.createElement("span");
   labelNode.className = "cost-of-risk-filter-selection-option-label";
   labelNode.textContent = label;
@@ -3551,9 +3558,11 @@ function createCostOfRiskFilterSelectionRow(label, isActive, onSelect, options =
     valueNode.className = "cost-of-risk-filter-selection-option-value";
     if (options.preview) costOfRiskFilterPreviewRenderer.markValueNode(valueNode, options.preview);
     const snapshotValue = costOfRiskFilterPreviewRenderer.consumeSnapshotValue(options.preview);
-    valueNode.textContent = snapshotValue ?? options.valueLabel ?? "";
+    const initialValue = snapshotValue ?? options.valueLabel ?? "";
+    valueNode.textContent = initialValue;
     button.append(valueNode);
-    if (options.preview && snapshotValue === null) costOfRiskFilterPreviewRenderer.scheduleValue(valueNode, options.preview);
+    if (barNode) costOfRiskFilterPreviewRenderer.recordMagnitude(options.preview?.token, barNode, initialValue);
+    if (options.preview && snapshotValue === null) costOfRiskFilterPreviewRenderer.scheduleValue(valueNode, options.preview, barNode);
   }
   if (!options.disabled) button.addEventListener("click", onSelect);
   cell.append(button);
@@ -3884,6 +3893,13 @@ function renderCostOfRiskDefinitionSelectionPanel() {
     button.setAttribute("aria-selected", String(isActive));
     button.title = definition.description;
 
+    let barNode = null;
+    if (!isActive) {
+      barNode = document.createElement("span");
+      barNode.className = "cost-of-risk-filter-selection-option-bar";
+      barNode.setAttribute("aria-hidden", "true");
+      button.append(barNode);
+    }
     const optionTitle = document.createElement("span");
     optionTitle.className = "cost-of-risk-filter-selection-option-title";
     optionTitle.textContent = definition.label;
@@ -3895,7 +3911,7 @@ function renderCostOfRiskDefinitionSelectionPanel() {
       value: definition.id
     };
     optionValue.textContent = "";
-    costOfRiskFilterPreviewRenderer.scheduleValue(optionValue, preview);
+    costOfRiskFilterPreviewRenderer.scheduleValue(optionValue, preview, barNode);
     const optionDescription = document.createElement("span");
     optionDescription.className = "cost-of-risk-filter-selection-option-description";
     optionDescription.textContent = definition.description;

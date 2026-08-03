@@ -14,11 +14,15 @@ export function createCostOfRiskFilterPreviewRenderer({
   let queueScheduled = false;
   let renderToken = 0;
   let snapshot = null;
+  let magnitudeEntries = [];
+  let maxMagnitude = 0;
 
   function resetQueue() {
     queue = [];
     queueScheduled = false;
     renderToken += 1;
+    magnitudeEntries = [];
+    maxMagnitude = 0;
     return renderToken;
   }
 
@@ -54,12 +58,33 @@ export function createCostOfRiskFilterPreviewRenderer({
     node.dataset.costOfRiskPreviewValue = String(preview.value ?? "");
   }
 
-  function scheduleValue(node, preview) {
+  function scheduleValue(node, preview, barNode = null) {
     node.textContent = "";
     node.setAttribute("aria-busy", "true");
     markValueNode(node, preview);
-    queue.push({ node, ...preview });
+    queue.push({ barNode, node, ...preview });
     scheduleQueue();
+  }
+
+  // Lightweight "data bar" behind each previewed value, sized relative to the
+  // largest magnitude seen so far among the rows sharing the same token
+  // (i.e. the same open panel). Recomputed whenever a bigger value shows up,
+  // so all bars stay proportional to one another without needing every
+  // value up front.
+  function recordMagnitude(token, barNode, text) {
+    if (!barNode || token !== renderToken) return;
+    const magnitude = parseCostOfRiskPreviewMagnitude(text) ?? 0;
+    const entry = magnitudeEntries.find((candidate) => candidate.barNode === barNode);
+    if (entry) {
+      entry.magnitude = magnitude;
+    } else {
+      magnitudeEntries.push({ barNode, magnitude });
+    }
+    if (magnitude > maxMagnitude) maxMagnitude = magnitude;
+    if (maxMagnitude <= 0) return;
+    magnitudeEntries.forEach((candidate) => {
+      candidate.barNode.style.width = `${Math.min(100, (candidate.magnitude / maxMagnitude) * 100)}%`;
+    });
   }
 
   function getCachedValue(key, factory) {
@@ -78,8 +103,10 @@ export function createCostOfRiskFilterPreviewRenderer({
       const item = queue.shift();
       if (!item) return;
       if (item.token === renderToken && item.node.isConnected) {
-        item.node.textContent = getPreviewValue?.(item.kind, item.value) ?? "";
+        const value = getPreviewValue?.(item.kind, item.value) ?? "";
+        item.node.textContent = value;
         item.node.removeAttribute("aria-busy");
+        recordMagnitude(item.token, item.barNode, value);
       }
       if (queue.length > 0) scheduleQueue();
     };
@@ -92,9 +119,22 @@ export function createCostOfRiskFilterPreviewRenderer({
     consumeSnapshotValue,
     getCachedValue,
     markValueNode,
+    recordMagnitude,
     resetQueue,
     scheduleValue
   };
+}
+
+// French-locale formatted numbers ("1 234,5 bp", "-45,2 M€"...) use a
+// regular, non-breaking or narrow non-breaking space as thousands
+// separator and a comma as decimal separator; strip all three and read the
+// leading signed number as the bar's magnitude.
+function parseCostOfRiskPreviewMagnitude(text) {
+  const match = String(text ?? "").match(/-?[\d\s\u00a0\u202f]+(?:[.,]\d+)?/);
+  if (!match) return null;
+  const normalized = match[0].replace(/[\s\u00a0\u202f]/g, "").replace(",", ".");
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? Math.abs(parsed) : null;
 }
 
 function createSnapshotKey(kind, value) {

@@ -816,6 +816,7 @@ button:focus-visible {
   min-height: 32px;
   min-width: 0;
   padding: 7px 8px;
+  position: relative;
   text-align: left;
   white-space: normal;
   width: 100%;
@@ -825,6 +826,17 @@ button:focus-visible {
   padding-left: 22px;
 }
 
+.cost-of-risk-filter-selection-option-bar {
+  background: rgba(17, 108, 200, 0.12);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transition: width 0.2s ease;
+  width: 0;
+  z-index: 0;
+}
+
 .cost-of-risk-filter-selection-option-label,
 .cost-of-risk-filter-selection-option-value,
 .cost-of-risk-filter-selection-option-reason {
@@ -832,7 +844,9 @@ button:focus-visible {
   line-height: 1.22;
   min-width: 0;
   overflow-wrap: anywhere;
+  position: relative;
   white-space: normal;
+  z-index: 1;
 }
 
 .cost-of-risk-filter-selection-option-value {
@@ -904,6 +918,8 @@ button:focus-visible {
   font-weight: 700;
   line-height: 1.15;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .cost-of-risk-filter-selection-option-description,
@@ -911,6 +927,8 @@ button:focus-visible {
   font-size: 0.7rem;
   grid-column: 1 / -1;
   line-height: 1.2;
+  position: relative;
+  z-index: 1;
 }
 
 .cost-of-risk-filter-selection-option-description {
