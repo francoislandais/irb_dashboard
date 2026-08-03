@@ -83,7 +83,7 @@ export function createCostOfRiskFilterPreviewRenderer({
     if (magnitude > maxMagnitude) maxMagnitude = magnitude;
     if (maxMagnitude <= 0) return;
     magnitudeEntries.forEach((candidate) => {
-      candidate.barNode.style.width = `${Math.min(100, (candidate.magnitude / maxMagnitude) * 100)}%`;
+      candidate.barNode.style.width = `${Math.min(50, (candidate.magnitude / maxMagnitude) * 50)}%`;
     });
   }
 
