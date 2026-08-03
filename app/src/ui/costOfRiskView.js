@@ -3692,7 +3692,7 @@ function getCostOfRiskMovementPreviewValue(state, filters) {
       activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode
     )
   );
-  const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed value");
+  const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed contribution");
   const relative = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Relative contribution");
   return formatCostOfRiskSelectedDisplayValue(
     activeCostOfRiskMovementDisplayMode === "ratio" ? relative : amount,
