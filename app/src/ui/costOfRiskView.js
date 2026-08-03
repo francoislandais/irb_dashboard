@@ -4251,7 +4251,7 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
           });
         }
       },
-      marginBottom: 112,
+      marginBottom: 90,
       type: "line"
     },
     credits: { enabled: false },
