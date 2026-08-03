@@ -1,27 +1,19 @@
-import { createCostOfRiskAuditInfoSection } from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
+import {
+  createCostOfRiskAuditInfoSection,
+  createCostOfRiskAuditIntroHeader
+} from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
 
 export function createCostOfRiskDatasetInfoPanel(state) {
   const activeDataset = state?.datasets?.find((dataset) => dataset.id === state.activeDatasetId) ?? null;
   const extractionDate = formatCostOfRiskExtractionDate(state?.extractionTimestamp);
 
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Dataset metadata";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = "Dataset";
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  summary.textContent = activeDataset
-    ? "This panel summarises the dataset currently loaded in the application."
-    : "No dataset is currently loaded.";
-
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Dataset metadata",
+    lead: activeDataset
+      ? "This panel summarises the dataset currently loaded in the application."
+      : "No dataset is currently loaded.",
+    title: "Dataset"
+  });
   intro.append(createCostOfRiskAuditInfoSection("Loaded file", [
     activeDataset?.label || state?.fileName || "No dataset",
     `Source: ${formatCostOfRiskDatasetSource(activeDataset?.source || state?.source)}`,

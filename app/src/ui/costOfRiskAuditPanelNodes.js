@@ -43,6 +43,36 @@ export function appendCostOfRiskHighlightedSelectionText(container, text, highli
   container.append(document.createTextNode(before), value, document.createTextNode(after));
 }
 
+// Every audit/filter-selection panel opens with the same
+// eyebrow + title + lead header on an "article.cost-of-risk-audit-intro"
+// element, ready to receive further sections via .append(...).
+export function createCostOfRiskAuditIntroHeader({
+  articleClassName = "cost-of-risk-audit-intro",
+  eyebrow: eyebrowText,
+  lead: leadText,
+  leadModifierClass = "",
+  title: titleText
+}) {
+  const article = document.createElement("article");
+  article.className = articleClassName;
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
+  eyebrow.textContent = eyebrowText;
+
+  const title = document.createElement("h2");
+  title.className = "cost-of-risk-audit-intro-title";
+  title.textContent = titleText;
+
+  const lead = document.createElement("p");
+  lead.className = "cost-of-risk-audit-intro-lead";
+  if (leadModifierClass) lead.classList.add(leadModifierClass);
+  lead.textContent = leadText;
+
+  article.append(eyebrow, title, lead);
+  return article;
+}
+
 export function createCostOfRiskAuditInfoSection(titleText, lines) {
   const section = document.createElement("section");
   section.className = "cost-of-risk-audit-intro-section";

@@ -130,7 +130,7 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260802-readable-selection-phrases";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260803-refactor-cleanup";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -209,6 +209,7 @@ import {
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,
+  createCostOfRiskAuditIntroHeader,
   createCostOfRiskSelectedDataDescription,
   createCostOfRiskSelectedDataDescriptionWithDetail,
   createCostOfRiskSelectedDataPlaceholder
@@ -2190,22 +2191,11 @@ function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {
   if (renderCostOfRiskHelpPanel()) return;
   if (!options.allowDefaultRender) return;
 
-  const article = document.createElement("article");
-  article.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Cost of risk method";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = definitionModel.definition?.label ?? "Cost of risk definition";
-
-  const lead = document.createElement("p");
-  lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = definitionModel.definition?.description ?? "";
-
-  article.append(eyebrow, title, lead);
+  const article = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Cost of risk method",
+    lead: definitionModel.definition?.description ?? "",
+    title: definitionModel.definition?.label ?? "Cost of risk definition"
+  });
   article.append(createCostOfRiskAuditInfoSection("Regulatory source", [
     definitionModel.definition?.source ?? "-"
   ]));
@@ -2838,22 +2828,11 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
   }
 
   const selectedValue = row.cells?.[selectedCell.metric]?.value ?? null;
-  const article = document.createElement("article");
-  article.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Exposure ratio audit trail";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = `${getCostOfRiskStageRatioMetricLabel(selectedCell.metric)} - ${row.label}`;
-
-  const lead = document.createElement("p");
-  lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = `Selected value: ${formatCostOfRiskStageRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`;
-
-  article.append(eyebrow, title, lead);
+  const article = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Exposure ratio audit trail",
+    lead: `Selected value: ${formatCostOfRiskStageRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`,
+    title: `${getCostOfRiskStageRatioMetricLabel(selectedCell.metric)} - ${row.label}`
+  });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(stageRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
@@ -2899,22 +2878,11 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
   }
 
   const selectedValue = row.cells?.[selectedCell.metric]?.value ?? null;
-  const article = document.createElement("article");
-  article.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Coverage ratio audit trail";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = `${getCostOfRiskCoverageRatioMetricLabel(selectedCell.metric)} - ${row.label}`;
-
-  const lead = document.createElement("p");
-  lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = `Selected value: ${formatCostOfRiskCoverageRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`;
-
-  article.append(eyebrow, title, lead);
+  const article = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Coverage ratio audit trail",
+    lead: `Selected value: ${formatCostOfRiskCoverageRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`,
+    title: `${getCostOfRiskCoverageRatioMetricLabel(selectedCell.metric)} - ${row.label}`
+  });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(coverageRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
@@ -2960,22 +2928,11 @@ function renderCostOfRiskCollateralRatioAuditPanel(collateralRatio, state, optio
   }
 
   const selectedValue = row.cells?.[selectedCell.metric]?.value ?? null;
-  const article = document.createElement("article");
-  article.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Collateral ratio audit trail";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = `${getCostOfRiskCollateralRatioMetricLabel(selectedCell.metric)} - ${row.label}`;
-
-  const lead = document.createElement("p");
-  lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = `Selected value: ${formatCostOfRiskCollateralRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`;
-
-  article.append(eyebrow, title, lead);
+  const article = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Collateral ratio audit trail",
+    lead: `Selected value: ${formatCostOfRiskCollateralRatioCellValue(selectedValue, selectedCell.metric, state.selectedUnit)}.`,
+    title: `${getCostOfRiskCollateralRatioMetricLabel(selectedCell.metric)} - ${row.label}`
+  });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(collateralRatio.referenceDate)}`,
     `JST: ${state.selectedJst}`,
@@ -3029,27 +2986,16 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
   setCostOfRiskSelectedDataSummary(selectionDescription);
   if (renderCostOfRiskHelpPanel()) return;
 
-  const article = document.createElement("article");
-  article.className = "cost-of-risk-audit-intro";
-
   if (!options.allowDataAudit) {
     replaceCostOfRiskAuditPanelContent();
     return;
   }
 
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Summary calculation detail";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = `${getCostOfRiskSummaryAuditMetricLabel(selectedCell)} - ${row.label}`;
-
-  const lead = document.createElement("p");
-  lead.className = "cost-of-risk-audit-intro-lead";
-  lead.textContent = `Selected value: ${selectedValue}.`;
-
-  article.append(eyebrow, title, lead);
+  const article = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Summary calculation detail",
+    lead: `Selected value: ${selectedValue}.`,
+    title: `${getCostOfRiskSummaryAuditMetricLabel(selectedCell)} - ${row.label}`
+  });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(summary.referenceDate)}`,
     `JST: ${state.selectedJst}`,
@@ -3436,50 +3382,7 @@ function renderCostOfRiskAuditPanelIntro() {
     return;
   }
 
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = content.eyebrow;
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = content.title;
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  if (content.control?.type === "smoothing") {
-    summary.classList.add("cost-of-risk-audit-intro-lead--smoothing");
-  }
-  summary.textContent = content.lead;
-
-  intro.append(eyebrow, title, summary);
-
-  if (content.control?.type === "smoothing") {
-    intro.append(renderCostOfRiskSmoothingHelpControl(content.control.windowSize));
-  }
-
-  content.sections.forEach((section) => {
-    const block = document.createElement("section");
-    block.className = "cost-of-risk-audit-intro-section";
-
-    const heading = document.createElement("h3");
-    heading.textContent = section.title;
-
-    const body = document.createElement("p");
-    body.textContent = section.body;
-
-    block.append(heading, body);
-    intro.append(block);
-  });
-
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = content.hint;
-  intro.append(hint);
-
-  replaceCostOfRiskAuditPanelContent(intro);
+  renderCostOfRiskPanelArticle(content);
 }
 
 function renderCostOfRiskHelpPanel() {
@@ -3515,25 +3418,12 @@ function renderCostOfRiskHelpPanel() {
 }
 
 function renderCostOfRiskPanelArticle(content) {
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = content.eyebrow;
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = content.title;
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  if (content.control?.type === "smoothing") {
-    summary.classList.add("cost-of-risk-audit-intro-lead--smoothing");
-  }
-  summary.textContent = content.lead;
-
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    eyebrow: content.eyebrow,
+    lead: content.lead,
+    leadModifierClass: content.control?.type === "smoothing" ? "cost-of-risk-audit-intro-lead--smoothing" : "",
+    title: content.title
+  });
 
   if (content.control?.type === "smoothing") {
     intro.append(renderCostOfRiskSmoothingHelpControl(content.control.windowSize));
@@ -3610,22 +3500,12 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
   const activeValue = activeCostOfRiskFilters[meta.filterKey];
 
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Filter";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = meta.label;
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  summary.textContent = `Choose the ${meta.label.toLowerCase()} perimeter applied to this view. The change applies immediately.`;
-
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
+    eyebrow: "Filter",
+    lead: `Choose the ${meta.label.toLowerCase()} perimeter applied to this view. The change applies immediately.`,
+    title: meta.label
+  });
 
   const table = document.createElement("table");
   table.className = "cost-of-risk-filter-selection-table";
@@ -3660,21 +3540,12 @@ function renderCostOfRiskBalanceScopeSelectionPanel() {
   const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
   const activeValue = activeCostOfRiskFilters.balanceScope || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
 
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Filter";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = "Perimeter";
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  summary.textContent = "Choose whether the view focuses on in-balance sheet exposures, off-balance sheet commitments and guarantees, or both where FINREP provides that detail.";
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
+    eyebrow: "Filter",
+    lead: "Choose whether the view focuses on in-balance sheet exposures, off-balance sheet commitments and guarantees, or both where FINREP provides that detail.",
+    title: "Perimeter"
+  });
 
   const table = document.createElement("table");
   table.className = "cost-of-risk-filter-selection-table";
@@ -3699,22 +3570,12 @@ function renderCostOfRiskStageSelectionPanel() {
   const options = latestCostOfRiskFilterOptions?.[meta.optionsKey] ?? [];
   const activeValue = activeCostOfRiskFilters[meta.filterKey];
 
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Filter";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = meta.label;
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  summary.textContent = "Choose either an IFRS stage perimeter or the F_18.00 performing / non-performing breakdown. The change applies immediately.";
-
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
+    eyebrow: "Filter",
+    lead: "Choose either an IFRS stage perimeter or the F_18.00 performing / non-performing breakdown. The change applies immediately.",
+    title: meta.label
+  });
 
   const allTable = document.createElement("table");
   allTable.className = "cost-of-risk-filter-selection-table";
@@ -4092,22 +3953,12 @@ function applyCostOfRiskFilterSelection(filterKey, value) {
 
 function renderCostOfRiskDefinitionSelectionPanel() {
   const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Filter";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = "Cost of risk definition";
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  summary.textContent = "Choose the calculation method used for the cost of risk ratio. The change applies immediately.";
-
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
+    eyebrow: "Filter",
+    lead: "Choose the calculation method used for the cost of risk ratio. The change applies immediately.",
+    title: "Cost of risk definition"
+  });
 
   const table = document.createElement("table");
   table.className = "cost-of-risk-filter-selection-table cost-of-risk-filter-selection-table--definition";

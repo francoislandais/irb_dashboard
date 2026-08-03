@@ -1,4 +1,7 @@
-import { createCostOfRiskAuditInfoSection } from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
+import {
+  createCostOfRiskAuditInfoSection,
+  createCostOfRiskAuditIntroHeader
+} from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
 
 export function createCostOfRiskPeerSelectionPanel(
   state,
@@ -11,24 +14,14 @@ export function createCostOfRiskPeerSelectionPanel(
   const selectedPeers = new Set((state?.peerJstCodes ?? jstOptions) ?? []);
   const selectedCount = jstOptions.filter((jstCode) => selectedPeers.has(jstCode)).length;
 
-  const intro = document.createElement("article");
-  intro.className = "cost-of-risk-audit-intro cost-of-risk-peer-selection-panel";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "cost-of-risk-audit-intro-eyebrow";
-  eyebrow.textContent = "Benchmark peers";
-
-  const title = document.createElement("h2");
-  title.className = "cost-of-risk-audit-intro-title";
-  title.textContent = "Peers";
-
-  const summary = document.createElement("p");
-  summary.className = "cost-of-risk-audit-intro-lead";
-  summary.textContent = jstOptions.length > 0
-    ? `${selectedCount} of ${jstOptions.length} JST selected for benchmark views. Changes are applied immediately.`
-    : "Load a dataset to choose the JST included in benchmark views.";
-
-  intro.append(eyebrow, title, summary);
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-peer-selection-panel",
+    eyebrow: "Benchmark peers",
+    lead: jstOptions.length > 0
+      ? `${selectedCount} of ${jstOptions.length} JST selected for benchmark views. Changes are applied immediately.`
+      : "Load a dataset to choose the JST included in benchmark views.",
+    title: "Peers"
+  });
 
   if (jstOptions.length > 0) {
     intro.append(createCostOfRiskPeerDisplayControl(state, updatePeerDisplayMode));

@@ -52,10 +52,10 @@ export function renderCostOfRiskActiveFiltersView({
   if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
   lastCostOfRiskActiveFiltersRenderKey = renderKey;
 
-  const balanceScopeItem = createCostOfRiskBalanceScopeFilterChip(filters.balanceScope, filterOptions.balanceScopes, balanceScopeMenuOpen);
-  const instrumentItem = createCostOfRiskInstrumentFilterChip(filters.asset, filterOptions.assets, instrumentMenuOpen);
-  const counterpartyItem = createCostOfRiskCounterpartyFilterChip(filters.counterparty, filterOptions.counterparties, counterpartyMenuOpen);
-  const stageItem = createCostOfRiskStageFilterChip(filters.stage, filterOptions.stages, stageMenuOpen);
+  const balanceScopeItem = createCostOfRiskPerimeterFilterChip("balanceScope", filters.balanceScope, filterOptions.balanceScopes, balanceScopeMenuOpen);
+  const instrumentItem = createCostOfRiskPerimeterFilterChip("instrument", filters.asset, filterOptions.assets, instrumentMenuOpen);
+  const counterpartyItem = createCostOfRiskPerimeterFilterChip("counterparty", filters.counterparty, filterOptions.counterparties, counterpartyMenuOpen);
+  const stageItem = createCostOfRiskPerimeterFilterChip("stage", filters.stage, filterOptions.stages, stageMenuOpen);
   const remainingActiveItems = [
     instrumentItem,
     counterpartyItem,
@@ -226,196 +226,92 @@ function createCostOfRiskDisplayModeChip({
   return chip;
 }
 
-function createCostOfRiskBalanceScopeFilterChip(value, options, isOpen) {
-  const activeValue = value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
-  const isInBalance = activeValue === COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--balance-scope";
-  chip.classList.toggle("is-open", Boolean(isOpen));
-  if (isInBalance) chip.dataset.costOfRiskAllFilter = "true";
-
-  const toggle = document.createElement("button");
-  toggle.className = "cost-of-risk-filter-chip-toggle";
-  toggle.type = "button";
-  toggle.dataset.costOfRiskBalanceScopeFilterToggle = "true";
-  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
-  toggle.setAttribute("aria-label", "Change balance-sheet perimeter");
-
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  const labelPrefix = document.createElement("span");
-  labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-  labelPrefix.textContent = "Perimeter: ";
-  const labelValue = document.createElement("span");
-  labelValue.className = "cost-of-risk-filter-chip-value";
-  labelValue.textContent = getCostOfRiskFilterOptionLabel(options, activeValue);
-  label.append(labelPrefix, labelValue);
-  toggle.append(label);
-  chip.append(toggle);
-
-  if (!isInBalance) {
-    const button = document.createElement("button");
-    button.className = "cost-of-risk-filter-chip-close";
-    button.type = "button";
-    button.dataset.costOfRiskClearFilter = "balanceScope";
-    button.setAttribute("aria-label", `Reset perimeter to In-balance`);
-    button.textContent = "×";
-    chip.append(button);
+// Instrument/Counterparty/Stage/Balance-scope chips share the same shape
+// (toggle button showing the active value, optional close button to reset to
+// the default) — only the wording, dataset key and default-value predicate
+// differ, so they're built from one config-driven function.
+const COST_OF_RISK_PERIMETER_FILTER_CONFIGS = {
+  balanceScope: {
+    clearFilterName: "balanceScope",
+    closeAriaLabel: () => "Reset perimeter to In-balance",
+    isDefaultValue: (value) => (value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE) === COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
+    labelPrefix: "Perimeter: ",
+    normalizeValue: (value) => value || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
+    toggleAriaLabel: "Change balance-sheet perimeter",
+    toggleDataset: "costOfRiskBalanceScopeFilterToggle"
+  },
+  counterparty: {
+    clearFilterName: "counterparty",
+    closeAriaLabel: (label) => `Remove ${label} filter`,
+    defaultLabel: "All Counterparties",
+    isDefaultValue: (value) => !value || value === COST_OF_RISK_FILTER_ALL,
+    labelPrefix: "Counterparty: ",
+    toggleAriaLabel: "Change counterparty filter",
+    toggleDataset: "costOfRiskCounterpartyFilterToggle"
+  },
+  instrument: {
+    clearFilterName: "asset",
+    closeAriaLabel: (label) => `Remove ${label} filter`,
+    defaultLabel: "All Instruments",
+    isDefaultValue: (value) => !value || value === COST_OF_RISK_FILTER_ALL,
+    labelPrefix: "Instruments: ",
+    toggleAriaLabel: "Change instruments filter",
+    toggleDataset: "costOfRiskInstrumentFilterToggle"
+  },
+  stage: {
+    clearFilterName: "stage",
+    closeAriaLabel: (label) => `Remove ${label} filter`,
+    defaultLabel: "All Stage",
+    isDefaultValue: (value) => !value || value === COST_OF_RISK_FILTER_ALL,
+    labelPrefix: "Status: ",
+    toggleAriaLabel: "Change stage filter",
+    toggleDataset: "costOfRiskStageFilterToggle"
   }
+};
 
-  return chip;
-}
-
-function createCostOfRiskInstrumentFilterChip(value, options, isOpen) {
-  const isAllInstrument = !value || value === COST_OF_RISK_FILTER_ALL;
+function createCostOfRiskPerimeterFilterChip(kind, value, options, isOpen) {
+  const config = COST_OF_RISK_PERIMETER_FILTER_CONFIGS[kind];
+  const normalizedValue = config.normalizeValue ? config.normalizeValue(value) : value;
+  const isDefault = config.isDefaultValue(value);
   const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--instrument";
+  chip.className = `cost-of-risk-filter-chip cost-of-risk-filter-chip--${kind === "balanceScope" ? "balance-scope" : kind}`;
   chip.classList.toggle("is-open", Boolean(isOpen));
-  if (isAllInstrument) chip.dataset.costOfRiskAllFilter = "true";
+  if (isDefault) chip.dataset.costOfRiskAllFilter = "true";
 
   const toggle = document.createElement("button");
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
-  toggle.dataset.costOfRiskInstrumentFilterToggle = "true";
+  toggle.dataset[config.toggleDataset] = "true";
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
-  toggle.setAttribute("aria-label", "Change instruments filter");
+  toggle.setAttribute("aria-label", config.toggleAriaLabel);
 
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label";
-  if (isAllInstrument) {
-    label.textContent = "All Instruments";
+  const resolvedLabel = getCostOfRiskFilterOptionLabel(options, normalizedValue);
+  if (isDefault && config.defaultLabel) {
+    label.textContent = config.defaultLabel;
   } else {
     const labelPrefix = document.createElement("span");
     labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-    labelPrefix.textContent = "Instruments: ";
+    labelPrefix.textContent = config.labelPrefix;
     const labelValue = document.createElement("span");
     labelValue.className = "cost-of-risk-filter-chip-value";
-    labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
+    labelValue.textContent = resolvedLabel;
     label.append(labelPrefix, labelValue);
   }
   toggle.append(label);
   chip.append(toggle);
 
-  if (!isAllInstrument) {
+  if (!isDefault) {
     const button = document.createElement("button");
     button.className = "cost-of-risk-filter-chip-close";
     button.type = "button";
-    button.dataset.costOfRiskClearFilter = "asset";
-    button.setAttribute("aria-label", `Remove ${getCostOfRiskFilterOptionLabel(options, value)} filter`);
+    button.dataset.costOfRiskClearFilter = config.clearFilterName;
+    button.setAttribute("aria-label", config.closeAriaLabel(resolvedLabel));
     button.textContent = "×";
     chip.append(button);
   }
 
-  return chip;
-}
-
-function createCostOfRiskCounterpartyFilterChip(value, options, isOpen) {
-  const isAllCounterparty = !value || value === COST_OF_RISK_FILTER_ALL;
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--counterparty";
-  chip.classList.toggle("is-open", Boolean(isOpen));
-  if (isAllCounterparty) chip.dataset.costOfRiskAllFilter = "true";
-
-  const toggle = document.createElement("button");
-  toggle.className = "cost-of-risk-filter-chip-toggle";
-  toggle.type = "button";
-  toggle.dataset.costOfRiskCounterpartyFilterToggle = "true";
-  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
-  toggle.setAttribute("aria-label", "Change counterparty filter");
-
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  if (isAllCounterparty) {
-    label.textContent = "All Counterparties";
-  } else {
-    const labelPrefix = document.createElement("span");
-    labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-    labelPrefix.textContent = "Counterparty: ";
-    const labelValue = document.createElement("span");
-    labelValue.className = "cost-of-risk-filter-chip-value";
-    labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
-    label.append(labelPrefix, labelValue);
-  }
-  toggle.append(label);
-  chip.append(toggle);
-
-  if (!isAllCounterparty) {
-    const button = document.createElement("button");
-    button.className = "cost-of-risk-filter-chip-close";
-    button.type = "button";
-    button.dataset.costOfRiskClearFilter = "counterparty";
-    button.setAttribute("aria-label", `Remove ${getCostOfRiskFilterOptionLabel(options, value)} filter`);
-    button.textContent = "×";
-    chip.append(button);
-  }
-
-  return chip;
-}
-
-function createCostOfRiskStageFilterChip(value, options, isOpen) {
-  const isAllStage = !value || value === COST_OF_RISK_FILTER_ALL;
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--stage";
-  chip.classList.toggle("is-open", Boolean(isOpen));
-  if (isAllStage) chip.dataset.costOfRiskAllFilter = "true";
-
-  const toggle = document.createElement("button");
-  toggle.className = "cost-of-risk-filter-chip-toggle";
-  toggle.type = "button";
-  toggle.dataset.costOfRiskStageFilterToggle = "true";
-  toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
-  toggle.setAttribute("aria-label", "Change stage filter");
-
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  if (isAllStage) {
-    label.textContent = "All Stage";
-  } else {
-    const labelPrefix = document.createElement("span");
-    labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-    labelPrefix.textContent = "Status: ";
-    const labelValue = document.createElement("span");
-    labelValue.className = "cost-of-risk-filter-chip-value";
-    labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
-    label.append(labelPrefix, labelValue);
-  }
-  toggle.append(label);
-  chip.append(toggle);
-
-  if (!isAllStage) {
-    const button = document.createElement("button");
-    button.className = "cost-of-risk-filter-chip-close";
-    button.type = "button";
-    button.dataset.costOfRiskClearFilter = "stage";
-    button.setAttribute("aria-label", `Remove ${getCostOfRiskFilterOptionLabel(options, value)} filter`);
-    button.textContent = "×";
-    chip.append(button);
-  }
-
-  return chip;
-}
-
-function createCostOfRiskActiveFilterChip(filterName, filterLabel, value, options) {
-  if (!value || value === COST_OF_RISK_FILTER_ALL) return null;
-
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip";
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label";
-  const labelPrefix = document.createElement("span");
-  labelPrefix.className = "cost-of-risk-filter-chip-prefix";
-  labelPrefix.textContent = `${filterLabel}: `;
-  const labelValue = document.createElement("span");
-  labelValue.className = "cost-of-risk-filter-chip-value";
-  labelValue.textContent = getCostOfRiskFilterOptionLabel(options, value);
-  label.append(labelPrefix, labelValue);
-  const button = document.createElement("button");
-  button.className = "cost-of-risk-filter-chip-close";
-  button.type = "button";
-  button.dataset.costOfRiskClearFilter = filterName;
-  button.setAttribute("aria-label", `Remove ${labelValue.textContent} filter`);
-  button.textContent = "×";
-  chip.append(label, button);
   return chip;
 }
 
