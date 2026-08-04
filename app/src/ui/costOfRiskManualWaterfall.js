@@ -121,7 +121,7 @@ export function renderManualCostOfRiskWaterfall(chart, waterfallData, options = 
     shape
       .attr({
         fill: isSelected ? primaryDark : COST_OF_RISK_STAGE_BOX_FILL,
-        stroke: primaryDark,
+        stroke: "#aeb8b2",
         "stroke-width": isSelected ? 2 : 1,
         zIndex: isSelected ? 8 : 6
       })
@@ -130,7 +130,7 @@ export function renderManualCostOfRiskWaterfall(chart, waterfallData, options = 
     const label = chart.renderer
       .text(formatManualWaterfallValue(item.contribution, waterfallData), xCenter, labelY)
       .css({
-        color: primaryDark,
+        color: isSelected ? primaryDark : "#5f6b65",
         fontSize: waterfallData.valueLabelFontSize || "10px",
         fontWeight: isSelected ? "700" : "500"
       })
