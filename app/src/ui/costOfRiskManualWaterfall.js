@@ -121,8 +121,8 @@ export function renderManualCostOfRiskWaterfall(chart, waterfallData, options = 
     shape
       .attr({
         fill: isSelected ? primaryDark : COST_OF_RISK_STAGE_BOX_FILL,
-        stroke: "none",
-        "stroke-width": 0,
+        stroke: isSelected ? primaryDark : "#c2cac5",
+        "stroke-width": 1,
         zIndex: isSelected ? 8 : 6
       })
       .add();
