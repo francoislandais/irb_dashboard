@@ -1,4 +1,4 @@
-import { getIndexedAxisCodes, getIndexedRowsByTableJst, getIndexedTableIds } from "./dataIndex.js";
+import { getIndexedAxisCodes, getIndexedRowsByTableJst, getIndexedTableIds } from "./dataIndex.js?v=20260804-lazy-index";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 

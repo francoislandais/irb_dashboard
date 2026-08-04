@@ -1,9 +1,8 @@
 import { parseCsv } from "./data/csvParser.js";
 import { validateCsvDataset } from "./data/csvSchema.js";
-import { buildDataIndexes } from "./data/dataIndex.js";
+import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260804-lazy-index";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadExplorerPoints } from "./data/explorerConfig.js";
-import { getUniqueValues } from "./data/timeSeries.js?v=20260708-explorer-rename";
 import {
   clearStoredDatasetFileHandle,
   clearStoredFileHandle,
@@ -17,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260802-readable-selection-phrases";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260804-axis-year-labels";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260804-lazy-index";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -171,7 +170,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const parsed = parseCsv(text);
   validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
-  const jstOptions = getUniqueValues(parsed.columns, parsed.rows, "jst_code");
+  const jstOptions = getIndexedJstCodes({ dataIndexes });
   const extractionTimestamp = getExtractionTimestamp(parsed.columns, parsed.rows);
   const datasetId = options.datasetId || createDatasetId(options.source || "local");
   csvTextByDatasetId.set(datasetId, text);

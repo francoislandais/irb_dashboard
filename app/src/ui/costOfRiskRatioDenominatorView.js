@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260804-lazy-index";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

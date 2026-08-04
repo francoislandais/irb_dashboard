@@ -1,9 +1,9 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260708-explorer-rename";
+import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260804-lazy-index";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-lazy-index";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -11,7 +11,7 @@ import {
   getBenchmarkValueFormat,
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
-} from "../data/explorerBenchmark.js";
+} from "../data/explorerBenchmark.js?v=20260804-lazy-index";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -40,7 +40,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js";
+} from "../data/explorer.js?v=20260804-lazy-index";
 import { getLatestState } from "./appState.js";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 

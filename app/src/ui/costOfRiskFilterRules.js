@@ -3,7 +3,7 @@ import {
   COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE,
   COST_OF_RISK_BALANCE_SCOPE_TOTAL,
   COST_OF_RISK_FILTER_ALL
-} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+} from "../data/costOfRisk.js?v=20260804-lazy-index";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

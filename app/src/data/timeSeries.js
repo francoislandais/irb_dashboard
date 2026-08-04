@@ -1,4 +1,4 @@
-import { getIndexedAxisCodes, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js";
+import { getIndexedAxisCodes, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260804-lazy-index";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
@@ -319,4 +319,3 @@ function buildValues(dateColumns, matchedRows) {
       : matchedRows.reduce((total, row) => total + parseNumericValue(row[column.index]), 0)
   }));
 }
-

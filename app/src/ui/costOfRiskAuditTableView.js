@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
+} from "../data/costOfRisk.js?v=20260804-lazy-index";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

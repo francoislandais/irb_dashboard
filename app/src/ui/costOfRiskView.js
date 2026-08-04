@@ -49,7 +49,7 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260803-transfer-denominator-help";
+} from "../data/costOfRisk.js?v=20260804-lazy-index";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
