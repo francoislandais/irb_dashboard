@@ -32,6 +32,7 @@ import {
   buildCostOfRiskStageSummaryModel,
   buildCostOfRiskStageTransferFlowDiagram,
   buildCostOfRiskStageTransferPanelAudit,
+  buildCostOfRiskStageTransferRelativeDenominatorDetail,
   buildCostOfRiskStageTransferFlowTimeSeries,
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
@@ -48,7 +49,7 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260803-ytd-denominator";
+} from "../data/costOfRisk.js?v=20260803-transfer-denominator-help";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -132,7 +133,7 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260803-ytd-denominator";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260803-transfer-denominator-help";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -194,7 +195,7 @@ import {
   COST_OF_RISK_DISABLED_TABS,
   readCostOfRiskUrlState,
   writeCostOfRiskUrlState
-} from "./costOfRiskUrlState.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskUrlState.js?v=20260803-transfer-denominator-help";
 import {
   COST_OF_RISK_COMPARISON_DEFINITION_ID,
   COST_OF_RISK_COMPARISON_METHOD_IDS,
@@ -350,7 +351,7 @@ function renderCostOfRiskRatioDenominatorControls(state) {
   });
 }
 
-// Reads cor_tab/cor_date/cor_view/cor_cell from the URL once, at module
+// Reads cor_tab/cor_date/cor_view/cor_cell/cor_period from the URL once, at module
 // load time, and uses them to override the hardcoded defaults above. Runs
 // before any data is loaded, so it only ever sets opaque string state -
 // anything stale or invalid (e.g. a cell key from a filter combination that
@@ -360,6 +361,9 @@ function applyCostOfRiskUrlState() {
   const urlState = readCostOfRiskUrlState();
   if (urlState.tab) activeCostOfRiskTab = urlState.tab;
   if (urlState.referenceDate) activeCostOfRiskReferenceDate = urlState.referenceDate;
+  activeCostOfRiskPeriodMode = urlState.periodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? COST_OF_RISK_PERIOD_MODE_YTD
+    : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
   if (urlState.summaryBreakdown) activeCostOfRiskSummaryBreakdown = urlState.summaryBreakdown;
   if (urlState.selection) applyCostOfRiskUrlSelection(activeCostOfRiskTab, urlState.selection);
 }
@@ -438,6 +442,7 @@ function applyCostOfRiskUrlSelection(tab, value) {
 export function syncCostOfRiskUrlParams() {
   writeCostOfRiskUrlState({
     activeTab: activeCostOfRiskTab,
+    periodMode: activeCostOfRiskPeriodMode,
     referenceDate: activeCostOfRiskReferenceDate,
     selection: getCostOfRiskUrlSelectionValue(),
     summaryBreakdown: activeCostOfRiskSummaryBreakdown
@@ -481,6 +486,17 @@ export function wireCostOfRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       setCostOfRiskHelpTopic("reference-date");
+      pulseCostOfRiskContextPanel();
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const stageTransferDenominatorHelp = event.target.closest?.("[data-cost-of-risk-stage-transfer-denominator-help]");
+    if (stageTransferDenominatorHelp) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("stage-transfer-denominator");
       pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
@@ -2495,7 +2511,7 @@ function setCostOfRiskMovementSelectedDataSummary(state) {
   const scopePhrase = getCostOfRiskSelectedPerimeterPhrase();
   const text = activeCostOfRiskMovementDisplayMode === "amount" && Number.isFinite(amount)
     ? `At ${referenceLabel}, for ${scopePhrase}, ${componentLabel} ${amount < 0 ? "reduces" : "increases"} ECL by ${formatCostOfRiskSelectedAmount(Math.abs(amount), state.selectedUnit)} as a ${getActiveCostOfRiskPeriodAmountPhrase()}.`
-    : `At ${referenceLabel}, for ${scopePhrase}, the contribution from ${componentLabel} to ECL movements is ${formattedValue}.`;
+    : `At ${referenceLabel}, for ${scopePhrase}, ${componentLabel} yield a ${formattedValue} ECL ${relative < 0 ? "decrease" : "increase"}.`;
   const detail = `from ${amountLabel} over ${denominatorLabel} ${getActiveCostOfRiskDenominatorPeriodPhrase()} exposure`;
   setCostOfRiskSelectedDataSummary(activeCostOfRiskMovementDisplayMode === "ratio"
     ? createCostOfRiskSelectedDataDescriptionWithDetail(text, detail, formattedValue)
@@ -2506,22 +2522,31 @@ function getCostOfRiskReadableMovementComponentLabel(title) {
   const label = String(title || "the selected component")
     .replace(/^\s*\d{4}\s*-\s*/u, "")
     .replace(/^Movements\//iu, "")
+    .replace(/\s*\(net\)\s*$/iu, "")
     .trim();
   const normalized = label.toLowerCase();
   const replacements = [
     ["increases due to origination and acquisition", "origination and acquisition"],
     ["decreases due to derecognition", "derecognition"],
-    ["changes due to change in credit risk", "credit-risk changes"],
+    ["changes due to change in credit risk", "changes due to change in credit risk"],
     ["changes due to modifications without derecognition", "modifications without derecognition"],
     ["changes due to update in the institution's methodology for estimation", "methodology updates"],
     ["changes due to update in the institutions methodology for estimation", "methodology updates"],
+    ["decrease in allowance account due to write-offs", "write-offs"],
     ["recoveries of previously written-off amounts recorded directly to the statement of profit or loss", "recoveries of written-off amounts"],
     ["amounts written-off directly to the statement of profit or loss", "direct write-offs to P&L"],
     ["gains or losses on derecognition", "derecognition gains and losses"],
     ["other adjustments", "other adjustments"]
   ];
   const match = replacements.find(([source]) => normalized === source);
-  return match ? match[1] : label.charAt(0).toLowerCase() + label.slice(1);
+  if (match) return match[1];
+  return label
+    .replace(/^changes due to\s+/iu, "")
+    .replace(/^change in\s+/iu, "")
+    .replace(/^decrease in allowance account due to\s+/iu, "")
+    .replace(/^increase in allowance account due to\s+/iu, "")
+    .replace(/\s+/g, " ")
+    .replace(/^./u, (char) => char.toLowerCase());
 }
 
 function setCostOfRiskStageTransferSelectedDataSummary(state) {
@@ -3318,6 +3343,11 @@ function renderCostOfRiskHelpPanel() {
     return true;
   }
 
+  if (activeCostOfRiskHelpTopic === "stage-transfer-denominator") {
+    renderCostOfRiskStageTransferDenominatorPanel();
+    return true;
+  }
+
   if (activeCostOfRiskHelpTopic.startsWith(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX)) {
     renderCostOfRiskFilterSelectionPanel(
       activeCostOfRiskHelpTopic.slice(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX.length)
@@ -3364,6 +3394,60 @@ function renderCostOfRiskPanelArticle(content) {
   intro.append(hint);
 
   replaceCostOfRiskAuditPanelContent(intro);
+}
+
+function renderCostOfRiskStageTransferDenominatorPanel() {
+  const state = getLatestState();
+  const detail = buildCostOfRiskStageTransferRelativeDenominatorDetail(
+    state,
+    activeCostOfRiskFilters,
+    activeCostOfRiskReferenceDate,
+    activeCostOfRiskPeriodMode
+  );
+  const formattedValue = formatCostOfRiskSelectedAmount(detail.value, state.selectedUnit);
+  const referenceLabel = formatReferenceQuarterLabel(detail.referenceDate || activeCostOfRiskReferenceDate);
+  const valueReferenceLabel = formatReferenceQuarterLabel(detail.valueReferenceDate);
+  const modeLabel = getActiveCostOfRiskPeriodLabel();
+  const ruleText = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? "Year to date uses the first available reference of the same calendar year, so the cumulative flow is divided by a stable opening exposure base."
+    : "Quarterly flow uses the previous reporting reference, so the quarterly movement is divided by the opening exposure base of that quarter.";
+
+  const article = createCostOfRiskAuditIntroHeader({
+    eyebrow: "Relative Transfer",
+    lead: `The denominator used for ${referenceLabel} in ${modeLabel} mode is ${formattedValue}.`,
+    title: "Denominator detail"
+  });
+
+  article.append(createCostOfRiskAuditInfoSection("Reference", [
+    `Displayed period: ${referenceLabel}`,
+    `Denominator date: ${valueReferenceLabel || "-"}`,
+    `Rule: ${detail.ruleLabel}`
+  ]));
+
+  article.append(createCostOfRiskAuditInfoSection("Logic", [
+    ruleText,
+    `The denominator is ${detail.denominatorLabel}, taken from ${detail.sourceTable || "F_18.00"} with the selected instruments and counterparty perimeter, across all stages.`
+  ]));
+
+  const componentLines = (detail.components ?? [])
+    .filter((component) => Number.isFinite(component.value))
+    .map((component) => {
+      const sign = component.operator === "subtract" ? "- " : "";
+      return `${sign}${component.label}: ${formatCostOfRiskSelectedAmount(component.value, state.selectedUnit)}`;
+    });
+  article.append(createCostOfRiskAuditInfoSection("Components", componentLines.length > 0
+    ? componentLines
+    : ["No denominator component is available for the current selection."]
+  ));
+
+  const hint = document.createElement("p");
+  hint.className = "cost-of-risk-audit-intro-hint";
+  hint.textContent = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+    ? "Switching back to Quarterly flow will use the previous-quarter denominator instead."
+    : "Switching to Year to date will use the first-quarter denominator instead.";
+  article.append(hint);
+
+  replaceCostOfRiskAuditPanelContent(article);
 }
 
 function renderCostOfRiskReferenceDateSelectionPanel() {

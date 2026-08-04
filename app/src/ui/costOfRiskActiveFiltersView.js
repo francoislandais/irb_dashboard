@@ -232,6 +232,16 @@ function createCostOfRiskDisplayModeChip({
   toggle.append(label);
   chip.append(toggle);
 
+  if (name === "stageTransfer" && isRelative) {
+    const help = document.createElement("button");
+    help.className = "cost-of-risk-filter-chip-help";
+    help.type = "button";
+    help.dataset.costOfRiskStageTransferDenominatorHelp = "true";
+    help.setAttribute("aria-label", "Explain relative transfer denominator");
+    help.textContent = "?";
+    chip.append(help);
+  }
+
   return chip;
 }
 

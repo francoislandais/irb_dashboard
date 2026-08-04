@@ -1566,6 +1566,61 @@ export function buildCostOfRiskStageTransferPanelAudit(
   };
 }
 
+export function buildCostOfRiskStageTransferRelativeDenominatorDetail(
+  state,
+  filters = {},
+  referenceDate = "",
+  periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
+) {
+  const indexes = getRequiredIndexes(state.columns);
+  const referenceColumns = getReferenceColumns(state.columns);
+  const normalizedPeriodMode = normalizeCostOfRiskPeriodMode(periodMode);
+  const denominatorFilters = getCostOfRiskStageTransferDenominatorFilters(filters);
+  const referenceIndex = getCostOfRiskReferenceIndex(referenceColumns, referenceDate);
+  const targetReference = referenceColumns[referenceIndex] ?? null;
+  const denominatorReferenceIndex = getCostOfRiskRatioDenominatorReferenceIndex(
+    referenceColumns,
+    referenceIndex,
+    normalizedPeriodMode
+  );
+  const denominatorReference = denominatorReferenceIndex >= 0
+    ? referenceColumns[denominatorReferenceIndex] ?? null
+    : null;
+
+  if (!indexes || !state.selectedJst || !targetReference || !denominatorReference) {
+    return {
+      components: [],
+      denominatorLabel: getCostOfRiskDenominatorComposition(state, denominatorFilters).label,
+      periodMode: normalizedPeriodMode,
+      referenceDate: targetReference?.label ?? "",
+      ruleLabel: getCostOfRiskRatioDenominatorLabel(normalizedPeriodMode),
+      sourceTable: "F_18.00",
+      status: "unavailable",
+      value: null,
+      valueReferenceDate: denominatorReference?.label ?? ""
+    };
+  }
+
+  const detail = buildCostOfRiskRatioDenominatorDetail(
+    state,
+    denominatorFilters,
+    denominatorReference.label,
+    state.selectedJst
+  );
+
+  return {
+    components: detail.components,
+    denominatorLabel: detail.label,
+    periodMode: normalizedPeriodMode,
+    referenceDate: targetReference.label,
+    ruleLabel: getCostOfRiskRatioDenominatorLabel(normalizedPeriodMode),
+    sourceTable: detail.sourceTable,
+    status: detail.status,
+    value: detail.value,
+    valueReferenceDate: denominatorReference.label
+  };
+}
+
 function buildCostOfRiskStageTransferSelectedScopeRows(audit) {
   if (audit.type === "transfer") {
     return audit.components.map((component) => ({

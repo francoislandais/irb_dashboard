@@ -1233,6 +1233,31 @@ button:focus-visible {
   background: rgba(36, 53, 45, 0.08);
 }
 
+.cost-of-risk-filter-chip-help {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid rgba(36, 53, 45, 0.34);
+  border-radius: 999px;
+  color: rgba(36, 53, 45, 0.62);
+  cursor: pointer;
+  font-size: 0.58rem;
+  font-weight: 700;
+  height: 13px;
+  line-height: 1;
+  margin-left: 1px;
+  margin-top: -1px;
+  padding: 0;
+  width: 13px;
+}
+
+.cost-of-risk-filter-chip-help:hover,
+.cost-of-risk-filter-chip-help:focus-visible {
+  background: rgba(36, 53, 45, 0.1);
+  border-color: rgba(36, 53, 45, 0.52);
+  color: var(--primary-dark);
+  outline: 0;
+}
+
 .cost-of-risk-filter-chip-prefix,
 .cost-of-risk-filter-chip--muted {
   color: rgba(36, 53, 45, 0.68);
