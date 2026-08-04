@@ -24,6 +24,7 @@ import {
   buildCostOfRiskF12ContributionSeries,
   buildCostOfRiskF2VsF12Audit,
   buildCostOfRiskFilteredSelectionValue,
+  buildCostOfRiskGeographyModel,
   buildCostOfRiskMovementContributionAudit,
   buildCostOfRiskNplFlowsModel,
   buildCostOfRiskStageBoxTimeSeries,
@@ -49,7 +50,7 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+} from "../data/costOfRisk.js?v=20260804-geography";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -122,6 +123,12 @@ import {
   renderCostOfRiskTreemap as renderTreemapChart
 } from "./costOfRiskTreemapView.js?v=20260802-readable-selection-phrases";
 import {
+  destroyCostOfRiskGeographyChart,
+  formatCostOfRiskGeographyCellValue,
+  getCostOfRiskGeographyChart,
+  renderCostOfRiskGeographyView
+} from "./costOfRiskGeographyView.js?v=20260804-geography-scroll";
+import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
@@ -129,11 +136,11 @@ import {
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
+} from "./benchmarkLineChart.js?v=20260804-geography";
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260803-transfer-denominator-help";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260804-geography";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -143,7 +150,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260802-readable-selection-phrases";
-import { openExplorerPoint } from "./explorerView.js?v=20260802-readable-selection-phrases";
+import { openExplorerPoint } from "./explorerView.js?v=20260804-lazy-index";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-readable-selection-phrases";
 import {
   clearCostOfRiskEmptyPanelsView,
@@ -180,7 +187,7 @@ import {
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
-import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260803-refactor-cleanup";
+import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260804-geography";
 import {
   COST_OF_RISK_FILTER_SELECTION_META,
   COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS
@@ -195,14 +202,14 @@ import {
   COST_OF_RISK_DISABLED_TABS,
   readCostOfRiskUrlState,
   writeCostOfRiskUrlState
-} from "./costOfRiskUrlState.js?v=20260803-transfer-denominator-help";
+} from "./costOfRiskUrlState.js?v=20260804-geography";
 import {
   COST_OF_RISK_COMPARISON_DEFINITION_ID,
   COST_OF_RISK_COMPARISON_METHOD_IDS,
   COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
   COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
   COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE
-} from "./costOfRiskTabConfig.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskTabConfig.js?v=20260804-geography";
 import {
   getCostOfRiskAuditPanelIntroContent,
   getCostOfRiskHelpPanelContent
@@ -247,6 +254,11 @@ let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskNplFlowsDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
+let activeCostOfRiskGeographyDisplayMode = "ratio";
+let activeCostOfRiskGeographyCountryMode = "top10";
+let activeCostOfRiskGeographyCountryQuery = "";
+let activeCostOfRiskGeographyCountryCodes = new Set();
+let activeCostOfRiskGeographyCellKey = "";
 let activeCostOfRiskPeriodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY;
 let activeCostOfRiskCounterpartySummaryCellKey = DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL;
 let activeCostOfRiskCounterpartySummaryOtherOpen = false;
@@ -317,6 +329,7 @@ function setCostOfRiskGlobalDisplayMode(mode) {
   activeCostOfRiskStageTransferDisplayMode = nextMode;
   activeCostOfRiskNplFlowsDisplayMode = nextMode;
   activeCostOfRiskSummaryDisplayMode = nextMode;
+  activeCostOfRiskGeographyDisplayMode = nextMode;
   closeCostOfRiskFilterMenus();
 }
 
@@ -524,11 +537,13 @@ export function wireCostOfRiskUi(actions, rerender) {
         ? activeCostOfRiskStageTransferDisplayMode
         : displayModeScope === "nplFlows"
           ? activeCostOfRiskNplFlowsDisplayMode
-          : displayModeScope === "summaryVariation"
-            ? activeCostOfRiskSummaryDisplayMode
-            : displayModeScope === "costOfRiskDefinition"
-              ? activeCostOfRiskDefinitionDisplayMode
-              : activeCostOfRiskMovementDisplayMode;
+          : displayModeScope === "geography"
+            ? activeCostOfRiskGeographyDisplayMode
+            : displayModeScope === "summaryVariation"
+              ? activeCostOfRiskSummaryDisplayMode
+              : displayModeScope === "costOfRiskDefinition"
+                ? activeCostOfRiskDefinitionDisplayMode
+                : activeCostOfRiskMovementDisplayMode;
       const nextMode = currentMode === "ratio" ? "amount" : "ratio";
       setCostOfRiskGlobalDisplayMode(nextMode);
       rerenderApp(actions.getState());
@@ -710,6 +725,27 @@ export function wireCostOfRiskUi(actions, rerender) {
       return;
     }
 
+    const geographyModeButton = event.target.closest?.("[data-cost-of-risk-geography-mode]");
+    if (geographyModeButton) {
+      event.preventDefault();
+      activeCostOfRiskGeographyCountryMode = geographyModeButton.dataset.costOfRiskGeographyMode || "top10";
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const geographyCountryButton = event.target.closest?.("[data-cost-of-risk-geography-country]");
+    if (geographyCountryButton) {
+      event.preventDefault();
+      const countryCode = geographyCountryButton.dataset.costOfRiskGeographyCountry || "";
+      if (activeCostOfRiskGeographyCountryCodes.has(countryCode)) {
+        activeCostOfRiskGeographyCountryCodes.delete(countryCode);
+      } else if (countryCode) {
+        activeCostOfRiskGeographyCountryCodes.add(countryCode);
+      }
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const button = event.target.closest?.("[data-cost-of-risk-summary-breakdown]");
     if (!button) return;
 
@@ -733,6 +769,19 @@ export function wireCostOfRiskUi(actions, rerender) {
 
     updateCostOfRiskCoreDefinition(checkbox.dataset.costOfRiskCoreCode, checkbox.checked, checkbox.dataset.costOfRiskCoreScope);
     rerenderApp(actions.getState());
+  });
+  elements.costOfRiskDashboard?.addEventListener("input", (event) => {
+    const geographySearch = event.target.closest?.("[data-cost-of-risk-geography-search]");
+    if (!geographySearch) return;
+
+    const cursorPosition = geographySearch.selectionStart ?? geographySearch.value.length;
+    activeCostOfRiskGeographyCountryQuery = geographySearch.value || "";
+    rerenderApp(actions.getState());
+    window.requestAnimationFrame?.(() => {
+      const nextSearch = elements.costOfRiskGeographyPanel?.querySelector("[data-cost-of-risk-geography-search]");
+      nextSearch?.focus();
+      nextSearch?.setSelectionRange?.(cursorPosition, cursorPosition);
+    });
   });
   elements.costOfRiskTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -821,6 +870,12 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskAsset, filterOptions.assets, activeCostOfRiskFilters.asset);
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
+  if (elements.costOfRiskStage) {
+    const stageUnavailable = activeCostOfRiskTab === "geography";
+    elements.costOfRiskStage.disabled = stageUnavailable || elements.costOfRiskStage.disabled;
+    elements.costOfRiskStage.closest?.(".cost-of-risk-field")?.classList.toggle("is-disabled", stageUnavailable);
+    elements.costOfRiskStage.title = stageUnavailable ? "Stage is not available in F_20.04 geography data." : "";
+  }
   renderCostOfRiskActiveFilters(filterOptions);
   if (!COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER.has(activeCostOfRiskTab)) renderCostOfRiskHelpPanel();
   const displayMode = getActiveCostOfRiskDisplayMode();
@@ -871,6 +926,64 @@ export function renderCostOfRisk(state) {
     }
     renderCostOfRiskNplFlowsView(nplFlows, state);
     setCostOfRiskNplFlowsSelectedDataSummary(nplFlows, state);
+    renderCostOfRiskHelpPanel();
+    scheduleCostOfRiskChartReflow();
+    return;
+  }
+
+  if (activeCostOfRiskTab === "geography") {
+    activeCostOfRiskGeographyCellKey = normalizeCostOfRiskGeographyCellKeyForDisplayMode(
+      activeCostOfRiskGeographyCellKey,
+      activeCostOfRiskGeographyDisplayMode
+    );
+    const geography = getCostOfRiskCachedModel(
+      state,
+      createCostOfRiskModelCacheKey(
+        state,
+        "geography",
+        activeCostOfRiskFilters,
+        activeCostOfRiskReferenceDate,
+        activeCostOfRiskGeographyCountryMode,
+        [...activeCostOfRiskGeographyCountryCodes],
+        activeCostOfRiskGeographyCountryQuery,
+        activeCostOfRiskGeographyCellKey
+      ),
+      () => buildCostOfRiskGeographyModel(state, activeCostOfRiskFilters, activeCostOfRiskReferenceDate, {
+        countryCodes: [...activeCostOfRiskGeographyCountryCodes],
+        countryMode: activeCostOfRiskGeographyCountryMode,
+        selectedCellKey: activeCostOfRiskGeographyCellKey
+      })
+    );
+    activeCostOfRiskReferenceDate = geography.referenceDate || activeCostOfRiskReferenceDate;
+    activeCostOfRiskGeographyCellKey = geography.selectedCell?.key ?? activeCostOfRiskGeographyCellKey;
+    renderCostOfRiskActiveFilters(filterOptions);
+    elements.costOfRiskEmpty.hidden = true;
+    elements.costOfRiskEmpty.textContent = "";
+    elements.costOfRiskDashboard.hidden = false;
+    leaveCostOfRiskStageTransferTab();
+    clearCostOfRiskAuditTable();
+    clearCostOfRiskSelectedDataSummary();
+    destroyCostOfRiskMovementChart();
+    destroyCostOfRiskWaterfallChart();
+    destroyCostOfRiskF2VsF12Chart();
+    destroyCostOfRiskStageRatioChart();
+    destroyCostOfRiskStageReconciliationChart();
+    renderCostOfRiskGeographyView({
+      chartContainer: elements.costOfRiskGeographyChart,
+      container: elements.costOfRiskGeographyPanel,
+      countryQuery: activeCostOfRiskGeographyCountryQuery,
+      displayMode: activeCostOfRiskGeographyDisplayMode,
+      model: geography,
+      onCellSelect: (cellKey) => {
+        activeCostOfRiskGeographyCellKey = cellKey;
+        rerenderApp(state);
+      },
+      onSelectJst: selectCostOfRiskChartJst,
+      onSelectReferenceDate: selectCostOfRiskReferenceDate,
+      peerDisplayMode: state.peerDisplayMode,
+      selectedJst: state.selectedJst,
+      selectedUnit: state.selectedUnit
+    });
     renderCostOfRiskHelpPanel();
     scheduleCostOfRiskChartReflow();
     return;
@@ -1291,6 +1404,22 @@ export function renderCostOfRisk(state) {
   scheduleCostOfRiskChartReflow();
 }
 
+function normalizeCostOfRiskGeographyCellKeyForDisplayMode(cellKey, displayMode) {
+  const [countryCode, metric] = String(cellKey ?? "").split(":");
+  if (!countryCode || !metric) return cellKey;
+  const amountMetrics = {
+    coverageRatio: "impairment",
+    nplRatio: "nonPerforming"
+  };
+  const ratioMetrics = {
+    impairment: "coverageRatio",
+    nonPerforming: "nplRatio"
+  };
+  if (displayMode === "amount" && amountMetrics[metric]) return `${countryCode}:${amountMetrics[metric]}`;
+  if (displayMode === "ratio" && ratioMetrics[metric]) return `${countryCode}:${ratioMetrics[metric]}`;
+  return cellKey;
+}
+
 function scheduleCostOfRiskChartReflow() {
   window.requestAnimationFrame?.(() => {
     getActiveCostOfRiskCharts().forEach((chart) => chart?.reflow?.());
@@ -1303,6 +1432,7 @@ function getActiveCostOfRiskCharts() {
   }
   if (activeCostOfRiskTab === "cost-of-risk") return [getCostOfRiskMovementChart()];
   if (activeCostOfRiskTab === "npl-flows") return [getCostOfRiskMovementChart()];
+  if (activeCostOfRiskTab === "geography") return [getCostOfRiskGeographyChart()];
   if (activeCostOfRiskTab === "stage-ratio") return [getCostOfRiskStageRatioChart()];
   if (activeCostOfRiskTab === "coverage-ratio") return [getCostOfRiskCoverageRatioChart()];
   if (activeCostOfRiskTab === "collateral-ratio") return [getCostOfRiskCollateralRatioChart()];
@@ -2295,6 +2425,7 @@ function getActiveCostOfRiskDisplayMode() {
   if (activeCostOfRiskTab === "cost-of-risk") return activeCostOfRiskDefinitionDisplayMode;
   if (activeCostOfRiskTab === "contributions") return activeCostOfRiskMovementDisplayMode;
   if (activeCostOfRiskTab === "npl-flows") return activeCostOfRiskNplFlowsDisplayMode;
+  if (activeCostOfRiskTab === "geography") return activeCostOfRiskGeographyDisplayMode;
   if (activeCostOfRiskTab === "stage-transfers") return activeCostOfRiskStageTransferDisplayMode;
   return activeCostOfRiskDisplayMode;
 }
@@ -3732,6 +3863,9 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
       activeCostOfRiskXAxisCode,
       activeCostOfRiskStageTransferFlowKey,
       activeCostOfRiskNplFlowKey,
+      activeCostOfRiskGeographyCountryMode,
+      [...activeCostOfRiskGeographyCountryCodes].join(","),
+      activeCostOfRiskGeographyCellKey,
       activeCostOfRiskDefinitionId,
       activeCostOfRiskDefinitionDriverCode,
       activeCostOfRiskDefinitionDisplayMode,
@@ -3768,6 +3902,7 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
         if (activeCostOfRiskTab === "contributions") return formatCostOfRiskFilterPreviewValue(getCostOfRiskMovementPreviewValue(state, filters));
         if (activeCostOfRiskTab === "stage-transfers") return formatCostOfRiskFilterPreviewValue(getCostOfRiskStageTransferPreviewValue(state, filters, kind, value));
         if (activeCostOfRiskTab === "npl-flows") return formatCostOfRiskFilterPreviewValue(getCostOfRiskNplFlowsPreviewValue(state, filters));
+        if (activeCostOfRiskTab === "geography") return formatCostOfRiskFilterPreviewValue(getCostOfRiskGeographyPreviewValue(state, filters));
         if (activeCostOfRiskTab === "cost-of-risk") return formatCostOfRiskFilterPreviewValue(getCostOfRiskDefinitionPreviewValue(state, activeCostOfRiskDefinitionId, filters));
       } catch (error) {
         console.warn("Unable to calculate filter preview value", error);
@@ -3920,6 +4055,32 @@ function getCostOfRiskNplFlowsPreviewValue(state, filters, referenceDate = activ
     state.selectedUnit,
     true
   );
+}
+
+function getCostOfRiskGeographyPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
+  const cellKey = normalizeCostOfRiskGeographyCellKeyForDisplayMode(
+    activeCostOfRiskGeographyCellKey,
+    activeCostOfRiskGeographyDisplayMode
+  );
+  const model = costOfRiskFilterPreviewRenderer.getCachedValue(
+    createCostOfRiskFilterPreviewCacheKey(
+      "geography-model",
+      filters,
+      referenceDate,
+      activeCostOfRiskGeographyCountryMode,
+      [...activeCostOfRiskGeographyCountryCodes].join(","),
+      cellKey
+    ),
+    () => buildCostOfRiskGeographyModel(state, filters, referenceDate, {
+      countryCodes: [...activeCostOfRiskGeographyCountryCodes],
+      countryMode: activeCostOfRiskGeographyCountryMode,
+      selectedCellKey: cellKey
+    })
+  );
+  if (model?.status || !model.selectedCell) return "";
+  const row = (model.countries ?? []).find((country) => country.code === model.selectedCell.countryCode);
+  const value = row?.[model.selectedCell.metric];
+  return formatCostOfRiskGeographyCellValue(value, model.selectedCell.metric, state.selectedUnit);
 }
 
 function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = activeCostOfRiskFilters, referenceDate = activeCostOfRiskReferenceDate) {

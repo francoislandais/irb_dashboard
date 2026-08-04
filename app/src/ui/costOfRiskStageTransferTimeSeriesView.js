@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds
-} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+} from "../data/costOfRisk.js?v=20260804-geography";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -14,7 +14,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
+} from "./benchmarkLineChart.js?v=20260804-geography";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,

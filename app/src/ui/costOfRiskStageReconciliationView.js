@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-geography";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,
@@ -20,7 +20,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260802-readable-selection-phrases";
+} from "./benchmarkLineChart.js?v=20260804-geography";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskStageReconciliationChart = null;

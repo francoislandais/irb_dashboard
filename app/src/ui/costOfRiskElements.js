@@ -21,6 +21,8 @@ export const costOfRiskElements = {
   costOfRiskF2VsF12Chart: document.querySelector("#cost-of-risk-f2-f12-chart"),
   costOfRiskF02Context: document.querySelector("#cost-of-risk-f02-context"),
   costOfRiskF02Value: document.querySelector("#cost-of-risk-f02-value"),
+  costOfRiskGeographyChart: document.querySelector("#cost-of-risk-geography-chart"),
+  costOfRiskGeographyPanel: document.querySelector("#cost-of-risk-geography-panel"),
   costOfRiskNplFlowsChart: document.querySelector("#cost-of-risk-npl-flows-chart"),
   costOfRiskNplFlowsPanel: document.querySelector("#cost-of-risk-npl-flows-panel"),
   costOfRiskPoints: document.querySelector("#cost-of-risk-points"),

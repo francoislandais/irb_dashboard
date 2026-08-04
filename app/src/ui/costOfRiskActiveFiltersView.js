@@ -4,7 +4,7 @@ import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+} from "../data/costOfRisk.js?v=20260804-geography";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -58,7 +58,9 @@ export function renderCostOfRiskActiveFiltersView({
   const balanceScopeItem = createCostOfRiskPerimeterFilterChip("balanceScope", filters.balanceScope, filterOptions.balanceScopes, balanceScopeMenuOpen);
   const instrumentItem = createCostOfRiskPerimeterFilterChip("instrument", filters.asset, filterOptions.assets, instrumentMenuOpen);
   const counterpartyItem = createCostOfRiskPerimeterFilterChip("counterparty", filters.counterparty, filterOptions.counterparties, counterpartyMenuOpen);
-  const stageItem = createCostOfRiskPerimeterFilterChip("stage", filters.stage, filterOptions.stages, stageMenuOpen);
+  const stageItem = activeTab === "geography"
+    ? createCostOfRiskDisabledStageChip(filters.stage, filterOptions.stages)
+    : createCostOfRiskPerimeterFilterChip("stage", filters.stage, filterOptions.stages, stageMenuOpen);
   const remainingActiveItems = [
     instrumentItem,
     counterpartyItem,
@@ -132,6 +134,20 @@ export function renderCostOfRiskActiveFiltersView({
         name: "nplFlows"
       })]
       : []),
+    ...(activeTab === "geography"
+      ? [createCostOfRiskDisplayModeChip({
+        displayMode,
+        isOpen: false,
+        labels: {
+          absolute: "Amounts",
+          relative: "Ratios",
+          switchToAbsolute: "Switch to Amounts",
+          switchToRelative: "Switch to Ratios"
+        },
+        menuLabel: "Geography display",
+        name: "geography"
+      })]
+      : []),
     ...(activeTab === "summary"
       ? [createCostOfRiskDisplayModeChip({
         displayMode,
@@ -150,6 +166,19 @@ export function renderCostOfRiskActiveFiltersView({
 
   container.replaceChildren(...chips);
   container.classList.toggle("is-empty", activeItems.length === 0);
+}
+
+function createCostOfRiskDisabledStageChip(stage, options) {
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--muted cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--disabled";
+  chip.title = "Stage is not available in F_20.04 geography data.";
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  label.textContent = stage === COST_OF_RISK_FILTER_ALL
+    ? "All Stage"
+    : getCostOfRiskFilterOptionLabel(options, stage) || "All Stage";
+  chip.append(label);
+  return chip;
 }
 
 function shouldShowCostOfRiskPeriodModeChip(activeTab) {

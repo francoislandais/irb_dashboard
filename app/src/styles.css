@@ -1320,6 +1320,242 @@ button:focus-visible {
   line-height: 1;
 }
 
+.cost-of-risk-field.is-disabled {
+  opacity: 0.48;
+}
+
+.cost-of-risk-field.is-disabled select {
+  cursor: not-allowed;
+}
+
+.cost-of-risk-filter-chip--disabled {
+  background: #eef1ef;
+  border-color: #d3dad6;
+  color: #7a837e;
+  opacity: 1;
+}
+
+.cost-of-risk-filter-chip--disabled .cost-of-risk-filter-chip-label {
+  color: #7a837e;
+}
+
+.cost-of-risk-geography {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+}
+
+.cost-of-risk-geography-panel {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cost-of-risk-geography-layout {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 154px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cost-of-risk-geography-side {
+  display: grid;
+  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cost-of-risk-geography-controls {
+  display: grid;
+  gap: 6px;
+}
+
+.cost-of-risk-geography-mode,
+.cost-of-risk-geography-country {
+  background: #f6f8f7;
+  border: 1px solid #dce3df;
+  border-radius: 6px;
+  color: #53605a;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  padding: 7px 9px;
+}
+
+.cost-of-risk-geography-mode.is-active,
+.cost-of-risk-geography-country.is-selected {
+  background: #e8f1ee;
+  border-color: transparent;
+  color: #173e35;
+}
+
+.cost-of-risk-geography-mode:focus-visible,
+.cost-of-risk-geography-country:focus-visible,
+.cost-of-risk-geography-search:focus-visible,
+.cost-of-risk-geography-value-button:focus-visible {
+  box-shadow: none;
+  outline: 0;
+}
+
+.cost-of-risk-geography-search {
+  background: #ffffff;
+  border: 1px solid #dce3df;
+  border-radius: 6px;
+  color: #24352d;
+  font: inherit;
+  min-width: 0;
+  width: 100%;
+  padding: 7px 9px;
+}
+
+.cost-of-risk-geography-picker {
+  display: grid;
+  gap: 5px;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.cost-of-risk-geography-table-scroll {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+}
+
+.cost-of-risk-geography-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  height: fit-content;
+  width: 100%;
+}
+
+.cost-of-risk-geography-table th {
+  background: #ffffff;
+  border-bottom: 1px solid #dce3df;
+  color: #6b746f;
+  font-weight: 500;
+  padding: 4px 8px;
+  position: sticky;
+  text-align: right;
+  top: 0;
+  z-index: 2;
+}
+
+.cost-of-risk-geography-table th:first-child {
+  text-align: left;
+}
+
+.cost-of-risk-geography-table td {
+  border-bottom: 1px solid #edf1ef;
+  padding: 1px 8px;
+}
+
+.cost-of-risk-geography-table tr:hover td,
+.cost-of-risk-geography-table tr:hover .cost-of-risk-geography-value-button {
+  background: #f6f7f6;
+}
+
+.cost-of-risk-geography-table tr.is-active-summary-row td,
+.cost-of-risk-geography-table tr.is-active-summary-row .cost-of-risk-geography-value-button,
+.cost-of-risk-geography-table tr.is-active-summary-row:hover td,
+.cost-of-risk-geography-table tr.is-active-summary-row:hover .cost-of-risk-geography-value-button {
+  background: #eef6f2;
+  color: inherit;
+}
+
+.cost-of-risk-geography-country-cell {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  line-height: 1.05;
+  min-width: 190px;
+}
+
+.cost-of-risk-geography-country-code {
+  color: #0a6da4;
+  font-weight: 600;
+  min-width: 24px;
+}
+
+.cost-of-risk-geography-country-label {
+  color: #3f4a45;
+}
+
+.cost-of-risk-geography-value-cell {
+  padding: 0;
+  position: relative;
+  text-align: right;
+}
+
+.cost-of-risk-geography-value-button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  line-height: 1.05;
+  min-height: 20px;
+  padding: 1px 8px;
+  position: relative;
+  text-align: right;
+  width: 100%;
+}
+
+.cost-of-risk-geography-value-button.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.cost-of-risk-geography-table tr.is-active-summary-row .cost-of-risk-geography-value-button.is-active,
+.cost-of-risk-geography-table tr.is-active-summary-row:hover .cost-of-risk-geography-value-button.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.cost-of-risk-geography-bar {
+  background: linear-gradient(90deg, rgba(10, 109, 164, 0.16), rgba(10, 109, 164, 0.04));
+  border-radius: 3px;
+  bottom: 3px;
+  display: block;
+  left: 8px;
+  position: absolute;
+  top: 3px;
+  width: var(--bar-width);
+}
+
+.cost-of-risk-geography-value {
+  color: inherit;
+  position: relative;
+  z-index: 1;
+}
+
+.cost-of-risk-geography-table tr.is-active-summary-row .cost-of-risk-geography-country-code,
+.cost-of-risk-geography-table tr.is-active-summary-row .cost-of-risk-geography-country-label {
+  color: inherit;
+}
+
+.cost-of-risk-geography-value-button.is-active .cost-of-risk-geography-bar {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08));
+}
+
+.cost-of-risk-geography-chart {
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  .cost-of-risk-geography-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .cost-of-risk-stage-filter-menu {
   background: #ffffff;
   border: 1px solid #d8dfdb;
@@ -1468,6 +1704,7 @@ button:focus-visible {
 
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="summary"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="cost-of-risk"],
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="geography"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="coverage-ratio"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="collateral-ratio"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="npl-flows"],
@@ -3452,6 +3689,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-split-section > .cost-of-risk-chart,
+.cost-of-risk-split-section > .cost-of-risk-geography-chart,
 .cost-of-risk-split-section > .cost-of-risk-waterfall,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-chart,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart,

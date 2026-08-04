@@ -1,5 +1,5 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
-import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260804-geography";
+import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransferFlowDiagramView.js?v=20260803-refactor-cleanup";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 

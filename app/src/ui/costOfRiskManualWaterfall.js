@@ -1,6 +1,6 @@
-import { COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+import { COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE } from "../data/costOfRisk.js?v=20260804-geography";
 import { formatBasisPointsValue } from "../data/core/formatting.js?v=20260710-bp-format";
-import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
+import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { getCostOfRiskCoreSectionLabel } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 

@@ -1,4 +1,4 @@
-import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+import { buildCostOfRiskRatioDenominatorDetail } from "../data/costOfRisk.js?v=20260804-geography";
 
 let lastCostOfRiskRatioDenominatorRenderKey = "";
 

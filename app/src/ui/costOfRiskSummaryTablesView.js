@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260804-geography";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 let costOfRiskSummaryMosaicClickTimer = null;

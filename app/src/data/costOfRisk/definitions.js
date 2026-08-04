@@ -43,6 +43,78 @@ export const COST_OF_RISK_TABLE_ID = "F_12.01";
 export const COST_OF_RISK_STAGE_TRANSFER_TABLE_ID = "F_12.02";
 export const COST_OF_RISK_STAGE_BOX_TABLE_ID = "F_18.00";
 export const COST_OF_RISK_NPL_FLOW_TABLE_ID = "F_18.01";
+export const COST_OF_RISK_GEOGRAPHY_TABLE_ID = "F_20.04";
+export const COST_OF_RISK_GEOGRAPHY_EXPOSURE_X_CODE = "0012";
+export const COST_OF_RISK_GEOGRAPHY_NON_PERFORMING_X_CODE = "0025";
+export const COST_OF_RISK_GEOGRAPHY_IMPAIRMENT_X_CODE = "0031";
+export const COST_OF_RISK_GEOGRAPHY_EURO_AREA_COUNTRIES = [
+  "AT",
+  "BE",
+  "HR",
+  "CY",
+  "EE",
+  "FI",
+  "FR",
+  "DE",
+  "GR",
+  "IE",
+  "IT",
+  "LV",
+  "LT",
+  "LU",
+  "MT",
+  "NL",
+  "PT",
+  "SK",
+  "SI",
+  "ES"
+];
+export const COST_OF_RISK_GEOGRAPHY_Y_CODES = {
+  all: {
+    debt: ["0080"],
+    loans: ["0140"]
+  },
+  "Central banks": {
+    debt: ["0090"],
+    loans: ["0150"]
+  },
+  "General governments": {
+    debt: ["0100"],
+    loans: ["0160"]
+  },
+  "Credit institutions": {
+    debt: ["0110"],
+    loans: ["0170"]
+  },
+  "Other financial corporations": {
+    debt: ["0120"],
+    loans: ["0180"]
+  },
+  "Non-financial corporations": {
+    debt: ["0130"],
+    loans: ["0190"]
+  },
+  NFC_SMES: {
+    debt: [],
+    loans: ["0200"]
+  },
+  NFC_CRE: {
+    debt: [],
+    loans: ["0210"]
+  },
+  Households: {
+    debt: [],
+    loans: ["0220"]
+  },
+  HH_RRE: {
+    debt: [],
+    loans: ["0230"]
+  },
+  HH_CONSUMPTION: {
+    debt: [],
+    loans: ["0240"]
+  }
+};
 export const COST_OF_RISK_NPL_FLOW_INFLOW_X_CODE = "0010";
 export const COST_OF_RISK_NPL_FLOW_OUTFLOW_X_CODE = "0020";
 export const COST_OF_RISK_NPL_FLOW_DEFINITION = [

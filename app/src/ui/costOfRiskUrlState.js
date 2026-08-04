@@ -5,7 +5,7 @@ const COST_OF_RISK_CELL_URL_PARAM = "cor_cell";
 const COST_OF_RISK_PERIOD_URL_PARAM = "cor_period";
 const COST_OF_RISK_PERIOD_URL_YTD = "ytd";
 
-const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "npl-flows", "stage-transfers", "contributions"]);
+const COST_OF_RISK_URL_TABS = new Set(["summary", "cost-of-risk", "geography", "npl-flows", "stage-transfers", "contributions"]);
 const COST_OF_RISK_PERIOD_URL_TABS = new Set(["cost-of-risk", "stage-transfers", "contributions"]);
 export const COST_OF_RISK_DISABLED_TABS = new Set(["f2-vs-f12", "stage-reconciliation", "core-definition", "analysis"]);
 

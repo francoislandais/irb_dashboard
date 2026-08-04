@@ -1,4 +1,4 @@
-import { COST_OF_RISK_DEFINITION_OPTIONS } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
+import { COST_OF_RISK_DEFINITION_OPTIONS } from "../data/costOfRisk.js?v=20260804-geography";
 
 export function getCostOfRiskHelpPanelContent(topic, activeCostOfRiskDefinitionId = "f12-selected-components") {
   if (!topic) return null;
