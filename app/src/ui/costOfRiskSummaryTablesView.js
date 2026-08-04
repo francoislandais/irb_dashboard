@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260804-lazy-index";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260804-index-empty-miss";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 
 let costOfRiskSummaryMosaicClickTimer = null;

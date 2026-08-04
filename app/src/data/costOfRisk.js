@@ -4696,13 +4696,11 @@ function decumulateQuarterlySeries(referenceColumns, values) {
 function getCostOfRiskIndexedPointRows(state, tableId, point, jstCode) {
   if (!state.dataIndexes?.byCoordinates || !point.xCode || !point.yCode) return null;
 
-  const indexedRows = getIndexedRowsByCoordinates(state, tableId, {
+  return getIndexedRowsByCoordinates(state, tableId, {
     selectedXCode: point.xCode,
     selectedYCode: point.yCode,
     selectedZCode: point.zCode ?? ""
   }, jstCode);
-
-  return indexedRows.length > 0 ? indexedRows : null;
 }
 
 function matchesAxis(row, indexes, axis, code) {

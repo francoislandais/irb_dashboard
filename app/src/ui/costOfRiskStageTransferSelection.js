@@ -1,4 +1,4 @@
-import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260804-lazy-index";
+import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260804-index-empty-miss";
 
 export const DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY = "transfer:1-2";
 

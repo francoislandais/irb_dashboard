@@ -4,7 +4,7 @@ import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260804-lazy-index";
+} from "../data/costOfRisk.js?v=20260804-index-empty-miss";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 

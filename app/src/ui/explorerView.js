@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-lazy-index";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-index-empty-miss";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
