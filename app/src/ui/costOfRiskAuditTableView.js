@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskAuditValue,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260804-index-empty-miss";
+} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
 
 export function renderCostOfRiskAuditTableView({
   activeDateLabel,

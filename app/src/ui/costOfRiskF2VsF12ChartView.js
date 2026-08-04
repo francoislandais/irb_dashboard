@@ -3,7 +3,7 @@ import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260804-index-empty-miss";
+} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskQuarterAxisLabelsOptions,

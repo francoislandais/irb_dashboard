@@ -1,4 +1,4 @@
-import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260804-lazy-index";
+import { getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260804-lazy-index";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "./core/axisColumns.js";
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "./core/formatting.js?v=20260710-bp-format";
@@ -4590,7 +4590,7 @@ function getPointSeriesValues(state, indexes, referenceColumns, tableId, point, 
 }
 
 function getCostOfRiskPointRows(state, indexes, tableId, point, jstCode) {
-  const indexedRows = getCostOfRiskIndexedPointRows(state, tableId, point, jstCode);
+  const indexedRows = getCostOfRiskIndexedPointRows(state, indexes, tableId, point, jstCode);
   if (indexedRows) return indexedRows;
 
   return state.rows.filter((row) => (
@@ -4693,14 +4693,24 @@ function decumulateQuarterlySeries(referenceColumns, values) {
   });
 }
 
-function getCostOfRiskIndexedPointRows(state, tableId, point, jstCode) {
+function getCostOfRiskIndexedPointRows(state, indexes, tableId, point, jstCode) {
   if (!state.dataIndexes?.byCoordinates || !point.xCode || !point.yCode) return null;
 
-  return getIndexedRowsByCoordinates(state, tableId, {
-    selectedXCode: point.xCode,
-    selectedYCode: point.yCode,
-    selectedZCode: point.zCode ?? ""
-  }, jstCode);
+  if (point.zCode) {
+    return getIndexedRowsByCoordinates(state, tableId, {
+      selectedXCode: point.xCode,
+      selectedYCode: point.yCode,
+      selectedZCode: point.zCode
+    }, jstCode);
+  }
+
+  const rowsToFilter = getIndexedRowsByAxisPoint(state, tableId, "y", point.yCode, jstCode);
+  if (rowsToFilter.length === 0) return [];
+
+  return rowsToFilter.filter((row) => (
+    matchesAxis(row, indexes, "x", point.xCode)
+    && matchesAxis(row, indexes, "y", point.yCode)
+  ));
 }
 
 function matchesAxis(row, indexes, axis, code) {

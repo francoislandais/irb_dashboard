@@ -1,4 +1,4 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260804-index-empty-miss";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
 import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransferFlowDiagramView.js?v=20260803-refactor-cleanup";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";

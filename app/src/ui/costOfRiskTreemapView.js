@@ -1,7 +1,7 @@
 import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskPointDisplayValue
-} from "../data/costOfRisk.js?v=20260804-index-empty-miss";
+} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
 import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
 
 let costOfRiskTreemapChart = null;

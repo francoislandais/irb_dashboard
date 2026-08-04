@@ -49,7 +49,7 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260804-index-empty-miss";
+} from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,

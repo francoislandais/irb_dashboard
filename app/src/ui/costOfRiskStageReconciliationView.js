@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-index-empty-miss";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-z-wildcard-index";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskHighchartsTitle,

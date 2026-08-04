@@ -16,7 +16,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260802-readable-selection-phrases";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260804-index-empty-miss";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260804-z-wildcard-index";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
