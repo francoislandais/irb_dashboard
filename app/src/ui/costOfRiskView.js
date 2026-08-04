@@ -218,7 +218,7 @@ import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js?v=20260804-no-blue-outline";
+} from "./costOfRiskManualWaterfall.js?v=20260804-flat-arrows";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,
