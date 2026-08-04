@@ -6,10 +6,10 @@ import {
 } from "../data/costOfRisk.js?v=20260803-refactor-cleanup";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
-  formatCostOfRiskQuarterAxisLabel,
+  createCostOfRiskQuarterAxisLabelsOptions,
   getCostOfRiskAxisTickPositions,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskF2VsF12Chart = null;
@@ -139,13 +139,7 @@ export function renderCostOfRiskF2VsF12Chart({
       }
     },
     xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
+      labels: createCostOfRiskQuarterAxisLabelsOptions(),
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: activePoint ? [{

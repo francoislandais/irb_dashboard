@@ -1292,6 +1292,34 @@ button:focus-visible {
   background: rgba(36, 53, 45, 0.08);
 }
 
+.cost-of-risk-axis-label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 28px;
+  text-align: center;
+  gap: 0;
+}
+
+.cost-of-risk-axis-quarter,
+.cost-of-risk-axis-year {
+  display: block;
+}
+
+.cost-of-risk-axis-quarter {
+  color: #7c8580;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.cost-of-risk-axis-year {
+  color: #7c8580;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+}
+
 .cost-of-risk-stage-filter-menu {
   background: #ffffff;
   border: 1px solid #d8dfdb;

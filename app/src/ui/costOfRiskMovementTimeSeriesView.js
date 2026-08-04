@@ -6,13 +6,13 @@ import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-form
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
-  formatCostOfRiskQuarterAxisLabel,
+  createCostOfRiskQuarterAxisLabelsOptions,
   getCostOfRiskAxisTickPositions,
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskBenchmarkModeBadge,
   renderCostOfRiskYAxisFocusBadge,
   renderCostOfRiskSmoothingBadge
-} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import {
   buildBenchmarkChartModel,
   clearBenchmarkEndpointLabels,
@@ -123,13 +123,7 @@ export function renderCostOfRiskMovementTimeSeriesChart({
       xDateFormat: "%d/%m/%Y"
     },
     xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
+      labels: createCostOfRiskQuarterAxisLabelsOptions(),
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: selectedReferencePoint?.date instanceof Date ? [{

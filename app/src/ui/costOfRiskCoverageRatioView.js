@@ -15,12 +15,12 @@ import {
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
-  formatCostOfRiskQuarterAxisLabel,
+  createCostOfRiskQuarterAxisLabelsOptions,
   getCostOfRiskAxisTickPositions,
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
   renderCostOfRiskYAxisFocusBadge
-} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCoverageRatioChart = null;
@@ -208,13 +208,7 @@ export function renderCostOfRiskCoverageRatioChart({
       xDateFormat: "%d/%m/%Y"
     },
     xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
+      labels: createCostOfRiskQuarterAxisLabelsOptions(),
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: selectedReferencePoint?.date instanceof Date ? [{

@@ -59,13 +59,13 @@ import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskStageReconciliationView.js?v=20260804-axis-year-labels";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
-  formatCostOfRiskQuarterAxisLabel,
+  createCostOfRiskQuarterAxisLabelsOptions,
   getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import {
   getCostOfRiskCounterpartySummaryValue,
   getCostOfRiskStageSummaryFilterValue,
@@ -81,13 +81,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskSummaryChartsView.js?v=20260804-axis-year-labels";
 import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260803-refactor-cleanup";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260804-axis-year-labels";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -95,7 +95,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskStageRatioView.js?v=20260804-axis-year-labels";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -103,7 +103,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskCoverageRatioView.js?v=20260804-axis-year-labels";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -111,12 +111,12 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskCollateralRatioView.js?v=20260804-axis-year-labels";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260804-axis-year-labels";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
@@ -125,7 +125,7 @@ import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260804-axis-year-labels";
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
@@ -1877,13 +1877,7 @@ function renderCostOfRiskDefinitionComparisonPanel(comparisonModels, benchmarkMo
       xDateFormat: "%d/%m/%Y"
     },
     xAxis: {
-      labels: {
-        formatter() {
-          return formatCostOfRiskQuarterAxisLabel(this.value);
-        },
-        rotation: -45,
-        style: { color: "#5f6b65" }
-      },
+      labels: createCostOfRiskQuarterAxisLabelsOptions(),
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: selectedReferencePoint?.date instanceof Date ? [{

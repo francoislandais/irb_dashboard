@@ -5,11 +5,35 @@ export const COST_OF_RISK_CHART_TITLE_POSITION = {
 };
 
 // Shared by every Cost of Risk temporal chart so quarterly reference dates
-// read "Q12026" on the x-axis instead of a raw date.
-export function formatCostOfRiskQuarterAxisLabel(timestamp) {
+// read as a compact quarter row with a separate year marker below the first
+// visible quarter of each year.
+export function formatCostOfRiskQuarterAxisLabel(timestamp, tickPositions = []) {
   const date = new Date(timestamp);
   const quarter = Math.floor(date.getMonth() / 3) + 1;
-  return `Q${quarter}${date.getFullYear()}`;
+  const year = date.getFullYear();
+  const orderedTicks = [...(tickPositions ?? [])].filter(Number.isFinite).sort((left, right) => left - right);
+  const tickIndex = orderedTicks.findIndex((tick) => tick === timestamp);
+  const previousTick = tickIndex > 0 ? orderedTicks[tickIndex - 1] : null;
+  const previousYear = previousTick ? new Date(previousTick).getFullYear() : null;
+  const shouldShowYear = tickIndex <= 0 || previousYear !== year;
+
+  return `<span class="cost-of-risk-axis-label"><span class="cost-of-risk-axis-quarter">Q${quarter}</span><span class="cost-of-risk-axis-year">${shouldShowYear ? year : "&nbsp;"}</span></span>`;
+}
+
+export function createCostOfRiskQuarterAxisLabelsOptions() {
+  return {
+    formatter() {
+      return formatCostOfRiskQuarterAxisLabel(this.value, this.axis?.tickPositions);
+    },
+    rotation: 0,
+    useHTML: true,
+    y: 14,
+    style: {
+      color: "#5f6b65",
+      textAlign: "center",
+      whiteSpace: "nowrap"
+    }
+  };
 }
 
 // Reference dates are real calendar quarter-ends (31/03, 30/06, ...), which
