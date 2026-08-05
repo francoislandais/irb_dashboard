@@ -4107,6 +4107,60 @@ button:focus-visible {
   color: #435049;
 }
 
+.explorer-template-list-section {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-top: 9px;
+  border-top: 1px solid #edf0ee;
+}
+
+.explorer-template-list-section h3 {
+  margin: 0;
+  color: #26332d;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.explorer-template-list-hint {
+  margin: 0;
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.explorer-template-list {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.explorer-template-option {
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.76rem;
+  line-height: 1.25;
+  min-height: 28px;
+  overflow-wrap: anywhere;
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.explorer-template-option:hover {
+  background: #eef2ef;
+}
+
+.explorer-template-option.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
+  cursor: default;
+  font-weight: 600;
+}
+
 .filter-summary {
   display: flex;
   flex-wrap: wrap;
@@ -4275,6 +4329,10 @@ table {
   overflow: hidden;
   padding: 0;
   text-align: left;
+}
+
+.axis-tab--static {
+  cursor: default;
 }
 
 .axis-tab[hidden] {

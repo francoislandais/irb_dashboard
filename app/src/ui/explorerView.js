@@ -70,7 +70,12 @@ const AXIS_URL_PARAM = "axis";
 const ROW_URL_PARAM = "row";
 const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
-const EXPLORER_AXIS_VALUES = new Set(["template", "x", "y", "z"]);
+// "template" used to be a fourth browsable axis (clicking the template tab
+// turned the main table into a list of templates); that mode is retired in
+// favor of the always-visible template list in the context panel, so it's
+// no longer a value the active axis can resolve to — including from a
+// bookmarked/refreshed URL that still has an old ?axis=template.
+const EXPLORER_AXIS_VALUES = new Set(["x", "y", "z"]);
 // Captured synchronously at module load, before any render can mutate the URL,
 // so the originally bookmarked/refreshed selection is never lost to a premature render.
 const pendingUrlAxis = getUrlAxisParam();
@@ -323,6 +328,23 @@ function updateUrlTemplateParam(templateId) {
     url.searchParams.delete(TEMPLATE_URL_PARAM);
   }
   window.history.replaceState({}, "", url);
+}
+
+// Switches the active template from the context panel's template list.
+// Deliberately does not touch context.activeAxis: each template keeps its
+// own remembered row/column/tab selection (see getExplorerContextForTemplate),
+// so switching templates here just swaps which template's data the main
+// table shows, without forcing it into any particular browsing mode.
+function setActiveExplorerTemplate(tableId) {
+  if (!tableId || tableId === activeExplorerTemplateId) return;
+
+  hasInteractedWithExplorerSelection = true;
+  activeExplorerTemplateId = tableId;
+  updateUrlTemplateParam(activeExplorerTemplateId);
+  if (getLatestState()) {
+    saveExplorerScrollPosition();
+    rerenderApp(getLatestState());
+  }
 }
 
 function findMatchingExplorerTemplateId(templates, requestedTemplateId) {
@@ -1349,13 +1371,17 @@ function renderExplorerContextPanel(state) {
     : "Explorer lets you inspect source regulatory datapoints by template, row, column and tab.";
 
   article.append(eyebrow, title, lead);
+
+  if (!explorerBenchmarkViewActive) {
+    article.append(createExplorerTemplateList(getExplorerTemplates(state), activeTemplate?.tableId ?? activeExplorerTemplateId));
+  }
+
   const cellRangeAggregate = buildExplorerCellRangeAggregate();
   if (cellRangeAggregate?.count > 0) {
     article.append(createExplorerCellRangeContext(cellRangeAggregate, state?.selectedUnit));
   }
 
   [
-    ["Template", `${activeTemplate?.tableId || activeExplorerTemplateId} - ${activeTemplate?.label || ""}`.trim()],
     ["Active axis", activeAxisLabel],
     ["Selected item", selectedCaption],
     ["Selected JST", state?.selectedJst || "-"]
@@ -1365,7 +1391,7 @@ function renderExplorerContextPanel(state) {
 
   const hint = document.createElement("p");
   hint.className = "explorer-context-hint";
-  hint.textContent = "Use the compact axis buttons to switch the table dimension. Drag across numeric cells for a quick sum; hold Command on Mac or Ctrl on Windows/Linux to add another range.";
+  hint.textContent = "Select a template above to switch it. Use the compact axis buttons to switch the table dimension. Drag across numeric cells for a quick sum; hold Command on Mac or Ctrl on Windows/Linux to add another range.";
   article.append(hint);
 
   elements.explorerContextPanel.replaceChildren(article);
@@ -1623,6 +1649,45 @@ function createExplorerContextItem(label, value) {
   return item;
 }
 
+// The template axis-tab is now a static display only (see index.html):
+// this list is the only way left to switch templates, so it's always
+// visible in the context panel rather than behind a click.
+function createExplorerTemplateList(templates, activeTemplateId) {
+  const section = document.createElement("section");
+  section.className = "explorer-template-list-section";
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Template";
+  section.append(heading);
+
+  const hint = document.createElement("p");
+  hint.className = "explorer-template-list-hint";
+  hint.textContent = "Select a regulatory template to explore. The change applies immediately.";
+  section.append(hint);
+
+  const list = document.createElement("div");
+  list.className = "explorer-template-list";
+  list.setAttribute("role", "listbox");
+  list.setAttribute("aria-label", "Template");
+
+  templates.forEach((template) => {
+    const isActive = template.tableId === activeTemplateId;
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "explorer-template-option";
+    option.classList.toggle("is-active", isActive);
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", String(isActive));
+    option.title = template.label;
+    option.textContent = template.label;
+    option.addEventListener("click", () => setActiveExplorerTemplate(template.tableId));
+    list.append(option);
+  });
+
+  section.append(list);
+  return section;
+}
+
 function getExplorerAxisDisplayName(axis) {
   if (axis === "template") return "Template";
   if (axis === "x") return "Column";
@@ -1706,7 +1771,11 @@ function getExplorerAxisCaptions() {
   const activeTemplate = getActiveExplorerTemplate();
 
   return {
-    template: formatExplorerAxisCaption(activeTemplate?.tableId || activeExplorerTemplateId, activeTemplate?.label || activeExplorerTemplateId),
+    // activeTemplate.label is already "<tableId> - <description>" (see
+    // getExplorerTemplateLabel), so it's used as-is here instead of going
+    // through formatExplorerAxisCaption like the other axes, which would
+    // double the table ID (e.g. "F_01.01 - F_01.01 - Own funds").
+    template: activeTemplate?.label || activeExplorerTemplateId,
     x: formatExplorerAxisCaption(context.selectedXCode, xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : "")),
     y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
     z: formatExplorerAxisCaption(context.selectedZCode, zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))

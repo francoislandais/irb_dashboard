@@ -150,7 +150,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260802-readable-selection-phrases";
-import { openExplorerPoint } from "./explorerView.js?v=20260804-lazy-index";
+import { openExplorerPoint } from "./explorerView.js?v=20260804-static-template-tab";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-readable-selection-phrases";
 import {
   clearCostOfRiskEmptyPanelsView,

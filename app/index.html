@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260804-explorer-panel-right">
+    <link rel="stylesheet" href="./src/styles.css?v=20260804-static-template-tab">
   </head>
   <body>
     <div class="app-shell">
@@ -63,10 +63,10 @@
             <div class="explorer-workspace">
               <div class="explorer-main-pane">
                 <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
-                  <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="template">
+                  <div class="axis-tab axis-tab--static" aria-label="Active template">
                     <span class="axis-tab-title">template</span>
                     <span class="axis-tab-value" data-axis-caption="template">-</span>
-                  </button>
+                  </div>
                   <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-explorer-axis="y">
                     <span class="axis-tab-title">row</span>
                     <span class="axis-tab-value" data-axis-caption="y">-</span>
@@ -331,6 +331,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260804-subtle-outline"></script>
+    <script type="module" src="./src/main.js?v=20260804-static-template-tab"></script>
   </body>
 </html>
