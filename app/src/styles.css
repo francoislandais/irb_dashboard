@@ -4631,7 +4631,7 @@ table {
 .metric-table th,
 .metric-table td {
   border: 0;
-  padding: 6px 4px;
+  padding: 3px 4px;
   text-align: right;
   white-space: nowrap;
 }
@@ -4718,7 +4718,7 @@ table {
 
 .metric-table tbody .description-column {
   font-weight: 400;
-  line-height: 1.25;
+  line-height: 1.18;
 }
 
 .metric-table .code-column {
