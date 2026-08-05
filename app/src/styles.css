@@ -1089,7 +1089,7 @@ button:focus-visible {
 @media (max-width: 1180px) {
   .explorer-workspace {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(180px, auto) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(180px, auto);
   }
 
   .explorer-context-panel {
@@ -3978,7 +3978,7 @@ button:focus-visible {
 
 .explorer-workspace {
   display: grid;
-  grid-template-columns: 300px minmax(0, 900px);
+  grid-template-columns: minmax(0, 900px) 300px;
   gap: 16px;
   min-height: 0;
   min-width: 0;
