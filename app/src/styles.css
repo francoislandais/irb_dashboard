@@ -3995,6 +3995,15 @@ button:focus-visible {
   overflow: hidden;
 }
 
+/* Same split as Cost of Risk's tab panels: data on top, the benchmark
+   chart in a fixed-height band underneath. No on-chart header/title here
+   (removed — see explorerView.js), so the table keeps the room that used
+   to go to it: --cost-risk-top-chart-height (260px) rather than the full
+   --cost-risk-time-chart-height (300px). */
+.explorer-main-pane.has-benchmark {
+  grid-template-rows: auto minmax(120px, 1fr) var(--cost-risk-top-chart-height);
+}
+
 .explorer-context-panel {
   align-self: stretch;
   align-content: start;
@@ -4107,58 +4116,133 @@ button:focus-visible {
   color: #435049;
 }
 
+.explorer-selection-summary-pane {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 8px;
+  height: 132px;
+  padding: 8px;
+  border: 1px solid #dfe6e1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.explorer-selection-summary-description {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-height: 0;
+  overflow: hidden;
+  background: #f6f8f7;
+  border-radius: 7px;
+  padding: 8px;
+  color: #66736d;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.explorer-selection-summary-line {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.explorer-selection-summary-label {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.explorer-selection-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.explorer-selection-summary-benchmark-button {
+  border: 1px solid var(--primary-dark);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 6px 12px;
+}
+
+.explorer-selection-summary-benchmark-button:hover,
+.explorer-selection-summary-benchmark-button:focus-visible {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.explorer-selection-summary-benchmark-button.is-active {
+  background: var(--primary-dark);
+  color: #ffffff;
+}
+
+.explorer-selection-summary-benchmark-button:disabled {
+  border-color: #c6cec8;
+  background: transparent;
+  color: #a6b0ab;
+  cursor: default;
+}
+
 .explorer-template-list-section {
   display: grid;
   gap: 6px;
   min-width: 0;
-  padding-top: 9px;
-  border-top: 1px solid #edf0ee;
-}
-
-.explorer-template-list-section h3 {
-  margin: 0;
-  color: #26332d;
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.explorer-template-list-hint {
-  margin: 0;
-  color: #66736d;
-  font-size: 0.72rem;
-  line-height: 1.35;
 }
 
 .explorer-template-list {
   display: grid;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
 }
 
 .explorer-template-option {
-  background: transparent;
-  border: 0;
-  border-radius: 5px;
+  display: grid;
+  gap: 2px;
+  background: #f7f9f8;
+  border: 1px solid #e7ebe9;
+  border-radius: 8px;
   color: var(--text);
   cursor: pointer;
-  font-size: 0.76rem;
-  line-height: 1.25;
-  min-height: 28px;
   overflow-wrap: anywhere;
-  padding: 5px 8px;
+  padding: 8px 10px;
   text-align: left;
+  transition: background .15s ease, border-color .15s ease;
 }
 
 .explorer-template-option:hover {
   background: #eef2ef;
+  border-color: #dce3e0;
 }
 
 .explorer-template-option.is-active {
   background: var(--primary-dark);
-  color: #ffffff;
+  border-color: var(--primary-dark);
   cursor: default;
-  font-weight: 600;
+}
+
+.explorer-template-option-code {
+  color: #26332d;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.explorer-template-option.is-active .explorer-template-option-code {
+  color: #ffffff;
+}
+
+.explorer-template-option-description {
+  color: #66736d;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.explorer-template-option.is-active .explorer-template-option-description {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .filter-summary {
@@ -4225,7 +4309,7 @@ table {
 
 .metric-table-wrap {
   position: relative;
-  grid-row: -2 / -1;
+  grid-row: 2;
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -4233,40 +4317,41 @@ table {
 }
 
 .explorer-benchmark-view {
-  display: grid;
-  grid-row: -2 / -1;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px;
+  position: relative;
+  grid-row: 3;
   min-width: 0;
   min-height: 0;
   height: 100%;
   overflow: hidden;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
 }
 
 .explorer-benchmark-view[hidden] {
   display: none;
 }
 
-.explorer-benchmark-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.explorer-benchmark-back {
-  border: 1px solid var(--primary-dark);
+/* Overlaid on the chart itself (not a header row) so it never eats into
+   the chart's own fixed height — see .explorer-benchmark-view. */
+.explorer-benchmark-close {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  z-index: 1;
+  border: 0;
   border-radius: 6px;
-  background: transparent;
-  color: var(--primary-dark);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 7px 14px;
+  background: #ffffff;
+  color: #66736d;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 4px 8px;
 }
 
-.explorer-benchmark-back:hover,
-.explorer-benchmark-back:focus-visible {
-  background: var(--primary-dark);
-  color: #ffffff;
+.explorer-benchmark-close:hover,
+.explorer-benchmark-close:focus-visible {
+  background: #eef2ef;
+  color: var(--primary-dark);
 }
 
 .explorer-benchmark-chart {
@@ -4331,10 +4416,6 @@ table {
   text-align: left;
 }
 
-.axis-tab--static {
-  cursor: default;
-}
-
 .axis-tab[hidden] {
   display: none;
 }
@@ -4379,9 +4460,9 @@ table {
   overflow: hidden;
   background: #ffffff;
   color: var(--ink);
-  font-size: 0.66rem;
-  font-weight: 400;
-  line-height: 1.15;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
   padding: 5px 7px;
 }
 
@@ -4411,6 +4492,51 @@ table {
   gap: 2px;
   max-height: 48px;
   overflow: hidden;
+}
+
+.explorer-template-static {
+  display: flex;
+  flex: 0 0 219px;
+  align-items: center;
+  width: 219px;
+  max-width: 219px;
+  height: 78px;
+  margin-right: 16px;
+  padding-right: 16px;
+}
+
+.explorer-template-static-value {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.explorer-template-static-lines {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.explorer-template-static-code {
+  display: block;
+  overflow: hidden;
+  color: var(--primary-dark);
+  font-size: 1.18rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explorer-template-static-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #66736d;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .axis-tab-ratio {
@@ -4747,14 +4873,6 @@ table {
   max-width: 88px;
 }
 
-.metric-table .latest-column {
-  color: var(--primary-dark);
-}
-
-.metric-table td.latest-column {
-  font-size: 0.88rem;
-}
-
 .metric-table .description-column {
   position: sticky;
   left: 0;
@@ -4980,10 +5098,6 @@ table {
 
 .metric-table tbody tr.is-selected .tree-toggle {
   color: #ffffff;
-}
-
-.metric-table tbody tr.is-contribution-child > td {
-  color: var(--primary-dark);
 }
 
 .metric-table tbody tr > td.is-cell-range-selected,

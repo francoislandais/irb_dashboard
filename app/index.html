@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260804-static-template-tab">
+    <link rel="stylesheet" href="./src/styles.css?v=20260805-denom-button-plain-table">
   </head>
   <body>
     <div class="app-shell">
@@ -63,9 +63,8 @@
             <div class="explorer-workspace">
               <div class="explorer-main-pane">
                 <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
-                  <div class="axis-tab axis-tab--static" aria-label="Active template">
-                    <span class="axis-tab-title">template</span>
-                    <span class="axis-tab-value" data-axis-caption="template">-</span>
+                  <div class="explorer-template-static" aria-label="Active template">
+                    <span class="explorer-template-static-value" data-axis-caption="template">-</span>
                   </div>
                   <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-explorer-axis="y">
                     <span class="axis-tab-title">row</span>
@@ -84,10 +83,7 @@
                   <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
                 </div>
                 <div id="explorer-benchmark-view" class="explorer-benchmark-view" hidden>
-                  <div class="explorer-benchmark-header">
-                    <button id="explorer-benchmark-back" class="explorer-benchmark-back" type="button">Back to table</button>
-                    <h3 id="explorer-benchmark-title" class="cost-of-risk-chart-title"></h3>
-                  </div>
+                  <button id="explorer-benchmark-close" class="explorer-benchmark-close" type="button" aria-label="Close benchmark">&times;</button>
                   <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
                 </div>
               </div>

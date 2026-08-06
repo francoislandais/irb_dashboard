@@ -205,8 +205,12 @@ const EXPLORER_TEMPLATE_LABELS = {
 
 };
 
+export function getExplorerTemplateDescription(tableId) {
+  return EXPLORER_TEMPLATE_LABELS[tableId] ?? "";
+}
+
 export function getExplorerTemplateLabel(tableId) {
-  const description = EXPLORER_TEMPLATE_LABELS[tableId];
+  const description = getExplorerTemplateDescription(tableId);
   return description ? `${tableId} - ${description}` : tableId;
 }
 
@@ -214,8 +218,9 @@ export function getExplorerTemplates(state) {
   const tableIds = getExplorerTableIds(state);
 
   return tableIds.map((tableId) => ({
-    tableId,
-    label: getExplorerTemplateLabel(tableId)
+    description: getExplorerTemplateDescription(tableId),
+    label: getExplorerTemplateLabel(tableId),
+    tableId
   }));
 }
 
