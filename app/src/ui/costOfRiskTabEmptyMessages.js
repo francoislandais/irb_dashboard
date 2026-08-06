@@ -1,14 +1,14 @@
 import {
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL
-} from "../data/costOfRisk.js?v=20260804-geography";
+} from "../data/costOfRisk.js?v=20260806-cell-selection";
 import {
   formatCostOfRiskCounterpartySelectionLabel,
   getCostOfRiskFilterParentValue,
   getCostOfRiskUnavailableMessage,
   isCostOfRiskIfrsStageFilterValue,
   isCostOfRiskPerformanceStatusFilterValue
-} from "./costOfRiskFilterRules.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskFilterRules.js?v=20260806-cell-selection";
 
 // Turns the raw "no data" status message a tab renders into either plain
 // text or an inline call-to-action (a button that clears the filter that's

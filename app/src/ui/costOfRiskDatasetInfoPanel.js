@@ -1,7 +1,7 @@
 import {
   createCostOfRiskAuditInfoSection,
   createCostOfRiskAuditIntroHeader
-} from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskAuditPanelNodes.js?v=20260806-cell-selection";
 
 export function createCostOfRiskDatasetInfoPanel(state) {
   const activeDataset = state?.datasets?.find((dataset) => dataset.id === state.activeDatasetId) ?? null;

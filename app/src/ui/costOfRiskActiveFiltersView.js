@@ -4,8 +4,8 @@ import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260804-geography";
-import { COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS } from "./costOfRiskFilterSelectionConfig.js";
+} from "../data/costOfRisk.js?v=20260806-cell-selection";
+import { COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS } from "./costOfRiskFilterSelectionConfig.js?v=20260806-cell-selection";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 

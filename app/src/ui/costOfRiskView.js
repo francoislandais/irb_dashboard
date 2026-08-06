@@ -50,12 +50,12 @@ import {
   getCostOfRiskYAxisBounds,
   getSelectedSmoothedCostOfRiskPoint,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260804-geography";
+} from "../data/costOfRisk.js?v=20260806-cell-selection";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransferFlowDiagramView.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskStageTransferFlowDiagramView.js?v=20260806-cell-selection";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
@@ -83,7 +83,7 @@ import {
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
 } from "./costOfRiskSummaryChartsView.js?v=20260804-axis-year-labels";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260803-refactor-cleanup";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260806-cell-selection";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
@@ -127,7 +127,7 @@ import {
   formatCostOfRiskGeographyCellValue,
   getCostOfRiskGeographyChart,
   renderCostOfRiskGeographyView
-} from "./costOfRiskGeographyView.js?v=20260804-geography-scroll";
+} from "./costOfRiskGeographyView.js?v=20260806-cell-selection-scroll";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
@@ -136,11 +136,11 @@ import {
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260804-geography";
+} from "./benchmarkLineChart.js?v=20260806-cell-selection";
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260804-geography";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260806-cell-selection";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -150,14 +150,14 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260802-readable-selection-phrases";
-import { openExplorerPoint } from "./explorerView.js?v=20260805-denom-button-plain-table";
+import { openExplorerPoint } from "./explorerView.js?v=20260806-cell-selection";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-readable-selection-phrases";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
 } from "./costOfRiskTabsView.js?v=20260802-readable-selection-phrases";
-import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260803-refactor-cleanup";
+import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260806-cell-selection";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
@@ -168,7 +168,7 @@ import {
   getCostOfRiskUnavailableMessage as getUnavailableMessage,
   isCostOfRiskIfrsStageFilterValue,
   isCostOfRiskPerformanceStatusFilterValue
-} from "./costOfRiskFilterRules.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskFilterRules.js?v=20260806-cell-selection";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -186,30 +186,30 @@ import {
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getLatestState } from "./appState.js";
-import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260804-geography";
+import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260806-cell-selection";
 import {
   COST_OF_RISK_FILTER_SELECTION_META,
   COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS,
   COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS
-} from "./costOfRiskFilterSelectionConfig.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskFilterSelectionConfig.js?v=20260806-cell-selection";
 import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
 } from "./costOfRiskFilterPreviewRenderer.js?v=20260803-bar-fade";
-import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260803-refactor-cleanup";
-import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260803-refactor-cleanup";
+import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260806-cell-selection";
+import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260806-cell-selection";
 import {
   COST_OF_RISK_DISABLED_TABS,
   readCostOfRiskUrlState,
   writeCostOfRiskUrlState
-} from "./costOfRiskUrlState.js?v=20260804-geography";
+} from "./costOfRiskUrlState.js?v=20260806-cell-selection";
 import {
   COST_OF_RISK_COMPARISON_DEFINITION_ID,
   COST_OF_RISK_COMPARISON_METHOD_IDS,
   COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
   COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
   COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE
-} from "./costOfRiskTabConfig.js?v=20260804-geography";
+} from "./costOfRiskTabConfig.js?v=20260806-cell-selection";
 import {
   getCostOfRiskAuditPanelIntroContent,
   getCostOfRiskHelpPanelContent
@@ -218,7 +218,7 @@ import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js?v=20260804-subtle-outline";
+} from "./costOfRiskManualWaterfall.js?v=20260806-cell-selection";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,
@@ -226,7 +226,7 @@ import {
   createCostOfRiskSelectedDataDescription,
   createCostOfRiskSelectedDataDescriptionWithDetail,
   createCostOfRiskSelectedDataPlaceholder
-} from "./costOfRiskAuditPanelNodes.js?v=20260803-refactor-cleanup";
+} from "./costOfRiskAuditPanelNodes.js?v=20260806-cell-selection";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};

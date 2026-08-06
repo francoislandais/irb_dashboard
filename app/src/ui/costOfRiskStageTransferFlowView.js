@@ -1,6 +1,6 @@
-import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260804-geography";
+import { formatCostOfRiskDisplayValue } from "../data/costOfRisk.js?v=20260806-cell-selection";
 import { COST_OF_RISK_CHART_TITLE_POSITION } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
-import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransferFlowDiagramView.js?v=20260803-refactor-cleanup";
+import { renderCostOfRiskStageTransferFlowDiagram } from "./costOfRiskStageTransferFlowDiagramView.js?v=20260806-cell-selection";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 export function renderCostOfRiskStageTransferFlowView({

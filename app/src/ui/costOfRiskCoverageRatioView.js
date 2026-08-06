@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260804-geography";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260806-cell-selection";
 import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   buildBenchmarkChartModel,
@@ -11,7 +11,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260804-geography";
+} from "./benchmarkLineChart.js?v=20260806-cell-selection";
 import {
   createCostOfRiskHighchartsTitle,
   escapeHtml,
