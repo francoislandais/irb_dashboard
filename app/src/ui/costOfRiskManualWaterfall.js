@@ -20,7 +20,7 @@ export function createManualWaterfallData(contributions) {
     end: total,
     groupIndex: 0,
     isTotal: true,
-    name: "Total contribution",
+    name: "Total movement",
     start: 0
   });
 

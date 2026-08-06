@@ -5,6 +5,7 @@ import {
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260804-geography";
+import { COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS } from "./costOfRiskFilterSelectionConfig.js";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -58,8 +59,8 @@ export function renderCostOfRiskActiveFiltersView({
   const balanceScopeItem = createCostOfRiskPerimeterFilterChip("balanceScope", filters.balanceScope, filterOptions.balanceScopes, balanceScopeMenuOpen);
   const instrumentItem = createCostOfRiskPerimeterFilterChip("instrument", filters.asset, filterOptions.assets, instrumentMenuOpen);
   const counterpartyItem = createCostOfRiskPerimeterFilterChip("counterparty", filters.counterparty, filterOptions.counterparties, counterpartyMenuOpen);
-  const stageItem = activeTab === "geography"
-    ? createCostOfRiskDisabledStageChip(filters.stage, filterOptions.stages)
+  const stageItem = COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS.has(activeTab)
+    ? null
     : createCostOfRiskPerimeterFilterChip("stage", filters.stage, filterOptions.stages, stageMenuOpen);
   const remainingActiveItems = [
     instrumentItem,
@@ -166,19 +167,6 @@ export function renderCostOfRiskActiveFiltersView({
 
   container.replaceChildren(...chips);
   container.classList.toggle("is-empty", activeItems.length === 0);
-}
-
-function createCostOfRiskDisabledStageChip(stage, options) {
-  const chip = document.createElement("div");
-  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--muted cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--disabled";
-  chip.title = "Stage is not available in F_20.04 geography data.";
-  const label = document.createElement("span");
-  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  label.textContent = stage === COST_OF_RISK_FILTER_ALL
-    ? "All Stage"
-    : getCostOfRiskFilterOptionLabel(options, stage) || "All Stage";
-  chip.append(label);
-  return chip;
 }
 
 function shouldShowCostOfRiskPeriodModeChip(activeTab) {

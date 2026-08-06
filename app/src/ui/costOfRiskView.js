@@ -174,7 +174,6 @@ import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
   getCostOfRiskStageTransferFlowKeyForStageFilter,
   getCostOfRiskStageTransferStage,
-  getCostOfRiskStageFilterForStageTransferFlowKey,
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
@@ -190,7 +189,8 @@ import { getLatestState } from "./appState.js";
 import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260804-geography";
 import {
   COST_OF_RISK_FILTER_SELECTION_META,
-  COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS
+  COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS,
+  COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS
 } from "./costOfRiskFilterSelectionConfig.js?v=20260803-refactor-cleanup";
 import {
   createCostOfRiskFilterPreviewCacheKey,
@@ -272,6 +272,13 @@ let activeCostOfRiskCoverageRatioCellKey = DEFAULT_COST_OF_RISK_COVERAGE_RATIO_C
 let activeCostOfRiskCollateralRatioCellKey = DEFAULT_COST_OF_RISK_COLLATERAL_RATIO_CELL;
 let activeCostOfRiskChartTitleText = "Time evolution chart";
 let activeCostOfRiskAuditIntroTab = "";
+// Tracks whether the active tab changed since the audit/context panel was
+// last written to. The panel is only re-rendered when a fresh click happens
+// on the current tab (see allowDataAudit below); without this, switching to
+// a tab that has nothing new to show would silently leave the previous
+// tab's stale content in the shared panel.
+let lastRenderedCostOfRiskAuditPanelTab = "";
+let didCostOfRiskAuditPanelTabJustChange = false;
 let activeCostOfRiskHelpTopic = "";
 let activeCostOfRiskSelectedDataSummaryNode = null;
 let activeCostOfRiskDataAuditRequested = false;
@@ -797,6 +804,8 @@ export function wireCostOfRiskUi(actions, rerender) {
 export function renderCostOfRisk(state) {
   if (!elements.costOfRiskEmpty || !elements.costOfRiskDashboard) return;
   normalizeActiveCostOfRiskTab();
+  didCostOfRiskAuditPanelTabJustChange = activeCostOfRiskTab !== lastRenderedCostOfRiskAuditPanelTab;
+  lastRenderedCostOfRiskAuditPanelTab = activeCostOfRiskTab;
   renderCostOfRiskTabs();
   clearCostOfRiskEmptyPanels();
 
@@ -871,10 +880,10 @@ export function renderCostOfRisk(state) {
   renderFilterSelect(elements.costOfRiskCounterparty, filterOptions.counterparties, activeCostOfRiskFilters.counterparty);
   renderFilterSelect(elements.costOfRiskStage, filterOptions.stages, activeCostOfRiskFilters.stage);
   if (elements.costOfRiskStage) {
-    const stageUnavailable = activeCostOfRiskTab === "geography";
+    const stageUnavailable = COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS.has(activeCostOfRiskTab);
     elements.costOfRiskStage.disabled = stageUnavailable || elements.costOfRiskStage.disabled;
     elements.costOfRiskStage.closest?.(".cost-of-risk-field")?.classList.toggle("is-disabled", stageUnavailable);
-    elements.costOfRiskStage.title = stageUnavailable ? "Stage is not available in F_20.04 geography data." : "";
+    elements.costOfRiskStage.title = stageUnavailable ? "Stage / performing status is not available for this tab." : "";
   }
   renderCostOfRiskActiveFilters(filterOptions);
   if (!COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER.has(activeCostOfRiskTab)) renderCostOfRiskHelpPanel();
@@ -920,13 +929,13 @@ export function renderCostOfRisk(state) {
       if (elements.costOfRiskNplFlowsChart) elements.costOfRiskNplFlowsChart.replaceChildren();
       destroyCostOfRiskMovementChart();
       renderCostOfRiskTabEmpty(nplFlows.status);
-      renderCostOfRiskHelpPanel();
+      if (!renderCostOfRiskHelpPanel()) renderCostOfRiskStageDecompositionUnavailablePanel();
       scheduleCostOfRiskChartReflow();
       return;
     }
     renderCostOfRiskNplFlowsView(nplFlows, state);
     setCostOfRiskNplFlowsSelectedDataSummary(nplFlows, state);
-    renderCostOfRiskHelpPanel();
+    if (!renderCostOfRiskHelpPanel()) renderCostOfRiskStageDecompositionUnavailablePanel();
     scheduleCostOfRiskChartReflow();
     return;
   }
@@ -1183,17 +1192,6 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
     clearCostOfRiskAuditTable();
-    if (isCostOfRiskPerformanceStatusFilterValue(activeCostOfRiskFilters.stage)) {
-      clearCostOfRiskSelectedDataSummary();
-      destroyCostOfRiskStageTransferChart();
-      destroyCostOfRiskStageTransferFlowChart();
-      if (elements.costOfRiskStageTransferChart) elements.costOfRiskStageTransferChart.replaceChildren();
-      if (elements.costOfRiskStageTransferFlowChartWrap) elements.costOfRiskStageTransferFlowChartWrap.hidden = true;
-      renderCostOfRiskTabEmpty("FINREP data does not support this level of detail with a breakdown by performing status. Remove this filter.");
-      renderCostOfRiskHelpPanel();
-      scheduleCostOfRiskChartReflow();
-      return;
-    }
     renderCostOfRiskStageTransferView(state);
     renderCostOfRiskStageTransferAuditPanel(state, { allowDataAudit: consumeCostOfRiskDataAuditRequest() });
     scheduleCostOfRiskChartReflow();
@@ -2348,6 +2346,22 @@ function syncCostOfRiskStageTransferSelectionFromStageFilter() {
   );
 }
 
+// Mirrors syncCostOfRiskStageTransferSelectionFromStageFilter: whichever
+// stage the global filter now points to must also be the row highlighted in
+// the Summary stage table, regardless of whether the filter was changed via
+// the filter picker or by clicking a table row in the first place.
+function syncCostOfRiskStageSummarySelectionFromStageFilter() {
+  const rowKey = getCostOfRiskStageSummaryRowKeyForStageFilterValue(activeCostOfRiskFilters.stage);
+  if (!rowKey) return;
+  const columnKey = getCostOfRiskSummaryCellColumnKey(activeCostOfRiskStageSummaryCellKey) || "gca:ratio";
+  activeCostOfRiskStageSummaryCellKey = `${columnKey}:${rowKey}`;
+}
+
+function getCostOfRiskStageSummaryRowKeyForStageFilterValue(stageValue) {
+  const candidateRowKeys = ["all", "stage1", "stage2", "stage3", "poci", "performing", "nonperforming"];
+  return candidateRowKeys.find((rowKey) => getCostOfRiskStageSummaryFilterValue(rowKey) === stageValue) ?? "";
+}
+
 function setActiveCostOfRiskStageFilter(stageValue) {
   const nextStage = normalizeCostOfRiskStageFilterValue(stageValue);
   const changed = activeCostOfRiskFilters.stage !== nextStage;
@@ -2356,6 +2370,7 @@ function setActiveCostOfRiskStageFilter(stageValue) {
     elements.costOfRiskStage.value = nextStage;
   }
   syncCostOfRiskStageTransferSelectionFromStageFilter();
+  syncCostOfRiskStageSummarySelectionFromStageFilter();
   return changed;
 }
 
@@ -2572,10 +2587,7 @@ function renderCostOfRiskChartTitle(selectedPoint, xAxisOptions, selectedCode) {
 }
 
 function renderCostOfRiskWaterfallTitle(displayMode = "amount", denominator = null, selectedUnit = "millions") {
-  const baseTitle = "Movement in the stock of allowances and provisions";
-  activeCostOfRiskWaterfallTitleText = displayMode === "ratio" && Number.isFinite(denominator)
-    ? `${baseTitle} over a ${getActiveCostOfRiskDenominatorPeriodPhrase()} exposure base of ${formatMetricValue(denominator, selectedUnit)} ${getCostOfRiskUnitLongLabel(selectedUnit)}`
-    : baseTitle;
+  activeCostOfRiskWaterfallTitleText = "Movement in the stock of allowances and provisions";
   if (elements.costOfRiskWaterfallTitle) elements.costOfRiskWaterfallTitle.textContent = activeCostOfRiskWaterfallTitleText;
 }
 
@@ -2750,7 +2762,7 @@ function renderCostOfRiskMovementAuditPanel(state, options = {}) {
     activeDateLabel: activeCostOfRiskReferenceDate,
     activeSeries: "movement",
     audit,
-    container: elements.costOfRiskAuditPanel,
+    container: elements.costOfRiskAuditPanelDetail,
     displayMode: activeCostOfRiskMovementDisplayMode,
     onOpenSourcePoint: openCostOfRiskAuditSourceInExplorer,
     selectedUnit: state.selectedUnit
@@ -2762,7 +2774,15 @@ function renderCostOfRiskStageTransferAuditPanel(state, options = {}) {
 
   setCostOfRiskStageTransferSelectedDataSummary(state);
   if (renderCostOfRiskHelpPanel()) return;
-  if (!options.allowDataAudit) return;
+  if (!options.allowDataAudit) {
+    // No fresh click happened on this tab this render. Leave any detail this
+    // tab already rendered on a previous pass untouched, but if we just
+    // switched into this tab from elsewhere (e.g. a stage decomposition
+    // selected on Summary), the shared panel would otherwise still be
+    // showing that other tab's stale content.
+    if (didCostOfRiskAuditPanelTabJustChange) renderCostOfRiskStageDecompositionUnavailablePanel();
+    return;
+  }
 
   if (isCostOfRiskAuditIntroVisible()) {
     renderCostOfRiskAuditPanelIntro();
@@ -2789,7 +2809,7 @@ function renderCostOfRiskStageTransferAuditPanel(state, options = {}) {
     activeDateLabel: activeCostOfRiskReferenceDate,
     activeSeries: "stage-transfer",
     audit,
-    container: elements.costOfRiskAuditPanel,
+    container: elements.costOfRiskAuditPanelDetail,
     displayMode: panelDisplayMode,
     onOpenSourcePoint: openCostOfRiskAuditSourceInExplorer,
     selectedUnit: state.selectedUnit
@@ -3300,6 +3320,13 @@ function renderCostOfRiskAuditPanelPlaceholder() {
   replaceCostOfRiskAuditPanelContent(placeholder);
 }
 
+function renderCostOfRiskStageDecompositionUnavailablePanel() {
+  const placeholder = document.createElement("div");
+  placeholder.className = "cost-of-risk-audit-placeholder";
+  placeholder.textContent = "Decomposition by staging status or performing status is not available in this tab.";
+  replaceCostOfRiskAuditPanelContent(placeholder);
+}
+
 function showCostOfRiskCalculationDetailsMenu(event, action) {
   const sourceEvent = event?.browserEvent ?? event;
   if (!sourceEvent || typeof sourceEvent.preventDefault !== "function") return;
@@ -3407,29 +3434,30 @@ function navigateCostOfRiskHelpTopicHistory(delta) {
   if (!renderCostOfRiskHelpPanel()) renderCostOfRiskAuditPanelIntro();
 }
 
+// The selection pane (top of the panel) and the detail pane (below it) are
+// static DOM elements declared once in index.html. Nothing here is allowed
+// to touch elements.costOfRiskAuditPanel itself or replace the selection
+// pane's children — see renderCostOfRiskSelectionPane, which is the only
+// function permitted to write to it, and is called every time the selected
+// data summary changes, independently of whatever the detail pane shows.
 function replaceCostOfRiskAuditPanelContent(...nodes) {
-  if (!elements.costOfRiskAuditPanel) return;
-  const layout = document.createElement("section");
-  layout.className = "cost-of-risk-context-layout";
+  if (!elements.costOfRiskAuditPanelDetail) return;
+  elements.costOfRiskAuditPanelDetail.replaceChildren(...nodes);
+}
 
-  const selectionPane = document.createElement("div");
-  selectionPane.className = "cost-of-risk-context-selected-pane";
-  selectionPane.append(getCostOfRiskSelectedDataSummaryNode());
-
-  const contextualPane = document.createElement("div");
-  contextualPane.className = "cost-of-risk-context-detail-pane";
-  contextualPane.append(...nodes);
-
-  layout.append(selectionPane, contextualPane);
-  elements.costOfRiskAuditPanel.replaceChildren(layout);
+function renderCostOfRiskSelectionPane() {
+  if (!elements.costOfRiskAuditPanelSelection) return;
+  elements.costOfRiskAuditPanelSelection.replaceChildren(getCostOfRiskSelectedDataSummaryNode());
 }
 
 function setCostOfRiskSelectedDataSummary(node) {
   activeCostOfRiskSelectedDataSummaryNode = node ?? null;
+  renderCostOfRiskSelectionPane();
 }
 
 function clearCostOfRiskSelectedDataSummary() {
   activeCostOfRiskSelectedDataSummaryNode = null;
+  renderCostOfRiskSelectionPane();
 }
 
 function getCostOfRiskSelectedDataSummaryNode() {
@@ -3474,9 +3502,12 @@ function renderCostOfRiskHelpPanel() {
   }
 
   if (activeCostOfRiskHelpTopic.startsWith(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX)) {
-    renderCostOfRiskFilterSelectionPanel(
-      activeCostOfRiskHelpTopic.slice(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX.length)
-    );
+    const filterName = activeCostOfRiskHelpTopic.slice(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX.length);
+    if (filterName === "stage" && COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS.has(activeCostOfRiskTab)) {
+      renderCostOfRiskStageDecompositionUnavailablePanel();
+      return true;
+    }
+    renderCostOfRiskFilterSelectionPanel(filterName);
     return true;
   }
 
@@ -3582,10 +3613,8 @@ function renderCostOfRiskReferenceDateSelectionPanel() {
 
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-reference-date-panel",
-    eyebrow: "Reference date",
-    lead: referenceColumns.length > 0
-      ? "Choose the reporting quarter used by the upper view. This is synchronized with point selection on the temporal chart."
-      : "No reference date is available in the loaded dataset.",
+    eyebrow: "Breakdown of selection by :",
+    lead: referenceColumns.length > 0 ? "" : "No reference date is available in the loaded dataset.",
     title: "Reference quarter"
   });
 
@@ -3621,6 +3650,12 @@ function renderCostOfRiskPeerSelectionPanel() {
   }));
 }
 
+function getCostOfRiskFilterSelectionPanelTitle(kind) {
+  if (kind === "instrument") return "Type of instrument";
+  if (kind === "counterparty") return "Type of counterparty";
+  return COST_OF_RISK_FILTER_SELECTION_META[kind]?.label ?? "";
+}
+
 function renderCostOfRiskFilterSelectionPanel(kind) {
   const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
 
@@ -3650,9 +3685,8 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
 
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
-    eyebrow: "Filter",
-    lead: `Choose the ${meta.label.toLowerCase()} perimeter applied to this view. The change applies immediately.`,
-    title: meta.label
+    eyebrow: "Breakdown of selection by :",
+    title: getCostOfRiskFilterSelectionPanelTitle(kind)
   });
 
   const table = document.createElement("table");
@@ -3690,9 +3724,8 @@ function renderCostOfRiskBalanceScopeSelectionPanel() {
 
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
-    eyebrow: "Filter",
-    lead: "Choose whether the view focuses on in-balance sheet exposures, off-balance sheet commitments and guarantees, or both where FINREP provides that detail.",
-    title: "Perimeter"
+    eyebrow: "Breakdown of selection by :",
+    title: "Balance sheet status"
   });
 
   const table = document.createElement("table");
@@ -3720,9 +3753,8 @@ function renderCostOfRiskStageSelectionPanel() {
 
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
-    eyebrow: "Filter",
-    lead: "Choose either an IFRS stage perimeter or the F_18.00 performing / non-performing breakdown. The change applies immediately.",
-    title: meta.label
+    eyebrow: "Breakdown of selection by :",
+    title: "Accounting status"
   });
 
   const allTable = document.createElement("table");
@@ -4153,7 +4185,7 @@ function getCostOfRiskReferenceDatePreviewValue(state, referenceDate) {
 }
 
 function applyCostOfRiskFilterSelection(filterKey, value) {
-  costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanel);
+  costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanelDetail);
   if (filterKey === "stage") {
     setActiveCostOfRiskStageFilter(value);
   } else {
@@ -4741,18 +4773,15 @@ function ensureCostOfRiskStageTransferFlowSelection() {
 }
 
 // One flow is always selected. Clicking the current flow keeps it active;
-// clicking another flow moves the selection.
+// clicking another flow moves the selection. This selection is local to the
+// stage-transfers tab's flow diagram (it only drives which node is
+// highlighted and which time series is shown below it) and must not touch
+// the global Stage filter, which is shared with every other tab.
 function selectCostOfRiskStageTransferFlow(flowKey) {
   if (!flowKey) return;
 
-  let shouldRerender = flowKey !== activeCostOfRiskStageTransferFlowKey;
+  const shouldRerender = flowKey !== activeCostOfRiskStageTransferFlowKey;
   activeCostOfRiskStageTransferFlowKey = flowKey;
-
-  const stageFilter = getCostOfRiskStageFilterForStageTransferFlowKey(flowKey);
-  if (stageFilter && activeCostOfRiskFilters.stage !== stageFilter) {
-    setActiveCostOfRiskStageFilter(stageFilter);
-    shouldRerender = true;
-  }
 
   if (!shouldRerender && !activeCostOfRiskDataAuditRequested) return;
   if (getLatestState()) rerenderApp(getLatestState());
@@ -4951,7 +4980,7 @@ function destroyCostOfRiskWaterfallChart() {
 function selectCostOfRiskReferenceDate(referenceDate) {
   if (!referenceDate || referenceDate === activeCostOfRiskReferenceDate) return;
 
-  costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanel);
+  costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanelDetail);
   activeCostOfRiskReferenceDate = referenceDate;
   if (getLatestState()) rerenderApp(getLatestState());
 }

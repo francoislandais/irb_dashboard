@@ -64,12 +64,16 @@ export function createCostOfRiskAuditIntroHeader({
   title.className = "cost-of-risk-audit-intro-title";
   title.textContent = titleText;
 
-  const lead = document.createElement("p");
-  lead.className = "cost-of-risk-audit-intro-lead";
-  if (leadModifierClass) lead.classList.add(leadModifierClass);
-  lead.textContent = leadText;
+  article.append(eyebrow, title);
 
-  article.append(eyebrow, title, lead);
+  if (leadText) {
+    const lead = document.createElement("p");
+    lead.className = "cost-of-risk-audit-intro-lead";
+    if (leadModifierClass) lead.classList.add(leadModifierClass);
+    lead.textContent = leadText;
+    article.append(lead);
+  }
+
   return article;
 }
 

@@ -67,16 +67,13 @@
                     <span class="explorer-template-static-value" data-axis-caption="template">-</span>
                   </div>
                   <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-explorer-axis="y">
-                    <span class="axis-tab-title">row</span>
-                    <span class="axis-tab-value" data-axis-caption="y">-</span>
+                    <span class="axis-tab-value" data-axis-caption="y">Row : -</span>
                   </button>
                   <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="x">
-                    <span class="axis-tab-title">column</span>
-                    <span class="axis-tab-value" data-axis-caption="x">-</span>
+                    <span class="axis-tab-value" data-axis-caption="x">Column : -</span>
                   </button>
                   <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="z">
-                    <span class="axis-tab-title">tab</span>
-                    <span class="axis-tab-value" data-axis-caption="z">-</span>
+                    <span class="axis-tab-value" data-axis-caption="z">Tab : -</span>
                   </button>
                 </div>
                 <div class="metric-table-wrap">
@@ -316,7 +313,10 @@
                 </div>
               </div>
               <aside id="cost-of-risk-audit-panel" class="cost-of-risk-audit-panel" aria-label="Audit trail">
-                <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
+                <div id="cost-of-risk-audit-panel-selection" class="cost-of-risk-context-selected-pane" aria-label="Current selection"></div>
+                <div id="cost-of-risk-audit-panel-detail" class="cost-of-risk-context-detail-pane">
+                  <div class="cost-of-risk-audit-placeholder">Select a data point to display its audit trail.</div>
+                </div>
               </aside>
             </div>
           </article>

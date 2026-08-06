@@ -141,7 +141,9 @@ export function wireExplorerUi(actions, rerender) {
     const row = event.target.closest("tbody tr[data-point-code]");
     if (row) {
       clearExplorerContextTopic();
-      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
+      const cell = event.target.closest("td[data-explorer-cell-column]");
+      const cellColumnIndex = cell ? Number(cell.dataset.explorerCellColumn) : 0;
+      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex });
     }
   });
   elements.explorerTable.addEventListener("keydown", (event) => {
@@ -214,7 +216,11 @@ function createExplorerTemplateContext() {
     },
     selectedXCode: "",
     selectedYCode: "",
-    selectedZCode: ""
+    selectedZCode: "",
+    // Which date column (0 = most recent) carries the strong highlight
+    // within the selected row — see applyExplorerSelection. Defaults to the
+    // first visible column until the user clicks a specific cell.
+    selectedCellColumnIndex: 0
   };
 }
 
@@ -1198,6 +1204,8 @@ function renderExplorerAxisTabs() {
   const captions = getExplorerAxisCaptions();
   const ratioCaptions = getExplorerAxisRatioCaptions();
   const activeAxis = getActiveExplorerAxis();
+  const context = getActiveExplorerContext();
+  const axisCodes = { x: context.selectedXCode, y: context.selectedYCode, z: context.selectedZCode };
   const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
   const axisOptions = getExplorerAxisOptions(getLatestState() ?? { columns: [], rows: [], explorerPoints: [] }, tableId);
 
@@ -1224,7 +1232,7 @@ function renderExplorerAxisTabs() {
     }
 
     element.title = [captions[axis], ratioCaptions[axis]].filter(Boolean).join("\n");
-    element.replaceChildren(createAxisCaptionLine(captions[axis], ratioCaptions[axis], axis));
+    element.replaceChildren(createAxisCaptionLine(axisCodes[axis], ratioCaptions[axis], axis));
   });
 }
 
@@ -1658,19 +1666,16 @@ function getExplorerAxisDisplayName(axis) {
   return "Row";
 }
 
-function createAxisCaptionLine(caption, ratioCaption = "", axis = "") {
-  const parts = splitAxisCaption(caption);
+// Compact by design: the box shows only "<Row|Column|Tab> : <code>" — the
+// full description (previously shown as a second line) is still available
+// as a hover tooltip (see the element.title assignment in
+// renderExplorerAxisTabs), it's just not duplicated inline anymore.
+function createAxisCaptionLine(code, ratioCaption = "", axis = "") {
   const wrapper = document.createElement("span");
   wrapper.className = "axis-tab-lines";
   const line = document.createElement("span");
   line.className = "axis-tab-line axis-tab-main";
-
-  if (parts.length === 0) {
-    line.textContent = "-";
-  } else {
-    line.textContent = truncateExplorerAxisCaption(parts.join(" - "));
-  }
-
+  line.textContent = `${getExplorerAxisDisplayName(axis)} : ${code || "none"}`;
   wrapper.append(line);
 
   if (ratioCaption) {
@@ -1685,14 +1690,6 @@ function createAxisCaptionLine(caption, ratioCaption = "", axis = "") {
   return wrapper;
 }
 
-function truncateExplorerAxisCaption(value, maxLength = 58) {
-  const text = String(value ?? "");
-  if (text.length <= maxLength) return text;
-
-  const edgeLength = Math.max(12, Math.floor((maxLength - 5) / 2));
-  return `${text.slice(0, edgeLength).trimEnd()} ... ${text.slice(-edgeLength).trimStart()}`;
-}
-
 function createAxisRatioClearButton(axis) {
   const button = document.createElement("button");
   button.type = "button";
@@ -1705,13 +1702,6 @@ function createAxisRatioClearButton(axis) {
     clearExplorerContributionBase(axis);
   });
   return button;
-}
-
-function splitAxisCaption(caption) {
-  return String(caption ?? "")
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
 }
 
 function getExplorerAxisCaptions() {
@@ -2096,10 +2086,17 @@ function getExplicitPathsFromRenderedRows(rows) {
 }
 
 function selectExplorerRow(pointCode, options = {}) {
-  const { shouldFocus = false } = options;
+  const { shouldFocus = false, cellColumnIndex } = options;
   hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
   const activeAxis = context.activeAxis;
+
+  // Only overwrite the highlighted cell when a specific cell was clicked
+  // (see the click handler). Row-only selection — keyboard nav, hierarchy
+  // toggles — leaves whichever column was last picked untouched.
+  if (Number.isFinite(cellColumnIndex)) {
+    context.selectedCellColumnIndex = cellColumnIndex;
+  }
 
   if (activeAxis === "template") {
 
@@ -2145,6 +2142,7 @@ function applyExplorerSelection() {
     row.removeAttribute("aria-selected");
     row.style.removeProperty("--highlight-start");
     row.style.removeProperty("--parent-highlight-start");
+    row.querySelectorAll("td.is-selected-cell").forEach((cell) => cell.classList.remove("is-selected-cell"));
   });
 
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
@@ -2174,11 +2172,15 @@ function applyExplorerSelection() {
     }
   }
 
+  const selectedCellColumnIndex = getActiveExplorerContext().selectedCellColumnIndex ?? 0;
+
   rows.forEach((row) => {
     if (row.dataset.pointCode === selectedCode) {
       row.classList.add("is-selected");
       row.setAttribute("aria-selected", "true");
       row.style.setProperty("--highlight-start", highlightStart);
+      const selectedCell = row.querySelector(`td[data-explorer-cell-column="${selectedCellColumnIndex}"]`);
+      if (selectedCell) selectedCell.classList.add("is-selected-cell");
     }
   });
 }

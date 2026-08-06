@@ -13,3 +13,13 @@ export const COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS = new Set([
   "stage-reconciliation",
   "stage-transfers"
 ]);
+
+// These tabs have no stage / performing-status breakdown in their source
+// FINREP template, so the Stage filter can't narrow them down. Rather than
+// blocking the user when a stage value happens to be selected elsewhere,
+// these tabs simply ignore it (all-status) and hide the Stage chip.
+export const COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS = new Set([
+  "geography",
+  "npl-flows",
+  "stage-transfers"
+]);

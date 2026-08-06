@@ -2058,12 +2058,6 @@ export function buildCostOfRiskNplFlowsModel(state, filters = {}, referenceDate 
       status: "F_18.01 reports NPL inflows and outflows for loans and advances only. Select All instruments or Loans and advances."
     };
   }
-  if (normalizedFilters.stage) {
-    return {
-      status: "F_18.01 does not provide NPL inflows and outflows with a breakdown by stage or performing status. Remove this filter."
-    };
-  }
-
   const ySelection = getCostOfRiskNplFlowYSelection(filters);
   if (ySelection.yCodes.length === 0) {
     return {

@@ -488,8 +488,11 @@ button:focus-visible {
   border-radius: 0;
   background: transparent;
   display: grid;
-  gap: 10px;
-  grid-template-rows: minmax(0, 1fr);
+  gap: 12px;
+  /* The selection pane's height is fixed on purpose: it always shows the
+     current tab's selection and must never resize or disappear depending on
+     what the detail pane below happens to render. */
+  grid-template-rows: 132px minmax(0, 1fr);
   height: 100%;
   max-height: 100%;
   min-height: 0;
@@ -526,6 +529,21 @@ button:focus-visible {
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.15;
+}
+
+.cost-of-risk-filter-selection-panel .cost-of-risk-audit-intro-eyebrow,
+.cost-of-risk-reference-date-panel .cost-of-risk-audit-intro-eyebrow {
+  color: #26332d;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.cost-of-risk-filter-selection-panel .cost-of-risk-audit-intro-title,
+.cost-of-risk-reference-date-panel .cost-of-risk-audit-intro-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 4px;
 }
 
 .cost-of-risk-audit-intro-lead {
@@ -576,15 +594,6 @@ button:focus-visible {
 
 .cost-of-risk-selected-data-summary-detail {
   color: #8b9691;
-}
-
-.cost-of-risk-context-layout {
-  align-self: stretch;
-  display: grid;
-  gap: 12px;
-  grid-template-rows: 132px minmax(0, 1fr);
-  height: 100%;
-  min-height: 100%;
 }
 
 .cost-of-risk-context-selected-pane,
@@ -1192,7 +1201,7 @@ button:focus-visible {
   color: var(--primary-dark);
   display: inline-flex;
   font-size: 0.76rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1;
   min-height: 24px;
   padding: 3px 0;
@@ -1261,13 +1270,13 @@ button:focus-visible {
 .cost-of-risk-filter-chip-prefix,
 .cost-of-risk-filter-chip--muted {
   color: rgba(36, 53, 45, 0.68);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .cost-of-risk-filter-chip-value,
 .cost-of-risk-filter-chip--date {
   color: var(--primary-dark);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .cost-of-risk-filter-chip-close {
@@ -4119,12 +4128,8 @@ button:focus-visible {
 .explorer-selection-summary-pane {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 6px;
   height: 132px;
-  padding: 8px;
-  border: 1px solid #dfe6e1;
-  border-radius: 8px;
-  background: #ffffff;
 }
 
 .explorer-selection-summary-description {
@@ -4159,13 +4164,13 @@ button:focus-visible {
 
 .explorer-selection-summary-benchmark-button {
   border: 1px solid var(--primary-dark);
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   color: var(--primary-dark);
   cursor: pointer;
-  font-size: 0.74rem;
+  font-size: 0.66rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 3px 8px;
 }
 
 .explorer-selection-summary-benchmark-button:hover,
@@ -4398,12 +4403,12 @@ table {
 }
 
 .axis-tab {
-  display: grid;
+  display: flex;
+  align-items: center;
   flex: 0 0 219px;
-  grid-template-rows: 18px 1fr;
   width: 219px;
   max-width: 219px;
-  height: 78px;
+  min-height: 40px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -4412,7 +4417,7 @@ table {
   font: inherit;
   min-width: 0;
   overflow: hidden;
-  padding: 0;
+  padding: 6px 10px;
   text-align: left;
 }
 
@@ -4434,46 +4439,24 @@ table {
   cursor: default;
 }
 
-.axis-tab-title {
-  align-items: center;
-  background: var(--primary-dark);
-  border-bottom: 1px solid #ffffff;
-  color: #ffffff;
-  display: flex;
-  font-size: 0.62rem;
-  font-weight: 400;
-  line-height: 1.1;
-  padding: 0 7px;
-  text-transform: none;
-}
-
-.axis-tab.is-disabled .axis-tab-title,
-.axis-tab:disabled .axis-tab-title {
-  background: #eef1ef;
-  border-bottom-color: #e3e8e5;
-  color: #9aa6a0;
-}
-
 .axis-tab-value {
   display: block;
   min-width: 0;
   overflow: hidden;
-  background: #ffffff;
   color: var(--ink);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.2;
-  padding: 5px 7px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .axis-tab.is-disabled .axis-tab-value,
 .axis-tab:disabled .axis-tab-value {
-  background: #f6f8f7;
   color: #a6b0ab;
 }
 
 .axis-tab.is-active .axis-tab-value {
-  background: var(--primary-dark);
   color: #ffffff;
 }
 
@@ -4482,16 +4465,23 @@ table {
   display: block;
   min-width: 0;
   overflow: hidden;
-  text-overflow: clip;
-  overflow-wrap: anywhere;
-  white-space: normal;
 }
 
 .axis-tab-lines {
   display: grid;
   gap: 2px;
-  max-height: 48px;
-  overflow: hidden;
+  width: 100%;
+}
+
+.axis-tab-main {
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.axis-tab-ratio {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .explorer-template-static {
@@ -4927,7 +4917,7 @@ table {
 
 .metric-table tbody tr.is-selected .code-column-badge {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(1, 104, 160, 0.35);
   color: inherit;
 }
 
@@ -5078,10 +5068,13 @@ table {
   );
 }
 
+/* Row selection is the light highlight — it marks which row is active
+   without competing with the strong highlight reserved for the one cell
+   the user actually clicked (see .is-selected-cell below). */
 .metric-table tbody tr.is-selected > th,
 .metric-table tbody tr.is-selected > td {
-  background: var(--primary-dark) !important;
-  color: #f4fbf8 !important;
+  background: #dceefa !important;
+  color: var(--ink) !important;
 }
 
 .metric-table tbody tr.is-selected > th.description-column {
@@ -5091,13 +5084,16 @@ table {
     #ffffff var(--parent-highlight-start, var(--highlight-start)),
     #f3f5f4 var(--parent-highlight-start, var(--highlight-start)),
     #f3f5f4 var(--highlight-start),
-    var(--primary-dark) var(--highlight-start),
-    var(--primary-dark) 100%
+    #dceefa var(--highlight-start),
+    #dceefa 100%
   ) !important;
 }
 
-.metric-table tbody tr.is-selected .tree-toggle {
-  color: #ffffff;
+/* The strong highlight belongs to a single cell: whichever date column was
+   last clicked within the selected row. */
+.metric-table tbody tr.is-selected > td.is-selected-cell {
+  background: var(--primary-dark) !important;
+  color: #f4fbf8 !important;
 }
 
 .metric-table tbody tr > td.is-cell-range-selected,

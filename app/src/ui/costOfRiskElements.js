@@ -3,6 +3,8 @@ export const costOfRiskElements = {
   costOfRiskAsset: document.querySelector("#cost-of-risk-asset"),
   costOfRiskAudit: document.querySelector("#cost-of-risk-audit"),
   costOfRiskAuditPanel: document.querySelector("#cost-of-risk-audit-panel"),
+  costOfRiskAuditPanelDetail: document.querySelector("#cost-of-risk-audit-panel-detail"),
+  costOfRiskAuditPanelSelection: document.querySelector("#cost-of-risk-audit-panel-selection"),
   costOfRiskCounterparty: document.querySelector("#cost-of-risk-counterparty"),
   costOfRiskCounterpartySummaryChart: document.querySelector("#cost-of-risk-counterparty-summary-chart"),
   costOfRiskCounterpartySummaryTable: document.querySelector("#cost-of-risk-counterparty-summary-table"),
