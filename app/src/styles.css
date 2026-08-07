@@ -1720,9 +1720,16 @@ button:focus-visible {
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"],
 .cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-reconciliation"] {
-  align-content: stretch;
-  grid-template-rows: var(--cost-risk-top-chart-height) var(--cost-risk-time-chart-height);
-  overflow: auto;
+  /* Both rows flex with whatever vertical room the viewport actually has,
+     instead of demanding a fixed 260px + 300px no matter what — that fixed
+     total is what forced a scrollbar on shorter/wider screens. The table
+     stays close to its usual size and the chart absorbs the rest, each
+     within a min/max band so neither a very short screen (scrollbar) nor a
+     very tall one (an oversized chart) can happen. */
+  grid-template-rows:
+    minmax(200px, 320px)
+    minmax(220px, 460px);
+  overflow: hidden;
 }
 
 .cost-of-risk-split-section {
