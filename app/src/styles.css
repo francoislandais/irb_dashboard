@@ -244,13 +244,12 @@ button:disabled {
   padding: 3px 6px 8px;
   min-width: 0;
   overflow: hidden;
+  background: var(--surface);
 }
 
 .preview-panel,
 .metric-panel {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
 }
 
 .global-bar {
@@ -4810,6 +4809,16 @@ table {
   white-space: nowrap;
 }
 
+/* A very subtle row divider. Plain columns (code, values) get a
+   full-width line, but the description column carries the row's tree
+   indentation, so its line must start at the same x position as the
+   hierarchy highlight instead of running the full width — see the
+   ::after rule under .description-column below. */
+.metric-table th:not(.description-column),
+.metric-table td {
+  border-bottom: 1px solid #eef1ef;
+}
+
 .metric-table tbody tr {
   cursor: pointer;
 }
@@ -4875,6 +4884,21 @@ table {
   padding-left: calc(8px + (var(--indent-level, 0) * 18px));
   text-align: left;
   white-space: normal;
+}
+
+/* Row divider for the description column, offset via a pseudo-element
+   rather than border-bottom so it never competes with the various
+   selection/hover background gradients painted on this cell — it starts
+   exactly where the hierarchy highlight starts for this row. */
+.metric-table .description-column::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--tree-highlight-offset) + (var(--indent-level, 0) * 18px));
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #eef1ef;
+  pointer-events: none;
 }
 
 .metric-table thead .description-column {
