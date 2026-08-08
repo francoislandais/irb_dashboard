@@ -841,7 +841,7 @@ button:focus-visible {
 }
 
 .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-bar {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0));
+  background: linear-gradient(to right, rgba(1, 104, 160, 0.26), rgba(1, 104, 160, 0));
 }
 
 .cost-of-risk-filter-selection-option-label,
