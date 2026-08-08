@@ -8,6 +8,8 @@ const initialState = {
   dataIndexes: null,
   dimensionMapping: null,
   dimensionMappingError: "",
+  impossibleXYCombinations: null,
+  impossibleXYCombinationsError: "",
   error: "",
   extractionTimestamp: "",
   fileHandle: null,
@@ -195,6 +197,23 @@ export function createDataStore() {
       emit();
     },
 
+    setImpossibleXYCombinations(impossibleXYCombinations) {
+      state = {
+        ...state,
+        impossibleXYCombinations,
+        impossibleXYCombinationsError: ""
+      };
+      emit();
+    },
+
+    setImpossibleXYCombinationsError(error) {
+      state = {
+        ...state,
+        impossibleXYCombinationsError: error?.message ?? "Le fichier interne des combinaisons x/y impossibles n'a pas pu être chargé."
+      };
+      emit();
+    },
+
     setExplorerPoints(explorerPoints) {
       state = {
         ...state,
@@ -283,6 +302,8 @@ export function createDataStore() {
         datasets: [],
         dimensionMapping: state.dimensionMapping,
         dimensionMappingError: state.dimensionMappingError,
+        impossibleXYCombinations: state.impossibleXYCombinations,
+        impossibleXYCombinationsError: state.impossibleXYCombinationsError,
         explorerPoints: state.explorerPoints,
         explorerPointsError: state.explorerPointsError,
         peerDisplayMode: state.peerDisplayMode,

@@ -702,6 +702,31 @@ function getExplorerTemplateSelections(state = getLatestState()) {
 }
 
 
+// Flags rows that can never have data given the OTHER axis's current
+// selection (see assets/ITS_impossible_x_y.csv) — e.g. browsing rows (y)
+// while a column (x) is selected, and this row's y-code is incompatible
+// with that x-code. Purely visual: the row stays fully selectable, and
+// selecting it is what drives the symmetric check on the other axis next
+// time that axis is browsed.
+function isExplorerRowAxisImpossible(seriesRow, activeAxis) {
+  if (seriesRow.isVirtual || !seriesRow.code) return false;
+  if (activeAxis !== "x" && activeAxis !== "y") return false;
+
+  const combinations = getLatestState()?.impossibleXYCombinations;
+  if (!combinations) return false;
+
+  const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
+  const context = getActiveExplorerContext();
+
+  if (activeAxis === "y") {
+    if (!context.selectedXCode) return false;
+    return combinations.isImpossible(tableId, context.selectedXCode, seriesRow.code);
+  }
+
+  if (!context.selectedYCode) return false;
+  return combinations.isImpossible(tableId, seriesRow.code, context.selectedYCode);
+}
+
 function renderExplorerTable(series, selectedUnit) {
   clearExplorerCellRangeSelection();
   const activeAxis = getActiveExplorerAxis();
@@ -744,6 +769,7 @@ function renderExplorerTable(series, selectedUnit) {
     const isParent = parentPaths.has(normalizedPath);
     const contributionValues = getExplorerContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution);
     const isContributionChild = Boolean(contributionValues);
+    const isAxisImpossible = isExplorerRowAxisImpossible(seriesRow, activeAxis);
 
     if (!seriesRow.isVirtual) valueRow.dataset.pointCode = seriesRow.code;
     valueRow.dataset.axis = activeAxis;
@@ -756,6 +782,7 @@ function renderExplorerTable(series, selectedUnit) {
     valueRow.dataset.indentLevel = String(seriesRow.indentLevel ?? 0);
     valueRow.classList.toggle("is-contribution-base", Boolean(contributionBase?.row) && normalizedPath === contributionBase.path);
     valueRow.classList.toggle("is-contribution-child", isContributionChild);
+    valueRow.classList.toggle("is-axis-impossible", isAxisImpossible);
     if (!seriesRow.isVirtual) {
       valueRow.setAttribute("role", "button");
       valueRow.tabIndex = 0;
@@ -792,11 +819,13 @@ function renderExplorerTable(series, selectedUnit) {
         ? getExplorerContributionRatio(point.value, reversedBaseValues[index]?.value)
         : null;
       const displayValue = contributionValue === null ? point.value : contributionValue;
-      td.textContent = seriesRow.isVirtual || point.value === null
-        ? "-"
-        : contributionValue === null
-          ? formatMetricValue(point.value, selectedUnit, seriesRow.format)
-          : formatContributionPercentValue(contributionValue);
+      td.textContent = isAxisImpossible
+        ? ""
+        : seriesRow.isVirtual || point.value === null
+          ? "-"
+          : contributionValue === null
+            ? formatMetricValue(point.value, selectedUnit, seriesRow.format)
+            : formatContributionPercentValue(contributionValue);
       if (!seriesRow.isVirtual && Number.isFinite(displayValue)) {
         td.dataset.explorerCellValue = String(displayValue);
         td.dataset.explorerCellRow = String(rowIndex);

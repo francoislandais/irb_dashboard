@@ -4400,17 +4400,16 @@ table {
   margin-left: var(--axis-tabs-offset-left);
   max-width: 900px;
   min-width: 0;
-  overflow: hidden;
 }
 
 /* Same pill as the Cost of Risk tabs (.cost-of-risk-tab): white/grey when
-   off, light blue fill + darker blue border + dark blue text when on. */
+   off, light blue fill + darker blue border + dark blue text when on.
+   Flexible (not a fixed 219px) so the three pills share whatever width is
+   actually left next to the template block, instead of overflowing it. */
 .axis-tab {
   display: flex;
   align-items: center;
-  flex: 0 0 219px;
-  width: 219px;
-  max-width: 219px;
+  flex: 1 1 0;
   min-height: 40px;
   border: 1px solid #d8dfdb;
   border-radius: 999px;
@@ -4796,7 +4795,15 @@ table {
 .metric-table {
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 980px;
+  /* Overrides the generic table{width:100%} rule, and drops the old
+     min-width:980px: both used to force the table wider than its columns'
+     own widths actually need, which — with table-layout:auto — makes the
+     browser stretch every column to fill that extra space. With few date
+     columns loaded, that inflated each one well past its 88px width.
+     table-layout:fixed makes every column strictly honor its own
+     width/min-width/max-width instead. */
+  table-layout: fixed;
+  width: auto;
   font-size: 0.8rem;
   --tree-content-offset: 6px;
   --tree-highlight-offset: 18px;
@@ -5048,9 +5055,13 @@ table {
   z-index: 45;
 }
 
+/* Highlighted rows get a white row-divider instead of the default
+   near-invisible grey (#eef1ef), which reads as barely-there against any
+   of these tinted backgrounds. */
 .metric-table tbody tr.is-selected-child > th,
 .metric-table tbody tr.is-selected-child > td {
   background: #f3f5f4;
+  border-bottom-color: #ffffff;
 }
 
 .metric-table tbody tr.is-selected-child > th.description-column {
@@ -5066,6 +5077,7 @@ table {
 .metric-table tbody tr.is-leaf-sibling-highlight > th,
 .metric-table tbody tr.is-leaf-sibling-highlight > td {
   background: #f3f5f4;
+  border-bottom-color: #ffffff;
 }
 
 .metric-table tbody tr.is-leaf-sibling-highlight > th.description-column {
@@ -5081,6 +5093,7 @@ table {
 .metric-table tbody tr.is-leaf-parent-highlight > th,
 .metric-table tbody tr.is-leaf-parent-highlight > td {
   background: #e2e8e5;
+  border-bottom-color: #ffffff;
 }
 
 .metric-table tbody tr.is-leaf-parent-highlight > th.description-column {
@@ -5093,6 +5106,21 @@ table {
   );
 }
 
+/* This row's code is incompatible with whatever is currently selected on
+   the other axis (see assets/ITS_impossible_x_y.csv) — there will never be
+   data for it. A pale, washed-out grey reads as "unavailable" precisely
+   because it's so faint next to normal black text — no fill, and the data
+   cells themselves are also left empty (no "-", see explorerView.js). */
+.metric-table tbody tr.is-axis-impossible > th,
+.metric-table tbody tr.is-axis-impossible > td {
+  color: #c3c9c5;
+}
+
+.metric-table tbody tr.is-axis-impossible .code-column-badge {
+  background: transparent;
+  color: #c3c9c5;
+}
+
 /* Row selection is the light highlight — it marks which row is active
    without competing with the strong highlight reserved for the one cell
    the user actually clicked (see .is-selected-cell below). */
@@ -5100,6 +5128,7 @@ table {
 .metric-table tbody tr.is-selected > td {
   background: #eaf2fa !important;
   color: var(--primary-dark) !important;
+  border-bottom-color: #ffffff !important;
 }
 
 .metric-table tbody tr.is-selected > th.description-column {

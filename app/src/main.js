@@ -3,6 +3,7 @@ import { validateCsvDataset } from "./data/csvSchema.js";
 import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260804-lazy-index";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadExplorerPoints } from "./data/explorerConfig.js";
+import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js";
 import {
   clearStoredDatasetFileHandle,
   clearStoredFileHandle,
@@ -15,8 +16,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260802-readable-selection-phrases";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260806-static-chart-title";
+import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260806-impossible-row-grey";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -595,6 +596,7 @@ wireUi(actions);
 store.subscribe(renderAppState);
 renderAppState(store.getState());
 loadInternalMapping();
+loadImpossibleCombinations();
 loadExplorerConfiguration();
 if (standaloneData?.csvText) {
   loadStandaloneData();
@@ -607,6 +609,14 @@ async function loadInternalMapping() {
     store.setDimensionMapping(await loadDimensionMapping());
   } catch (error) {
     store.setDimensionMappingError(error);
+  }
+}
+
+async function loadImpossibleCombinations() {
+  try {
+    store.setImpossibleXYCombinations(await loadImpossibleXYCombinations());
+  } catch (error) {
+    store.setImpossibleXYCombinationsError(error);
   }
 }
 
