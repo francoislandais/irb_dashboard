@@ -261,6 +261,7 @@ function createCostOfRiskSummaryStatusScope({
   COST_OF_RISK_SUMMARY_STATUS_METRICS.forEach((metric, metricIndex) => {
     headRow.append(createCostOfRiskSummaryScopeHeaderCell(
       getCostOfRiskSummaryDisplayMetricLabel(metric, displayMode),
+      "",
       {
         active: activeStatusCell.metricIndex === metricIndex,
         metricGroup: true
