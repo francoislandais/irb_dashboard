@@ -3036,7 +3036,7 @@ button:focus-visible {
 .cost-of-risk-summary-status-scope-table .cost-of-risk-summary-scope-row {
   align-items: center;
   display: grid;
-  grid-template-columns: minmax(180px, 1.05fr) repeat(3, minmax(150px, 1fr));
+  grid-template-columns: minmax(180px, 1.05fr) repeat(3, minmax(118px, 0.92fr) minmax(78px, 0.52fr));
   min-width: 0;
 }
 
@@ -3060,6 +3060,12 @@ button:focus-visible {
   font-weight: 650;
   min-height: 24px;
   text-align: right;
+}
+
+.cost-of-risk-summary-scope-header--variation {
+  color: #8b948f;
+  font-size: 0.68rem;
+  font-weight: 500;
 }
 
 /* Aligned with the row labels below it, the same way the metric headers
@@ -3106,6 +3112,12 @@ button:focus-visible {
   white-space: nowrap;
 }
 
+.cost-of-risk-summary-scope-cell--variation .cost-of-risk-summary-scope-value-text {
+  color: #8b948f;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
 .cost-of-risk-summary-scope-cell.is-empty-cell {
   cursor: default;
   pointer-events: none;
@@ -3145,16 +3157,9 @@ button:focus-visible {
   font-weight: 600;
 }
 
-.cost-of-risk-summary-scope-value-variation {
-  color: #8b948f;
-  flex: 0 0 auto;
-  font-size: 0.72rem;
-  font-weight: 400;
-}
-
-.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value-variation {
-  color: #8b948f;
-  font-weight: 400;
+.cost-of-risk-summary-scope-cell--variation.is-active-cell .cost-of-risk-summary-scope-value-text {
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .cost-of-risk-summary-scope-text {

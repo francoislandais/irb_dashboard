@@ -264,6 +264,14 @@ function createCostOfRiskSummaryStatusScope({
       displayMode === "amount" ? "" : "%",
       { active: activeStatusCell.metricIndex === metricIndex }
     ));
+    headRow.append(createCostOfRiskSummaryScopeHeaderCell(
+      "QoQ",
+      displayMode === "amount" ? "" : "bp",
+      {
+        active: activeStatusCell.metricIndex === metricIndex && activeStatusCell.kind === getCostOfRiskSummaryVariationKind(displayMode),
+        variation: true
+      }
+    ));
   });
   table.append(headRow);
 
@@ -290,7 +298,7 @@ function createCostOfRiskSummaryStatusScope({
     tr.append(labelCell);
 
     COST_OF_RISK_SUMMARY_STATUS_METRICS.forEach((metric, metricIndex) => {
-      const key = `${metric.key}:${metric.kind}:${row.key}`;
+      const key = getCostOfRiskSummaryDisplayCellKey(metric, row.key, displayMode);
       const cell = getCostOfRiskSummaryDisplayCell(row, metric, displayMode);
       const ratioCell = row.cells?.[metric.key];
       const isAvailable = isCostOfRiskSummaryCellAvailable(metric, cell, displayMode);
@@ -311,10 +319,23 @@ function createCostOfRiskSummaryStatusScope({
         }
       }
       td.append(createCostOfRiskSummaryScopeValue(
-        formatCostOfRiskSummaryMosaicValue(cell, metric.key, metric.kind, selectedUnit, displayMode),
-        formatCostOfRiskSummaryMosaicVariation(cell, metric, selectedUnit, displayMode)
+        formatCostOfRiskSummaryMosaicValue(cell, metric.key, metric.kind, selectedUnit, displayMode)
       ));
       tr.append(td);
+
+      const variationKey = getCostOfRiskSummaryVariationCellKey(metric, row.key, displayMode);
+      const variationValue = formatCostOfRiskSummaryMosaicVariation(cell, metric, selectedUnit, displayMode);
+      const variationCell = document.createElement("div");
+      variationCell.className = "cost-of-risk-summary-scope-cell cost-of-risk-summary-scope-cell--variation";
+      variationCell.classList.toggle("is-empty-cell", !isAvailable || !variationValue);
+      variationCell.classList.toggle("is-active-cell", isAvailable && activeCellKey === variationKey);
+      if (isAvailable && variationValue) {
+        variationCell.dataset.costOfRiskCalculationDetail = "summary-cell";
+        variationCell.dataset.costOfRiskCalculationValue = variationKey;
+        variationCell.addEventListener("click", () => onCellSelect(variationKey, row.key));
+      }
+      variationCell.append(createCostOfRiskSummaryScopeValue(variationValue));
+      tr.append(variationCell);
     });
     table.append(tr);
   });
@@ -327,6 +348,7 @@ function createCostOfRiskSummaryScopeHeaderCell(label, unit = "", options = {}) 
   th.className = "cost-of-risk-summary-scope-header";
   th.classList.toggle("is-coordinate-column", Boolean(options.active));
   th.classList.toggle("cost-of-risk-summary-scope-header--category", Boolean(options.category));
+  th.classList.toggle("cost-of-risk-summary-scope-header--variation", Boolean(options.variation));
   th.append(createCostOfRiskSummaryScopeText(unit ? `${label} ${unit}` : label));
   return th;
 }
@@ -419,19 +441,13 @@ function getCostOfRiskScopeUnitLabel(selectedUnit) {
   }[selectedUnit] ?? "M€";
 }
 
-function createCostOfRiskSummaryScopeValue(value, variation = "") {
+function createCostOfRiskSummaryScopeValue(value) {
   const span = document.createElement("span");
   span.className = "cost-of-risk-summary-scope-value";
   const text = document.createElement("span");
   text.className = "cost-of-risk-summary-scope-value-text";
   text.textContent = value;
   span.append(text);
-  if (variation && variation !== "-") {
-    const variationText = document.createElement("span");
-    variationText.className = "cost-of-risk-summary-scope-value-variation";
-    variationText.textContent = variation;
-    span.append(variationText);
-  }
   return span;
 }
 
@@ -445,16 +461,35 @@ function createCostOfRiskSummaryScopeText(value) {
 function getCostOfRiskSummaryStatusActiveCell(activeCellKey) {
   const rowKey = getCostOfRiskSummaryCellRowKey(activeCellKey);
   const columnKey = getCostOfRiskSummaryCellColumnKey(activeCellKey);
-  const metricIndex = COST_OF_RISK_SUMMARY_STATUS_METRICS.findIndex((metric) => `${metric.key}:${metric.kind}` === columnKey);
+  const metricIndex = COST_OF_RISK_SUMMARY_STATUS_METRICS.findIndex((metric) => {
+    const keys = new Set([
+      `${metric.key}:${metric.kind}`,
+      `${metric.key}:mom`,
+      `${metric.key}:ratioMom`,
+      `${getCostOfRiskSummaryAmountMetricKey(metric)}:level`,
+      `${getCostOfRiskSummaryAmountMetricKey(metric)}:mom`
+    ]);
+    return keys.has(columnKey);
+  });
   const rowIndex = COST_OF_RISK_SUMMARY_STATUS_ROWS
     .filter((row) => !row.spacer)
     .findIndex((row) => row.key === rowKey);
-  return { metricIndex, rowIndex, rowKey };
+  const kind = String(columnKey).split(":")[1] ?? "";
+  return { kind, metricIndex, rowIndex, rowKey };
 }
 
 function getCostOfRiskSummarySelectedMetric(activeCellKey) {
   const columnKey = getCostOfRiskSummaryCellColumnKey(activeCellKey);
-  return COST_OF_RISK_SUMMARY_STATUS_METRICS.find((metric) => `${metric.key}:${metric.kind}` === columnKey)
+  return COST_OF_RISK_SUMMARY_STATUS_METRICS.find((metric) => {
+    const keys = new Set([
+      `${metric.key}:${metric.kind}`,
+      `${metric.key}:mom`,
+      `${metric.key}:ratioMom`,
+      `${getCostOfRiskSummaryAmountMetricKey(metric)}:level`,
+      `${getCostOfRiskSummaryAmountMetricKey(metric)}:mom`
+    ]);
+    return keys.has(columnKey);
+  })
     ?? COST_OF_RISK_SUMMARY_STATUS_METRICS[0];
 }
 
@@ -482,6 +517,26 @@ function getCostOfRiskSummaryDisplayCell(row, metric, displayMode) {
   if (metric.key === "coverage") return row.cells?.allowances ?? null;
   if (metric.key === "collateral") return row.cells?.collateralAmount ?? null;
   return row.cells?.gca ?? null;
+}
+
+function getCostOfRiskSummaryDisplayCellKey(metric, rowKey, displayMode) {
+  if (displayMode === "amount") return `${getCostOfRiskSummaryAmountMetricKey(metric)}:level:${rowKey}`;
+  return `${metric.key}:${metric.kind}:${rowKey}`;
+}
+
+function getCostOfRiskSummaryVariationCellKey(metric, rowKey, displayMode) {
+  if (displayMode === "amount") return `${getCostOfRiskSummaryAmountMetricKey(metric)}:mom:${rowKey}`;
+  return `${metric.key}:${getCostOfRiskSummaryVariationKind(displayMode)}:${rowKey}`;
+}
+
+function getCostOfRiskSummaryAmountMetricKey(metric) {
+  if (metric?.key === "coverage") return "allowances";
+  if (metric?.key === "collateral") return "collateralAmount";
+  return metric?.key ?? "";
+}
+
+function getCostOfRiskSummaryVariationKind(displayMode) {
+  return displayMode === "amount" ? "mom" : "ratioMom";
 }
 
 function getCostOfRiskSummaryDisplayMetricLabel(metric, displayMode) {
@@ -789,11 +844,12 @@ export function getCostOfRiskStageSummaryMetricLabel(selectedCell) {
   const metricLabel = {
     allowances: "Allowances",
     collateral: "Collateral",
+    collateralAmount: "Collateral",
     coverage: "Coverage",
     gca: "GCA"
   }[selectedCell.metric] ?? selectedCell.metric;
   if (selectedCell.kind === "ratio" && selectedCell.metric === "gca") return "Exposure ratio";
-  return selectedCell.kind === "mom" ? `${metricLabel} variation` : metricLabel;
+  return selectedCell.kind === "mom" || selectedCell.kind === "ratioMom" ? `${metricLabel} variation` : metricLabel;
 }
 
 export function getCostOfRiskStageSummaryFilterValue(rowKey) {

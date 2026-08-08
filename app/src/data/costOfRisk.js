@@ -2950,7 +2950,7 @@ function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumn
     ? buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.stageKey)
     : buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, filters, jstCode, selectedCell.metric, selectedCell.stageKey);
   const totalSeries = selectedCell.metric === "gca" || selectedCell.metric === "allowances"
-    ? selectedCell.metric === "gca" && selectedCell.kind === "ratio"
+    ? selectedCell.metric === "gca" && (selectedCell.kind === "ratio" || selectedCell.kind === "ratioMom")
       ? getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, {
         ...filters,
         stage: COST_OF_RISK_FILTER_ALL
@@ -2961,7 +2961,7 @@ function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumn
   return referenceColumns.map((column, index) => {
     const previousValue = index > 0 ? metricSeries[index - 1] : null;
     const value = metricSeries[index] ?? null;
-    const pointValue = selectedCell.kind === "mom"
+    const pointValue = selectedCell.kind === "mom" || selectedCell.kind === "ratioMom"
       ? getFiniteDelta(value, previousValue)
       : value;
     const ratioBasisPoints = getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selectedCell, index);
@@ -2977,6 +2977,9 @@ function buildCostOfRiskStageSummaryPointsForJst(state, indexes, referenceColumn
 }
 
 function buildCostOfRiskStageSummaryMetricSeries(state, indexes, referenceColumns, ySelection, filters, jstCode, metric, stageKey) {
+  if (metric === "collateralAmount") {
+    return buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "collateral", stageKey);
+  }
   if (metric === "coverage") {
     return buildCostOfRiskCoverageSeries(
       buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, stageKey),
@@ -3082,7 +3085,7 @@ function buildCostOfRiskCounterpartySummaryRowsForJst(state, indexes, referenceC
 function buildCostOfRiskCounterpartySummaryPointsForJst(state, indexes, referenceColumns, filters, jstCode, selectedCell) {
   const metricSeries = buildCostOfRiskCounterpartySummaryMetricSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric, selectedCell.rowKey);
   const totalSeries = selectedCell.metric === "gca" || selectedCell.metric === "allowances"
-    ? selectedCell.metric === "gca" && selectedCell.kind === "ratio"
+    ? selectedCell.metric === "gca" && (selectedCell.kind === "ratio" || selectedCell.kind === "ratioMom")
       ? buildCostOfRiskCounterpartySummaryRatioBaseSeries(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskCounterpartySummaryValueForRowKey(selectedCell.rowKey))
       : buildCostOfRiskCounterpartySummaryTotalSeries(state, indexes, referenceColumns, filters, jstCode, selectedCell.metric)
     : null;
@@ -3090,7 +3093,7 @@ function buildCostOfRiskCounterpartySummaryPointsForJst(state, indexes, referenc
   return referenceColumns.map((column, index) => {
     const previousValue = index > 0 ? metricSeries[index - 1] : null;
     const value = metricSeries[index] ?? null;
-    const pointValue = selectedCell.kind === "mom"
+    const pointValue = selectedCell.kind === "mom" || selectedCell.kind === "ratioMom"
       ? getFiniteDelta(value, previousValue)
       : value;
     const ratioBasisPoints = getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selectedCell, index);
@@ -3109,6 +3112,9 @@ function buildCostOfRiskCounterpartySummaryMetricSeries(state, indexes, referenc
   const rowDefinition = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((candidate) => candidate.key === rowKey && candidate.type === "row")
     ?? COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.find((candidate) => candidate.key === "nfc");
 
+  if (metric === "collateralAmount") {
+    return buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "collateral", rowDefinition.value);
+  }
   if (metric === "coverage") {
     return buildCostOfRiskCoverageSeries(
       buildCostOfRiskCounterpartySummarySeries(state, indexes, referenceColumns, filters, jstCode, "gca", rowDefinition.value),
@@ -3239,7 +3245,7 @@ function getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selected
   const previousValue = index > 0 ? metricSeries[index - 1] : null;
 
   if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral") {
-    if (selectedCell.kind === "mom") {
+    if (selectedCell.kind === "mom" || selectedCell.kind === "ratioMom") {
       const delta = getFiniteDelta(value, previousValue);
       return delta === null ? null : delta * 10000;
     }
@@ -3248,6 +3254,16 @@ function getCostOfRiskStageSummaryRatioValue(metricSeries, totalSeries, selected
 
   const total = totalSeries?.[index] ?? null;
   const ratio = Number.isFinite(value) && Number.isFinite(total) && total !== 0 ? value / total : null;
+
+  if (selectedCell.kind === "ratioMom") {
+    const previousTotal = totalSeries?.[index - 1] ?? null;
+    const previousRatio = Number.isFinite(previousValue) && Number.isFinite(previousTotal) && previousTotal !== 0
+      ? previousValue / previousTotal
+      : null;
+    return Number.isFinite(ratio) && Number.isFinite(previousRatio)
+      ? (ratio - previousRatio) * 10000
+      : null;
+  }
 
   if (selectedCell.kind === "mom") {
     const delta = getFiniteDelta(value, previousValue);
@@ -3267,8 +3283,8 @@ function getFiniteDelta(currentValue, previousValue) {
 
 function parseCostOfRiskStageSummaryCellKey(cellKey) {
   const [metric, kind, stageKey] = String(cellKey ?? "").split(":");
-  const isMetric = ["gca", "allowances", "coverage", "collateral"].includes(metric);
-  const isKind = ["level", "mom", "ratio"].includes(kind);
+  const isMetric = ["gca", "allowances", "coverage", "collateral", "collateralAmount"].includes(metric);
+  const isKind = ["level", "mom", "ratio", "ratioMom"].includes(kind);
   const isStage = COST_OF_RISK_STAGE_SUMMARY_ROWS.some((row) => row.key === stageKey);
   return isMetric && isKind && isStage ? { key: `${metric}:${kind}:${stageKey}`, kind, metric, stageKey } : null;
 }
@@ -3278,8 +3294,8 @@ function parseCostOfRiskCounterpartySummaryCellKey(cellKey) {
   const [metric, kind, rowKey] = parts[0] === "counterparty"
     ? [parts[1], parts[2], parts[3]]
     : parts;
-  const isMetric = ["gca", "allowances", "coverage", "collateral"].includes(metric);
-  const isKind = ["level", "mom", "ratio"].includes(kind);
+  const isMetric = ["gca", "allowances", "coverage", "collateral", "collateralAmount"].includes(metric);
+  const isKind = ["level", "mom", "ratio", "ratioMom"].includes(kind);
   const isRow = COST_OF_RISK_COUNTERPARTY_SUMMARY_ROWS.some((row) => row.type === "row" && row.key === rowKey);
   return isMetric && isKind && isRow ? { key: `counterparty:${metric}:${kind}:${rowKey}`, kind, metric, rowKey } : null;
 }

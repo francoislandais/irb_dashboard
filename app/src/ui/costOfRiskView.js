@@ -3058,7 +3058,7 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
   }
 
   const cell = row.cells?.[selectedCell.metric] ?? {};
-  const rawValue = selectedCell.kind === "mom" ? cell.mom : cell.value;
+  const rawValue = selectedCell.kind === "mom" || selectedCell.kind === "ratioMom" ? cell.mom : cell.value;
   const selectedValue = formatCostOfRiskSummaryAuditValue(cell, selectedCell, state.selectedUnit);
   const selectionDescription = createCostOfRiskSummarySelectionDescription({
     cell,
@@ -3156,16 +3156,20 @@ function getCostOfRiskSummarySelectionDescription({
     return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} represents ${formatContributionPercentValue(cell.ratio)} (${numeratorLabel}) of total GCA${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
   }
 
-  if (selectedCell.metric === "coverage" && selectedCell.kind !== "mom") {
+  if (selectedCell.metric === "coverage" && selectedCell.kind !== "mom" && selectedCell.kind !== "ratioMom") {
     return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} coverage is ${formatContributionPercentValue(cell.value)} (${numeratorLabel}) over GCA${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
   }
 
-  if (selectedCell.metric === "collateral" && selectedCell.kind !== "mom") {
+  if (selectedCell.metric === "collateral" && selectedCell.kind !== "mom" && selectedCell.kind !== "ratioMom") {
     return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} collateralisation is ${formatContributionPercentValue(cell.value)} (${numeratorLabel}) over GCA${denominatorLabel ? ` (${denominatorLabel})` : ""}.`;
   }
 
   if (selectedCell.kind === "mom") {
-    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} shows a quarter-on-quarter variation of ${displayedSelectionValue}. In relative mode, it is divided by the previous-quarter value for the same row.`;
+    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} changes by ${displayedSelectionValue} quarter on quarter.`;
+  }
+
+  if (selectedCell.kind === "ratioMom") {
+    return `At ${dateLabel}, for ${scopePhrase}, ${rowLabel} ratio changes by ${displayedSelectionValue} quarter on quarter.`;
   }
 
   const metricLabel = getCostOfRiskSummaryAuditMetricLabel(selectedCell).toLowerCase();
@@ -3173,7 +3177,7 @@ function getCostOfRiskSummarySelectionDescription({
 }
 
 function getCostOfRiskSummarySelectedDataEmphasisValue(row, cell, selectedCell, selectedUnit) {
-  if (getActiveCostOfRiskDisplayMode() !== "amount") {
+  if (selectedCell.kind === "ratioMom" || getActiveCostOfRiskDisplayMode() !== "amount") {
     return formatCostOfRiskSummaryAuditValue(cell, selectedCell, selectedUnit);
   }
 
@@ -3256,15 +3260,18 @@ function getCostOfRiskActiveFilterLabel(optionsKey, value) {
 
 function formatCostOfRiskSummaryAuditValue(cell, selectedCell, selectedUnit) {
   if (selectedCell.metric === "coverage" || selectedCell.metric === "collateral") {
-    return selectedCell.kind === "mom"
+    return selectedCell.kind === "mom" || selectedCell.kind === "ratioMom"
       ? formatBasisPointsValue(cell.momRatioBasisPoints)
       : formatContributionPercentValue(cell.value);
   }
   if (selectedCell.kind === "ratio") {
     return formatContributionPercentValue(cell.ratio);
   }
+  if (selectedCell.kind === "ratioMom") {
+    return formatBasisPointsValue(cell.ratioMomBasisPoints ?? cell.momRatioBasisPoints);
+  }
   if (selectedCell.kind === "mom") {
-    return formatCostOfRiskDisplayValue(cell.momRatioBasisPoints, "ratio", selectedUnit, true);
+    return formatSignedMetricValue(cell.mom, selectedUnit);
   }
   return formatMetricValue(cell.value, selectedUnit);
 }
@@ -3273,10 +3280,11 @@ function getCostOfRiskSummaryAuditMetricLabel(selectedCell) {
   const metricLabels = {
     allowances: "Allowances",
     collateral: "Collateral",
+    collateralAmount: "Collateral",
     coverage: "Coverage",
     gca: "GCA"
   };
-  const kindLabel = selectedCell.kind === "mom"
+  const kindLabel = selectedCell.kind === "mom" || selectedCell.kind === "ratioMom"
     ? "variation"
     : selectedCell.kind === "ratio"
       ? "ratio"
@@ -3295,7 +3303,10 @@ function getCostOfRiskSummaryAuditDefinition(selectedCell) {
     return "Exposure ratio equals GCA for the selected row divided by total GCA for the perimeter.";
   }
   if (selectedCell.kind === "mom") {
-    return "Variation is the quarter-on-quarter change in the selected stock, expressed as a growth rate versus the previous quarter when relative mode is active.";
+    return "Variation is the quarter-on-quarter change in the selected stock.";
+  }
+  if (selectedCell.kind === "ratioMom") {
+    return "Variation is the quarter-on-quarter change in the selected ratio, expressed in basis points.";
   }
   return "Stock value is read from F_18.00 for the selected row and perimeter.";
 }
