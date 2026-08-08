@@ -132,10 +132,11 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   const stageStroke = "#c6cec8";
   const arrowWidth = 14;
   const selectedStage = getSelectedStageBoxStage(selectedFlowKey);
+  const highlightedStageBoxes = getHighlightedStageBoxStages(selectedFlowKey);
 
   addStageBox(svg, 40, 160, "Stage 1", stageFill, stageStroke, {
     flowKey: "stagebox:1",
-    isSelected: selectedFlowKey === "stagebox:1",
+    isSelected: highlightedStageBoxes.has("1"),
     onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
@@ -143,7 +144,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   });
   addStageBox(svg, 600, 160, "Stage 2", stageFill, stageStroke, {
     flowKey: "stagebox:2",
-    isSelected: selectedFlowKey === "stagebox:2",
+    isSelected: highlightedStageBoxes.has("2"),
     onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
@@ -151,7 +152,7 @@ export function renderCostOfRiskStageTransferFlowDiagram({
   });
   addStageBox(svg, 1160, 160, "Stage 3", stageFill, stageStroke, {
     flowKey: "stagebox:3",
-    isSelected: selectedFlowKey === "stagebox:3",
+    isSelected: highlightedStageBoxes.has("3"),
     onShowCalculationDetails,
     onSelect: onSelectFlow,
     primaryDark,
@@ -307,6 +308,17 @@ export function renderCostOfRiskStageTransferFlowDiagram({
 
 function getSelectedStageBoxStage(selectedFlowKey) {
   return String(selectedFlowKey ?? "").match(/^stagebox:(\d)$/)?.[1] ?? "";
+}
+
+function getHighlightedStageBoxStages(selectedFlowKey) {
+  const key = String(selectedFlowKey ?? "");
+  const stageBoxMatch = key.match(/^stagebox:(\d)$/);
+  if (stageBoxMatch) return new Set([stageBoxMatch[1]]);
+
+  const transferMatch = key.match(/^transfer:(\d)-(\d)$/);
+  if (transferMatch) return new Set([transferMatch[1], transferMatch[2]]);
+
+  return new Set();
 }
 
 function isFlowRelatedToSelectedStage(flowKey, selectedStage) {
