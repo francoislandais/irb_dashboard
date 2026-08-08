@@ -10,6 +10,7 @@ const initialState = {
   dimensionMappingError: "",
   impossibleXYCombinations: null,
   impossibleXYCombinationsError: "",
+  impossibleXYCombinationsSource: null,
   error: "",
   extractionTimestamp: "",
   fileHandle: null,
@@ -91,6 +92,7 @@ export function createDataStore() {
         extractionTimestamp: extractionTimestamp || "",
         fileHandle,
         fileName: file.name,
+        impossibleXYCombinations: scopeImpossibleXYCombinations(state.impossibleXYCombinationsSource, dataIndexes),
         jstOptions,
         loadedAt,
         peerJstCodes,
@@ -146,6 +148,7 @@ export function createDataStore() {
         extractionTimestamp: dataset.extractionTimestamp || "",
         fileHandle: dataset.fileHandle,
         fileName: dataset.fileName,
+        impossibleXYCombinations: scopeImpossibleXYCombinations(state.impossibleXYCombinationsSource, dataset.dataIndexes),
         jstOptions: dataset.jstOptions,
         loadedAt: dataset.loadedAt,
         peerJstCodes,
@@ -170,6 +173,7 @@ export function createDataStore() {
         extractionTimestamp: nextDataset?.extractionTimestamp ?? "",
         fileHandle: nextDataset?.fileHandle ?? null,
         fileName: nextDataset?.fileName ?? "",
+        impossibleXYCombinations: scopeImpossibleXYCombinations(state.impossibleXYCombinationsSource, nextDataset?.dataIndexes),
         jstOptions: nextDataset?.jstOptions ?? [],
         loadedAt: nextDataset?.loadedAt ?? null,
         peerJstCodes: nextDataset ? normalizePeerJstCodes(state.peerJstCodes, nextDataset.jstOptions) : [],
@@ -200,8 +204,9 @@ export function createDataStore() {
     setImpossibleXYCombinations(impossibleXYCombinations) {
       state = {
         ...state,
-        impossibleXYCombinations,
-        impossibleXYCombinationsError: ""
+        impossibleXYCombinations: scopeImpossibleXYCombinations(impossibleXYCombinations, state.dataIndexes),
+        impossibleXYCombinationsError: "",
+        impossibleXYCombinationsSource: impossibleXYCombinations
       };
       emit();
     },
@@ -302,8 +307,9 @@ export function createDataStore() {
         datasets: [],
         dimensionMapping: state.dimensionMapping,
         dimensionMappingError: state.dimensionMappingError,
-        impossibleXYCombinations: state.impossibleXYCombinations,
+        impossibleXYCombinations: null,
         impossibleXYCombinationsError: state.impossibleXYCombinationsError,
+        impossibleXYCombinationsSource: state.impossibleXYCombinationsSource,
         explorerPoints: state.explorerPoints,
         explorerPointsError: state.explorerPointsError,
         peerDisplayMode: state.peerDisplayMode,
@@ -314,4 +320,23 @@ export function createDataStore() {
       emit();
     }
   };
+}
+
+function scopeImpossibleXYCombinations(impossibleXYCombinations, dataIndexes) {
+  if (!impossibleXYCombinations?.forTableIds) return impossibleXYCombinations ?? null;
+  const tableIds = getDatasetTableIds(dataIndexes);
+  return tableIds.length > 0
+    ? impossibleXYCombinations.forTableIds(tableIds)
+    : impossibleXYCombinations;
+}
+
+function getDatasetTableIds(dataIndexes) {
+  const tableIdsByJst = dataIndexes?.tableIdsByJst;
+  if (!tableIdsByJst) return [];
+
+  const tableIds = new Set();
+  tableIdsByJst.forEach((jstTableIds) => {
+    jstTableIds?.forEach((tableId) => tableIds.add(tableId));
+  });
+  return [...tableIds];
 }
