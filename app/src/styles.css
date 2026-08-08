@@ -3062,16 +3062,16 @@ button:focus-visible {
   text-align: right;
 }
 
-.cost-of-risk-summary-scope-header--variation {
-  color: #8b948f;
-  font-size: 0.68rem;
-  font-weight: 500;
-}
-
 /* Aligned with the row labels below it, the same way the metric headers
    are aligned with the (right-aligned) values below them. */
 .cost-of-risk-summary-scope-header--category {
   text-align: left;
+}
+
+.cost-of-risk-summary-scope-header--metric-group {
+  grid-column: span 2;
+  padding-left: 0;
+  padding-right: 18px;
 }
 
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
@@ -3116,6 +3116,14 @@ button:focus-visible {
   color: #8b948f;
   font-size: 0.72rem;
   font-weight: 400;
+}
+
+.cost-of-risk-summary-scope-cell:not(.cost-of-risk-summary-scope-cell--variation) {
+  padding-right: 2px;
+}
+
+.cost-of-risk-summary-scope-cell--variation {
+  padding-left: 0;
 }
 
 .cost-of-risk-summary-scope-cell.is-empty-cell {

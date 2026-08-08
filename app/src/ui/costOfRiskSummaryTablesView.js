@@ -261,15 +261,9 @@ function createCostOfRiskSummaryStatusScope({
   COST_OF_RISK_SUMMARY_STATUS_METRICS.forEach((metric, metricIndex) => {
     headRow.append(createCostOfRiskSummaryScopeHeaderCell(
       getCostOfRiskSummaryDisplayMetricLabel(metric, displayMode),
-      displayMode === "amount" ? "" : "%",
-      { active: activeStatusCell.metricIndex === metricIndex }
-    ));
-    headRow.append(createCostOfRiskSummaryScopeHeaderCell(
-      "QoQ",
-      displayMode === "amount" ? "" : "bp",
       {
-        active: activeStatusCell.metricIndex === metricIndex && activeStatusCell.kind === getCostOfRiskSummaryVariationKind(displayMode),
-        variation: true
+        active: activeStatusCell.metricIndex === metricIndex,
+        metricGroup: true
       }
     ));
   });
@@ -348,7 +342,7 @@ function createCostOfRiskSummaryScopeHeaderCell(label, unit = "", options = {}) 
   th.className = "cost-of-risk-summary-scope-header";
   th.classList.toggle("is-coordinate-column", Boolean(options.active));
   th.classList.toggle("cost-of-risk-summary-scope-header--category", Boolean(options.category));
-  th.classList.toggle("cost-of-risk-summary-scope-header--variation", Boolean(options.variation));
+  th.classList.toggle("cost-of-risk-summary-scope-header--metric-group", Boolean(options.metricGroup));
   th.append(createCostOfRiskSummaryScopeText(unit ? `${label} ${unit}` : label));
   return th;
 }
