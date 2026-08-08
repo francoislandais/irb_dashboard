@@ -3069,9 +3069,12 @@ button:focus-visible {
 }
 
 .cost-of-risk-summary-scope-header--metric-group {
+  display: flex;
   grid-column: span 2;
+  justify-content: center;
   padding-left: 0;
-  padding-right: 18px;
+  padding-right: 34px;
+  text-align: center;
 }
 
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
