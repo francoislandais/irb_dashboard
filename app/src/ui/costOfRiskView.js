@@ -4650,9 +4650,9 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
   const waterfallData = createManualWaterfallData(contributions);
   waterfallData.valueFormatter = (value) => formatCostOfRiskDisplayValue(value, displayMode, selectedUnit, true);
   waterfallData.selectedCode = activeCostOfRiskXAxisCode;
-  waterfallData.axisLabelFontSize = "10px";
-  waterfallData.axisLabelLineHeight = "11px";
-  waterfallData.valueLabelFontSize = "12px";
+  waterfallData.axisLabelFontSize = "12px";
+  waterfallData.axisLabelLineHeight = "13px";
+  waterfallData.valueLabelFontSize = "14px";
   const options = {
     chart: {
       animation: false,
