@@ -3069,12 +3069,17 @@ button:focus-visible {
 }
 
 .cost-of-risk-summary-scope-header--metric-group {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 0.52fr);
   grid-column: span 2;
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 34px;
-  text-align: center;
+  padding-left: 9px;
+  padding-right: 9px;
+  text-align: right;
+}
+
+.cost-of-risk-summary-scope-header--metric-group .cost-of-risk-summary-scope-text {
+  grid-column: 1;
+  justify-self: end;
 }
 
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
