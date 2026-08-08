@@ -198,19 +198,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     x: 560,
     y: 205
   }, formatValue, displayMode, selectedUnit);
-  addNetFlowLabel(svg, {
-    flowKey: "net:1-2",
-    from: "1",
-    isSelected: selectedFlowKey === "net:1-2",
-    onShowCalculationDetails,
-    onSelect: onSelectFlow,
-    primaryDark,
-    reverseValue: getFlowValue(displayFlows, "2", "1"),
-    to: "2",
-    value: getFlowValue(displayFlows, "1", "2"),
-    x: 420,
-    y: 245
-  }, formatValue, displayMode, selectedUnit);
   addHorizontalFlow(svg, {
     color: flowArrowColor,
     direction: "right",
@@ -243,19 +230,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     x: 1120,
     y: 205
   }, formatValue, displayMode, selectedUnit);
-  addNetFlowLabel(svg, {
-    flowKey: "net:2-3",
-    from: "2",
-    isSelected: selectedFlowKey === "net:2-3",
-    onShowCalculationDetails,
-    onSelect: onSelectFlow,
-    primaryDark,
-    reverseValue: getFlowValue(displayFlows, "3", "2"),
-    to: "3",
-    value: getFlowValue(displayFlows, "2", "3"),
-    x: 980,
-    y: 245
-  }, formatValue, displayMode, selectedUnit);
 
   addDirectFlow(svg, {
     flowArrowColor,
@@ -268,19 +242,6 @@ export function renderCostOfRiskStageTransferFlowDiagram({
     selectedStage,
     selectedFlowKey,
     width: arrowWidth
-  }, formatValue, displayMode, selectedUnit);
-  addNetFlowLabel(svg, {
-    flowKey: "net:1-3",
-    from: "1",
-    isSelected: selectedFlowKey === "net:1-3",
-    onShowCalculationDetails,
-    onSelect: onSelectFlow,
-    primaryDark,
-    reverseValue: getFlowValue(displayFlows, "3", "1"),
-    to: "3",
-    value: getFlowValue(displayFlows, "1", "3"),
-    x: 710,
-    y: 123
   }, formatValue, displayMode, selectedUnit);
 
   const stageArrowOffset = 26;
@@ -412,62 +373,6 @@ function getFlowValue(flows, from, to) {
   return flows.find((flow) => flow.from === from && flow.to === to)?.displayValue ?? null;
 }
 
-function addNetFlowLabel(svg, config, formatValue, displayMode, selectedUnit) {
-  const hasForwardValue = Number.isFinite(config.value);
-  const hasReverseValue = Number.isFinite(config.reverseValue);
-  if (!hasForwardValue && !hasReverseValue) return;
-
-  const forwardValue = hasForwardValue ? config.value : 0;
-  const reverseValue = hasReverseValue ? config.reverseValue : 0;
-  const netValue = forwardValue - reverseValue;
-  const from = netValue < 0 ? config.to : config.from;
-  const to = netValue < 0 ? config.from : config.to;
-  const direction = netValue === 0 ? `${config.from}<->${config.to}` : `${from}->${to}`;
-  const formattedValue = formatValue(Math.abs(netValue), displayMode, selectedUnit, false);
-  const label = `Net ${direction}: ${formattedValue}`;
-  const labelWidth = Math.max(120, label.length * 8.4 + 18);
-  const group = svgElement("g", {
-    class: "cost-of-risk-stage-flow-net-label-group"
-  });
-  if (config.flowKey && typeof config.onSelect === "function") {
-    group.style.cursor = "pointer";
-    group.addEventListener("click", (event) => {
-      event.stopPropagation();
-      config.onSelect(config.flowKey);
-    });
-    group.addEventListener("contextmenu", (event) => {
-      event.stopPropagation();
-      if (typeof config.onShowCalculationDetails === "function") {
-        config.onShowCalculationDetails(event, config.flowKey);
-      }
-    });
-  }
-
-  if (config.isSelected) {
-    group.append(svgElement("rect", {
-      fill: config.primaryDark,
-      height: 24,
-      rx: 4,
-      width: labelWidth,
-      x: config.x - labelWidth / 2,
-      y: config.y - 16
-    }));
-  }
-
-  const text = addText(
-    group,
-    label,
-    config.x,
-    config.y,
-    "cost-of-risk-stage-flow-net-label",
-    { "text-anchor": "middle" }
-  );
-  text.setAttribute("fill", config.isSelected ? "#ffffff" : "#26332d");
-  text.style.fill = config.isSelected ? "#ffffff" : "#26332d";
-  text.style.fontWeight = config.isSelected ? "700" : "500";
-  svg.append(group);
-}
-
 function scaleArrowLength(value, length) {
   if (!Number.isFinite(value) || value === 0) return 8;
   return length;
@@ -483,14 +388,20 @@ function scaleArrowWidth(value, maxFlow, minWidth =4, maxWidth = 32) {
 
 }
 
+// Same soft selected look as the Cost of Risk tab pills (.cost-of-risk-tab.is-active):
+// light blue fill, a slightly darker blue outline, dark blue text — instead
+// of the previous solid-fill/white-text treatment.
+const STAGE_BOX_SELECTED_FILL = "#eaf2fa";
+const STAGE_BOX_SELECTED_STROKE = "#cfe0f0";
+
 function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
   const isSelected = Boolean(config.isSelected);
   const valueLabel = String(config.valueLabel ?? "");
   const rect = svgElement("rect", {
-    fill: isSelected ? config.primaryDark : fill,
+    fill: isSelected ? STAGE_BOX_SELECTED_FILL : fill,
     height: 90,
-    rx: 0,
-    stroke: isSelected ? config.primaryDark : stroke,
+    rx: 12,
+    stroke: isSelected ? STAGE_BOX_SELECTED_STROKE : stroke,
     "stroke-width": 1,
     width: 220,
     x,
@@ -506,8 +417,8 @@ function addStageBox(svg, x, y, label, fill, stroke, config = {}) {
     })
     : null;
   if (isSelected) {
-    text.style.fill = "#ffffff";
-    if (value) value.style.fill = "#ffffff";
+    text.style.fill = config.primaryDark;
+    if (value) value.style.fill = config.primaryDark;
   }
 
   if (config.flowKey && typeof config.onSelect === "function") {

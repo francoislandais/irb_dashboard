@@ -260,15 +260,12 @@ function createCostOfRiskSummaryStatusScope({
   let visibleRowIndex = 0;
   const headRow = document.createElement("div");
   headRow.className = "cost-of-risk-summary-scope-head-row";
-  headRow.append(createCostOfRiskSummaryScopeHeaderCell("Category"));
+  headRow.append(createCostOfRiskSummaryScopeHeaderCell("Category", "", { category: true }));
   COST_OF_RISK_SUMMARY_STATUS_METRICS.forEach((metric, metricIndex) => {
     headRow.append(createCostOfRiskSummaryScopeHeaderCell(
       getCostOfRiskSummaryDisplayMetricLabel(metric, displayMode),
       displayMode === "amount" ? "" : "%",
-      {
-        active: activeStatusCell.metricIndex === metricIndex,
-        info: metric.key === "collateral"
-      }
+      { active: activeStatusCell.metricIndex === metricIndex }
     ));
   });
   table.append(headRow);
@@ -317,8 +314,7 @@ function createCostOfRiskSummaryStatusScope({
         }
       }
       td.append(createCostOfRiskSummaryScopeValue(
-        formatCostOfRiskSummaryMosaicValue(cell, metric.key, metric.kind, selectedUnit, displayMode),
-        getCostOfRiskSummaryBarRatio(cell, metric, displayMode)
+        formatCostOfRiskSummaryMosaicValue(cell, metric.key, metric.kind, selectedUnit, displayMode)
       ));
       tr.append(td);
     });
@@ -332,14 +328,8 @@ function createCostOfRiskSummaryScopeHeaderCell(label, unit = "", options = {}) 
   const th = document.createElement("div");
   th.className = "cost-of-risk-summary-scope-header";
   th.classList.toggle("is-coordinate-column", Boolean(options.active));
-  const labelNode = createCostOfRiskSummaryScopeText(unit ? `${label} ${unit}` : label);
-  if (options.info) {
-    const info = document.createElement("span");
-    info.className = "cost-of-risk-summary-scope-info";
-    info.textContent = "i";
-    labelNode.append(info);
-  }
-  th.append(labelNode);
+  th.classList.toggle("cost-of-risk-summary-scope-header--category", Boolean(options.category));
+  th.append(createCostOfRiskSummaryScopeText(unit ? `${label} ${unit}` : label));
   return th;
 }
 
@@ -360,13 +350,6 @@ function createCostOfRiskSummaryCategoryMarker(rowKey) {
   marker.textContent = config.label;
   marker.setAttribute("aria-hidden", "true");
   return marker;
-}
-
-function getCostOfRiskSummaryBarRatio(cell, metric, displayMode) {
-  if (!cell) return null;
-  const value = metric.kind === "ratio" ? cell.ratio : cell.ratio ?? cell.value;
-  if (!Number.isFinite(value)) return null;
-  return Math.max(0, Math.min(1, value));
 }
 
 function createCostOfRiskSummaryScopeHeader({
@@ -438,22 +421,13 @@ function getCostOfRiskScopeUnitLabel(selectedUnit) {
   }[selectedUnit] ?? "M€";
 }
 
-function createCostOfRiskSummaryScopeValue(value, barRatio = null) {
+function createCostOfRiskSummaryScopeValue(value) {
   const span = document.createElement("span");
   span.className = "cost-of-risk-summary-scope-value";
   const text = document.createElement("span");
   text.className = "cost-of-risk-summary-scope-value-text";
   text.textContent = value;
   span.append(text);
-  if (Number.isFinite(barRatio)) {
-    const track = document.createElement("span");
-    track.className = "cost-of-risk-summary-scope-bar";
-    const fill = document.createElement("span");
-    fill.className = "cost-of-risk-summary-scope-bar-fill";
-    fill.style.width = `${Math.round(barRatio * 100)}%`;
-    track.append(fill);
-    span.append(track);
-  }
   return span;
 }
 

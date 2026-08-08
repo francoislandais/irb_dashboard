@@ -3,7 +3,13 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260806-cell-selection";
+import { clampCostOfRiskSmoothingWindow, getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260806-cell-selection";
+import {
+  createCostOfRiskHighchartsTitle,
+  getCostOfRiskFocusedYAxisBounds,
+  renderCostOfRiskSmoothingBadge,
+  renderCostOfRiskYAxisFocusBadge
+} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -76,6 +82,9 @@ const pendingUrlTab = getUrlTabParam();
 let explorerStickyFrame = 0;
 let explorerBenchmarkViewActive = false;
 let explorerBenchmarkChart = null;
+let explorerBenchmarkSmoothingWindow = 1;
+let explorerBenchmarkLastSmoothingWindow = 4;
+let explorerBenchmarkFocusYAxis = false;
 let explorerReturnTarget = null;
 let shouldFocusOpenedExplorerPoint = false;
 let explorerCellDrag = null;
@@ -533,7 +542,11 @@ function renderExplorerBenchmarkChart(benchmark, state) {
   if (!elements.explorerBenchmarkChart || !window.Highcharts) return;
 
   const benchmarkSeries = benchmark.series.map((serie) => ({ jstCode: serie.jstCode, points: serie.values }));
-  const chartModel = buildBenchmarkChartModel(benchmarkSeries, state.selectedJst, primaryDark, { displayMode: "amount", peerDisplayMode: state.peerDisplayMode });
+  const chartModel = buildBenchmarkChartModel(benchmarkSeries, state.selectedJst, primaryDark, {
+    displayMode: "amount",
+    peerDisplayMode: state.peerDisplayMode,
+    smoothingWindow: explorerBenchmarkSmoothingWindow
+  });
   const series = chartModel.series;
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
 
@@ -543,7 +556,9 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     return;
   }
 
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
+  const yBounds = explorerBenchmarkFocusYAxis
+    ? getCostOfRiskFocusedYAxisBounds(series, state.selectedJst)
+    : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
 
   const options = {
     chart: {
@@ -557,6 +572,8 @@ function renderExplorerBenchmarkChart(benchmark, state) {
             clearPeerDistributionBands(this);
           }
           renderBenchmarkEndpointLabels(this, state.selectedJst, selectExplorerBenchmarkJst, { peerDisplayMode: chartModel.peerDisplayMode });
+          renderCostOfRiskSmoothingBadge(this, explorerBenchmarkSmoothingWindow, clearExplorerBenchmarkSmoothing, updateExplorerBenchmarkSmoothingWindow);
+          renderCostOfRiskYAxisFocusBadge(this, explorerBenchmarkFocusYAxis, toggleExplorerBenchmarkFocusYAxis);
         }
       },
       // Fixed regardless of whether the anonymised-mode subtitle has text:
@@ -578,7 +595,7 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     }, state.selectedJst),
     series,
     subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
-    title: { text: null },
+    title: createCostOfRiskHighchartsTitle("temporal benchmark of the current selection"),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
@@ -625,12 +642,38 @@ function renderExplorerBenchmarkChart(benchmark, state) {
     explorerBenchmarkChart = window.Highcharts.chart(elements.explorerBenchmarkChart, options);
     markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
   }
+  // The container is only unhidden a moment before this runs (see
+  // renderExplorer), so force a reflow in case Highcharts measured its
+  // width before the surrounding grid track had finished laying out.
+  explorerBenchmarkChart.reflow();
 }
 
 function destroyExplorerBenchmarkChart() {
   if (!explorerBenchmarkChart) return;
   explorerBenchmarkChart.destroy();
   explorerBenchmarkChart = null;
+}
+
+// Same smoothing/focus controls as every Cost of Risk benchmark chart (see
+// costOfRiskChartUtils.js's badges) so this reads as the exact same chart.
+function updateExplorerBenchmarkSmoothingWindow(value) {
+  const nextWindow = value === "toggle"
+    ? (explorerBenchmarkSmoothingWindow > 1 ? 1 : explorerBenchmarkLastSmoothingWindow)
+    : clampCostOfRiskSmoothingWindow(value);
+  if (explorerBenchmarkSmoothingWindow === nextWindow) return;
+  explorerBenchmarkSmoothingWindow = nextWindow;
+  if (nextWindow > 1) explorerBenchmarkLastSmoothingWindow = nextWindow;
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function clearExplorerBenchmarkSmoothing() {
+  if (explorerBenchmarkSmoothingWindow <= 1) return;
+  updateExplorerBenchmarkSmoothingWindow(1);
+}
+
+function toggleExplorerBenchmarkFocusYAxis() {
+  explorerBenchmarkFocusYAxis = !explorerBenchmarkFocusYAxis;
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 // Reuses the same global JST_CODE update entry point as the header dropdown

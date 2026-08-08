@@ -55,7 +55,7 @@ import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
   getStageTransferDisplayValue
-} from "./costOfRiskStageTransferFlowDiagramView.js?v=20260806-cell-selection";
+} from "./costOfRiskStageTransferFlowDiagramView.js?v=20260806-soft-stage-boxes";
 import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
@@ -74,7 +74,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskSummaryTablesView.js?v=20260806-summary-frame-cleanup";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -82,8 +82,8 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260804-axis-year-labels";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260806-cell-selection";
+} from "./costOfRiskSummaryChartsView.js?v=20260806-summary-frame-cleanup";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260806-soft-stage-boxes";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
@@ -150,7 +150,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260802-readable-selection-phrases";
-import { openExplorerPoint } from "./explorerView.js?v=20260806-cell-selection";
+import { openExplorerPoint } from "./explorerView.js?v=20260806-static-chart-title";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-readable-selection-phrases";
 import {
   clearCostOfRiskEmptyPanelsView,

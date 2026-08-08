@@ -11,8 +11,6 @@
   /* --primary-dark: #0c4c42;*/
   --primary-dark: #0168a0;
   --flow-arrow: #e2e5e3;
-  --cost-risk-top-chart-height: 260px;
-  --cost-risk-time-chart-height: 300px;
   --danger: #a13d35;
   --focus: #d99a28;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -563,12 +561,9 @@ button:focus-visible {
 
 .cost-of-risk-selected-data-summary {
   align-content: start;
-  background: #f6f8f7;
-  border-radius: 7px;
   display: block;
   height: 114px;
   overflow: hidden;
-  padding: 10px;
 }
 
 .cost-of-risk-selected-data-summary-label {
@@ -1115,15 +1110,15 @@ button:focus-visible {
 
 .cost-of-risk-tabs {
   display: inline-flex;
-  align-items: flex-end;
+  align-items: center;
+  gap: 8px;
   max-width: min(100%, 900px);
   width: min(100%, 900px);
   border: 0;
-  border-bottom: 1px solid #d8dfdb;
   border-radius: 0;
-  background: var(--bg);
   overflow-x: auto;
   overflow-y: hidden;
+  padding: 2px 2px 6px;
   scrollbar-color: #c8d0cb transparent;
   scrollbar-width: thin;
   white-space: nowrap;
@@ -1159,25 +1154,26 @@ button:focus-visible {
 .cost-of-risk-tab {
   flex: 0 0 auto;
   min-width: max-content;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
+  border: 1px solid #d8dfdb;
+  border-radius: 999px;
+  background: #ffffff;
   color: #5f6b65;
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 500;
   min-height: 34px;
-  padding: 8px 13px 7px;
+  padding: 8px 16px;
 }
 
 .cost-of-risk-tab:hover {
+  border-color: #c2cac5;
   background: #eef2ef;
   color: var(--primary-dark);
 }
 
 .cost-of-risk-tab.is-active {
-  background: transparent;
-  border-bottom-color: var(--primary-dark);
+  border-color: #cfe0f0;
+  background: #eaf2fa;
   color: var(--primary-dark);
   font-weight: 600;
 }
@@ -1987,18 +1983,22 @@ button:focus-visible {
   white-space: nowrap;
 }
 
+/* Same pill look as the Cost of Risk tabs (.cost-of-risk-tab): white/grey
+   when off, light blue fill + darker blue border + dark blue text when on.
+   Height is unchanged (still 19px) — only color and corner radius match. */
 .cost-of-risk-chart-smoothing-badge {
-  --smoothing-badge-fill: #eef1ef;
+  --smoothing-badge-fill: #ffffff;
+  --smoothing-badge-border: #d8dfdb;
   position: absolute;
   z-index: 1000;
   display: inline-flex;
   align-items: center;
   max-width: 180px;
   min-height: 19px;
-  border: 1px solid #d2d9d5;
-  border-radius: 5px;
+  border: 1px solid var(--smoothing-badge-border);
+  border-radius: 999px;
   background: var(--smoothing-badge-fill);
-  color: #202722;
+  color: #5f6b65;
   font-size: 10px;
   font-weight: 400;
   line-height: 1;
@@ -2006,20 +2006,22 @@ button:focus-visible {
 }
 
 .cost-of-risk-chart-smoothing-badge.is-smoothed {
-  --smoothing-badge-fill: #d9ecf7;
-  border-color: #bfdbea;
-  color: #1d2823;
+  --smoothing-badge-fill: #eaf2fa;
+  --smoothing-badge-border: #cfe0f0;
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .cost-of-risk-chart-y-focus-badge {
-  --y-focus-badge-fill: #eef1ef;
+  --y-focus-badge-fill: #ffffff;
+  --y-focus-badge-border: #d8dfdb;
   position: absolute;
   z-index: 1000;
   min-height: 19px;
-  border: 1px solid #d2d9d5;
-  border-radius: 5px;
+  border: 1px solid var(--y-focus-badge-border);
+  border-radius: 999px;
   background: var(--y-focus-badge-fill);
-  color: #52615a;
+  color: #5f6b65;
   font-size: 10px;
   font-weight: 400;
   line-height: 1;
@@ -2029,9 +2031,10 @@ button:focus-visible {
 }
 
 .cost-of-risk-chart-y-focus-badge.is-focused {
-  --y-focus-badge-fill: #d9ecf7;
-  border-color: #bfdbea;
-  color: #1d2823;
+  --y-focus-badge-fill: #eaf2fa;
+  --y-focus-badge-border: #cfe0f0;
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .cost-of-risk-chart-benchmark-mode {
@@ -2527,7 +2530,7 @@ button:focus-visible {
 
 .cost-of-risk-stage-summary-table {
   align-content: start;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
   display: grid;
@@ -2539,13 +2542,20 @@ button:focus-visible {
   width: 100%;
 }
 
+/* Same frame as every other tab's data panel (.cost-of-risk-npl-flows-panel,
+   .cost-of-risk-definition-panel, etc.) so the border stays in the exact
+   same place when switching tabs, instead of the Summary tab having its own.
+   It hugs its content (align-self: start, no forced height) rather than
+   stretching to fill the whole split-section — the frame should wrap the
+   data, not the leftover empty space below it. */
 .cost-of-risk-summary-table-panel {
   align-content: start;
+  align-self: start;
   background: #ffffff;
+  border: 1px solid var(--line);
   border-radius: 8px;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  height: 100%;
+  grid-template-rows: auto auto;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
@@ -2555,13 +2565,18 @@ button:focus-visible {
 
 .cost-of-risk-summary-table-body {
   display: grid;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: auto;
   min-height: 0;
   min-width: 0;
-  overflow: hidden;
 }
 
+/* Nested inside .cost-of-risk-summary-table-panel, which already draws the
+   frame — no double border/radius, and no forced height, here. */
 .cost-of-risk-summary-table-body > .cost-of-risk-stage-summary-table {
+  border: 0;
+  border-radius: 0;
+  height: auto;
+  overflow: visible;
   padding: 0;
 }
 
@@ -2942,8 +2957,6 @@ button:focus-visible {
 
 .cost-of-risk-summary-scope-panel {
   background: #ffffff;
-  border: 1px solid #e4ebe7;
-  border-radius: 8px;
   min-width: 0;
   overflow: hidden;
   padding: 7px 20px 10px;
@@ -3046,7 +3059,13 @@ button:focus-visible {
   font-size: 0.79rem;
   font-weight: 650;
   min-height: 24px;
-  text-align: center;
+  text-align: right;
+}
+
+/* Aligned with the row labels below it, the same way the metric headers
+   are aligned with the (right-aligned) values below them. */
+.cost-of-risk-summary-scope-header--category {
+  text-align: left;
 }
 
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
@@ -3075,11 +3094,6 @@ button:focus-visible {
   padding-left: 20px !important;
 }
 
-.cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-label .cost-of-risk-summary-scope-text {
-  background: transparent;
-  border-radius: 0;
-}
-
 .cost-of-risk-summary-scope-cell {
   align-items: center;
   cursor: pointer;
@@ -3102,19 +3116,20 @@ button:focus-visible {
   border-radius: 0;
 }
 
-.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value,
-.cost-of-risk-summary-scope-row.is-selected-row .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value {
-  background: var(--primary-dark);
-  color: #ffffff;
+/* Same soft selection as the tab pills / stage boxes: light blue fill, a
+   slightly darker blue outline, dark blue text — no more solid fill. */
+.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value {
+  background: #eaf2fa;
+  border-color: #cfe0f0;
 }
 
 .cost-of-risk-summary-scope-value {
   align-items: center;
   background: transparent;
+  border: 1px solid transparent;
   border-radius: 6px;
-  display: grid;
-  grid-template-columns: 72px minmax(44px, 96px);
-  gap: 10px;
+  display: flex;
+  justify-content: flex-end;
   min-width: 0;
   padding: 2px 8px;
   width: 100%;
@@ -3122,36 +3137,11 @@ button:focus-visible {
 
 .cost-of-risk-summary-scope-value-text {
   color: #223a5e;
-  justify-self: end;
 }
 
 .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value-text {
-  color: #ffffff;
-}
-
-.cost-of-risk-summary-scope-bar {
-  background: #e8ecef;
-  border-radius: 999px;
-  display: block;
-  height: 4px;
-  overflow: hidden;
-  width: 100%;
-}
-
-.cost-of-risk-summary-scope-bar-fill {
-  background: #116cc8;
-  border-radius: inherit;
-  display: block;
-  height: 100%;
-  min-width: 3px;
-}
-
-.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-bar {
-  background: rgba(255, 255, 255, 0.35);
-}
-
-.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-bar-fill {
-  background: #ffffff;
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .cost-of-risk-summary-scope-text {
@@ -3167,19 +3157,6 @@ button:focus-visible {
   color: #87918b;
   font-size: 0.72rem;
   font-weight: 600;
-}
-
-.cost-of-risk-summary-scope-info {
-  align-items: center;
-  border: 1px solid #aeb9b4;
-  border-radius: 999px;
-  color: #87918b;
-  display: inline-flex;
-  font-size: 0.66rem;
-  height: 14px;
-  justify-content: center;
-  margin-left: 6px;
-  width: 14px;
 }
 
 .cost-of-risk-summary-category-marker {
@@ -3231,10 +3208,6 @@ button:focus-visible {
   background: #ffe3e3;
   border: 1px solid #ff7777;
   color: #ff5555;
-}
-
-.cost-of-risk-summary-scope-row.is-selected-row {
-  background: #edf5ff;
 }
 
 .cost-of-risk-summary-counterparty-scope-table .cost-of-risk-summary-scope-value {
@@ -3708,7 +3681,12 @@ button:focus-visible {
 .cost-of-risk-split-section > .cost-of-risk-waterfall,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-chart,
 .cost-of-risk-split-section > .cost-of-risk-stage-transfer-flow-chart,
-.cost-of-risk-split-section > .cost-of-risk-stage-reconciliation-chart {
+.cost-of-risk-split-section > .cost-of-risk-stage-reconciliation-chart,
+/* Every real Cost of Risk benchmark chart is a direct child of
+   .cost-of-risk-split-section, which is what actually overrides
+   .cost-of-risk-chart's base width: 80% up to 100% — .explorer-benchmark-chart
+   needs the exact same override, or it stays visibly narrower. */
+.explorer-benchmark-view > .cost-of-risk-chart {
   height: 100%;
   min-height: 0;
   overflow: hidden;
@@ -3988,7 +3966,7 @@ button:focus-visible {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding: 18px;
+  padding: 8px 18px 18px;
 }
 
 .explorer-workspace {
@@ -4004,19 +3982,26 @@ button:focus-visible {
 .explorer-main-pane {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px;
+  gap: 6px;
   min-height: 0;
   min-width: 0;
-  overflow: hidden;
 }
 
-/* Same split as Cost of Risk's tab panels: data on top, the benchmark
-   chart in a fixed-height band underneath. No on-chart header/title here
-   (removed — see explorerView.js), so the table keeps the room that used
-   to go to it: --cost-risk-top-chart-height (260px) rather than the full
-   --cost-risk-time-chart-height (300px). */
+/* Same row sizing as Cost of Risk's tab panels (see the
+   [data-cost-of-risk-panel="..."] rule) AND the same top-anchored packing
+   (align-content: start, see .cost-of-risk-tab-panel) instead of a
+   flexible middle row. A flexible row would absorb all the leftover
+   height and push the chart down to whatever the viewport happens to be,
+   so it would only ever coincide with Cost of Risk's chart position by
+   accident, at one specific window height. Matching both the clamped
+   row sizes and the top-packed alignment puts the chart at the same
+   deterministic offset from the top as Cost of Risk, at every viewport size. */
 .explorer-main-pane.has-benchmark {
-  grid-template-rows: auto minmax(120px, 1fr) var(--cost-risk-top-chart-height);
+  align-content: start;
+  grid-template-rows:
+    auto
+    minmax(200px, 320px)
+    minmax(220px, 460px);
 }
 
 .explorer-context-panel {
@@ -4209,40 +4194,43 @@ button:focus-visible {
   min-width: 0;
 }
 
+/* Same pill as the tab pills / axis-tab buttons: white/grey when off,
+   light blue fill + darker blue border + dark blue text when on. */
 .explorer-template-option {
   display: grid;
   gap: 2px;
-  background: #f7f9f8;
-  border: 1px solid #e7ebe9;
-  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #eef1ef;
+  border-radius: 999px;
   color: var(--text);
   cursor: pointer;
   overflow-wrap: anywhere;
-  padding: 8px 10px;
+  padding: 8px 16px;
   text-align: left;
   transition: background .15s ease, border-color .15s ease;
 }
 
 .explorer-template-option:hover {
   background: #eef2ef;
-  border-color: #dce3e0;
+  border-color: #c2cac5;
 }
 
 .explorer-template-option.is-active {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background: #eaf2fa;
+  border-color: #cfe0f0;
   cursor: default;
 }
 
 .explorer-template-option-code {
   color: #26332d;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.2;
 }
 
 .explorer-template-option.is-active .explorer-template-option-code {
-  color: #ffffff;
+  color: var(--primary-dark);
+  font-weight: 700;
 }
 
 .explorer-template-option-description {
@@ -4253,7 +4241,7 @@ button:focus-visible {
 }
 
 .explorer-template-option.is-active .explorer-template-option-description {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(1, 104, 160, 0.75);
 }
 
 .filter-summary {
@@ -4327,15 +4315,23 @@ table {
   overflow: auto;
 }
 
+/* Same width contract as Cost of Risk's .cost-of-risk-split-section, so
+   .cost-of-risk-chart's width: 80% resolves against the exact same basis. */
 .explorer-benchmark-view {
   position: relative;
   grid-row: 3;
+  width: min(100%, 900px);
   min-width: 0;
   min-height: 0;
   height: 100%;
-  overflow: hidden;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
+  /* No overflow: hidden here, matching .cost-of-risk-split-section (which
+     doesn't clip either) — it was cutting off the chart's own bottom axis
+     line whenever the row's actual height rounded a fraction of a pixel
+     short of the chart's rendered height. */
+  /* .explorer-main-pane's row gap (6px) matches the header-row gaps, but
+     Cost of Risk's own table-to-chart gap is 14px (.cost-of-risk-tab-panel's
+     gap) — add the difference here so this specific gap matches too. */
+  margin-top: 8px;
 }
 
 .explorer-benchmark-view[hidden] {
@@ -4343,11 +4339,12 @@ table {
 }
 
 /* Overlaid on the chart itself (not a header row) so it never eats into
-   the chart's own fixed height — see .explorer-benchmark-view. */
+   the chart's own fixed height — see .explorer-benchmark-view. Nudged in
+   from the corner so it doesn't sit right on the edge. */
 .explorer-benchmark-close {
   position: absolute;
-  top: 10px;
-  right: 0;
+  top: 6px;
+  right: 8px;
   z-index: 1;
   border: 0;
   border-radius: 6px;
@@ -4365,11 +4362,9 @@ table {
   color: var(--primary-dark);
 }
 
-.explorer-benchmark-chart {
-  height: 100%;
-  min-height: 0;
-  width: 100%;
-}
+/* No size override here on purpose: it inherits .cost-of-risk-chart's
+   height: 300px / width: 80% as-is, so this is pixel-identical to every
+   Cost of Risk benchmark chart. */
 
 .template-tabs {
   display: flex;
@@ -4408,6 +4403,8 @@ table {
   overflow: hidden;
 }
 
+/* Same pill as the Cost of Risk tabs (.cost-of-risk-tab): white/grey when
+   off, light blue fill + darker blue border + dark blue text when on. */
 .axis-tab {
   display: flex;
   align-items: center;
@@ -4415,15 +4412,15 @@ table {
   width: 219px;
   max-width: 219px;
   min-height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  border: 1px solid #d8dfdb;
+  border-radius: 999px;
   background: #ffffff;
-  color: var(--ink);
+  color: #5f6b65;
   cursor: pointer;
   font: inherit;
   min-width: 0;
   overflow: hidden;
-  padding: 6px 10px;
+  padding: 6px 16px;
   text-align: left;
 }
 
@@ -4431,10 +4428,16 @@ table {
   display: none;
 }
 
+.axis-tab:hover {
+  border-color: #c2cac5;
+  background: #eef2ef;
+  color: var(--primary-dark);
+}
+
 .axis-tab.is-active {
-  border-color: var(--primary-dark);
-  background: var(--primary-dark);
-  color: #ffffff;
+  border-color: #cfe0f0;
+  background: #eaf2fa;
+  color: var(--primary-dark);
 }
 
 .axis-tab.is-disabled,
@@ -4449,21 +4452,16 @@ table {
   display: block;
   min-width: 0;
   overflow: hidden;
-  color: var(--ink);
+  color: inherit;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.axis-tab.is-disabled .axis-tab-value,
-.axis-tab:disabled .axis-tab-value {
-  color: #a6b0ab;
-}
-
 .axis-tab.is-active .axis-tab-value {
-  color: #ffffff;
+  font-weight: 600;
 }
 
 .axis-tab-lines,
@@ -4547,10 +4545,6 @@ table {
   padding-top: 2px;
 }
 
-.axis-tab.is-active .axis-tab-ratio {
-  border-top-color: rgba(255, 255, 255, 0.22);
-  color: #cfe0d8;
-}
 
 .axis-ratio-clear {
   display: inline-grid;
@@ -5104,8 +5098,8 @@ table {
    the user actually clicked (see .is-selected-cell below). */
 .metric-table tbody tr.is-selected > th,
 .metric-table tbody tr.is-selected > td {
-  background: #dceefa !important;
-  color: var(--ink) !important;
+  background: #eaf2fa !important;
+  color: var(--primary-dark) !important;
 }
 
 .metric-table tbody tr.is-selected > th.description-column {
@@ -5115,8 +5109,8 @@ table {
     #ffffff var(--parent-highlight-start, var(--highlight-start)),
     #f3f5f4 var(--parent-highlight-start, var(--highlight-start)),
     #f3f5f4 var(--highlight-start),
-    #dceefa var(--highlight-start),
-    #dceefa 100%
+    #eaf2fa var(--highlight-start),
+    #eaf2fa 100%
   ) !important;
 }
 
