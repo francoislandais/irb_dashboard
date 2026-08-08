@@ -3701,11 +3701,12 @@ function renderCostOfRiskFilterSelectionPanel(kind) {
   }));
   options.filter((option) => option.value !== COST_OF_RISK_FILTER_ALL).forEach((option) => {
     const optionState = getCostOfRiskFilterSelectionOptionState(kind, option);
+    if (optionState.hidden) return;
     tbody.append(createCostOfRiskFilterSelectionRow(optionState.label, option.value === activeValue, () => {
       applyCostOfRiskFilterSelection(meta.filterKey, option.value);
     }, {
       ...optionState,
-      preview: optionState.disabled ? null : { kind, token: previewToken, value: option.value }
+      preview: { kind, token: previewToken, value: option.value }
     }));
   });
 
@@ -3807,10 +3808,8 @@ function getCostOfRiskFilterSelectionOptionState(kind, option) {
 
   const parent = getFilterParentValue("counterparty", option.value);
   const isFineCounterparty = parent !== COST_OF_RISK_FILTER_ALL;
-  const isDisabled = isFineCounterparty && COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS.has(activeCostOfRiskTab);
   return {
-    disabled: isDisabled,
-    disabledReason: isDisabled ? "This counterparty breakdown is not available in this tab." : "",
+    hidden: isFineCounterparty && COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS.has(activeCostOfRiskTab),
     indent: isFineCounterparty,
     label: formatCostOfRiskCounterpartySelectionLabel(option.label)
   };
