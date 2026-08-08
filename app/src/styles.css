@@ -3081,9 +3081,7 @@ button:focus-visible {
 .cost-of-risk-summary-scope-label {
   align-items: center;
   cursor: pointer;
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: 6px;
+  display: flex;
   overflow: hidden;
   text-align: left;
   text-overflow: ellipsis;
@@ -3177,57 +3175,6 @@ button:focus-visible {
   color: #87918b;
   font-size: 0.72rem;
   font-weight: 600;
-}
-
-.cost-of-risk-summary-category-marker {
-  align-items: center;
-  border-radius: 4px;
-  display: inline-flex;
-  font-size: 0.72rem;
-  font-weight: 700;
-  height: 16px;
-  justify-content: center;
-  justify-self: center;
-  line-height: 1;
-  width: 16px;
-}
-
-.cost-of-risk-summary-category-marker--all {
-  background: transparent;
-  color: #216fd0;
-  font-size: 0.86rem;
-}
-
-.cost-of-risk-summary-category-marker--stage1 {
-  background: #dff5eb;
-  color: #44b68b;
-}
-
-.cost-of-risk-summary-category-marker--stage2 {
-  background: #fff2ca;
-  color: #e5ae24;
-}
-
-.cost-of-risk-summary-category-marker--stage3 {
-  background: #ffe3e3;
-  color: #ff6464;
-}
-
-.cost-of-risk-summary-category-marker--poci {
-  background: #f2defc;
-  color: #b956e2;
-}
-
-.cost-of-risk-summary-category-marker--performing {
-  background: #dff5eb;
-  border: 1px solid #70c9ad;
-  color: #44b68b;
-}
-
-.cost-of-risk-summary-category-marker--nonperforming {
-  background: #ffe3e3;
-  border: 1px solid #ff7777;
-  color: #ff5555;
 }
 
 .cost-of-risk-summary-counterparty-scope-table .cost-of-risk-summary-scope-value {

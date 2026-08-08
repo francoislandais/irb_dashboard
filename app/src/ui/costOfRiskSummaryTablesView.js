@@ -290,7 +290,7 @@ function createCostOfRiskSummaryStatusScope({
     const labelCell = document.createElement("div");
     labelCell.className = `cost-of-risk-summary-scope-label cost-of-risk-summary-scope-label--level-${definition.level}`;
     labelCell.classList.toggle("is-coordinate-row", activeStatusCell.rowKey === row.key);
-    labelCell.append(createCostOfRiskSummaryCategoryMarker(row.key), createCostOfRiskSummaryScopeText(row.label));
+    labelCell.append(createCostOfRiskSummaryScopeText(row.label));
     labelCell.addEventListener("click", () => onCellSelect(`gca:ratio:${row.key}`, row.key));
     tr.append(labelCell);
 
@@ -347,25 +347,6 @@ function createCostOfRiskSummaryScopeHeaderCell(label, unit = "", options = {}) 
   th.classList.toggle("cost-of-risk-summary-scope-header--category", Boolean(options.category));
   th.append(createCostOfRiskSummaryScopeText(unit ? `${label} ${unit}` : label));
   return th;
-}
-
-function createCostOfRiskSummaryCategoryMarker(rowKey) {
-  const marker = document.createElement("span");
-  marker.className = "cost-of-risk-summary-category-marker";
-  const markerMap = {
-    all: { label: "◇", tone: "all" },
-    nonperforming: { label: "!", tone: "nonperforming" },
-    performing: { label: "✓", tone: "performing" },
-    poci: { label: "P", tone: "poci" },
-    stage1: { label: "1", tone: "stage1" },
-    stage2: { label: "2", tone: "stage2" },
-    stage3: { label: "3", tone: "stage3" }
-  };
-  const config = markerMap[rowKey] ?? { label: "", tone: "default" };
-  marker.classList.add(`cost-of-risk-summary-category-marker--${config.tone}`);
-  marker.textContent = config.label;
-  marker.setAttribute("aria-hidden", "true");
-  return marker;
 }
 
 function createCostOfRiskSummaryScopeHeader({
