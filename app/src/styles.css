@@ -3080,6 +3080,7 @@ button:focus-visible {
 .cost-of-risk-summary-scope-header--metric-group .cost-of-risk-summary-scope-text {
   grid-column: 1;
   justify-self: end;
+  margin-right: 17px;
 }
 
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
