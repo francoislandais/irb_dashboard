@@ -890,14 +890,14 @@ button:focus-visible {
 }
 
 .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-  color: #ffffff;
-  font-weight: 700;
+  background: #eaf2fa;
+  border-color: #cfe0f0;
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-value {
-  color: #ffffff;
+  color: var(--primary-dark);
 }
 
 .cost-of-risk-filter-selection-row.is-disabled .cost-of-risk-filter-selection-option {
@@ -949,7 +949,7 @@ button:focus-visible {
 
 .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-description,
 .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option-source {
-  color: rgba(255, 255, 255, 0.82);
+  color: #5f6b65;
 }
 
 .cost-of-risk-audit-panel .cost-of-risk-audit-title {
