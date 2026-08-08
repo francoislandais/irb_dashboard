@@ -3068,21 +3068,6 @@ button:focus-visible {
   text-align: left;
 }
 
-.cost-of-risk-summary-scope-header--metric-group {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 0.52fr);
-  grid-column: span 2;
-  padding-left: 9px;
-  padding-right: 9px;
-  text-align: right;
-}
-
-.cost-of-risk-summary-scope-header--metric-group .cost-of-risk-summary-scope-text {
-  grid-column: 1;
-  justify-self: end;
-  margin-right: 17px;
-}
-
 .cost-of-risk-summary-scope-header.is-coordinate-column .cost-of-risk-summary-scope-text {
   background: transparent;
   border-radius: 0;
