@@ -3129,6 +3129,7 @@ button:focus-visible {
   border: 1px solid transparent;
   border-radius: 6px;
   display: flex;
+  gap: 10px;
   justify-content: flex-end;
   min-width: 0;
   padding: 2px 8px;
@@ -3142,6 +3143,18 @@ button:focus-visible {
 .cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value-text {
   color: var(--primary-dark);
   font-weight: 600;
+}
+
+.cost-of-risk-summary-scope-value-variation {
+  color: #8b948f;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.cost-of-risk-summary-scope-cell.is-active-cell .cost-of-risk-summary-scope-value-variation {
+  color: #8b948f;
+  font-weight: 400;
 }
 
 .cost-of-risk-summary-scope-text {

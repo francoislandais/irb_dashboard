@@ -228,13 +228,10 @@ function createCostOfRiskSummaryCounterpartyScope({
         });
       }
     }
-    cell.append(createCostOfRiskSummaryScopeValue(formatCostOfRiskSummaryMosaicValue(
-      cellData,
-      selectedMetric.key,
-      selectedMetric.kind,
-      selectedUnit,
-      displayMode
-    )));
+    cell.append(createCostOfRiskSummaryScopeValue(
+      formatCostOfRiskSummaryMosaicValue(cellData, selectedMetric.key, selectedMetric.kind, selectedUnit, displayMode),
+      formatCostOfRiskSummaryMosaicVariation(cellData, selectedMetric, selectedUnit, displayMode)
+    ));
     tr.append(cell);
     table.append(tr);
   });
@@ -314,7 +311,8 @@ function createCostOfRiskSummaryStatusScope({
         }
       }
       td.append(createCostOfRiskSummaryScopeValue(
-        formatCostOfRiskSummaryMosaicValue(cell, metric.key, metric.kind, selectedUnit, displayMode)
+        formatCostOfRiskSummaryMosaicValue(cell, metric.key, metric.kind, selectedUnit, displayMode),
+        formatCostOfRiskSummaryMosaicVariation(cell, metric, selectedUnit, displayMode)
       ));
       tr.append(td);
     });
@@ -421,13 +419,19 @@ function getCostOfRiskScopeUnitLabel(selectedUnit) {
   }[selectedUnit] ?? "M€";
 }
 
-function createCostOfRiskSummaryScopeValue(value) {
+function createCostOfRiskSummaryScopeValue(value, variation = "") {
   const span = document.createElement("span");
   span.className = "cost-of-risk-summary-scope-value";
   const text = document.createElement("span");
   text.className = "cost-of-risk-summary-scope-value-text";
   text.textContent = value;
   span.append(text);
+  if (variation && variation !== "-") {
+    const variationText = document.createElement("span");
+    variationText.className = "cost-of-risk-summary-scope-value-variation";
+    variationText.textContent = variation;
+    span.append(variationText);
+  }
   return span;
 }
 
@@ -651,6 +655,18 @@ function formatCostOfRiskSummaryMosaicValue(cell, metric, kind, selectedUnit, di
   if (displayMode === "amount") return Number.isFinite(cell.value) ? formatMetricValue(cell.value, selectedUnit) : "-";
   if (kind === "ratio") return Number.isFinite(cell.ratio) ? formatContributionPercentValue(cell.ratio) : "-";
   return formatCostOfRiskStageSummaryCell(cell, metric, kind, selectedUnit, displayMode);
+}
+
+function formatCostOfRiskSummaryMosaicVariation(cell, metric, selectedUnit, displayMode) {
+  if (!cell) return "";
+  if (displayMode === "amount") {
+    return Number.isFinite(cell.mom) ? formatSignedMetricValue(cell.mom, selectedUnit) : "";
+  }
+
+  const basisPoints = metric?.kind === "ratio"
+    ? cell.ratioMomBasisPoints
+    : cell.momRatioBasisPoints;
+  return Number.isFinite(basisPoints) ? formatSignedBasisPointsValue(basisPoints) : "";
 }
 
 export function renderCostOfRiskCounterpartySummaryTable({
