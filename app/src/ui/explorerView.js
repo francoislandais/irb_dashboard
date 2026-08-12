@@ -3,13 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { clampCostOfRiskSmoothingWindow, getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
-import {
-  createCostOfRiskHighchartsTitle,
-  getCostOfRiskFocusedYAxisBounds,
-  renderCostOfRiskSmoothingBadge,
-  renderCostOfRiskYAxisFocusBadge
-} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
+import { clampCostOfRiskSmoothingWindow } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -19,17 +13,9 @@ import {
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260804-lazy-index";
 import {
-  buildBenchmarkChartModel,
-  clearBenchmarkEndpointLabels,
-  clearPeerDistributionBands,
-  getBenchmarkLinePlotOptions,
-  getBenchmarkYAxisBoundsSeries,
-  hasBenchmarkChartModeChanged,
-  markBenchmarkChartMode,
-  renderBenchmarkEndpointLabels,
-  renderPeerDistributionBands,
-  scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
+  destroyExplorerBenchmarkChart,
+  renderExplorerBenchmarkView
+} from "./explorerBenchmarkView.js?v=20260812-explorer-benchmark-view";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -48,7 +34,6 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js?v=20260805-template-desc";
 import { getLatestState } from "./appState.js";
-import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let rerenderApp = () => {};
 let setActiveModule = () => {};
@@ -81,7 +66,6 @@ const pendingUrlColumn = getUrlColumnParam();
 const pendingUrlTab = getUrlTabParam();
 let explorerStickyFrame = 0;
 let explorerBenchmarkViewActive = false;
-let explorerBenchmarkChart = null;
 let explorerBenchmarkSmoothingWindow = 1;
 let explorerBenchmarkLastSmoothingWindow = 4;
 let explorerBenchmarkFocusYAxis = false;
@@ -458,7 +442,22 @@ export function renderExplorer(state) {
   // keep reaching it) — only the benchmark chart itself is torn down once
   // it's actually closed.
   if (explorerBenchmarkViewActive) {
-    renderExplorerBenchmarkView(state);
+    const benchmark = buildExplorerBenchmark();
+    // No on-chart title: the context panel's selection summary card already
+    // describes the selection, so the chart itself just shows the plot.
+    renderExplorerBenchmarkView({
+      benchmark,
+      container: elements.explorerBenchmarkChart,
+      focusYAxis: explorerBenchmarkFocusYAxis,
+      formatValue: (value) => formatBenchmarkValue(value, benchmark),
+      onClearSmoothing: clearExplorerBenchmarkSmoothing,
+      onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
+      onSelectJst: selectExplorerBenchmarkJst,
+      onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
+      peerDisplayMode: state.peerDisplayMode,
+      selectedJst: state.selectedJst,
+      smoothingWindow: explorerBenchmarkSmoothingWindow
+    });
   } else {
     destroyExplorerBenchmarkChart();
   }
@@ -522,136 +521,6 @@ function hideExplorerBenchmarkView() {
 
   explorerBenchmarkViewActive = false;
   if (getLatestState()) rerenderApp(getLatestState());
-}
-
-function renderExplorerBenchmarkView(state) {
-  // No on-chart title: the context panel's selection summary card already
-  // describes the selection, so the chart itself just shows the plot.
-  const benchmark = buildExplorerBenchmark();
-
-  if (benchmark.series.length === 0 || benchmark.dates.length === 0) {
-    destroyExplorerBenchmarkChart();
-    if (elements.explorerBenchmarkChart) elements.explorerBenchmarkChart.textContent = "No data available for this point.";
-    return;
-  }
-
-  renderExplorerBenchmarkChart(benchmark, state);
-}
-
-function renderExplorerBenchmarkChart(benchmark, state) {
-  if (!elements.explorerBenchmarkChart || !window.Highcharts) return;
-
-  const benchmarkSeries = benchmark.series.map((serie) => ({ jstCode: serie.jstCode, points: serie.values }));
-  const chartModel = buildBenchmarkChartModel(benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: "amount",
-    peerDisplayMode: state.peerDisplayMode,
-    smoothingWindow: explorerBenchmarkSmoothingWindow
-  });
-  const series = chartModel.series;
-  const isAnonymised = chartModel.peerDisplayMode === "anonymised";
-
-  if (series.length === 0) {
-    destroyExplorerBenchmarkChart();
-    elements.explorerBenchmarkChart.textContent = "No data available for this point.";
-    return;
-  }
-
-  const yBounds = explorerBenchmarkFocusYAxis
-    ? getCostOfRiskFocusedYAxisBounds(series, state.selectedJst)
-    : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
-
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      events: {
-        render() {
-          if (isAnonymised) {
-            renderPeerDistributionBands(this, chartModel.distribution);
-          } else {
-            clearPeerDistributionBands(this);
-          }
-          renderBenchmarkEndpointLabels(this, state.selectedJst, selectExplorerBenchmarkJst, { peerDisplayMode: chartModel.peerDisplayMode });
-          renderCostOfRiskSmoothingBadge(this, explorerBenchmarkSmoothingWindow, clearExplorerBenchmarkSmoothing, updateExplorerBenchmarkSmoothingWindow);
-          renderCostOfRiskYAxisFocusBadge(this, explorerBenchmarkFocusYAxis, toggleExplorerBenchmarkFocusYAxis);
-        }
-      },
-      // Fixed regardless of whether the anonymised-mode subtitle has text:
-      // letting Highcharts auto-size that margin shifted the plot area (and
-      // every axis label with it) whenever the subtitle appeared/disappeared.
-      marginTop: 40,
-      spacingRight: 128,
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    // No reference-date callback yet: the first argument (referenceLabel) is
-    // intentionally ignored, per spec ("aucun callback sur la date de
-    // référence n'est implémenté à ce stade").
-    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
-      selectExplorerBenchmarkJst(seriesName);
-    }, state.selectedJst),
-    series,
-    subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
-    title: createCostOfRiskHighchartsTitle("temporal benchmark of the current selection"),
-    tooltip: {
-      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
-      pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatBenchmarkValue(this.y, benchmark)}`;
-      },
-      shared: false,
-      split: false,
-      stickOnContact: true,
-      xDateFormat: "%d/%m/%Y"
-    },
-    xAxis: {
-      labels: { style: { color: "#5f6b65" } },
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      tickColor: "#d9dedb",
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return formatBenchmarkValue(this.value, benchmark);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      max: yBounds.max,
-      min: yBounds.min,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 8,
-      title: { text: null }
-    }
-  };
-
-  if (hasBenchmarkChartModeChanged(explorerBenchmarkChart, chartModel.peerDisplayMode)) destroyExplorerBenchmarkChart();
-  if (explorerBenchmarkChart) {
-    clearBenchmarkEndpointLabels(explorerBenchmarkChart);
-    explorerBenchmarkChart.update(options, true, true, false);
-    markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(explorerBenchmarkChart, state.selectedJst, selectExplorerBenchmarkJst, { peerDisplayMode: chartModel.peerDisplayMode });
-  } else {
-    explorerBenchmarkChart = window.Highcharts.chart(elements.explorerBenchmarkChart, options);
-    markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
-  }
-  // The container is only unhidden a moment before this runs (see
-  // renderExplorer), so force a reflow in case Highcharts measured its
-  // width before the surrounding grid track had finished laying out.
-  explorerBenchmarkChart.reflow();
-}
-
-function destroyExplorerBenchmarkChart() {
-  if (!explorerBenchmarkChart) return;
-  explorerBenchmarkChart.destroy();
-  explorerBenchmarkChart = null;
 }
 
 // Same smoothing/focus controls as every Cost of Risk benchmark chart (see
