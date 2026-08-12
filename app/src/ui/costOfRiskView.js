@@ -38,7 +38,6 @@ import {
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
   clampCostOfRiskSmoothingWindow,
-  createCostOfRiskChartData,
   formatCostOfRiskDisplayValue,
   formatCostOfRiskSmoothingLabel,
   formatReferenceQuarterLabel,
@@ -47,9 +46,7 @@ import {
   getCostOfRiskPointDisplayValue,
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
-  getCostOfRiskYAxisBounds,
-  getSelectedSmoothedCostOfRiskPoint,
-  smoothCostOfRiskPoints
+  getSelectedSmoothedCostOfRiskPoint
 } from "../data/costOfRisk.js?v=20260806-cell-selection";
 import {
   createStageTransferWaterfallData,
@@ -62,10 +59,7 @@ import {
   renderCostOfRiskStageReconciliationView
 } from "./costOfRiskStageReconciliationView.js?v=20260804-axis-year-labels";
 import {
-  createCostOfRiskHighchartsTitle,
-  escapeHtml,
-  createCostOfRiskQuarterAxisLabelsOptions,
-  getCostOfRiskAxisTickPositions
+  createCostOfRiskHighchartsTitle
 } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import {
   getCostOfRiskCounterpartySummaryValue,
@@ -134,9 +128,9 @@ import {
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
 } from "./costOfRiskMovementTimeSeriesView.js?v=20260804-axis-year-labels";
 import {
-  renderBenchmarkEndpointLabels,
-  scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260806-cell-selection";
+  renderCostOfRiskDefinitionComparisonView,
+  renderCostOfRiskDefinitionView
+} from "./costOfRiskDefinitionView.js?v=20260806-definition-view-v2";
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
@@ -1023,6 +1017,40 @@ export function renderCostOfRisk(state) {
     elements.costOfRiskEmpty.hidden = true;
     elements.costOfRiskEmpty.textContent = "";
     elements.costOfRiskDashboard.hidden = false;
+    // Only fetched when it'll actually be used (comparison mode, or the total
+    // definition with the F02 benchmark toggled on) — building it is a real
+    // computation on a cache miss, not just a cheap lookup.
+    const needsF02Model = activeCostOfRiskDefinitionBenchmarkMode === "f02"
+      && (isComparisonDefinition || !activeCostOfRiskDefinitionDriverCode);
+    const f02Model = needsF02Model
+      ? getCostOfRiskDefinitionModelForId(state, "f02-impairment", "", customDefinitionCodes, {
+        includeBenchmarkSeries: false,
+        includeComponents: false,
+        includeDrivers: false
+      })
+      : null;
+    const definitionViewParams = {
+      benchmarkMode: activeCostOfRiskDefinitionBenchmarkMode,
+      chartContainer: elements.costOfRiskDefinitionChart,
+      panelContainer: elements.costOfRiskDefinitionPanel,
+      definitionId: activeCostOfRiskDefinitionId,
+      displayMode: activeCostOfRiskDefinitionDisplayMode,
+      driverCode: activeCostOfRiskDefinitionDriverCode,
+      f02Model,
+      focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
+      onClearSmoothing: clearCostOfRiskSmoothing,
+      onChangeSmoothing: updateCostOfRiskSmoothingWindow,
+      onSelectJst: selectCostOfRiskChartJst,
+      onSelectReferenceDate: selectCostOfRiskReferenceDate,
+      onToggleBenchmarkMode: setCostOfRiskDefinitionBenchmarkMode,
+      onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
+      peerDisplayMode: state.peerDisplayMode,
+      referenceDate: activeCostOfRiskReferenceDate,
+      renderTabEmpty: renderCostOfRiskTabEmpty,
+      selectedJst: state.selectedJst,
+      selectedUnit: state.selectedUnit,
+      smoothingWindow: activeCostOfRiskSmoothingWindow
+    };
     if (isComparisonDefinition) {
       const comparisonModels = COST_OF_RISK_COMPARISON_METHOD_IDS.map((definitionId) => (
         getCostOfRiskDefinitionModelForId(state, definitionId, "", customDefinitionCodes, {
@@ -1031,9 +1059,25 @@ export function renderCostOfRisk(state) {
           includeDrivers: false
         })
       ));
-      renderCostOfRiskDefinitionComparisonView(comparisonModels, definitionModel, state);
+      renderCostOfRiskDefinitionComparisonView({
+        ...definitionViewParams,
+        benchmarkModel: definitionModel,
+        comparisonBenchmarkDefinitionId: activeCostOfRiskComparisonBenchmarkDefinitionId,
+        comparisonModels,
+        onSelectComparisonDefinition: selectCostOfRiskComparisonDefinition
+      });
     } else {
-      renderCostOfRiskDefinitionView(definitionModel, state);
+      renderCostOfRiskDefinitionView({
+        ...definitionViewParams,
+        definitionModel,
+        panelTab: activeCostOfRiskDefinitionPanelTab,
+        emptyMessageContext: {
+          activeTab: activeCostOfRiskTab,
+          filterOptions: latestCostOfRiskFilterOptions,
+          filters: activeCostOfRiskFilters,
+          onSelectFilter: applyCostOfRiskEmptyMessageFilterSelection
+        }
+      });
     }
     setCostOfRiskDefinitionSelectedDataSummary(definitionModel, state);
     renderCostOfRiskDefinitionAuditPanel(definitionModel, { allowDefaultRender: consumeCostOfRiskDataAuditRequest() });
@@ -1690,83 +1734,6 @@ function renderCostOfRiskNplFlowsPanel(model, selectedUnit = "millions") {
   elements.costOfRiskNplFlowsPanel.replaceChildren(root);
 }
 
-function renderCostOfRiskDefinitionView(definitionModel, state) {
-  destroyCostOfRiskDefinitionComparisonChart();
-  renderCostOfRiskDefinitionPanel(definitionModel, state.selectedUnit);
-  if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
-    destroyCostOfRiskMovementChart();
-  }
-  const isTotalDefinitionSelected = !activeCostOfRiskDefinitionDriverCode;
-  const chartSelection = isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
-    ? buildCostOfRiskDefinitionVsF02ChartSelection(definitionModel, state)
-    : {
-        ...definitionModel,
-        series: definitionModel.chartSeries ?? definitionModel.series
-      };
-  const chartSelectedSeriesName = isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
-    ? getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel)
-    : state.selectedJst;
-  renderMovementTimeSeriesChart({
-    activeReferenceDate: activeCostOfRiskReferenceDate,
-    container: elements.costOfRiskDefinitionChart,
-    displayMode: activeCostOfRiskDefinitionDisplayMode,
-    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
-    jstCode: chartSelectedSeriesName,
-    benchmarkMode: activeCostOfRiskDefinitionBenchmarkMode,
-    onClearSmoothing: clearCostOfRiskSmoothing,
-    onChangeSmoothing: updateCostOfRiskSmoothingWindow,
-    onSelectJst: isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
-      ? () => {}
-      : selectCostOfRiskChartJst,
-    onSelectReferenceDate: selectCostOfRiskReferenceDate,
-    onToggleBenchmarkMode: setCostOfRiskDefinitionBenchmarkMode,
-    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
-    peerDisplayMode: isTotalDefinitionSelected && activeCostOfRiskDefinitionBenchmarkMode === "f02"
-      ? "explicit"
-      : state.peerDisplayMode,
-    renderTabEmpty: renderCostOfRiskTabEmpty,
-    selectedUnit: state.selectedUnit,
-    selection: chartSelection,
-    showBenchmarkModeToggle: isTotalDefinitionSelected,
-    smoothingWindow: activeCostOfRiskSmoothingWindow,
-    titleText: "Cost of Risk - Time Evolution"
-  });
-}
-
-function buildCostOfRiskDefinitionVsF02ChartSelection(definitionModel, state) {
-  const f02Model = getCostOfRiskDefinitionModelForId(
-    state,
-    "f02-impairment",
-    "",
-    getActiveCostOfRiskCustomDefinitionXCodes(),
-    {
-      includeBenchmarkSeries: false,
-      includeComponents: false,
-      includeDrivers: false
-    }
-  );
-  const currentSeriesName = getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel);
-  return {
-    ...definitionModel,
-    benchmarkSeries: [
-      {
-        jstCode: currentSeriesName,
-        points: definitionModel.series ?? []
-      },
-      {
-        jstCode: "F02",
-        points: f02Model.series ?? []
-      }
-    ],
-    selectedAreaSeriesName: "F02",
-    series: definitionModel.series ?? []
-  };
-}
-
-function getCostOfRiskDefinitionVsF02CurrentSeriesName(definitionModel) {
-  return definitionModel.definition?.label ?? "Current definition";
-}
-
 function getCostOfRiskDefinitionModelForId(
   state,
   definitionId,
@@ -1812,407 +1779,12 @@ function getCostOfRiskDefinitionModelOptions() {
   };
 }
 
-function renderCostOfRiskDefinitionComparisonView(comparisonModels, benchmarkModel, state) {
-  renderCostOfRiskDefinitionComparisonPanel(comparisonModels, benchmarkModel, state);
-  if (getCostOfRiskMovementChart()?.renderTo !== elements.costOfRiskDefinitionChart) {
-    destroyCostOfRiskMovementChart();
-  }
-  const chartSelection = activeCostOfRiskDefinitionBenchmarkMode === "f02"
-    ? buildCostOfRiskDefinitionVsF02ChartSelection(benchmarkModel, state)
-    : benchmarkModel;
-  const chartSelectedSeriesName = activeCostOfRiskDefinitionBenchmarkMode === "f02"
-    ? getCostOfRiskDefinitionVsF02CurrentSeriesName(benchmarkModel)
-    : state.selectedJst;
-  renderMovementTimeSeriesChart({
-    activeReferenceDate: activeCostOfRiskReferenceDate,
-    container: elements.costOfRiskDefinitionChart,
-    displayMode: activeCostOfRiskDefinitionDisplayMode,
-    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
-    jstCode: chartSelectedSeriesName,
-    benchmarkMode: activeCostOfRiskDefinitionBenchmarkMode,
-    onClearSmoothing: clearCostOfRiskSmoothing,
-    onChangeSmoothing: updateCostOfRiskSmoothingWindow,
-    onSelectJst: activeCostOfRiskDefinitionBenchmarkMode === "f02" ? () => {} : selectCostOfRiskChartJst,
-    onSelectReferenceDate: selectCostOfRiskReferenceDate,
-    onToggleBenchmarkMode: setCostOfRiskDefinitionBenchmarkMode,
-    onToggleYAxisFocus: toggleCostOfRiskFocusedYAxis,
-    peerDisplayMode: activeCostOfRiskDefinitionBenchmarkMode === "f02" ? "explicit" : state.peerDisplayMode,
-    renderTabEmpty: renderCostOfRiskTabEmpty,
-    selectedUnit: state.selectedUnit,
-    selection: chartSelection,
-    showBenchmarkModeToggle: true,
-    smoothingWindow: activeCostOfRiskSmoothingWindow,
-    titleText: `Cost of Risk - ${benchmarkModel.definition?.label ?? "Selected definition"} Benchmark`
-  });
-}
-
-function renderCostOfRiskDefinitionPanel(definitionModel, selectedUnit = "millions") {
-  if (!elements.costOfRiskDefinitionPanel) return;
-  if (definitionModel.status) {
-    elements.costOfRiskDefinitionPanel.replaceChildren(createCostOfRiskDefinitionEmpty(definitionModel.status));
-    return;
-  }
-
-  const root = document.createElement("div");
-  root.className = "cost-of-risk-definition-grid cost-of-risk-definition-grid--side";
-  root.append(createCostOfRiskDefinitionSummary(definitionModel, selectedUnit));
-
-  const detail = document.createElement("div");
-  detail.className = "cost-of-risk-definition-drivers";
-  detail.append(createCostOfRiskDefinitionPanelTabs());
-  const activeItems = activeCostOfRiskDefinitionPanelTab === "components"
-    ? definitionModel.components ?? []
-    : definitionModel.drivers ?? [];
-  if (activeItems.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "cost-of-risk-definition-driver-empty";
-    empty.textContent = activeCostOfRiskDefinitionPanelTab === "components"
-      ? "No F12 component is available for the selected definition."
-      : "No significant driver is available for the selected definition.";
-    detail.append(empty);
-  } else {
-    activeItems.forEach((item) => {
-      detail.append(createCostOfRiskDefinitionDetailRow(item, selectedUnit, activeCostOfRiskDefinitionPanelTab));
-    });
-  }
-
-  root.append(detail);
-  elements.costOfRiskDefinitionPanel.replaceChildren(root);
-}
-
-function createCostOfRiskDefinitionSummary(definitionModel, selectedUnit) {
-  const summary = document.createElement("div");
-  summary.className = "cost-of-risk-definition-summary";
-  summary.append(
-    createCostOfRiskDefinitionButton(definitionModel),
-    createCostOfRiskDefinitionValueButton(definitionModel, selectedUnit),
-    createCostOfRiskDefinitionScopeDetails(definitionModel, selectedUnit)
-  );
-  return summary;
-}
-
-function renderCostOfRiskDefinitionComparisonPanel(comparisonModels, benchmarkModel, state) {
-  if (!elements.costOfRiskDefinitionPanel) return;
-  if (!window.Highcharts) return;
-  destroyCostOfRiskDefinitionComparisonChart();
-
-  const root = document.createElement("div");
-  root.className = "cost-of-risk-definition-comparison";
-  root.append(createCostOfRiskDefinitionHeader(benchmarkModel, state.selectedUnit));
-  const chartContainer = document.createElement("div");
-  chartContainer.className = "cost-of-risk-definition-comparison-chart";
-  root.append(chartContainer);
-  elements.costOfRiskDefinitionPanel.replaceChildren(root);
-
-  const palette = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
-  const dashStyles = ["ShortDash", "ShortDot", "Dash", "Dot"];
-  const series = comparisonModels.map((model, index) => {
-    const definitionId = model.definition?.id ?? "";
-    const isActive = definitionId === activeCostOfRiskComparisonBenchmarkDefinitionId;
-    const color = isActive ? primaryDark : palette[index % palette.length];
-    const chartData = createCostOfRiskChartData(smoothCostOfRiskPoints(model.series ?? [], activeCostOfRiskSmoothingWindow), activeCostOfRiskDefinitionDisplayMode);
-    return {
-      clip: false,
-      color,
-      custom: {
-        benchmarkLabel: model.definition?.label ?? definitionId,
-        definitionId
-      },
-      dashStyle: isActive ? "Solid" : dashStyles[index % dashStyles.length],
-      data: chartData,
-      fillColor: isActive ? "rgba(140, 148, 144, 0.12)" : "transparent",
-      lineWidth: isActive ? 3.6 : 1.45,
-      marker: {
-        fillColor: isActive ? "#ffffff" : color,
-        enabled: isActive,
-        lineColor: color,
-        lineWidth: isActive ? 1.5 : 0,
-        radius: isActive ? 5 : 0,
-        symbol: "circle"
-      },
-      name: definitionId,
-      opacity: isActive ? 1 : 0.78,
-      states: {
-        hover: {
-          enabled: true,
-          halo: { size: isActive ? 9 : 0 },
-          lineWidth: isActive ? 4 : 2.1,
-          lineWidthPlus: 0
-        },
-        inactive: {
-          opacity: isActive ? 1 : 0.42
-        }
-      },
-      threshold: 0,
-      type: isActive ? "area" : "line",
-      zIndex: isActive ? 100 : 1
-    };
-  }).filter((serie) => serie.data.length > 0);
-  if (series.length === 0) {
-    chartContainer.textContent = "No cost of risk definition time series is available for the current selection.";
-    return;
-  }
-  const yBounds = getCostOfRiskYAxisBounds(series);
-  const selectedReferencePoint = benchmarkModel.series?.find((point) => point.label === activeCostOfRiskReferenceDate);
-
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      events: {
-        render() {
-          renderBenchmarkEndpointLabels(this, activeCostOfRiskComparisonBenchmarkDefinitionId, selectCostOfRiskComparisonDefinition);
-        }
-      },
-      spacingRight: 128,
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    plotOptions: {
-      series: {
-        animation: false,
-        cursor: "pointer",
-        events: {
-          click() {
-            const definitionId = this.userOptions?.custom?.definitionId ?? "";
-            selectCostOfRiskComparisonDefinition(definitionId);
-          }
-        },
-        point: {
-          events: {
-            click() {
-              const definitionId = this.series?.userOptions?.custom?.definitionId ?? "";
-              setTimeout(() => selectCostOfRiskComparisonDefinition(definitionId, this.referenceLabel), 0);
-            }
-          }
-        }
-      }
-    },
-    series,
-    title: { text: "" },
-    tooltip: {
-      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
-      pointFormatter() {
-          const label = this.series.userOptions?.custom?.benchmarkLabel ?? this.series.name;
-          return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(label)}</b>: ${formatCostOfRiskDisplayValue(this.y, activeCostOfRiskDefinitionDisplayMode, state.selectedUnit)}`;
-      },
-      shared: false,
-      split: false,
-      stickOnContact: true,
-      xDateFormat: "%d/%m/%Y"
-    },
-    xAxis: {
-      labels: createCostOfRiskQuarterAxisLabelsOptions(),
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      plotLines: selectedReferencePoint?.date instanceof Date ? [{
-        color: "#7f8984",
-        dashStyle: "ShortDash",
-        value: selectedReferencePoint.date.getTime(),
-        width: 1,
-        zIndex: 3
-      }] : [],
-      tickColor: "#d9dedb",
-      tickPositions: getCostOfRiskAxisTickPositions(comparisonModels.flatMap((model) => model.series ?? [])),
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return activeCostOfRiskDefinitionDisplayMode === "ratio"
-            ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(this.value)
-            : formatMetricValue(this.value, state.selectedUnit);
-        },
-        style: { color: "#5f6b65" }
-      },
-      max: yBounds.max,
-      min: yBounds.min,
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 6,
-      title: { text: activeCostOfRiskDefinitionDisplayMode === "ratio" ? "Cost of risk (bp)" : "Amount" }
-    }
-  };
-
-  costOfRiskDefinitionComparisonChart = window.Highcharts.chart(chartContainer, options);
-  scheduleBenchmarkEndpointLabels(
-    costOfRiskDefinitionComparisonChart,
-    activeCostOfRiskComparisonBenchmarkDefinitionId,
-    selectCostOfRiskComparisonDefinition
-  );
-}
-
-function destroyCostOfRiskDefinitionComparisonChart() {
-  if (!costOfRiskDefinitionComparisonChart) return;
-  costOfRiskDefinitionComparisonChart.destroy();
-  costOfRiskDefinitionComparisonChart = null;
-}
-
 function selectCostOfRiskComparisonDefinition(definitionId, referenceLabel = "") {
   if (!COST_OF_RISK_COMPARISON_METHOD_IDS.includes(definitionId)) return;
   activeCostOfRiskComparisonBenchmarkDefinitionId = definitionId;
   activeCostOfRiskDefinitionDriverCode = "";
   if (referenceLabel) activeCostOfRiskReferenceDate = referenceLabel;
   if (getLatestState()) rerenderApp(getLatestState());
-}
-
-function createCostOfRiskDefinitionHeader(definitionModel, selectedUnit) {
-  const header = document.createElement("div");
-  header.className = "cost-of-risk-definition-header";
-  header.append(
-    createCostOfRiskDefinitionButton(definitionModel),
-    createCostOfRiskDefinitionValueButton(definitionModel, selectedUnit)
-  );
-  return header;
-}
-
-function createCostOfRiskDefinitionButton(definitionModel) {
-  const definition = COST_OF_RISK_DEFINITION_OPTIONS.find((option) => option.id === activeCostOfRiskDefinitionId)
-    ?? definitionModel.definition
-    ?? COST_OF_RISK_DEFINITION_OPTIONS[0];
-  const definitionButton = document.createElement("button");
-  definitionButton.type = "button";
-  definitionButton.className = "cost-of-risk-definition-local-chip";
-  definitionButton.dataset.costOfRiskDefinitionFilterToggle = "true";
-  definitionButton.setAttribute("aria-label", "Change cost of risk definition");
-  const definitionPrefix = document.createElement("span");
-  definitionPrefix.className = "cost-of-risk-definition-local-chip-prefix";
-  definitionPrefix.textContent = "Cost of risk:";
-  const definitionValue = document.createElement("span");
-  definitionValue.className = "cost-of-risk-definition-local-chip-value";
-  definitionValue.textContent = definition?.label ?? "Definition";
-  definitionButton.append(definitionPrefix, definitionValue);
-  return definitionButton;
-}
-
-function createCostOfRiskDefinitionValueButton(definitionModel, selectedUnit) {
-  const valueButton = document.createElement("button");
-  valueButton.type = "button";
-  valueButton.className = "cost-of-risk-definition-headline-value";
-  valueButton.classList.toggle("is-active", !activeCostOfRiskDefinitionDriverCode);
-  valueButton.dataset.costOfRiskDefinitionBenchmarkTarget = "total";
-  valueButton.dataset.costOfRiskCalculationDetail = "cost-of-risk-total";
-  valueButton.textContent = formatCostOfRiskDisplayValue(
-    activeCostOfRiskDefinitionDisplayMode === "ratio"
-      ? definitionModel.ratioBasisPoints
-      : definitionModel.value,
-    activeCostOfRiskDefinitionDisplayMode,
-    selectedUnit,
-    true
-  );
-
-  return valueButton;
-}
-
-function createCostOfRiskDefinitionScopeDetails(definitionModel, selectedUnit) {
-  const details = document.createElement("div");
-  details.className = "cost-of-risk-definition-scope-details";
-  [
-    {
-      label: "Numerator",
-      value: formatMetricValue(definitionModel.value, selectedUnit)
-    },
-    {
-      label: "Denominator",
-      value: formatMetricValue(definitionModel.denominator, selectedUnit)
-    }
-  ].forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "cost-of-risk-definition-scope-row";
-
-    const label = document.createElement("span");
-    label.className = "cost-of-risk-definition-scope-label";
-    label.textContent = `${item.label}:`;
-
-    const value = document.createElement("span");
-    value.className = "cost-of-risk-definition-scope-value";
-    value.textContent = item.value;
-
-    row.append(label, value);
-    details.append(row);
-  });
-
-  return details;
-}
-
-function createCostOfRiskDefinitionPanelTabs() {
-  const tabs = document.createElement("div");
-  tabs.className = "cost-of-risk-definition-detail-tabs";
-  [
-    { key: "components", label: "Components" },
-    { key: "drivers", label: "Main drivers" }
-  ].forEach((tab) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "cost-of-risk-definition-detail-tab";
-    button.classList.toggle("is-active", activeCostOfRiskDefinitionPanelTab === tab.key);
-    button.dataset.costOfRiskDefinitionPanelTab = tab.key;
-    button.textContent = tab.label;
-    tabs.append(button);
-  });
-  return tabs;
-}
-
-function createCostOfRiskDefinitionDetailRow(item, selectedUnit, panelTab) {
-  const row = document.createElement("button");
-  row.type = "button";
-  row.className = "cost-of-risk-definition-driver";
-  const showsCustomCheckbox = panelTab === "components" && activeCostOfRiskDefinitionId === "f12-custom-components";
-  row.classList.toggle("has-checkbox", showsCustomCheckbox);
-  row.classList.toggle("is-active", item.code === activeCostOfRiskDefinitionDriverCode);
-  row.dataset.costOfRiskDefinitionDriver = item.code;
-  row.dataset.costOfRiskCalculationDetail = "cost-of-risk-driver";
-  row.dataset.costOfRiskCalculationValue = item.code;
-
-  if (showsCustomCheckbox) {
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "cost-of-risk-definition-component-checkbox";
-    checkbox.checked = item.included !== false;
-    checkbox.dataset.costOfRiskCustomDefinitionComponent = String(item.code ?? "").replace(/^component:/, "");
-    checkbox.setAttribute("aria-label", `${checkbox.checked ? "Remove" : "Include"} ${item.label}`);
-    row.append(checkbox);
-  }
-
-  const label = document.createElement("div");
-  label.className = "cost-of-risk-definition-driver-label";
-  label.textContent = item.label;
-  label.title = item.source;
-
-  const value = document.createElement("div");
-  value.className = "cost-of-risk-definition-driver-value";
-  value.textContent = formatCostOfRiskDisplayValue(
-    activeCostOfRiskDefinitionDisplayMode === "ratio" ? item.ratioBasisPoints : item.value,
-    activeCostOfRiskDefinitionDisplayMode,
-    selectedUnit,
-    true
-  );
-
-  row.append(label, value);
-  return row;
-}
-
-function createCostOfRiskDefinitionEmpty(message) {
-  const empty = document.createElement("div");
-  empty.className = "cost-of-risk-definition-empty";
-  const resolvedMessage = resolveCostOfRiskTabEmptyMessage(message, {
-    activeTab: activeCostOfRiskTab,
-    filterOptions: latestCostOfRiskFilterOptions,
-    filters: activeCostOfRiskFilters,
-    onSelectFilter: applyCostOfRiskEmptyMessageFilterSelection
-  });
-  if (resolvedMessage instanceof Node) {
-    empty.append(resolvedMessage);
-  } else {
-    empty.textContent = resolvedMessage;
-  }
-  return empty;
 }
 
 function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {
