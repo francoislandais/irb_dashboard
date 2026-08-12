@@ -1697,6 +1697,21 @@ table {
   color: #c3c9c5;
 }
 
+/* The reason the row is empty, tucked into the first data cell only and
+   left to overflow over the (equally empty) cells next to it rather than
+   wrapping or widening the column — it should read as a faint aside, not
+   compete with real figures elsewhere in the table. */
+.metric-table tbody tr.is-axis-impossible td.is-axis-impossible-hint {
+  position: relative;
+  overflow: visible;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: #d3d8d5;
+  z-index: 1;
+}
+
 /* Row selection is the light highlight — it marks which row is active
    without competing with the strong highlight reserved for the one cell
    the user actually clicked (see .is-selected-cell below). */

@@ -819,13 +819,20 @@ function renderExplorerTable(series, selectedUnit) {
         ? getExplorerContributionRatio(point.value, reversedBaseValues[index]?.value)
         : null;
       const displayValue = contributionValue === null ? point.value : contributionValue;
-      td.textContent = isAxisImpossible
-        ? ""
-        : seriesRow.isVirtual || point.value === null
-          ? "-"
-          : contributionValue === null
-            ? formatMetricValue(point.value, selectedUnit, seriesRow.format)
-            : formatContributionPercentValue(contributionValue);
+      if (isAxisImpossible && index === 0) {
+        td.textContent = activeAxis === "y"
+          ? "Not compatible with the current column selection"
+          : "Not compatible with the current row selection";
+        td.classList.add("is-axis-impossible-hint");
+      } else {
+        td.textContent = isAxisImpossible
+          ? ""
+          : seriesRow.isVirtual || point.value === null
+            ? "-"
+            : contributionValue === null
+              ? formatMetricValue(point.value, selectedUnit, seriesRow.format)
+              : formatContributionPercentValue(contributionValue);
+      }
       if (!seriesRow.isVirtual && Number.isFinite(displayValue)) {
         td.dataset.explorerCellValue = String(displayValue);
         td.dataset.explorerCellRow = String(rowIndex);
