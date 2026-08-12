@@ -46,7 +46,7 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260806-cell-selection";
+} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -56,7 +56,7 @@ import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskStageReconciliationView.js?v=20260812-costofrisk-domain-split";
 import {
   createCostOfRiskHighchartsTitle
 } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
@@ -67,7 +67,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260806-summary-frame-cleanup";
+} from "./costOfRiskSummaryTablesView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -75,13 +75,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260806-summary-frame-cleanup";
-import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260806-soft-stage-boxes";
+} from "./costOfRiskSummaryChartsView.js?v=20260812-costofrisk-domain-split";
+import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -89,7 +89,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskStageRatioView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -97,7 +97,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskCoverageRatioView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -105,52 +105,52 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskCollateralRatioView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260812-costofrisk-domain-split";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
-} from "./costOfRiskTreemapView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskTreemapView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskGeographyChart,
   formatCostOfRiskGeographyCellValue,
   getCostOfRiskGeographyChart,
   renderCostOfRiskGeographyView
-} from "./costOfRiskGeographyView.js?v=20260806-cell-selection-scroll";
+} from "./costOfRiskGeographyView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260804-axis-year-labels";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260812-costofrisk-domain-split";
 import {
   renderCostOfRiskDefinitionComparisonView,
   renderCostOfRiskDefinitionView
-} from "./costOfRiskDefinitionView.js?v=20260806-definition-view-v2";
+} from "./costOfRiskDefinitionView.js?v=20260812-costofrisk-domain-split";
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260806-cell-selection";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260812-costofrisk-domain-split";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
   renderCostOfRiskXAxisOptions as renderXAxisOptions
-} from "./costOfRiskControlsView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskControlsView.js?v=20260812-costofrisk-domain-split";
 import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
-} from "./costOfRiskAuditTableView.js?v=20260802-readable-selection-phrases";
-import { openExplorerPoint } from "./explorerView.js?v=20260806-impossible-row-grey";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskAuditTableView.js?v=20260812-costofrisk-domain-split";
+import { openExplorerPoint } from "./explorerView.js?v=20260812-costofrisk-domain-split";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260812-costofrisk-domain-split";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
   renderCostOfRiskTabsView
 } from "./costOfRiskTabsView.js?v=20260802-readable-selection-phrases";
-import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260806-cell-selection";
+import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260812-costofrisk-domain-split";
 import {
   createCostOfRiskModelCacheKey,
   getCostOfRiskCachedModel
@@ -159,7 +159,7 @@ import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   getCostOfRiskUnavailableMessage as getUnavailableMessage,
   isCostOfRiskPerformanceStatusFilterValue
-} from "./costOfRiskFilterRules.js?v=20260806-cell-selection";
+} from "./costOfRiskFilterRules.js?v=20260812-costofrisk-domain-split";
 import { getReferenceColumns } from "../data/core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_STAGE_TRANSFER_FLOW_KEY,
@@ -168,7 +168,7 @@ import {
   getSyncedCostOfRiskStageTransferFlowKey,
   isCostOfRiskAllStageValue,
   normalizeCostOfRiskStageFilterValue
-} from "./costOfRiskStageTransferSelection.js?v=20260802-readable-selection-phrases";
+} from "./costOfRiskStageTransferSelection.js?v=20260812-costofrisk-domain-split";
 import {
   getActiveCostOfRiskCoreXCodes,
   normalizeCostOfRiskCoreSelection,
@@ -185,7 +185,7 @@ import {
 import {
   createFilterSelectionRow as createCostOfRiskFilterSelectionRow,
   renderCostOfRiskFilterSelectionPanel
-} from "./costOfRiskFilterSelectionView.js?v=20260812-filter-selection-view";
+} from "./costOfRiskFilterSelectionView.js?v=20260812-costofrisk-domain-split";
 import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
@@ -207,12 +207,12 @@ import {
 import {
   getCostOfRiskAuditPanelIntroContent,
   getCostOfRiskHelpPanelContent
-} from "./costOfRiskPanelContent.js?v=20260803-ytd-denominator";
+} from "./costOfRiskPanelContent.js?v=20260812-costofrisk-domain-split";
 import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js?v=20260806-cell-selection";
+} from "./costOfRiskManualWaterfall.js?v=20260812-costofrisk-domain-split";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,

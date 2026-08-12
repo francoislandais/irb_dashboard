@@ -4,7 +4,7 @@ import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260806-cell-selection";
+} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskQuarterAxisLabelsOptions,
@@ -14,13 +14,13 @@ import {
 import {
   renderBenchmarkEndpointLabels,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260806-cell-selection";
+} from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260804-axis-year-labels";
-import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260806-cell-selection";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260812-costofrisk-domain-split";
+import { resolveCostOfRiskTabEmptyMessage } from "./costOfRiskTabEmptyMessages.js?v=20260812-costofrisk-domain-split";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskDefinitionComparisonChart = null;

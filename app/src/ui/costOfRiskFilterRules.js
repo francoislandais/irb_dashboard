@@ -3,7 +3,7 @@ import {
   COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE,
   COST_OF_RISK_BALANCE_SCOPE_TOTAL,
   COST_OF_RISK_FILTER_ALL
-} from "../data/costOfRisk.js?v=20260806-cell-selection";
+} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 
 const COST_OF_RISK_FILTER_PARENT_VALUES = {
   counterparty: {

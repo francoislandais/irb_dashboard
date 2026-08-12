@@ -2,7 +2,7 @@ import {
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_DEFINITION_OPTIONS,
   COST_OF_RISK_FILTER_ALL
-} from "../data/costOfRisk.js?v=20260806-cell-selection";
+} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
   COST_OF_RISK_FILTER_SELECTION_META,
   COST_OF_RISK_FINE_COUNTERPARTY_UNSUPPORTED_TABS
@@ -12,7 +12,7 @@ import {
   getCostOfRiskFilterParentValue as getFilterParentValue,
   isCostOfRiskIfrsStageFilterValue,
   isCostOfRiskPerformanceStatusFilterValue
-} from "./costOfRiskFilterRules.js?v=20260806-cell-selection";
+} from "./costOfRiskFilterRules.js?v=20260812-costofrisk-domain-split";
 import { createCostOfRiskAuditIntroHeader } from "./costOfRiskAuditPanelNodes.js?v=20260806-cell-selection";
 
 export function renderCostOfRiskFilterSelectionPanel({

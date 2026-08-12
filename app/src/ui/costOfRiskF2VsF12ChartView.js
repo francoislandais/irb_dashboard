@@ -3,7 +3,7 @@ import {
   formatCostOfRiskDisplayValue,
   getCostOfRiskYAxisBounds,
   smoothCostOfRiskPoints
-} from "../data/costOfRisk.js?v=20260806-cell-selection";
+} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import { formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import {
   createCostOfRiskQuarterAxisLabelsOptions,

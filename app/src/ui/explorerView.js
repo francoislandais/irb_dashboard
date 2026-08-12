@@ -3,7 +3,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { clampCostOfRiskSmoothingWindow, getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260806-cell-selection";
+import { clampCostOfRiskSmoothingWindow, getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
   createCostOfRiskHighchartsTitle,
   getCostOfRiskFocusedYAxisBounds,
@@ -29,7 +29,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260806-cell-selection";
+} from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
