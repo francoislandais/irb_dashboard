@@ -155,6 +155,14 @@ export function getCostOfRiskF12ReconciliationXAxisOptions(state) {
   return getCostOfRiskXAxisOptionsForCodes(state, COST_OF_RISK_F12_RECONCILIATION_X_CODES);
 }
 
+export function getCostOfRiskXAxisOptionsForCodes(state, codes) {
+  const xLabels = getCostOfRiskXAxisLabelMap(state);
+  return codes.map((code) => ({
+    code,
+    label: xLabels.get(code) ?? code
+  }));
+}
+
 export function buildCostOfRiskFilteredSelectionValue(
   state,
   filters,
@@ -666,18 +674,6 @@ export function computeCostOfRiskTransferFlowPeriodSeries(state, indexes, refere
 
 export function computeCostOfRiskStageExposureLevels(state, indexes, referenceColumns, filters, stage, jstCode) {
   return getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, getCostOfRiskStageScopedFilters(filters, stage));
-}
-
-function computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, stage, jstCode) {
-  return computeCostOfRiskWriteOffPeriodSeriesForStage(
-    state,
-    indexes,
-    referenceColumns,
-    filters,
-    stage,
-    jstCode,
-    COST_OF_RISK_PERIOD_MODE_QUARTERLY
-  );
 }
 
 export function getCostOfRiskStageScopedFilters(filters = {}, stage) {

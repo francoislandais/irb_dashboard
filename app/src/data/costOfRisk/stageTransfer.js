@@ -843,6 +843,18 @@ function computeCostOfRiskWriteOffPeriodSeriesForStage(state, indexes, reference
   return total;
 }
 
+function computeCostOfRiskWriteOffQuarterlySeriesForStage(state, indexes, referenceColumns, filters, stage, jstCode) {
+  return computeCostOfRiskWriteOffPeriodSeriesForStage(
+    state,
+    indexes,
+    referenceColumns,
+    filters,
+    stage,
+    jstCode,
+    COST_OF_RISK_PERIOD_MODE_QUARTERLY
+  );
+}
+
 function parseCostOfRiskFlowKey(flowKey) {
   const [type, value] = String(flowKey ?? "").split(":");
   if (type === "transfer") {

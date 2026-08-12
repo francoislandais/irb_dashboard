@@ -30,7 +30,7 @@ import {
   getCostOfRiskRatioDenominatorSeries,
   getCostOfRiskReferenceIndex,
   getCostOfRiskXAxisFullLabelMap,
-  getCostOfRiskXAxisLabelMap,
+  getCostOfRiskXAxisOptionsForCodes,
   getMappingDescription,
   getPointSeriesValues,
   normalizeCostOfRiskPeriodMode,
@@ -40,14 +40,6 @@ import {
 
 export function getCostOfRiskWaterfallXAxisOptions(state) {
   return getCostOfRiskXAxisOptionsForCodes(state, COST_OF_RISK_WATERFALL_X_CODES);
-}
-
-function getCostOfRiskXAxisOptionsForCodes(state, codes) {
-  const xLabels = getCostOfRiskXAxisLabelMap(state);
-  return codes.map((code) => ({
-    code,
-    label: xLabels.get(code) ?? code
-  }));
 }
 
 export function buildCostOfRiskF02ImpairmentRatio(
