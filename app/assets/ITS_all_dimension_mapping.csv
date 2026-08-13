@@ -327,6 +327,10 @@ C_04.00;y_axis_rc_code;860;Additional information for calculation of reporting t
 C_04.00;y_axis_rc_code;901;Exception from deductions  from cet1/Software assets accounted for as intangible assets exempted from the deduction from cet1;;;
 C_04.00;y_axis_rc_code;905;Accounting classification of at1 instruments/Capital instruments and the related share premium accounts classified as equity under applicable accounting standards;;;
 C_04.00;y_axis_rc_code;906;Accounting classification of at1 instruments/Capital instruments and the related share premium accounts classified as liabilities under applicable accounting standards;;;
+C_04.00;y_axis_rc_code;870;Output floor/Floor adjustment before application of transitional cap;;;
+C_04.00;y_axis_rc_code;880;Output floor/Floor adjustment after application of transitional cap;;;
+C_04.00;y_axis_rc_code;890;Output floor/Fully loaded floor adjustment;;;
+C_04.00;y_axis_rc_code;900;Output floor/Output floor applied (%);;;
 C_05.01;x_axis_rc_code;10;Adjustments to cet1;;;
 C_05.01;x_axis_rc_code;20;Adjustments to at1;;;
 C_05.01;x_axis_rc_code;30;Adjustments to t2;;;
