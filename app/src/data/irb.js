@@ -68,7 +68,7 @@ export function getIrbOutputFloorModel(state, horizonId = "fully-loaded") {
     buildOutputFloorSnapshot(state, indexes, selectedReference, state.selectedJst, horizon.factor)
   ));
   const benchmarkSeries = buildOutputFloorBenchmarkSeries(state, indexes, referenceColumns, selectedHorizon.factor);
-  const diagnosticRows = buildCreditDiagnosticRows(state, indexes, selectedReference, state.selectedJst, selectedHorizon.factor);
+  const diagnosticRows = buildCreditDiagnosticRows(state, indexes, selectedReference, state.selectedJst, selectedHorizon.factor, selectedSnapshot);
 
   return {
     benchmarkSeries,
@@ -168,7 +168,7 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
   };
 }
 
-function buildCreditDiagnosticRows(state, indexes, referenceColumn, jstCode, factor) {
+function buildCreditDiagnosticRows(state, indexes, referenceColumn, jstCode, factor, selectedSnapshot) {
   return CREDIT_DIAGNOSTIC_ROWS.map((row) => {
     const currentTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
       xCode: CURRENT_TREA_X_CODE,
@@ -182,11 +182,15 @@ function buildCreditDiagnosticRows(state, indexes, referenceColumn, jstCode, fac
     const gap = Number.isFinite(currentTrea) && Number.isFinite(threshold)
       ? threshold - currentTrea
       : null;
+    const floorAddOn = Number.isFinite(gap) ? Math.max(0, gap) : null;
+    const impactBasisPoints = computeIncrementalCet1ImpactBasisPoints(selectedSnapshot, floorAddOn);
 
     return {
       code: row.code,
       currentTrea,
+      floorAddOn,
       gap,
+      impactBasisPoints,
       label: row.label,
       standardisedTrea,
       threshold
@@ -196,6 +200,22 @@ function buildCreditDiagnosticRows(state, indexes, referenceColumn, jstCode, fac
     || Number.isFinite(row.standardisedTrea)
     || Number.isFinite(row.threshold)
   ));
+}
+
+function computeIncrementalCet1ImpactBasisPoints(snapshot, floorAddOn) {
+  if (
+    !snapshot
+    || !Number.isFinite(snapshot.cet1Capital)
+    || !Number.isFinite(snapshot.totalTrea)
+    || !Number.isFinite(floorAddOn)
+  ) {
+    return null;
+  }
+
+  const addOn = Math.max(0, floorAddOn);
+  const currentRatio = snapshot.cet1Capital / snapshot.totalTrea;
+  const flooredRatio = snapshot.cet1Capital / (snapshot.totalTrea + addOn);
+  return (flooredRatio - currentRatio) * 10000;
 }
 
 function readDataPoint(state, indexes, tableId, coordinates, referenceColumn, jstCode) {

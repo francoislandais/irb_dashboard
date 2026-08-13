@@ -162,6 +162,7 @@ function createCreditDiagnostic(model, state) {
         <th>S-TREA</th>
         <th>Floor threshold</th>
         <th>Gap</th>
+        <th>CET1 impact</th>
       </tr>
     </thead>
   `;
@@ -175,6 +176,7 @@ function createCreditDiagnostic(model, state) {
       <td>${formatOptionalMetric(row.standardisedTrea, state.selectedUnit)}</td>
       <td>${formatOptionalMetric(row.threshold, state.selectedUnit)}</td>
       <td class="${Number(row.gap) > 0 ? "is-binding" : ""}">${formatOptionalSignedMetric(row.gap, state.selectedUnit)}</td>
+      <td class="${Number(row.floorAddOn) > 0 ? "is-binding" : ""}">${formatSignedBasisPoints(row.impactBasisPoints)}</td>
     `;
     body.append(tr);
   });

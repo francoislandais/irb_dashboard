@@ -688,7 +688,7 @@ button:focus-visible {
 .irb-output-floor-table {
   border-collapse: collapse;
   color: #26332d;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   line-height: 1.2;
   width: 100%;
 }
@@ -696,7 +696,7 @@ button:focus-visible {
 .irb-output-floor-table th,
 .irb-output-floor-table td {
   border-bottom: 1px solid #edf0ee;
-  padding: 7px 8px;
+  padding: 7px 7px;
   text-align: right;
   white-space: nowrap;
 }
