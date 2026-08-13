@@ -1,22 +1,5 @@
-import { getIrbOutputFloorModel } from "../data/irb.js?v=20260813-output-floor";
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+import { getIrbOutputFloorModel, IRB_OUTPUT_FLOOR_DEFAULT_SCOPE } from "../data/irb.js?v=20260813-output-floor-scopes";
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
-import {
-  buildBenchmarkChartModel,
-  clearBenchmarkEndpointLabels,
-  getBenchmarkLinePlotOptions,
-  getBenchmarkYAxisBoundsSeries,
-  hasBenchmarkChartModeChanged,
-  markBenchmarkChartMode,
-  renderBenchmarkEndpointLabels,
-  scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
-import {
-  createCostOfRiskHighchartsTitle,
-  createCostOfRiskQuarterAxisLabelsOptions,
-  getCostOfRiskAxisTickPositions
-} from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
-import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 const IRB_DEFAULT_TAB = "output-floor";
 const IRB_DEFAULT_OUTPUT_FLOOR_HORIZON = "fully-loaded";
@@ -29,7 +12,7 @@ const elements = {
 
 let activeIrbTab = IRB_DEFAULT_TAB;
 let activeOutputFloorHorizon = IRB_DEFAULT_OUTPUT_FLOOR_HORIZON;
-let outputFloorBenchmarkChart = null;
+let activeOutputFloorScope = IRB_OUTPUT_FLOOR_DEFAULT_SCOPE;
 let renderAppState = null;
 let actionsRef = null;
 
@@ -69,60 +52,65 @@ function renderOutputFloor(state) {
   const container = elements.outputFloorView;
   if (!container) return;
 
-  const model = getIrbOutputFloorModel(state, activeOutputFloorHorizon);
+  const model = getIrbOutputFloorModel(state, activeOutputFloorHorizon, activeOutputFloorScope);
   container.replaceChildren();
 
-  if (model.status && !model.selectedSnapshot) {
-    destroyOutputFloorBenchmarkChart();
+  if (model.status) {
     container.append(createIrbNotice(model.status));
     return;
   }
 
+  activeOutputFloorScope = model.selectedScope.id;
+
   container.append(
     createOutputFloorSummary(model, state),
-    createCreditDiagnostic(model, state),
-    createBenchmarkPanel(model, state)
+    createScopeSelector(model, state)
   );
-
-  renderOutputFloorBenchmarkChart(model, state);
 }
 
 function createOutputFloorSummary(model, state) {
   const section = document.createElement("section");
   section.className = "irb-output-floor-summary";
 
+  const scope = model.selectedScope;
   const currentCard = createMetricCard({
-    label: "Current CET1 ratio",
-    value: formatPercentFromFraction(model.selectedSnapshot?.currentCet1Ratio),
-    detail: `${model.selectedSnapshot?.referenceLabel ?? "-"} - reported denominator`
+    label: "Current RWA",
+    value: formatOptionalMetric(scope.currentTrea, state.selectedUnit),
+    detail: `${scope.label} - ${model.selectedSnapshot?.referenceLabel ?? "-"}`
   });
-  const flooredCard = createMetricCard({
-    label: "Floored CET1 ratio",
-    value: formatPercentFromFraction(model.selectedSnapshot?.flooredCet1Ratio),
-    detail: `${model.selectedHorizon.label} output floor`
+  const thresholdCard = createMetricCard({
+    label: "Output floor threshold",
+    value: formatOptionalMetric(scope.threshold, state.selectedUnit),
+    detail: `${formatPercentFromFactor(model.selectedHorizon.factor)} × standardised RWA for this perimeter`
+  });
+  const gapCard = createMetricCard({
+    label: "Gap to output floor",
+    value: formatOptionalSignedMetric(scope.gap, state.selectedUnit),
+    detail: scope.isBinding
+      ? "Binding on this perimeter: positive gap"
+      : "Not binding: negative gap shows the distance to the threshold",
+    tone: scope.isBinding ? "negative" : "neutral"
   });
   const impactCard = createMetricCard({
-    label: model.selectedSnapshot?.isBinding ? "CET1 impact" : "Distance to bite",
-    value: formatSignedBasisPoints(model.selectedSnapshot?.distanceBasisPoints),
-    detail: model.selectedSnapshot?.isBinding ? "Output floor is binding" : "Negative value shows the distance before binding",
-    tone: model.selectedSnapshot?.isBinding ? "negative" : "neutral"
-  });
-  const addOnCard = createMetricCard({
-    label: "Distance to floor",
-    value: formatOptionalSignedMetric(model.selectedSnapshot?.totalFloorGap, state.selectedUnit),
-    detail: model.selectedSnapshot?.isBinding ? "Positive gap converted into add-on" : "Negative gap before the floor bites"
+    label: "CET1 impact",
+    value: formatSignedBasisPoints(scope.impactBasisPoints),
+    detail: scope.isBinding
+      ? `Impact from the ${scope.label} add-on`
+      : "No impact while this perimeter remains above its threshold",
+    tone: scope.isBinding ? "negative" : "neutral"
   });
 
   const horizonPanel = document.createElement("div");
   horizonPanel.className = "irb-output-floor-horizons";
   model.selectedDateHorizonImpacts.forEach((snapshot) => {
+    const horizonScope = snapshot.scopes?.find((candidate) => candidate.id === scope.id);
     const button = document.createElement("button");
     button.className = "irb-output-floor-horizon";
     button.classList.toggle("is-active", snapshot.factor === model.selectedHorizon.factor);
     button.type = "button";
     button.innerHTML = `
       <span>${snapshot.factor === 0.725 ? "FL" : Math.round(snapshot.factor * 100) + "%"}</span>
-      <strong>${formatSignedBasisPoints(snapshot.distanceBasisPoints)}</strong>
+      <strong>${formatSignedBasisPoints(horizonScope?.distanceBasisPoints)}</strong>
     `;
     button.addEventListener("click", () => {
       activeOutputFloorHorizon = model.horizons.find((horizon) => horizon.factor === snapshot.factor)?.id || IRB_DEFAULT_OUTPUT_FLOOR_HORIZON;
@@ -134,30 +122,37 @@ function createOutputFloorSummary(model, state) {
   const mechanics = document.createElement("div");
   mechanics.className = "irb-output-floor-mechanics";
   mechanics.append(
-    createMechanicRow("Total TREA", model.selectedSnapshot?.totalTrea, state.selectedUnit),
-    createMechanicRow(`${formatPercentFromFactor(model.selectedHorizon.factor)} x total S-TREA`, model.selectedSnapshot?.totalFloorThreshold, state.selectedUnit),
-    createMechanicRow("Output floor add-on", model.selectedSnapshot?.totalFloorAddOn, state.selectedUnit, true),
-    createMechanicRow("Floored total TREA", model.selectedSnapshot?.flooredTrea, state.selectedUnit)
+    createMechanicRow("Standardised RWA", scope.standardisedTrea, state.selectedUnit),
+    createMechanicRow("Perimeter add-on", scope.floorAddOn, state.selectedUnit, true),
+    createMechanicRow("Total RWA after this add-on", scope.flooredTotalTrea, state.selectedUnit),
+    createMechanicRow("Current CET1 ratio", scope.currentCet1Ratio, "percent"),
+    createMechanicRow("CET1 ratio after this add-on", scope.flooredCet1Ratio, "percent")
   );
 
-  section.append(currentCard, flooredCard, impactCard, addOnCard, horizonPanel, mechanics);
+  section.append(currentCard, thresholdCard, gapCard, impactCard, horizonPanel, mechanics);
   return section;
 }
 
-function createCreditDiagnostic(model, state) {
+function createScopeSelector(model, state) {
   const section = document.createElement("section");
   section.className = "irb-output-floor-diagnostic";
 
   const header = document.createElement("div");
   header.className = "irb-output-floor-section-title";
-  header.textContent = "Credit risk diagnostic";
+  header.textContent = "Output floor perimeters - select a row to update the analysis above";
+
+  if (model.scopeRows.length === 0) {
+    const notice = createIrbNotice("No output floor perimeter is available for this JST/date.");
+    section.append(header, notice);
+    return section;
+  }
 
   const table = document.createElement("table");
   table.className = "irb-output-floor-table";
   table.innerHTML = `
     <thead>
       <tr>
-        <th>Credit risk block</th>
+        <th>Perimeter</th>
         <th>Current TREA</th>
         <th>S-TREA</th>
         <th>Floor threshold</th>
@@ -168,8 +163,13 @@ function createCreditDiagnostic(model, state) {
   `;
 
   const body = document.createElement("tbody");
-  model.diagnosticRows.forEach((row) => {
+  model.scopeRows.forEach((row) => {
     const tr = document.createElement("tr");
+    const isSelected = row.id === model.selectedScope.id;
+    tr.className = `irb-output-floor-scope-row${isSelected ? " is-selected" : ""}`;
+    tr.tabIndex = 0;
+    tr.setAttribute("role", "button");
+    tr.setAttribute("aria-pressed", String(isSelected));
     tr.innerHTML = `
       <td>${row.label}</td>
       <td>${formatOptionalMetric(row.currentTrea, state.selectedUnit)}</td>
@@ -178,112 +178,22 @@ function createCreditDiagnostic(model, state) {
       <td class="${Number(row.gap) > 0 ? "is-binding" : ""}">${formatOptionalSignedMetric(row.gap, state.selectedUnit)}</td>
       <td class="${Number(row.floorAddOn) > 0 ? "is-binding" : ""}">${formatSignedBasisPoints(row.impactBasisPoints)}</td>
     `;
+    const selectScope = () => {
+      activeOutputFloorScope = row.id;
+      renderAppState?.(actionsRef?.getState?.() ?? state);
+    };
+    tr.addEventListener("click", selectScope);
+    tr.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      selectScope();
+    });
     body.append(tr);
   });
 
   table.append(body);
   section.append(header, table);
   return section;
-}
-
-function createBenchmarkPanel(model) {
-  const section = document.createElement("section");
-  section.className = "irb-output-floor-benchmark-panel";
-
-  const chart = document.createElement("div");
-  chart.id = "irb-output-floor-benchmark-chart";
-  chart.className = "irb-output-floor-benchmark-chart";
-  section.append(chart);
-  return section;
-}
-
-function renderOutputFloorBenchmarkChart(model, state) {
-  const container = document.querySelector("#irb-output-floor-benchmark-chart");
-  if (!container || !window.Highcharts) return;
-
-  const chartModel = buildBenchmarkChartModel(model.benchmarkSeries, state.selectedJst, primaryDark, {
-    displayMode: "ratio",
-    peerDisplayMode: state.peerDisplayMode,
-    smoothingWindow: 1
-  });
-  const series = chartModel.series;
-  if (series.length === 0) {
-    destroyOutputFloorBenchmarkChart();
-    container.textContent = "No benchmark data available for the current output floor horizon.";
-    return;
-  }
-
-  const yBounds = getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
-  const options = {
-    chart: {
-      animation: false,
-      backgroundColor: "transparent",
-      events: {
-        render() {
-          renderBenchmarkEndpointLabels(this, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-        }
-      },
-      marginTop: 40,
-      spacingRight: 128,
-      type: "line",
-      zooming: { type: "xy" },
-      zoomType: "xy"
-    },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
-      onSelectJst(seriesName);
-    }, state.selectedJst),
-    series,
-    subtitle: { text: "" },
-    title: createCostOfRiskHighchartsTitle(`CET1 impact / distance to output floor - ${model.selectedHorizon.label}`),
-    tooltip: {
-      headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
-      pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatSignedBasisPoints(this.y)}`;
-      },
-      shared: false,
-      split: false,
-      stickOnContact: true,
-      xDateFormat: "%d/%m/%Y"
-    },
-    xAxis: {
-      labels: createCostOfRiskQuarterAxisLabelsOptions(),
-      lineColor: "#c2cac5",
-      lineWidth: 1,
-      tickColor: "#d9dedb",
-      tickPositions: getCostOfRiskAxisTickPositions(model.benchmarkSeries[0]?.points),
-      type: "datetime"
-    },
-    yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return formatSignedBasisPoints(this.value);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
-      max: yBounds.max,
-      min: yBounds.min,
-      startOnTick: false,
-      endOnTick: false,
-      tickAmount: 6,
-      title: { text: "CET1 impact (bp)" }
-    }
-  };
-
-  if (hasBenchmarkChartModeChanged(outputFloorBenchmarkChart, chartModel.peerDisplayMode)) destroyOutputFloorBenchmarkChart();
-  if (outputFloorBenchmarkChart) {
-    clearBenchmarkEndpointLabels(outputFloorBenchmarkChart);
-    outputFloorBenchmarkChart.update(options, true, true, false);
-    markBenchmarkChartMode(outputFloorBenchmarkChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(outputFloorBenchmarkChart, state.selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-  } else {
-    outputFloorBenchmarkChart = window.Highcharts.chart(container, options);
-    markBenchmarkChartMode(outputFloorBenchmarkChart, chartModel.peerDisplayMode);
-  }
 }
 
 function createMetricCard({ detail, label, tone = "", value }) {
@@ -308,9 +218,15 @@ function createMechanicRow(label, value, selectedUnit, signed = false) {
   const labelNode = document.createElement("span");
   labelNode.textContent = label;
   const valueNode = document.createElement("strong");
-  valueNode.textContent = signed
-    ? formatOptionalSignedMetric(value, selectedUnit)
-    : formatOptionalMetric(value, selectedUnit);
+  if (selectedUnit === "percent") {
+    valueNode.textContent = formatPercentFromFraction(value);
+  } else if (selectedUnit === "basis-points") {
+    valueNode.textContent = formatSignedBasisPoints(value);
+  } else {
+    valueNode.textContent = signed
+      ? formatOptionalSignedMetric(value, selectedUnit)
+      : formatOptionalMetric(value, selectedUnit);
+  }
   row.append(labelNode, valueNode);
   return row;
 }
@@ -320,17 +236,6 @@ function createIrbNotice(message) {
   notice.className = "irb-empty-state";
   notice.textContent = message;
   return notice;
-}
-
-function destroyOutputFloorBenchmarkChart() {
-  if (!outputFloorBenchmarkChart) return;
-  outputFloorBenchmarkChart.destroy();
-  outputFloorBenchmarkChart = null;
-}
-
-function onSelectJst(jstCode) {
-  if (!jstCode || !actionsRef) return;
-  actionsRef.updateSelectedJst(jstCode);
 }
 
 function formatPercentFromFraction(value) {

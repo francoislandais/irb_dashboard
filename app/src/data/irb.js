@@ -23,21 +23,24 @@ const OUTPUT_FLOOR_STREA_X_CODE = "0020";
 const TOTAL_TREA_Y_CODE = "0010";
 const CREDIT_RISK_Y_CODE = "0040";
 
-const CREDIT_DIAGNOSTIC_ROWS = [
-  { code: "0040", label: "Credit risk" },
-  { code: "0050", label: "Standardised approach" },
-  { code: "0240", label: "IRB approach" },
-  { code: "0250", label: "Foundation IRB" },
-  { code: "0310", label: "Advanced IRB" },
-  { code: "0370", label: "Retail real estate SME" },
-  { code: "0380", label: "Retail real estate non-SME" },
-  { code: "0390", label: "Qualifying revolving retail" },
-  { code: "0400", label: "Retail other SME" },
-  { code: "0410", label: "Retail other non-SME" },
-  { code: "0450", label: "Other non-credit obligation assets" }
+export const IRB_OUTPUT_FLOOR_DEFAULT_SCOPE = "global";
+
+const OUTPUT_FLOOR_SCOPE_DEFINITIONS = [
+  { id: "global", label: "Global perimeter", yCodes: [TOTAL_TREA_Y_CODE] },
+  { id: "credit-total", label: "Credit risk - total", yCodes: [CREDIT_RISK_Y_CODE] },
+  { id: "credit-sa-irb", label: "Credit risk - SA + IRB", yCodes: ["0050", "0240"] },
+  { id: "credit-irb", label: "Credit risk - IRB", yCodes: ["0240"] },
+  { id: "other-risks", label: "Non-credit risks - total", derivedFrom: ["global", "credit-total"] },
+  { id: "settlement-delivery", label: "Settlement and delivery risk", yCodes: ["0490"] },
+  { id: "market-risk", label: "Market risk", yCodes: ["0520"] },
+  { id: "operational-risk", label: "Operational risk", yCodes: ["0590"] },
+  { id: "fixed-overheads", label: "Fixed overheads risk", yCodes: ["0630"] },
+  { id: "cva", label: "Credit valuation adjustment", yCodes: ["0640"] },
+  { id: "large-exposures", label: "Large exposures in the trading book", yCodes: ["0680"] },
+  { id: "other", label: "Other risk exposure amounts", yCodes: ["0690"] }
 ];
 
-export function getIrbOutputFloorModel(state, horizonId = "fully-loaded") {
+export function getIrbOutputFloorModel(state, horizonId = "fully-loaded", scopeId = IRB_OUTPUT_FLOOR_DEFAULT_SCOPE) {
   const indexes = getRequiredAxisColumnIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedHorizon = getIrbOutputFloorHorizon(horizonId);
@@ -45,8 +48,6 @@ export function getIrbOutputFloorModel(state, horizonId = "fully-loaded") {
 
   if (!indexes || !state.selectedJst) {
     return {
-      benchmarkSeries: [],
-      diagnosticRows: [],
       horizons: IRB_OUTPUT_FLOOR_HORIZONS,
       selectedHorizon,
       status: "Load a CSV and select a JST."
@@ -55,8 +56,6 @@ export function getIrbOutputFloorModel(state, horizonId = "fully-loaded") {
 
   if (!selectedReference) {
     return {
-      benchmarkSeries: [],
-      diagnosticRows: [],
       horizons: IRB_OUTPUT_FLOOR_HORIZONS,
       selectedHorizon,
       status: "No reference date is available in the dataset."
@@ -67,44 +66,22 @@ export function getIrbOutputFloorModel(state, horizonId = "fully-loaded") {
   const selectedDateHorizonImpacts = IRB_OUTPUT_FLOOR_HORIZONS.map((horizon) => (
     buildOutputFloorSnapshot(state, indexes, selectedReference, state.selectedJst, horizon.factor)
   ));
-  const benchmarkSeries = buildOutputFloorBenchmarkSeries(state, indexes, referenceColumns, selectedHorizon.factor);
-  const diagnosticRows = buildCreditDiagnosticRows(state, indexes, selectedReference, state.selectedJst, selectedHorizon.factor, selectedSnapshot);
+  const selectedScope = getSnapshotScope(selectedSnapshot, scopeId);
 
   return {
-    benchmarkSeries,
-    diagnosticRows,
     horizons: IRB_OUTPUT_FLOOR_HORIZONS,
     referenceDate: selectedReference,
     selectedDateHorizonImpacts,
     selectedHorizon,
+    selectedScope,
     selectedSnapshot,
+    scopeRows: selectedSnapshot.scopes ?? [],
     status: selectedSnapshot.status || ""
   };
 }
 
 export function getIrbOutputFloorHorizon(horizonId) {
   return IRB_OUTPUT_FLOOR_HORIZONS.find((horizon) => horizon.id === horizonId) ?? IRB_OUTPUT_FLOOR_HORIZONS.at(-1);
-}
-
-function buildOutputFloorBenchmarkSeries(state, indexes, referenceColumns, factor) {
-  const peerCodes = state.peerJstCodes?.length ? state.peerJstCodes : state.jstOptions;
-  const jstCodes = [...new Set([state.selectedJst, ...(peerCodes ?? [])].filter(Boolean))];
-
-  return jstCodes.map((jstCode) => ({
-    jstCode,
-    points: referenceColumns
-      .map((referenceColumn) => {
-        const snapshot = buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, factor);
-        if (snapshot.status || !Number.isFinite(snapshot.distanceBasisPoints)) return null;
-        return {
-          date: referenceColumn.date,
-          label: referenceColumn.label,
-          smoothedRatioBasisPoints: snapshot.distanceBasisPoints,
-          smoothedValue: snapshot.distanceBasisPoints
-        };
-      })
-      .filter(Boolean)
-  })).filter((serie) => serie.points.length > 0);
 }
 
 function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, factor) {
@@ -124,51 +101,48 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     xCode: OUTPUT_FLOOR_STREA_X_CODE,
     yCode: TOTAL_TREA_Y_CODE
   }, referenceColumn, jstCode);
-  const creditCurrentTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
-    xCode: CURRENT_TREA_X_CODE,
-    yCode: CREDIT_RISK_Y_CODE
-  }, referenceColumn, jstCode);
-  const creditStandardisedTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
-    xCode: OUTPUT_FLOOR_STREA_X_CODE,
-    yCode: CREDIT_RISK_Y_CODE
-  }, referenceColumn, jstCode);
-
-  const required = [cet1Capital, totalTrea, totalStandardisedTrea, creditCurrentTrea, creditStandardisedTrea];
+  // The output floor binds at consolidated level. Credit-risk values are only
+  // used by the diagnostic table below and must not block the global result.
+  const required = [totalTrea, totalStandardisedTrea];
   if (required.some((value) => !Number.isFinite(value))) {
     return {
       factor,
       jstCode,
       referenceLabel: referenceColumn.label,
-      status: "Output floor simulation is not available for this JST/date because CET1 capital, total TREA, total S-TREA, credit TREA or credit S-TREA is missing."
+      status: "Output floor simulation is not available for this JST/date because total TREA or total S-TREA is missing."
     };
   }
 
   const totalFloorThreshold = factor * totalStandardisedTrea;
   const totalFloorGap = totalFloorThreshold - totalTrea;
   const totalFloorAddOn = Math.max(0, totalFloorGap);
-  const creditFloorThreshold = factor * creditStandardisedTrea;
-  const creditFloorGap = creditFloorThreshold - creditCurrentTrea;
-  const creditFloorAddOn = Math.max(0, creditFloorThreshold - creditCurrentTrea);
   const flooredTrea = totalTrea + totalFloorAddOn;
-  const currentCet1Ratio = cet1Capital / totalTrea;
-  const flooredCet1Ratio = cet1Capital / flooredTrea;
-  const impactBasisPoints = (flooredCet1Ratio - currentCet1Ratio) * 10000;
-  const distanceBasisPoints = totalFloorAddOn > 0
-    ? impactBasisPoints
-    : totalFloorThreshold > 0
-      ? -Math.abs((cet1Capital / totalFloorThreshold - currentCet1Ratio) * 10000)
-      : 0;
+  const currentCet1Ratio = Number.isFinite(cet1Capital) && totalTrea !== 0
+    ? cet1Capital / totalTrea
+    : null;
+  const flooredCet1Ratio = Number.isFinite(cet1Capital) && flooredTrea !== 0
+    ? cet1Capital / flooredTrea
+    : null;
+  const impactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(flooredCet1Ratio)
+    ? (flooredCet1Ratio - currentCet1Ratio) * 10000
+    : null;
+  const distanceBasisPoints = Number.isFinite(cet1Capital) && totalFloorThreshold > 0 && Number.isFinite(currentCet1Ratio)
+    ? totalFloorAddOn > 0
+      ? impactBasisPoints
+      : -Math.abs((cet1Capital / totalFloorThreshold - currentCet1Ratio) * 10000)
+    : null;
   const reportedRatioAsFraction = Number.isFinite(reportedCet1Ratio)
     ? (Math.abs(reportedCet1Ratio) > 1 ? reportedCet1Ratio / 100 : reportedCet1Ratio)
     : null;
 
+  const scopes = buildOutputFloorScopes(state, indexes, referenceColumn, jstCode, factor, {
+    cet1Capital,
+    totalStandardisedTrea,
+    totalTrea
+  });
+
   return {
     cet1Capital,
-    creditCurrentTrea,
-    creditFloorGap,
-    creditFloorAddOn,
-    creditFloorThreshold,
-    creditStandardisedTrea,
     currentCet1Ratio,
     distanceBasisPoints,
     factor,
@@ -179,6 +153,7 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     jstCode,
     referenceLabel: referenceColumn.label,
     reportedCet1Ratio: reportedRatioAsFraction,
+    scopes,
     totalFloorAddOn,
     totalFloorGap,
     totalFloorThreshold,
@@ -187,54 +162,92 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
   };
 }
 
-function buildCreditDiagnosticRows(state, indexes, referenceColumn, jstCode, factor, selectedSnapshot) {
-  return CREDIT_DIAGNOSTIC_ROWS.map((row) => {
-    const currentTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
-      xCode: CURRENT_TREA_X_CODE,
-      yCode: row.code
-    }, referenceColumn, jstCode);
-    const standardisedTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
-      xCode: OUTPUT_FLOOR_STREA_X_CODE,
-      yCode: row.code
-    }, referenceColumn, jstCode);
-    const threshold = Number.isFinite(standardisedTrea) ? factor * standardisedTrea : null;
-    const gap = Number.isFinite(currentTrea) && Number.isFinite(threshold)
-      ? threshold - currentTrea
-      : null;
-    const floorAddOn = Number.isFinite(gap) ? Math.max(0, gap) : null;
-    const impactBasisPoints = computeIncrementalCet1ImpactBasisPoints(selectedSnapshot, floorAddOn);
+function buildOutputFloorScopes(state, indexes, referenceColumn, jstCode, factor, totals) {
+  const directScopes = new Map();
 
-    return {
-      code: row.code,
-      currentTrea,
-      floorAddOn,
-      gap,
-      impactBasisPoints,
-      label: row.label,
-      standardisedTrea,
-      threshold
-    };
-  }).filter((row) => (
-    Number.isFinite(row.currentTrea)
-    || Number.isFinite(row.standardisedTrea)
-    || Number.isFinite(row.threshold)
-  ));
+  OUTPUT_FLOOR_SCOPE_DEFINITIONS.filter((definition) => definition.yCodes).forEach((definition) => {
+    const currentTrea = definition.id === IRB_OUTPUT_FLOOR_DEFAULT_SCOPE
+      ? totals.totalTrea
+      : readDataPoints(state, indexes, C02_TABLE_ID, definition.yCodes, CURRENT_TREA_X_CODE, referenceColumn, jstCode);
+    const standardisedTrea = definition.id === IRB_OUTPUT_FLOOR_DEFAULT_SCOPE
+      ? totals.totalStandardisedTrea
+      : readDataPoints(state, indexes, C02_TABLE_ID, definition.yCodes, OUTPUT_FLOOR_STREA_X_CODE, referenceColumn, jstCode);
+    directScopes.set(definition.id, buildOutputFloorScope(definition, currentTrea, standardisedTrea, factor, totals));
+  });
+
+  const globalScope = directScopes.get("global");
+  const creditScope = directScopes.get("credit-total");
+  const otherDefinition = OUTPUT_FLOOR_SCOPE_DEFINITIONS.find((definition) => definition.id === "other-risks");
+  const otherCurrentTrea = subtractFinite(globalScope?.currentTrea, creditScope?.currentTrea);
+  const otherStandardisedTrea = subtractFinite(globalScope?.standardisedTrea, creditScope?.standardisedTrea);
+  directScopes.set("other-risks", buildOutputFloorScope(otherDefinition, otherCurrentTrea, otherStandardisedTrea, factor, totals));
+
+  return OUTPUT_FLOOR_SCOPE_DEFINITIONS
+    .map((definition) => directScopes.get(definition.id))
+    .filter((scope) => Number.isFinite(scope?.currentTrea) || Number.isFinite(scope?.standardisedTrea));
 }
 
-function computeIncrementalCet1ImpactBasisPoints(snapshot, floorAddOn) {
-  if (
-    !snapshot
-    || !Number.isFinite(snapshot.cet1Capital)
-    || !Number.isFinite(snapshot.totalTrea)
-    || !Number.isFinite(floorAddOn)
-  ) {
-    return null;
-  }
+function buildOutputFloorScope(definition, currentTrea, standardisedTrea, factor, totals) {
+  const threshold = Number.isFinite(standardisedTrea) ? factor * standardisedTrea : null;
+  const gap = Number.isFinite(currentTrea) && Number.isFinite(threshold) ? threshold - currentTrea : null;
+  const floorAddOn = Number.isFinite(gap) ? Math.max(0, gap) : null;
+  const flooredScopeTrea = Number.isFinite(currentTrea) && Number.isFinite(floorAddOn) ? currentTrea + floorAddOn : null;
+  const flooredTotalTrea = Number.isFinite(totals.totalTrea) && Number.isFinite(floorAddOn)
+    ? totals.totalTrea + floorAddOn
+    : null;
+  const currentCet1Ratio = Number.isFinite(totals.cet1Capital) && totals.totalTrea !== 0
+    ? totals.cet1Capital / totals.totalTrea
+    : null;
+  const flooredCet1Ratio = Number.isFinite(totals.cet1Capital) && flooredTotalTrea
+    ? totals.cet1Capital / flooredTotalTrea
+    : null;
+  const thresholdTotalTrea = Number.isFinite(totals.totalTrea) && Number.isFinite(gap)
+    ? totals.totalTrea + gap
+    : null;
+  const thresholdCet1Ratio = Number.isFinite(totals.cet1Capital) && thresholdTotalTrea > 0
+    ? totals.cet1Capital / thresholdTotalTrea
+    : null;
+  const impactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(flooredCet1Ratio)
+    ? (flooredCet1Ratio - currentCet1Ratio) * 10000
+    : null;
+  const distanceBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(thresholdCet1Ratio)
+    ? floorAddOn > 0
+      ? impactBasisPoints
+      : -Math.abs((thresholdCet1Ratio - currentCet1Ratio) * 10000)
+    : null;
 
-  const addOn = Math.max(0, floorAddOn);
-  const currentRatio = snapshot.cet1Capital / snapshot.totalTrea;
-  const flooredRatio = snapshot.cet1Capital / (snapshot.totalTrea + addOn);
-  return (flooredRatio - currentRatio) * 10000;
+  return {
+    currentCet1Ratio,
+    currentTrea,
+    factor,
+    floorAddOn,
+    flooredCet1Ratio,
+    flooredScopeTrea,
+    flooredTotalTrea,
+    gap,
+    id: definition.id,
+    impactBasisPoints,
+    distanceBasisPoints,
+    isBinding: Number.isFinite(gap) && gap > 0,
+    label: definition.label,
+    standardisedTrea,
+    threshold
+  };
+}
+
+function getSnapshotScope(snapshot, scopeId) {
+  return snapshot?.scopes?.find((scope) => scope.id === scopeId)
+    ?? snapshot?.scopes?.find((scope) => scope.id === IRB_OUTPUT_FLOOR_DEFAULT_SCOPE)
+    ?? { id: IRB_OUTPUT_FLOOR_DEFAULT_SCOPE, label: "Global perimeter" };
+}
+
+function readDataPoints(state, indexes, tableId, yCodes, xCode, referenceColumn, jstCode) {
+  const values = yCodes.map((yCode) => readDataPoint(state, indexes, tableId, { xCode, yCode }, referenceColumn, jstCode));
+  return values.every(Number.isFinite) ? values.reduce((total, value) => total + value, 0) : null;
+}
+
+function subtractFinite(total, part) {
+  return Number.isFinite(total) && Number.isFinite(part) ? total - part : null;
 }
 
 function readDataPoint(state, indexes, tableId, coordinates, referenceColumn, jstCode) {

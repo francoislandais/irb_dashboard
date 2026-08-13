@@ -572,8 +572,7 @@ button:focus-visible {
 .irb-output-floor-card,
 .irb-output-floor-horizons,
 .irb-output-floor-mechanics,
-.irb-output-floor-diagnostic,
-.irb-output-floor-benchmark-panel {
+.irb-output-floor-diagnostic {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
@@ -683,7 +682,7 @@ button:focus-visible {
 .irb-output-floor-diagnostic {
   display: grid;
   gap: 8px;
-  max-height: 210px;
+  max-height: min(62vh, 680px);
   min-height: 0;
   overflow: auto;
   padding: 12px 14px;
@@ -721,17 +720,20 @@ button:focus-visible {
   font-weight: 600;
 }
 
-.irb-output-floor-benchmark-panel {
-  height: min(42vh, 380px);
-  min-height: 280px;
-  overflow: hidden;
-  padding: 8px 12px 10px;
+.irb-output-floor-scope-row {
+  cursor: pointer;
+  outline: none;
 }
 
-.irb-output-floor-benchmark-chart {
-  height: 100%;
-  min-height: 0;
-  width: 100%;
+.irb-output-floor-scope-row:hover td,
+.irb-output-floor-scope-row:focus-visible td {
+  background: #f4f7f5;
+}
+
+.irb-output-floor-scope-row.is-selected td {
+  background: #eaf2fa;
+  color: #203b61;
+  font-weight: 600;
 }
 
 @media (max-width: 1300px) {
