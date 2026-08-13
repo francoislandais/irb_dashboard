@@ -104,13 +104,13 @@ function createOutputFloorSummary(model, state) {
   const impactCard = createMetricCard({
     label: "CET1 impact",
     value: formatSignedBasisPoints(model.selectedSnapshot?.impactBasisPoints),
-    detail: model.selectedSnapshot?.isBinding ? "Credit floor is binding" : "Credit floor does not bite",
+    detail: model.selectedSnapshot?.isBinding ? "Output floor is binding" : "Output floor does not bite",
     tone: model.selectedSnapshot?.isBinding ? "negative" : "neutral"
   });
   const addOnCard = createMetricCard({
-    label: "Credit floor add-on",
-    value: formatMetricValue(model.selectedSnapshot?.creditFloorAddOn ?? null, state.selectedUnit),
-    detail: `${formatPercentFromFactor(model.selectedHorizon.factor)} of credit S-TREA`
+    label: "Distance to floor",
+    value: formatOptionalSignedMetric(model.selectedSnapshot?.totalFloorGap, state.selectedUnit),
+    detail: model.selectedSnapshot?.isBinding ? "Positive gap converted into add-on" : "Negative gap before the floor bites"
   });
 
   const horizonPanel = document.createElement("div");
@@ -134,9 +134,9 @@ function createOutputFloorSummary(model, state) {
   const mechanics = document.createElement("div");
   mechanics.className = "irb-output-floor-mechanics";
   mechanics.append(
-    createMechanicRow("Credit TREA", model.selectedSnapshot?.creditCurrentTrea, state.selectedUnit),
-    createMechanicRow(`${formatPercentFromFactor(model.selectedHorizon.factor)} x credit S-TREA`, model.selectedSnapshot?.creditFloorThreshold, state.selectedUnit),
-    createMechanicRow("Incremental floor add-on", model.selectedSnapshot?.creditFloorAddOn, state.selectedUnit, true),
+    createMechanicRow("Total TREA", model.selectedSnapshot?.totalTrea, state.selectedUnit),
+    createMechanicRow(`${formatPercentFromFactor(model.selectedHorizon.factor)} x total S-TREA`, model.selectedSnapshot?.totalFloorThreshold, state.selectedUnit),
+    createMechanicRow("Output floor add-on", model.selectedSnapshot?.totalFloorAddOn, state.selectedUnit, true),
     createMechanicRow("Floored total TREA", model.selectedSnapshot?.flooredTrea, state.selectedUnit)
   );
 
@@ -236,7 +236,7 @@ function renderOutputFloorBenchmarkChart(model, state) {
     }, state.selectedJst),
     series,
     subtitle: { text: "" },
-    title: createCostOfRiskHighchartsTitle(`CET1 impact of credit output floor - ${model.selectedHorizon.label}`),
+    title: createCostOfRiskHighchartsTitle(`CET1 impact of output floor - ${model.selectedHorizon.label}`),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {

@@ -120,6 +120,10 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     xCode: CURRENT_TREA_X_CODE,
     yCode: TOTAL_TREA_Y_CODE
   }, referenceColumn, jstCode);
+  const totalStandardisedTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
+    xCode: OUTPUT_FLOOR_STREA_X_CODE,
+    yCode: TOTAL_TREA_Y_CODE
+  }, referenceColumn, jstCode);
   const creditCurrentTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
     xCode: CURRENT_TREA_X_CODE,
     yCode: CREDIT_RISK_Y_CODE
@@ -129,19 +133,23 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     yCode: CREDIT_RISK_Y_CODE
   }, referenceColumn, jstCode);
 
-  const required = [cet1Capital, totalTrea, creditCurrentTrea, creditStandardisedTrea];
+  const required = [cet1Capital, totalTrea, totalStandardisedTrea, creditCurrentTrea, creditStandardisedTrea];
   if (required.some((value) => !Number.isFinite(value))) {
     return {
       factor,
       jstCode,
       referenceLabel: referenceColumn.label,
-      status: "Output floor simulation is not available for this JST/date because CET1 capital, total TREA, credit TREA or credit S-TREA is missing."
+      status: "Output floor simulation is not available for this JST/date because CET1 capital, total TREA, total S-TREA, credit TREA or credit S-TREA is missing."
     };
   }
 
+  const totalFloorThreshold = factor * totalStandardisedTrea;
+  const totalFloorGap = totalFloorThreshold - totalTrea;
+  const totalFloorAddOn = Math.max(0, totalFloorGap);
   const creditFloorThreshold = factor * creditStandardisedTrea;
+  const creditFloorGap = creditFloorThreshold - creditCurrentTrea;
   const creditFloorAddOn = Math.max(0, creditFloorThreshold - creditCurrentTrea);
-  const flooredTrea = totalTrea + creditFloorAddOn;
+  const flooredTrea = totalTrea + totalFloorAddOn;
   const currentCet1Ratio = cet1Capital / totalTrea;
   const flooredCet1Ratio = cet1Capital / flooredTrea;
   const impactBasisPoints = (flooredCet1Ratio - currentCet1Ratio) * 10000;
@@ -152,6 +160,7 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
   return {
     cet1Capital,
     creditCurrentTrea,
+    creditFloorGap,
     creditFloorAddOn,
     creditFloorThreshold,
     creditStandardisedTrea,
@@ -160,10 +169,14 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     flooredCet1Ratio,
     flooredTrea,
     impactBasisPoints,
-    isBinding: creditFloorAddOn > 0,
+    isBinding: totalFloorAddOn > 0,
     jstCode,
     referenceLabel: referenceColumn.label,
     reportedCet1Ratio: reportedRatioAsFraction,
+    totalFloorAddOn,
+    totalFloorGap,
+    totalFloorThreshold,
+    totalStandardisedTrea,
     totalTrea
   };
 }
