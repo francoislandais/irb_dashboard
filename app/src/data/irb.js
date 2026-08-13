@@ -15,6 +15,7 @@ export const IRB_OUTPUT_FLOOR_HORIZONS = [
 const C01_TABLE_ID = "C_01.00";
 const C02_TABLE_ID = "C_02.00";
 const C03_TABLE_ID = "C_03.00";
+const C04_TABLE_ID = "C_04.00";
 
 const CET1_CAPITAL_Y_CODE = "0020";
 const CET1_RATIO_Y_CODE = "0010";
@@ -22,6 +23,8 @@ const CURRENT_TREA_X_CODE = "0010";
 const OUTPUT_FLOOR_STREA_X_CODE = "0020";
 const TOTAL_TREA_Y_CODE = "0010";
 const CREDIT_RISK_Y_CODE = "0040";
+const FULLY_LOADED_FLOOR_ADJUSTMENT_X_CODE = "0010";
+const FULLY_LOADED_FLOOR_ADJUSTMENT_Y_CODE = "0890";
 
 export const IRB_OUTPUT_FLOOR_DEFAULT_SCOPE = "global";
 
@@ -101,6 +104,10 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     xCode: CURRENT_TREA_X_CODE,
     yCode: CET1_RATIO_Y_CODE
   }, referenceColumn, jstCode);
+  const fullyLoadedFloorAdjustment = readDataPoint(state, indexes, C04_TABLE_ID, {
+    xCode: FULLY_LOADED_FLOOR_ADJUSTMENT_X_CODE,
+    yCode: FULLY_LOADED_FLOOR_ADJUSTMENT_Y_CODE
+  }, referenceColumn, jstCode);
   const totalTrea = readDataPoint(state, indexes, C02_TABLE_ID, {
     xCode: CURRENT_TREA_X_CODE,
     yCode: TOTAL_TREA_Y_CODE
@@ -148,8 +155,15 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     totalStandardisedTrea,
     totalTrea
   });
+  const adjustedEstimate = buildFullyLoadedAdjustmentEstimate({
+    cet1Capital,
+    fullyLoadedFloorAdjustment,
+    totalFloorThreshold,
+    totalTrea
+  });
 
   return {
+    adjustedEstimate,
     cet1Capital,
     currentCet1Ratio,
     distanceBasisPoints,
@@ -167,6 +181,55 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     totalFloorThreshold,
     totalStandardisedTrea,
     totalTrea
+  };
+}
+
+function buildFullyLoadedAdjustmentEstimate({
+  cet1Capital,
+  fullyLoadedFloorAdjustment,
+  totalFloorThreshold,
+  totalTrea
+}) {
+  if (!Number.isFinite(fullyLoadedFloorAdjustment)) {
+    return {
+      available: false,
+      fullyLoadedFloorAdjustment: null
+    };
+  }
+
+  const adjustedThreshold = totalFloorThreshold + fullyLoadedFloorAdjustment;
+  const adjustedGap = adjustedThreshold - totalTrea;
+  const adjustedAddOn = Math.max(0, adjustedGap);
+  const adjustedFlooredTotalTrea = totalTrea + adjustedAddOn;
+  const currentCet1Ratio = Number.isFinite(cet1Capital) && totalTrea !== 0
+    ? cet1Capital / totalTrea
+    : null;
+  const adjustedCet1Ratio = Number.isFinite(cet1Capital) && adjustedFlooredTotalTrea !== 0
+    ? cet1Capital / adjustedFlooredTotalTrea
+    : null;
+  const thresholdCet1Ratio = Number.isFinite(cet1Capital) && adjustedThreshold > 0
+    ? cet1Capital / adjustedThreshold
+    : null;
+  const cet1ImpactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(adjustedCet1Ratio)
+    ? (adjustedCet1Ratio - currentCet1Ratio) * 10000
+    : null;
+  const cet1ImpactOrDistanceBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(thresholdCet1Ratio)
+    ? adjustedAddOn > 0
+      ? cet1ImpactBasisPoints
+      : -Math.abs((thresholdCet1Ratio - currentCet1Ratio) * 10000)
+    : null;
+
+  return {
+    adjustedAddOn,
+    adjustedCet1Ratio,
+    adjustedFlooredTotalTrea,
+    adjustedGap,
+    adjustedThreshold,
+    available: true,
+    cet1ImpactBasisPoints,
+    cet1ImpactOrDistanceBasisPoints,
+    fullyLoadedFloorAdjustment,
+    isBinding: adjustedGap > 0
   };
 }
 

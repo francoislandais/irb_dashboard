@@ -72,6 +72,7 @@ function renderOutputFloor(state) {
   container.append(
     createOutputFloorReferenceSelector(model, state),
     createOutputFloorSummary(model, state),
+    createFullyLoadedAdjustmentEstimate(model, state),
     createScopeSelector(model, state)
   );
 }
@@ -162,6 +163,60 @@ function createOutputFloorSummary(model, state) {
   );
 
   section.append(currentCard, thresholdCard, gapCard, impactCard, horizonPanel, mechanics);
+  return section;
+}
+
+function createFullyLoadedAdjustmentEstimate(model, state) {
+  const section = document.createElement("section");
+  section.className = "irb-output-floor-adjustment";
+
+  const header = document.createElement("div");
+  header.className = "irb-output-floor-section-title";
+  header.textContent = "Fully loaded floor adjustment estimate - global perimeter";
+  section.append(header);
+
+  const estimate = model.selectedSnapshot.adjustedEstimate;
+  if (!estimate?.available) {
+    section.append(createIrbNotice("C04.00, row 0890 is not available for this JST/reference date."));
+    return section;
+  }
+
+  const metrics = document.createElement("div");
+  metrics.className = "irb-output-floor-adjustment-metrics";
+  metrics.append(
+    createMetricCard({
+      label: "Initial floor threshold",
+      value: formatOptionalMetric(model.selectedSnapshot.totalFloorThreshold, state.selectedUnit),
+      detail: "Existing output floor calculation"
+    }),
+    createMetricCard({
+      label: "Fully loaded adjustment",
+      value: formatOptionalSignedMetric(estimate.fullyLoadedFloorAdjustment, state.selectedUnit),
+      detail: "C04.00 x=0010, y=0890"
+    }),
+    createMetricCard({
+      label: "Adjusted floor threshold",
+      value: formatOptionalMetric(estimate.adjustedThreshold, state.selectedUnit),
+      detail: "Initial threshold + fully loaded adjustment"
+    }),
+    createMetricCard({
+      label: "Adjusted gap",
+      value: formatOptionalSignedMetric(estimate.adjustedGap, state.selectedUnit),
+      detail: estimate.isBinding
+        ? "Binding: positive gap added to total RWA"
+        : "Not binding: negative distance to adjusted threshold",
+      tone: estimate.isBinding ? "negative" : "neutral"
+    }),
+    createMetricCard({
+      label: estimate.isBinding ? "Adjusted CET1 impact" : "CET1 distance to bite",
+      value: formatSignedBasisPoints(estimate.cet1ImpactOrDistanceBasisPoints),
+      detail: estimate.isBinding
+        ? "Estimated impact of the adjusted global add-on"
+        : "Negative value shows the distance before the adjusted floor binds",
+      tone: estimate.isBinding ? "negative" : "neutral"
+    })
+  );
+  section.append(metrics);
   return section;
 }
 

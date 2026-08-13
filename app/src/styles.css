@@ -583,10 +583,29 @@ button:focus-visible {
 .irb-output-floor-card,
 .irb-output-floor-horizons,
 .irb-output-floor-mechanics,
+.irb-output-floor-adjustment,
 .irb-output-floor-diagnostic {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+}
+
+.irb-output-floor-adjustment {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+
+.irb-output-floor-adjustment-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  min-width: 0;
+}
+
+.irb-output-floor-adjustment .irb-output-floor-card {
+  background: #f8faf9;
+  min-height: 102px;
 }
 
 .irb-output-floor-card {
@@ -750,6 +769,10 @@ button:focus-visible {
 @media (max-width: 1300px) {
   .irb-output-floor-summary {
     grid-template-columns: repeat(2, minmax(130px, 1fr));
+  }
+
+  .irb-output-floor-adjustment-metrics {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
   }
 }
 
