@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260812-costofrisk-domain-split";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
-import { renderIrb, wireIrbUi } from "./irbView.js?v=20260813-irb-output-floor";
+import { renderIrb, wireIrbUi } from "./irbView.js?v=20260813-irb-output-floor-view";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -83,7 +83,7 @@ export function wireUi(actions) {
   });
   wireCostOfRiskUi(actions, renderAppState);
   wireExplorerUi(actions, renderAppState);
-  wireIrbUi();
+  wireIrbUi(actions, renderAppState);
 }
 
 function toggleSidebar() {

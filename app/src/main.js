@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260812-explorer-benchmark-view";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260813-irb-output-floor-view";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";

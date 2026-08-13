@@ -96,7 +96,7 @@
               <button class="irb-tab is-active" type="button" role="tab" aria-selected="true" data-irb-tab="output-floor">Output floor</button>
             </div>
             <div class="irb-tab-panel is-active" role="tabpanel" data-irb-panel="output-floor">
-              <div class="irb-empty-state">Output floor analysis will be configured here.</div>
+              <div id="irb-output-floor-view" class="irb-output-floor-view" aria-label="Output floor analysis"></div>
             </div>
           </article>
         </section>
@@ -307,6 +307,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260813-irb-output-floor"></script>
+    <script type="module" src="./src/main.js?v=20260813-irb-output-floor-view"></script>
   </body>
 </html>
