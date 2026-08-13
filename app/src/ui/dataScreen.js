@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
-import { renderCet1 } from "./cet1View.js?v=20260710-bp-format";
 import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260812-costofrisk-domain-split";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
+import { renderIrb, wireIrbUi } from "./irbView.js?v=20260813-irb-output-floor";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -83,6 +83,7 @@ export function wireUi(actions) {
   });
   wireCostOfRiskUi(actions, renderAppState);
   wireExplorerUi(actions, renderAppState);
+  wireIrbUi();
 }
 
 function toggleSidebar() {
@@ -136,7 +137,7 @@ export function renderAppState(state) {
     elements.supportNotice.textContent = state.capabilityNotice;
   }
   if (state.activeModule === "explorer") renderExplorer(state);
-  if (state.activeModule === "cet-1") renderCet1(state);
+  if (state.activeModule === "irb") renderIrb(state);
   if (state.activeModule === "cost-of-risk") {
     renderCostOfRisk(state);
     syncCostOfRiskUrlParams();

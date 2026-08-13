@@ -51,7 +51,7 @@
       <aside class="sidebar" aria-label="Modules">
         <nav class="module-list" aria-label="Navigation des modules">
           <button class="module-link is-active" type="button" data-module-target="explorer">Explorer</button>
-          <button class="module-link" type="button" data-module-target="cet-1">CET 1</button>
+          <button class="module-link" type="button" data-module-target="irb">IRB</button>
           <button class="module-link" type="button" data-module-target="cost-of-risk">Cost of risk</button>
         </nav>
       </aside>
@@ -90,34 +90,13 @@
           </article>
         </section>
 
-        <section id="cet-1-view" class="module-view cet-1-view" aria-label="CET 1">
-          <article class="cet1-panel">
-            <div id="cet1-empty" class="notice" hidden></div>
-            <div id="cet1-dashboard" class="cet1-dashboard" hidden>
-              <div class="cet1-main-card">
-                <div>
-                  <div class="cet1-card-label">CET1 capital ratio</div>
-                  <div id="cet1-ratio-context" class="cet1-card-context">-</div>
-                </div>
-                <div id="cet1-ratio-value" class="cet1-card-value">-</div>
-              </div>
-              <div class="cet1-metric-grid">
-                <div class="cet1-metric-card">
-                  <div class="cet1-card-label">Quarter-on-quarter change</div>
-                  <div id="cet1-ratio-change" class="cet1-metric-value">-</div>
-                  <div id="cet1-ratio-change-context" class="cet1-card-context">-</div>
-                </div>
-                <div class="cet1-metric-card">
-                  <div class="cet1-card-label">Common Equity Tier 1 capital</div>
-                  <div id="cet1-numerator-value" class="cet1-metric-value">-</div>
-                  <div id="cet1-numerator-context" class="cet1-card-context">Numerator</div>
-                </div>
-                <div class="cet1-metric-card">
-                  <div class="cet1-card-label">Total risk exposure amount</div>
-                  <div id="cet1-denominator-value" class="cet1-metric-value">-</div>
-                  <div id="cet1-denominator-context" class="cet1-card-context">Denominator</div>
-                </div>
-              </div>
+        <section id="irb-view" class="module-view irb-view" aria-label="IRB">
+          <article class="irb-panel">
+            <div class="irb-tabs" role="tablist" aria-label="IRB view">
+              <button class="irb-tab is-active" type="button" role="tab" aria-selected="true" data-irb-tab="output-floor">Output floor</button>
+            </div>
+            <div class="irb-tab-panel is-active" role="tabpanel" data-irb-panel="output-floor">
+              <div class="irb-empty-state">Output floor analysis will be configured here.</div>
             </div>
           </article>
         </section>
@@ -328,6 +307,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260812-explorer-benchmark-view"></script>
+    <script type="module" src="./src/main.js?v=20260813-irb-output-floor"></script>
   </body>
 </html>

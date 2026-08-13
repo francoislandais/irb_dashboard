@@ -24,7 +24,8 @@ const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
 const DATASET_URL_PARAM = "dataset";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
-const MODULE_URL_VALUES = new Set(["explorer", "cet-1", "cost-of-risk"]);
+const MODULE_URL_VALUES = new Set(["explorer", "irb", "cost-of-risk"]);
+const MODULE_URL_ALIASES = new Map([["cet-1", "irb"]]);
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";
 let currentCsvFileName = standaloneData?.fileName ?? "";
@@ -240,6 +241,7 @@ function updateUrlJstParam(jstCode) {
 
 function getUrlModuleParam() {
   const module = new URLSearchParams(window.location.search).get(MODULE_URL_PARAM) ?? "";
+  if (MODULE_URL_ALIASES.has(module)) return MODULE_URL_ALIASES.get(module);
   return MODULE_URL_VALUES.has(module) ? module : "";
 }
 
