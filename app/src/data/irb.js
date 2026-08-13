@@ -40,11 +40,18 @@ const OUTPUT_FLOOR_SCOPE_DEFINITIONS = [
   { id: "other", label: "Other risk exposure amounts", yCodes: ["0690"] }
 ];
 
-export function getIrbOutputFloorModel(state, horizonId = "fully-loaded", scopeId = IRB_OUTPUT_FLOOR_DEFAULT_SCOPE) {
+export function getIrbOutputFloorModel(
+  state,
+  horizonId = "fully-loaded",
+  scopeId = IRB_OUTPUT_FLOOR_DEFAULT_SCOPE,
+  referenceName = ""
+) {
   const indexes = getRequiredAxisColumnIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
   const selectedHorizon = getIrbOutputFloorHorizon(horizonId);
-  const selectedReference = referenceColumns.at(-1) ?? null;
+  const selectedReference = referenceColumns.find((reference) => reference.name === referenceName)
+    ?? referenceColumns.at(-1)
+    ?? null;
 
   if (!indexes || !state.selectedJst) {
     return {
@@ -71,6 +78,7 @@ export function getIrbOutputFloorModel(state, horizonId = "fully-loaded", scopeI
   return {
     horizons: IRB_OUTPUT_FLOOR_HORIZONS,
     referenceDate: selectedReference,
+    referenceDates: referenceColumns,
     selectedDateHorizonImpacts,
     selectedHorizon,
     selectedScope,

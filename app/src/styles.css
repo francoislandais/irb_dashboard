@@ -562,6 +562,17 @@ button:focus-visible {
   min-width: 0;
 }
 
+.irb-output-floor-toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.irb-output-floor-reference-field {
+  width: min(220px, 100%);
+}
+
 .irb-output-floor-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(130px, 1fr)) minmax(220px, 1.25fr) minmax(250px, 1.4fr);

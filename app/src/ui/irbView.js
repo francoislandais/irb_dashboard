@@ -13,6 +13,7 @@ const elements = {
 let activeIrbTab = IRB_DEFAULT_TAB;
 let activeOutputFloorHorizon = IRB_DEFAULT_OUTPUT_FLOOR_HORIZON;
 let activeOutputFloorScope = IRB_OUTPUT_FLOOR_DEFAULT_SCOPE;
+let activeOutputFloorReference = "";
 let renderAppState = null;
 let actionsRef = null;
 
@@ -52,7 +53,12 @@ function renderOutputFloor(state) {
   const container = elements.outputFloorView;
   if (!container) return;
 
-  const model = getIrbOutputFloorModel(state, activeOutputFloorHorizon, activeOutputFloorScope);
+  const model = getIrbOutputFloorModel(
+    state,
+    activeOutputFloorHorizon,
+    activeOutputFloorScope,
+    activeOutputFloorReference
+  );
   container.replaceChildren();
 
   if (model.status) {
@@ -61,11 +67,37 @@ function renderOutputFloor(state) {
   }
 
   activeOutputFloorScope = model.selectedScope.id;
+  activeOutputFloorReference = model.referenceDate.name;
 
   container.append(
+    createOutputFloorReferenceSelector(model, state),
     createOutputFloorSummary(model, state),
     createScopeSelector(model, state)
   );
+}
+
+function createOutputFloorReferenceSelector(model, state) {
+  const toolbar = document.createElement("div");
+  toolbar.className = "irb-output-floor-toolbar";
+
+  const label = document.createElement("label");
+  label.className = "field compact-field irb-output-floor-reference-field";
+  const caption = document.createElement("span");
+  caption.textContent = "Reference date";
+  const select = document.createElement("select");
+  select.setAttribute("aria-label", "IRB reference date");
+
+  model.referenceDates.forEach((reference) => {
+    select.append(new Option(reference.label, reference.name, false, reference.name === model.referenceDate.name));
+  });
+  select.addEventListener("change", (event) => {
+    activeOutputFloorReference = event.target.value;
+    renderAppState?.(actionsRef?.getState?.() ?? state);
+  });
+
+  label.append(caption, select);
+  toolbar.append(label);
+  return toolbar;
 }
 
 function createOutputFloorSummary(model, state) {
