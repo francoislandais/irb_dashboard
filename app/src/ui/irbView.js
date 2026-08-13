@@ -102,9 +102,9 @@ function createOutputFloorSummary(model, state) {
     detail: `${model.selectedHorizon.label} output floor`
   });
   const impactCard = createMetricCard({
-    label: "CET1 impact",
-    value: formatSignedBasisPoints(model.selectedSnapshot?.impactBasisPoints),
-    detail: model.selectedSnapshot?.isBinding ? "Output floor is binding" : "Output floor does not bite",
+    label: model.selectedSnapshot?.isBinding ? "CET1 impact" : "Distance to bite",
+    value: formatSignedBasisPoints(model.selectedSnapshot?.distanceBasisPoints),
+    detail: model.selectedSnapshot?.isBinding ? "Output floor is binding" : "Negative value shows the distance before binding",
     tone: model.selectedSnapshot?.isBinding ? "negative" : "neutral"
   });
   const addOnCard = createMetricCard({
@@ -122,7 +122,7 @@ function createOutputFloorSummary(model, state) {
     button.type = "button";
     button.innerHTML = `
       <span>${snapshot.factor === 0.725 ? "FL" : Math.round(snapshot.factor * 100) + "%"}</span>
-      <strong>${formatSignedBasisPoints(snapshot.impactBasisPoints)}</strong>
+      <strong>${formatSignedBasisPoints(snapshot.distanceBasisPoints)}</strong>
     `;
     button.addEventListener("click", () => {
       activeOutputFloorHorizon = model.horizons.find((horizon) => horizon.factor === snapshot.factor)?.id || IRB_DEFAULT_OUTPUT_FLOOR_HORIZON;
@@ -236,7 +236,7 @@ function renderOutputFloorBenchmarkChart(model, state) {
     }, state.selectedJst),
     series,
     subtitle: { text: "" },
-    title: createCostOfRiskHighchartsTitle(`CET1 impact of output floor - ${model.selectedHorizon.label}`),
+    title: createCostOfRiskHighchartsTitle(`CET1 impact / distance to output floor - ${model.selectedHorizon.label}`),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {

@@ -607,6 +607,10 @@ button:focus-visible {
   color: #b05b52;
 }
 
+.irb-output-floor-card.is-neutral .irb-output-floor-card-value {
+  color: #69756e;
+}
+
 .irb-output-floor-card-detail {
   color: #69756e;
   font-size: 0.72rem;

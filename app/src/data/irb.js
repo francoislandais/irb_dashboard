@@ -95,12 +95,12 @@ function buildOutputFloorBenchmarkSeries(state, indexes, referenceColumns, facto
     points: referenceColumns
       .map((referenceColumn) => {
         const snapshot = buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, factor);
-        if (snapshot.status || !Number.isFinite(snapshot.impactBasisPoints)) return null;
+        if (snapshot.status || !Number.isFinite(snapshot.distanceBasisPoints)) return null;
         return {
           date: referenceColumn.date,
           label: referenceColumn.label,
-          smoothedRatioBasisPoints: snapshot.impactBasisPoints,
-          smoothedValue: snapshot.impactBasisPoints
+          smoothedRatioBasisPoints: snapshot.distanceBasisPoints,
+          smoothedValue: snapshot.distanceBasisPoints
         };
       })
       .filter(Boolean)
@@ -153,6 +153,11 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
   const currentCet1Ratio = cet1Capital / totalTrea;
   const flooredCet1Ratio = cet1Capital / flooredTrea;
   const impactBasisPoints = (flooredCet1Ratio - currentCet1Ratio) * 10000;
+  const distanceBasisPoints = totalFloorAddOn > 0
+    ? impactBasisPoints
+    : totalFloorThreshold > 0
+      ? -Math.abs((cet1Capital / totalFloorThreshold - currentCet1Ratio) * 10000)
+      : 0;
   const reportedRatioAsFraction = Number.isFinite(reportedCet1Ratio)
     ? (Math.abs(reportedCet1Ratio) > 1 ? reportedCet1Ratio / 100 : reportedCet1Ratio)
     : null;
@@ -165,6 +170,7 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     creditFloorThreshold,
     creditStandardisedTrea,
     currentCet1Ratio,
+    distanceBasisPoints,
     factor,
     flooredCet1Ratio,
     flooredTrea,
