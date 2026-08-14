@@ -1577,6 +1577,130 @@ table {
   padding: 14px 16px 18px;
 }
 
+.dataset-dialog {
+  width: min(980px, calc(100vw - 48px));
+  max-height: min(860px, calc(100vh - 48px));
+}
+
+.dataset-dialog-body {
+  gap: 12px;
+}
+
+.dataset-dialog-summary {
+  display: grid;
+  gap: 9px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dataset-dialog-summary-item {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid #edf1ee;
+  padding: 7px 2px 9px;
+}
+
+.dataset-dialog-summary-item span {
+  color: #66736d;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.dataset-dialog-summary-item strong {
+  color: #26332d;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.dataset-dialog-template-list {
+  grid-column: 1 / -1;
+  border-radius: 7px;
+  background: #f4f7f5;
+  color: #52615a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  padding: 9px 11px;
+}
+
+.dataset-dialog-header-actions,
+.dataset-dialog-query-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.dataset-dialog-header-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.audit-trail-header .dataset-dialog-header-actions .topbar-button {
+  border: 1px solid #cbd5cf;
+  background: #ffffff;
+  color: #26332d;
+  font-size: 0.74rem;
+  line-height: 1.2;
+  padding: 6px 10px;
+}
+
+.audit-trail-header .dataset-dialog-header-actions .topbar-button:hover:not(:disabled) {
+  background: #eef4f1;
+}
+
+.audit-trail-header .dataset-dialog-header-actions .dataset-dialog-close {
+  margin-left: 2px;
+}
+
+.dataset-dialog-query-panel {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dataset-dialog-query-panel[hidden] {
+  display: none;
+}
+
+.dataset-dialog-query-header strong {
+  color: #26332d;
+  font-size: 0.82rem;
+}
+
+.dataset-dialog-query {
+  max-height: 430px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid #d8dfda;
+  border-radius: 7px;
+  background: #17211c;
+  color: #e8f0eb;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  padding: 12px 14px;
+  tab-size: 4;
+  white-space: pre;
+}
+
+@media (max-width: 720px) {
+  .audit-trail-header:has(+ .dataset-dialog-body) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dataset-dialog-header-actions {
+    justify-content: flex-start;
+  }
+
+  .dataset-dialog-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .dataset-dialog-template-list {
+    grid-column: 1;
+  }
+}
+
 .audit-trail-summary {
   display: grid;
   gap: 4px;

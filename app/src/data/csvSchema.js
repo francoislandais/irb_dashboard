@@ -9,6 +9,23 @@ const REQUIRED_AXIS_COLUMN_LABELS = {
   zAxisRcCode: "z_axis_rc_code"
 };
 
+export function removeEmptyReferenceColumns(columns, rows) {
+  const indexesToRemove = new Set(columns
+    .map((column, index) => ({ column, index }))
+    .filter(({ column, index }) => (
+      /^ref_\d{4}_\d{2}_\d{2}$/.test(String(column))
+      && rows.every((row) => String(row[index] ?? "").trim() === "")
+    ))
+    .map(({ index }) => index));
+
+  if (indexesToRemove.size === 0) return { columns, rows };
+
+  return {
+    columns: columns.filter((_, index) => !indexesToRemove.has(index)),
+    rows: rows.map((row) => row.filter((_, index) => !indexesToRemove.has(index)))
+  };
+}
+
 export function validateCsvDataset(columns, rows) {
   const missingColumns = getMissingAxisColumns(columns);
   if (missingColumns.length > 0) {

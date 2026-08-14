@@ -190,7 +190,6 @@ import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
 } from "./costOfRiskFilterPreviewRenderer.js?v=20260803-bar-fade";
-import { createCostOfRiskDatasetInfoPanel } from "./costOfRiskDatasetInfoPanel.js?v=20260806-cell-selection";
 import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260806-cell-selection";
 import {
   COST_OF_RISK_DISABLED_TABS,
@@ -284,7 +283,6 @@ let activeCostOfRiskNplFlowKey = "net";
 let costOfRiskDefinitionComparisonChart = null;
 let costOfRiskWaterfallChart = null;
 let costOfRiskPeerSelectionActions = null;
-let costOfRiskDatasetInfoActions = null;
 let latestCostOfRiskFilterOptions = null;
 let costOfRiskHelpTopicHistory = [""];
 let costOfRiskHelpTopicHistoryIndex = 0;
@@ -1507,12 +1505,6 @@ function updateCostOfRiskTabsFade() {
 export function showCostOfRiskPeerSelection(actions) {
   costOfRiskPeerSelectionActions = actions;
   setCostOfRiskHelpTopic("peer-selection");
-  renderCostOfRiskHelpPanel();
-}
-
-export function showCostOfRiskDatasetInfo(actions) {
-  costOfRiskDatasetInfoActions = actions;
-  setCostOfRiskHelpTopic("dataset-info");
   renderCostOfRiskHelpPanel();
 }
 
@@ -3074,11 +3066,6 @@ function renderCostOfRiskHelpPanel() {
     return true;
   }
 
-  if (activeCostOfRiskHelpTopic === "dataset-info") {
-    renderCostOfRiskDatasetInfoPanel();
-    return true;
-  }
-
   if (activeCostOfRiskHelpTopic === "stage-transfer-denominator") {
     renderCostOfRiskStageTransferDenominatorPanel();
     return true;
@@ -3576,11 +3563,6 @@ function applyCostOfRiskFilterSelection(filterKey, value) {
     if (filterKey === "counterparty" && elements.costOfRiskCounterparty) elements.costOfRiskCounterparty.value = value;
   }
   if (getLatestState()) rerenderApp(getLatestState());
-}
-
-function renderCostOfRiskDatasetInfoPanel() {
-  const state = costOfRiskDatasetInfoActions?.getState?.() ?? getLatestState();
-  replaceCostOfRiskAuditPanelContent(createCostOfRiskDatasetInfoPanel(state));
 }
 
 function renderCostOfRiskSmoothingHelpControl(windowSize) {

@@ -1,5 +1,5 @@
 import { parseCsv } from "./data/csvParser.js";
-import { validateCsvDataset } from "./data/csvSchema.js";
+import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js";
 import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260804-lazy-index";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadExplorerPoints } from "./data/explorerConfig.js";
@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260813-irb-output-floor-view";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260814-dataset-dialog";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -92,6 +92,7 @@ const actions = {
       await clearStoredFileHandle();
       store.forgetDataset(state.activeDatasetId);
       updateUrlDatasetParam(store.getState().activeDatasetId);
+      updateUrlModuleParam(store.getState().activeModule);
       return;
     }
     await clearStoredFileHandle();
@@ -117,6 +118,7 @@ const actions = {
       store.setActiveDataset(datasetId);
     }
     updateUrlDatasetParam(store.getState().activeDatasetId);
+    updateUrlModuleParam(store.getState().activeModule);
     updateUrlJstParam(store.getState().selectedJst);
     applyUrlPeerExclusions(store.getState().jstOptions);
     updateUrlPeerExclusionsParam(store.getState());
@@ -169,7 +171,8 @@ async function loadFile(file, handle, options = {}) {
 }
 
 async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
-  const parsed = parseCsv(text);
+  const rawParsed = parseCsv(text);
+  const parsed = removeEmptyReferenceColumns(rawParsed.columns, rawParsed.rows);
   validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
   const jstOptions = getIndexedJstCodes({ dataIndexes });
@@ -190,6 +193,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
     loadedAt
   });
   updateUrlDatasetParam(store.getState().activeDatasetId);
+  updateUrlModuleParam(store.getState().activeModule);
 
   const urlJst = getUrlJstParam();
   const matchedJst = findMatchingJstCode(jstOptions, urlJst);

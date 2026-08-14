@@ -77,7 +77,6 @@ let explorerCellRangePreview = null;
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
 let explorerPeerSelectionActions = null;
-let explorerDatasetInfoActions = null;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -161,12 +160,6 @@ export function wireExplorerUi(actions, rerender) {
 export function showExplorerPeerSelection(actions) {
   explorerPeerSelectionActions = actions;
   explorerContextTopic = "peer-selection";
-  renderExplorerContextPanel(actions.getState());
-}
-
-export function showExplorerDatasetInfo(actions) {
-  explorerDatasetInfoActions = actions;
-  explorerContextTopic = "dataset-info";
   renderExplorerContextPanel(actions.getState());
 }
 
@@ -1214,11 +1207,6 @@ function renderExplorerContextPanel(state) {
     return;
   }
 
-  if (explorerContextTopic === "dataset-info") {
-    renderExplorerDatasetInfoPanel(state);
-    return;
-  }
-
   const activeTemplate = getActiveExplorerTemplate();
   const article = document.createElement("article");
   article.className = "explorer-context-article";
@@ -1366,65 +1354,6 @@ function createExplorerPeerSelectionButton(label, onClick) {
 function updateExplorerPeerSelection(peerJstCodes) {
   if (!explorerPeerSelectionActions?.updatePeerJstCodes) return;
   explorerPeerSelectionActions.updatePeerJstCodes(peerJstCodes);
-}
-
-function renderExplorerDatasetInfoPanel(state) {
-  const panelState = state ?? explorerDatasetInfoActions?.getState?.() ?? getLatestState();
-  const activeDataset = panelState?.datasets?.find((dataset) => dataset.id === panelState.activeDatasetId) ?? null;
-  const extractionDate = formatExplorerExtractionDate(panelState?.extractionTimestamp);
-
-  const article = document.createElement("article");
-  article.className = "explorer-context-article";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "explorer-context-eyebrow";
-  eyebrow.textContent = "Dataset metadata";
-
-  const title = document.createElement("h2");
-  title.className = "explorer-context-title";
-  title.textContent = "Dataset";
-
-  const lead = document.createElement("p");
-  lead.className = "explorer-context-lead";
-  lead.textContent = activeDataset
-    ? "This panel summarises the dataset currently loaded in the application."
-    : "No dataset is currently loaded.";
-
-  article.append(eyebrow, title, lead);
-  article.append(createExplorerContextItem("Loaded file", [
-    activeDataset?.label || panelState?.fileName || "No dataset",
-    `Source: ${formatExplorerDatasetSource(activeDataset?.source || panelState?.source)}`,
-    `Rows: ${Number(panelState?.rows?.length ?? 0).toLocaleString("fr-FR")}`,
-    `Columns: ${Number(panelState?.columns?.length ?? 0).toLocaleString("fr-FR")}`
-  ].join("\n")));
-  article.append(createExplorerContextItem("Extraction", [
-    extractionDate ? `Extraction date: ${extractionDate}` : "Extraction date not available",
-    panelState?.extractionTimestamp ? `Raw timestamp: ${panelState.extractionTimestamp}` : ""
-  ].filter(Boolean).join("\n")));
-
-  const hint = document.createElement("p");
-  hint.className = "explorer-context-hint";
-  hint.textContent = "Use the Dataset dropdown in the header to switch to another loaded dataset or add a new one.";
-  article.append(hint);
-
-  elements.explorerContextPanel.replaceChildren(article);
-}
-
-function formatExplorerDatasetSource(source) {
-  if (source === "embedded") return "portable embedded dataset";
-  if (source === "local") return "local file";
-  if (source === "session") return "session file";
-  return source || "not available";
-}
-
-function formatExplorerExtractionDate(extractionTimestamp) {
-  const value = String(extractionTimestamp ?? "").trim();
-  if (!value) return "";
-  const date = new Date(value);
-  if (!Number.isNaN(date.getTime())) {
-    return new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(date);
-  }
-  return value;
 }
 
 function createExplorerReturnButton(target) {

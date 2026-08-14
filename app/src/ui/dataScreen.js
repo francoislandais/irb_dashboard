@@ -1,7 +1,8 @@
 import { setLatestState } from "./appState.js";
-import { renderCostOfRisk, showCostOfRiskDatasetInfo, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260812-costofrisk-domain-split";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerDatasetInfo, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
+import { renderCostOfRisk, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260812-costofrisk-domain-split";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260813-irb-output-floor-view";
+import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
@@ -33,12 +34,7 @@ export function wireUi(actions) {
   elements.forgetFileButton?.addEventListener("click", actions.forgetFile);
   elements.exportStandaloneButton?.addEventListener("click", actions.exportStandalone);
   elements.datasetInfoButton?.addEventListener("click", () => {
-    const activeModule = actions.getState().activeModule;
-    if (activeModule === "cost-of-risk") {
-      showCostOfRiskDatasetInfo(actions);
-    } else if (activeModule === "explorer") {
-      showExplorerDatasetInfo(actions);
-    }
+    showDatasetDialog(actions.getState());
   });
   elements.peersButton?.addEventListener("click", () => {
     const activeModule = actions.getState().activeModule;
@@ -114,7 +110,7 @@ export function renderAppState(state) {
   if (elements.peersButton) elements.peersButton.disabled = state.jstOptions.length === 0;
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
   renderJstSelect(state.jstOptions, state.selectedJst);
-  renderActiveModule(state.activeModule);
+  renderActiveModule(state.activeModule, state.availableModules);
 
   if (elements.fileStatus) {
     if (state.isRestoring) {
@@ -195,13 +191,16 @@ function renderJstSelect(jstOptions, selectedJst) {
   elements.jstSelect.disabled = false;
 }
 
-function renderActiveModule(activeModule) {
+function renderActiveModule(activeModule, availableModules = []) {
+  const available = new Set(availableModules);
   elements.moduleButtons.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.moduleTarget === activeModule);
+    const isAvailable = available.has(button.dataset.moduleTarget);
+    button.hidden = !isAvailable;
+    button.classList.toggle("is-active", isAvailable && button.dataset.moduleTarget === activeModule);
   });
 
   elements.moduleViews.forEach((view) => {
-    view.classList.toggle("is-visible", view.id === `${activeModule}-view`);
+    view.classList.toggle("is-visible", Boolean(activeModule) && view.id === `${activeModule}-view`);
   });
 }
 

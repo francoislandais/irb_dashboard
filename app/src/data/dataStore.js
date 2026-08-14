@@ -1,5 +1,6 @@
 const initialState = {
   activeModule: "explorer",
+  availableModules: [],
   capabilityNotice: "",
   columns: [],
   activeDatasetId: "",
@@ -81,10 +82,14 @@ export function createDataStore() {
       const peerJstCodes = state.activeDatasetId === nextDatasetId
         ? normalizePeerJstCodes(state.peerJstCodes, jstOptions)
         : [...jstOptions];
+      const availableModules = getAvailableModules(dataIndexes);
+      nextDataset.availableModules = availableModules;
 
       state = {
         ...state,
+        activeModule: getAvailableActiveModule(state.activeModule, availableModules),
         activeDatasetId: nextDatasetId,
+        availableModules,
         columns,
         datasets,
         dataIndexes,
@@ -109,6 +114,7 @@ export function createDataStore() {
         .filter((entry) => entry.handle && entry.id && !existingIds.has(entry.id))
         .map((entry) => ({
           id: entry.id,
+          availableModules: [],
           columns: [],
           dataIndexes: null,
           fileHandle: entry.handle,
@@ -138,10 +144,13 @@ export function createDataStore() {
         ? state.selectedJst
         : dataset.jstOptions[0] ?? "";
       const peerJstCodes = normalizePeerJstCodes(state.peerJstCodes, dataset.jstOptions);
+      const availableModules = dataset.availableModules ?? getAvailableModules(dataset.dataIndexes);
 
       state = {
         ...state,
+        activeModule: getAvailableActiveModule(state.activeModule, availableModules),
         activeDatasetId,
+        availableModules,
         columns: dataset.columns,
         dataIndexes: dataset.dataIndexes,
         error: "",
@@ -162,10 +171,13 @@ export function createDataStore() {
     forgetDataset(datasetId = state.activeDatasetId) {
       const datasets = state.datasets.filter((dataset) => dataset.id !== datasetId);
       const nextDataset = datasets.find((dataset) => dataset.isLoaded !== false) ?? null;
+      const availableModules = nextDataset?.availableModules ?? getAvailableModules(nextDataset?.dataIndexes);
 
       state = {
         ...state,
+        activeModule: getAvailableActiveModule(state.activeModule, availableModules),
         activeDatasetId: nextDataset?.id ?? "",
+        availableModules,
         columns: nextDataset?.columns ?? [],
         datasets,
         dataIndexes: nextDataset?.dataIndexes ?? null,
@@ -339,4 +351,26 @@ function getDatasetTableIds(dataIndexes) {
     jstTableIds?.forEach((tableId) => tableIds.add(tableId));
   });
   return [...tableIds];
+}
+
+const MODULE_REQUIREMENTS = [
+  { id: "explorer", requiredTableIds: [] },
+  { id: "irb", requiredTableIds: ["C_01.00", "C_02.00", "C_03.00", "C_04.00"] },
+  {
+    id: "cost-of-risk",
+    requiredTableIds: ["F_02.00", "F_12.01", "F_12.02", "F_18.00", "F_18.01", "F_20.04"]
+  }
+];
+
+function getAvailableModules(dataIndexes) {
+  const tableIds = new Set(getDatasetTableIds(dataIndexes));
+  if (tableIds.size === 0) return [];
+
+  return MODULE_REQUIREMENTS
+    .filter((module) => module.requiredTableIds.every((tableId) => tableIds.has(tableId)))
+    .map((module) => module.id);
+}
+
+function getAvailableActiveModule(activeModule, availableModules) {
+  return availableModules.includes(activeModule) ? activeModule : availableModules[0] ?? "";
 }
