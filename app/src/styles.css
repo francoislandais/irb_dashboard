@@ -664,7 +664,7 @@ button:focus-visible {
 
 .irb-output-floor-hero {
   display: grid;
-  grid-template-columns: minmax(260px, 1.15fr) minmax(420px, 2fr);
+  grid-template-columns: minmax(300px, 1.15fr) minmax(600px, 2.4fr);
   gap: 12px;
   min-width: 0;
 }
@@ -673,14 +673,14 @@ button:focus-visible {
   align-content: center;
   display: grid;
   gap: 8px;
-  border: 1px solid #d7c3be;
+  border: 1px solid #d7dcda;
   border-radius: 8px;
-  background: #fbf5f3;
+  background: #f4f6f5;
   padding: 18px 20px;
 }
 
 .irb-output-floor-eyebrow {
-  color: #8b4d45;
+  color: #66716c;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -688,13 +688,13 @@ button:focus-visible {
 }
 
 .irb-output-floor-hero-copy strong {
-  color: #a54d43;
+  color: #44514b;
   font-size: 2rem;
   line-height: 1;
 }
 
 .irb-output-floor-hero-copy p {
-  color: #705e5a;
+  color: #68736e;
   font-size: 0.76rem;
   line-height: 1.35;
   margin: 0;
@@ -702,7 +702,7 @@ button:focus-visible {
 
 .irb-output-floor-hero-ratios {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, minmax(170px, 1fr));
   gap: 10px;
 }
 

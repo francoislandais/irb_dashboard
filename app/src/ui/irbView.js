@@ -585,7 +585,7 @@ function createOutputFloorHero(model, state) {
   copy.innerHTML = `
     <span class="irb-output-floor-eyebrow">Reported fully loaded bite</span>
     <strong>${formatOptionalMetric(snapshot.fullyLoadedFloorAdjustment, state.selectedUnit)}</strong>
-    <p>C04.00, row 0890 — RWA increase reported by the institution with the output floor at 72.5%.</p>
+    <p>C04.00, row 0890 — RWA increase reported by the institution with the output floor at 72.5%. Total RWA: ${formatOptionalMetric(snapshot.totalTrea, state.selectedUnit)}. The reported bite represents ${formatPercentFromFraction(snapshot.fullyLoadedFloorAdjustmentShare)} of total RWA.</p>
   `;
   const ratios = document.createElement("div");
   ratios.className = "irb-output-floor-hero-ratios";
@@ -600,6 +600,12 @@ function createOutputFloorHero(model, state) {
       value: formatPercentFromFraction(snapshot.fullyLoadedCet1Ratio),
       detail: `${formatSignedBasisPoints(snapshot.fullyLoadedImpactBasisPoints)} vs current CET1`,
       tone: snapshot.fullyLoadedFloorAdjustment > 0 ? "negative" : "neutral"
+    }),
+    createMetricCard({
+      label: "Impact on CET1",
+      value: formatSignedBasisPoints(snapshot.fullyLoadedImpactBasisPoints),
+      detail: "Basis points vs current CET1 ratio",
+      tone: snapshot.fullyLoadedImpactBasisPoints < 0 ? "negative" : "neutral"
     })
   );
   section.append(copy, ratios);
@@ -628,7 +634,7 @@ function createOutputFloorScenarioBridge(model, state) {
     createMetricCard({
       label: "Current market RWA",
       value: formatOptionalMetric(snapshot.currentMarketRwa, state.selectedUnit),
-      detail: `C02 x=0010 · 0520 plus add-ons 0755/0770 (${formatOptionalMetric(snapshot.currentMarketAddOnRwa, state.selectedUnit)})`
+      detail: `${formatPercentFromFraction(snapshot.currentMarketRwaShare)} of total RWA · C02 x=0010 · 0520 plus add-ons 0755/0770 (${formatOptionalMetric(snapshot.currentMarketAddOnRwa, state.selectedUnit)})`
     }),
     createMetricCard({
       label: "Standardised market RWA",

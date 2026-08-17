@@ -125,12 +125,18 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode) {
   // two market-specific add-ons reported under "Other". Full standardisation
   // replaces that complete current perimeter with C02 row 0520 in S-TREA.
   const marketRwaImpact = standardisedMarketRwa - currentMarketRwa;
+  const currentMarketRwaShare = totalTrea !== 0
+    ? currentMarketRwa / totalTrea
+    : null;
   const marketAdjustedTrea = totalTrea + marketRwaImpact;
   const marketAdjustedCet1Ratio = Number.isFinite(effectiveCet1Capital) && marketAdjustedTrea > 0
     ? effectiveCet1Capital / marketAdjustedTrea
     : null;
   const fullyLoadedImpactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(fullyLoadedCet1Ratio)
     ? (fullyLoadedCet1Ratio - currentCet1Ratio) * 10000
+    : null;
+  const fullyLoadedFloorAdjustmentShare = totalTrea !== 0
+    ? fullyLoadedFloorAdjustment / totalTrea
     : null;
   const marketImpactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(marketAdjustedCet1Ratio)
     ? (marketAdjustedCet1Ratio - currentCet1Ratio) * 10000
@@ -149,9 +155,11 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode) {
     currentMarketAddOnRwa,
     currentMarketCoreRwa,
     currentMarketRwa,
+    currentMarketRwaShare,
     fullyLoadedCet1Ratio,
     fullyLoadedFactor: FULLY_LOADED_FACTOR,
     fullyLoadedFloorAdjustment,
+    fullyLoadedFloorAdjustmentShare,
     fullyLoadedImpactBasisPoints,
     fullyLoadedTrea,
     irbHeadroom,
