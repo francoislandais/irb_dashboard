@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260812-explorer-impossible-hint">
+    <link rel="stylesheet" href="./src/styles.css?v=20260814-irb-y-tree">
     <link rel="stylesheet" href="./src/costOfRiskStyles.css?v=20260812-css-domain-split">
   </head>
   <body>
@@ -94,9 +94,17 @@
           <article class="irb-panel">
             <div class="irb-tabs" role="tablist" aria-label="IRB view">
               <button class="irb-tab is-active" type="button" role="tab" aria-selected="true" data-irb-tab="output-floor">Output floor</button>
+              <button class="irb-tab" type="button" role="tab" aria-selected="false" data-irb-tab="density">IRB Density</button>
             </div>
-            <div class="irb-tab-panel is-active" role="tabpanel" data-irb-panel="output-floor">
-              <div id="irb-output-floor-view" class="irb-output-floor-view" aria-label="Output floor analysis"></div>
+            <div id="irb-active-filters" class="cost-of-risk-active-filters irb-active-filters" aria-label="Active IRB filters" hidden></div>
+            <div class="irb-content">
+              <div class="irb-tab-panel is-active" role="tabpanel" data-irb-panel="output-floor">
+                <div id="irb-output-floor-view" class="irb-output-floor-view" aria-label="Output floor analysis"></div>
+              </div>
+              <div class="irb-tab-panel" role="tabpanel" data-irb-panel="density" hidden>
+                <div id="irb-density-view" class="irb-density-view" aria-label="IRB credit risk density analysis"></div>
+              </div>
+              <aside id="irb-context-panel" class="irb-context-panel" aria-label="IRB filter selection" hidden></aside>
             </div>
           </article>
         </section>
@@ -307,6 +315,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260813-irb-output-floor-view"></script>
+    <script type="module" src="./src/main.js?v=20260814-irb-density-cube"></script>
   </body>
 </html>

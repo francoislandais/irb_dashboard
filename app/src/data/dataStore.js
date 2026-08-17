@@ -355,7 +355,7 @@ function getDatasetTableIds(dataIndexes) {
 
 const MODULE_REQUIREMENTS = [
   { id: "explorer", requiredTableIds: [] },
-  { id: "irb", requiredTableIds: ["C_01.00", "C_02.00", "C_03.00", "C_04.00"] },
+  { id: "irb", requiredTableIds: ["C_01.00", "C_02.00", "C_03.00", "C_04.00", "C_08.01"] },
   {
     id: "cost-of-risk",
     requiredTableIds: ["F_02.00", "F_12.01", "F_12.02", "F_18.00", "F_18.01", "F_20.04"]

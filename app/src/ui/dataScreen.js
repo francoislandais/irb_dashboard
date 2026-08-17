@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { renderCostOfRisk, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260812-costofrisk-domain-split";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
-import { renderIrb, wireIrbUi } from "./irbView.js?v=20260813-irb-output-floor-view";
+import { renderIrb, wireIrbUi } from "./irbView.js?v=20260814-irb-density-cube";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
 
 const ADD_DATASET_OPTION = "__add_dataset__";

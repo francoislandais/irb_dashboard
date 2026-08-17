@@ -1,16 +1,7 @@
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { getIndexedRowsByTableJst } from "./dataIndex.js?v=20260804-lazy-index";
-
-export const IRB_OUTPUT_FLOOR_HORIZONS = [
-  { id: "2025", label: "2025", factor: 0.50 },
-  { id: "2026", label: "2026", factor: 0.55 },
-  { id: "2027", label: "2027", factor: 0.60 },
-  { id: "2028", label: "2028", factor: 0.65 },
-  { id: "2029", label: "2029", factor: 0.70 },
-  { id: "fully-loaded", label: "Fully loaded", factor: 0.725 }
-];
+import { getIndexedJstCodes, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260804-lazy-index";
 
 const C01_TABLE_ID = "C_01.00";
 const C02_TABLE_ID = "C_02.00";
@@ -22,80 +13,49 @@ const CET1_RATIO_Y_CODE = "0010";
 const CURRENT_TREA_X_CODE = "0010";
 const OUTPUT_FLOOR_STREA_X_CODE = "0020";
 const TOTAL_TREA_Y_CODE = "0010";
-const CREDIT_RISK_Y_CODE = "0040";
+const MARKET_RISK_Y_CODE = "0520";
+const MARKET_RISK_ADD_ON_Y_CODES = ["0755", "0770"];
 const FULLY_LOADED_FLOOR_ADJUSTMENT_X_CODE = "0010";
 const FULLY_LOADED_FLOOR_ADJUSTMENT_Y_CODE = "0890";
-
-export const IRB_OUTPUT_FLOOR_DEFAULT_SCOPE = "global";
-
-const OUTPUT_FLOOR_SCOPE_DEFINITIONS = [
-  { id: "global", label: "Global perimeter", yCodes: [TOTAL_TREA_Y_CODE] },
-  { id: "credit-total", label: "Credit risk - total", yCodes: [CREDIT_RISK_Y_CODE] },
-  { id: "credit-sa-irb", label: "Credit risk - SA + IRB", yCodes: ["0050", "0240"] },
-  { id: "credit-irb", label: "Credit risk - IRB", yCodes: ["0240"] },
-  { id: "other-risks", label: "Non-credit risks - total", derivedFrom: ["global", "credit-total"] },
-  { id: "settlement-delivery", label: "Settlement and delivery risk", yCodes: ["0490"] },
-  { id: "market-risk", label: "Market risk", yCodes: ["0520"] },
-  { id: "operational-risk", label: "Operational risk", yCodes: ["0590"] },
-  { id: "fixed-overheads", label: "Fixed overheads risk", yCodes: ["0630"] },
-  { id: "cva", label: "Credit valuation adjustment", yCodes: ["0640"] },
-  { id: "large-exposures", label: "Large exposures in the trading book", yCodes: ["0680"] },
-  { id: "other", label: "Other risk exposure amounts", yCodes: ["0690"] }
-];
+const FULLY_LOADED_FACTOR = 0.725;
 
 export function getIrbOutputFloorModel(
   state,
-  horizonId = "fully-loaded",
-  scopeId = IRB_OUTPUT_FLOOR_DEFAULT_SCOPE,
   referenceName = ""
 ) {
   const indexes = getRequiredAxisColumnIndexes(state.columns);
   const referenceColumns = getReferenceColumns(state.columns);
-  const selectedHorizon = getIrbOutputFloorHorizon(horizonId);
   const selectedReference = referenceColumns.find((reference) => reference.name === referenceName)
     ?? referenceColumns.at(-1)
     ?? null;
 
   if (!indexes || !state.selectedJst) {
     return {
-      horizons: IRB_OUTPUT_FLOOR_HORIZONS,
-      selectedHorizon,
       status: "Load a CSV and select a JST."
     };
   }
 
   if (!selectedReference) {
     return {
-      horizons: IRB_OUTPUT_FLOOR_HORIZONS,
-      selectedHorizon,
       status: "No reference date is available in the dataset."
     };
   }
 
-  const selectedSnapshot = buildOutputFloorSnapshot(state, indexes, selectedReference, state.selectedJst, selectedHorizon.factor);
-  const selectedDateHorizonImpacts = IRB_OUTPUT_FLOOR_HORIZONS.map((horizon) => (
-    buildOutputFloorSnapshot(state, indexes, selectedReference, state.selectedJst, horizon.factor)
-  ));
-  const selectedScope = getSnapshotScope(selectedSnapshot, scopeId);
+  const selectedSnapshot = buildOutputFloorSnapshot(state, indexes, selectedReference, state.selectedJst);
+  const benchmarkRows = getIndexedJstCodes(state)
+    .map((jstCode) => buildOutputFloorSnapshot(state, indexes, selectedReference, jstCode))
+    .filter((snapshot) => snapshot.available);
 
   return {
-    horizons: IRB_OUTPUT_FLOOR_HORIZONS,
+    benchmarkRows,
     referenceDate: selectedReference,
     referenceDates: referenceColumns,
-    selectedDateHorizonImpacts,
-    selectedHorizon,
-    selectedScope,
     selectedSnapshot,
-    scopeRows: selectedSnapshot.scopes ?? [],
     status: selectedSnapshot.status || ""
   };
 }
 
-export function getIrbOutputFloorHorizon(horizonId) {
-  return IRB_OUTPUT_FLOOR_HORIZONS.find((horizon) => horizon.id === horizonId) ?? IRB_OUTPUT_FLOOR_HORIZONS.at(-1);
-}
-
-function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, factor) {
+function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode) {
   const cet1Capital = readDataPoint(state, indexes, C01_TABLE_ID, {
     xCode: CURRENT_TREA_X_CODE,
     yCode: CET1_CAPITAL_Y_CODE
@@ -116,209 +76,99 @@ function buildOutputFloorSnapshot(state, indexes, referenceColumn, jstCode, fact
     xCode: OUTPUT_FLOOR_STREA_X_CODE,
     yCode: TOTAL_TREA_Y_CODE
   }, referenceColumn, jstCode);
-  // The output floor binds at consolidated level. Credit-risk values are only
-  // used by the diagnostic table below and must not block the global result.
-  const required = [totalTrea, totalStandardisedTrea];
-  if (required.some((value) => !Number.isFinite(value))) {
-    return {
-      factor,
-      jstCode,
-      referenceLabel: referenceColumn.label,
-      status: "Output floor simulation is not available for this JST/date because total TREA or total S-TREA is missing."
-    };
-  }
-
-  const totalFloorThreshold = factor * totalStandardisedTrea;
-  const totalFloorGap = totalFloorThreshold - totalTrea;
-  const totalFloorAddOn = Math.max(0, totalFloorGap);
-  const flooredTrea = totalTrea + totalFloorAddOn;
-  const currentCet1Ratio = Number.isFinite(cet1Capital) && totalTrea !== 0
-    ? cet1Capital / totalTrea
+  const currentMarketCoreRwa = readDataPoint(state, indexes, C02_TABLE_ID, {
+    xCode: CURRENT_TREA_X_CODE,
+    yCode: MARKET_RISK_Y_CODE
+  }, referenceColumn, jstCode);
+  const currentMarketAddOns = MARKET_RISK_ADD_ON_Y_CODES.map((yCode) => (
+    readDataPoint(state, indexes, C02_TABLE_ID, {
+      xCode: CURRENT_TREA_X_CODE,
+      yCode
+    }, referenceColumn, jstCode)
+  ));
+  const currentMarketAddOnRwa = currentMarketAddOns
+    .filter((value) => Number.isFinite(value))
+    .reduce((total, value) => total + value, 0);
+  const currentMarketRwa = Number.isFinite(currentMarketCoreRwa)
+    ? currentMarketCoreRwa + currentMarketAddOnRwa
     : null;
-  const flooredCet1Ratio = Number.isFinite(cet1Capital) && flooredTrea !== 0
-    ? cet1Capital / flooredTrea
-    : null;
-  const impactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(flooredCet1Ratio)
-    ? (flooredCet1Ratio - currentCet1Ratio) * 10000
-    : null;
-  const distanceBasisPoints = Number.isFinite(cet1Capital) && totalFloorThreshold > 0 && Number.isFinite(currentCet1Ratio)
-    ? totalFloorAddOn > 0
-      ? impactBasisPoints
-      : -Math.abs((cet1Capital / totalFloorThreshold - currentCet1Ratio) * 10000)
-    : null;
+  const standardisedMarketRwa = readDataPoint(state, indexes, C02_TABLE_ID, {
+    xCode: OUTPUT_FLOOR_STREA_X_CODE,
+    yCode: MARKET_RISK_Y_CODE
+  }, referenceColumn, jstCode);
   const reportedRatioAsFraction = Number.isFinite(reportedCet1Ratio)
     ? (Math.abs(reportedCet1Ratio) > 1 ? reportedCet1Ratio / 100 : reportedCet1Ratio)
     : null;
-
-  const scopes = buildOutputFloorScopes(state, indexes, referenceColumn, jstCode, factor, {
-    cet1Capital,
-    totalStandardisedTrea,
-    totalTrea
-  });
-  const adjustedEstimate = buildFullyLoadedAdjustmentEstimate({
-    cet1Capital,
-    fullyLoadedFloorAdjustment,
-    totalFloorThreshold,
-    totalTrea
-  });
-
-  return {
-    adjustedEstimate,
-    cet1Capital,
-    currentCet1Ratio,
-    distanceBasisPoints,
-    factor,
-    flooredCet1Ratio,
-    flooredTrea,
-    impactBasisPoints,
-    isBinding: totalFloorAddOn > 0,
-    jstCode,
-    referenceLabel: referenceColumn.label,
-    reportedCet1Ratio: reportedRatioAsFraction,
-    scopes,
-    totalFloorAddOn,
-    totalFloorGap,
-    totalFloorThreshold,
-    totalStandardisedTrea,
-    totalTrea
-  };
-}
-
-function buildFullyLoadedAdjustmentEstimate({
-  cet1Capital,
-  fullyLoadedFloorAdjustment,
-  totalFloorThreshold,
-  totalTrea
-}) {
-  if (!Number.isFinite(fullyLoadedFloorAdjustment)) {
+  const effectiveCet1Capital = Number.isFinite(reportedRatioAsFraction) && Number.isFinite(totalTrea)
+    ? reportedRatioAsFraction * totalTrea
+    : cet1Capital;
+  const required = [totalTrea, fullyLoadedFloorAdjustment, currentMarketRwa, standardisedMarketRwa];
+  if (required.some((value) => !Number.isFinite(value))) {
     return {
       available: false,
-      fullyLoadedFloorAdjustment: null
+      jstCode,
+      referenceLabel: referenceColumn.label,
+      status: "The analysis requires C02 total and market RWA in columns 0010/0020, plus C04 row 0890."
     };
   }
 
-  const adjustedThreshold = totalFloorThreshold + fullyLoadedFloorAdjustment;
-  const adjustedGap = adjustedThreshold - totalTrea;
-  const adjustedAddOn = Math.max(0, adjustedGap);
-  const adjustedFlooredTotalTrea = totalTrea + adjustedAddOn;
-  const currentCet1Ratio = Number.isFinite(cet1Capital) && totalTrea !== 0
-    ? cet1Capital / totalTrea
+  const currentCet1Ratio = Number.isFinite(reportedRatioAsFraction)
+    ? reportedRatioAsFraction
+    : Number.isFinite(effectiveCet1Capital) && totalTrea !== 0
+      ? effectiveCet1Capital / totalTrea
+      : null;
+  const fullyLoadedTrea = totalTrea + fullyLoadedFloorAdjustment;
+  const fullyLoadedCet1Ratio = Number.isFinite(effectiveCet1Capital) && fullyLoadedTrea > 0
+    ? effectiveCet1Capital / fullyLoadedTrea
     : null;
-  const adjustedCet1Ratio = Number.isFinite(cet1Capital) && adjustedFlooredTotalTrea !== 0
-    ? cet1Capital / adjustedFlooredTotalTrea
+  // The current market perimeter includes the core market-risk amount and the
+  // two market-specific add-ons reported under "Other". Full standardisation
+  // replaces that complete current perimeter with C02 row 0520 in S-TREA.
+  const marketRwaImpact = standardisedMarketRwa - currentMarketRwa;
+  const marketAdjustedTrea = totalTrea + marketRwaImpact;
+  const marketAdjustedCet1Ratio = Number.isFinite(effectiveCet1Capital) && marketAdjustedTrea > 0
+    ? effectiveCet1Capital / marketAdjustedTrea
     : null;
-  const thresholdCet1Ratio = Number.isFinite(cet1Capital) && adjustedThreshold > 0
-    ? cet1Capital / adjustedThreshold
+  const fullyLoadedImpactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(fullyLoadedCet1Ratio)
+    ? (fullyLoadedCet1Ratio - currentCet1Ratio) * 10000
     : null;
-  const cet1ImpactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(adjustedCet1Ratio)
-    ? (adjustedCet1Ratio - currentCet1Ratio) * 10000
+  const marketImpactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(marketAdjustedCet1Ratio)
+    ? (marketAdjustedCet1Ratio - currentCet1Ratio) * 10000
     : null;
-  const cet1ImpactOrDistanceBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(thresholdCet1Ratio)
-    ? adjustedAddOn > 0
-      ? cet1ImpactBasisPoints
-      : -Math.abs((thresholdCet1Ratio - currentCet1Ratio) * 10000)
+  const scenarioDifferenceBasisPoints = Number.isFinite(fullyLoadedCet1Ratio) && Number.isFinite(marketAdjustedCet1Ratio)
+    ? (fullyLoadedCet1Ratio - marketAdjustedCet1Ratio) * 10000
     : null;
+  const netHeadroom = marketRwaImpact - fullyLoadedFloorAdjustment;
+  const residualFloorBite = Math.max(0, -netHeadroom);
+  const irbHeadroom = Math.max(0, netHeadroom);
 
   return {
-    adjustedAddOn,
-    adjustedCet1Ratio,
-    adjustedFlooredTotalTrea,
-    adjustedGap,
-    adjustedThreshold,
     available: true,
-    cet1ImpactBasisPoints,
-    cet1ImpactOrDistanceBasisPoints,
-    fullyLoadedFloorAdjustment,
-    isBinding: adjustedGap > 0
-  };
-}
-
-function buildOutputFloorScopes(state, indexes, referenceColumn, jstCode, factor, totals) {
-  const directScopes = new Map();
-
-  OUTPUT_FLOOR_SCOPE_DEFINITIONS.filter((definition) => definition.yCodes).forEach((definition) => {
-    const currentTrea = definition.id === IRB_OUTPUT_FLOOR_DEFAULT_SCOPE
-      ? totals.totalTrea
-      : readDataPoints(state, indexes, C02_TABLE_ID, definition.yCodes, CURRENT_TREA_X_CODE, referenceColumn, jstCode);
-    const standardisedTrea = definition.id === IRB_OUTPUT_FLOOR_DEFAULT_SCOPE
-      ? totals.totalStandardisedTrea
-      : readDataPoints(state, indexes, C02_TABLE_ID, definition.yCodes, OUTPUT_FLOOR_STREA_X_CODE, referenceColumn, jstCode);
-    directScopes.set(definition.id, buildOutputFloorScope(definition, currentTrea, standardisedTrea, factor, totals));
-  });
-
-  const globalScope = directScopes.get("global");
-  const creditScope = directScopes.get("credit-total");
-  const otherDefinition = OUTPUT_FLOOR_SCOPE_DEFINITIONS.find((definition) => definition.id === "other-risks");
-  const otherCurrentTrea = subtractFinite(globalScope?.currentTrea, creditScope?.currentTrea);
-  const otherStandardisedTrea = subtractFinite(globalScope?.standardisedTrea, creditScope?.standardisedTrea);
-  directScopes.set("other-risks", buildOutputFloorScope(otherDefinition, otherCurrentTrea, otherStandardisedTrea, factor, totals));
-
-  return OUTPUT_FLOOR_SCOPE_DEFINITIONS
-    .map((definition) => directScopes.get(definition.id))
-    .filter((scope) => Number.isFinite(scope?.currentTrea) || Number.isFinite(scope?.standardisedTrea));
-}
-
-function buildOutputFloorScope(definition, currentTrea, standardisedTrea, factor, totals) {
-  const threshold = Number.isFinite(standardisedTrea) ? factor * standardisedTrea : null;
-  const gap = Number.isFinite(currentTrea) && Number.isFinite(threshold) ? threshold - currentTrea : null;
-  const floorAddOn = Number.isFinite(gap) ? Math.max(0, gap) : null;
-  const flooredScopeTrea = Number.isFinite(currentTrea) && Number.isFinite(floorAddOn) ? currentTrea + floorAddOn : null;
-  const flooredTotalTrea = Number.isFinite(totals.totalTrea) && Number.isFinite(floorAddOn)
-    ? totals.totalTrea + floorAddOn
-    : null;
-  const currentCet1Ratio = Number.isFinite(totals.cet1Capital) && totals.totalTrea !== 0
-    ? totals.cet1Capital / totals.totalTrea
-    : null;
-  const flooredCet1Ratio = Number.isFinite(totals.cet1Capital) && flooredTotalTrea
-    ? totals.cet1Capital / flooredTotalTrea
-    : null;
-  const thresholdTotalTrea = Number.isFinite(totals.totalTrea) && Number.isFinite(gap)
-    ? totals.totalTrea + gap
-    : null;
-  const thresholdCet1Ratio = Number.isFinite(totals.cet1Capital) && thresholdTotalTrea > 0
-    ? totals.cet1Capital / thresholdTotalTrea
-    : null;
-  const impactBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(flooredCet1Ratio)
-    ? (flooredCet1Ratio - currentCet1Ratio) * 10000
-    : null;
-  const distanceBasisPoints = Number.isFinite(currentCet1Ratio) && Number.isFinite(thresholdCet1Ratio)
-    ? floorAddOn > 0
-      ? impactBasisPoints
-      : -Math.abs((thresholdCet1Ratio - currentCet1Ratio) * 10000)
-    : null;
-
-  return {
+    cet1Capital: effectiveCet1Capital,
     currentCet1Ratio,
-    currentTrea,
-    factor,
-    floorAddOn,
-    flooredCet1Ratio,
-    flooredScopeTrea,
-    flooredTotalTrea,
-    gap,
-    id: definition.id,
-    impactBasisPoints,
-    distanceBasisPoints,
-    isBinding: Number.isFinite(gap) && gap > 0,
-    label: definition.label,
-    standardisedTrea,
-    threshold
+    currentMarketAddOnRwa,
+    currentMarketCoreRwa,
+    currentMarketRwa,
+    fullyLoadedCet1Ratio,
+    fullyLoadedFactor: FULLY_LOADED_FACTOR,
+    fullyLoadedFloorAdjustment,
+    fullyLoadedImpactBasisPoints,
+    fullyLoadedTrea,
+    irbHeadroom,
+    jstCode,
+    marketAdjustedCet1Ratio,
+    marketAdjustedTrea,
+    marketImpactBasisPoints,
+    marketRwaImpact,
+    netHeadroom,
+    referenceLabel: referenceColumn.label,
+    reportedCet1Ratio: reportedRatioAsFraction,
+    residualFloorBite,
+    scenarioDifferenceBasisPoints,
+    standardisedMarketRwa,
+    totalStandardisedTrea,
+    totalTrea
   };
-}
-
-function getSnapshotScope(snapshot, scopeId) {
-  return snapshot?.scopes?.find((scope) => scope.id === scopeId)
-    ?? snapshot?.scopes?.find((scope) => scope.id === IRB_OUTPUT_FLOOR_DEFAULT_SCOPE)
-    ?? { id: IRB_OUTPUT_FLOOR_DEFAULT_SCOPE, label: "Global perimeter" };
-}
-
-function readDataPoints(state, indexes, tableId, yCodes, xCode, referenceColumn, jstCode) {
-  const values = yCodes.map((yCode) => readDataPoint(state, indexes, tableId, { xCode, yCode }, referenceColumn, jstCode));
-  return values.every(Number.isFinite) ? values.reduce((total, value) => total + value, 0) : null;
-}
-
-function subtractFinite(total, part) {
-  return Number.isFinite(total) && Number.isFinite(part) ? total - part : null;
 }
 
 function readDataPoint(state, indexes, tableId, coordinates, referenceColumn, jstCode) {
