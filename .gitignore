@@ -6,8 +6,11 @@
 
 # Fichiers systeme locaux.
 .DS_Store
+__pycache__/
+*.pyc
 
 # Dossiers de travail locaux.
+datasets/
 outputs/
 work/
 

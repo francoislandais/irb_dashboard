@@ -78,6 +78,49 @@ await exportStandaloneApp("/chemin/vers/donnees.csv", {
 });
 ```
 
+### Generation de toutes les applications locales
+
+Deux dossiers locaux, exclus de Git, sont utilises :
+
+- `datasets/` recoit les fichiers CSV utilisateur ;
+- `outputs/` recoit les applications HTML generees.
+
+Deposer les CSV dans `datasets/`, puis executer :
+
+```sh
+node scripts/exportAllStandaloneApps.mjs
+```
+
+Pour chaque fichier `mon-fichier.csv`, le programme cree :
+
+```text
+outputs/Agora Explorer_mon-fichier.html
+```
+
+Les dossiers sont crees automatiquement s'ils n'existent pas. Leur contenu n'est jamais suivi par Git.
+
+### Extraire directement depuis Hive vers `datasets/`
+
+Le module `scripts/hive_to_dataset.py` contient les fonctions `build_hive_query` et `run_hive_query_to_csv`. Par defaut, le CSV est toujours enregistre dans le dossier local `datasets/` du projet :
+
+```python
+from scripts.hive_to_dataset import run_hive_query_to_csv
+
+df = run_hive_query_to_csv(
+    templates=["F_12.01", "F_18.00"],
+    reference_dates=["2025-03-31", "2025-06-30"],
+    jst_codes=["FRSOG", "FRBNP", "FRCAG"],
+    output_name="finrep_extract",
+    devo_client=devo,
+)
+```
+
+Le résultat est enregistré sous `datasets/finrep_extract.csv`. Il peut ensuite être transforme en application autonome avec :
+
+```sh
+node scripts/exportAllStandaloneApps.mjs
+```
+
 ## Organisation du code
 
 - `app/src/data/` contient le modele de donnees, le parsing CSV, les index et les calculs metier.
