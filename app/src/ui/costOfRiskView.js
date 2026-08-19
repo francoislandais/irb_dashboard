@@ -354,7 +354,6 @@ function selectCostOfRiskPeriodMode(periodMode) {
 function pulseCostOfRiskContextPanel() {
 }
 
-applyCostOfRiskUrlState();
 const COST_OF_RISK_STAGE_BOX_FILL = "#f7f8f7";
 const activeCostOfRiskFilters = {
   asset: COST_OF_RISK_FILTER_ALL,
@@ -362,6 +361,8 @@ const activeCostOfRiskFilters = {
   counterparty: COST_OF_RISK_FILTER_ALL,
   stage: COST_OF_RISK_FILTER_ALL
 };
+const pendingCostOfRiskUrlFilters = new Set();
+applyCostOfRiskUrlState();
 
 function renderCostOfRiskRatioDenominatorControls(state) {
   renderRatioDenominatorControls({
@@ -390,8 +391,41 @@ function applyCostOfRiskUrlState() {
     : urlState.periodMode === COST_OF_RISK_PERIOD_MODE_YTD
       ? COST_OF_RISK_PERIOD_MODE_YTD
       : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
+  if (urlState.asset) {
+    activeCostOfRiskFilters.asset = urlState.asset;
+    pendingCostOfRiskUrlFilters.add("asset");
+  }
+  if (urlState.balanceScope) {
+    activeCostOfRiskFilters.balanceScope = urlState.balanceScope;
+    pendingCostOfRiskUrlFilters.add("balanceScope");
+  }
+  if (urlState.counterparty) {
+    activeCostOfRiskFilters.counterparty = urlState.counterparty;
+    pendingCostOfRiskUrlFilters.add("counterparty");
+  }
+  if (urlState.stage) {
+    activeCostOfRiskFilters.stage = urlState.stage;
+    pendingCostOfRiskUrlFilters.add("stage");
+  }
+  if (urlState.displayMode) setCostOfRiskGlobalDisplayMode(urlState.displayMode);
+  if (urlState.smoothingWindow) {
+    activeCostOfRiskSmoothingWindow = urlState.smoothingWindow;
+    if (urlState.smoothingWindow > 1) activeCostOfRiskLastSmoothingWindow = urlState.smoothingWindow;
+  }
+  activeCostOfRiskFocusSelectedYAxis = urlState.focusSelectedYAxis;
+  if (urlState.detailTab) activeCostOfRiskDefinitionPanelTab = urlState.detailTab;
+  if (urlState.benchmarkMode) activeCostOfRiskDefinitionBenchmarkMode = urlState.benchmarkMode;
+  if (urlState.xAxisCode) activeCostOfRiskXAxisCode = urlState.xAxisCode;
+  restoreCostOfRiskDefinitionComponents(urlState.components);
+  if (urlState.movementComponents) {
+    const movementCodes = urlState.movementComponents
+      .split(".")
+      .filter((code) => COST_OF_RISK_WATERFALL_X_CODES.includes(code));
+    activeCostOfRiskMovementXCodes = new Set(movementCodes);
+  }
   if (urlState.summaryBreakdown) activeCostOfRiskSummaryBreakdown = urlState.summaryBreakdown;
   if (urlState.selection) applyCostOfRiskUrlSelection(activeCostOfRiskTab, urlState.selection);
+  if (urlState.panel) activeCostOfRiskHelpTopic = urlState.panel;
 }
 
 function normalizeActiveCostOfRiskTab() {
@@ -407,7 +441,9 @@ function normalizeActiveCostOfRiskTab() {
 function getCostOfRiskUrlSelectionValue() {
   switch (activeCostOfRiskTab) {
     case "summary":
-      return activeCostOfRiskStageSummaryCellKey;
+      return activeCostOfRiskSummaryBreakdown === "counterparty"
+        ? activeCostOfRiskCounterpartySummaryCellKey
+        : activeCostOfRiskStageSummaryCellKey;
     case "cost-of-risk":
       return activeCostOfRiskDefinitionDriverCode
         ? `${activeCostOfRiskDefinitionId}|${activeCostOfRiskDefinitionDriverCode}`
@@ -432,7 +468,11 @@ function getCostOfRiskUrlSelectionValue() {
 function applyCostOfRiskUrlSelection(tab, value) {
   switch (tab) {
     case "summary":
-      activeCostOfRiskStageSummaryCellKey = value;
+      if (activeCostOfRiskSummaryBreakdown === "counterparty") {
+        activeCostOfRiskCounterpartySummaryCellKey = value;
+      } else {
+        activeCostOfRiskStageSummaryCellKey = value;
+      }
       return;
     case "cost-of-risk": {
       const [definitionId, driverCode] = value.split("|");
@@ -470,10 +510,49 @@ function applyCostOfRiskUrlSelection(tab, value) {
 export function syncCostOfRiskUrlParams() {
   writeCostOfRiskUrlState({
     activeTab: activeCostOfRiskTab,
+    asset: activeCostOfRiskFilters.asset,
+    balanceScope: activeCostOfRiskFilters.balanceScope,
+    benchmarkMode: activeCostOfRiskDefinitionBenchmarkMode,
+    components: serializeCostOfRiskDefinitionComponents(),
+    counterparty: activeCostOfRiskFilters.counterparty,
+    detailTab: activeCostOfRiskDefinitionPanelTab,
+    displayMode: getActiveCostOfRiskDisplayMode(),
+    focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
+    movementComponents: [...activeCostOfRiskMovementXCodes].join(".") || "-",
+    panel: activeCostOfRiskHelpTopic,
     periodMode: activeCostOfRiskPeriodMode,
     referenceDate: activeCostOfRiskReferenceDate,
     selection: getCostOfRiskUrlSelectionValue(),
-    summaryBreakdown: activeCostOfRiskSummaryBreakdown
+    smoothingWindow: activeCostOfRiskSmoothingWindow,
+    stage: activeCostOfRiskFilters.stage,
+    summaryBreakdown: activeCostOfRiskSummaryBreakdown,
+    xAxisCode: activeCostOfRiskXAxisCode
+  });
+}
+
+function serializeCostOfRiskDefinitionComponents() {
+  return [
+    ["f02", "f02-impairment"],
+    ["eba", "f12-selected-components"],
+    ["acpr", "f12-acpr-components"]
+  ].map(([key, definitionId]) => (
+    `${key}:${getActiveCostOfRiskCustomDefinitionXCodes(definitionId).join(".")}`
+  )).join(";");
+}
+
+function restoreCostOfRiskDefinitionComponents(serialized) {
+  if (!serialized) return;
+  const definitionByKey = new Map([
+    ["f02", "f02-impairment"],
+    ["eba", "f12-selected-components"],
+    ["acpr", "f12-acpr-components"]
+  ]);
+  String(serialized).split(";").forEach((entry) => {
+    const [key, rawCodes = ""] = entry.split(":");
+    const definitionId = definitionByKey.get(key);
+    if (!definitionId) return;
+    const codes = rawCodes.split(".").filter((code) => COST_OF_RISK_DEFINITION_CUSTOM_X_CODES.includes(code));
+    activeCostOfRiskDefinitionXCodes.set(definitionId, new Set(codes));
   });
 }
 
@@ -482,10 +561,12 @@ export function wireCostOfRiskUi(actions, rerender) {
   setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
   elements.costOfRiskAsset?.addEventListener("change", (event) => {
+    pendingCostOfRiskUrlFilters.delete("asset");
     activeCostOfRiskFilters.asset = event.target.value;
     rerenderApp(actions.getState());
   });
   elements.costOfRiskCounterparty?.addEventListener("change", (event) => {
+    pendingCostOfRiskUrlFilters.delete("counterparty");
     activeCostOfRiskFilters.counterparty = event.target.value;
     rerenderApp(actions.getState());
   });
@@ -1880,13 +1961,19 @@ function selectCostOfRiskCollateralRatioCell(cellKey) {
 }
 
 function normalizeActiveCostOfRiskFilter(name, options) {
-  if (!options.some((option) => option.value === activeCostOfRiskFilters[name])) {
-    if (name === "stage") {
-      setActiveCostOfRiskStageFilter(COST_OF_RISK_FILTER_ALL);
-      return;
-    }
-    activeCostOfRiskFilters[name] = COST_OF_RISK_FILTER_ALL;
+  if (options.some((option) => option.value === activeCostOfRiskFilters[name])) {
+    pendingCostOfRiskUrlFilters.delete(name);
+    return;
   }
+  // Some datasets render once before their mapping-derived stage options are
+  // available. Keep URL-restored filters intact through that transient render
+  // instead of overwriting the shareable state with "All".
+  if (pendingCostOfRiskUrlFilters.has(name)) return;
+  if (name === "stage") {
+    setActiveCostOfRiskStageFilter(COST_OF_RISK_FILTER_ALL);
+    return;
+  }
+  activeCostOfRiskFilters[name] = COST_OF_RISK_FILTER_ALL;
 }
 
 function getActiveCostOfRiskStageTransferStage() {
@@ -1917,6 +2004,7 @@ function getCostOfRiskStageSummaryRowKeyForStageFilterValue(stageValue) {
 }
 
 function setActiveCostOfRiskStageFilter(stageValue) {
+  pendingCostOfRiskUrlFilters.delete("stage");
   const nextStage = normalizeCostOfRiskStageFilterValue(stageValue);
   const changed = activeCostOfRiskFilters.stage !== nextStage;
   activeCostOfRiskFilters.stage = nextStage;
@@ -3931,6 +4019,7 @@ function getCostOfRiskReferenceDatePreviewValue(state, referenceDate) {
 
 function applyCostOfRiskFilterSelection(filterKey, value) {
   costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanelDetail);
+  pendingCostOfRiskUrlFilters.delete(filterKey);
   if (filterKey === "stage") {
     setActiveCostOfRiskStageFilter(value);
   } else {

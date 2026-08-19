@@ -29,7 +29,9 @@ const store = createDataStore();
 const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
 const DATASET_URL_PARAM = "dataset";
+const UNIT_URL_PARAM = "unit";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
+const PEER_DISPLAY_MODE_URL_PARAM = "peer_mode";
 const MODULE_URL_VALUES = new Set(["explorer", "irb", "cost-of-risk"]);
 const MODULE_URL_ALIASES = new Map([["cet-1", "irb"]]);
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
@@ -141,6 +143,7 @@ const actions = {
 
   updateSelectedUnit(unit) {
     store.setSelectedUnit(unit);
+    updateUrlUnitParam(store.getState().selectedUnit);
   },
 
   updatePeerJstCodes(peerJstCodes) {
@@ -150,6 +153,7 @@ const actions = {
 
   updatePeerDisplayMode(peerDisplayMode) {
     store.setPeerDisplayMode(peerDisplayMode);
+    updateUrlPeerDisplayModeParam(store.getState().peerDisplayMode);
   },
 
   setActiveModule(activeModule) {
@@ -168,6 +172,10 @@ const actions = {
 
 const initialModule = getUrlModuleParam();
 if (initialModule) store.setActiveModule(initialModule);
+store.setPeerDisplayMode(getUrlPeerDisplayModeParam());
+updateUrlPeerDisplayModeParam(store.getState().peerDisplayMode);
+store.setSelectedUnit(getUrlUnitParam());
+updateUrlUnitParam(store.getState().selectedUnit);
 
 async function loadFile(file, handle, options = {}) {
   const text = await file.text();
@@ -310,6 +318,32 @@ function updateUrlPeerExclusionsParam(state = store.getState()) {
   } else {
     url.searchParams.delete(PEERS_EXCLUDED_URL_PARAM);
   }
+  replaceAppUrlState(url);
+}
+
+function getUrlPeerDisplayModeParam() {
+  return readUrlStateParams().get(PEER_DISPLAY_MODE_URL_PARAM) === "anonymised"
+    ? "anonymised"
+    : "explicit";
+}
+
+function updateUrlPeerDisplayModeParam(peerDisplayMode) {
+  const url = createUrlState();
+  url.searchParams.set(
+    PEER_DISPLAY_MODE_URL_PARAM,
+    peerDisplayMode === "anonymised" ? "anonymised" : "explicit"
+  );
+  replaceAppUrlState(url);
+}
+
+function getUrlUnitParam() {
+  const unit = readUrlStateParams().get(UNIT_URL_PARAM) ?? "";
+  return ["millions", "billions", "thousands", "units"].includes(unit) ? unit : "millions";
+}
+
+function updateUrlUnitParam(unit) {
+  const url = createUrlState();
+  url.searchParams.set(UNIT_URL_PARAM, ["billions", "thousands", "units"].includes(unit) ? unit : "millions");
   replaceAppUrlState(url);
 }
 
