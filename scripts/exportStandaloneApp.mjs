@@ -31,22 +31,27 @@ export async function exportStandaloneApp(dataFilePath, options = {}) {
 
 async function buildStandaloneBundle(appDirectory) {
   const readAppText = (relativePath) => readFile(join(appDirectory, relativePath), "utf8");
-  const [indexHtml, stylesCss, mappingCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, costOfRiskStylesCss, mappingCsv, impossibleCombinationsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     readAppText("index.html"),
     readAppText("src/styles.css"),
+    readAppText("src/costOfRiskStyles.css"),
     readAppText("assets/ITS_all_dimension_mapping.csv"),
+    readAppText("assets/ITS_impossible_x_y.csv"),
     readAppText("vendor/highcharts.js"),
     readAppText("vendor/highcharts-treemap.js"),
     collectModuleSources("src/main.js", readAppText)
   ]);
 
   return {
-    assets: { "assets/ITS_all_dimension_mapping.csv": mappingCsv },
+    assets: {
+      "assets/ITS_all_dimension_mapping.csv": mappingCsv,
+      "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv
+    },
     highchartsJs,
     highchartsTreemapJs,
     indexHtml,
     moduleSources,
-    stylesCss
+    stylesCss: `${stylesCss}\n${costOfRiskStylesCss}`
   };
 }
 

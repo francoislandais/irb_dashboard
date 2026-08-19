@@ -1,5 +1,6 @@
 import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260804-lazy-index";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
+import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
@@ -251,12 +252,12 @@ function applyPendingUrlExplorerSelection(context) {
 
 function updateUrlExplorerSelectionParams() {
   const context = getActiveExplorerContext();
-  const url = new URL(window.location.href);
+  const url = createUrlState();
   setOrDeleteUrlParam(url, AXIS_URL_PARAM, context.activeAxis);
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
-  window.history.replaceState({}, "", url);
+  replaceExplorerUrlState(url);
 }
 
 function setOrDeleteUrlParam(url, key, value) {
@@ -268,33 +269,37 @@ function setOrDeleteUrlParam(url, key, value) {
 }
 
 function getUrlAxisParam() {
-  return new URLSearchParams(window.location.search).get(AXIS_URL_PARAM) ?? "";
+  return readUrlStateParams().get(AXIS_URL_PARAM) ?? "";
 }
 
 function getUrlRowParam() {
-  return new URLSearchParams(window.location.search).get(ROW_URL_PARAM) ?? "";
+  return readUrlStateParams().get(ROW_URL_PARAM) ?? "";
 }
 
 function getUrlColumnParam() {
-  return new URLSearchParams(window.location.search).get(COLUMN_URL_PARAM) ?? "";
+  return readUrlStateParams().get(COLUMN_URL_PARAM) ?? "";
 }
 
 function getUrlTabParam() {
-  return new URLSearchParams(window.location.search).get(TAB_URL_PARAM) ?? "";
+  return readUrlStateParams().get(TAB_URL_PARAM) ?? "";
 }
 
 function getUrlTemplateParam() {
-  return new URLSearchParams(window.location.search).get(TEMPLATE_URL_PARAM) ?? "";
+  return readUrlStateParams().get(TEMPLATE_URL_PARAM) ?? "";
 }
 
 function updateUrlTemplateParam(templateId) {
-  const url = new URL(window.location.href);
+  const url = createUrlState();
   if (templateId) {
     url.searchParams.set(TEMPLATE_URL_PARAM, templateId);
   } else {
     url.searchParams.delete(TEMPLATE_URL_PARAM);
   }
-  window.history.replaceState({}, "", url);
+  replaceExplorerUrlState(url);
+}
+
+function replaceExplorerUrlState(url) {
+  replaceUrlState(url);
 }
 
 // Switches the active template from the context panel's template list.
@@ -418,7 +423,6 @@ export function renderExplorer(state) {
   const template = getActiveExplorerTemplate();
   const templates = getExplorerTemplates(state);
   ensureExplorerSelections(state);
-  if (context.activeAxis === "template") ensureAllExplorerTemplateSelections(state);
   updateUrlExplorerSelectionParams();
   elements.unitSelect.value = state.selectedUnit;
   renderExplorerAxisTabs();
@@ -499,7 +503,7 @@ export function openExplorerPoint({
   updateUrlTemplateParam(activeExplorerTemplateId);
 
   const context = getExplorerContextForTemplate(activeExplorerTemplateId);
-  context.activeAxis = yCode ? "y" : xCode ? "x" : zCode ? "z" : "template";
+  context.activeAxis = yCode ? "y" : xCode ? "x" : zCode ? "z" : "y";
   if (xCode) context.selectedXCode = normalizeAxisCode(xCode, "x");
   if (yCode) context.selectedYCode = normalizeAxisCode(yCode, "y");
   if (zCode) context.selectedZCode = normalizeAxisCode(zCode, "z");
@@ -1975,15 +1979,7 @@ function selectExplorerRow(pointCode, options = {}) {
     context.selectedCellColumnIndex = cellColumnIndex;
   }
 
-  if (activeAxis === "template") {
-
-  activeExplorerTemplateId = pointCode || activeExplorerTemplateId;
-
-  updateUrlTemplateParam(activeExplorerTemplateId);
-
-  getActiveExplorerContext().activeAxis = "template";
-
-}else if (activeAxis === "y") {
+  if (activeAxis === "y") {
     context.selectedYCode = pointCode || context.selectedYCode;
   } else if (activeAxis === "z") {
     context.selectedZCode = pointCode || context.selectedZCode;
@@ -2109,11 +2105,7 @@ function setSelectedExplorerCodeForActiveAxis(pointCode) {
   hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
 
-  if (context.activeAxis === "template") {
-    activeExplorerTemplateId = pointCode || activeExplorerTemplateId;
-    updateUrlTemplateParam(activeExplorerTemplateId);
-    getActiveExplorerContext().activeAxis = "template";
-  } else if (context.activeAxis === "y") {
+  if (context.activeAxis === "y") {
     context.selectedYCode = pointCode;
   } else if (context.activeAxis === "z") {
     context.selectedZCode = pointCode;

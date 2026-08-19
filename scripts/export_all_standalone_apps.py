@@ -77,7 +77,10 @@ def _build_standalone_bundle(app_directory: Path) -> dict:
         "assets": {
             "assets/ITS_all_dimension_mapping.csv": _read_app_text(
                 app_directory, "assets/ITS_all_dimension_mapping.csv"
-            )
+            ),
+            "assets/ITS_impossible_x_y.csv": _read_app_text(
+                app_directory, "assets/ITS_impossible_x_y.csv"
+            ),
         },
         "highchartsJs": _read_app_text(app_directory, "vendor/highcharts.js"),
         "highchartsTreemapJs": _read_app_text(
@@ -85,7 +88,12 @@ def _build_standalone_bundle(app_directory: Path) -> dict:
         ),
         "indexHtml": _read_app_text(app_directory, "index.html"),
         "moduleSources": _collect_module_sources(app_directory, "src/main.js"),
-        "stylesCss": _read_app_text(app_directory, "src/styles.css"),
+        "stylesCss": "\n".join(
+            (
+                _read_app_text(app_directory, "src/styles.css"),
+                _read_app_text(app_directory, "src/costOfRiskStyles.css"),
+            )
+        ),
     }
 
 

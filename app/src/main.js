@@ -23,6 +23,7 @@ import {
   getStandaloneModuleDependencies,
   resolveStandaloneModulePath
 } from "./standaloneExport.mjs";
+import { createUrlState, readUrlStateParams, replaceUrlState } from "./ui/urlState.js";
 
 const store = createDataStore();
 const JST_URL_PARAM = "jst";
@@ -235,51 +236,51 @@ async function loadStandaloneData() {
 }
 
 function getUrlJstParam() {
-  return new URLSearchParams(window.location.search).get(JST_URL_PARAM) ?? "";
+  return readUrlStateParams().get(JST_URL_PARAM) ?? "";
 }
 
 function updateUrlJstParam(jstCode) {
-  const url = new URL(window.location.href);
+  const url = createUrlState();
   if (jstCode) {
     url.searchParams.set(JST_URL_PARAM, jstCode);
   } else {
     url.searchParams.delete(JST_URL_PARAM);
   }
-  window.history.replaceState({}, "", url);
+  replaceAppUrlState(url);
 }
 
 function getUrlModuleParam() {
-  const module = new URLSearchParams(window.location.search).get(MODULE_URL_PARAM) ?? "";
+  const module = readUrlStateParams().get(MODULE_URL_PARAM) ?? "";
   if (MODULE_URL_ALIASES.has(module)) return MODULE_URL_ALIASES.get(module);
   return MODULE_URL_VALUES.has(module) ? module : "";
 }
 
 function updateUrlModuleParam(activeModule) {
-  const url = new URL(window.location.href);
+  const url = createUrlState();
   if (MODULE_URL_VALUES.has(activeModule)) {
     url.searchParams.set(MODULE_URL_PARAM, activeModule);
   } else {
     url.searchParams.delete(MODULE_URL_PARAM);
   }
-  window.history.replaceState({}, "", url);
+  replaceAppUrlState(url);
 }
 
 function getUrlDatasetParam() {
-  return new URLSearchParams(window.location.search).get(DATASET_URL_PARAM) ?? "";
+  return readUrlStateParams().get(DATASET_URL_PARAM) ?? "";
 }
 
 function updateUrlDatasetParam(datasetId) {
-  const url = new URL(window.location.href);
+  const url = createUrlState();
   if (datasetId) {
     url.searchParams.set(DATASET_URL_PARAM, datasetId);
   } else {
     url.searchParams.delete(DATASET_URL_PARAM);
   }
-  window.history.replaceState({}, "", url);
+  replaceAppUrlState(url);
 }
 
 function getUrlPeerExclusionsParam() {
-  return new URLSearchParams(window.location.search)
+  return readUrlStateParams()
     .get(PEERS_EXCLUDED_URL_PARAM)
     ?.split(",")
     .map((value) => value.trim())
@@ -299,7 +300,7 @@ function applyUrlPeerExclusions(jstOptions) {
 }
 
 function updateUrlPeerExclusionsParam(state = store.getState()) {
-  const url = new URL(window.location.href);
+  const url = createUrlState();
   const jstOptions = state.jstOptions ?? [];
   const selectedPeers = new Set(state.peerJstCodes?.length ? state.peerJstCodes : jstOptions);
   const excludedPeers = jstOptions.filter((jstCode) => !selectedPeers.has(jstCode));
@@ -309,7 +310,11 @@ function updateUrlPeerExclusionsParam(state = store.getState()) {
   } else {
     url.searchParams.delete(PEERS_EXCLUDED_URL_PARAM);
   }
-  window.history.replaceState({}, "", url);
+  replaceAppUrlState(url);
+}
+
+function replaceAppUrlState(url) {
+  replaceUrlState(url);
 }
 
 function findMatchingJstCode(jstOptions, requestedJst) {
@@ -358,10 +363,12 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, mappingCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, costOfRiskStylesCss, mappingCsv, impossibleCombinationsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
+    fetchAppText("src/costOfRiskStyles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
+    fetchAppText("assets/ITS_impossible_x_y.csv"),
     fetchAppText("vendor/highcharts.js"),
     fetchAppText("vendor/highcharts-treemap.js"),
     collectStandaloneModuleSources("src/main.js")
@@ -369,13 +376,14 @@ async function getStandaloneBundle() {
 
   return {
     assets: {
-      "assets/ITS_all_dimension_mapping.csv": mappingCsv
+      "assets/ITS_all_dimension_mapping.csv": mappingCsv,
+      "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv
     },
     highchartsJs,
     highchartsTreemapJs,
     indexHtml,
     moduleSources,
-    stylesCss
+    stylesCss: `${stylesCss}\n${costOfRiskStylesCss}`
   };
 }
 

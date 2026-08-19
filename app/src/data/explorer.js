@@ -281,7 +281,7 @@ export function getPreferredExplorerAxisCodes(configuredCodes, availableCodes) {
 }
 
 export function getVisibleExplorerAxes(axisOptions) {
-  return ["template", "y", "x", "z"].filter((axis) => axisOptions[axis]?.isVisible);
+  return ["y", "x", "z"].filter((axis) => axisOptions[axis]?.isVisible);
 }
 
 export function hasExplorerSelectedCombination(rows, columns, context) {

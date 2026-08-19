@@ -10,7 +10,7 @@ const COST_OF_RISK_PERIOD_URL_TABS = new Set(["cost-of-risk", "stage-transfers",
 export const COST_OF_RISK_DISABLED_TABS = new Set(["f2-vs-f12", "stage-reconciliation", "core-definition", "analysis"]);
 
 export function readCostOfRiskUrlState() {
-  const params = new URLSearchParams(window.location.search);
+  const params = readUrlStateParams();
   const tab = params.get(COST_OF_RISK_TAB_URL_PARAM);
   const view = params.get(COST_OF_RISK_VIEW_URL_PARAM);
 
@@ -24,7 +24,7 @@ export function readCostOfRiskUrlState() {
 }
 
 export function writeCostOfRiskUrlState({ activeTab, periodMode, referenceDate, selection, summaryBreakdown }) {
-  const url = new URL(window.location.href);
+  const url = createUrlState();
 
   if (!COST_OF_RISK_URL_TABS.has(activeTab)) {
     url.searchParams.delete(COST_OF_RISK_TAB_URL_PARAM);
@@ -32,7 +32,7 @@ export function writeCostOfRiskUrlState({ activeTab, periodMode, referenceDate, 
     url.searchParams.delete(COST_OF_RISK_VIEW_URL_PARAM);
     url.searchParams.delete(COST_OF_RISK_CELL_URL_PARAM);
     url.searchParams.delete(COST_OF_RISK_PERIOD_URL_PARAM);
-    window.history.replaceState({}, "", url);
+    replaceCostOfRiskUrlState(url);
     return;
   }
 
@@ -51,7 +51,11 @@ export function writeCostOfRiskUrlState({ activeTab, periodMode, referenceDate, 
     url.searchParams.delete(COST_OF_RISK_VIEW_URL_PARAM);
   }
 
-  window.history.replaceState({}, "", url);
+  replaceCostOfRiskUrlState(url);
+}
+
+function replaceCostOfRiskUrlState(url) {
+  replaceUrlState(url);
 }
 
 function setOptionalUrlParam(url, key, value) {
@@ -61,3 +65,4 @@ function setOptionalUrlParam(url, key, value) {
     url.searchParams.delete(key);
   }
 }
+import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";

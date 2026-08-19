@@ -25,7 +25,7 @@ export function buildExplorerSeries(state) {
 }
 
 export function buildExplorerAxisSeries(state, options = {}) {
-  const axis = ["template", "x", "y", "z"].includes(options.axis) ? options.axis : "y";
+  const axis = ["x", "y", "z"].includes(options.axis) ? options.axis : "y";
   const tableId = options.tableId || EXPLORER_TARGET.tableId;
   const selectedXCode = normalizeAxisCode(options.selectedXCode || EXPLORER_TARGET.xAxisRcCode, "x");
   const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
