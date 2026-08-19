@@ -1,12 +1,17 @@
 import { getIrbOutputFloorModel } from "../data/irb.js?v=20260817-output-floor-bridge";
 import { getIrbDensityModel, getIrbDensityPoint, IRB_DENSITY_TOTAL_Y_CODE } from "../data/irbDensity.js?v=20260814-irb-density-cube";
+import { getIrbCet1RatioModel, getIrbCet1TimeSeriesModel } from "../data/irbCet1.js?v=20260818-cet1-timeseries";
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { createCostOfRiskQuarterAxisLabelsOptions } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
+import { clearBenchmarkEndpointLabels, renderBenchmarkEndpointLabels, scheduleBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
+import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 const IRB_DEFAULT_TAB = "output-floor";
 
 const elements = {
   activeFilters: document.querySelector("#irb-active-filters"),
   contextPanel: document.querySelector("#irb-context-panel"),
+  cet1RatioView: document.querySelector("#irb-cet1-ratio-view"),
   densityView: document.querySelector("#irb-density-view"),
   outputFloorView: document.querySelector("#irb-output-floor-view"),
   tabs: [...document.querySelectorAll("[data-irb-tab]")],
@@ -15,6 +20,12 @@ const elements = {
 
 let activeIrbTab = IRB_DEFAULT_TAB;
 let activeOutputFloorReference = "";
+let activeCet1PreviousReference = "";
+let activeCet1Detail = "numerator";
+let activeCet1FilterPanel = "cet1-reference-date";
+let activeCet1ComparisonHorizon = "quarter";
+let activeCet1RatioType = "cet1";
+let activeCet1ChartSelection = { kind: "ratio", label: "CET1 ratio" };
 let activeDensityBenchmarkPortfolio = "";
 let activeDensityBenchmarkMetric = "density";
 let activeDensityYCode = IRB_DENSITY_TOTAL_Y_CODE;
@@ -22,6 +33,7 @@ let activeDensityFilterPanel = "";
 const expandedDensityYPaths = new Set();
 let densityYTreeInitialized = false;
 let densityBenchmarkChart = null;
+let cet1TimeSeriesChart = null;
 let densityTableScrollTop = 0;
 let renderAppState = null;
 let actionsRef = null;
@@ -40,7 +52,11 @@ export function wireIrbUi(actions, rerender) {
     const toggle = event.target.closest?.("[data-irb-filter-toggle]");
     if (!toggle) return;
     const filter = toggle.dataset.irbFilterToggle;
-    activeDensityFilterPanel = activeDensityFilterPanel === filter ? "" : filter;
+    if (activeIrbTab === "cet1-ratio") {
+      activeCet1FilterPanel = filter;
+    } else {
+      activeDensityFilterPanel = activeDensityFilterPanel === filter ? "" : filter;
+    }
     renderIrb(actions.getState());
   });
   renderIrbTabs();
@@ -49,10 +65,429 @@ export function wireIrbUi(actions, rerender) {
 export function renderIrb(state) {
   renderIrbTabs();
   const isDensity = activeIrbTab === "density";
-  if (elements.activeFilters) elements.activeFilters.hidden = !isDensity;
-  if (elements.contextPanel && !isDensity) elements.contextPanel.hidden = true;
+  const hasFilterBar = isDensity || activeIrbTab === "cet1-ratio";
+  if (elements.activeFilters) elements.activeFilters.hidden = !hasFilterBar;
+  if (elements.contextPanel && !hasFilterBar) elements.contextPanel.hidden = true;
   if (activeIrbTab === "output-floor") renderOutputFloor(state);
   if (isDensity) renderDensity(state);
+  if (activeIrbTab === "cet1-ratio") renderCet1Ratio(state);
+}
+
+function renderCet1Ratio(state) {
+  const container = elements.cet1RatioView;
+  if (!container) return;
+  let model = getIrbCet1RatioModel(state, activeOutputFloorReference, activeCet1PreviousReference, activeCet1RatioType);
+  container.replaceChildren();
+  if (model.status) {
+    elements.activeFilters?.replaceChildren();
+    if (elements.contextPanel) {
+      elements.contextPanel.hidden = true;
+      elements.contextPanel.replaceChildren();
+    }
+    container.append(createIrbNotice(model.status));
+    return;
+  }
+  const horizonOffset = getCet1HorizonOffset(activeCet1ComparisonHorizon);
+  const currentIndex = model.referenceDates.findIndex((date) => date.name === model.currentReference.name);
+  const horizonReference = model.referenceDates[currentIndex - horizonOffset];
+  if (!horizonReference) {
+    activeCet1ComparisonHorizon = "quarter";
+  } else if (horizonReference.name !== model.previousReference.name) {
+    model = getIrbCet1RatioModel(state, model.currentReference.name, horizonReference.name, activeCet1RatioType);
+  }
+  if (model.status) {
+    container.append(createIrbNotice(model.status));
+    return;
+  }
+  activeOutputFloorReference = model.currentReference.name;
+  activeCet1PreviousReference = model.previousReference.name;
+  renderCet1ActiveFilters(model);
+  renderCet1FilterPanel(model, state);
+  const analysisPanel = document.createElement("section");
+  analysisPanel.className = "irb-cet1-analysis-panel";
+  analysisPanel.append(createCet1RatioHero(model, state));
+  const detail = createCet1DetailPanel(model, state);
+  if (detail) analysisPanel.append(detail);
+  container.append(analysisPanel);
+  const chartPanel = createCet1TimeSeriesPanel();
+  container.append(chartPanel);
+  renderCet1TimeSeriesChart(state, model);
+}
+
+function renderCet1ActiveFilters(model) {
+  const container = elements.activeFilters;
+  if (!container) return;
+  container.replaceChildren(
+    createCet1FilterChip("cet1-ratio-type", model.ratioDefinition.label, "Change capital ratio"),
+    createCet1FilterChip("cet1-reference-date", formatCet1Quarter(model.currentReference), "Change CET1 reference date"),
+    createCet1FilterChip("cet1-comparison", getCet1HorizonLabel(activeCet1ComparisonHorizon), "Change comparison horizon")
+  );
+}
+
+function createCet1FilterChip(filter, text, ariaLabel) {
+  const chip = document.createElement("div");
+  chip.className = `cost-of-risk-filter-chip${filter === "cet1-reference-date" ? " cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--date" : ""}`;
+  chip.classList.toggle("is-open", activeCet1FilterPanel === filter);
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.irbFilterToggle = filter;
+  toggle.setAttribute("aria-expanded", String(activeCet1FilterPanel === filter));
+  toggle.setAttribute("aria-label", ariaLabel);
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  label.textContent = text;
+  toggle.append(label);
+  chip.append(toggle);
+  return chip;
+}
+
+function renderCet1FilterPanel(model, state) {
+  const panel = elements.contextPanel;
+  if (!panel) return;
+  if (!activeCet1FilterPanel) activeCet1FilterPanel = "cet1-reference-date";
+  panel.hidden = false;
+  panel.replaceChildren();
+
+  const article = document.createElement("article");
+  article.className = "cost-of-risk-audit-intro cost-of-risk-reference-date-panel";
+  const panelTitle = activeCet1FilterPanel === "cet1-reference-date"
+    ? "Reference quarter"
+    : activeCet1FilterPanel === "cet1-ratio-type"
+      ? "Capital ratio"
+      : "Comparison horizon";
+  article.innerHTML = `<span class="cost-of-risk-audit-intro-eyebrow">Breakdown of selection by:</span><h2 class="cost-of-risk-audit-intro-title">${panelTitle}</h2>`;
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-filter-selection-table cost-of-risk-reference-date-table";
+  const body = document.createElement("tbody");
+
+  if (activeCet1FilterPanel === "cet1-reference-date") {
+    [...model.availableCurrentDates].reverse().forEach((reference) => {
+      const preview = getIrbCet1RatioModel(state, reference.name, "", activeCet1RatioType);
+      body.append(createCet1FilterOption({
+        active: reference.name === model.currentReference.name,
+        label: formatCet1Quarter(reference),
+        value: preview.status ? "-" : formatPercentFromFraction(preview.currentRatio),
+        onSelect: () => {
+          activeOutputFloorReference = reference.name;
+          activeCet1PreviousReference = "";
+          renderAppState?.(actionsRef?.getState?.() ?? state);
+        }
+      }));
+    });
+  } else if (activeCet1FilterPanel === "cet1-ratio-type") {
+    [
+      { key: "cet1", label: "CET1 ratio" },
+      { key: "tier1", label: "Tier 1 capital ratio" },
+      { key: "total", label: "Total capital ratio" }
+    ].forEach((option) => {
+      const preview = getIrbCet1RatioModel(state, model.currentReference.name, model.previousReference.name, option.key);
+      body.append(createCet1FilterOption({
+        active: option.key === activeCet1RatioType,
+        label: option.label,
+        value: preview.status ? "-" : formatPercentFromFraction(preview.currentRatio),
+        onSelect: () => {
+          activeCet1RatioType = option.key;
+          activeCet1ChartSelection = { kind: "ratio", label: option.label, ratioKey: option.key };
+          renderAppState?.(actionsRef?.getState?.() ?? state);
+        }
+      }));
+    });
+  } else {
+    const currentIndex = model.referenceDates.findIndex((date) => date.name === model.currentReference.name);
+    [
+      { key: "quarter", label: "Previous quarter", offset: 1 },
+      { key: "semester", label: "Six months", offset: 2 },
+      { key: "year", label: "One year", offset: 4 }
+    ].forEach((option) => {
+      const comparisonDate = model.referenceDates[currentIndex - option.offset];
+      body.append(createCet1FilterOption({
+        active: option.key === activeCet1ComparisonHorizon,
+        disabled: !comparisonDate,
+        label: option.label,
+        value: comparisonDate ? formatCet1Quarter(comparisonDate) : "Unavailable",
+        onSelect: () => {
+          activeCet1ComparisonHorizon = option.key;
+          activeCet1PreviousReference = comparisonDate.name;
+          renderAppState?.(actionsRef?.getState?.() ?? state);
+        }
+      }));
+    });
+  }
+  table.append(body);
+  article.append(table);
+  panel.append(article);
+}
+
+function createCet1FilterOption({ active, disabled = false, label, value, onSelect }) {
+  const row = document.createElement("tr");
+  row.className = `cost-of-risk-filter-selection-row${active ? " is-active" : ""}`;
+  const cell = document.createElement("td");
+  const button = document.createElement("button");
+  button.className = "cost-of-risk-filter-selection-option";
+  button.type = "button";
+  button.disabled = disabled;
+  button.innerHTML = `<span class="cost-of-risk-filter-selection-option-label">${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong>`;
+  button.addEventListener("click", onSelect);
+  cell.append(button);
+  row.append(cell);
+  return row;
+}
+
+function getCet1HorizonOffset(horizon) {
+  return { quarter: 1, semester: 2, year: 4 }[horizon] ?? 1;
+}
+
+function getCet1HorizonLabel(horizon) {
+  return { quarter: "Previous quarter", semester: "Six months", year: "One year" }[horizon] ?? "Previous quarter";
+}
+
+function formatCet1Quarter(reference) {
+  const date = reference?.date;
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return reference?.label ?? "-";
+  return `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
+}
+
+function createCet1RatioHero(model, state) {
+  const section = document.createElement("section");
+  section.className = "irb-cet1-summary-rail";
+  const ratio = document.createElement("button");
+  ratio.type = "button";
+  ratio.className = "irb-cet1-rail-ratio";
+  ratio.classList.toggle("is-selected", activeCet1ChartSelection.kind === "ratio");
+  ratio.innerHTML = `
+      <span>${escapeHtml(model.ratioDefinition.label)}</span>
+      <strong>${formatPercentFromFraction(model.currentRatio)}</strong>
+      <small>${formatSignedBasisPoints(model.ratioChangeBasisPoints)} over the selected period</small>
+  `;
+  ratio.addEventListener("click", () => selectCet1ChartMetric({ kind: "ratio", label: model.ratioDefinition.label, ratioKey: activeCet1RatioType }));
+  section.append(
+    ratio,
+    createCet1ScopeButton({
+      key: "numerator",
+      label: model.ratioDefinition.capitalLabel,
+      value: formatOptionalMetric(model.numerator.current, state.selectedUnit),
+      change: formatOptionalSignedMetric(model.numerator.change, state.selectedUnit),
+      effect: formatSignedBasisPoints(model.attribution.numeratorBasisPoints)
+    }),
+    createCet1ScopeButton({
+      key: "denominator",
+      label: "Total RWA",
+      value: formatOptionalMetric(model.denominator.current, state.selectedUnit),
+      change: formatOptionalSignedMetric(model.denominator.change, state.selectedUnit),
+      effect: formatSignedBasisPoints(model.attribution.denominatorBasisPoints)
+    })
+  );
+  return section;
+}
+
+function createCet1ScopeButton({ key, label, value, change, effect }) {
+  const button = document.createElement("button");
+  button.className = `irb-cet1-scope-button${activeCet1Detail === key ? " is-active" : ""}`;
+  button.classList.toggle("is-chart-selected", activeCet1ChartSelection.kind === key);
+  button.type = "button";
+  button.setAttribute("aria-pressed", String(activeCet1Detail === key));
+  button.innerHTML = `<span>${label}</span><strong>${value}</strong><small>${change} · ${effect}</small>`;
+  button.addEventListener("click", () => {
+    activeCet1Detail = key;
+    activeCet1ChartSelection = { kind: key, label, ratioKey: activeCet1RatioType };
+    renderAppState?.(actionsRef?.getState?.());
+  });
+  return button;
+}
+
+function createCet1DetailPanel(model, state) {
+  if (!activeCet1Detail) return null;
+  const isNumerator = activeCet1Detail === "numerator";
+  const source = isNumerator ? "C01.00" : "C02.00";
+  const components = isNumerator ? model.numeratorComponents : model.denominatorComponents;
+  const effectBasisPoints = isNumerator ? model.attribution.numeratorBasisPoints : model.attribution.denominatorBasisPoints;
+  const section = document.createElement("section");
+  section.className = "irb-cet1-breakdown irb-cet1-detail-panel";
+  const header = document.createElement("div");
+  header.className = "irb-cet1-breakdown-header";
+  header.innerHTML = `<div><strong>${isNumerator ? `${escapeHtml(model.ratioDefinition.capitalLabel)} drivers` : "RWA drivers"}</strong></div><div class="irb-cet1-detail-effect"><span>Effect on capital ratio</span><strong class="${effectBasisPoints >= 0 ? "is-positive" : "is-negative"}">${formatSignedBasisPoints(effectBasisPoints)}</strong></div>`;
+  const table = document.createElement("table");
+  table.innerHTML = '<thead><tr><th aria-label="Component"></th><th>Current value</th><th>Change</th><th>Ratio impact</th></tr></thead>';
+  const body = document.createElement("tbody");
+  components.forEach((component) => {
+    const row = document.createElement("tr");
+    const isChartSelected = activeCet1ChartSelection.kind === "component"
+      && activeCet1ChartSelection.tableId === source
+      && activeCet1ChartSelection.yCode === component.code;
+    row.className = `irb-cet1-driver-row${isChartSelected ? " is-selected" : ""}`;
+    if (component.code !== "residual") {
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
+    }
+    const tone = component.basisPoints > 0 ? "is-positive" : component.basisPoints < 0 ? "is-negative" : "";
+    row.innerHTML = `<td><span>${escapeHtml(component.label)}</span><small>${component.code === "residual" ? "Reconciliation" : `${source.replace("_", "")} · ${component.code}`}</small></td><td>${formatOptionalMetric(component.current, state.selectedUnit)}</td><td>${formatOptionalSignedMetric(component.change, state.selectedUnit)}</td><td class="${tone}">${formatSignedBasisPoints(component.basisPoints)}</td>`;
+    if (component.code !== "residual") {
+      const selectComponent = () => selectCet1ChartMetric({ kind: "component", label: component.label, tableId: source, yCode: component.code });
+      row.addEventListener("click", selectComponent);
+      row.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        selectComponent();
+      });
+    }
+    body.append(row);
+  });
+  table.append(body);
+  section.append(header, table);
+  return section;
+}
+
+function selectCet1ChartMetric(selection) {
+  activeCet1ChartSelection = selection;
+  renderAppState?.(actionsRef?.getState?.());
+}
+
+function createCet1TimeSeriesPanel() {
+  const section = document.createElement("section");
+  section.className = "irb-cet1-timeseries-panel";
+  const header = document.createElement("div");
+  header.className = "irb-cet1-timeseries-header";
+  header.innerHTML = `<div><strong>Time evolution</strong><span>${escapeHtml(activeCet1ChartSelection.label)}</span></div>`;
+  const chart = document.createElement("div");
+  chart.className = "irb-cet1-timeseries-chart";
+  section.append(header, chart);
+  return section;
+}
+
+function renderCet1TimeSeriesChart(state, ratioModel) {
+  const container = elements.cet1RatioView?.querySelector(".irb-cet1-timeseries-chart");
+  if (!container || !window.Highcharts) return;
+  const model = getIrbCet1TimeSeriesModel(state, { ...activeCet1ChartSelection, ratioKey: activeCet1RatioType });
+  if (model.status || !model.series.length) {
+    container.classList.add("is-empty");
+    container.textContent = model.status || "No time series is available for this selection.";
+    cet1TimeSeriesChart?.destroy();
+    cet1TimeSeriesChart = null;
+    return;
+  }
+  const selectedReferenceIndex = model.referenceDates.findIndex((reference) => reference.name === ratioModel.currentReference.name);
+  const selectedReference = model.referenceDates[selectedReferenceIndex];
+  const peerGrays = ["#8f9893", "#a2aaa6", "#b4bbb8", "#7f8984"];
+  const peerDashes = ["ShortDash", "ShortDot", "Dash", "Dot"];
+  const onSelectJst = (jstCode) => actionsRef?.updateSelectedJst?.(jstCode);
+  const chartSeries = model.series.map((series, index) => {
+    const selected = series.jstCode === model.selectedJst;
+    const color = selected ? primaryDark : peerGrays[index % peerGrays.length];
+    return {
+      clip: false,
+      color,
+      dashStyle: selected ? "Solid" : peerDashes[index % peerDashes.length],
+      data: series.data.map((value, pointIndex) => ({
+        x: model.referenceDates[pointIndex].date.getTime(),
+        y: Number.isFinite(value) ? value : null
+      })),
+      fillColor: selected ? "rgba(140, 148, 144, 0.12)" : "transparent",
+      lineWidth: selected ? 3.6 : 1.45,
+      marker: {
+        enabled: selected,
+        fillColor: selected ? "#ffffff" : color,
+        lineColor: color,
+        lineWidth: selected ? 1.5 : 0,
+        radius: selected ? 5 : 0,
+        symbol: "circle"
+      },
+      name: series.jstCode,
+      opacity: selected ? 1 : 0.78,
+      states: {
+        hover: { enabled: true, halo: { size: selected ? 9 : 0 }, lineWidth: selected ? 4 : 2.1, lineWidthPlus: 0 },
+        inactive: { opacity: selected ? 1 : 0.42 }
+      },
+      threshold: 0,
+      type: selected ? "area" : "line",
+      zIndex: selected ? 100 : 1
+    };
+  }).sort((left, right) => left.name === model.selectedJst ? 1 : right.name === model.selectedJst ? -1 : left.name.localeCompare(right.name));
+  const chartOptions = {
+    chart: {
+      animation: false,
+      backgroundColor: "transparent",
+      events: {
+        render() {
+          renderBenchmarkEndpointLabels(this, model.selectedJst, onSelectJst, { peerDisplayMode: "explicit" });
+        }
+      },
+      spacing: [6, 128, 4, 4],
+      type: "line",
+      zooming: { type: "xy" },
+      zoomType: "xy"
+    },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    title: { text: null },
+    xAxis: {
+      labels: createCostOfRiskQuarterAxisLabelsOptions(),
+      lineColor: "#c2cac5",
+      lineWidth: 1,
+      plotLines: selectedReference ? [{ color: "#7f8984", dashStyle: "ShortDash", value: selectedReference.date.getTime(), width: 1, zIndex: 3 }] : [],
+      tickColor: "#d9dedb",
+      tickPositions: model.referenceDates.map((reference) => reference.date.getTime()),
+      type: "datetime"
+    },
+    yAxis: {
+      gridLineColor: "#edf0ee",
+      labels: {
+        formatter() {
+          return model.valueKind === "amount"
+            ? formatMetricValue(this.value, state.selectedUnit)
+            : new Intl.NumberFormat("fr-FR", { maximumFractionDigits: model.valueKind === "ratio" ? 1 : 0 }).format(this.value);
+        },
+        style: { color: "#5f6b65" }
+      },
+      lineColor: "#aeb8b2",
+      lineWidth: 1,
+      startOnTick: false,
+      endOnTick: false,
+      tickAmount: 8,
+      title: { text: model.valueKind === "ratio" ? `${model.label} (%)` : model.valueKind === "bps" ? "Change (bp)" : "Amount" }
+    },
+    plotOptions: {
+      series: {
+        animation: false,
+        clip: false,
+        connectNulls: false,
+        cursor: "pointer",
+        point: {
+          events: {
+            click() {
+              const reference = model.referenceDates.find((item) => item.date.getTime() === this.x);
+              if (reference) activeOutputFloorReference = reference.name;
+              if (this.series.name === state.selectedJst) {
+                renderAppState?.(actionsRef?.getState?.() ?? state);
+              } else {
+                actionsRef?.updateSelectedJst?.(this.series.name);
+              }
+            }
+          }
+        }
+      }
+    },
+    series: chartSeries,
+    tooltip: {
+      shared: false,
+      formatter() {
+        const value = model.valueKind === "ratio"
+          ? `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(this.y)} %`
+          : model.valueKind === "bps"
+            ? formatSignedBasisPoints(this.y)
+            : formatMetricValue(this.y, state.selectedUnit);
+        const date = new Date(this.x);
+        const quarter = `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
+        return `<b>${this.series.name}</b><br>${quarter}: ${value}`;
+      }
+    }
+  };
+  if (cet1TimeSeriesChart) {
+    clearBenchmarkEndpointLabels(cet1TimeSeriesChart);
+    cet1TimeSeriesChart.destroy();
+  }
+  cet1TimeSeriesChart = window.Highcharts.chart(container, chartOptions);
+  scheduleBenchmarkEndpointLabels(cet1TimeSeriesChart, model.selectedJst, onSelectJst, { peerDisplayMode: "explicit" });
 }
 
 function renderIrbTabs() {
@@ -779,4 +1214,13 @@ function formatOptionalMetric(value, selectedUnit) {
 
 function formatOptionalSignedMetric(value, selectedUnit) {
   return Number.isFinite(value) ? formatSignedMetricValue(value, selectedUnit) : "-";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }

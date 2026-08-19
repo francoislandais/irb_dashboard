@@ -95,6 +95,7 @@
             <div class="irb-tabs" role="tablist" aria-label="IRB view">
               <button class="irb-tab is-active" type="button" role="tab" aria-selected="true" data-irb-tab="output-floor">Output floor</button>
               <button class="irb-tab" type="button" role="tab" aria-selected="false" data-irb-tab="density">IRB Density</button>
+              <button class="irb-tab" type="button" role="tab" aria-selected="false" data-irb-tab="cet1-ratio">Capital Ratios</button>
             </div>
             <div id="irb-active-filters" class="cost-of-risk-active-filters irb-active-filters" aria-label="Active IRB filters" hidden></div>
             <div class="irb-content">
@@ -103,6 +104,9 @@
               </div>
               <div class="irb-tab-panel" role="tabpanel" data-irb-panel="density" hidden>
                 <div id="irb-density-view" class="irb-density-view" aria-label="IRB credit risk density analysis"></div>
+              </div>
+              <div class="irb-tab-panel" role="tabpanel" data-irb-panel="cet1-ratio" hidden>
+                <div id="irb-cet1-ratio-view" class="irb-cet1-ratio-view" aria-label="Capital ratios movement analysis"></div>
               </div>
               <aside id="irb-context-panel" class="irb-context-panel" aria-label="IRB filter selection" hidden></aside>
             </div>

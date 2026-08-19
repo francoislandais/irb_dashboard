@@ -498,6 +498,12 @@ button:focus-visible {
   justify-content: start;
 }
 
+.irb-content:has(.irb-tab-panel[data-irb-panel="cet1-ratio"].is-active) {
+  gap: 16px;
+  grid-template-columns: minmax(0, 900px) 300px;
+  justify-content: start;
+}
+
 .irb-context-panel {
   grid-column: 2;
   grid-row: 1;
@@ -515,6 +521,16 @@ button:focus-visible {
 
 .irb-context-panel .cost-of-risk-filter-selection-option {
   grid-template-columns: minmax(0, 1fr) auto;
+  font-weight: 400;
+}
+
+.irb-context-panel .cost-of-risk-filter-selection-option strong {
+  font-weight: 400;
+}
+
+.irb-context-panel .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option,
+.irb-context-panel .cost-of-risk-filter-selection-row.is-active .cost-of-risk-filter-selection-option strong {
+  font-weight: 600;
 }
 
 .irb-y-tree-table {
@@ -631,6 +647,12 @@ button:focus-visible {
   overflow: hidden;
 }
 
+.irb-tab-panel[data-irb-panel="cet1-ratio"] {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .irb-empty-state {
   align-self: start;
   width: min(560px, 100%);
@@ -714,6 +736,89 @@ button:focus-visible {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+}
+
+.irb-cet1-ratio-view {
+  display: grid;
+  gap: 14px;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 2px 2px;
+  width: min(100%, 900px);
+}
+
+.irb-cet1-analysis-panel {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 210px minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+}
+
+.irb-cet1-summary-rail {
+  display: grid;
+  gap: 4px;
+  grid-template-rows: minmax(78px, 1.15fr) repeat(2, minmax(48px, .85fr));
+  min-height: 0;
+}
+
+.irb-cet1-rail-ratio,
+.irb-cet1-rail-movement,
+.irb-cet1-scope-button { border: 0; border-radius: 0; cursor: pointer; display: grid; font: inherit; text-align: left; }
+.irb-cet1-rail-ratio { align-content: center; background: #eaf2fa; border-radius: 6px; gap: 3px; padding: 9px 12px; }
+.irb-cet1-rail-ratio span { color: #637169; font-size: .68rem; font-weight: 700; text-transform: uppercase; }
+.irb-cet1-rail-ratio strong { color: var(--primary-dark); font-size: 1.8rem; line-height: 1; }
+.irb-cet1-rail-ratio small { color: var(--muted); font-size: .68rem; }
+.irb-cet1-rail-movement { align-items: center; background: transparent; grid-template-columns: auto 1fr; padding: 5px 10px; }
+.irb-cet1-rail-movement span { display: none; }
+.irb-cet1-rail-movement strong { color: var(--text); font-size: 1.15rem; }
+.irb-cet1-rail-movement small { color: var(--muted); font-size: .68rem; text-align: right; }
+.irb-cet1-scope-button { align-content: center; background: #fff; border-bottom: 1px solid #e5e9e7; gap: 2px; padding: 8px 10px; position: relative; }
+.irb-cet1-scope-button:hover, .irb-cet1-rail-movement:hover { background: #f4f8fc; }
+.irb-cet1-rail-ratio:hover { background: #e3eef8; }
+.irb-cet1-scope-button:focus-visible, .irb-cet1-rail-ratio:focus-visible, .irb-cet1-rail-movement:focus-visible { outline: 2px solid var(--primary-dark); outline-offset: -2px; }
+.irb-cet1-scope-button.is-active { background: #eaf2fa; border-bottom-color: #cfe0f0; }
+.irb-cet1-scope-button.is-chart-selected { box-shadow: inset 3px 0 0 var(--primary-dark); }
+.irb-cet1-scope-button span { color: #526159; font-size: .7rem; font-weight: 700; text-transform: uppercase; }
+.irb-cet1-scope-button strong { color: var(--primary-dark); font-size: 1rem; }
+.irb-cet1-scope-button small { color: var(--muted); font-size: .64rem; }
+.irb-cet1-rail-ratio.is-selected, .irb-cet1-rail-movement.is-selected { box-shadow: inset 3px 0 0 var(--primary-dark); }
+
+.irb-cet1-breakdown .is-positive,
+.irb-cet1-breakdown .is-negative { color: var(--text); }
+
+.irb-cet1-breakdown { background: #fff; border: 0; min-height: 0; min-width: 0; overflow: auto; }
+.irb-cet1-detail-panel { align-self: stretch; margin: 0; }
+.irb-cet1-breakdown-header { align-items: center; background: #fff; border-bottom: 1px solid var(--line); display: flex; height: 40px; justify-content: space-between; padding: 5px 10px; position: sticky; top: 0; z-index: 3; }
+.irb-cet1-breakdown-header > div { display: grid; gap: 3px; }
+.irb-cet1-breakdown-header strong { color: var(--primary-dark); font-size: .82rem; font-weight: 600; }
+.irb-cet1-breakdown-header span { color: var(--muted); font-size: .7rem; }
+.irb-cet1-detail-effect { align-items: end; display: grid; gap: 2px; text-align: right; }
+.irb-cet1-detail-effect strong { font-size: 1rem; }
+.irb-cet1-breakdown table { border-collapse: collapse; width: 100%; }
+.irb-cet1-breakdown th { color: var(--muted); font-size: .64rem; font-weight: 500; padding: 6px 10px; text-align: right; text-transform: uppercase; }
+.irb-cet1-breakdown th:first-child { text-align: left; }
+.irb-cet1-breakdown td { border-top: 1px solid #edf0ee; color: #45534c; font-size: .7rem; font-weight: 400; padding: 5px 9px; text-align: right; }
+.irb-cet1-breakdown td:first-child { align-items: baseline; display: flex; gap: 7px; max-width: 390px; min-width: 0; text-align: left; }
+.irb-cet1-breakdown td:first-child > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.irb-cet1-breakdown td small { color: var(--muted); flex: 0 0 auto; font-size: .61rem; font-weight: 400; }
+.irb-cet1-driver-row[role="button"] { cursor: pointer; }
+.irb-cet1-driver-row[role="button"]:hover { background: #f4f8fc; }
+.irb-cet1-driver-row.is-selected { background: #eaf2fa; }
+.irb-cet1-driver-row:focus-visible { outline: 2px solid var(--primary-dark); outline-offset: -2px; }
+
+.irb-cet1-timeseries-panel { background: #fff; border: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; overflow: hidden; }
+.irb-cet1-timeseries-header { align-items: center; border-bottom: 1px solid #e5e9e7; display: flex; justify-content: space-between; min-height: 38px; padding: 7px 10px; }
+.irb-cet1-timeseries-header > div { align-items: baseline; display: flex; gap: 9px; }
+.irb-cet1-timeseries-header strong { color: var(--primary-dark); font-size: .82rem; }
+.irb-cet1-timeseries-header span { color: var(--muted); font-size: .7rem; }
+.irb-cet1-timeseries-chart { height: 100%; min-height: 0; min-width: 0; }
+.irb-cet1-timeseries-chart.is-empty { align-items: center; color: var(--muted); display: flex; font-size: .78rem; justify-content: center; }
+
+@media (max-width: 1050px) {
+  .irb-cet1-analysis-panel { grid-template-columns: 185px minmax(0, 1fr); }
 }
 
 .irb-output-floor-adjustment {
