@@ -262,29 +262,6 @@ export const COST_OF_RISK_DEFINITION_OPTIONS = [
       "c110 - Foreign exchange and other movements",
       "c120 - Changes due to modifications without derecognition"
     ]
-  },
-  {
-    id: "f12-custom-components",
-    label: "Custom definition",
-    source: "F_12.01 user-selected components",
-    description: "Custom cost of risk definition built by selecting which F_12.01 components should be included.",
-    components: [
-      "User-selected F_12.01 movement columns",
-      "All candidate components are selected by default",
-      "The Components view controls which columns are retained"
-    ]
-  },
-  {
-    id: "definitions-comparison",
-    label: "Definitions comparison",
-    source: "F_02.00 r0460 and F_12.01 selected definitions",
-    description: "Compare every available cost of risk definition on the same time series chart.",
-    components: [
-      "F02 impairment",
-      "EBA definition",
-      "ACPR definition",
-      "Custom definition"
-    ]
   }
 ];
 

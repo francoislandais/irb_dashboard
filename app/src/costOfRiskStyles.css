@@ -2007,6 +2007,34 @@
   background: #f4f6f5;
 }
 
+.cost-of-risk-definition-driver.is-excluded {
+  opacity: 0.46;
+}
+
+.cost-of-risk-definition-driver.is-excluded .cost-of-risk-definition-driver-label,
+.cost-of-risk-definition-driver.is-excluded .cost-of-risk-definition-driver-value {
+  color: #7b8581;
+}
+
+.cost-of-risk-definition-driver.is-excluded:hover {
+  background: #f3f4f4;
+  opacity: 0.7;
+}
+
+.cost-of-risk-definition-driver.is-user-added {
+  background: #fff1ef;
+  box-shadow: inset 2px 0 0 #c96b61;
+}
+
+.cost-of-risk-definition-driver.is-user-added:hover {
+  background: #ffe9e6;
+}
+
+.cost-of-risk-definition-driver.is-user-added .cost-of-risk-definition-driver-label,
+.cost-of-risk-definition-driver.is-user-added .cost-of-risk-definition-driver-value {
+  color: #8b3f38;
+}
+
 .cost-of-risk-definition-driver.is-active,
 .cost-of-risk-definition-driver.is-active:hover {
   background: var(--primary-dark);

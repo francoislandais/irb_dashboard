@@ -9,6 +9,7 @@ import {
   COST_OF_RISK_F02_TABLE_ID,
   COST_OF_RISK_F02_X_AXIS_CODE,
   COST_OF_RISK_F02_Y_AXIS_CODE,
+  COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_TABLE_ID
 } from "./definitions.js";
 import {
@@ -40,7 +41,7 @@ export function buildCostOfRiskDefinitionModel(
   filters = {},
   referenceDate = "",
   selectedDriverCode = "",
-  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  customXCodes = null,
   options = {}
 ) {
   const indexes = getRequiredIndexes(state.columns);
@@ -103,7 +104,7 @@ export function buildCostOfRiskDefinitionModel(
     components,
     definition,
     denominator: selectedPoint?.denominator ?? null,
-    denominatorLabel: getCostOfRiskDenominatorComposition(state, filters).label,
+    denominatorLabel: getCostOfRiskDenominatorComposition(state, getCostOfRiskDefinitionDenominatorFilters(filters)).label,
     drivers,
     ratioBasisPoints: selectedPoint?.ratioBasisPoints ?? null,
     referenceDate: selectedPoint?.label ?? "",
@@ -121,7 +122,7 @@ function buildCostOfRiskDefinitionBenchmarkSeries(
   definitionId,
   filters,
   selectedDriverCode = "",
-  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  customXCodes = null,
   selectedJstSeries = null,
   periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
 ) {
@@ -141,20 +142,60 @@ function buildCostOfRiskDefinitionSelectedSeriesForJst(state, indexes, reference
     : buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, selectedCode, jstCode, periodMode);
 }
 
-function getCostOfRiskDefinitionXCodes(definitionId, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES) {
+function getCostOfRiskDefinitionXCodes(definitionId, customXCodes = null) {
+  if (Array.isArray(customXCodes)) return normalizeCostOfRiskDefinitionCustomXCodes(customXCodes);
   if (definitionId === "f12-acpr-components") return COST_OF_RISK_DEFINITION_ACPR_X_CODES;
-  if (definitionId === "f12-custom-components") return normalizeCostOfRiskDefinitionCustomXCodes(customXCodes);
+  if (definitionId === "f02-impairment") return [];
   return COST_OF_RISK_DEFINITION_F12_X_CODES;
 }
 
-function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
-  return definitionId === "f02-impairment"
-    ? buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode)
-    : buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referenceColumns, filters, jstCode, getCostOfRiskDefinitionXCodes(definitionId, customXCodes), periodMode);
+function buildCostOfRiskDefinitionSeriesForJst(state, indexes, referenceColumns, definitionId, filters, jstCode, customXCodes = null, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  const selectedXCodes = getCostOfRiskDefinitionXCodes(definitionId, customXCodes);
+  if (definitionId !== "f02-impairment") {
+    return buildCostOfRiskF12SelectedComponentPointsForJst(
+      state, indexes, referenceColumns, filters, jstCode, selectedXCodes, periodMode
+    );
+  }
+  const baseSeries = buildCostOfRiskF02ImpairmentPointsForJst(
+    state, indexes, referenceColumns, filters, jstCode, periodMode
+  );
+  if (selectedXCodes.length === 0) return baseSeries;
+  const adjustmentSeries = buildCostOfRiskF12SelectedComponentPointsForJst(
+    state, indexes, referenceColumns, filters, jstCode, selectedXCodes, periodMode
+  );
+  return baseSeries.map((point, index) => {
+    const adjustment = adjustmentSeries[index];
+    const value = Number.isFinite(point?.value) || Number.isFinite(adjustment?.value)
+      ? (point?.value ?? 0) + (adjustment?.value ?? 0)
+      : null;
+    return {
+      ...point,
+      ratioBasisPoints: point?.denominator && Number.isFinite(value) ? (value / point.denominator) * 10000 : null,
+      value
+    };
+  });
+}
+
+// Definition ratios use one stable exposure base. Dimensional filters refine
+// the numerator only, so the ratios of the displayed sub-components remain
+// additive and can be reconciled with the all-scope definition ratio.
+function getCostOfRiskDefinitionDenominatorSeries(state, indexes, referenceColumns, jstCode, filters = {}) {
+  return getCostOfRiskRatioDenominatorSeries(
+    state, indexes, referenceColumns, jstCode, getCostOfRiskDefinitionDenominatorFilters(filters)
+  );
+}
+
+function getCostOfRiskDefinitionDenominatorFilters(filters = {}) {
+  return {
+    ...filters,
+    asset: COST_OF_RISK_FILTER_ALL,
+    counterparty: COST_OF_RISK_FILTER_ALL,
+    stage: COST_OF_RISK_FILTER_ALL
+  };
 }
 
 function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceColumns, definitionId, filters, driverCode, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
-  if (!driverCode || definitionId === "f02-impairment") {
+  if (!driverCode || driverCode === "F02:0460") {
     return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode);
   }
 
@@ -170,7 +211,7 @@ function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceCo
     jstCode,
     periodMode
   );
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+  const denominatorSeries = getCostOfRiskDefinitionDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
     const value = periodValueSeries[index] ?? null;
@@ -187,7 +228,7 @@ function buildCostOfRiskDefinitionDriverSeriesForJst(state, indexes, referenceCo
 }
 
 function buildCostOfRiskDefinitionComponentSeriesForJst(state, indexes, referenceColumns, definitionId, filters, componentCode, jstCode, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
-  if (definitionId === "f02-impairment") {
+  if (componentCode === "component:f02-impairment") {
     return buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, jstCode, periodMode);
   }
 
@@ -203,7 +244,7 @@ function buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColum
     zCode: ""
   }, jstCode);
   const periodValueSeries = resolveCostOfRiskPeriodSeries(referenceColumns, rawValueSeries, periodMode);
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+  const denominatorSeries = getCostOfRiskDefinitionDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
     const rawValue = periodValueSeries[index] ?? null;
@@ -232,7 +273,7 @@ function buildCostOfRiskF12SelectedComponentPointsForJst(state, indexes, referen
     jstCode,
     periodMode
   );
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
+  const denominatorSeries = getCostOfRiskDefinitionDenominatorSeries(state, indexes, referenceColumns, jstCode, filters);
 
   return referenceColumns.map((referenceColumn, index) => {
     const value = periodValueSeries[index] ?? null;
@@ -255,21 +296,22 @@ function buildCostOfRiskDefinitionDrivers(
   definitionId,
   filters,
   referenceIndex,
-  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  customXCodes = null,
   periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
 ) {
+  const baseDrivers = [];
   if (definitionId === "f02-impairment") {
     const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst, periodMode)[referenceIndex];
-    return [{
+    baseDrivers.push({
       code: "F02:0460",
       label: "F02 impairment contribution",
       ratioBasisPoints: point?.ratioBasisPoints ?? null,
       source: `${COST_OF_RISK_F02_TABLE_ID} / x ${COST_OF_RISK_F02_X_AXIS_CODE} / y ${COST_OF_RISK_F02_Y_AXIS_CODE}`,
       value: point?.value ?? null
-    }];
+    });
   }
 
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  const denominatorSeries = getCostOfRiskDefinitionDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, referenceIndex, periodMode);
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
   const granularDescriptors = getCostOfRiskDefinitionGranularDriverDescriptors(state, filters);
@@ -278,7 +320,7 @@ function buildCostOfRiskDefinitionDrivers(
     : buildCostOfRiskSelectionFromFilters(state, filters).points;
   const descriptorByCode = new Map(granularDescriptors.map((descriptor) => [descriptor.code, descriptor]));
 
-  return getCostOfRiskDefinitionXCodes(definitionId, customXCodes).flatMap((xCode) => selectedYCodes.map((yCode) => {
+  const componentDrivers = getCostOfRiskDefinitionXCodes(definitionId, customXCodes).flatMap((xCode) => selectedYCodes.map((yCode) => {
     const periodValueSeries = getCostOfRiskAllowanceMovementPeriodSeries(
       state,
       indexes,
@@ -300,7 +342,8 @@ function buildCostOfRiskDefinitionDrivers(
       source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / y ${yCode}`,
       value
     };
-  }))
+  }));
+  return [...baseDrivers, ...componentDrivers]
     .filter((driver) => Number.isFinite(driver.value))
     .sort((left, right) => Math.abs(right.value) - Math.abs(left.value))
     .slice(0, 6);
@@ -313,28 +356,52 @@ function buildCostOfRiskDefinitionComponents(
   definitionId,
   filters,
   referenceIndex,
-  customXCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  customXCodes = null,
   periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
 ) {
   if (definitionId === "f02-impairment") {
     const point = buildCostOfRiskF02ImpairmentPointsForJst(state, indexes, referenceColumns, filters, state.selectedJst, periodMode)[referenceIndex];
-    return [{
+    const baseComponent = {
       code: "component:f02-impairment",
+      defaultIncluded: true,
+      included: true,
       label: "F02 impairment / reversal",
       ratioBasisPoints: point?.ratioBasisPoints ?? null,
       source: `${COST_OF_RISK_F02_TABLE_ID} / x ${COST_OF_RISK_F02_X_AXIS_CODE} / y ${COST_OF_RISK_F02_Y_AXIS_CODE}`,
       value: point?.value ?? null
-    }];
+    };
+    return [baseComponent, ...buildCostOfRiskF12DefinitionComponents(
+      state, indexes, referenceColumns, definitionId, filters, referenceIndex, customXCodes, periodMode
+    )];
   }
 
-  const denominatorSeries = getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
+  return buildCostOfRiskF12DefinitionComponents(
+    state, indexes, referenceColumns, definitionId, filters, referenceIndex, customXCodes, periodMode
+  );
+}
+
+function buildCostOfRiskF12DefinitionComponents(
+  state,
+  indexes,
+  referenceColumns,
+  definitionId,
+  filters,
+  referenceIndex,
+  customXCodes,
+  periodMode
+) {
+
+  const denominatorSeries = getCostOfRiskDefinitionDenominatorSeries(state, indexes, referenceColumns, state.selectedJst, filters);
   const denominator = getCostOfRiskMovementDenominator(denominatorSeries, referenceColumns, referenceIndex, periodMode);
   const xLabels = getCostOfRiskXAxisFullLabelMap(state);
 
   const includedCodes = new Set(getCostOfRiskDefinitionXCodes(definitionId, customXCodes));
-  const componentCodes = definitionId === "f12-custom-components"
-    ? COST_OF_RISK_DEFINITION_CUSTOM_X_CODES
-    : getCostOfRiskDefinitionXCodes(definitionId, customXCodes);
+  const defaultCodes = new Set(definitionId === "f12-acpr-components"
+    ? COST_OF_RISK_DEFINITION_ACPR_X_CODES
+    : definitionId === "f12-selected-components"
+      ? COST_OF_RISK_DEFINITION_F12_X_CODES
+      : []);
+  const componentCodes = COST_OF_RISK_DEFINITION_CUSTOM_X_CODES;
 
   return componentCodes.map((xCode) => {
     const point = buildCostOfRiskF12SelectedComponentPointsForJst(
@@ -350,13 +417,16 @@ function buildCostOfRiskDefinitionComponents(
 
     return {
       code: `component:${xCode}`,
+      defaultIncluded: defaultCodes.has(xCode),
       included: includedCodes.has(xCode),
+      userAdded: includedCodes.has(xCode) && !defaultCodes.has(xCode),
+      userRemoved: !includedCodes.has(xCode) && defaultCodes.has(xCode),
       label: formatCostOfRiskDefinitionMovementLabel(xLabels.get(xCode) ?? xCode),
       ratioBasisPoints: denominator ? (value / denominator) * 10000 : null,
       source: `${COST_OF_RISK_TABLE_ID} / x ${xCode} / selected Y scope`,
       value
     };
-  }).filter((component) => Number.isFinite(component.value));
+  });
 }
 
 function normalizeCostOfRiskDefinitionCustomXCodes(customXCodes) {

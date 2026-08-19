@@ -2,6 +2,8 @@ import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  COST_OF_RISK_DEFINITION_ACPR_X_CODES,
+  COST_OF_RISK_DEFINITION_F12_X_CODES,
   DEFAULT_COST_OF_RISK_COLLATERAL_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_COUNTERPARTY_SUMMARY_CELL,
@@ -128,7 +130,6 @@ import {
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
 } from "./costOfRiskMovementTimeSeriesView.js?v=20260812-costofrisk-domain-split";
 import {
-  renderCostOfRiskDefinitionComparisonView,
   renderCostOfRiskDefinitionView
 } from "./costOfRiskDefinitionView.js?v=20260812-costofrisk-domain-split";
 import {
@@ -198,8 +199,6 @@ import {
   writeCostOfRiskUrlState
 } from "./costOfRiskUrlState.js?v=20260806-cell-selection";
 import {
-  COST_OF_RISK_COMPARISON_DEFINITION_ID,
-  COST_OF_RISK_COMPARISON_METHOD_IDS,
   COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
   COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
   COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE
@@ -241,8 +240,11 @@ let activeCostOfRiskDefinitionDisplayMode = "ratio";
 let activeCostOfRiskDefinitionId = "f12-selected-components";
 let activeCostOfRiskDefinitionDriverCode = "";
 let activeCostOfRiskDefinitionPanelTab = "components";
-let activeCostOfRiskCustomDefinitionXCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
-let activeCostOfRiskComparisonBenchmarkDefinitionId = "f12-selected-components";
+const activeCostOfRiskDefinitionXCodes = new Map([
+  ["f02-impairment", new Set()],
+  ["f12-selected-components", new Set(COST_OF_RISK_DEFINITION_F12_X_CODES)],
+  ["f12-acpr-components", new Set(COST_OF_RISK_DEFINITION_ACPR_X_CODES)]
+]);
 let activeCostOfRiskDefinitionBenchmarkMode = "benchmark";
 let activeCostOfRiskMovementDisplayMode = "ratio";
 let activeCostOfRiskStageTransferDisplayMode = "ratio";
@@ -305,20 +307,23 @@ function toggleCostOfRiskFilterSelectionTopic(kind) {
   setCostOfRiskHelpTopic(activeCostOfRiskHelpTopic === topic ? "" : topic);
 }
 
-function getActiveCostOfRiskCustomDefinitionXCodes() {
+function getActiveCostOfRiskCustomDefinitionXCodes(definitionId = activeCostOfRiskDefinitionId) {
   const allowedCodes = new Set(COST_OF_RISK_DEFINITION_CUSTOM_X_CODES);
+  const selectedCodes = activeCostOfRiskDefinitionXCodes.get(definitionId) ?? new Set();
   return COST_OF_RISK_DEFINITION_CUSTOM_X_CODES.filter((code) => (
-    allowedCodes.has(code) && activeCostOfRiskCustomDefinitionXCodes.has(code)
+    allowedCodes.has(code) && selectedCodes.has(code)
   ));
 }
 
 function toggleCostOfRiskCustomDefinitionComponent(xCode) {
   const normalizedCode = String(xCode ?? "").padStart(4, "0");
   if (!COST_OF_RISK_DEFINITION_CUSTOM_X_CODES.includes(normalizedCode)) return;
-  if (activeCostOfRiskCustomDefinitionXCodes.has(normalizedCode)) {
-    activeCostOfRiskCustomDefinitionXCodes.delete(normalizedCode);
+  const selectedCodes = activeCostOfRiskDefinitionXCodes.get(activeCostOfRiskDefinitionId) ?? new Set();
+  activeCostOfRiskDefinitionXCodes.set(activeCostOfRiskDefinitionId, selectedCodes);
+  if (selectedCodes.has(normalizedCode)) {
+    selectedCodes.delete(normalizedCode);
   } else {
-    activeCostOfRiskCustomDefinitionXCodes.add(normalizedCode);
+    selectedCodes.add(normalizedCode);
   }
 }
 
@@ -431,7 +436,9 @@ function applyCostOfRiskUrlSelection(tab, value) {
       return;
     case "cost-of-risk": {
       const [definitionId, driverCode] = value.split("|");
-      if (definitionId) activeCostOfRiskDefinitionId = definitionId;
+      if (["f02-impairment", "f12-selected-components", "f12-acpr-components"].includes(definitionId)) {
+        activeCostOfRiskDefinitionId = definitionId;
+      }
       activeCostOfRiskDefinitionDriverCode = driverCode ?? "";
       return;
     }
@@ -1015,20 +1022,10 @@ export function renderCostOfRisk(state) {
 
   if (activeCostOfRiskTab === "cost-of-risk") {
     const customDefinitionCodes = getActiveCostOfRiskCustomDefinitionXCodes();
-    const isComparisonDefinition = activeCostOfRiskDefinitionId === COST_OF_RISK_COMPARISON_DEFINITION_ID;
-    const benchmarkDefinitionId = isComparisonDefinition
-      ? activeCostOfRiskComparisonBenchmarkDefinitionId
-      : activeCostOfRiskDefinitionId;
-    const definitionModelOptions = isComparisonDefinition
-      ? {
-        includeBenchmarkSeries: true,
-        includeComponents: false,
-        includeDrivers: false
-      }
-      : getCostOfRiskDefinitionModelOptions();
+    const definitionModelOptions = getCostOfRiskDefinitionModelOptions();
     const definitionModel = getCostOfRiskDefinitionModelForId(
       state,
-      benchmarkDefinitionId,
+      activeCostOfRiskDefinitionId,
       activeCostOfRiskDefinitionDriverCode,
       customDefinitionCodes,
       definitionModelOptions
@@ -1042,9 +1039,9 @@ export function renderCostOfRisk(state) {
     // definition with the F02 benchmark toggled on) — building it is a real
     // computation on a cache miss, not just a cheap lookup.
     const needsF02Model = activeCostOfRiskDefinitionBenchmarkMode === "f02"
-      && (isComparisonDefinition || !activeCostOfRiskDefinitionDriverCode);
+      && !activeCostOfRiskDefinitionDriverCode;
     const f02Model = needsF02Model
-      ? getCostOfRiskDefinitionModelForId(state, "f02-impairment", "", customDefinitionCodes, {
+      ? getCostOfRiskDefinitionModelForId(state, "f02-impairment", "", getActiveCostOfRiskCustomDefinitionXCodes("f02-impairment"), {
         includeBenchmarkSeries: false,
         includeComponents: false,
         includeDrivers: false
@@ -1072,34 +1069,17 @@ export function renderCostOfRisk(state) {
       selectedUnit: state.selectedUnit,
       smoothingWindow: activeCostOfRiskSmoothingWindow
     };
-    if (isComparisonDefinition) {
-      const comparisonModels = COST_OF_RISK_COMPARISON_METHOD_IDS.map((definitionId) => (
-        getCostOfRiskDefinitionModelForId(state, definitionId, "", customDefinitionCodes, {
-          includeBenchmarkSeries: false,
-          includeComponents: false,
-          includeDrivers: false
-        })
-      ));
-      renderCostOfRiskDefinitionComparisonView({
-        ...definitionViewParams,
-        benchmarkModel: definitionModel,
-        comparisonBenchmarkDefinitionId: activeCostOfRiskComparisonBenchmarkDefinitionId,
-        comparisonModels,
-        onSelectComparisonDefinition: selectCostOfRiskComparisonDefinition
-      });
-    } else {
-      renderCostOfRiskDefinitionView({
-        ...definitionViewParams,
-        definitionModel,
-        panelTab: activeCostOfRiskDefinitionPanelTab,
-        emptyMessageContext: {
-          activeTab: activeCostOfRiskTab,
-          filterOptions: latestCostOfRiskFilterOptions,
-          filters: activeCostOfRiskFilters,
-          onSelectFilter: applyCostOfRiskEmptyMessageFilterSelection
-        }
-      });
-    }
+    renderCostOfRiskDefinitionView({
+      ...definitionViewParams,
+      definitionModel,
+      panelTab: activeCostOfRiskDefinitionPanelTab,
+      emptyMessageContext: {
+        activeTab: activeCostOfRiskTab,
+        filterOptions: latestCostOfRiskFilterOptions,
+        filters: activeCostOfRiskFilters,
+        onSelectFilter: applyCostOfRiskEmptyMessageFilterSelection
+      }
+    });
     setCostOfRiskDefinitionSelectedDataSummary(definitionModel, state);
     renderCostOfRiskDefinitionAuditPanel(definitionModel, { allowDefaultRender: consumeCostOfRiskDataAuditRequest() });
     leaveCostOfRiskStageTransferTab();
@@ -1794,18 +1774,6 @@ function getCostOfRiskDefinitionModelOptions() {
   };
 }
 
-function selectCostOfRiskComparisonDefinition(definitionId, referenceLabel = "") {
-  if (!COST_OF_RISK_COMPARISON_METHOD_IDS.includes(definitionId)) return;
-  activeCostOfRiskComparisonBenchmarkDefinitionId = definitionId;
-  activeCostOfRiskDefinitionDriverCode = "";
-  if (referenceLabel) {
-    activeCostOfRiskReferenceDate = referenceLabel;
-    if (activeCostOfRiskDataAuditPinned) activeCostOfRiskDataAuditRequested = true;
-  }
-  if (getLatestState()) rerenderApp(getLatestState());
-  if (referenceLabel) synchronizeCostOfRiskContextForReferenceDate(referenceLabel);
-}
-
 function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {
   if (!elements.costOfRiskAuditPanel) return;
   if (renderCostOfRiskHelpPanel()) return;
@@ -1819,18 +1787,33 @@ function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {
   article.append(createCostOfRiskAuditInfoSection("Regulatory source", [
     definitionModel.definition?.source ?? "-"
   ]));
-  article.append(createCostOfRiskAuditInfoSection("Selected components", definitionModel.definition?.components ?? [
-    "No component detail is available for this definition."
-  ]));
+  const selectedComponents = (definitionModel.components ?? [])
+    .filter((component) => component.included !== false)
+    .map((component) => component.label);
+  article.append(createCostOfRiskAuditInfoSection("Selected components", selectedComponents.length > 0
+    ? selectedComponents
+    : ["No component is currently selected."]));
+
+  const definitionAdjustments = [
+    ...(definitionModel.components ?? [])
+      .filter((component) => component.userAdded)
+      .map((component) => `Added: ${component.label}`),
+    ...(definitionModel.components ?? [])
+      .filter((component) => component.userRemoved)
+      .map((component) => `Removed: ${component.label}`)
+  ];
+  if (definitionAdjustments.length > 0) {
+    article.append(createCostOfRiskAuditInfoSection("Adjustments to the original definition", definitionAdjustments));
+  }
   article.append(createCostOfRiskAuditInfoSection("Interpretation", [
     definitionModel.definition?.id === "f02-impairment"
-      ? "This method reads the cost of risk directly from the income statement. It is compact and close to the reported P&L measure, but it does not expose the underlying allowance movement components."
-      : "This method reconstructs cost of risk from the selected F_12.01 movement columns. It is more analytical because the same definition can be decomposed by movement component, stage, counterparty and instrument when FINREP provides the detail."
+      ? "The original method reads impairment directly from the income statement. Any checked F_12.01 component is shown as an explicit user adjustment to that reported amount."
+      : "This method reconstructs cost of risk from the checked F_12.01 movement columns. The same definition can be decomposed by movement component, stage, counterparty and instrument when FINREP provides the detail."
   ]));
 
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = "Use the method selector to switch definition. The value and time chart are recomputed immediately.";
+  hint.textContent = "Use the checkboxes to test additions or removals. The value and time chart are recomputed immediately.";
   article.append(hint);
 
   replaceCostOfRiskAuditPanelContent(article);
@@ -3845,8 +3828,7 @@ function getCostOfRiskDefinitionPreviewValue(
   referenceDate = activeCostOfRiskReferenceDate,
   periodMode = activeCostOfRiskPeriodMode
 ) {
-  if (definitionId === COST_OF_RISK_COMPARISON_DEFINITION_ID) return "";
-  const customCodes = getActiveCostOfRiskCustomDefinitionXCodes();
+  const customCodes = getActiveCostOfRiskCustomDefinitionXCodes(definitionId);
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
     createCostOfRiskFilterPreviewCacheKey("definition-model", state.selectedJst, definitionId, filters, referenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(","), periodMode),
     () => buildCostOfRiskDefinitionModel(

@@ -531,9 +531,12 @@ function createCostOfRiskDefinitionDetailRow(item, selectedUnit, panelTab, { def
   const row = document.createElement("button");
   row.type = "button";
   row.className = "cost-of-risk-definition-driver";
-  const showsCustomCheckbox = panelTab === "components" && definitionId === "f12-custom-components";
+  const showsCustomCheckbox = panelTab === "components" && item.code !== "component:f02-impairment";
   row.classList.toggle("has-checkbox", showsCustomCheckbox);
   row.classList.toggle("is-active", item.code === driverCode);
+  row.classList.toggle("is-excluded", showsCustomCheckbox && item.included === false);
+  row.classList.toggle("is-user-added", showsCustomCheckbox && item.userAdded === true);
+  row.classList.toggle("is-user-removed", showsCustomCheckbox && item.userRemoved === true);
   row.dataset.costOfRiskDefinitionDriver = item.code;
   row.dataset.costOfRiskCalculationDetail = "cost-of-risk-driver";
   row.dataset.costOfRiskCalculationValue = item.code;
