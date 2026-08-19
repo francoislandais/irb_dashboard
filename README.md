@@ -88,7 +88,7 @@ Deux dossiers locaux, exclus de Git, sont utilises :
 Deposer les CSV dans `datasets/`, puis executer :
 
 ```sh
-node scripts/exportAllStandaloneApps.mjs
+python3 scripts/export_all_standalone_apps.py
 ```
 
 Pour chaque fichier `mon-fichier.csv`, le programme cree :
@@ -98,6 +98,17 @@ outputs/Agora Explorer_mon-fichier.html
 ```
 
 Les dossiers sont crees automatiquement s'ils n'existent pas. Leur contenu n'est jamais suivi par Git.
+
+La fonction peut etre appelee directement depuis un notebook Python :
+
+```python
+from scripts.export_all_standalone_apps import export_all_standalone_apps
+
+generated_files = export_all_standalone_apps()
+generated_files
+```
+
+La generation est entierement realisee en Python : le notebook n'a pas besoin d'appeler Node.js.
 
 ### Extraire directement depuis Hive vers `datasets/`
 
@@ -118,7 +129,7 @@ df = run_hive_query_to_csv(
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. Il peut ensuite être transforme en application autonome avec :
 
 ```sh
-node scripts/exportAllStandaloneApps.mjs
+python3 scripts/export_all_standalone_apps.py
 ```
 
 ## Organisation du code
