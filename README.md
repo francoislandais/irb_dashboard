@@ -52,6 +52,32 @@ Ou directement :
 http://127.0.0.1:4173/app/
 ```
 
+## Generation automatisee d'une application autonome
+
+La fonction `exportStandaloneApp` produit le meme fichier HTML autonome que le bouton d'export de l'application. Son seul argument obligatoire est le chemin du fichier CSV a integrer :
+
+```sh
+node scripts/exportStandaloneApp.mjs /chemin/vers/donnees.csv
+```
+
+Le fichier `agora-explorer-donnees.html` est cree dans le dossier courant.
+
+La fonction peut aussi etre importee depuis un autre script :
+
+```js
+import { exportStandaloneApp } from "./scripts/exportStandaloneApp.mjs";
+
+const outputPath = await exportStandaloneApp("/chemin/vers/donnees.csv");
+```
+
+Un chemin de sortie peut être fourni en option lorsque cela est necessaire :
+
+```js
+await exportStandaloneApp("/chemin/vers/donnees.csv", {
+  outputPath: "/chemin/vers/application-autonome.html"
+});
+```
+
 ## Organisation du code
 
 - `app/src/data/` contient le modele de donnees, le parsing CSV, les index et les calculs metier.
