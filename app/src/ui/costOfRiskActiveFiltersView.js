@@ -2,6 +2,7 @@ import {
   COST_OF_RISK_DEFINITION_OPTIONS,
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL,
+  COST_OF_RISK_PERIOD_MODE_ANNUALIZED,
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
@@ -25,6 +26,7 @@ export function renderCostOfRiskActiveFiltersView({
   counterpartyMenuOpen,
   balanceScopeMenuOpen,
   instrumentMenuOpen,
+  selectedJst,
   referenceDate,
   stageMenuOpen
 }) {
@@ -46,6 +48,7 @@ export function renderCostOfRiskActiveFiltersView({
     counterpartyMenuOpen,
     balanceScopeMenuOpen,
     instrumentMenuOpen,
+    selectedJst,
     referenceDate,
     summaryDisplayMenuOpen,
     nplFlowsDisplayMenuOpen,
@@ -69,6 +72,7 @@ export function renderCostOfRiskActiveFiltersView({
   ].filter(Boolean);
   const activeItems = remainingActiveItems.filter((item) => !item.dataset.costOfRiskAllFilter);
   const chips = [
+    createCostOfRiskJstChip(selectedJst),
     createCostOfRiskReferenceDateChip(referenceDate),
     balanceScopeItem,
     ...(remainingActiveItems.length > 0
@@ -169,6 +173,22 @@ export function renderCostOfRiskActiveFiltersView({
   container.classList.toggle("is-empty", activeItems.length === 0);
 }
 
+function createCostOfRiskJstChip(selectedJst) {
+  const chip = document.createElement("div");
+  chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--locked cost-of-risk-filter-chip--jst";
+  const toggle = document.createElement("button");
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.type = "button";
+  toggle.dataset.costOfRiskJstHelp = "true";
+  toggle.setAttribute("aria-label", "Change JST code");
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  label.textContent = selectedJst || "JST";
+  toggle.append(label);
+  chip.append(toggle);
+  return chip;
+}
+
 function shouldShowCostOfRiskPeriodModeChip(activeTab) {
   return activeTab === "contributions"
     || activeTab === "stage-transfers"
@@ -264,6 +284,7 @@ function createCostOfRiskDisplayModeChip({
 
 function createCostOfRiskPeriodModeChip(periodMode) {
   const isYtd = periodMode === COST_OF_RISK_PERIOD_MODE_YTD;
+  const isAnnualized = periodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED;
   const chip = document.createElement("div");
   chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--period-mode";
 
@@ -271,12 +292,11 @@ function createCostOfRiskPeriodModeChip(periodMode) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskPeriodModeToggle = "true";
-  toggle.setAttribute("aria-pressed", String(isYtd));
-  toggle.setAttribute("aria-label", "Switch period view");
+  toggle.setAttribute("aria-label", "Change period view");
 
   const value = document.createElement("span");
   value.className = "cost-of-risk-filter-chip-value";
-  value.textContent = isYtd ? "Year to date" : "Quarterly flow";
+  value.textContent = isAnnualized ? "Annualized" : isYtd ? "Year-to-date" : "Quarterly flow";
   toggle.append(value);
   chip.append(toggle);
 

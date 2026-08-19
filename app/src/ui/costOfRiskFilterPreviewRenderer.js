@@ -60,8 +60,8 @@ export function createCostOfRiskFilterPreviewRenderer({
     node.dataset.costOfRiskPreviewValue = String(preview.value ?? "");
   }
 
-  function scheduleValue(node, preview, barNode = null) {
-    node.textContent = "";
+  function scheduleValue(node, preview, barNode = null, { preserveValue = false } = {}) {
+    if (!preserveValue) node.textContent = "";
     node.setAttribute("aria-busy", "true");
     markValueNode(node, preview);
     queue.push({ barNode, node, ...preview });

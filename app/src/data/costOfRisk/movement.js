@@ -15,7 +15,6 @@ import {
 } from "./definitions.js";
 import {
   COST_OF_RISK_PERIOD_MODE_QUARTERLY,
-  COST_OF_RISK_PERIOD_MODE_YTD,
   addSeriesValues,
   buildCostOfRiskSelectionFromFilters,
   createEmptySeries,
@@ -33,6 +32,7 @@ import {
   getCostOfRiskXAxisOptionsForCodes,
   getMappingDescription,
   getPointSeriesValues,
+  isCostOfRiskCumulativePeriodMode,
   normalizeCostOfRiskPeriodMode,
   resolveCostOfRiskDenominatorCellSeries,
   resolveCostOfRiskPeriodSeries
@@ -323,7 +323,7 @@ function resolveCostOfRiskRatioDenominatorPeriodSeries(
   periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
 ) {
   if (!Array.isArray(series)) return [];
-  if (normalizeCostOfRiskPeriodMode(periodMode) !== COST_OF_RISK_PERIOD_MODE_YTD) {
+  if (!isCostOfRiskCumulativePeriodMode(periodMode)) {
     return shiftCostOfRiskSeriesToPreviousReference(series);
   }
   return series.map((_, index) => {

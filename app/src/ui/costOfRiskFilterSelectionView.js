@@ -66,6 +66,7 @@ export function renderCostOfRiskFilterSelectionPanel({
   tbody.append(createFilterSelectionRow(meta.allLabel, isAllActive, () => {
     onSelectFilter(meta.filterKey, COST_OF_RISK_FILTER_ALL);
   }, {
+    selectionValue: COST_OF_RISK_FILTER_ALL,
     preview: { kind, token: previewToken, value: COST_OF_RISK_FILTER_ALL }
   }, previewRenderer));
   options.filter((option) => option.value !== COST_OF_RISK_FILTER_ALL).forEach((option) => {
@@ -75,6 +76,7 @@ export function renderCostOfRiskFilterSelectionPanel({
       onSelectFilter(meta.filterKey, option.value);
     }, {
       ...optionState,
+      selectionValue: option.value,
       preview: { kind, token: previewToken, value: option.value }
     }, previewRenderer));
   });
@@ -105,6 +107,7 @@ function renderBalanceScopeSelectionPanel({ activeFilters, filterOptions, onSele
     tbody.append(createFilterSelectionRow(option.label, option.value === activeValue, () => {
       onSelectFilter("balanceScope", option.value);
     }, {
+      selectionValue: option.value,
       preview: { kind: "balanceScope", token: previewToken, value: option.value }
     }, previewRenderer));
   });
@@ -134,6 +137,7 @@ function renderStageSelectionPanel({ activeFilters, filterOptions, onSelectFilte
   allBody.append(createFilterSelectionRow(meta.allLabel, isAllActive, () => {
     onSelectFilter(meta.filterKey, COST_OF_RISK_FILTER_ALL);
   }, {
+    selectionValue: COST_OF_RISK_FILTER_ALL,
     preview: { kind: "stage", token: previewToken, value: COST_OF_RISK_FILTER_ALL }
   }, previewRenderer));
   allTable.append(allBody);
@@ -162,6 +166,7 @@ function createStageSelectionGroup(titleText, options, activeValue, previewToken
     tbody.append(createFilterSelectionRow(option.label, option.value === activeValue, () => {
       onSelectFilter("stage", option.value);
     }, {
+      selectionValue: option.value,
       preview: { kind: "stage", token: previewToken, value: option.value }
     }, previewRenderer));
   });
@@ -187,6 +192,9 @@ function getFilterSelectionOptionState(kind, option, activeTab) {
 export function createFilterSelectionRow(label, isActive, onSelect, options = {}, previewRenderer) {
   const row = document.createElement("tr");
   row.className = "cost-of-risk-filter-selection-row";
+  if (options.selectionValue !== undefined) {
+    row.dataset.costOfRiskSelectionValue = String(options.selectionValue);
+  }
   row.classList.toggle("is-active", isActive);
   row.classList.toggle("is-disabled", Boolean(options.disabled));
   row.classList.toggle("is-indented", Boolean(options.indent));
@@ -226,9 +234,18 @@ export function createFilterSelectionRow(label, isActive, onSelect, options = {}
     valueNode.textContent = initialValue;
     button.append(valueNode);
     if (barNode) previewRenderer.recordMagnitude(options.preview?.token, barNode, initialValue);
-    if (options.preview && snapshotValue === null) previewRenderer.scheduleValue(valueNode, options.preview, barNode);
+    if (options.preview) {
+      previewRenderer.scheduleValue(valueNode, options.preview, barNode, {
+        preserveValue: snapshotValue !== null
+      });
+    }
   }
-  if (!options.disabled) button.addEventListener("click", onSelect);
+  if (!options.disabled) button.addEventListener("click", () => {
+    if (options.selectionValue !== undefined) {
+      updateSelectionRows(row.closest(".cost-of-risk-filter-selection-panel"), options.selectionValue);
+    }
+    onSelect();
+  });
   cell.append(button);
   row.append(cell);
   return row;
@@ -251,6 +268,7 @@ function renderDefinitionSelectionPanel({ activeDefinitionId, onSelectDefinition
     const isActive = definition.id === activeDefinitionId;
     const row = document.createElement("tr");
     row.className = "cost-of-risk-filter-selection-row";
+    row.dataset.costOfRiskSelectionValue = definition.id;
     row.classList.toggle("is-active", isActive);
 
     const cell = document.createElement("td");
@@ -288,6 +306,7 @@ function renderDefinitionSelectionPanel({ activeDefinitionId, onSelectDefinition
     button.append(optionDescription, optionSource);
 
     button.addEventListener("click", () => {
+      updateSelectionRows(intro, definition.id);
       onSelectDefinition(definition.id);
     });
 
@@ -301,6 +320,14 @@ function renderDefinitionSelectionPanel({ activeDefinitionId, onSelectDefinition
 
   replaceContent(intro);
   previewRenderer.clearSnapshot();
+}
+
+function updateSelectionRows(panel, selectedValue) {
+  panel?.querySelectorAll?.("[data-cost-of-risk-selection-value]").forEach((row) => {
+    const isActive = row.dataset.costOfRiskSelectionValue === String(selectedValue);
+    row.classList.toggle("is-active", isActive);
+    row.querySelector("[role='option']")?.setAttribute("aria-selected", String(isActive));
+  });
 }
 
 function getFilterSelectionPanelTitle(kind) {

@@ -8,6 +8,7 @@ import {
   DEFAULT_COST_OF_RISK_STAGE_RATIO_CELL,
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL,
   COST_OF_RISK_F12_RECONCILIATION_X_CODES,
+  COST_OF_RISK_PERIOD_MODE_ANNUALIZED,
   COST_OF_RISK_PERIOD_MODE_QUARTERLY,
   COST_OF_RISK_PERIOD_MODE_YTD,
   COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE,
@@ -275,6 +276,7 @@ let didCostOfRiskAuditPanelTabJustChange = false;
 let activeCostOfRiskHelpTopic = "";
 let activeCostOfRiskSelectedDataSummaryNode = null;
 let activeCostOfRiskDataAuditRequested = false;
+let activeCostOfRiskDataAuditPinned = false;
 let activeCostOfRiskMovementAuditXCode = "";
 let activeCostOfRiskWaterfallTitleText = "F12 Contribution Breakdown";
 let costOfRiskStageTransferChart = null;
@@ -332,11 +334,16 @@ function setCostOfRiskGlobalDisplayMode(mode) {
   closeCostOfRiskFilterMenus();
 }
 
-function toggleCostOfRiskPeriodMode() {
-  activeCostOfRiskPeriodMode = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? COST_OF_RISK_PERIOD_MODE_QUARTERLY
-    : COST_OF_RISK_PERIOD_MODE_YTD;
+function selectCostOfRiskPeriodMode(periodMode) {
+  const nextMode = periodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED
+    ? COST_OF_RISK_PERIOD_MODE_ANNUALIZED
+    : periodMode === COST_OF_RISK_PERIOD_MODE_YTD
+      ? COST_OF_RISK_PERIOD_MODE_YTD
+      : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
+  if (nextMode === activeCostOfRiskPeriodMode) return;
+  activeCostOfRiskPeriodMode = nextMode;
   closeCostOfRiskFilterMenus();
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 function pulseCostOfRiskContextPanel() {
@@ -373,9 +380,11 @@ function applyCostOfRiskUrlState() {
   const urlState = readCostOfRiskUrlState();
   if (urlState.tab) activeCostOfRiskTab = urlState.tab;
   if (urlState.referenceDate) activeCostOfRiskReferenceDate = urlState.referenceDate;
-  activeCostOfRiskPeriodMode = urlState.periodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? COST_OF_RISK_PERIOD_MODE_YTD
-    : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
+  activeCostOfRiskPeriodMode = urlState.periodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED
+    ? COST_OF_RISK_PERIOD_MODE_ANNUALIZED
+    : urlState.periodMode === COST_OF_RISK_PERIOD_MODE_YTD
+      ? COST_OF_RISK_PERIOD_MODE_YTD
+      : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
   if (urlState.summaryBreakdown) activeCostOfRiskSummaryBreakdown = urlState.summaryBreakdown;
   if (urlState.selection) applyCostOfRiskUrlSelection(activeCostOfRiskTab, urlState.selection);
 }
@@ -492,6 +501,17 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabs?.addEventListener("scroll", updateCostOfRiskTabsFade, { passive: true });
   window.addEventListener("resize", updateCostOfRiskTabsFade);
   elements.costOfRiskActiveFilters?.addEventListener("click", (event) => {
+    const jstHelp = event.target.closest?.("[data-cost-of-risk-jst-help]");
+    if (jstHelp) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("jst-code");
+      pulseCostOfRiskContextPanel();
+      rerenderApp(actions.getState());
+      return;
+    }
+
     const referenceDateHelp = event.target.closest?.("[data-cost-of-risk-reference-date-help]");
     if (referenceDateHelp) {
       event.preventDefault();
@@ -553,7 +573,9 @@ export function wireCostOfRiskUi(actions, rerender) {
     if (periodModeToggle) {
       event.preventDefault();
       event.stopPropagation();
-      toggleCostOfRiskPeriodMode();
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("period-mode");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -786,6 +808,7 @@ export function wireCostOfRiskUi(actions, rerender) {
     button.addEventListener("click", () => {
       const nextTab = button.dataset.costOfRiskTab || "summary";
       if (COST_OF_RISK_DISABLED_TABS.has(nextTab)) return;
+      if (nextTab !== activeCostOfRiskTab) activeCostOfRiskDataAuditPinned = false;
       activeCostOfRiskTab = nextTab;
       closeCostOfRiskFilterMenus();
       rerenderApp(actions.getState());
@@ -1775,8 +1798,12 @@ function selectCostOfRiskComparisonDefinition(definitionId, referenceLabel = "")
   if (!COST_OF_RISK_COMPARISON_METHOD_IDS.includes(definitionId)) return;
   activeCostOfRiskComparisonBenchmarkDefinitionId = definitionId;
   activeCostOfRiskDefinitionDriverCode = "";
-  if (referenceLabel) activeCostOfRiskReferenceDate = referenceLabel;
+  if (referenceLabel) {
+    activeCostOfRiskReferenceDate = referenceLabel;
+    if (activeCostOfRiskDataAuditPinned) activeCostOfRiskDataAuditRequested = true;
+  }
   if (getLatestState()) rerenderApp(getLatestState());
+  if (referenceLabel) synchronizeCostOfRiskContextForReferenceDate(referenceLabel);
 }
 
 function renderCostOfRiskDefinitionAuditPanel(definitionModel, options = {}) {
@@ -1978,6 +2005,7 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 
 function renderCostOfRiskActiveFilters(filterOptions) {
   const displayedFilters = activeCostOfRiskFilters;
+  const state = getLatestState();
   renderCostOfRiskActiveFiltersView({
     activeTab: activeCostOfRiskTab,
     balanceScopeMenuOpen: isCostOfRiskFilterSelectionTopicOpen("balanceScope"),
@@ -1993,6 +2021,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     nplFlowsDisplayMenuOpen: activeCostOfRiskNplFlowsDisplayMenuOpen,
     periodMode: activeCostOfRiskPeriodMode,
     referenceDate: activeCostOfRiskReferenceDate,
+    selectedJst: state?.selectedJst ?? "",
     stageMenuOpen: isCostOfRiskFilterSelectionTopicOpen("stage"),
     summaryDisplayMenuOpen: activeCostOfRiskSummaryDisplayMenuOpen,
     stageTransferDisplayMenuOpen: activeCostOfRiskStageTransferDisplayMenuOpen
@@ -2010,21 +2039,19 @@ function getActiveCostOfRiskDisplayMode() {
 }
 
 function getActiveCostOfRiskPeriodLabel() {
-  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? "Year to date"
-    : "Quarterly flow";
+  if (activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED) return "Annualized";
+  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD ? "Year to date" : "Quarterly flow";
 }
 
 function getActiveCostOfRiskPeriodAmountPhrase() {
-  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? "year-to-date amount"
-    : "quarterly flow";
+  if (activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED) return "annualized year-to-date amount";
+  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD ? "year-to-date amount" : "quarterly flow";
 }
 
 function getActiveCostOfRiskDenominatorPeriodPhrase() {
-  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? "first-quarter"
-    : "previous-quarter";
+  return activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_QUARTERLY
+    ? "previous-quarter"
+    : "first-quarter";
 }
 
 function hasOpenCostOfRiskFilterMenu() {
@@ -2912,7 +2939,7 @@ function showCostOfRiskCalculationDetailsMenu(event, action) {
 }
 
 function showCostOfRiskCalculationDetails(scope, value) {
-  activeCostOfRiskDataAuditRequested = true;
+  requestCostOfRiskDataAudit();
   hideCostOfRiskAuditIntro();
   clearCostOfRiskHelpTopic();
 
@@ -2970,6 +2997,11 @@ function consumeCostOfRiskDataAuditRequest() {
   return requested;
 }
 
+function requestCostOfRiskDataAudit() {
+  activeCostOfRiskDataAuditRequested = true;
+  activeCostOfRiskDataAuditPinned = true;
+}
+
 function isCostOfRiskAuditIntroVisible() {
   return activeCostOfRiskAuditIntroTab === activeCostOfRiskTab
     && Boolean(getCostOfRiskAuditPanelIntroContent(activeCostOfRiskTab));
@@ -2989,7 +3021,10 @@ function clearCostOfRiskHelpTopic() {
 
 function setCostOfRiskHelpTopic(topic) {
   const nextTopic = topic || "";
-  if (nextTopic) activeCostOfRiskDataAuditRequested = false;
+  if (nextTopic) {
+    activeCostOfRiskDataAuditRequested = false;
+    activeCostOfRiskDataAuditPinned = false;
+  }
   activeCostOfRiskHelpTopic = nextTopic;
   recordCostOfRiskHelpTopic(nextTopic);
 }
@@ -3056,8 +3091,18 @@ function renderCostOfRiskAuditPanelIntro() {
 function renderCostOfRiskHelpPanel() {
   if (!elements.costOfRiskAuditPanel) return false;
 
+  if (activeCostOfRiskHelpTopic === "jst-code") {
+    renderCostOfRiskJstSelectionPanel();
+    return true;
+  }
+
   if (activeCostOfRiskHelpTopic === "reference-date") {
     renderCostOfRiskReferenceDateSelectionPanel();
+    return true;
+  }
+
+  if (activeCostOfRiskHelpTopic === "period-mode") {
+    renderCostOfRiskPeriodModeSelectionPanel();
     return true;
   }
 
@@ -3077,6 +3122,18 @@ function renderCostOfRiskHelpPanel() {
       renderCostOfRiskStageDecompositionUnavailablePanel();
       return true;
     }
+    const state = getLatestState();
+    const panelKey = createCostOfRiskFilterSelectionPanelKey(state, filterName);
+    const existingPanel = elements.costOfRiskAuditPanelDetail
+      ?.querySelector?.("[data-cost-of-risk-filter-panel-key]");
+    if (existingPanel?.dataset.costOfRiskFilterPanelKey === panelKey) {
+      updateCostOfRiskStablePanelSelection(
+        existingPanel,
+        getCostOfRiskFilterSelectionValue(filterName, activeCostOfRiskFilters, activeCostOfRiskDefinitionId)
+      );
+      costOfRiskFilterPreviewRenderer.clearSnapshot();
+      return true;
+    }
     renderCostOfRiskFilterSelectionPanel({
       activeDefinitionId: activeCostOfRiskDefinitionId,
       activeFilters: activeCostOfRiskFilters,
@@ -3093,6 +3150,9 @@ function renderCostOfRiskHelpPanel() {
       renderPlaceholder: renderCostOfRiskAuditPanelPlaceholder,
       replaceContent: replaceCostOfRiskAuditPanelContent
     });
+    const renderedPanel = elements.costOfRiskAuditPanelDetail
+      ?.querySelector?.(".cost-of-risk-filter-selection-panel");
+    if (renderedPanel) renderedPanel.dataset.costOfRiskFilterPanelKey = panelKey;
     return true;
   }
 
@@ -3149,9 +3209,11 @@ function renderCostOfRiskStageTransferDenominatorPanel() {
   const referenceLabel = formatReferenceQuarterLabel(detail.referenceDate || activeCostOfRiskReferenceDate);
   const valueReferenceLabel = formatReferenceQuarterLabel(detail.valueReferenceDate);
   const modeLabel = getActiveCostOfRiskPeriodLabel();
-  const ruleText = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? "Year to date uses the first available reference of the same calendar year, so the cumulative flow is divided by a stable opening exposure base."
-    : "Quarterly flow uses the previous reporting reference, so the quarterly movement is divided by the opening exposure base of that quarter.";
+  const ruleText = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED
+    ? "Annualized scales the year-to-date flow to a full-year equivalent and divides it by the same stable opening exposure base used for year-to-date."
+    : activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
+      ? "Year to date uses the first available reference of the same calendar year, so the cumulative flow is divided by a stable opening exposure base."
+      : "Quarterly flow uses the previous reporting reference, so the quarterly movement is divided by the opening exposure base of that quarter.";
 
   const article = createCostOfRiskAuditIntroHeader({
     eyebrow: "Relative Transfer",
@@ -3183,18 +3245,27 @@ function renderCostOfRiskStageTransferDenominatorPanel() {
 
   const hint = document.createElement("p");
   hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-    ? "Switching back to Quarterly flow will use the previous-quarter denominator instead."
-    : "Switching to Year to date will use the first-quarter denominator instead.";
+  hint.textContent = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_QUARTERLY
+    ? "Year-to-date and Annualized use the first-quarter denominator instead."
+    : "Quarterly flow uses the previous-quarter denominator instead.";
   article.append(hint);
 
   replaceCostOfRiskAuditPanelContent(article);
 }
 
 function renderCostOfRiskReferenceDateSelectionPanel() {
-  const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
   const state = getLatestState();
   const referenceColumns = getReferenceColumns(state?.columns ?? []);
+  const panelKey = createCostOfRiskReferenceDatePanelKey(state, referenceColumns);
+  const existingPanel = elements.costOfRiskAuditPanelDetail
+    ?.querySelector?.("[data-cost-of-risk-reference-panel-key]");
+  if (existingPanel?.dataset.costOfRiskReferencePanelKey === panelKey) {
+    updateCostOfRiskStablePanelSelection(existingPanel, activeCostOfRiskReferenceDate);
+    costOfRiskFilterPreviewRenderer.clearSnapshot();
+    return;
+  }
+
+  const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
 
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-reference-date-panel",
@@ -3202,6 +3273,7 @@ function renderCostOfRiskReferenceDateSelectionPanel() {
     lead: referenceColumns.length > 0 ? "" : "No reference date is available in the loaded dataset.",
     title: "Reference quarter"
   });
+  intro.dataset.costOfRiskReferencePanelKey = panelKey;
 
   if (referenceColumns.length > 0) {
     const table = document.createElement("table");
@@ -3210,8 +3282,10 @@ function renderCostOfRiskReferenceDateSelectionPanel() {
     [...referenceColumns].reverse().forEach((column) => {
       const isActive = column.label === activeCostOfRiskReferenceDate;
       tbody.append(createCostOfRiskFilterSelectionRow(formatReferenceQuarterLabel(column.label), isActive, () => {
+        updateCostOfRiskStablePanelSelection(intro, column.label);
         selectCostOfRiskReferenceDate(column.label);
       }, {
+        selectionValue: column.label,
         preview: { kind: "referenceDate", token: previewToken, value: column.label }
       }, costOfRiskFilterPreviewRenderer));
     });
@@ -3221,6 +3295,243 @@ function renderCostOfRiskReferenceDateSelectionPanel() {
 
   replaceCostOfRiskAuditPanelContent(intro);
   costOfRiskFilterPreviewRenderer.clearSnapshot();
+}
+
+function createCostOfRiskReferenceDatePanelKey(state, referenceColumns) {
+  return createCostOfRiskStableSelectionPanelKey(state, "reference-date", {
+    options: referenceColumns.map((column) => column.label),
+    referenceDate: ""
+  });
+}
+
+function renderCostOfRiskPeriodModeSelectionPanel() {
+  const state = getLatestState();
+  const options = [
+    { label: "Quarterly flow", value: COST_OF_RISK_PERIOD_MODE_QUARTERLY },
+    { label: "Year-to-date", value: COST_OF_RISK_PERIOD_MODE_YTD },
+    { label: "Annualized", value: COST_OF_RISK_PERIOD_MODE_ANNUALIZED }
+  ];
+  const panelKey = createCostOfRiskStableSelectionPanelKey(state, "period-mode", {
+    options,
+    referenceDate: activeCostOfRiskReferenceDate
+  });
+  const existingPanel = elements.costOfRiskAuditPanelDetail
+    ?.querySelector?.("[data-cost-of-risk-period-panel-key]");
+  if (existingPanel?.dataset.costOfRiskPeriodPanelKey === panelKey) {
+    updateCostOfRiskStablePanelSelection(existingPanel, activeCostOfRiskPeriodMode);
+    costOfRiskFilterPreviewRenderer.clearSnapshot();
+    return;
+  }
+
+  const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
+    eyebrow: "Breakdown of selection by :",
+    title: "Period view"
+  });
+  intro.dataset.costOfRiskPeriodPanelKey = panelKey;
+
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-filter-selection-table";
+  const tbody = document.createElement("tbody");
+  options.forEach((option) => {
+    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === activeCostOfRiskPeriodMode, () => {
+      updateCostOfRiskStablePanelSelection(intro, option.value);
+      selectCostOfRiskPeriodMode(option.value);
+    }, {
+      selectionValue: option.value,
+      preview: { kind: "periodMode", token: previewToken, value: option.value }
+    }, costOfRiskFilterPreviewRenderer));
+  });
+  table.append(tbody);
+  intro.append(table);
+
+  replaceCostOfRiskAuditPanelContent(intro);
+  costOfRiskFilterPreviewRenderer.clearSnapshot();
+}
+
+function renderCostOfRiskJstSelectionPanel() {
+  const state = getLatestState();
+  const jstCodes = state?.jstOptions ?? [];
+  const panelKey = createCostOfRiskJstSelectionPanelKey(state, jstCodes);
+  const existingPanel = elements.costOfRiskAuditPanelDetail
+    ?.querySelector?.("[data-cost-of-risk-jst-panel-key]");
+  if (existingPanel?.dataset.costOfRiskJstPanelKey === panelKey) {
+    updateCostOfRiskJstPanelSelection(existingPanel, state?.selectedJst);
+    return;
+  }
+
+  const previewToken = costOfRiskFilterPreviewRenderer.resetQueue();
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-reference-date-panel",
+    eyebrow: "Breakdown of selection by :",
+    lead: jstCodes.length > 0 ? "" : "No JST code is available in the loaded dataset.",
+    title: "JST code"
+  });
+  intro.dataset.costOfRiskJstPanelKey = panelKey;
+
+  if (jstCodes.length > 0) {
+    const table = document.createElement("table");
+    table.className = "cost-of-risk-filter-selection-table cost-of-risk-reference-date-table";
+    const tbody = document.createElement("tbody");
+    jstCodes.forEach((jstCode) => {
+      const row = createCostOfRiskFilterSelectionRow(jstCode, jstCode === state.selectedJst, () => {
+        updateCostOfRiskJstPanelSelection(intro, jstCode);
+        updateSelectedJst(jstCode);
+      }, {
+        preview: { kind: "jst", token: previewToken, value: jstCode }
+      }, costOfRiskFilterPreviewRenderer);
+      row.dataset.costOfRiskJstCode = jstCode;
+      tbody.append(row);
+    });
+    table.append(tbody);
+    intro.append(table);
+  }
+
+  replaceCostOfRiskAuditPanelContent(intro);
+  costOfRiskFilterPreviewRenderer.clearSnapshot();
+}
+
+function createCostOfRiskJstSelectionPanelKey(state, jstCodes) {
+  return createCostOfRiskFilterPreviewCacheKey(
+    "jst-panel",
+    state?.activeDatasetId,
+    state?.selectedUnit,
+    state?.rows?.length ?? 0,
+    jstCodes,
+    activeCostOfRiskTab,
+    activeCostOfRiskReferenceDate,
+    activeCostOfRiskFilters,
+    activeCostOfRiskStageSummaryCellKey,
+    activeCostOfRiskCounterpartySummaryCellKey,
+    activeCostOfRiskStageRatioCellKey,
+    activeCostOfRiskCoverageRatioCellKey,
+    activeCostOfRiskCollateralRatioCellKey,
+    activeCostOfRiskMovementAuditXCode,
+    activeCostOfRiskXAxisCode,
+    activeCostOfRiskStageTransferFlowKey,
+    activeCostOfRiskNplFlowKey,
+    activeCostOfRiskGeographyCountryMode,
+    [...activeCostOfRiskGeographyCountryCodes],
+    activeCostOfRiskGeographyCellKey,
+    activeCostOfRiskDefinitionId,
+    activeCostOfRiskDefinitionDriverCode,
+    activeCostOfRiskDefinitionDisplayMode,
+    activeCostOfRiskMovementDisplayMode,
+    activeCostOfRiskStageTransferDisplayMode,
+    activeCostOfRiskNplFlowsDisplayMode,
+    activeCostOfRiskSummaryDisplayMode,
+    activeCostOfRiskPeriodMode
+  );
+}
+
+function updateCostOfRiskJstPanelSelection(panel, selectedJst) {
+  panel?.querySelectorAll?.("[data-cost-of-risk-jst-code]").forEach((row) => {
+    const isActive = row.dataset.costOfRiskJstCode === selectedJst;
+    row.classList.toggle("is-active", isActive);
+    row.querySelector("[role='option']")?.setAttribute("aria-selected", String(isActive));
+  });
+}
+
+function createCostOfRiskFilterSelectionPanelKey(state, kind) {
+  const filterKeyByKind = {
+    balanceScope: "balanceScope",
+    counterparty: "counterparty",
+    instrument: "asset",
+    stage: "stage"
+  };
+  const filterKey = filterKeyByKind[kind];
+  const filters = { ...activeCostOfRiskFilters };
+  if (filterKey) delete filters[filterKey];
+  return createCostOfRiskStableSelectionPanelKey(state, `filter:${kind}`, {
+    filters,
+    options: latestCostOfRiskFilterOptions,
+    referenceDate: activeCostOfRiskReferenceDate
+  });
+}
+
+function createCostOfRiskStableSelectionPanelKey(state, scope, {
+  filters = activeCostOfRiskFilters,
+  options = [],
+  referenceDate = activeCostOfRiskReferenceDate
+} = {}) {
+  return createCostOfRiskFilterPreviewCacheKey(
+    "stable-selection-panel",
+    scope,
+    state?.activeDatasetId,
+    state?.selectedJst,
+    state?.selectedUnit,
+    state?.rows?.length ?? 0,
+    options,
+    activeCostOfRiskTab,
+    referenceDate,
+    filters,
+    getCostOfRiskStablePanelMetricState(scope)
+  );
+}
+
+function getCostOfRiskStablePanelMetricState(scope) {
+  const filterKind = scope.startsWith("filter:") ? scope.slice("filter:".length) : "";
+  const periodMode = scope === "period-mode" ? "" : activeCostOfRiskPeriodMode;
+  if (activeCostOfRiskTab === "summary") {
+    return {
+      breakdown: activeCostOfRiskSummaryBreakdown,
+      counterpartyCell: filterKind === "counterparty"
+        ? getCostOfRiskSummaryCellColumnKey(activeCostOfRiskCounterpartySummaryCellKey)
+        : activeCostOfRiskCounterpartySummaryCellKey,
+      displayMode: activeCostOfRiskSummaryDisplayMode,
+      stageCell: filterKind === "stage"
+        ? getCostOfRiskSummaryCellColumnKey(activeCostOfRiskStageSummaryCellKey)
+        : activeCostOfRiskStageSummaryCellKey
+    };
+  }
+  if (activeCostOfRiskTab === "stage-ratio") return { cell: activeCostOfRiskStageRatioCellKey };
+  if (activeCostOfRiskTab === "coverage-ratio") return { cell: activeCostOfRiskCoverageRatioCellKey };
+  if (activeCostOfRiskTab === "collateral-ratio") return { cell: activeCostOfRiskCollateralRatioCellKey };
+  if (activeCostOfRiskTab === "contributions") return {
+    displayMode: activeCostOfRiskMovementDisplayMode,
+    periodMode,
+    xCode: activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode
+  };
+  if (activeCostOfRiskTab === "stage-transfers") return {
+    displayMode: activeCostOfRiskStageTransferDisplayMode,
+    flowKey: activeCostOfRiskStageTransferFlowKey,
+    periodMode
+  };
+  if (activeCostOfRiskTab === "npl-flows") return {
+    displayMode: activeCostOfRiskNplFlowsDisplayMode,
+    flowKey: activeCostOfRiskNplFlowKey
+  };
+  if (activeCostOfRiskTab === "geography") return {
+    cell: activeCostOfRiskGeographyCellKey,
+    countryCodes: [...activeCostOfRiskGeographyCountryCodes],
+    countryMode: activeCostOfRiskGeographyCountryMode,
+    displayMode: activeCostOfRiskGeographyDisplayMode
+  };
+  if (activeCostOfRiskTab === "cost-of-risk") return {
+    definitionId: filterKind === "definition" ? "" : activeCostOfRiskDefinitionId,
+    displayMode: activeCostOfRiskDefinitionDisplayMode,
+    driverCode: activeCostOfRiskDefinitionDriverCode,
+    periodMode
+  };
+  return {};
+}
+
+function getCostOfRiskFilterSelectionValue(kind, filters, definitionId) {
+  if (kind === "definition") return definitionId;
+  if (kind === "instrument") return filters.asset || COST_OF_RISK_FILTER_ALL;
+  if (kind === "counterparty") return filters.counterparty || COST_OF_RISK_FILTER_ALL;
+  if (kind === "stage") return filters.stage || COST_OF_RISK_FILTER_ALL;
+  if (kind === "balanceScope") return filters.balanceScope || COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE;
+  return "";
+}
+
+function updateCostOfRiskStablePanelSelection(panel, selectedValue) {
+  panel?.querySelectorAll?.("[data-cost-of-risk-selection-value]").forEach((row) => {
+    const isActive = row.dataset.costOfRiskSelectionValue === selectedValue;
+    row.classList.toggle("is-active", isActive);
+    row.querySelector("[role='option']")?.setAttribute("aria-selected", String(isActive));
+  });
 }
 
 function renderCostOfRiskPeerSelectionPanel() {
@@ -3246,7 +3557,7 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
     createCostOfRiskFilterPreviewCacheKey(
       "value",
       state.activeDatasetId,
-      state.selectedJst,
+      kind === "jst" ? "" : state.selectedJst,
       state.selectedUnit,
       state.rows?.length ?? 0,
       (state.peerJstCodes ?? []).join(","),
@@ -3274,11 +3585,15 @@ function getCostOfRiskFilterSelectionPreviewValue(kind, value) {
       activeCostOfRiskStageTransferDisplayMode,
       activeCostOfRiskNplFlowsDisplayMode,
       activeCostOfRiskSummaryDisplayMode,
-      activeCostOfRiskPeriodMode
+      kind === "periodMode" ? "" : activeCostOfRiskPeriodMode
     ),
     () => {
       try {
+        if (kind === "jst") {
+          return getCostOfRiskReferenceDatePreviewValue({ ...state, selectedJst: value }, activeCostOfRiskReferenceDate);
+        }
         if (kind === "referenceDate") return getCostOfRiskReferenceDatePreviewValue(state, value);
+        if (kind === "periodMode") return getCostOfRiskPeriodModePreviewValue(state, value);
         const filters = getCostOfRiskPreviewFiltersForSelection(kind, value);
         if (kind === "definition") return formatCostOfRiskFilterPreviewValue(getCostOfRiskDefinitionPreviewValue(state, value));
         if (activeCostOfRiskTab === "summary") return formatCostOfRiskFilterPreviewValue(getCostOfRiskSummaryPreviewValue(state, filters, kind, value));
@@ -3319,6 +3634,32 @@ function formatCostOfRiskFilterPreviewValue(value) {
     .trim();
 }
 
+function getCostOfRiskPeriodModePreviewValue(state, periodMode) {
+  const filters = activeCostOfRiskFilters;
+  if (activeCostOfRiskTab === "contributions") {
+    return formatCostOfRiskFilterPreviewValue(
+      getCostOfRiskMovementPreviewValue(state, filters, activeCostOfRiskReferenceDate, periodMode)
+    );
+  }
+  if (activeCostOfRiskTab === "stage-transfers") {
+    return formatCostOfRiskFilterPreviewValue(
+      getCostOfRiskStageTransferPreviewValue(state, filters, "", "", activeCostOfRiskReferenceDate, periodMode)
+    );
+  }
+  if (activeCostOfRiskTab === "cost-of-risk") {
+    return formatCostOfRiskFilterPreviewValue(
+      getCostOfRiskDefinitionPreviewValue(
+        state,
+        activeCostOfRiskDefinitionId,
+        filters,
+        activeCostOfRiskReferenceDate,
+        periodMode
+      )
+    );
+  }
+  return "";
+}
+
 function getCostOfRiskPreviewFiltersForSelection(kind, value) {
   const filters = { ...activeCostOfRiskFilters };
   if (kind === "instrument") filters.asset = value;
@@ -3337,7 +3678,7 @@ function getCostOfRiskSummaryPreviewValue(state, filters, kind = "", value = "",
 
 function getCostOfRiskSummaryFilteredPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("summary-model", filters, referenceDate, activeCostOfRiskStageSummaryCellKey),
+    createCostOfRiskFilterPreviewCacheKey("summary-model", state.selectedJst, filters, referenceDate, activeCostOfRiskStageSummaryCellKey),
     () => buildCostOfRiskStageSummaryModel(state, filters, referenceDate, activeCostOfRiskStageSummaryCellKey, {
       includeCounterpartyRows: Boolean(activeCostOfRiskStageSummaryCellKey?.startsWith("counterparty:"))
     })
@@ -3360,7 +3701,7 @@ function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value, reference
   if (!metric || !cellKind) return "";
 
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("summary-dimension-model", activeCostOfRiskFilters, referenceDate, activeCostOfRiskStageSummaryCellKey),
+    createCostOfRiskFilterPreviewCacheKey("summary-dimension-model", state.selectedJst, activeCostOfRiskFilters, referenceDate, activeCostOfRiskStageSummaryCellKey),
     () => buildCostOfRiskStageSummaryModel(
       state,
       activeCostOfRiskFilters,
@@ -3382,7 +3723,7 @@ function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value, reference
 
 function getCostOfRiskRatioPreviewValue(state, filters, config, referenceDate = activeCostOfRiskReferenceDate) {
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("ratio-model", config.builder.name, filters, referenceDate, config.cellKey),
+    createCostOfRiskFilterPreviewCacheKey("ratio-model", state.selectedJst, config.builder.name, filters, referenceDate, config.cellKey),
     () => config.builder(state, filters, referenceDate, config.cellKey)
   );
   const selectedCell = model.selectedCell;
@@ -3392,14 +3733,19 @@ function getCostOfRiskRatioPreviewValue(state, filters, config, referenceDate = 
   return formatCostOfRiskRatioSelectedCellValue(value, selectedCell.metric, state.selectedUnit, config.formatter);
 }
 
-function getCostOfRiskMovementPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
+function getCostOfRiskMovementPreviewValue(
+  state,
+  filters,
+  referenceDate = activeCostOfRiskReferenceDate,
+  periodMode = activeCostOfRiskPeriodMode
+) {
   const audit = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("movement-audit", filters, activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode, activeCostOfRiskPeriodMode),
+    createCostOfRiskFilterPreviewCacheKey("movement-audit", state.selectedJst, filters, activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode, periodMode),
     () => buildCostOfRiskMovementContributionAudit(
       state,
       filters,
       activeCostOfRiskMovementAuditXCode || activeCostOfRiskXAxisCode,
-      activeCostOfRiskPeriodMode
+      periodMode
     )
   );
   const amount = getCostOfRiskAuditRowValue(audit, (row) => row.label === "Displayed contribution", referenceDate);
@@ -3412,7 +3758,14 @@ function getCostOfRiskMovementPreviewValue(state, filters, referenceDate = activ
   );
 }
 
-function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value = "", referenceDate = activeCostOfRiskReferenceDate) {
+function getCostOfRiskStageTransferPreviewValue(
+  state,
+  filters,
+  kind = "",
+  value = "",
+  referenceDate = activeCostOfRiskReferenceDate,
+  periodMode = activeCostOfRiskPeriodMode
+) {
   let flowKey = activeCostOfRiskStageTransferFlowKey;
   if (kind === "stage") {
     const stageFlowKey = getCostOfRiskStageTransferFlowKeyForStageFilter(value);
@@ -3428,13 +3781,13 @@ function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value
   }
 
   const audit = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("stage-transfer-audit", filters, referenceDate, flowKey, activeCostOfRiskPeriodMode),
+    createCostOfRiskFilterPreviewCacheKey("stage-transfer-audit", state.selectedJst, filters, referenceDate, flowKey, periodMode),
     () => buildCostOfRiskStageTransferPanelAudit(
       state,
       filters,
       flowKey,
       referenceDate,
-      activeCostOfRiskPeriodMode
+      periodMode
     )
   );
   const isStageBox = flowKey.startsWith("stagebox:");
@@ -3446,7 +3799,7 @@ function getCostOfRiskStageTransferPreviewValue(state, filters, kind = "", value
 
 function getCostOfRiskNplFlowsPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("npl-flows-model", filters, referenceDate, activeCostOfRiskNplFlowKey),
+    createCostOfRiskFilterPreviewCacheKey("npl-flows-model", state.selectedJst, filters, referenceDate, activeCostOfRiskNplFlowKey),
     () => buildCostOfRiskNplFlowsModel(state, filters, referenceDate, activeCostOfRiskNplFlowKey)
   );
   if (model?.status) return "";
@@ -3466,6 +3819,7 @@ function getCostOfRiskGeographyPreviewValue(state, filters, referenceDate = acti
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
     createCostOfRiskFilterPreviewCacheKey(
       "geography-model",
+      state.selectedJst,
       filters,
       referenceDate,
       activeCostOfRiskGeographyCountryMode,
@@ -3484,11 +3838,17 @@ function getCostOfRiskGeographyPreviewValue(state, filters, referenceDate = acti
   return formatCostOfRiskGeographyCellValue(value, model.selectedCell.metric, state.selectedUnit);
 }
 
-function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = activeCostOfRiskFilters, referenceDate = activeCostOfRiskReferenceDate) {
+function getCostOfRiskDefinitionPreviewValue(
+  state,
+  definitionId,
+  filters = activeCostOfRiskFilters,
+  referenceDate = activeCostOfRiskReferenceDate,
+  periodMode = activeCostOfRiskPeriodMode
+) {
   if (definitionId === COST_OF_RISK_COMPARISON_DEFINITION_ID) return "";
   const customCodes = getActiveCostOfRiskCustomDefinitionXCodes();
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("definition-model", definitionId, filters, referenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(","), activeCostOfRiskPeriodMode),
+    createCostOfRiskFilterPreviewCacheKey("definition-model", state.selectedJst, definitionId, filters, referenceDate, activeCostOfRiskDefinitionDriverCode, customCodes.join(","), periodMode),
     () => buildCostOfRiskDefinitionModel(
       state,
       definitionId,
@@ -3500,7 +3860,7 @@ function getCostOfRiskDefinitionPreviewValue(state, definitionId, filters = acti
         includeBenchmarkSeries: false,
         includeComponents: Boolean(activeCostOfRiskDefinitionDriverCode?.startsWith("component:")),
         includeDrivers: Boolean(activeCostOfRiskDefinitionDriverCode && !activeCostOfRiskDefinitionDriverCode.startsWith("component:")),
-        periodMode: activeCostOfRiskPeriodMode
+        periodMode
       }
     )
   );
@@ -3549,6 +3909,7 @@ function getCostOfRiskReferenceDatePreviewValue(state, referenceDate) {
   if (activeCostOfRiskTab === "contributions") return formatCostOfRiskFilterPreviewValue(getCostOfRiskMovementPreviewValue(state, filters, referenceDate));
   if (activeCostOfRiskTab === "stage-transfers") return formatCostOfRiskFilterPreviewValue(getCostOfRiskStageTransferPreviewValue(state, filters, "", "", referenceDate));
   if (activeCostOfRiskTab === "npl-flows") return formatCostOfRiskFilterPreviewValue(getCostOfRiskNplFlowsPreviewValue(state, filters, referenceDate));
+  if (activeCostOfRiskTab === "geography") return formatCostOfRiskFilterPreviewValue(getCostOfRiskGeographyPreviewValue(state, filters, referenceDate));
   if (activeCostOfRiskTab === "cost-of-risk") return formatCostOfRiskFilterPreviewValue(getCostOfRiskDefinitionPreviewValue(state, activeCostOfRiskDefinitionId, filters, referenceDate));
   return "";
 }
@@ -3702,7 +4063,7 @@ function openCostOfRiskSummaryDetailTab(tab, rowKey) {
   if (tab === "coverage-ratio") activeCostOfRiskCoverageRatioCellKey = `${rowKey}:ratio`;
   if (tab === "collateral-ratio") activeCostOfRiskCollateralRatioCellKey = `${rowKey}:ratio`;
   activeCostOfRiskTab = tab;
-  activeCostOfRiskDataAuditRequested = true;
+  requestCostOfRiskDataAudit();
   hideCostOfRiskAuditIntro();
   closeCostOfRiskFilterMenus();
   clearCostOfRiskHelpTopic();
@@ -4275,7 +4636,22 @@ function selectCostOfRiskReferenceDate(referenceDate) {
 
   costOfRiskFilterPreviewRenderer.captureSnapshot(elements.costOfRiskAuditPanelDetail);
   activeCostOfRiskReferenceDate = referenceDate;
+  updateCostOfRiskStablePanelSelection(
+    elements.costOfRiskAuditPanelDetail?.querySelector?.("[data-cost-of-risk-reference-panel-key]"),
+    referenceDate
+  );
+  if (activeCostOfRiskDataAuditPinned) activeCostOfRiskDataAuditRequested = true;
   if (getLatestState()) rerenderApp(getLatestState());
+  synchronizeCostOfRiskContextForReferenceDate(referenceDate);
+}
+
+function synchronizeCostOfRiskContextForReferenceDate(referenceDate) {
+  updateCostOfRiskStablePanelSelection(
+    elements.costOfRiskAuditPanelDetail?.querySelector?.("[data-cost-of-risk-reference-panel-key]"),
+    referenceDate
+  );
+  if (activeCostOfRiskHelpTopic) renderCostOfRiskHelpPanel();
+  renderCostOfRiskSelectionPane();
 }
 
 function updateCostOfRiskSmoothingWindow(value) {
@@ -4284,11 +4660,7 @@ function updateCostOfRiskSmoothingWindow(value) {
       ? 1
       : activeCostOfRiskLastSmoothingWindow
     : clampCostOfRiskSmoothingWindow(value);
-  setCostOfRiskHelpTopic(`smoothing:${nextWindow}`);
-  if (activeCostOfRiskSmoothingWindow === nextWindow) {
-    renderCostOfRiskHelpPanel();
-    return;
-  }
+  if (activeCostOfRiskSmoothingWindow === nextWindow) return;
   activeCostOfRiskSmoothingWindow = nextWindow;
   if (nextWindow > 1) activeCostOfRiskLastSmoothingWindow = nextWindow;
   if (elements.costOfRiskSmoothing) elements.costOfRiskSmoothing.value = String(nextWindow);
@@ -4326,8 +4698,12 @@ function selectCostOfRiskChartJst(jstCode) {
 
 function selectCostOfRiskAuditSeries(seriesName, referenceDate) {
   if (seriesName) activeCostOfRiskAuditSeries = seriesName;
-  if (referenceDate) activeCostOfRiskReferenceDate = referenceDate;
+  if (referenceDate) {
+    activeCostOfRiskReferenceDate = referenceDate;
+    if (activeCostOfRiskDataAuditPinned) activeCostOfRiskDataAuditRequested = true;
+  }
   if (getLatestState()) rerenderApp(getLatestState());
+  if (referenceDate) synchronizeCostOfRiskContextForReferenceDate(referenceDate);
 }
 
 function renderCostOfRiskAuditTable(audit, selectedUnit) {

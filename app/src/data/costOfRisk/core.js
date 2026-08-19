@@ -48,6 +48,8 @@ export const COST_OF_RISK_PERIOD_MODE_QUARTERLY = "quarterly";
 
 export const COST_OF_RISK_PERIOD_MODE_YTD = "ytd";
 
+export const COST_OF_RISK_PERIOD_MODE_ANNUALIZED = "annualized";
+
 // The ratio denominator follows the sidebar filters: it is always the
 // FINREP F_18.00 GCA for the same asset/counterparty/stage perimeter as the
 // numerator.
@@ -95,19 +97,37 @@ function addCostOfRiskSignedAllowanceMovementSeries(state, indexes, referenceCol
 }
 
 export function normalizeCostOfRiskPeriodMode(periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  if (periodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED) {
+    return COST_OF_RISK_PERIOD_MODE_ANNUALIZED;
+  }
   return periodMode === COST_OF_RISK_PERIOD_MODE_YTD
     ? COST_OF_RISK_PERIOD_MODE_YTD
     : COST_OF_RISK_PERIOD_MODE_QUARTERLY;
 }
 
 export function resolveCostOfRiskPeriodSeries(referenceColumns, values, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
-  return normalizeCostOfRiskPeriodMode(periodMode) === COST_OF_RISK_PERIOD_MODE_YTD
-    ? values
-    : decumulateQuarterlySeries(referenceColumns, values);
+  const normalizedMode = normalizeCostOfRiskPeriodMode(periodMode);
+  if (normalizedMode === COST_OF_RISK_PERIOD_MODE_YTD) return values;
+  if (normalizedMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED) {
+    return values.map((value, index) => {
+      if (!Number.isFinite(value)) return value;
+      const referenceDate = referenceColumns?.[index]?.date;
+      if (!(referenceDate instanceof Date) || Number.isNaN(referenceDate.getTime())) return value;
+      const quarter = Math.floor(referenceDate.getMonth() / 3) + 1;
+      return value * (4 / quarter);
+    });
+  }
+  return decumulateQuarterlySeries(referenceColumns, values);
+}
+
+export function isCostOfRiskCumulativePeriodMode(periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
+  const normalizedMode = normalizeCostOfRiskPeriodMode(periodMode);
+  return normalizedMode === COST_OF_RISK_PERIOD_MODE_YTD
+    || normalizedMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED;
 }
 
 export function getCostOfRiskRatioDenominatorLabel(periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {
-  return normalizeCostOfRiskPeriodMode(periodMode) === COST_OF_RISK_PERIOD_MODE_YTD
+  return isCostOfRiskCumulativePeriodMode(periodMode)
     ? "first quarter of the year"
     : "previous quarter";
 }
@@ -233,7 +253,7 @@ export function getCostOfRiskRatioDenominatorReferenceIndex(
   periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY
 ) {
   if (!Number.isInteger(index) || index < 0) return -1;
-  if (normalizeCostOfRiskPeriodMode(periodMode) !== COST_OF_RISK_PERIOD_MODE_YTD) {
+  if (!isCostOfRiskCumulativePeriodMode(periodMode)) {
     return index > 0 ? index - 1 : -1;
   }
   return getCostOfRiskFirstReferenceIndexOfYear(referenceColumns, index);
