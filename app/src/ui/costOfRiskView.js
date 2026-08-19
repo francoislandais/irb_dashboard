@@ -495,7 +495,10 @@ export function wireCostOfRiskUi(actions, rerender) {
   });
   elements.costOfRiskDisplayMode?.addEventListener("change", (event) => {
     if (COST_OF_RISK_TABS_WITH_DEDICATED_DISPLAY_MODE.has(activeCostOfRiskTab)) return;
-    setCostOfRiskGlobalDisplayMode(event.target.value === "amount" ? "amount" : "ratio");
+    event.target.value = getActiveCostOfRiskDisplayMode();
+    closeCostOfRiskFilterMenus();
+    setCostOfRiskHelpTopic("display-mode");
+    pulseCostOfRiskContextPanel();
     rerenderApp(actions.getState());
   });
   elements.costOfRiskXAxis?.addEventListener("change", (event) => {
@@ -541,37 +544,13 @@ export function wireCostOfRiskUi(actions, rerender) {
       return;
     }
 
-    const displayModeOption = event.target.closest?.("[data-cost-of-risk-display-mode-option]");
-    if (displayModeOption) {
-      event.preventDefault();
-      event.stopPropagation();
-      closeCostOfRiskFilterMenus();
-      const [, value] = String(displayModeOption.dataset.costOfRiskDisplayModeOption ?? "").split(":");
-      const nextMode = value === "ratio" ? "ratio" : "amount";
-      setCostOfRiskGlobalDisplayMode(nextMode);
-      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
-      rerenderApp(actions.getState());
-      return;
-    }
-
     const displayModeToggle = event.target.closest?.("[data-cost-of-risk-display-mode-toggle]");
     if (displayModeToggle) {
       event.preventDefault();
       event.stopPropagation();
-      const displayModeScope = displayModeToggle.dataset.costOfRiskDisplayModeToggle;
-      const currentMode = displayModeScope === "stageTransfer"
-        ? activeCostOfRiskStageTransferDisplayMode
-        : displayModeScope === "nplFlows"
-          ? activeCostOfRiskNplFlowsDisplayMode
-          : displayModeScope === "geography"
-            ? activeCostOfRiskGeographyDisplayMode
-            : displayModeScope === "summaryVariation"
-              ? activeCostOfRiskSummaryDisplayMode
-              : displayModeScope === "costOfRiskDefinition"
-                ? activeCostOfRiskDefinitionDisplayMode
-                : activeCostOfRiskMovementDisplayMode;
-      const nextMode = currentMode === "ratio" ? "amount" : "ratio";
-      setCostOfRiskGlobalDisplayMode(nextMode);
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("display-mode");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -729,9 +708,10 @@ export function wireCostOfRiskUi(actions, rerender) {
     const definitionDisplayButton = event.target.closest?.("[data-cost-of-risk-definition-display]");
     if (definitionDisplayButton) {
       event.preventDefault();
-      setCostOfRiskGlobalDisplayMode(definitionDisplayButton.dataset.costOfRiskDefinitionDisplay === "amount"
-        ? "amount"
-        : "ratio");
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("display-mode");
+      pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
     }
@@ -1989,10 +1969,11 @@ function updateCostOfRiskCoreDefinition(code, isSelected, scope = "movement") {
 function renderCostOfRiskActiveFilters(filterOptions) {
   const displayedFilters = activeCostOfRiskFilters;
   const state = getLatestState();
+  const displayModePanelOpen = activeCostOfRiskHelpTopic === "display-mode";
   renderCostOfRiskActiveFiltersView({
     activeTab: activeCostOfRiskTab,
     balanceScopeMenuOpen: isCostOfRiskFilterSelectionTopicOpen("balanceScope"),
-    contributionDisplayMenuOpen: activeCostOfRiskContributionDisplayMenuOpen,
+    contributionDisplayMenuOpen: displayModePanelOpen,
     container: elements.costOfRiskActiveFilters,
     counterpartyMenuOpen: isCostOfRiskFilterSelectionTopicOpen("counterparty"),
     costOfRiskDefinitionId: activeCostOfRiskDefinitionId,
@@ -2001,13 +1982,13 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     instrumentMenuOpen: isCostOfRiskFilterSelectionTopicOpen("instrument"),
     filterOptions,
     filters: displayedFilters,
-    nplFlowsDisplayMenuOpen: activeCostOfRiskNplFlowsDisplayMenuOpen,
+    nplFlowsDisplayMenuOpen: displayModePanelOpen,
     periodMode: activeCostOfRiskPeriodMode,
     referenceDate: activeCostOfRiskReferenceDate,
     selectedJst: state?.selectedJst ?? "",
     stageMenuOpen: isCostOfRiskFilterSelectionTopicOpen("stage"),
-    summaryDisplayMenuOpen: activeCostOfRiskSummaryDisplayMenuOpen,
-    stageTransferDisplayMenuOpen: activeCostOfRiskStageTransferDisplayMenuOpen
+    summaryDisplayMenuOpen: displayModePanelOpen,
+    stageTransferDisplayMenuOpen: displayModePanelOpen
   });
 }
 
@@ -3089,6 +3070,11 @@ function renderCostOfRiskHelpPanel() {
     return true;
   }
 
+  if (activeCostOfRiskHelpTopic === "display-mode") {
+    renderCostOfRiskDisplayModeSelectionPanel();
+    return true;
+  }
+
   if (activeCostOfRiskHelpTopic === "peer-selection") {
     renderCostOfRiskPeerSelectionPanel();
     return true;
@@ -3333,6 +3319,52 @@ function renderCostOfRiskPeriodModeSelectionPanel() {
   costOfRiskFilterPreviewRenderer.clearSnapshot();
 }
 
+function renderCostOfRiskDisplayModeSelectionPanel() {
+  const state = getLatestState();
+  const options = [
+    { label: "Relative display", value: "ratio" },
+    { label: "Absolute display", value: "amount" }
+  ];
+  const panelKey = createCostOfRiskStableSelectionPanelKey(state, "display-mode", {
+    options,
+    referenceDate: ""
+  });
+  const existingPanel = elements.costOfRiskAuditPanelDetail
+    ?.querySelector?.("[data-cost-of-risk-display-panel-key]");
+  if (existingPanel?.dataset.costOfRiskDisplayPanelKey === panelKey) {
+    updateCostOfRiskStablePanelSelection(existingPanel, getActiveCostOfRiskDisplayMode());
+    costOfRiskFilterPreviewRenderer.clearSnapshot();
+    return;
+  }
+
+  const intro = createCostOfRiskAuditIntroHeader({
+    articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
+    eyebrow: "Breakdown of selection by :",
+    lead: "This choice is shared by every compatible Cost of Risk view.",
+    title: "Display mode"
+  });
+  intro.dataset.costOfRiskDisplayPanelKey = panelKey;
+
+  const table = document.createElement("table");
+  table.className = "cost-of-risk-filter-selection-table";
+  const tbody = document.createElement("tbody");
+  options.forEach((option) => {
+    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === getActiveCostOfRiskDisplayMode(), () => {
+      updateCostOfRiskStablePanelSelection(intro, option.value);
+      setCostOfRiskGlobalDisplayMode(option.value);
+      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = option.value;
+      if (getLatestState()) rerenderApp(getLatestState());
+    }, {
+      selectionValue: option.value
+    }, costOfRiskFilterPreviewRenderer));
+  });
+  table.append(tbody);
+  intro.append(table);
+
+  replaceCostOfRiskAuditPanelContent(intro);
+  costOfRiskFilterPreviewRenderer.clearSnapshot();
+}
+
 function renderCostOfRiskJstSelectionPanel() {
   const state = getLatestState();
   const jstCodes = state?.jstOptions ?? [];
@@ -3454,6 +3486,7 @@ function createCostOfRiskStableSelectionPanelKey(state, scope, {
 }
 
 function getCostOfRiskStablePanelMetricState(scope) {
+  if (scope === "display-mode") return {};
   const filterKind = scope.startsWith("filter:") ? scope.slice("filter:".length) : "";
   const periodMode = scope === "period-mode" ? "" : activeCostOfRiskPeriodMode;
   if (activeCostOfRiskTab === "summary") {
@@ -3980,15 +4013,6 @@ function renderCostOfRiskSmoothingHelpControl(windowSize) {
   control.append(header, slider);
 
   return control;
-}
-
-function getCostOfRiskDisplayModeHelpTopic(scope, mode) {
-  const normalizedMode = mode === "ratio" ? "relative" : "absolute";
-  if (scope === "stageTransfer") return `stage-transfer-${normalizedMode}`;
-  if (scope === "nplFlows") return `npl-flow-${normalizedMode}`;
-  if (scope === "summaryVariation") return `summary-${normalizedMode}`;
-  if (scope === "costOfRiskDefinition") return `cost-risk-${normalizedMode}`;
-  return `movement-${normalizedMode}`;
 }
 
 function renderCostOfRiskStageSummaryView(stageSummary, state) {
