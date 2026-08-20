@@ -1,5 +1,5 @@
 import { setLatestState } from "./appState.js";
-import { renderCostOfRisk, showCostOfRiskPeerSelection, syncCostOfRiskUrlParams, wireCostOfRiskUi } from "./costOfRiskView.js?v=20260812-costofrisk-domain-split";
+import { renderCreditRisk, showCreditRiskPeerSelection, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260820-credit-risk-module";
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260814-irb-density-cube";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
@@ -38,8 +38,8 @@ export function wireUi(actions) {
   });
   elements.peersButton?.addEventListener("click", () => {
     const activeModule = actions.getState().activeModule;
-    if (activeModule === "cost-of-risk") {
-      showCostOfRiskPeerSelection(actions);
+    if (activeModule === "credit-risk") {
+      showCreditRiskPeerSelection(actions);
     } else if (activeModule === "explorer") {
       showExplorerPeerSelection(actions);
     }
@@ -77,7 +77,7 @@ export function wireUi(actions) {
   elements.moduleButtons.forEach((button) => {
     button.addEventListener("click", () => actions.setActiveModule(button.dataset.moduleTarget));
   });
-  wireCostOfRiskUi(actions, renderAppState);
+  wireCreditRiskUi(actions, renderAppState);
   wireExplorerUi(actions, renderAppState);
   wireIrbUi(actions, renderAppState);
 }
@@ -134,9 +134,9 @@ export function renderAppState(state) {
   }
   if (state.activeModule === "explorer") renderExplorer(state);
   if (state.activeModule === "irb") renderIrb(state);
-  if (state.activeModule === "cost-of-risk") {
-    renderCostOfRisk(state);
-    syncCostOfRiskUrlParams();
+  if (state.activeModule === "credit-risk") {
+    renderCreditRisk(state);
+    syncCreditRiskUrlParams();
   }
 }
 

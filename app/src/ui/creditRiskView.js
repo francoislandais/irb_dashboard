@@ -194,10 +194,10 @@ import {
 } from "./costOfRiskFilterPreviewRenderer.js?v=20260803-bar-fade";
 import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260806-cell-selection";
 import {
-  COST_OF_RISK_DISABLED_TABS,
-  readCostOfRiskUrlState,
-  writeCostOfRiskUrlState
-} from "./costOfRiskUrlState.js?v=20260806-cell-selection";
+  CREDIT_RISK_DISABLED_TABS,
+  readCreditRiskUrlState,
+  writeCreditRiskUrlState
+} from "./creditRiskUrlState.js?v=20260820-credit-risk-module";
 import {
   COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
   COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
@@ -376,14 +376,14 @@ function renderCostOfRiskRatioDenominatorControls(state) {
   });
 }
 
-// Reads cor_tab/cor_date/cor_view/cor_cell/cor_period from the URL once, at module
+// Reads the credit_* view state from the URL once, at module
 // load time, and uses them to override the hardcoded defaults above. Runs
 // before any data is loaded, so it only ever sets opaque string state -
 // anything stale or invalid (e.g. a cell key from a filter combination that
 // no longer applies) is harmless: the render-time normalizers already used
 // throughout this module simply won't find a matching row/option.
 function applyCostOfRiskUrlState() {
-  const urlState = readCostOfRiskUrlState();
+  const urlState = readCreditRiskUrlState();
   if (urlState.tab) activeCostOfRiskTab = urlState.tab;
   if (urlState.referenceDate) activeCostOfRiskReferenceDate = urlState.referenceDate;
   activeCostOfRiskPeriodMode = urlState.periodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED
@@ -429,7 +429,7 @@ function applyCostOfRiskUrlState() {
 }
 
 function normalizeActiveCostOfRiskTab() {
-  if (!COST_OF_RISK_DISABLED_TABS.has(activeCostOfRiskTab)) return;
+  if (!CREDIT_RISK_DISABLED_TABS.has(activeCostOfRiskTab)) return;
   activeCostOfRiskTab = "summary";
 }
 
@@ -437,7 +437,7 @@ function normalizeActiveCostOfRiskTab() {
 // grid cell, a cost-of-risk definition + driver, a stage-ratio/coverage-
 // ratio cell, or a stage-transfer flow); these two functions are the single
 // place that knows how to read/write that element for whichever tab is
-// active, so the URL only ever needs one generic cor_cell param.
+// active, so the URL only ever needs one generic credit_cell param.
 function getCostOfRiskUrlSelectionValue() {
   switch (activeCostOfRiskTab) {
     case "summary":
@@ -507,8 +507,8 @@ function applyCostOfRiskUrlSelection(tab, value) {
 // Called once per render (from dataScreen.js, right after renderCostOfRisk
 // returns) so the URL always reflects whatever is currently on screen,
 // regardless of which internal branch/early-return produced it.
-export function syncCostOfRiskUrlParams() {
-  writeCostOfRiskUrlState({
+export function syncCreditRiskUrlParams() {
+  writeCreditRiskUrlState({
     activeTab: activeCostOfRiskTab,
     asset: activeCostOfRiskFilters.asset,
     balanceScope: activeCostOfRiskFilters.balanceScope,
@@ -556,7 +556,7 @@ function restoreCostOfRiskDefinitionComponents(serialized) {
   });
 }
 
-export function wireCostOfRiskUi(actions, rerender) {
+export function wireCreditRiskUi(actions, rerender) {
   rerenderApp = rerender;
   setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
@@ -875,7 +875,7 @@ export function wireCostOfRiskUi(actions, rerender) {
   elements.costOfRiskTabButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const nextTab = button.dataset.costOfRiskTab || "summary";
-      if (COST_OF_RISK_DISABLED_TABS.has(nextTab)) return;
+      if (CREDIT_RISK_DISABLED_TABS.has(nextTab)) return;
       if (nextTab !== activeCostOfRiskTab) activeCostOfRiskDataAuditPinned = false;
       activeCostOfRiskTab = nextTab;
       closeCostOfRiskFilterMenus();
@@ -884,7 +884,7 @@ export function wireCostOfRiskUi(actions, rerender) {
   });
 }
 
-export function renderCostOfRisk(state) {
+export function renderCreditRisk(state) {
   if (!elements.costOfRiskEmpty || !elements.costOfRiskDashboard) return;
   normalizeActiveCostOfRiskTab();
   didCostOfRiskAuditPanelTabJustChange = activeCostOfRiskTab !== lastRenderedCostOfRiskAuditPanelTab;
@@ -1566,7 +1566,7 @@ function updateCostOfRiskTabsFade() {
   tabs.classList.toggle("can-scroll-right", tabs.scrollLeft < maxScrollLeft - 1);
 }
 
-export function showCostOfRiskPeerSelection(actions) {
+export function showCreditRiskPeerSelection(actions) {
   costOfRiskPeerSelectionActions = actions;
   setCostOfRiskHelpTopic("peer-selection");
   renderCostOfRiskHelpPanel();

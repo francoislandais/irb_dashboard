@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260814-irb-density-cube";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260820-credit-risk-module";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -32,7 +32,7 @@ const DATASET_URL_PARAM = "dataset";
 const UNIT_URL_PARAM = "unit";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
 const PEER_DISPLAY_MODE_URL_PARAM = "peer_mode";
-const MODULE_URL_VALUES = new Set(["explorer", "irb", "cost-of-risk"]);
+const MODULE_URL_VALUES = new Set(["explorer", "irb", "credit-risk"]);
 const MODULE_URL_ALIASES = new Map([["cet-1", "irb"]]);
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";
@@ -397,10 +397,10 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, costOfRiskStylesCss, mappingCsv, impossibleCombinationsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
-    fetchAppText("src/costOfRiskStyles.css"),
+    fetchAppText("src/creditRiskStyles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
     fetchAppText("assets/ITS_impossible_x_y.csv"),
     fetchAppText("vendor/highcharts.js"),
@@ -417,7 +417,7 @@ async function getStandaloneBundle() {
     highchartsTreemapJs,
     indexHtml,
     moduleSources,
-    stylesCss: `${stylesCss}\n${costOfRiskStylesCss}`
+    stylesCss: `${stylesCss}\n${creditRiskStylesCss}`
   };
 }
 

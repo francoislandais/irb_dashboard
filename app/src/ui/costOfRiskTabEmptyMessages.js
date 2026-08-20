@@ -13,7 +13,7 @@ import {
 // Turns the raw "no data" status message a tab renders into either plain
 // text or an inline call-to-action (a button that clears the filter that's
 // causing the gap), depending on what the message says. `context` carries
-// everything that would otherwise be read from costOfRiskView.js module
+// everything that would otherwise be read from creditRiskView.js module
 // state: { activeTab, filters, filterOptions, onSelectFilter }, where
 // onSelectFilter(filterKey, value) applies the change and clears any stale
 // context-panel topic.

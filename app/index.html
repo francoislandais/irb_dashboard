@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
     <link rel="stylesheet" href="./src/styles.css?v=20260814-irb-y-tree">
-    <link rel="stylesheet" href="./src/costOfRiskStyles.css?v=20260812-css-domain-split">
+    <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260820-credit-risk-module">
   </head>
   <body>
     <div class="app-shell">
@@ -52,7 +52,7 @@
         <nav class="module-list" aria-label="Navigation des modules">
           <button class="module-link is-active" type="button" data-module-target="explorer">Explorer</button>
           <button class="module-link" type="button" data-module-target="irb">IRB</button>
-          <button class="module-link" type="button" data-module-target="cost-of-risk">Cost of risk</button>
+          <button class="module-link" type="button" data-module-target="credit-risk">Credit Risk</button>
         </nav>
       </aside>
 
@@ -113,11 +113,11 @@
           </article>
         </section>
 
-        <section id="cost-of-risk-view" class="module-view cost-of-risk-view" aria-label="Cost of risk">
+        <section id="credit-risk-view" class="module-view credit-risk-view" aria-label="Credit Risk">
           <article class="cost-of-risk-panel">
             <div id="cost-of-risk-empty" class="notice" hidden></div>
             <div id="cost-of-risk-dashboard" class="cost-of-risk-dashboard" hidden>
-              <aside class="cost-of-risk-filters-sidebar" aria-label="Cost of risk filters">
+              <aside class="cost-of-risk-filters-sidebar" aria-label="Credit Risk filters">
                 <label class="field cost-of-risk-field cost-of-risk-field--stacked">
                   <span>Instruments</span>
                   <select id="cost-of-risk-asset"></select>
@@ -149,7 +149,7 @@
                 </label>
               </aside>
               <div class="cost-of-risk-main">
-                <div class="cost-of-risk-tabs" role="tablist" aria-label="Cost of risk view">
+                <div class="cost-of-risk-tabs" role="tablist" aria-label="Credit Risk view">
                   <button class="cost-of-risk-tab is-active" type="button" role="tab" aria-selected="true" data-cost-of-risk-tab="summary">Summary</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="stage-transfers">Staging Transfer</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="contributions">ECL movements</button>
@@ -164,7 +164,7 @@
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="core-definition" hidden>Core Definition</button>
                   <button class="cost-of-risk-tab" type="button" role="tab" aria-selected="false" data-cost-of-risk-tab="analysis" hidden>Analysis</button>
                 </div>
-                <div id="cost-of-risk-active-filters" class="cost-of-risk-active-filters" aria-label="Active cost of risk filters"></div>
+                <div id="cost-of-risk-active-filters" class="cost-of-risk-active-filters" aria-label="Active Credit Risk filters"></div>
                 <div class="cost-of-risk-scroll">
                 <div class="cost-of-risk-tab-panel is-active" data-cost-of-risk-panel="summary">
                   <div class="cost-of-risk-split-section">
@@ -319,6 +319,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260814-irb-density-cube"></script>
+    <script type="module" src="./src/main.js?v=20260820-credit-risk-module"></script>
   </body>
 </html>

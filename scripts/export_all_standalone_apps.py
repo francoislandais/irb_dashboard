@@ -91,7 +91,7 @@ def _build_standalone_bundle(app_directory: Path) -> dict:
         "stylesCss": "\n".join(
             (
                 _read_app_text(app_directory, "src/styles.css"),
-                _read_app_text(app_directory, "src/costOfRiskStyles.css"),
+                _read_app_text(app_directory, "src/creditRiskStyles.css"),
             )
         ),
     }
