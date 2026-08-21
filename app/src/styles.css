@@ -1871,6 +1871,10 @@ table {
   background: rgba(36, 53, 45, 0.08);
 }
 
+.explorer-filter-chip-evolution.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
 .explorer-jst-selection-list {
   display: grid;
   margin-top: 8px;

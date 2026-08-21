@@ -55,6 +55,11 @@ const AXIS_URL_PARAM = "axis";
 const ROW_URL_PARAM = "row";
 const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
+const EXPLORER_EVOLUTION_OPTIONS = [
+  { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
+  { value: "semiannual", label: "Semiannual", step: 2, description: "Every six months" },
+  { value: "annual", label: "Annual", step: 4, description: "Every twelve months" }
+];
 // "template" used to be a fourth browsable axis (clicking the template tab
 // turned the main table into a list of templates); that mode is retired in
 // favor of the always-visible template list in the context panel, so it's
@@ -147,7 +152,8 @@ export function wireExplorerUi(actions, rerender) {
     if (row) {
       const cell = event.target.closest("td[data-explorer-cell-column]");
       const cellColumnIndex = cell ? Number(cell.dataset.explorerCellColumn) : 0;
-      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex });
+      const cellDate = cell?.dataset.explorerCellDate ?? "";
+      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex, cellDate });
     }
   });
   elements.explorerTable.addEventListener("keydown", (event) => {
@@ -213,7 +219,9 @@ function createExplorerTemplateContext() {
     // Which date column (0 = most recent) carries the strong highlight
     // within the selected row — see applyExplorerSelection. Defaults to the
     // first visible column until the user clicks a specific cell.
-    selectedCellColumnIndex: 0
+    selectedCellColumnIndex: 0,
+    selectedReferenceLabel: "",
+    evolutionFrequency: "quarterly"
   };
 }
 
@@ -475,14 +483,15 @@ export function renderExplorer(state) {
     templateSelections: getExplorerTemplateSelections(),
     templates
   });
+  const displayedTableSeries = buildExplorerEvolutionSeries(tableSeries, state);
   elements.explorerTable.replaceChildren();
 
   elements.explorerEmpty.hidden = !tableSeries.status;
   elements.explorerEmpty.textContent = tableSeries.status;
 
-  if (tableSeries.rows.length === 0 || tableSeries.dateColumns.length === 0) return;
+  if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) return;
 
-  renderExplorerTable(tableSeries, state.selectedUnit);
+  renderExplorerTable(displayedTableSeries, state.selectedUnit);
   applyExplorerSelection();
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
@@ -1194,13 +1203,70 @@ function renderExplorerActiveFilters(state) {
       renderExplorerContextPanel(getLatestState());
     }
   });
-  elements.explorerActiveFilters.replaceChildren(jstChip, dateChip, unitChip);
+  const evolutionOption = getActiveExplorerEvolutionOption();
+  const evolutionChip = document.createElement("span");
+  evolutionChip.className = "cost-of-risk-filter-chip explorer-filter-chip-evolution";
+  evolutionChip.classList.toggle("is-open", explorerContextTopic === "evolution-frequency");
+  const evolutionToggle = document.createElement("button");
+  evolutionToggle.type = "button";
+  evolutionToggle.className = "cost-of-risk-filter-chip-toggle";
+  evolutionToggle.setAttribute("aria-expanded", String(explorerContextTopic === "evolution-frequency"));
+  evolutionToggle.setAttribute("aria-controls", "explorer-context-detail");
+  evolutionToggle.setAttribute("aria-label", "Change evolution frequency");
+  const evolutionLabel = document.createElement("span");
+  evolutionLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  evolutionLabel.textContent = evolutionOption.label;
+  evolutionToggle.append(evolutionLabel);
+  evolutionToggle.addEventListener("click", () => {
+    explorerContextTopic = "evolution-frequency";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
+  });
+  evolutionChip.append(evolutionToggle);
+  elements.explorerActiveFilters.replaceChildren(jstChip, dateChip, unitChip, evolutionChip);
 }
 
 function getSelectedExplorerReference(state = getLatestState()) {
   const references = getReferenceColumns(state?.columns ?? []);
+  const selectedLabel = getActiveExplorerContext().selectedReferenceLabel;
+  if (selectedLabel) {
+    const selectedReference = references.find((reference) => reference.label === selectedLabel);
+    if (selectedReference) return selectedReference;
+  }
   const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
   return references[references.length - 1 - selectedColumnIndex] ?? references.at(-1) ?? null;
+}
+
+function getActiveExplorerEvolutionOption() {
+  const frequency = getActiveExplorerContext().evolutionFrequency;
+  return EXPLORER_EVOLUTION_OPTIONS.find((option) => option.value === frequency) ?? EXPLORER_EVOLUTION_OPTIONS[0];
+}
+
+function buildExplorerEvolutionSeries(series, state) {
+  if (!series?.dateColumns?.length) return series;
+  const context = getActiveExplorerContext();
+  const selectedReference = getSelectedExplorerReference(state);
+  const anchorIndex = Math.max(0, series.dateColumns.findIndex((column) => column.label === selectedReference?.label));
+  const resolvedAnchorIndex = series.dateColumns[anchorIndex]?.label === selectedReference?.label
+    ? anchorIndex
+    : series.dateColumns.length - 1;
+  const step = getActiveExplorerEvolutionOption().step;
+  const selectedIndexes = [];
+  for (let index = resolvedAnchorIndex; index >= 0; index -= step) selectedIndexes.push(index);
+  selectedIndexes.reverse();
+
+  context.selectedReferenceLabel = series.dateColumns[resolvedAnchorIndex]?.label ?? "";
+  context.selectedCellColumnIndex = 0;
+
+  return {
+    ...series,
+    dateColumns: selectedIndexes.map((index) => series.dateColumns[index]),
+    rows: series.rows.map((row) => ({
+      ...row,
+      values: selectedIndexes.map((index) => row.values[index])
+    }))
+  };
 }
 
 function getCompleteExplorerSelectionsForBenchmark(context, activeAxis) {
@@ -1340,6 +1406,11 @@ function renderExplorerContextPanel(state) {
     return;
   }
 
+  if (explorerContextTopic === "evolution-frequency") {
+    renderExplorerEvolutionFrequencyPanel();
+    return;
+  }
+
   if (explorerContextTopic === "peer-selection") {
     renderExplorerPeerSelectionPanel(state);
     return;
@@ -1382,9 +1453,9 @@ function renderExplorerJstSelectionPanel(state) {
   title.textContent = "JST code";
 
   const benchmark = buildExplorerBenchmark(state?.jstOptions ?? []);
-  const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
+  const selectedReference = getSelectedExplorerReference(state);
   const valuesByJst = new Map(benchmark.series.map((item) => {
-    const point = item.values[item.values.length - 1 - selectedColumnIndex] ?? null;
+    const point = item.values.find((candidate) => candidate.label === selectedReference?.label) ?? null;
     return [item.jstCode, point?.value ?? null];
   }));
   const list = document.createElement("div");
@@ -1439,7 +1510,7 @@ function renderExplorerReferenceDatePanel(state) {
   list.setAttribute("role", "listbox");
   list.setAttribute("aria-label", "Reference date");
 
-  [...benchmark.dates].reverse().forEach((reference, reverseIndex) => {
+  [...benchmark.dates].reverse().forEach((reference) => {
     const isActive = reference.label === selectedReference?.label;
     const row = document.createElement("button");
     row.type = "button";
@@ -1456,8 +1527,51 @@ function renderExplorerReferenceDatePanel(state) {
     row.append(label, metric);
     row.addEventListener("click", () => {
       const context = getActiveExplorerContext();
-      if (context.selectedCellColumnIndex === reverseIndex) return;
-      context.selectedCellColumnIndex = reverseIndex;
+      if (context.selectedReferenceLabel === reference.label) return;
+      context.selectedReferenceLabel = reference.label;
+      context.selectedCellColumnIndex = 0;
+      saveExplorerScrollPosition();
+      if (getLatestState()) rerenderApp(getLatestState());
+    });
+    list.append(row);
+  });
+
+  article.append(eyebrow, title, list);
+  replaceExplorerContextDetail(article);
+}
+
+function renderExplorerEvolutionFrequencyPanel() {
+  const context = getActiveExplorerContext();
+  const article = document.createElement("article");
+  article.className = "explorer-context-article explorer-evolution-frequency-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "explorer-context-eyebrow";
+  eyebrow.textContent = "Breakdown of selection by:";
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Evolution frequency";
+  const list = document.createElement("div");
+  list.className = "explorer-jst-selection-list explorer-evolution-frequency-list";
+  list.setAttribute("role", "listbox");
+  list.setAttribute("aria-label", "Evolution frequency");
+
+  EXPLORER_EVOLUTION_OPTIONS.forEach((option) => {
+    const isActive = option.value === context.evolutionFrequency;
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "explorer-jst-selection-row explorer-evolution-frequency-row";
+    row.classList.toggle("is-active", isActive);
+    row.setAttribute("role", "option");
+    row.setAttribute("aria-selected", String(isActive));
+    const label = document.createElement("span");
+    label.textContent = option.label;
+    const detail = document.createElement("span");
+    detail.textContent = option.description;
+    row.append(label, detail);
+    row.addEventListener("click", () => {
+      if (context.evolutionFrequency === option.value) return;
+      context.evolutionFrequency = option.value;
       saveExplorerScrollPosition();
       if (getLatestState()) rerenderApp(getLatestState());
     });
@@ -2206,7 +2320,7 @@ function getExplicitPathsFromRenderedRows(rows) {
 }
 
 function selectExplorerRow(pointCode, options = {}) {
-  const { shouldFocus = false, cellColumnIndex } = options;
+  const { shouldFocus = false, cellColumnIndex, cellDate = "" } = options;
   hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
   const activeAxis = context.activeAxis;
@@ -2216,6 +2330,10 @@ function selectExplorerRow(pointCode, options = {}) {
   // toggles — leaves whichever column was last picked untouched.
   if (Number.isFinite(cellColumnIndex)) {
     context.selectedCellColumnIndex = cellColumnIndex;
+  }
+  if (cellDate) {
+    context.selectedReferenceLabel = cellDate;
+    context.selectedCellColumnIndex = 0;
   }
 
   if (activeAxis === "y") {
