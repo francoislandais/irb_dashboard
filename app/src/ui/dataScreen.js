@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
-import { renderCreditRisk, showCreditRiskPeerSelection, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260820-credit-risk-module";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260812-explorer-benchmark-view";
-import { renderIrb, wireIrbUi } from "./irbView.js?v=20260814-irb-density-cube";
+import { renderCreditRisk, showCreditRiskPeerSelection, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260820-global-unit-filter";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260820-global-unit-filter";
+import { renderIrb, wireIrbUi } from "./irbView.js?v=20260820-global-unit-filter";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
 
 const ADD_DATASET_OPTION = "__add_dataset__";

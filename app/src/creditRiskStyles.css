@@ -785,6 +785,10 @@
   background: rgba(36, 53, 45, 0.08);
 }
 
+.cost-of-risk-filter-chip--unit.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
 .cost-of-risk-filter-chip-help {
   align-self: flex-start;
   background: transparent;

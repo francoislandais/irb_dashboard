@@ -135,7 +135,8 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260812-costofrisk-domain-split";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260820-global-unit-filter";
+import { createUnitSelectionPanel } from "./unitFilterView.js?v=20260820-global-unit-filter";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -225,6 +226,7 @@ import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-co
 let rerenderApp = () => {};
 let setActiveModule = () => {};
 let updateSelectedJst = () => {};
+let updateSelectedUnit = () => {};
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
 let activeCostOfRiskLastSmoothingWindow = 4;
@@ -560,6 +562,7 @@ export function wireCreditRiskUi(actions, rerender) {
   rerenderApp = rerender;
   setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
+  updateSelectedUnit = actions.updateSelectedUnit;
   elements.costOfRiskAsset?.addEventListener("change", (event) => {
     pendingCostOfRiskUrlFilters.delete("asset");
     activeCostOfRiskFilters.asset = event.target.value;
@@ -609,6 +612,17 @@ export function wireCreditRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       setCostOfRiskHelpTopic("reference-date");
+      pulseCostOfRiskContextPanel();
+      rerenderApp(actions.getState());
+      return;
+    }
+
+    const unitHelp = event.target.closest?.("[data-cost-of-risk-unit-help]");
+    if (unitHelp) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskFilterMenus();
+      setCostOfRiskHelpTopic("unit");
       pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
@@ -2074,9 +2088,11 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     periodMode: activeCostOfRiskPeriodMode,
     referenceDate: activeCostOfRiskReferenceDate,
     selectedJst: state?.selectedJst ?? "",
+    selectedUnit: state?.selectedUnit ?? "millions",
     stageMenuOpen: isCostOfRiskFilterSelectionTopicOpen("stage"),
     summaryDisplayMenuOpen: displayModePanelOpen,
-    stageTransferDisplayMenuOpen: displayModePanelOpen
+    stageTransferDisplayMenuOpen: displayModePanelOpen,
+    unitMenuOpen: activeCostOfRiskHelpTopic === "unit"
   });
 }
 
@@ -3150,6 +3166,14 @@ function renderCostOfRiskHelpPanel() {
 
   if (activeCostOfRiskHelpTopic === "reference-date") {
     renderCostOfRiskReferenceDateSelectionPanel();
+    return true;
+  }
+
+  if (activeCostOfRiskHelpTopic === "unit") {
+    replaceCostOfRiskAuditPanelContent(createUnitSelectionPanel({
+      selectedUnit: getLatestState()?.selectedUnit,
+      onSelect: (unit) => updateSelectedUnit(unit)
+    }));
     return true;
   }
 

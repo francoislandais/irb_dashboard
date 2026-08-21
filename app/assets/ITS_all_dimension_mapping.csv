@@ -259,10 +259,10 @@ C_04.00;y_axis_rc_code;20;Deferred tax /Assets/That do not rely on future profit
 C_04.00;y_axis_rc_code;30;Deferred tax /Assets/That rely on future profitability and do not arise from temporary differences;;;
 C_04.00;y_axis_rc_code;40;Deferred tax /Assets/That rely on future profitability and arise from temporary differences;;;
 C_04.00;y_axis_rc_code;50;Deferred tax /Liabilities;;;
-C_04.00;y_axis_rc_code;60;Deferred tax /Liabilities/Deferred tax liabilities non deductible from deferred tax assets that rely on future profitability;;;
-C_04.00;y_axis_rc_code;70;Deferred tax /Liabilities/Deferred tax liabilities deductible from deferred tax assets that rely on future profitability;;;
-C_04.00;y_axis_rc_code;80;Deferred tax /Liabilities/Deferred tax liabilities deductible from deferred tax assets that rely on future profitability/Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and do not arise from temporary differences;;;
-C_04.00;y_axis_rc_code;90;Deferred tax /Liabilities/Deferred tax liabilities deductible from deferred tax assets that rely on future profitability/Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and arise from temporary differences;;;
+C_04.00;y_axis_rc_code;60;Deferred tax /Liabilities/Non deductible from deferred tax assets that rely on future profitability;;;
+C_04.00;y_axis_rc_code;70;Deferred tax /Liabilities/Deductible from deferred tax assets that rely on future profitability;;;
+C_04.00;y_axis_rc_code;80;Deferred tax /Liabilities/Deductible from deferred tax assets that rely on future profitability/And do not arise from temporary differences;;;
+C_04.00;y_axis_rc_code;90;Deferred tax /Liabilities/Deductible from deferred tax assets that rely on future profitability/And arise from temporary differences;;;
 C_04.00;y_axis_rc_code;93;Tax overpayments and tax loss carry backs;;;
 C_04.00;y_axis_rc_code;96;Deferred tax assets subject to a risk weight of 250%;;;
 C_04.00;y_axis_rc_code;97;Deferred tax assets subject to a risk weight of 0%;;;

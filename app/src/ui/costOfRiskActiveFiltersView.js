@@ -7,6 +7,7 @@ import {
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import { COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS } from "./costOfRiskFilterSelectionConfig.js?v=20260806-cell-selection";
+import { createUnitFilterChip } from "./unitFilterView.js?v=20260820-global-unit-filter";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 
@@ -27,8 +28,10 @@ export function renderCostOfRiskActiveFiltersView({
   balanceScopeMenuOpen,
   instrumentMenuOpen,
   selectedJst,
+  selectedUnit,
   referenceDate,
-  stageMenuOpen
+  stageMenuOpen,
+  unitMenuOpen
 }) {
   if (!container) return;
 
@@ -49,12 +52,14 @@ export function renderCostOfRiskActiveFiltersView({
     balanceScopeMenuOpen,
     instrumentMenuOpen,
     selectedJst,
+    selectedUnit,
     referenceDate,
     summaryDisplayMenuOpen,
     nplFlowsDisplayMenuOpen,
     periodMode,
     stageMenuOpen,
-    stageTransferDisplayMenuOpen
+    stageTransferDisplayMenuOpen,
+    unitMenuOpen
   });
   if (renderKey === lastCostOfRiskActiveFiltersRenderKey) return;
   lastCostOfRiskActiveFiltersRenderKey = renderKey;
@@ -74,6 +79,11 @@ export function renderCostOfRiskActiveFiltersView({
   const chips = [
     createCostOfRiskJstChip(selectedJst),
     createCostOfRiskReferenceDateChip(referenceDate),
+    createUnitFilterChip({
+      selectedUnit,
+      isOpen: Boolean(unitMenuOpen),
+      dataset: { costOfRiskUnitHelp: "true" }
+    }),
     balanceScopeItem,
     ...(remainingActiveItems.length > 0
       ? remainingActiveItems

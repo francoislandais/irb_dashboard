@@ -5,6 +5,7 @@ import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } fr
 import { createCostOfRiskQuarterAxisLabelsOptions } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { clearBenchmarkEndpointLabels, renderBenchmarkEndpointLabels, scheduleBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
+import { createUnitFilterChip, createUnitSelectionPanel } from "./unitFilterView.js?v=20260820-global-unit-filter";
 
 const IRB_DEFAULT_TAB = "output-floor";
 
@@ -20,6 +21,7 @@ const elements = {
 
 let activeIrbTab = IRB_DEFAULT_TAB;
 let activeOutputFloorReference = "";
+let activeOutputFloorFilterPanel = "";
 let activeCet1PreviousReference = "";
 let activeCet1Detail = "numerator";
 let activeCet1FilterPanel = "cet1-reference-date";
@@ -54,8 +56,10 @@ export function wireIrbUi(actions, rerender) {
     const filter = toggle.dataset.irbFilterToggle;
     if (activeIrbTab === "cet1-ratio") {
       activeCet1FilterPanel = filter;
-    } else {
+    } else if (activeIrbTab === "density") {
       activeDensityFilterPanel = activeDensityFilterPanel === filter ? "" : filter;
+    } else {
+      activeOutputFloorFilterPanel = activeOutputFloorFilterPanel === filter ? "" : filter;
     }
     renderIrb(actions.getState());
   });
@@ -65,7 +69,7 @@ export function wireIrbUi(actions, rerender) {
 export function renderIrb(state) {
   renderIrbTabs();
   const isDensity = activeIrbTab === "density";
-  const hasFilterBar = isDensity || activeIrbTab === "cet1-ratio";
+  const hasFilterBar = true;
   if (elements.activeFilters) elements.activeFilters.hidden = !hasFilterBar;
   if (elements.contextPanel && !hasFilterBar) elements.contextPanel.hidden = true;
   if (activeIrbTab === "output-floor") renderOutputFloor(state);
@@ -101,7 +105,7 @@ function renderCet1Ratio(state) {
   }
   activeOutputFloorReference = model.currentReference.name;
   activeCet1PreviousReference = model.previousReference.name;
-  renderCet1ActiveFilters(model);
+  renderCet1ActiveFilters(model, state);
   renderCet1FilterPanel(model, state);
   const analysisPanel = document.createElement("section");
   analysisPanel.className = "irb-cet1-analysis-panel";
@@ -114,12 +118,13 @@ function renderCet1Ratio(state) {
   renderCet1TimeSeriesChart(state, model);
 }
 
-function renderCet1ActiveFilters(model) {
+function renderCet1ActiveFilters(model, state) {
   const container = elements.activeFilters;
   if (!container) return;
   container.replaceChildren(
     createCet1FilterChip("cet1-ratio-type", model.ratioDefinition.label, "Change capital ratio"),
     createCet1FilterChip("cet1-reference-date", formatCet1Quarter(model.currentReference), "Change CET1 reference date"),
+    createIrbUnitFilterChip(state.selectedUnit, activeCet1FilterPanel === "unit"),
     createCet1FilterChip("cet1-comparison", getCet1HorizonLabel(activeCet1ComparisonHorizon), "Change comparison horizon")
   );
 }
@@ -148,6 +153,14 @@ function renderCet1FilterPanel(model, state) {
   if (!activeCet1FilterPanel) activeCet1FilterPanel = "cet1-reference-date";
   panel.hidden = false;
   panel.replaceChildren();
+
+  if (activeCet1FilterPanel === "unit") {
+    panel.append(createUnitSelectionPanel({
+      selectedUnit: state.selectedUnit,
+      onSelect: (unit) => actionsRef?.updateSelectedUnit?.(unit)
+    }));
+    return;
+  }
 
   const article = document.createElement("article");
   article.className = "cost-of-risk-audit-intro cost-of-risk-reference-date-panel";
@@ -517,6 +530,8 @@ function renderOutputFloor(state) {
   }
 
   activeOutputFloorReference = model.referenceDate.name;
+  renderOutputFloorActiveFilters(state);
+  renderOutputFloorFilterPanel(state);
 
   container.append(
     createOutputFloorReferenceSelector(model, state),
@@ -524,6 +539,25 @@ function renderOutputFloor(state) {
     createOutputFloorScenarioBridge(model, state),
     createOutputFloorBenchmark(model, state)
   );
+}
+
+function renderOutputFloorActiveFilters(state) {
+  elements.activeFilters?.replaceChildren(
+    createIrbUnitFilterChip(state.selectedUnit, activeOutputFloorFilterPanel === "unit")
+  );
+}
+
+function renderOutputFloorFilterPanel(state) {
+  if (!elements.contextPanel) return;
+  elements.contextPanel.hidden = activeOutputFloorFilterPanel !== "unit";
+  if (activeOutputFloorFilterPanel !== "unit") {
+    elements.contextPanel.replaceChildren();
+    return;
+  }
+  elements.contextPanel.replaceChildren(createUnitSelectionPanel({
+    selectedUnit: state.selectedUnit,
+    onSelect: (unit) => actionsRef?.updateSelectedUnit?.(unit)
+  }));
 }
 
 function createOutputFloorReferenceSelector(model, state) {
@@ -575,7 +609,7 @@ function renderDensity(state) {
   if (activeDensityBenchmarkPortfolio) {
     activeDensityBenchmarkPortfolio = model.selectedPortfolio.code;
   }
-  renderDensityActiveFilters(model);
+  renderDensityActiveFilters(model, state);
   renderDensityFilterPanel(model, state);
   container.append(createDensityTable(model, state), createDensityBenchmarkPanel(model));
   const nextTableWrap = container.querySelector(".irb-density-table-wrap");
@@ -583,11 +617,12 @@ function renderDensity(state) {
   renderDensityBenchmarkChart(model, state);
 }
 
-function renderDensityActiveFilters(model) {
+function renderDensityActiveFilters(model, state) {
   const container = elements.activeFilters;
   if (!container) return;
   container.replaceChildren(
     createDensityFilterChip("reference-date", model.referenceDate.label, "Change IRB reference date"),
+    createIrbUnitFilterChip(state.selectedUnit, activeDensityFilterPanel === "unit"),
     createDensityFilterChip("y-axis", model.selectedY.label, "Change exposure component")
   );
 }
@@ -616,6 +651,14 @@ function renderDensityFilterPanel(model, state) {
   panel.hidden = !activeDensityFilterPanel;
   if (!activeDensityFilterPanel) {
     panel.replaceChildren();
+    return;
+  }
+
+  if (activeDensityFilterPanel === "unit") {
+    panel.replaceChildren(createUnitSelectionPanel({
+      selectedUnit: state.selectedUnit,
+      onSelect: (unit) => actionsRef?.updateSelectedUnit?.(unit)
+    }));
     return;
   }
 
@@ -671,6 +714,14 @@ function renderDensityFilterPanel(model, state) {
   table.append(body);
   article.append(table);
   panel.replaceChildren(article);
+}
+
+function createIrbUnitFilterChip(selectedUnit, isOpen) {
+  return createUnitFilterChip({
+    selectedUnit,
+    isOpen,
+    dataset: { irbFilterToggle: "unit" }
+  });
 }
 
 function renderDensityYAxisPanel(panel, model, state) {

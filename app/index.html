@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260814-irb-y-tree">
-    <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260820-credit-risk-module">
+    <link rel="stylesheet" href="./src/styles.css?v=20260820-global-unit-filter">
+    <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260820-global-unit-filter">
   </head>
   <body>
     <div class="app-shell">
@@ -64,9 +64,9 @@
             <div class="explorer-workspace">
               <div class="explorer-main-pane">
                 <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
-                  <div class="explorer-template-static" aria-label="Active template">
+                  <button class="axis-tab explorer-template-static" type="button" aria-label="Show templates" aria-controls="explorer-context-detail" aria-expanded="true" data-explorer-template-control>
                     <span class="explorer-template-static-value" data-axis-caption="template">-</span>
-                  </div>
+                  </button>
                   <button class="axis-tab is-active" type="button" role="tab" aria-selected="true" data-explorer-axis="y">
                     <span class="axis-tab-value" data-axis-caption="y">Row : -</span>
                   </button>
@@ -77,6 +77,7 @@
                     <span class="axis-tab-value" data-axis-caption="z">Tab : -</span>
                   </button>
                 </div>
+                <div id="explorer-active-filters" class="cost-of-risk-active-filters explorer-active-filters" aria-label="Active Explorer filters"></div>
                 <div class="metric-table-wrap">
                   <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
                 </div>
@@ -85,7 +86,10 @@
                   <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
                 </div>
               </div>
-              <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information"></aside>
+              <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information">
+                <div id="explorer-context-selection" class="cost-of-risk-context-selected-pane" aria-label="Current Explorer selection"></div>
+                <div id="explorer-context-detail" class="cost-of-risk-context-detail-pane" aria-label="Explorer selection options"></div>
+              </aside>
             </div>
           </article>
         </section>
@@ -319,6 +323,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260820-credit-risk-module"></script>
+    <script type="module" src="./src/main.js?v=20260820-global-unit-filter"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@ import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { clampCostOfRiskSmoothingWindow } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -35,10 +35,12 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js?v=20260805-template-desc";
 import { getLatestState } from "./appState.js";
+import { createUnitFilterChip, createUnitSelectionPanel } from "./unitFilterView.js?v=20260820-global-unit-filter";
 
 let rerenderApp = () => {};
 let setActiveModule = () => {};
 let updateSelectedJst = () => {};
+let updateSelectedUnit = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
@@ -87,14 +89,18 @@ const elements = {
     y: document.querySelector('[data-axis-caption="y"]'),
     z: document.querySelector('[data-axis-caption="z"]')
   },
+  explorerActiveFilters: document.querySelector("#explorer-active-filters"),
   explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
   explorerBenchmarkClose: document.querySelector("#explorer-benchmark-close"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
+  explorerContextDetail: document.querySelector("#explorer-context-detail"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
+  explorerContextSelection: document.querySelector("#explorer-context-selection"),
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerMainPane: document.querySelector(".explorer-main-pane"),
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
+  explorerTemplateControl: document.querySelector("[data-explorer-template-control]"),
   unitSelect: document.querySelector("#unit-select")
 };
 
@@ -102,6 +108,7 @@ export function wireExplorerUi(actions, rerender) {
   rerenderApp = rerender;
   setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
+  updateSelectedUnit = actions.updateSelectedUnit;
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
       if (button.disabled) return;
@@ -109,10 +116,15 @@ export function wireExplorerUi(actions, rerender) {
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       explorerBenchmarkViewActive = false;
-      clearExplorerContextTopic();
       getActiveExplorerContext().activeAxis = button.getAttribute("data-explorer-axis") || "y";
       rerenderApp(actions.getState());
     });
+  });
+  elements.explorerTemplateControl?.addEventListener("click", () => {
+    explorerContextTopic = "";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(actions.getState());
+    renderExplorerContextPanel(actions.getState());
   });
   elements.explorerBenchmarkClose?.addEventListener("click", hideExplorerBenchmarkView);
   elements.explorerTableWrap?.addEventListener("scroll", scheduleExplorerStickyParentsUpdate, { passive: true });
@@ -133,7 +145,6 @@ export function wireExplorerUi(actions, rerender) {
 
     const row = event.target.closest("tbody tr[data-point-code]");
     if (row) {
-      clearExplorerContextTopic();
       const cell = event.target.closest("td[data-explorer-cell-column]");
       const cellColumnIndex = cell ? Number(cell.dataset.explorerCellColumn) : 0;
       selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex });
@@ -152,7 +163,6 @@ export function wireExplorerUi(actions, rerender) {
     if (!row) return;
 
     event.preventDefault();
-    clearExplorerContextTopic();
     selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
@@ -162,10 +172,6 @@ export function showExplorerPeerSelection(actions) {
   explorerPeerSelectionActions = actions;
   explorerContextTopic = "peer-selection";
   renderExplorerContextPanel(actions.getState());
-}
-
-function clearExplorerContextTopic() {
-  explorerContextTopic = "";
 }
 
 function createExplorerTemplateContext() {
@@ -426,6 +432,7 @@ export function renderExplorer(state) {
   updateUrlExplorerSelectionParams();
   elements.unitSelect.value = state.selectedUnit;
   renderExplorerAxisTabs();
+  renderExplorerActiveFilters(state);
   renderExplorerContextPanel(state);
 
   // The benchmark chart no longer replaces the table: it splits the main
@@ -1083,7 +1090,7 @@ function showExplorerBenchmarkView() {
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
-function buildExplorerBenchmark() {
+function buildExplorerBenchmark(jstCodes = null) {
   const state = getLatestState();
   const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
   const context = getActiveExplorerContext();
@@ -1099,7 +1106,8 @@ function buildExplorerBenchmark() {
     return { dates: [], format, isContribution: false, label, series: [] };
   }
 
-  const series = getPeerBenchmarkJstCodes(state).map((jstCode) => {
+  const benchmarkJstCodes = jstCodes ?? getPeerBenchmarkJstCodes(state);
+  const series = benchmarkJstCodes.map((jstCode) => {
     const rows = getBenchmarkRows(state, indexes, tableId, selections, jstCode);
     const baseRows = contribution
       ? getBenchmarkRows(state, indexes, contribution.tableId || tableId, contribution.selections, jstCode)
@@ -1124,6 +1132,75 @@ function buildExplorerBenchmark() {
     label: contribution ? `${label} / ${contribution.label}` : label,
     series
   };
+}
+
+function renderExplorerActiveFilters(state) {
+  if (!elements.explorerActiveFilters) return;
+
+  const jstChip = document.createElement("span");
+  jstChip.className = "cost-of-risk-filter-chip explorer-filter-chip-jst";
+  jstChip.classList.toggle("is-open", explorerContextTopic === "jst-code");
+
+  const jstToggle = document.createElement("button");
+  jstToggle.type = "button";
+  jstToggle.className = "cost-of-risk-filter-chip-toggle";
+  jstToggle.setAttribute("aria-expanded", String(explorerContextTopic === "jst-code"));
+  jstToggle.setAttribute("aria-controls", "explorer-context-detail");
+
+  const jstValue = document.createElement("span");
+  jstValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  jstValue.textContent = state?.selectedJst || "JST";
+  jstToggle.append(jstValue);
+  jstToggle.addEventListener("click", () => {
+    explorerContextTopic = "jst-code";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
+  });
+
+  jstChip.append(jstToggle);
+
+  const reference = getSelectedExplorerReference(state);
+  const dateChip = document.createElement("span");
+  dateChip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--date explorer-filter-chip-date";
+  dateChip.classList.toggle("is-open", explorerContextTopic === "reference-date");
+
+  const dateToggle = document.createElement("button");
+  dateToggle.type = "button";
+  dateToggle.className = "cost-of-risk-filter-chip-toggle";
+  dateToggle.setAttribute("aria-expanded", String(explorerContextTopic === "reference-date"));
+  dateToggle.setAttribute("aria-controls", "explorer-context-detail");
+  dateToggle.setAttribute("aria-label", "Change reference date");
+
+  const dateValue = document.createElement("span");
+  dateValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  dateValue.textContent = reference ? formatReferenceQuarterLabel(reference.label) : "Reference date";
+  dateToggle.append(dateValue);
+  dateToggle.addEventListener("click", () => {
+    explorerContextTopic = "reference-date";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
+  });
+
+  dateChip.append(dateToggle);
+  const unitChip = createUnitFilterChip({
+    selectedUnit: state?.selectedUnit,
+    isOpen: explorerContextTopic === "unit",
+    onOpen: () => {
+      explorerContextTopic = "unit";
+      renderExplorerAxisTabs();
+      renderExplorerActiveFilters(getLatestState());
+      renderExplorerContextPanel(getLatestState());
+    }
+  });
+  elements.explorerActiveFilters.replaceChildren(jstChip, dateChip, unitChip);
+}
+
+function getSelectedExplorerReference(state = getLatestState()) {
+  const references = getReferenceColumns(state?.columns ?? []);
+  const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
+  return references[references.length - 1 - selectedColumnIndex] ?? references.at(-1) ?? null;
 }
 
 function getCompleteExplorerSelectionsForBenchmark(context, activeAxis) {
@@ -1186,6 +1263,12 @@ function renderExplorerAxisTabs() {
   const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
   const axisOptions = getExplorerAxisOptions(getLatestState() ?? { columns: [], rows: [], explorerPoints: [] }, tableId);
 
+  if (elements.explorerTemplateControl) {
+    const showsTemplates = explorerContextTopic === "";
+    elements.explorerTemplateControl.classList.toggle("is-panel-active", showsTemplates);
+    elements.explorerTemplateControl.setAttribute("aria-expanded", String(showsTemplates));
+  }
+
   elements.explorerAxisButtons.forEach((button) => {
     const axis = button.getAttribute("data-explorer-axis");
     const isActive = axis === activeAxis;
@@ -1213,9 +1296,8 @@ function renderExplorerAxisTabs() {
   });
 }
 
-// The template slot is a static title, not a switchable tab like row/column/
-// tab (see index.html's explorer-template-static), so it's plain typography
-// (big code, lighter description) rather than a bordered axis-tab card.
+// The template uses the same compact pill shape as the switchable axes, but
+// deliberately remains static: template changes still happen in the panel.
 function createExplorerTemplateCaption(activeTemplate) {
   const wrapper = document.createElement("span");
   wrapper.className = "explorer-template-static-lines";
@@ -1238,6 +1320,26 @@ function createExplorerTemplateCaption(activeTemplate) {
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
 
+  renderExplorerSelectionPane();
+
+  if (explorerContextTopic === "jst-code") {
+    renderExplorerJstSelectionPanel(state);
+    return;
+  }
+
+  if (explorerContextTopic === "reference-date") {
+    renderExplorerReferenceDatePanel(state);
+    return;
+  }
+
+  if (explorerContextTopic === "unit") {
+    replaceExplorerContextDetail(createUnitSelectionPanel({
+      selectedUnit: state?.selectedUnit,
+      onSelect: (unit) => updateSelectedUnit(unit)
+    }));
+    return;
+  }
+
   if (explorerContextTopic === "peer-selection") {
     renderExplorerPeerSelectionPanel(state);
     return;
@@ -1251,14 +1353,119 @@ function renderExplorerContextPanel(state) {
     article.append(createExplorerReturnButton(explorerReturnTarget));
   }
 
-  // Simplified on purpose: the context panel always shows just the
-  // selection summary card and the template list, whether or not the
-  // benchmark chart is open — opening it must not replace this panel with
-  // anything else (see createExplorerSelectionSummaryCard's Benchmark
-  // button, which just toggles explorerBenchmarkViewActive in place).
-  article.append(createExplorerSelectionSummaryCard());
+  // The lower pane shows templates by default. The selection and its actions
+  // live in a separate, permanent pane above and cannot be replaced here.
   article.append(createExplorerTemplateList(getExplorerTemplates(state), activeTemplate?.tableId ?? activeExplorerTemplateId));
-  elements.explorerContextPanel.replaceChildren(article);
+  replaceExplorerContextDetail(article);
+}
+
+function renderExplorerSelectionPane() {
+  if (!elements.explorerContextSelection) return;
+  elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
+}
+
+function replaceExplorerContextDetail(...nodes) {
+  if (!elements.explorerContextDetail) return;
+  elements.explorerContextDetail.replaceChildren(...nodes);
+}
+
+function renderExplorerJstSelectionPanel(state) {
+  const article = document.createElement("article");
+  article.className = "explorer-context-article explorer-jst-selection-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "explorer-context-eyebrow";
+  eyebrow.textContent = "Breakdown of selection by:";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "JST code";
+
+  const benchmark = buildExplorerBenchmark(state?.jstOptions ?? []);
+  const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
+  const valuesByJst = new Map(benchmark.series.map((item) => {
+    const point = item.values[item.values.length - 1 - selectedColumnIndex] ?? null;
+    return [item.jstCode, point?.value ?? null];
+  }));
+  const list = document.createElement("div");
+  list.className = "explorer-jst-selection-list";
+  list.setAttribute("role", "listbox");
+  list.setAttribute("aria-label", "JST code");
+
+  (state?.jstOptions ?? []).forEach((jstCode) => {
+    const isActive = jstCode === state?.selectedJst;
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "explorer-jst-selection-row";
+    row.classList.toggle("is-active", isActive);
+    row.setAttribute("role", "option");
+    row.setAttribute("aria-selected", String(isActive));
+    row.dataset.explorerJstCode = jstCode;
+
+    const label = document.createElement("span");
+    label.textContent = jstCode;
+    const metric = document.createElement("span");
+    const rawValue = valuesByJst.get(jstCode);
+    metric.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
+    row.append(label, metric);
+    row.addEventListener("click", () => {
+      if (jstCode === getLatestState()?.selectedJst) return;
+      updateSelectedJst(jstCode);
+    });
+    list.append(row);
+  });
+
+  article.append(eyebrow, title, list);
+  replaceExplorerContextDetail(article);
+}
+
+function renderExplorerReferenceDatePanel(state) {
+  const article = document.createElement("article");
+  article.className = "explorer-context-article explorer-reference-date-panel";
+
+  const eyebrow = document.createElement("div");
+  eyebrow.className = "explorer-context-eyebrow";
+  eyebrow.textContent = "Breakdown of selection by:";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Reference date";
+
+  const benchmark = buildExplorerBenchmark(state?.selectedJst ? [state.selectedJst] : []);
+  const selectedReference = getSelectedExplorerReference(state);
+  const valuesByReference = new Map((benchmark.series[0]?.values ?? []).map((point) => [point.label, point.value]));
+  const list = document.createElement("div");
+  list.className = "explorer-jst-selection-list explorer-reference-date-list";
+  list.setAttribute("role", "listbox");
+  list.setAttribute("aria-label", "Reference date");
+
+  [...benchmark.dates].reverse().forEach((reference, reverseIndex) => {
+    const isActive = reference.label === selectedReference?.label;
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "explorer-jst-selection-row explorer-reference-date-row";
+    row.classList.toggle("is-active", isActive);
+    row.setAttribute("role", "option");
+    row.setAttribute("aria-selected", String(isActive));
+
+    const label = document.createElement("span");
+    label.textContent = formatReferenceQuarterLabel(reference.label);
+    const metric = document.createElement("span");
+    const rawValue = valuesByReference.get(reference.label);
+    metric.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
+    row.append(label, metric);
+    row.addEventListener("click", () => {
+      const context = getActiveExplorerContext();
+      if (context.selectedCellColumnIndex === reverseIndex) return;
+      context.selectedCellColumnIndex = reverseIndex;
+      saveExplorerScrollPosition();
+      if (getLatestState()) rerenderApp(getLatestState());
+    });
+    list.append(row);
+  });
+
+  article.append(eyebrow, title, list);
+  replaceExplorerContextDetail(article);
 }
 
 function renderExplorerPeerSelectionPanel(state) {
@@ -1335,7 +1542,7 @@ function renderExplorerPeerSelectionPanel(state) {
   hint.textContent = "Use Select all or individual checkboxes to adjust the peer set; charts refresh as soon as the selection changes.";
   article.append(hint);
 
-  elements.explorerContextPanel.replaceChildren(article);
+  replaceExplorerContextDetail(article);
 }
 
 function renderExplorerPeerDisplayControl(state) {

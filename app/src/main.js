@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260820-credit-risk-module";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260820-global-unit-filter";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -338,12 +338,12 @@ function updateUrlPeerDisplayModeParam(peerDisplayMode) {
 
 function getUrlUnitParam() {
   const unit = readUrlStateParams().get(UNIT_URL_PARAM) ?? "";
-  return ["millions", "billions", "thousands", "units"].includes(unit) ? unit : "millions";
+  return ["millions", "billions", "thousands", "euros"].includes(unit) ? unit : "millions";
 }
 
 function updateUrlUnitParam(unit) {
   const url = createUrlState();
-  url.searchParams.set(UNIT_URL_PARAM, ["billions", "thousands", "units"].includes(unit) ? unit : "millions");
+  url.searchParams.set(UNIT_URL_PARAM, ["billions", "thousands", "euros"].includes(unit) ? unit : "millions");
   replaceAppUrlState(url);
 }
 

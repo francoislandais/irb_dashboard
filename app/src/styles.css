@@ -725,7 +725,7 @@ button:focus-visible {
 .irb-output-floor-hero-ratios {
   display: grid;
   grid-template-columns: repeat(3, minmax(170px, 1fr));
-  gap: 10px;
+  gap: 14px;
 }
 
 .irb-output-floor-card,
@@ -1288,7 +1288,7 @@ button:focus-visible {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding: 8px 18px 18px;
+  padding: 18px;
 }
 
 .explorer-workspace {
@@ -1303,7 +1303,7 @@ button:focus-visible {
 
 .explorer-main-pane {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: 6px;
   min-height: 0;
   min-width: 0;
@@ -1322,26 +1322,28 @@ button:focus-visible {
   align-content: start;
   grid-template-rows:
     auto
+    auto
     minmax(200px, 320px)
     minmax(220px, 460px);
 }
 
 .explorer-context-panel {
   align-self: stretch;
-  align-content: start;
+  align-content: stretch;
   box-sizing: border-box;
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  grid-template-rows: 132px minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
   max-height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #ffffff;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .explorer-context-article {
@@ -1442,7 +1444,8 @@ button:focus-visible {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 6px;
-  height: 132px;
+  box-sizing: border-box;
+  height: 100%;
 }
 
 .explorer-selection-summary-description {
@@ -1630,7 +1633,7 @@ table {
 
 .metric-table-wrap {
   position: relative;
-  grid-row: 2;
+  grid-row: 3;
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -1641,7 +1644,7 @@ table {
    .cost-of-risk-chart's width: 80% resolves against the exact same basis. */
 .explorer-benchmark-view {
   position: relative;
-  grid-row: 3;
+  grid-row: 4;
   width: min(100%, 900px);
   min-width: 0;
   min-height: 0;
@@ -1650,9 +1653,7 @@ table {
      doesn't clip either) — it was cutting off the chart's own bottom axis
      line whenever the row's actual height rounded a fraction of a pixel
      short of the chart's rendered height. */
-  /* .explorer-main-pane's row gap (6px) matches the header-row gaps, but
-     Cost of Risk's own table-to-chart gap is 14px (.cost-of-risk-tab-panel's
-     gap) — add the difference here so this specific gap matches too. */
+  /* Match Credit Risk's 14px separation between its principal blocks. */
   margin-top: 8px;
 }
 
@@ -1720,29 +1721,30 @@ table {
   align-items: center;
   gap: 8px;
   margin-left: var(--axis-tabs-offset-left);
-  max-width: 900px;
+  max-width: min(100%, 900px);
   min-width: 0;
+  padding: 2px 2px 6px;
+  width: min(100%, 900px);
 }
 
-/* Same pill as the Cost of Risk tabs (.cost-of-risk-tab): white/grey when
-   off, light blue fill + darker blue border + dark blue text when on.
-   Flexible (not a fixed 219px) so the three pills share whatever width is
-   actually left next to the template block, instead of overflowing it. */
+/* Same content-sized pill as the Credit Risk tabs: white/grey when off,
+   light blue fill + darker blue border + dark blue text when on. */
 .axis-tab {
   display: flex;
   align-items: center;
-  flex: 1 1 0;
-  min-height: 40px;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 34px;
   border: 1px solid #d8dfdb;
   border-radius: 999px;
   background: #ffffff;
   color: #5f6b65;
   cursor: pointer;
   font: inherit;
-  min-width: 0;
+  min-width: max-content;
   overflow: hidden;
-  padding: 6px 16px;
-  text-align: left;
+  padding: 8px 16px;
+  text-align: center;
 }
 
 .axis-tab[hidden] {
@@ -1779,6 +1781,7 @@ table {
   line-height: 1.2;
   white-space: nowrap;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
 .axis-tab.is-active .axis-tab-value {
@@ -1811,13 +1814,14 @@ table {
 
 .explorer-template-static {
   display: flex;
-  flex: 0 0 219px;
+  flex: 0 0 auto;
   align-items: center;
-  width: 219px;
-  max-width: 219px;
-  height: 78px;
-  margin-right: 16px;
-  padding-right: 16px;
+  width: auto;
+  max-width: none;
+  height: auto;
+  margin-right: 0;
+  padding: 8px 16px;
+  cursor: pointer;
 }
 
 .explorer-template-static-value {
@@ -1830,28 +1834,74 @@ table {
   display: grid;
   gap: 2px;
   min-width: 0;
+  text-align: center;
 }
 
 .explorer-template-static-code {
   display: block;
   overflow: hidden;
   color: var(--primary-dark);
-  font-size: 1.18rem;
-  font-weight: 400;
+  font-size: 0.75rem;
+  font-weight: 500;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .explorer-template-static-description {
-  display: -webkit-box;
-  overflow: hidden;
-  color: #66736d;
+  display: none;
+}
+
+.axis-tab.explorer-template-static:hover {
+  border-color: #c2cac5;
+  background: #eef2ef;
+  color: var(--primary-dark);
+}
+
+.explorer-active-filters {
+  grid-row: 2;
+  min-height: 28px;
+}
+
+.explorer-filter-chip-jst.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
+.explorer-filter-chip-date.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
+.explorer-jst-selection-list {
+  display: grid;
+  margin-top: 8px;
+}
+
+.explorer-jst-selection-row {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #e7ebe8;
+  color: #26332d;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
   font-size: 0.78rem;
   font-weight: 400;
-  line-height: 1.25;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 36px;
+  padding: 7px 8px;
+  text-align: left;
+}
+
+.explorer-jst-selection-row:hover {
+  background: #f4f7f5;
+}
+
+.explorer-jst-selection-row.is-active {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+  font-weight: 600;
 }
 
 .axis-tab-ratio {
