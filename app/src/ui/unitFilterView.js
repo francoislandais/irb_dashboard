@@ -1,12 +1,12 @@
 export const UNIT_FILTER_OPTIONS = [
-  { value: "millions", shortLabel: "€m", label: "Millions EUR" },
-  { value: "billions", shortLabel: "€bn", label: "Billions EUR" },
-  { value: "thousands", shortLabel: "€k", label: "Thousands EUR" },
-  { value: "euros", shortLabel: "€", label: "EUR" }
+  { value: "millions", shortLabel: "€ million", label: "€ million" },
+  { value: "billions", shortLabel: "€ billion", label: "€ billion" },
+  { value: "thousands", shortLabel: "€ thousand", label: "€ thousand" },
+  { value: "euros", shortLabel: "€", label: "€" }
 ];
 
 export function getUnitFilterLabel(selectedUnit) {
-  return UNIT_FILTER_OPTIONS.find((option) => option.value === selectedUnit)?.shortLabel ?? "€m";
+  return UNIT_FILTER_OPTIONS.find((option) => option.value === selectedUnit)?.shortLabel ?? "€ million";
 }
 
 export function createUnitFilterChip({ selectedUnit, isOpen = false, onOpen, dataset = {} }) {
@@ -50,10 +50,7 @@ export function createUnitSelectionPanel({ selectedUnit, onSelect }) {
     const label = document.createElement("span");
     label.className = "cost-of-risk-filter-selection-option-label";
     label.textContent = option.label;
-    const value = document.createElement("strong");
-    value.className = "cost-of-risk-filter-selection-option-value";
-    value.textContent = option.shortLabel;
-    button.append(label, value);
+    button.append(label);
     button.addEventListener("click", () => onSelect(option.value));
     cell.append(button);
     row.append(cell);

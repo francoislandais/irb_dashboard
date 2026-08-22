@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260821-explorer-evolution-frequency">
+    <link rel="stylesheet" href="./src/styles.css?v=20260822-explorer-date-focus">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260820-global-unit-filter">
   </head>
   <body>
@@ -29,10 +29,10 @@
           <label class="field compact-field">
             <span>Unité</span>
             <select id="unit-select">
-              <option value="millions" selected>Millions EUR</option>
-              <option value="billions">Milliards EUR</option>
-              <option value="thousands">K EUR</option>
-              <option value="euros">EUR</option>
+              <option value="millions" selected>€ million</option>
+              <option value="billions">€ billion</option>
+              <option value="thousands">€ thousand</option>
+              <option value="euros">€</option>
             </select>
           </label>
           <button id="peers-button" class="topbar-button" type="button" disabled>Peers</button>
@@ -82,7 +82,6 @@
                   <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
                 </div>
                 <div id="explorer-benchmark-view" class="explorer-benchmark-view" hidden>
-                  <button id="explorer-benchmark-close" class="explorer-benchmark-close" type="button" aria-label="Close benchmark">&times;</button>
                   <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
                 </div>
               </div>
@@ -323,6 +322,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260821-explorer-evolution-frequency"></script>
+    <script type="module" src="./src/main.js?v=20260822-explorer-date-focus"></script>
   </body>
 </html>

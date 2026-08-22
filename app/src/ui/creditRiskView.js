@@ -136,7 +136,7 @@ import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
 import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260820-global-unit-filter";
-import { createUnitSelectionPanel } from "./unitFilterView.js?v=20260820-global-unit-filter";
+import { createUnitSelectionPanel } from "./unitFilterView.js?v=20260822-unit-labels";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,

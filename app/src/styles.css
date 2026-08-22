@@ -1661,30 +1661,6 @@ table {
   display: none;
 }
 
-/* Overlaid on the chart itself (not a header row) so it never eats into
-   the chart's own fixed height — see .explorer-benchmark-view. Nudged in
-   from the corner so it doesn't sit right on the edge. */
-.explorer-benchmark-close {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  z-index: 1;
-  border: 0;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #66736d;
-  cursor: pointer;
-  font-size: 1.1rem;
-  line-height: 1;
-  padding: 4px 8px;
-}
-
-.explorer-benchmark-close:hover,
-.explorer-benchmark-close:focus-visible {
-  background: #eef2ef;
-  color: var(--primary-dark);
-}
-
 /* No size override here on purpose: it inherits .cost-of-risk-chart's
    height: 300px / width: 80% as-is, so this is pixel-identical to every
    Cost of Risk benchmark chart. */
@@ -1875,6 +1851,14 @@ table {
   background: rgba(36, 53, 45, 0.08);
 }
 
+.explorer-filter-chip-display.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
+.explorer-filter-chip-benchmark.is-open .cost-of-risk-filter-chip-toggle {
+  background: rgba(36, 53, 45, 0.08);
+}
+
 .explorer-jst-selection-list {
   display: grid;
   margin-top: 8px;
@@ -1906,6 +1890,35 @@ table {
   background: #eaf2fa;
   color: var(--primary-dark);
   font-weight: 600;
+}
+
+.explorer-display-mode-row,
+.explorer-evolution-frequency-row {
+  align-content: center;
+  align-items: start;
+  gap: 2px;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 52px;
+}
+
+.explorer-display-mode-row > span,
+.explorer-evolution-frequency-row > span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.explorer-display-mode-row > span:last-child,
+.explorer-evolution-frequency-row > span:last-child {
+  color: #66736d;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.explorer-display-mode-row.is-active > span:last-child,
+.explorer-evolution-frequency-row.is-active > span:last-child {
+  color: color-mix(in srgb, var(--primary-dark) 72%, #ffffff);
 }
 
 .axis-tab-ratio {
@@ -2326,6 +2339,22 @@ table {
   border-bottom: 1px solid #eef1ef;
 }
 
+.metric-table .variation-column-start {
+  background-image: linear-gradient(90deg, #ffffff 0, #ffffff 16px, transparent 16px) !important;
+  background-repeat: no-repeat;
+  padding-left: 28px;
+}
+
+.metric-table thead .variation-column-start {
+  background-color: #f6f8f7;
+  background-image: linear-gradient(90deg, #ffffff 0, #ffffff 16px, transparent 16px);
+}
+
+.metric-table tbody tr.is-selected > td.variation-column-start {
+  background-color: #eaf2fa !important;
+  background-image: linear-gradient(90deg, #ffffff 0, #ffffff 16px, transparent 16px) !important;
+}
+
 .metric-table tbody tr {
   cursor: pointer;
 }
@@ -2377,6 +2406,20 @@ table {
   width: 88px;
   min-width: 88px;
   max-width: 88px;
+}
+
+.metric-table td.date-focus-column,
+.metric-table thead th.date-focus-column {
+  width: 126px;
+  min-width: 126px;
+  max-width: 126px;
+}
+
+.metric-table td.date-focus-column.variation-column-start,
+.metric-table thead th.date-focus-column.variation-column-start {
+  width: 146px;
+  min-width: 146px;
+  max-width: 146px;
 }
 
 .metric-table .description-column {
