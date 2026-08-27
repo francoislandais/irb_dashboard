@@ -1800,8 +1800,8 @@
 .cost-of-risk-definition-panel {
   align-content: start;
   background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 0;
   display: grid;
   min-height: 0;
   min-width: 0;
@@ -2127,12 +2127,9 @@
   width: 100%;
 }
 
-/* Same frame as every other tab's data panel (.cost-of-risk-npl-flows-panel,
-   .cost-of-risk-definition-panel, etc.) so the border stays in the exact
-   same place when switching tabs, instead of the Summary tab having its own.
-   It hugs its content (align-self: start, no forced height) rather than
-   stretching to fill the whole split-section — the frame should wrap the
-   data, not the leftover empty space below it. */
+/* The Summary data block follows the flat leading-panel treatment used by
+   the other main Credit Risk tabs. It hugs its content rather than stretching
+   to fill the unused space below it. */
 .cost-of-risk-summary-table-panel {
   align-content: start;
   align-self: start;
@@ -3273,6 +3270,16 @@
   min-width: 0;
   width: 80%;
   padding: 10px 12px 8px;
+}
+
+/* The leading analytical block is intentionally flat across the four main
+   Credit Risk tabs. The lower time-series block keeps its own frame. */
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="contributions"]
+  > .cost-of-risk-split-section:first-child .cost-of-risk-waterfall,
+.cost-of-risk-tab-panel[data-cost-of-risk-panel="stage-transfers"]
+  > .cost-of-risk-split-section:first-child .cost-of-risk-waterfall {
+  border: 0;
+  border-radius: 0;
 }
 
 .cost-of-risk-stage-reconciliation-summary {
