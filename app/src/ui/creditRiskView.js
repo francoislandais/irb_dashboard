@@ -2712,6 +2712,7 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
   const rowSource = isCounterpartyCell ? summary.counterpartyRows : summary.rows;
   const row = (rowSource ?? []).find((candidate) => candidate.key === rowKey);
   if (activeCostOfRiskTab !== "summary" || !selectedCell || !row) {
+    clearCostOfRiskSelectedDataSummary();
     renderCostOfRiskAuditPanelIntro();
     return;
   }
