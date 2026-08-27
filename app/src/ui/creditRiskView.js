@@ -135,8 +135,8 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260820-global-unit-filter";
-import { createUnitSelectionPanel } from "./unitFilterView.js?v=20260822-unit-labels";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260827-quick-filter-menu";
+import { createUnitSelectionPanel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260822-unit-labels";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,
@@ -227,6 +227,7 @@ let rerenderApp = () => {};
 let setActiveModule = () => {};
 let updateSelectedJst = () => {};
 let updateSelectedUnit = () => {};
+let costOfRiskQuickFilterMenu = null;
 let activeCostOfRiskXAxisCode = COST_OF_RISK_X_AXIS_CODE;
 let activeCostOfRiskSmoothingWindow = 4;
 let activeCostOfRiskLastSmoothingWindow = 4;
@@ -595,6 +596,7 @@ export function wireCreditRiskUi(actions, rerender) {
   elements.costOfRiskTabs?.addEventListener("scroll", updateCostOfRiskTabsFade, { passive: true });
   window.addEventListener("resize", updateCostOfRiskTabsFade);
   elements.costOfRiskActiveFilters?.addEventListener("click", (event) => {
+    closeCostOfRiskQuickFilterMenu();
     const jstHelp = event.target.closest?.("[data-cost-of-risk-jst-help]");
     if (jstHelp) {
       event.preventDefault();
@@ -725,7 +727,17 @@ export function wireCreditRiskUi(actions, rerender) {
     pulseCostOfRiskContextPanel();
     rerenderApp(actions.getState());
   });
+  elements.costOfRiskActiveFilters?.addEventListener("contextmenu", (event) => {
+    const target = event.target.closest?.("[data-cost-of-risk-quick-filter]");
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openCostOfRiskQuickFilterMenu(target, target.dataset.costOfRiskQuickFilter, actions);
+  });
   document.addEventListener("click", (event) => {
+    if (costOfRiskQuickFilterMenu && !costOfRiskQuickFilterMenu.contains(event.target)) {
+      closeCostOfRiskQuickFilterMenu();
+    }
     if (!hasOpenCostOfRiskFilterMenu()) return;
     if (elements.costOfRiskActiveFilters?.contains(event.target)) return;
     if (closeCostOfRiskFilterMenus()) rerenderApp(actions.getState());
@@ -737,6 +749,12 @@ export function wireCreditRiskUi(actions, rerender) {
       if (closeCostOfRiskFilterMenus()) rerenderApp(actions.getState());
     }, 0);
   }, true);
+  window.addEventListener("blur", closeCostOfRiskQuickFilterMenu);
+  window.addEventListener("resize", closeCostOfRiskQuickFilterMenu);
+  document.addEventListener("scroll", closeCostOfRiskQuickFilterMenu, true);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeCostOfRiskQuickFilterMenu();
+  });
   elements.costOfRiskDashboard?.addEventListener("click", (event) => {
     const definitionToggle = event.target.closest?.("[data-cost-of-risk-definition-filter-toggle]");
     if (definitionToggle) {
@@ -1520,6 +1538,116 @@ export function renderCreditRisk(state) {
     clearCostOfRiskAuditTable();
   }
   scheduleCostOfRiskChartReflow();
+}
+
+function openCostOfRiskQuickFilterMenu(anchor, kind, actions) {
+  closeCostOfRiskQuickFilterMenu();
+  const options = getCostOfRiskQuickFilterOptions(kind, actions.getState());
+  if (options.length === 0) return;
+
+  const menu = document.createElement("div");
+  menu.className = "cost-of-risk-quick-filter-menu";
+  menu.setAttribute("role", "menu");
+  menu.setAttribute("aria-label", `Quick ${kind} selection`);
+
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.className = "cost-of-risk-quick-filter-option";
+    button.classList.toggle("is-active", Boolean(option.active));
+    button.type = "button";
+    button.setAttribute("role", "menuitemradio");
+    button.setAttribute("aria-checked", String(Boolean(option.active)));
+    button.disabled = Boolean(option.disabled);
+    button.textContent = option.label;
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeCostOfRiskQuickFilterMenu();
+      option.select();
+    });
+    menu.append(button);
+  });
+
+  document.body.append(menu);
+  costOfRiskQuickFilterMenu = menu;
+  const anchorRect = anchor.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+  const viewportPadding = 8;
+  const left = Math.min(
+    Math.max(viewportPadding, anchorRect.left),
+    Math.max(viewportPadding, window.innerWidth - menuRect.width - viewportPadding)
+  );
+  const availableBelow = window.innerHeight - anchorRect.bottom - viewportPadding;
+  const top = availableBelow >= Math.min(menuRect.height, 240)
+    ? anchorRect.bottom + 4
+    : Math.max(viewportPadding, anchorRect.top - menuRect.height - 4);
+  menu.style.left = `${Math.round(left)}px`;
+  menu.style.top = `${Math.round(top)}px`;
+  const initialOption = menu.querySelector(".is-active") ?? menu.querySelector("button:not(:disabled)");
+  initialOption?.scrollIntoView?.({ block: "nearest" });
+  initialOption?.focus?.({ preventScroll: true });
+}
+
+function closeCostOfRiskQuickFilterMenu() {
+  costOfRiskQuickFilterMenu?.remove();
+  costOfRiskQuickFilterMenu = null;
+}
+
+function getCostOfRiskQuickFilterOptions(kind, state) {
+  const createOptions = (options, activeValue, select) => (options ?? []).map((option) => ({
+    active: option.value === activeValue,
+    disabled: option.disabled,
+    label: option.label ?? option.value,
+    select: () => select(option.value)
+  }));
+
+  if (kind === "jst") {
+    return createOptions(
+      (state?.jstOptions ?? []).map((value) => ({ label: value, value })),
+      state?.selectedJst,
+      (value) => updateSelectedJst(value)
+    );
+  }
+  if (kind === "referenceDate") {
+    const options = [...getReferenceColumns(state?.columns ?? [])]
+      .reverse()
+      .map((column) => ({ label: formatReferenceQuarterLabel(column.label), value: column.label }));
+    return createOptions(options, activeCostOfRiskReferenceDate, selectCostOfRiskReferenceDate);
+  }
+  if (kind === "unit") {
+    return createOptions(UNIT_FILTER_OPTIONS, state?.selectedUnit, updateSelectedUnit);
+  }
+  if (kind === "displayMode") {
+    return createOptions([
+      { label: "Relative display", value: "ratio" },
+      { label: "Absolute display", value: "amount" }
+    ], getActiveCostOfRiskDisplayMode(), (value) => {
+      setCostOfRiskGlobalDisplayMode(value);
+      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = value;
+      if (getLatestState()) rerenderApp(getLatestState());
+    });
+  }
+  if (kind === "periodMode") {
+    return createOptions([
+      { label: "Quarterly flow", value: COST_OF_RISK_PERIOD_MODE_QUARTERLY },
+      { label: "Year-to-date", value: COST_OF_RISK_PERIOD_MODE_YTD },
+      { label: "Annualized", value: COST_OF_RISK_PERIOD_MODE_ANNUALIZED }
+    ], activeCostOfRiskPeriodMode, selectCostOfRiskPeriodMode);
+  }
+
+  const optionKeyByFilter = {
+    asset: "assets",
+    balanceScope: "balanceScopes",
+    counterparty: "counterparties",
+    stage: "stages"
+  };
+  const optionsKey = optionKeyByFilter[kind];
+  if (!optionsKey) return [];
+  return createOptions(
+    latestCostOfRiskFilterOptions?.[optionsKey],
+    activeCostOfRiskFilters[kind],
+    (value) => applyCostOfRiskFilterSelection(kind, value)
+  );
 }
 
 function normalizeCostOfRiskGeographyCellKeyForDisplayMode(cellKey, displayMode) {
@@ -4433,6 +4561,8 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
         }
       },
       marginBottom: 64,
+      marginLeft: 0,
+      spacingLeft: 0,
       type: "line"
     },
     credits: { enabled: false },
@@ -4462,15 +4592,9 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
       type: "category"
     },
     yAxis: {
-      gridLineColor: "#edf0ee",
-      labels: {
-        formatter() {
-          return formatCostOfRiskDisplayValue(this.value, displayMode, selectedUnit);
-        },
-        style: { color: "#5f6b65" }
-      },
-      lineColor: "#aeb8b2",
-      lineWidth: 1,
+      gridLineWidth: 0,
+      labels: { enabled: false },
+      lineWidth: 0,
       max: waterfallData.max,
       min: waterfallData.min,
       plotLines: [{
@@ -4479,7 +4603,8 @@ function renderCostOfRiskWaterfallChart(waterfall, jstCode, displayMode = "ratio
         value: 0,
         width: 1
       }],
-      title: { text: displayMode === "ratio" ? "Growth rate (bp)" : "Amount" }
+      tickWidth: 0,
+      title: { text: null }
     }
   };
 

@@ -82,7 +82,10 @@ export function renderCostOfRiskActiveFiltersView({
     createUnitFilterChip({
       selectedUnit,
       isOpen: Boolean(unitMenuOpen),
-      dataset: { costOfRiskUnitHelp: "true" }
+      dataset: {
+        costOfRiskQuickFilter: "unit",
+        costOfRiskUnitHelp: "true"
+      }
     }),
     balanceScopeItem,
     ...(remainingActiveItems.length > 0
@@ -190,6 +193,7 @@ function createCostOfRiskJstChip(selectedJst) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskJstHelp = "true";
+  toggle.dataset.costOfRiskQuickFilter = "jst";
   toggle.setAttribute("aria-label", "Change JST code");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
@@ -235,6 +239,7 @@ function createCostOfRiskReferenceDateChip(referenceDate) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskReferenceDateHelp = "true";
+  toggle.dataset.costOfRiskQuickFilter = "referenceDate";
   toggle.setAttribute("aria-label", "Explain the reference date");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label";
@@ -270,6 +275,7 @@ function createCostOfRiskDisplayModeChip({
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskDisplayModeToggle = name;
+  toggle.dataset.costOfRiskQuickFilter = "displayMode";
   toggle.setAttribute("aria-pressed", String(isRelative));
   toggle.setAttribute("aria-label", `Change ${menuLabel.toLowerCase()}`);
 
@@ -302,6 +308,7 @@ function createCostOfRiskPeriodModeChip(periodMode) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset.costOfRiskPeriodModeToggle = "true";
+  toggle.dataset.costOfRiskQuickFilter = "periodMode";
   toggle.setAttribute("aria-label", "Change period view");
 
   const value = document.createElement("span");
@@ -365,6 +372,7 @@ function createCostOfRiskPerimeterFilterChip(kind, value, options, isOpen) {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.type = "button";
   toggle.dataset[config.toggleDataset] = "true";
+  toggle.dataset.costOfRiskQuickFilter = config.clearFilterName;
   toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
   toggle.setAttribute("aria-label", config.toggleAriaLabel);
 
