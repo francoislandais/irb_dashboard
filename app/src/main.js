@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260822-explorer-date-focus";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260827-summary-header";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

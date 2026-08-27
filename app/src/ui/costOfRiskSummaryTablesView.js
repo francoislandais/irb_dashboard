@@ -26,9 +26,9 @@ const COST_OF_RISK_SUMMARY_STATUS_ROWS = [
 ];
 
 const COST_OF_RISK_SUMMARY_STATUS_METRICS = [
-  { key: "gca", kind: "ratio", label: "Ratio", targetTab: "stage-ratio" },
-  { key: "coverage", kind: "level", label: "Coverage", targetTab: "coverage-ratio" },
-  { key: "collateral", kind: "level", label: "Collateralisation", targetTab: "collateral-ratio" }
+  { key: "gca", kind: "ratio", label: "Ratio", groupLabel: "Gross exposure amount", targetTab: "stage-ratio" },
+  { key: "coverage", kind: "level", label: "Coverage", groupLabel: "Stock of allowance", targetTab: "coverage-ratio" },
+  { key: "collateral", kind: "level", label: "Collateralisation", groupLabel: "Collateral", targetTab: "collateral-ratio" }
 ];
 
 const COST_OF_RISK_COUNTERPARTY_SUMMARY_ROW_VALUES = {
@@ -260,14 +260,9 @@ function createCostOfRiskSummaryStatusScope({
   headRow.append(createCostOfRiskSummaryScopeHeaderCell("Category", "", { category: true }));
   COST_OF_RISK_SUMMARY_STATUS_METRICS.forEach((metric, metricIndex) => {
     headRow.append(createCostOfRiskSummaryScopeHeaderCell(
-      getCostOfRiskSummaryDisplayMetricLabel(metric, displayMode),
+      metric.groupLabel,
       "",
-      { active: activeStatusCell.metricIndex === metricIndex }
-    ));
-    headRow.append(createCostOfRiskSummaryScopeHeaderCell(
-      "",
-      "",
-      { active: activeStatusCell.metricIndex === metricIndex && activeStatusCell.kind === getCostOfRiskSummaryVariationKind(displayMode) }
+      { active: activeStatusCell.metricIndex === metricIndex, group: true }
     ));
   });
   table.append(headRow);
@@ -345,6 +340,7 @@ function createCostOfRiskSummaryScopeHeaderCell(label, unit = "", options = {}) 
   th.className = "cost-of-risk-summary-scope-header";
   th.classList.toggle("is-coordinate-column", Boolean(options.active));
   th.classList.toggle("cost-of-risk-summary-scope-header--category", Boolean(options.category));
+  th.classList.toggle("cost-of-risk-summary-scope-header--metric-group", Boolean(options.group));
   th.append(createCostOfRiskSummaryScopeText(unit ? `${label} ${unit}` : label));
   return th;
 }

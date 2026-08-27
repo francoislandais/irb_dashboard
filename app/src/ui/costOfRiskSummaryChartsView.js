@@ -24,7 +24,7 @@ import {
 import {
   formatSignedGrowthPercentValue,
   getCostOfRiskStageSummaryMetricLabel
-} from "./costOfRiskSummaryTablesView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskSummaryTablesView.js?v=20260827-summary-header";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 let costOfRiskCounterpartySummaryChart = null;
