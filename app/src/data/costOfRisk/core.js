@@ -50,17 +50,29 @@ export const COST_OF_RISK_PERIOD_MODE_YTD = "ytd";
 
 export const COST_OF_RISK_PERIOD_MODE_ANNUALIZED = "annualized";
 
-// The ratio denominator follows the sidebar filters: it is always the
-// FINREP F_18.00 GCA for the same asset/counterparty/stage perimeter as the
-// numerator.
+export const COST_OF_RISK_DENOMINATOR_SCOPE_COMMON = "common";
+
+// Relative display normally follows the numerator perimeter. The optional
+// common scope instead fixes the base to in-balance F_18.00 GCA for all debt
+// instruments and all stages, excluding cash balances at central banks.
 export function getCostOfRiskDenominatorComposition(state, filters = {}) {
-  const normalized = normalizeCostOfRiskFilters(filters);
-  const ySelection = getCostOfRiskStageBoxYSelection(state, filters);
+  const useCommonDenominator = filters.denominatorScope === COST_OF_RISK_DENOMINATOR_SCOPE_COMMON;
+  const denominatorFilters = useCommonDenominator
+    ? {
+      asset: COST_OF_RISK_FILTER_ALL,
+      balanceScope: COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
+      counterparty: COST_OF_RISK_FILTER_ALL,
+      stage: COST_OF_RISK_FILTER_ALL
+    }
+    : filters;
+  const normalized = normalizeCostOfRiskFilters(denominatorFilters);
+  const ySelection = getCostOfRiskStageBoxYSelection(state, denominatorFilters);
   const excludeCash = normalized.balanceScope !== COST_OF_RISK_BALANCE_SCOPE_OFF_BALANCE && !normalized.asset && !normalized.counterparty;
   const xCodes = COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[normalized.stage] ?? COST_OF_RISK_DENOMINATOR_STAGE_X_CODES[""];
 
   const labelParts = [excludeCash ? `${ySelection.label} (excl. cash at central banks)` : ySelection.label];
   if (normalized.stage) labelParts.push(normalized.stage);
+  if (useCommonDenominator) labelParts.push("common denominator");
 
   return {
     excludeCash,
@@ -1073,6 +1085,9 @@ export function normalizeCostOfRiskFilters(filters) {
     asset: filters.asset && filters.asset !== COST_OF_RISK_FILTER_ALL ? filters.asset : "",
     balanceScope: normalizeCostOfRiskBalanceScope(filters.balanceScope),
     counterparty: filters.counterparty && filters.counterparty !== COST_OF_RISK_FILTER_ALL ? filters.counterparty : "",
+    denominatorScope: filters.denominatorScope === COST_OF_RISK_DENOMINATOR_SCOPE_COMMON
+      ? COST_OF_RISK_DENOMINATOR_SCOPE_COMMON
+      : "",
     stage: filters.stage && filters.stage !== COST_OF_RISK_FILTER_ALL ? filters.stage : ""
   };
 }
@@ -1404,10 +1419,10 @@ export function resolveCostOfRiskDenominatorPointsSeries(state, indexes, referen
   return values;
 }
 
-// The denominator for the current sidebar filters: sums every matching
-// F_18.00 cell (see getCostOfRiskDenominatorComposition), then - only when
-// both Accounting type and Counterparty are unrestricted - subtracts cash
-// balances at central banks, which must never be part of the denominator.
+// Sums every matching F_18.00 cell (see getCostOfRiskDenominatorComposition),
+// then - only when Accounting type and Counterparty are unrestricted -
+// subtracts cash balances at central banks. In common-scope mode the
+// composition is deliberately independent from the numerator filters.
 export function getCostOfRiskRatioDenominatorSeries(state, indexes, referenceColumns, jstCode, filters = {}) {
   const composition = getCostOfRiskDenominatorComposition(state, filters);
   const baseSeries = resolveCostOfRiskDenominatorPointsSeries(state, indexes, referenceColumns, jstCode, composition.xCodes, composition.yCodes);

@@ -266,7 +266,8 @@ function createCostOfRiskDisplayModeChip({
   menuLabel,
   name
 }) {
-  const isRelative = displayMode === "ratio";
+  const isCommonRelative = displayMode === "common-ratio";
+  const isRelative = displayMode === "ratio" || isCommonRelative;
   const chip = document.createElement("div");
   chip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--contribution-display";
   chip.classList.toggle("is-open", Boolean(isOpen));
@@ -281,7 +282,7 @@ function createCostOfRiskDisplayModeChip({
 
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  label.textContent = isRelative ? labels.relative : labels.absolute;
+  label.textContent = isCommonRelative ? "Common-base relative display" : isRelative ? labels.relative : labels.absolute;
   toggle.append(label);
   chip.append(toggle);
 

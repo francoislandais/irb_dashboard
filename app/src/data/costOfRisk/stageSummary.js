@@ -6,6 +6,7 @@ import {
   DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL
 } from "./definitions.js";
 import {
+  COST_OF_RISK_DENOMINATOR_SCOPE_COMMON,
   buildCostOfRiskCounterpartySummaryPointsForJst,
   buildCostOfRiskCounterpartySummaryRowsForJst,
   buildCostOfRiskCoverageSeries,
@@ -31,6 +32,7 @@ export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate =
     ?? parseCostOfRiskStageSummaryCellKey(DEFAULT_COST_OF_RISK_STAGE_SUMMARY_CELL);
   const stageNeutralFilters = {
     ...normalizedFilters,
+    denominatorScope: filters.denominatorScope,
     stage: COST_OF_RISK_FILTER_ALL
   };
   const ySelection = getCostOfRiskStageBoxYSelection(state, stageNeutralFilters);
@@ -56,6 +58,7 @@ export function buildCostOfRiskStageSummaryModel(state, filters, referenceDate =
     : normalizedFilters.stage;
   const counterpartyRowsFilters = {
     ...normalizedFilters,
+    denominatorScope: filters.denominatorScope,
     stage: selectedStatusFilter || COST_OF_RISK_FILTER_ALL
   };
   const counterpartyRows = includeCounterpartyRows
@@ -100,9 +103,10 @@ function buildCostOfRiskStageSummaryRowsForJst(state, indexes, referenceColumns,
   return COST_OF_RISK_STAGE_SUMMARY_ROWS.map((rowDefinition) => {
     const gca = buildCostOfRiskStageSummaryGcaSeries(state, indexes, referenceColumns, filters, jstCode, rowDefinition.key);
     const allowances = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "allowances", rowDefinition.key);
-    const coverage = buildCostOfRiskCoverageSeries(gca, allowances);
+    const relativeDenominator = filters.denominatorScope === COST_OF_RISK_DENOMINATOR_SCOPE_COMMON ? totalGca : gca;
+    const coverage = buildCostOfRiskCoverageSeries(relativeDenominator, allowances);
     const collateralAmount = buildCostOfRiskStageSummarySeries(state, indexes, referenceColumns, ySelection, jstCode, "collateral", rowDefinition.key);
-    const collateral = buildCostOfRiskCoverageSeries(gca, collateralAmount);
+    const collateral = buildCostOfRiskCoverageSeries(relativeDenominator, collateralAmount);
     return {
       key: rowDefinition.key,
       label: rowDefinition.label,

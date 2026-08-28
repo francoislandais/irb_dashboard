@@ -2,6 +2,7 @@ import {
   COST_OF_RISK_FILTER_ALL,
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_DEFINITION_CUSTOM_X_CODES,
+  COST_OF_RISK_DENOMINATOR_SCOPE_COMMON,
   COST_OF_RISK_DEFINITION_ACPR_X_CODES,
   COST_OF_RISK_DEFINITION_F12_X_CODES,
   DEFAULT_COST_OF_RISK_COLLATERAL_RATIO_CELL,
@@ -49,7 +50,7 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+} from "../data/costOfRisk.js?v=20260827-common-denominator";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,
@@ -135,7 +136,7 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260827-quick-filter-menu";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260827-common-denominator";
 import { createUnitSelectionPanel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260822-unit-labels";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
@@ -188,7 +189,7 @@ import {
 import {
   createFilterSelectionRow as createCostOfRiskFilterSelectionRow,
   renderCostOfRiskFilterSelectionPanel
-} from "./costOfRiskFilterSelectionView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskFilterSelectionView.js?v=20260827-display-mode-descriptions";
 import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
@@ -198,7 +199,7 @@ import {
   CREDIT_RISK_DISABLED_TABS,
   readCreditRiskUrlState,
   writeCreditRiskUrlState
-} from "./creditRiskUrlState.js?v=20260820-credit-risk-module";
+} from "./creditRiskUrlState.js?v=20260827-common-denominator";
 import {
   COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX,
   COST_OF_RISK_TABS_WITH_CONTEXT_RENDERER,
@@ -254,6 +255,7 @@ let activeCostOfRiskStageTransferDisplayMode = "ratio";
 let activeCostOfRiskNplFlowsDisplayMode = "ratio";
 let activeCostOfRiskSummaryDisplayMode = "ratio";
 let activeCostOfRiskGeographyDisplayMode = "ratio";
+let activeCostOfRiskRelativeDenominatorScope = "selection";
 let activeCostOfRiskGeographyCountryMode = "top10";
 let activeCostOfRiskGeographyCountryQuery = "";
 let activeCostOfRiskGeographyCountryCodes = new Set();
@@ -332,6 +334,12 @@ function toggleCostOfRiskCustomDefinitionComponent(xCode) {
 
 function setCostOfRiskGlobalDisplayMode(mode) {
   const nextMode = mode === "amount" ? "amount" : "ratio";
+  activeCostOfRiskRelativeDenominatorScope = mode === "common-ratio" ? COST_OF_RISK_DENOMINATOR_SCOPE_COMMON : "selection";
+  if (activeCostOfRiskRelativeDenominatorScope === COST_OF_RISK_DENOMINATOR_SCOPE_COMMON) {
+    activeCostOfRiskFilters.denominatorScope = COST_OF_RISK_DENOMINATOR_SCOPE_COMMON;
+  } else {
+    delete activeCostOfRiskFilters.denominatorScope;
+  }
   activeCostOfRiskDisplayMode = nextMode;
   activeCostOfRiskDefinitionDisplayMode = nextMode;
   activeCostOfRiskMovementDisplayMode = nextMode;
@@ -340,6 +348,13 @@ function setCostOfRiskGlobalDisplayMode(mode) {
   activeCostOfRiskSummaryDisplayMode = nextMode;
   activeCostOfRiskGeographyDisplayMode = nextMode;
   closeCostOfRiskFilterMenus();
+}
+
+function getCostOfRiskDisplayModeSelection() {
+  if (getActiveCostOfRiskDisplayMode() === "amount") return "amount";
+  return activeCostOfRiskRelativeDenominatorScope === COST_OF_RISK_DENOMINATOR_SCOPE_COMMON
+    ? "common-ratio"
+    : "ratio";
 }
 
 function selectCostOfRiskPeriodMode(periodMode) {
@@ -519,7 +534,7 @@ export function syncCreditRiskUrlParams() {
     components: serializeCostOfRiskDefinitionComponents(),
     counterparty: activeCostOfRiskFilters.counterparty,
     detailTab: activeCostOfRiskDefinitionPanelTab,
-    displayMode: getActiveCostOfRiskDisplayMode(),
+    displayMode: getCostOfRiskDisplayModeSelection(),
     focusSelectedYAxis: activeCostOfRiskFocusSelectedYAxis,
     movementComponents: [...activeCostOfRiskMovementXCodes].join(".") || "-",
     panel: activeCostOfRiskHelpTopic,
@@ -1619,11 +1634,12 @@ function getCostOfRiskQuickFilterOptions(kind, state) {
   }
   if (kind === "displayMode") {
     return createOptions([
+      { label: "Absolute display", value: "amount" },
       { label: "Relative display", value: "ratio" },
-      { label: "Absolute display", value: "amount" }
-    ], getActiveCostOfRiskDisplayMode(), (value) => {
+      { label: "Common-base relative display", value: "common-ratio" }
+    ], getCostOfRiskDisplayModeSelection(), (value) => {
       setCostOfRiskGlobalDisplayMode(value);
-      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = value;
+      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
       if (getLatestState()) rerenderApp(getLatestState());
     });
   }
@@ -2208,7 +2224,7 @@ function renderCostOfRiskActiveFilters(filterOptions) {
     counterpartyMenuOpen: isCostOfRiskFilterSelectionTopicOpen("counterparty"),
     costOfRiskDefinitionId: activeCostOfRiskDefinitionId,
     costOfRiskDefinitionMenuOpen: isCostOfRiskFilterSelectionTopicOpen("definition"),
-    displayMode: getActiveCostOfRiskDisplayMode(),
+    displayMode: getCostOfRiskDisplayModeSelection(),
     instrumentMenuOpen: isCostOfRiskFilterSelectionTopicOpen("instrument"),
     filterOptions,
     filters: displayedFilters,
@@ -3563,8 +3579,21 @@ function renderCostOfRiskPeriodModeSelectionPanel() {
 function renderCostOfRiskDisplayModeSelectionPanel() {
   const state = getLatestState();
   const options = [
-    { label: "Relative display", value: "ratio" },
-    { label: "Absolute display", value: "amount" }
+    {
+      description: "Amounts in the selected unit. No denominator is applied.",
+      label: "Absolute display",
+      value: "amount"
+    },
+    {
+      description: "Uses the denominator defined by the view and selected perimeter. ECL Movements uses F_18.00 GCA/exposure (previous quarter for Quarterly; first quarter of the year for YTD or Annualized). Allowance-share views use total allowances.",
+      label: "Relative display",
+      value: "ratio"
+    },
+    {
+      description: "Uses one common F_18.00 GCA base across perimeters: all in-balance debt instruments, all counterparties and stages, excluding cash balances at central banks. Movement views keep the same period-reference rule.",
+      label: "Common-base relative display",
+      value: "common-ratio"
+    }
   ];
   const panelKey = createCostOfRiskStableSelectionPanelKey(state, "display-mode", {
     options,
@@ -3573,7 +3602,7 @@ function renderCostOfRiskDisplayModeSelectionPanel() {
   const existingPanel = elements.costOfRiskAuditPanelDetail
     ?.querySelector?.("[data-cost-of-risk-display-panel-key]");
   if (existingPanel?.dataset.costOfRiskDisplayPanelKey === panelKey) {
-    updateCostOfRiskStablePanelSelection(existingPanel, getActiveCostOfRiskDisplayMode());
+    updateCostOfRiskStablePanelSelection(existingPanel, getCostOfRiskDisplayModeSelection());
     costOfRiskFilterPreviewRenderer.clearSnapshot();
     return;
   }
@@ -3590,12 +3619,13 @@ function renderCostOfRiskDisplayModeSelectionPanel() {
   table.className = "cost-of-risk-filter-selection-table";
   const tbody = document.createElement("tbody");
   options.forEach((option) => {
-    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === getActiveCostOfRiskDisplayMode(), () => {
+    tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === getCostOfRiskDisplayModeSelection(), () => {
       updateCostOfRiskStablePanelSelection(intro, option.value);
       setCostOfRiskGlobalDisplayMode(option.value);
-      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = option.value;
+      if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
       if (getLatestState()) rerenderApp(getLatestState());
     }, {
+      description: option.description,
       selectionValue: option.value
     }, costOfRiskFilterPreviewRenderer));
   });

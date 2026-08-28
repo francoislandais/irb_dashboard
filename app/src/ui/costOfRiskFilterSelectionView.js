@@ -240,6 +240,12 @@ export function createFilterSelectionRow(label, isActive, onSelect, options = {}
       });
     }
   }
+  if (options.description) {
+    const descriptionNode = document.createElement("span");
+    descriptionNode.className = "cost-of-risk-filter-selection-option-description";
+    descriptionNode.textContent = options.description;
+    button.append(descriptionNode);
+  }
   if (!options.disabled) button.addEventListener("click", () => {
     if (options.selectionValue !== undefined) {
       updateSelectionRows(row.closest(".cost-of-risk-filter-selection-panel"), options.selectionValue);

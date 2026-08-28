@@ -40,7 +40,11 @@ export function readCreditRiskUrlState() {
     components: params.get(CREDIT_RISK_COMPONENTS_URL_PARAM) ?? "",
     counterparty: params.get(CREDIT_RISK_COUNTERPARTY_URL_PARAM) ?? "",
     detailTab: params.get(CREDIT_RISK_DETAIL_TAB_URL_PARAM) === "drivers" ? "drivers" : "",
-    displayMode: params.get(CREDIT_RISK_DISPLAY_URL_PARAM) === "amount" ? "amount" : params.get(CREDIT_RISK_DISPLAY_URL_PARAM) === "ratio" ? "ratio" : "",
+    displayMode: params.get(CREDIT_RISK_DISPLAY_URL_PARAM) === "amount"
+      ? "amount"
+      : params.get(CREDIT_RISK_DISPLAY_URL_PARAM) === "common-ratio"
+        ? "common-ratio"
+        : params.get(CREDIT_RISK_DISPLAY_URL_PARAM) === "ratio" ? "ratio" : "",
     focusSelectedYAxis: params.get(CREDIT_RISK_FOCUS_URL_PARAM) === "1",
     movementComponents: params.get(CREDIT_RISK_MOVEMENTS_URL_PARAM) ?? "",
     panel: normalizeContextPanel(params.get(CREDIT_RISK_PANEL_URL_PARAM)),
