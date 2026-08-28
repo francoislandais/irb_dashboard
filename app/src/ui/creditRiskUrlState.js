@@ -122,7 +122,7 @@ function normalizeContextPanel(value) {
   const panel = String(value ?? "");
   const fixedPanels = new Set([
     "jst-code", "reference-date", "period-mode", "display-mode",
-    "peer-selection", "stage-transfer-denominator"
+    "peer-selection"
   ]);
   if (fixedPanels.has(panel)) return panel;
   return /^filter-selection:(instrument|counterparty|balanceScope|stage|definition)$/.test(panel) ? panel : "";

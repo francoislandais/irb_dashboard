@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260827-common-denominator";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260828-summary-display-mode";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -518,16 +518,41 @@ function createDatasetId(source) {
   return `${source || "dataset"}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-wireUi(actions);
-store.subscribe(renderAppState);
-renderAppState(store.getState());
-loadInternalMapping();
-loadImpossibleCombinations();
-loadExplorerConfiguration();
-if (standaloneData?.csvText) {
-  loadStandaloneData();
-} else {
-  restoreLastFile();
+startApplication();
+
+async function startApplication() {
+  wireUi(actions);
+  store.subscribe(renderAppState);
+  renderAppState(store.getState());
+
+  try {
+    await Promise.all([
+      loadInternalMapping(),
+      loadImpossibleCombinations(),
+      loadExplorerConfiguration(),
+      standaloneData?.csvText ? loadStandaloneData() : restoreLastFile()
+    ]);
+  } catch (error) {
+    store.setError(error);
+  } finally {
+    renderAppState(store.getState());
+    await waitForApplicationPaint();
+    revealApplication();
+  }
+}
+
+function waitForApplicationPaint() {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+  });
+}
+
+function revealApplication() {
+  const startupScreen = document.querySelector("#startup-screen");
+  document.body.classList.remove("is-app-loading");
+  document.body.classList.add("is-app-ready");
+  startupScreen?.classList.add("is-leaving");
+  window.setTimeout(() => startupScreen?.remove(), 220);
 }
 
 async function loadInternalMapping() {

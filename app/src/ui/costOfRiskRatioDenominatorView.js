@@ -31,6 +31,11 @@ export function renderCostOfRiskRatioDenominatorControls({
     return;
   }
 
+  if (activeTab === "summary") {
+    tooltipElement.textContent = "Summary ratios are column-specific: exposure share uses total GCA, coverage uses allowances over GCA, and collateralisation uses collateral over GCA.";
+    return;
+  }
+
   const detail = buildCostOfRiskRatioDenominatorDetail(state, filters, referenceDate, state.selectedJst);
   tooltipElement.textContent = `Growth rate denominator: previous-quarter ${detail.label}, as reported in FINREP F 18.00.`;
 }

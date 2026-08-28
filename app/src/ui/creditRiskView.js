@@ -36,7 +36,6 @@ import {
   buildCostOfRiskStageSummaryModel,
   buildCostOfRiskStageTransferFlowDiagram,
   buildCostOfRiskStageTransferPanelAudit,
-  buildCostOfRiskStageTransferRelativeDenominatorDetail,
   buildCostOfRiskStageTransferFlowTimeSeries,
   buildCostOfRiskStageTransferWaterfall,
   buildCostOfRiskWaterfall,
@@ -148,7 +147,7 @@ import {
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260812-costofrisk-domain-split";
 import { openExplorerPoint } from "./explorerView.js?v=20260812-explorer-benchmark-view";
-import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260812-costofrisk-domain-split";
+import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260828-summary-display-mode";
 import {
   clearCostOfRiskEmptyPanelsView,
   renderCostOfRiskTabEmptyView,
@@ -345,16 +344,31 @@ function setCostOfRiskGlobalDisplayMode(mode) {
   activeCostOfRiskMovementDisplayMode = nextMode;
   activeCostOfRiskStageTransferDisplayMode = nextMode;
   activeCostOfRiskNplFlowsDisplayMode = nextMode;
-  activeCostOfRiskSummaryDisplayMode = nextMode;
   activeCostOfRiskGeographyDisplayMode = nextMode;
   closeCostOfRiskFilterMenus();
 }
 
+function setCostOfRiskDisplayModeForActiveTab(mode) {
+  if (activeCostOfRiskTab === "summary") {
+    activeCostOfRiskSummaryDisplayMode = mode === "amount" ? "amount" : "ratio";
+    closeCostOfRiskFilterMenus();
+    return;
+  }
+  setCostOfRiskGlobalDisplayMode(mode);
+}
+
 function getCostOfRiskDisplayModeSelection() {
+  if (activeCostOfRiskTab === "summary") return activeCostOfRiskSummaryDisplayMode;
   if (getActiveCostOfRiskDisplayMode() === "amount") return "amount";
   return activeCostOfRiskRelativeDenominatorScope === COST_OF_RISK_DENOMINATOR_SCOPE_COMMON
     ? "common-ratio"
     : "ratio";
+}
+
+function getCostOfRiskSummaryFilters(filters = activeCostOfRiskFilters) {
+  const summaryFilters = { ...filters };
+  delete summaryFilters.denominatorScope;
+  return summaryFilters;
 }
 
 function selectCostOfRiskPeriodMode(periodMode) {
@@ -386,7 +400,7 @@ function renderCostOfRiskRatioDenominatorControls(state) {
   renderRatioDenominatorControls({
     activeTab: activeCostOfRiskTab,
     displayMode: getActiveCostOfRiskDisplayMode(),
-    filters: activeCostOfRiskFilters,
+    filters: activeCostOfRiskTab === "summary" ? getCostOfRiskSummaryFilters() : activeCostOfRiskFilters,
     infoElement: elements.costOfRiskRatioInfo,
     referenceDate: activeCostOfRiskReferenceDate,
     state,
@@ -425,7 +439,7 @@ function applyCostOfRiskUrlState() {
     activeCostOfRiskFilters.stage = urlState.stage;
     pendingCostOfRiskUrlFilters.add("stage");
   }
-  if (urlState.displayMode) setCostOfRiskGlobalDisplayMode(urlState.displayMode);
+  if (urlState.displayMode) setCostOfRiskDisplayModeForActiveTab(urlState.displayMode);
   if (urlState.smoothingWindow) {
     activeCostOfRiskSmoothingWindow = urlState.smoothingWindow;
     if (urlState.smoothingWindow > 1) activeCostOfRiskLastSmoothingWindow = urlState.smoothingWindow;
@@ -640,17 +654,6 @@ export function wireCreditRiskUi(actions, rerender) {
       event.stopPropagation();
       closeCostOfRiskFilterMenus();
       setCostOfRiskHelpTopic("unit");
-      pulseCostOfRiskContextPanel();
-      rerenderApp(actions.getState());
-      return;
-    }
-
-    const stageTransferDenominatorHelp = event.target.closest?.("[data-cost-of-risk-stage-transfer-denominator-help]");
-    if (stageTransferDenominatorHelp) {
-      event.preventDefault();
-      event.stopPropagation();
-      closeCostOfRiskFilterMenus();
-      setCostOfRiskHelpTopic("stage-transfer-denominator");
       pulseCostOfRiskContextPanel();
       rerenderApp(actions.getState());
       return;
@@ -1197,12 +1200,13 @@ export function renderCreditRisk(state) {
   }
 
   if (activeCostOfRiskTab === "summary") {
+    const summaryFilters = getCostOfRiskSummaryFilters();
     const summary = getCostOfRiskCachedModel(
       state,
-      createCostOfRiskModelCacheKey(state, "summary-ratios", activeCostOfRiskFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
+      createCostOfRiskModelCacheKey(state, "summary-ratios", summaryFilters, activeCostOfRiskReferenceDate, activeCostOfRiskStageSummaryCellKey),
       () => buildCostOfRiskStageSummaryModel(
         state,
-        activeCostOfRiskFilters,
+        summaryFilters,
         activeCostOfRiskReferenceDate,
         activeCostOfRiskStageSummaryCellKey,
         { includeCounterpartyRows: false }
@@ -1633,12 +1637,18 @@ function getCostOfRiskQuickFilterOptions(kind, state) {
     return createOptions(UNIT_FILTER_OPTIONS, state?.selectedUnit, updateSelectedUnit);
   }
   if (kind === "displayMode") {
-    return createOptions([
-      { label: "Absolute display", value: "amount" },
-      { label: "Relative display", value: "ratio" },
-      { label: "Common-base relative display", value: "common-ratio" }
-    ], getCostOfRiskDisplayModeSelection(), (value) => {
-      setCostOfRiskGlobalDisplayMode(value);
+    const options = activeCostOfRiskTab === "summary"
+      ? [
+        { label: "Absolute display", value: "amount" },
+        { label: "Ratio", value: "ratio" }
+      ]
+      : [
+        { label: "Absolute display", value: "amount" },
+        { label: "Relative display", value: "ratio" },
+        { label: "Common-base relative display", value: "common-ratio" }
+      ];
+    return createOptions(options, getCostOfRiskDisplayModeSelection(), (value) => {
+      setCostOfRiskDisplayModeForActiveTab(value);
       if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
       if (getLatestState()) rerenderApp(getLatestState());
     });
@@ -3337,11 +3347,6 @@ function renderCostOfRiskHelpPanel() {
     return true;
   }
 
-  if (activeCostOfRiskHelpTopic === "stage-transfer-denominator") {
-    renderCostOfRiskStageTransferDenominatorPanel();
-    return true;
-  }
-
   if (activeCostOfRiskHelpTopic.startsWith(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX)) {
     const filterName = activeCostOfRiskHelpTopic.slice(COST_OF_RISK_FILTER_SELECTION_TOPIC_PREFIX.length);
     if (filterName === "stage" && COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS.has(activeCostOfRiskTab)) {
@@ -3421,62 +3426,6 @@ function renderCostOfRiskPanelArticle(content) {
   intro.append(hint);
 
   replaceCostOfRiskAuditPanelContent(intro);
-}
-
-function renderCostOfRiskStageTransferDenominatorPanel() {
-  const state = getLatestState();
-  const detail = buildCostOfRiskStageTransferRelativeDenominatorDetail(
-    state,
-    activeCostOfRiskFilters,
-    activeCostOfRiskReferenceDate,
-    activeCostOfRiskPeriodMode
-  );
-  const formattedValue = formatCostOfRiskSelectedAmount(detail.value, state.selectedUnit);
-  const referenceLabel = formatReferenceQuarterLabel(detail.referenceDate || activeCostOfRiskReferenceDate);
-  const valueReferenceLabel = formatReferenceQuarterLabel(detail.valueReferenceDate);
-  const modeLabel = getActiveCostOfRiskPeriodLabel();
-  const ruleText = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_ANNUALIZED
-    ? "Annualized scales the year-to-date flow to a full-year equivalent and divides it by the same stable opening exposure base used for year-to-date."
-    : activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_YTD
-      ? "Year to date uses the first available reference of the same calendar year, so the cumulative flow is divided by a stable opening exposure base."
-      : "Quarterly flow uses the previous reporting reference, so the quarterly movement is divided by the opening exposure base of that quarter.";
-
-  const article = createCostOfRiskAuditIntroHeader({
-    eyebrow: "Relative Transfer",
-    lead: `The denominator used for ${referenceLabel} in ${modeLabel} mode is ${formattedValue}.`,
-    title: "Denominator detail"
-  });
-
-  article.append(createCostOfRiskAuditInfoSection("Reference", [
-    `Displayed period: ${referenceLabel}`,
-    `Denominator date: ${valueReferenceLabel || "-"}`,
-    `Rule: ${detail.ruleLabel}`
-  ]));
-
-  article.append(createCostOfRiskAuditInfoSection("Logic", [
-    ruleText,
-    `The denominator is ${detail.denominatorLabel}, taken from ${detail.sourceTable || "F_18.00"} with the selected instruments and counterparty perimeter, across all stages.`
-  ]));
-
-  const componentLines = (detail.components ?? [])
-    .filter((component) => Number.isFinite(component.value))
-    .map((component) => {
-      const sign = component.operator === "subtract" ? "- " : "";
-      return `${sign}${component.label}: ${formatCostOfRiskSelectedAmount(component.value, state.selectedUnit)}`;
-    });
-  article.append(createCostOfRiskAuditInfoSection("Components", componentLines.length > 0
-    ? componentLines
-    : ["No denominator component is available for the current selection."]
-  ));
-
-  const hint = document.createElement("p");
-  hint.className = "cost-of-risk-audit-intro-hint";
-  hint.textContent = activeCostOfRiskPeriodMode === COST_OF_RISK_PERIOD_MODE_QUARTERLY
-    ? "Year-to-date and Annualized use the first-quarter denominator instead."
-    : "Quarterly flow uses the previous-quarter denominator instead.";
-  article.append(hint);
-
-  replaceCostOfRiskAuditPanelContent(article);
 }
 
 function renderCostOfRiskReferenceDateSelectionPanel() {
@@ -3578,23 +3527,37 @@ function renderCostOfRiskPeriodModeSelectionPanel() {
 
 function renderCostOfRiskDisplayModeSelectionPanel() {
   const state = getLatestState();
-  const options = [
-    {
-      description: "Amounts in the selected unit. No denominator is applied.",
-      label: "Absolute display",
-      value: "amount"
-    },
-    {
-      description: "Uses the denominator defined by the view and selected perimeter. ECL Movements uses F_18.00 GCA/exposure (previous quarter for Quarterly; first quarter of the year for YTD or Annualized). Allowance-share views use total allowances.",
-      label: "Relative display",
-      value: "ratio"
-    },
-    {
-      description: "Uses one common F_18.00 GCA base across perimeters: all in-balance debt instruments, all counterparties and stages, excluding cash balances at central banks. Movement views keep the same period-reference rule.",
-      label: "Common-base relative display",
-      value: "common-ratio"
-    }
-  ];
+  const isSummary = activeCostOfRiskTab === "summary";
+  const options = isSummary
+    ? [
+      {
+        description: "Shows gross exposure amount, stock of allowances and collateral as amounts in the selected unit.",
+        label: "Absolute display",
+        value: "amount"
+      },
+      {
+        description: "Gross exposure is shown as a share of total exposure for the selected perimeter. Stock of allowances is shown as allowances divided by gross exposure, and collateral as collateral divided by gross exposure.",
+        label: "Ratio",
+        value: "ratio"
+      }
+    ]
+    : [
+      {
+        description: "Amounts in the selected unit. No denominator is applied.",
+        label: "Absolute display",
+        value: "amount"
+      },
+      {
+        description: "Uses the denominator defined by the view and selected perimeter. ECL Movements uses F_18.00 GCA/exposure (previous quarter for Quarterly; first quarter of the year for YTD or Annualized). Allowance-share views use total allowances.",
+        label: "Relative display",
+        value: "ratio"
+      },
+      {
+        description: "Uses one common F_18.00 GCA base across perimeters: all in-balance debt instruments, all counterparties and stages, excluding cash balances at central banks. Movement views keep the same period-reference rule.",
+        label: "Common-base relative display",
+        value: "common-ratio"
+      }
+    ];
   const panelKey = createCostOfRiskStableSelectionPanelKey(state, "display-mode", {
     options,
     referenceDate: ""
@@ -3610,7 +3573,9 @@ function renderCostOfRiskDisplayModeSelectionPanel() {
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-filter-selection-panel",
     eyebrow: "Breakdown of selection by :",
-    lead: "This choice is shared by every compatible Cost of Risk view.",
+    lead: isSummary
+      ? "This choice applies specifically to the Summary view."
+      : "This choice is shared by every compatible Credit Risk view.",
     title: "Display mode"
   });
   intro.dataset.costOfRiskDisplayPanelKey = panelKey;
@@ -3621,7 +3586,7 @@ function renderCostOfRiskDisplayModeSelectionPanel() {
   options.forEach((option) => {
     tbody.append(createCostOfRiskFilterSelectionRow(option.label, option.value === getCostOfRiskDisplayModeSelection(), () => {
       updateCostOfRiskStablePanelSelection(intro, option.value);
-      setCostOfRiskGlobalDisplayMode(option.value);
+      setCostOfRiskDisplayModeForActiveTab(option.value);
       if (elements.costOfRiskDisplayMode) elements.costOfRiskDisplayMode.value = getActiveCostOfRiskDisplayMode();
       if (getLatestState()) rerenderApp(getLatestState());
     }, {
@@ -3964,9 +3929,10 @@ function getCostOfRiskSummaryPreviewValue(state, filters, kind = "", value = "",
 }
 
 function getCostOfRiskSummaryFilteredPreviewValue(state, filters, referenceDate = activeCostOfRiskReferenceDate) {
+  const summaryFilters = getCostOfRiskSummaryFilters(filters);
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("summary-model", state.selectedJst, filters, referenceDate, activeCostOfRiskStageSummaryCellKey),
-    () => buildCostOfRiskStageSummaryModel(state, filters, referenceDate, activeCostOfRiskStageSummaryCellKey, {
+    createCostOfRiskFilterPreviewCacheKey("summary-model", state.selectedJst, summaryFilters, referenceDate, activeCostOfRiskStageSummaryCellKey),
+    () => buildCostOfRiskStageSummaryModel(state, summaryFilters, referenceDate, activeCostOfRiskStageSummaryCellKey, {
       includeCounterpartyRows: Boolean(activeCostOfRiskStageSummaryCellKey?.startsWith("counterparty:"))
     })
   );
@@ -3987,11 +3953,12 @@ function getCostOfRiskSummaryDimensionPreviewValue(state, kind, value, reference
   const [metric, cellKind] = selectedColumnKey.split(":");
   if (!metric || !cellKind) return "";
 
+  const summaryFilters = getCostOfRiskSummaryFilters();
   const model = costOfRiskFilterPreviewRenderer.getCachedValue(
-    createCostOfRiskFilterPreviewCacheKey("summary-dimension-model", state.selectedJst, activeCostOfRiskFilters, referenceDate, activeCostOfRiskStageSummaryCellKey),
+    createCostOfRiskFilterPreviewCacheKey("summary-dimension-model", state.selectedJst, summaryFilters, referenceDate, activeCostOfRiskStageSummaryCellKey),
     () => buildCostOfRiskStageSummaryModel(
       state,
-      activeCostOfRiskFilters,
+      summaryFilters,
       referenceDate,
       activeCostOfRiskStageSummaryCellKey,
       { includeCounterpartyRows: kind === "counterparty" }
