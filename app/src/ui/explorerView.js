@@ -655,6 +655,7 @@ function renderExplorerTable(series, selectedUnit) {
   const parentPaths = getParentPaths(tableRows);
   const nodePaths = getExplicitPaths(displayRows);
   const axisImpossibleByPath = getExplorerAxisImpossiblePaths(displayRows, activeAxis, parentPaths);
+  const dateFocusPrimaryCells = [];
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
   const tbody = document.createElement("tbody");
@@ -780,6 +781,13 @@ function renderExplorerTable(series, selectedUnit) {
         td.dataset.explorerCellKind = contributionValue === null ? "amount" : "ratio";
         td.dataset.explorerCellDate = columnKind === "current" ? orderedDates[index]?.label ?? "" : "";
         td.dataset.explorerCellLabel = seriesRow.description || seriesRow.code || "";
+        if (isDateFocus && index === 0 && !isAxisImpossible) {
+          dateFocusPrimaryCells.push({
+            cell: td,
+            kind: contributionValue === null ? "amount" : "ratio",
+            value: displayValue
+          });
+        }
       }
       valueRow.append(td);
     });
@@ -787,9 +795,30 @@ function renderExplorerTable(series, selectedUnit) {
     tbody.append(valueRow);
   });
 
+  applyExplorerDateFocusValueIntensity(dateFocusPrimaryCells);
+
   thead.append(headerRow);
   elements.explorerTable.append(thead, tbody);
   applyExplorerTreeState(parentPaths, nodePaths);
+}
+
+function applyExplorerDateFocusValueIntensity(entries) {
+  const maximumByKind = new Map();
+  entries.forEach(({ kind, value }) => {
+    const magnitude = Math.abs(value);
+    if (!Number.isFinite(magnitude) || magnitude === 0) return;
+    maximumByKind.set(kind, Math.max(maximumByKind.get(kind) ?? 0, magnitude));
+  });
+
+  entries.forEach(({ cell, kind, value }) => {
+    const magnitude = Math.abs(value);
+    const maximum = maximumByKind.get(kind) ?? 0;
+    if (!Number.isFinite(magnitude) || magnitude === 0 || maximum === 0) return;
+    const relativeImportance = Math.pow(Math.min(1, magnitude / maximum), 0.45);
+    const opacity = 0.025 + (relativeImportance * 0.12);
+    cell.classList.add("date-focus-primary-value");
+    cell.style.setProperty("--date-focus-value-opacity", opacity.toFixed(3));
+  });
 }
 
 function getExplorerDateFocusSelection(series) {

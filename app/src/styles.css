@@ -2441,6 +2441,10 @@ table {
   outline-offset: -3px;
 }
 
+.metric-table td.date-focus-primary-value {
+  background-color: rgb(48 57 52 / var(--date-focus-value-opacity, 0));
+}
+
 .metric-table tbody tr:hover th,
 .metric-table tbody tr:hover td {
   background: #eef4f1;
