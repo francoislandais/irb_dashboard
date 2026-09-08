@@ -29,6 +29,7 @@ const store = createDataStore();
 const JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
 const DATASET_URL_PARAM = "dataset";
+const HEADER_URL_PARAM = "header";
 const UNIT_URL_PARAM = "unit";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
 const PEER_DISPLAY_MODE_URL_PARAM = "peer_mode";
@@ -518,7 +519,13 @@ function createDatasetId(source) {
   return `${source || "dataset"}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+applyUrlHeaderVisibility();
 startApplication();
+
+function applyUrlHeaderVisibility() {
+  const shouldHideHeader = readUrlStateParams().get(HEADER_URL_PARAM) === "hidden";
+  document.querySelector(".app-shell")?.classList.toggle("is-header-hidden", shouldHideHeader);
+}
 
 async function startApplication() {
   wireUi(actions);

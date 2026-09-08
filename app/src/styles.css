@@ -134,6 +134,19 @@ button:disabled {
   grid-template-columns: 0 minmax(0, 1fr);
 }
 
+.app-shell.is-header-hidden {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.app-shell.is-header-hidden .app-header {
+  display: none;
+}
+
+.app-shell.is-header-hidden .sidebar,
+.app-shell.is-header-hidden .main-view {
+  grid-row: 1;
+}
+
 .app-header {
   display: grid;
   grid-column: 1 / -1;
@@ -2828,6 +2841,10 @@ table {
     grid-template-columns: 1fr;
   }
 
+  .app-shell.is-header-hidden {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
   .app-header {
     grid-column: 1;
     grid-template-columns: 1fr;
@@ -2837,6 +2854,14 @@ table {
     grid-column: 1;
     grid-row: 2;
     padding: 16px;
+  }
+
+  .app-shell.is-header-hidden .sidebar {
+    grid-row: 1;
+  }
+
+  .app-shell.is-header-hidden .main-view {
+    grid-row: 2;
   }
 
   .app-shell.is-sidebar-collapsed .sidebar {
