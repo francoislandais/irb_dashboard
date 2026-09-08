@@ -774,6 +774,10 @@ export function wireCreditRiskUi(actions, rerender) {
     if (event.key === "Escape") closeCostOfRiskQuickFilterMenu();
   });
   elements.costOfRiskDashboard?.addEventListener("click", (event) => {
+    if (activeCostOfRiskDataAuditPinned && event.target.closest?.("[data-cost-of-risk-calculation-detail]")) {
+      activeCostOfRiskDataAuditRequested = true;
+    }
+
     const definitionToggle = event.target.closest?.("[data-cost-of-risk-definition-filter-toggle]");
     if (definitionToggle) {
       event.preventDefault();
@@ -2107,11 +2111,13 @@ function setCostOfRiskNplFlowsSelectedDataSummary(model, state) {
 }
 
 function selectCostOfRiskStageRatioCell(cellKey) {
+  requestPinnedCostOfRiskDataAudit();
   activeCostOfRiskStageRatioCellKey = cellKey;
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
 function selectCostOfRiskCoverageRatioCell(cellKey) {
+  requestPinnedCostOfRiskDataAudit();
   activeCostOfRiskCoverageRatioCellKey = cellKey;
   if (getLatestState()) rerenderApp(getLatestState());
 }
@@ -2124,6 +2130,7 @@ function returnToCostOfRiskSummary() {
 }
 
 function selectCostOfRiskCollateralRatioCell(cellKey) {
+  requestPinnedCostOfRiskDataAudit();
   activeCostOfRiskCollateralRatioCellKey = cellKey;
   if (getLatestState()) rerenderApp(getLatestState());
 }
@@ -3225,6 +3232,10 @@ function requestCostOfRiskDataAudit() {
   activeCostOfRiskDataAuditPinned = true;
 }
 
+function requestPinnedCostOfRiskDataAudit() {
+  if (activeCostOfRiskDataAuditPinned) activeCostOfRiskDataAuditRequested = true;
+}
+
 function isCostOfRiskAuditIntroVisible() {
   return activeCostOfRiskAuditIntroTab === activeCostOfRiskTab
     && Boolean(getCostOfRiskAuditPanelIntroContent(activeCostOfRiskTab));
@@ -3280,7 +3291,19 @@ function replaceCostOfRiskAuditPanelContent(...nodes) {
 
 function renderCostOfRiskSelectionPane() {
   if (!elements.costOfRiskAuditPanelSelection) return;
-  elements.costOfRiskAuditPanelSelection.replaceChildren(getCostOfRiskSelectedDataSummaryNode());
+  const sourceButton = document.createElement("button");
+  sourceButton.type = "button";
+  sourceButton.className = "cost-of-risk-selection-source-button";
+  sourceButton.classList.toggle("is-active", activeCostOfRiskDataAuditPinned);
+  sourceButton.setAttribute("aria-pressed", String(activeCostOfRiskDataAuditPinned));
+  sourceButton.textContent = "Source";
+  sourceButton.addEventListener("click", () => {
+    clearCostOfRiskHelpTopic();
+    hideCostOfRiskAuditIntro();
+    requestCostOfRiskDataAudit();
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
+  elements.costOfRiskAuditPanelSelection.replaceChildren(getCostOfRiskSelectedDataSummaryNode(), sourceButton);
 }
 
 function setCostOfRiskSelectedDataSummary(node) {
@@ -4350,6 +4373,7 @@ function selectCostOfRiskStageSummaryColumn(metric, kind) {
 }
 
 function selectCostOfRiskStageSummaryCell(cellKey, rowKey = "") {
+  requestPinnedCostOfRiskDataAudit();
   let shouldRerender = false;
   const hadHelpTopic = Boolean(activeCostOfRiskHelpTopic);
   if (cellKey && cellKey !== activeCostOfRiskStageSummaryCellKey) {
@@ -4462,6 +4486,7 @@ function selectCostOfRiskCounterpartySummaryColumn(metric, kind) {
 }
 
 function selectCostOfRiskCounterpartySummaryCell(cellKey, counterpartyValue = "") {
+  requestPinnedCostOfRiskDataAudit();
   let shouldRerender = false;
   const hadHelpTopic = Boolean(activeCostOfRiskHelpTopic);
   if (cellKey && cellKey !== activeCostOfRiskCounterpartySummaryCellKey) {
@@ -4676,6 +4701,7 @@ function ensureCostOfRiskStageTransferFlowSelection() {
 function selectCostOfRiskStageTransferFlow(flowKey) {
   if (!flowKey) return;
 
+  requestPinnedCostOfRiskDataAudit();
   const shouldRerender = flowKey !== activeCostOfRiskStageTransferFlowKey;
   activeCostOfRiskStageTransferFlowKey = flowKey;
 
@@ -4855,6 +4881,7 @@ function renderCostOfRiskStageTransferWaterfallChart(waterfall, selectedUnit, di
 function selectCostOfRiskXAxisFromWaterfall(code) {
   if (!code) return;
 
+  requestPinnedCostOfRiskDataAudit();
   activeCostOfRiskMovementAuditXCode = code;
   if (code === activeCostOfRiskXAxisCode) {
     if (activeCostOfRiskDataAuditRequested && getLatestState()) rerenderApp(getLatestState());

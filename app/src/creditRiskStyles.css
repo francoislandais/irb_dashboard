@@ -170,6 +170,34 @@
   min-height: 0;
   overflow: hidden;
   padding: 8px;
+  position: relative;
+}
+
+.cost-of-risk-selection-source-button {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #7a8580;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 3px 5px;
+}
+
+.cost-of-risk-selection-source-button:hover,
+.cost-of-risk-selection-source-button:focus-visible,
+.cost-of-risk-selection-source-button.is-active {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+  outline: 0;
+}
+
+.cost-of-risk-context-selected-pane > .cost-of-risk-selected-data-summary {
+  padding-right: 48px;
 }
 
 .cost-of-risk-context-detail-pane {
