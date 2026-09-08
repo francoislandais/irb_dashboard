@@ -1523,10 +1523,11 @@ function renderExplorerAxisTabs() {
     const axis = button.getAttribute("data-explorer-axis");
     const isActive = axis === activeAxis;
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
+    const isUnusedTabAxis = axis === "z" && (axisOptions.z?.codes?.length ?? 0) === 0;
     button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled", !isAvailable);
     button.disabled = !isAvailable;
-    button.hidden = false;
+    button.hidden = isUnusedTabAxis;
     button.setAttribute("aria-disabled", String(!isAvailable));
     button.setAttribute("aria-selected", String(isActive && isAvailable));
   });
