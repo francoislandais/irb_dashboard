@@ -7,7 +7,7 @@ import {
   formatReferenceQuarterLabel
 } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import { COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS } from "./costOfRiskFilterSelectionConfig.js?v=20260806-cell-selection";
-import { createUnitFilterChip } from "./unitFilterView.js?v=20260822-unit-labels";
+import { createUnitFilterChip } from "./unitFilterView.js?v=20260910-context-title-only";
 
 let lastCostOfRiskActiveFiltersRenderKey = "";
 

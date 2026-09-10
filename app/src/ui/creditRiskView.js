@@ -135,8 +135,8 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260827-common-denominator";
-import { createUnitSelectionPanel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260822-unit-labels";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260910-context-title-only";
+import { createUnitSelectionPanel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260910-context-title-only";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
   renderCostOfRiskSmoothingControl as renderSmoothingControl,

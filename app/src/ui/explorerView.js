@@ -32,7 +32,7 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js?v=20260805-template-desc";
 import { getLatestState } from "./appState.js";
-import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260822-unit-labels";
+import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
 
 let rerenderApp = () => {};
@@ -1787,10 +1787,6 @@ function renderExplorerJstSelectionPanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-jst-selection-panel";
 
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "explorer-context-eyebrow";
-  eyebrow.textContent = "Breakdown of selection by:";
-
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
   title.textContent = "JST code";
@@ -1829,17 +1825,13 @@ function renderExplorerJstSelectionPanel(state) {
     list.append(row);
   });
 
-  article.append(eyebrow, title, list);
+  article.append(title, list);
   replaceExplorerContextDetail(article);
 }
 
 function renderExplorerReferenceDatePanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-reference-date-panel";
-
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "explorer-context-eyebrow";
-  eyebrow.textContent = "Breakdown of selection by:";
 
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
@@ -1879,7 +1871,7 @@ function renderExplorerReferenceDatePanel(state) {
     list.append(row);
   });
 
-  article.append(eyebrow, title, list);
+  article.append(title, list);
   replaceExplorerContextDetail(article);
 }
 
@@ -1888,9 +1880,6 @@ function renderExplorerEvolutionFrequencyPanel() {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-evolution-frequency-panel";
 
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "explorer-context-eyebrow";
-  eyebrow.textContent = "Breakdown of selection by:";
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
   title.textContent = "Evolution frequency";
@@ -1921,7 +1910,7 @@ function renderExplorerEvolutionFrequencyPanel() {
     list.append(row);
   });
 
-  article.append(eyebrow, title, list);
+  article.append(title, list);
   replaceExplorerContextDetail(article);
 }
 
@@ -1929,9 +1918,6 @@ function renderExplorerDisplayModePanel() {
   const context = getActiveExplorerContext();
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-display-mode-panel";
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "explorer-context-eyebrow";
-  eyebrow.textContent = "Breakdown of selection by:";
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
   title.textContent = "Table display";
@@ -1963,16 +1949,13 @@ function renderExplorerDisplayModePanel() {
     list.append(row);
   });
 
-  article.append(eyebrow, title, list);
+  article.append(title, list);
   replaceExplorerContextDetail(article);
 }
 
 function renderExplorerBenchmarkModePanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-benchmark-mode-panel";
-  const eyebrow = document.createElement("div");
-  eyebrow.className = "explorer-context-eyebrow";
-  eyebrow.textContent = "Breakdown of selection by:";
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
   title.textContent = "Benchmark display";
@@ -2007,7 +1990,7 @@ function renderExplorerBenchmarkModePanel(state) {
     list.append(row);
   });
 
-  article.append(eyebrow, title, list);
+  article.append(title, list);
   replaceExplorerContextDetail(article);
 }
 

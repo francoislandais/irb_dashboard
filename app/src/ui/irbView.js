@@ -5,7 +5,7 @@ import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } fr
 import { createCostOfRiskQuarterAxisLabelsOptions } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { clearBenchmarkEndpointLabels, renderBenchmarkEndpointLabels, scheduleBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
-import { createUnitFilterChip, createUnitSelectionPanel } from "./unitFilterView.js?v=20260822-unit-labels";
+import { createUnitFilterChip, createUnitSelectionPanel } from "./unitFilterView.js?v=20260910-context-title-only";
 
 const IRB_DEFAULT_TAB = "output-floor";
 

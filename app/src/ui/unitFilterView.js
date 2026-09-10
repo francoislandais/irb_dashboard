@@ -35,7 +35,7 @@ export function createUnitFilterChip({ selectedUnit, isOpen = false, onOpen, dat
 export function createUnitSelectionPanel({ selectedUnit, onSelect }) {
   const article = document.createElement("article");
   article.className = "cost-of-risk-audit-intro cost-of-risk-reference-date-panel unit-selection-panel";
-  article.innerHTML = '<span class="cost-of-risk-audit-intro-eyebrow">Breakdown of selection by:</span><h2 class="cost-of-risk-audit-intro-title">Display unit</h2>';
+  article.innerHTML = '<h2 class="cost-of-risk-audit-intro-title">Display unit</h2>';
 
   const table = document.createElement("table");
   table.className = "cost-of-risk-filter-selection-table";
