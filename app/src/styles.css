@@ -520,25 +520,6 @@ button:focus-visible {
   min-height: 0;
 }
 
-@media (max-width: 1180px) {
-  .explorer-workspace {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) minmax(180px, auto);
-  }
-
-  .explorer-context-panel {
-    max-height: 220px;
-  }
-
-  .cost-of-risk-dashboard {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .cost-of-risk-audit-panel {
-    min-height: 180px;
-  }
-}
-
 .cost-of-risk-split-section > .cost-of-risk-chart,
 .cost-of-risk-split-section > .cost-of-risk-geography-chart,
 .cost-of-risk-split-section > .cost-of-risk-waterfall,
@@ -584,18 +565,26 @@ button:focus-visible {
 
 .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active) {
   gap: 16px;
-  grid-template-columns: minmax(0, 900px) 300px;
+  grid-template-columns: 300px minmax(0, 900px);
   justify-content: start;
 }
 
 .irb-content:has(.irb-tab-panel[data-irb-panel="cet1-ratio"].is-active) {
   gap: 16px;
-  grid-template-columns: minmax(0, 900px) 300px;
+  grid-template-columns: 300px minmax(0, 900px);
   justify-content: start;
 }
 
-.irb-context-panel {
+.irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active)
+  .irb-tab-panel[data-irb-panel="density"],
+.irb-content:has(.irb-tab-panel[data-irb-panel="cet1-ratio"].is-active)
+  .irb-tab-panel[data-irb-panel="cet1-ratio"] {
   grid-column: 2;
+  grid-row: 1;
+}
+
+.irb-context-panel {
+  grid-column: 1;
   grid-row: 1;
   min-height: 0;
   overflow: auto;
@@ -1383,15 +1372,16 @@ button:focus-visible {
 
 .explorer-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 900px) 300px;
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
   min-width: 0;
   height: 100%;
-  justify-content: start;
+  width: 100%;
 }
 
 .explorer-main-pane {
+  grid-column: 2;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
   gap: 6px;
@@ -1418,6 +1408,8 @@ button:focus-visible {
 }
 
 .explorer-context-panel {
+  grid-column: 1;
+  grid-row: 1;
   align-self: stretch;
   align-content: stretch;
   box-sizing: border-box;
@@ -2907,4 +2899,42 @@ table {
     min-width: 860px;
   }
 
+}
+
+@media (max-width: 1180px) {
+  .explorer-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(180px, auto);
+  }
+
+  .explorer-main-pane {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .explorer-context-panel {
+    grid-column: 1;
+    grid-row: 2;
+    max-height: 220px;
+  }
+
+  .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active),
+  .irb-content:has(.irb-tab-panel[data-irb-panel="cet1-ratio"].is-active) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(180px, auto);
+  }
+
+  .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active)
+    .irb-tab-panel[data-irb-panel="density"],
+  .irb-content:has(.irb-tab-panel[data-irb-panel="cet1-ratio"].is-active)
+    .irb-tab-panel[data-irb-panel="cet1-ratio"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .irb-context-panel {
+    grid-column: 1;
+    grid-row: 2;
+    max-height: 220px;
+  }
 }
