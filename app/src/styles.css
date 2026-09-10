@@ -1732,28 +1732,21 @@ table {
 }
 
 .explorer-benchmark-preview {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  position: relative;
+  display: block;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid #dfe6e1;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.explorer-benchmark-preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 34px;
-  padding: 4px 7px 3px 11px;
-  color: var(--primary-dark);
-  font-size: .78rem;
-  font-weight: 600;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .explorer-benchmark-expand-button {
+  position: absolute;
+  right: 4px;
+  top: 3px;
+  z-index: 5;
   display: grid;
   place-items: center;
   width: 28px;
@@ -1796,12 +1789,12 @@ table {
 
 .explorer-benchmark-preview-slot {
   overflow: hidden;
-  padding: 0 5px 5px;
+  padding: 0;
 }
 
 .explorer-benchmark-preview-slot .explorer-benchmark-view,
 .explorer-benchmark-preview-slot .explorer-benchmark-chart {
-  height: 165px;
+  height: 100%;
 }
 
 .explorer-benchmark-expanded-slot {

@@ -55,7 +55,18 @@ export function renderExplorerBenchmarkView({
     peerDisplayMode,
     smoothingWindow
   });
-  const series = chartModel.series;
+  const series = compact
+    ? chartModel.series.map((serie) => ({
+      ...serie,
+      lineWidth: serie.name === selectedJst ? 2.2 : serie.lineWidth,
+      marker: serie.name === selectedJst
+        ? { ...serie.marker, enabled: true, fillColor: primaryDark, lineWidth: 0, radius: 1.4 }
+        : serie.marker,
+      states: serie.name === selectedJst
+        ? { ...serie.states, hover: { ...serie.states?.hover, halo: { size: 2 }, lineWidth: 2.4 } }
+        : serie.states
+    }))
+    : chartModel.series;
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
 
   if (series.length === 0) {
@@ -128,20 +139,25 @@ export function renderExplorerBenchmarkView({
       type: "datetime"
     },
     yAxis: {
+      visible: !compact,
       gridLineColor: "#edf0ee",
+      gridLineWidth: compact ? 0 : 1,
       labels: {
+        enabled: !compact,
         formatter() {
           return formatValue(this.value);
         },
         style: { color: "#5f6b65", fontSize: compact ? "9px" : undefined }
       },
       lineColor: "#aeb8b2",
-      lineWidth: 1,
+      lineWidth: compact ? 0 : 1,
       max: yBounds.max,
       min: yBounds.min,
       startOnTick: false,
       endOnTick: false,
-      tickAmount: compact ? 4 : 8,
+      tickAmount: compact ? undefined : 8,
+      tickLength: compact ? 0 : undefined,
+      tickWidth: compact ? 0 : 1,
       title: { text: null }
     }
   };

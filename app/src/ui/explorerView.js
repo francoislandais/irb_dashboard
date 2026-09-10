@@ -13,7 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260804-lazy-index";
-import { renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260910-explorer-benchmark-preview";
+import { renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260910-explorer-benchmark-mini";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -487,7 +487,7 @@ export function renderExplorer(state) {
     onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
     onSelectJst: selectExplorerBenchmarkJst,
     onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
-    peerDisplayMode: state.peerDisplayMode,
+    peerDisplayMode: explorerBenchmarkExpanded ? state.peerDisplayMode : "anonymised",
     selectedJst: state.selectedJst,
     smoothingWindow: explorerBenchmarkSmoothingWindow
   });
