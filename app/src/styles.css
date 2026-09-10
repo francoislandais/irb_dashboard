@@ -1401,7 +1401,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 12px;
-  grid-template-rows: auto minmax(0, 1fr) minmax(100px, 36%);
+  grid-template-rows: auto clamp(110px, 16vh, 150px) minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -3089,7 +3089,7 @@ table {
   .explorer-context-panel {
     grid-column: 1;
     grid-row: 1;
-    grid-template-rows: auto minmax(0, 1fr) minmax(90px, 34%);
+    grid-template-rows: auto clamp(100px, 15vh, 135px) minmax(0, 1fr);
     max-height: 100%;
   }
 
