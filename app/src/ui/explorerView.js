@@ -803,6 +803,7 @@ function renderExplorerTable(series, selectedUnit) {
     if (isDateFocus && index === 1) th.classList.add("variation-column-start");
     th.dataset.explorerExportColumn = "true";
     th.dataset.explorerExportLabel = isDateFocus ? dateColumn.label : formatReferenceQuarterLabel(dateColumn.label);
+    th.dataset.explorerDateColumn = String(index);
     th.textContent = isDateFocus ? dateColumn.label : getExplorerQuarterLabel(dateColumn);
     headerRow.append(th);
   });
@@ -2767,6 +2768,10 @@ function selectExplorerRow(pointCode, options = {}) {
 function applyExplorerSelection() {
   const rows = [...elements.explorerTable.querySelectorAll("tbody tr")];
 
+  elements.explorerTable.querySelectorAll(".is-selected-date-column, .is-selected-date-header").forEach((element) => {
+    element.classList.remove("is-selected-date-column", "is-selected-date-header");
+  });
+
   rows.forEach((row) => {
     row.classList.remove(
       "is-selected",
@@ -2782,6 +2787,15 @@ function applyExplorerSelection() {
     row.style.removeProperty("--parent-highlight-start");
     row.querySelectorAll("td.is-selected-cell").forEach((cell) => cell.classList.remove("is-selected-cell"));
   });
+
+  if (getActiveExplorerContext().displayMode !== "focus") {
+    const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
+    const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
+    selectedHeader?.classList.add("is-selected-date-header");
+    rows.forEach((row) => {
+      row.querySelector(`td[data-explorer-cell-column="${selectedColumnIndex}"]`)?.classList.add("is-selected-date-column");
+    });
+  }
 
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
   if (!selectedCode) return;
