@@ -539,9 +539,9 @@ function buildVisibleExplorerExcelPayload(state, table) {
   const captions = getExplorerAxisCaptions();
   const template = getActiveExplorerTemplate();
   const selectedReference = getSelectedExplorerReference(state);
-  const headerCells = [...table.tHead.rows[0].cells];
+  const headerCells = [...table.tHead.querySelectorAll("th[data-explorer-export-column]")];
   const columns = headerCells.map((cell, index) => ({
-    label: index === 0 ? displayedDimension : cell.textContent.trim(),
+    label: index === 0 ? displayedDimension : cell.dataset.explorerExportLabel || cell.textContent.trim(),
     width: index === 0 ? 54 : index === 1 ? 13 : 20
   }));
   const rows = [...table.tBodies[0].rows]
@@ -758,7 +758,10 @@ function renderExplorerTable(series, selectedUnit) {
   const axisImpossibleByPath = getExplorerAxisImpossiblePaths(displayRows, activeAxis, parentPaths);
   const dateFocusPrimaryCells = [];
   const thead = document.createElement("thead");
+  const yearHeaderRow = document.createElement("tr");
   const headerRow = document.createElement("tr");
+  yearHeaderRow.className = "explorer-year-header-row";
+  headerRow.className = isDateFocus ? "explorer-focus-header-row" : "explorer-quarter-header-row";
   const tbody = document.createElement("tbody");
 
   expandDefaultExplorerPaths(displayRows, parentPaths);
@@ -766,6 +769,8 @@ function renderExplorerTable(series, selectedUnit) {
   const descriptionHeader = document.createElement("th");
   descriptionHeader.scope = "col";
   descriptionHeader.className = "description-column";
+  descriptionHeader.dataset.explorerExportColumn = "true";
+  if (!isDateFocus) descriptionHeader.rowSpan = 2;
   descriptionHeader.append(createExplorerSearchInput());
   headerRow.append(descriptionHeader);
 
@@ -773,7 +778,21 @@ function renderExplorerTable(series, selectedUnit) {
   codeHeader.scope = "col";
   codeHeader.className = "code-column";
   codeHeader.textContent = "Code";
+  codeHeader.dataset.explorerExportColumn = "true";
+  if (!isDateFocus) codeHeader.rowSpan = 2;
   headerRow.append(codeHeader);
+
+  if (!isDateFocus) {
+    buildExplorerYearGroups(orderedDates).forEach(({ count, year }) => {
+      const th = document.createElement("th");
+      th.className = "explorer-year-header";
+      th.colSpan = count;
+      th.scope = "colgroup";
+      th.textContent = year;
+      yearHeaderRow.append(th);
+    });
+    yearHeaderRow.prepend(descriptionHeader, codeHeader);
+  }
 
   orderedDates.forEach((dateColumn, index) => {
     const th = document.createElement("th");
@@ -782,7 +801,9 @@ function renderExplorerTable(series, selectedUnit) {
     if (isDateFocus) th.classList.add("date-focus-column");
     if (isDateFocus && index > 0) th.classList.add("date-focus-variation-column");
     if (isDateFocus && index === 1) th.classList.add("variation-column-start");
-    th.textContent = dateColumn.label;
+    th.dataset.explorerExportColumn = "true";
+    th.dataset.explorerExportLabel = isDateFocus ? dateColumn.label : formatReferenceQuarterLabel(dateColumn.label);
+    th.textContent = isDateFocus ? dateColumn.label : getExplorerQuarterLabel(dateColumn);
     headerRow.append(th);
   });
 
@@ -900,9 +921,23 @@ function renderExplorerTable(series, selectedUnit) {
 
   applyExplorerDateFocusValueIntensity(dateFocusPrimaryCells);
 
-  thead.append(headerRow);
+  thead.append(...(isDateFocus ? [headerRow] : [yearHeaderRow, headerRow]));
   elements.explorerTable.append(thead, tbody);
   applyExplorerTreeState(parentPaths, nodePaths);
+}
+
+function buildExplorerYearGroups(dateColumns) {
+  return dateColumns.reduce((groups, dateColumn) => {
+    const year = String(dateColumn.date?.getFullYear?.() || formatReferenceQuarterLabel(dateColumn.label).match(/\d{4}/)?.[0] || "-");
+    const currentGroup = groups.at(-1);
+    if (currentGroup?.year === year) currentGroup.count += 1;
+    else groups.push({ year, count: 1 });
+    return groups;
+  }, []);
+}
+
+function getExplorerQuarterLabel(dateColumn) {
+  return formatReferenceQuarterLabel(dateColumn.label).match(/^Q[1-4]/)?.[0] || dateColumn.label;
 }
 
 function applyExplorerDateFocusValueIntensity(entries) {

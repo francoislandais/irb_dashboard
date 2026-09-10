@@ -2534,6 +2534,31 @@ table {
   font-weight: 400;
 }
 
+.metric-table thead .explorer-year-header-row th {
+  top: 0;
+  height: 26px;
+}
+
+.metric-table thead .explorer-quarter-header-row th {
+  top: 26px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.metric-table thead th.explorer-year-header {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  border-right: 12px solid #ffffff;
+  background: #f2f3f2;
+  color: #26332d;
+  text-align: center;
+}
+
+.metric-table thead th.explorer-year-header:last-child {
+  border-right: 0;
+}
+
 .metric-table td {
   font-variant-numeric: tabular-nums;
   max-width: none;
