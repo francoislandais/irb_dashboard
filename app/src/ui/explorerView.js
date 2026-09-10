@@ -899,13 +899,15 @@ function renderExplorerTable(series, selectedUnit) {
                 valueFormat: seriesRow.format
               });
       }
-      if (!seriesRow.isVirtual && Number.isFinite(displayValue)) {
-        td.dataset.explorerCellValue = String(displayValue);
+      if (!seriesRow.isVirtual) {
         td.dataset.explorerCellRow = String(rowIndex);
         td.dataset.explorerCellColumn = String(index);
         td.dataset.explorerCellKind = contributionValue === null ? "amount" : "ratio";
         td.dataset.explorerCellDate = columnKind === "current" ? orderedDates[index]?.label ?? "" : "";
         td.dataset.explorerCellLabel = seriesRow.description || seriesRow.code || "";
+      }
+      if (!seriesRow.isVirtual && Number.isFinite(displayValue)) {
+        td.dataset.explorerCellValue = String(displayValue);
         if (isDateFocus && index === 0 && !isAxisImpossible) {
           dateFocusPrimaryCells.push({
             cell: td,
@@ -1151,7 +1153,7 @@ function finishExplorerCellRangeSelection() {
 }
 
 function getExplorerValueCell(target) {
-  return target?.closest?.("td[data-explorer-cell-value]");
+  return target?.closest?.("td[data-explorer-cell-column]");
 }
 
 function applyExplorerCellRangeSelection(startCell, endCell) {
@@ -1215,7 +1217,7 @@ function getExplorerCellRangeCells(startCell, endCell) {
   const columnMin = Math.min(start.column, end.column);
   const columnMax = Math.max(start.column, end.column);
 
-  return [...elements.explorerTable.querySelectorAll("td[data-explorer-cell-value]")]
+  return [...elements.explorerTable.querySelectorAll("td[data-explorer-cell-column]")]
     .filter((cell) => {
       const row = cell.closest("tr");
       if (!row || row.hidden) return false;

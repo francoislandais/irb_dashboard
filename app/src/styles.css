@@ -2573,7 +2573,7 @@ table {
   max-width: none;
 }
 
-.metric-table td[data-explorer-cell-value] {
+.metric-table td[data-explorer-cell-column] {
   user-select: none;
 }
 
