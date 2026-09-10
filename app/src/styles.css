@@ -1927,26 +1927,37 @@ table {
 }
 
 .explorer-excel-export-button svg {
-  width: 19px;
-  height: 19px;
-  overflow: visible;
+  width: 21px;
+  height: 21px;
+  overflow: hidden;
 }
 
-.explorer-excel-export-button .excel-sheet {
-  fill: currentColor;
-  opacity: 0.16;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
+.explorer-excel-export-button .excel-workbook {
+  fill: #21a366;
 }
 
-.explorer-excel-export-button .excel-fold,
-.explorer-excel-export-button .excel-mark {
+.explorer-excel-export-button .excel-grid {
   fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
+  stroke: rgba(255, 255, 255, .72);
+  stroke-width: .75;
+  stroke-linecap: square;
+}
+
+.explorer-excel-export-button .excel-tile {
+  fill: #107c41;
+}
+
+.explorer-excel-export-button .excel-x {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.65;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.explorer-excel-export-button:disabled svg {
+  filter: grayscale(1);
+  opacity: .42;
 }
 
 .axis-tab:hover {
