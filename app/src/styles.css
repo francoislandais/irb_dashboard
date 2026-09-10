@@ -2680,6 +2680,11 @@ table {
   font-weight: 400;
 }
 
+.metric-table tbody tr.is-tree-parent > th.description-column .tree-label {
+  color: var(--primary-dark);
+  font-weight: 400;
+}
+
 .metric-table tbody tr[data-is-virtual="true"] > th,
 .metric-table tbody tr[data-is-virtual="true"] > td {
   color: #3d5549;
@@ -2762,7 +2767,8 @@ table {
 }
 
 .metric-table tbody tr.is-ancestor .tree-label {
-  font-weight: 700;
+  color: var(--primary-dark);
+  font-weight: 400;
 }
 
 .metric-table tbody tr.is-sticky-parent > th,
