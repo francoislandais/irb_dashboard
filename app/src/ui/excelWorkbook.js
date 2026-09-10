@@ -79,7 +79,7 @@ function buildSheetXml({ columns, metadata, rows, subtitle, title }) {
   const endRow = Math.max(tableHeaderRow, rowNumber);
 
   return xmlDocument(`<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <sheetViews><sheetView workbookViewId="0"><pane xSplit="2" ySplit="${tableHeaderRow}" topLeftCell="C${tableHeaderRow + 1}" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>
+  <sheetViews><sheetView workbookViewId="0"/></sheetViews>
   <sheetFormatPr defaultRowHeight="18"/>
   <cols>${widths}</cols>
   <sheetData>${sheetRows.join("")}</sheetData>
