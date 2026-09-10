@@ -2814,7 +2814,13 @@ table {
 }
 
 .metric-table tbody tr.is-selected > th.description-column {
-  background: var(--primary-dark) !important;
+  background: linear-gradient(
+    to right,
+    #ffffff 0,
+    #ffffff var(--parent-highlight-start, var(--highlight-start)),
+    var(--primary-dark) var(--parent-highlight-start, var(--highlight-start)),
+    var(--primary-dark) 100%
+  ) !important;
   color: #ffffff !important;
 }
 
