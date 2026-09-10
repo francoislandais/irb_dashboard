@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260908-url-header-mode">
+    <link rel="stylesheet" href="./src/styles.css?v=20260910-explorer-excel">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260830-credit-risk-source-panel">
   </head>
   <body class="is-app-loading">
@@ -84,6 +84,13 @@
                   </button>
                   <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="z">
                     <span class="axis-tab-value" data-axis-caption="z">Tab : -</span>
+                  </button>
+                  <button id="explorer-excel-export" class="explorer-excel-export-button" type="button" aria-label="Export visible table to Excel" title="Export visible table to Excel" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path class="excel-sheet" d="M7 2.75h8.8L20.25 7v14.25H7z"/>
+                      <path class="excel-fold" d="M15.75 2.75V7h4.5"/>
+                      <path class="excel-mark" d="m3.75 8.25 5.5 7.5m0-7.5-5.5 7.5"/>
+                    </svg>
                   </button>
                 </div>
                 <div id="explorer-active-filters" class="cost-of-risk-active-filters explorer-active-filters" aria-label="Active Explorer filters"></div>
@@ -331,6 +338,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260908-tab-visibility"></script>
+    <script type="module" src="./src/main.js?v=20260910-explorer-excel"></script>
   </body>
 </html>

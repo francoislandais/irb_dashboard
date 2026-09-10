@@ -2,7 +2,7 @@ import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
-import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, isPercentFormat } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat } from "../data/core/formatting.js?v=20260710-bp-format";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
@@ -35,7 +35,8 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js?v=20260805-template-desc";
 import { getLatestState } from "./appState.js";
-import { createUnitFilterChip, createUnitSelectionPanel } from "./unitFilterView.js?v=20260822-unit-labels";
+import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260822-unit-labels";
+import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
 
 let rerenderApp = () => {};
 let setActiveModule = () => {};
@@ -106,6 +107,7 @@ const elements = {
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
   explorerEmpty: document.querySelector("#explorer-empty"),
+  explorerExcelExport: document.querySelector("#explorer-excel-export"),
   explorerMainPane: document.querySelector(".explorer-main-pane"),
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
@@ -175,6 +177,7 @@ export function wireExplorerUi(actions, rerender) {
     selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
+  elements.explorerExcelExport?.addEventListener("click", exportVisibleExplorerTable);
 }
 
 export function showExplorerPeerSelection(actions) {
@@ -489,6 +492,9 @@ export function renderExplorer(state) {
   });
   const displayedTableSeries = buildExplorerEvolutionSeries(tableSeries, state);
   elements.explorerTable.replaceChildren();
+  if (elements.explorerExcelExport) {
+    elements.explorerExcelExport.disabled = displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0;
+  }
 
   elements.explorerEmpty.hidden = !tableSeries.status;
   elements.explorerEmpty.textContent = tableSeries.status;
@@ -505,6 +511,101 @@ export function renderExplorer(state) {
   } else {
     restoreExplorerScrollPosition();
   }
+}
+
+function exportVisibleExplorerTable() {
+  const state = getLatestState();
+  const table = elements.explorerTable;
+  if (!state || !table?.tHead || !table.tBodies[0]) return;
+
+  const payload = buildVisibleExplorerExcelPayload(state, table);
+  if (payload.rows.length === 0 || payload.columns.length === 0) return;
+
+  const button = elements.explorerExcelExport;
+  if (button) button.disabled = true;
+  try {
+    downloadExcelWorkbook(payload);
+  } finally {
+    window.setTimeout(() => {
+      if (button) button.disabled = false;
+    }, 350);
+  }
+}
+
+function buildVisibleExplorerExcelPayload(state, table) {
+  const activeAxis = getActiveExplorerAxis();
+  const axisLabels = { x: "Column", y: "Row", z: "Tab" };
+  const displayedDimension = axisLabels[activeAxis] ?? activeAxis.toUpperCase();
+  const captions = getExplorerAxisCaptions();
+  const template = getActiveExplorerTemplate();
+  const selectedReference = getSelectedExplorerReference(state);
+  const headerCells = [...table.tHead.rows[0].cells];
+  const columns = headerCells.map((cell, index) => ({
+    label: index === 0 ? displayedDimension : cell.textContent.trim(),
+    width: index === 0 ? 54 : index === 1 ? 13 : 20
+  }));
+  const rows = [...table.tBodies[0].rows]
+    .filter((row) => !row.hidden && window.getComputedStyle(row).display !== "none")
+    .map((row) => ({
+      cells: [...row.cells].map((cell, index) => buildExplorerExcelCell(cell, index, row, state))
+    }));
+  const templateTitle = template?.description || String(template?.label || "").replace(`${template?.tableId || ""} - `, "") || "Regulatory template";
+  const unitLabel = getUnitFilterLabel(state.selectedUnit);
+  const metadata = [
+    { label: "Template", value: template?.tableId || activeExplorerTemplateId || "-" },
+    { label: "Template title", value: templateTitle },
+    { label: "Displayed dimension", value: displayedDimension },
+    { label: "Row selection", value: captions.y || "Not used" },
+    { label: "Column selection", value: captions.x || "Not used" },
+    { label: "Tab selection", value: captions.z || "Not used" },
+    { label: "JST code", value: state.selectedJst || "-" },
+    { label: "Display unit", value: unitLabel },
+    { label: "Table display", value: getActiveExplorerDisplayOption().label },
+    { label: "Evolution frequency", value: getActiveExplorerEvolutionOption().label }
+  ];
+  if (getActiveExplorerContext().displayMode === "focus" && selectedReference) {
+    metadata.push({ label: "Reference date", value: formatReferenceQuarterLabel(selectedReference.label) });
+  }
+
+  const templateId = template?.tableId || activeExplorerTemplateId || "Template";
+  return {
+    columns,
+    fileName: sanitizeExcelFileName(`Agora Explorer_${templateId}_${displayedDimension}.xlsx`),
+    metadata,
+    rows,
+    subtitle: `Visible table · ${state.selectedJst || "JST not selected"} · ${unitLabel}`,
+    title: `${templateId} — ${templateTitle} — ${displayedDimension} dimension`
+  };
+}
+
+function buildExplorerExcelCell(cell, index, row, state) {
+  if (index === 0) {
+    return {
+      type: "text",
+      value: cell.querySelector(".tree-label")?.textContent.trim() || cell.textContent.trim(),
+      indent: Number(row.dataset.indentLevel) || 0
+    };
+  }
+  if (index === 1) {
+    return { type: "text", value: cell.querySelector(".code-column-badge")?.textContent.trim() || cell.textContent.trim() };
+  }
+
+  const rawValue = Number(cell.dataset.explorerCellValue);
+  if (!Number.isFinite(rawValue)) return { type: "text", value: cell.textContent.trim() };
+
+  const columnKind = cell.dataset.explorerExportKind || "current";
+  const valueFormat = cell.dataset.explorerExportFormat || "";
+  const isRatio = cell.dataset.explorerCellKind === "ratio" || columnKind === "relative-change" || isPercentFormat(valueFormat);
+  const value = isRatio
+    ? (cell.dataset.explorerCellKind === "ratio" || columnKind === "relative-change" || Math.abs(rawValue) <= 1 ? rawValue : rawValue / 100)
+    : rawValue / getUnitDefinition(state.selectedUnit).divisor;
+  const opacity = Number(cell.style.getPropertyValue("--date-focus-value-opacity")) || 0;
+  const emphasis = opacity >= 0.115 ? 3 : opacity >= 0.075 ? 2 : opacity > 0 ? 1 : 0;
+  return { type: "number", value, numberFormat: isRatio ? "percent" : "amount", emphasis };
+}
+
+function sanitizeExcelFileName(fileName) {
+  return fileName.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
 }
 
 export function openExplorerPoint({
@@ -750,6 +851,8 @@ function renderExplorerTable(series, selectedUnit) {
       if (isDateFocus && index > 0) td.classList.add("date-focus-variation-column");
       if (isDateFocus && index === 1) td.classList.add("variation-column-start");
       const columnKind = orderedDates[index]?.kind ?? "current";
+      td.dataset.explorerExportKind = columnKind;
+      td.dataset.explorerExportFormat = seriesRow.format ?? "";
       const contributionValue = isContributionFocus
         ? point.value
         : isContributionChild

@@ -1817,6 +1817,62 @@ table {
   display: none;
 }
 
+.explorer-excel-export-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  border: 1px solid #bdd3c8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #217346;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.explorer-excel-export-button:hover:not(:disabled) {
+  border-color: #217346;
+  background: #edf6f1;
+}
+
+.explorer-excel-export-button:focus-visible {
+  outline: 2px solid #8bbba4;
+  outline-offset: 2px;
+}
+
+.explorer-excel-export-button:disabled {
+  border-color: #e1e6e3;
+  background: #f7f8f7;
+  color: #aab4af;
+  cursor: default;
+}
+
+.explorer-excel-export-button svg {
+  width: 19px;
+  height: 19px;
+  overflow: visible;
+}
+
+.explorer-excel-export-button .excel-sheet {
+  fill: currentColor;
+  opacity: 0.16;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.explorer-excel-export-button .excel-fold,
+.explorer-excel-export-button .excel-mark {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .axis-tab:hover {
   border-color: #c2cac5;
   background: #eef2ef;
