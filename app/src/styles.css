@@ -1372,7 +1372,7 @@ button:focus-visible {
 
 .explorer-workspace {
   display: grid;
-  grid-template-columns: clamp(290px, 24vw, 360px) minmax(0, 1fr);
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
   min-width: 0;
@@ -1412,6 +1412,16 @@ button:focus-visible {
   border: 0;
   border-radius: 0;
   background: transparent;
+}
+
+.explorer-context-panel > .cost-of-risk-context-selected-pane,
+.explorer-context-panel > .cost-of-risk-context-detail-pane {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .explorer-context-article {
@@ -3049,7 +3059,7 @@ table {
 
 @media (max-width: 1180px) {
   .explorer-workspace {
-    grid-template-columns: clamp(260px, 30vw, 320px) minmax(0, 1fr);
+    grid-template-columns: 300px minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
   }
 
