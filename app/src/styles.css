@@ -2768,7 +2768,7 @@ table {
 
 .metric-table tbody tr.is-ancestor .tree-label {
   color: var(--primary-dark);
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .metric-table tbody tr.is-sticky-parent > th,
