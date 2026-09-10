@@ -2701,7 +2701,7 @@ table {
   bottom: 0;
   left: calc(var(--tree-highlight-offset) + (var(--connector-level, 0) * 18px));
   width: 1px;
-  background: #c9d2cc;
+  background: transparent;
   pointer-events: none;
 }
 
@@ -2856,10 +2856,6 @@ table {
 
 .metric-table tbody tr.is-selected > th.description-column .tree-toggle {
   color: #ffffff;
-}
-
-.metric-table tbody tr.is-selected > th.description-column .tree-connector {
-  display: none;
 }
 
 .metric-table tbody tr.is-selected > th.description-column::after {
