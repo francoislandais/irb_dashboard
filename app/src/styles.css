@@ -2506,12 +2506,12 @@ table {
   background-color: rgb(48 57 52 / var(--date-focus-value-opacity, 0));
 }
 
-.metric-table tbody tr:hover th,
-.metric-table tbody tr:hover td {
+.metric-table tbody th:hover,
+.metric-table tbody td:hover {
   background: #eef4f1;
 }
 
-.metric-table tbody tr:hover th.description-column {
+.metric-table tbody th.description-column:hover {
   background: linear-gradient(
     to right,
     #ffffff 0,
@@ -2566,6 +2566,10 @@ table {
 
 .metric-table tbody td.is-selected-date-column {
   background: #eaf2fa;
+}
+
+.metric-table tbody td.is-selected-date-column:hover {
+  background: #dfeef8;
 }
 
 .metric-table td {
