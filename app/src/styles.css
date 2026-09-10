@@ -2777,6 +2777,28 @@ table {
   z-index: 45;
 }
 
+.metric-table tbody tr.is-sticky-parent > td.is-selected-date-column {
+  background: #eaf2fa;
+}
+
+.metric-table tbody tr.is-sticky-parent > td:hover {
+  background: #eef4f1;
+}
+
+.metric-table tbody tr.is-sticky-parent > td.is-selected-date-column:hover {
+  background: #dfeef8;
+}
+
+.metric-table tbody tr.is-sticky-parent > th.description-column:hover {
+  background: linear-gradient(
+    to right,
+    #ffffff 0,
+    #ffffff calc(var(--tree-highlight-offset) + (var(--indent-level, 0) * 18px)),
+    #eef4f1 calc(var(--tree-highlight-offset) + (var(--indent-level, 0) * 18px)),
+    #eef4f1 100%
+  );
+}
+
 /* This row's code is incompatible with whatever is currently selected on
    the other axis (see assets/ITS_impossible_x_y.csv) — there will never be
    data for it. A pale, washed-out grey reads as "unavailable" precisely
@@ -2821,8 +2843,8 @@ table {
   background: linear-gradient(
     to right,
     #ffffff 0,
-    #ffffff var(--parent-highlight-start, var(--highlight-start)),
-    var(--primary-dark) var(--parent-highlight-start, var(--highlight-start)),
+    #ffffff var(--highlight-start),
+    var(--primary-dark) var(--highlight-start),
     var(--primary-dark) 100%
   ) !important;
   color: #ffffff !important;
