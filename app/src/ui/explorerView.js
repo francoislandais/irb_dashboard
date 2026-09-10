@@ -13,10 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260804-lazy-index";
-import {
-  destroyExplorerBenchmarkChart,
-  renderExplorerBenchmarkView
-} from "./explorerBenchmarkView.js?v=20260812-explorer-benchmark-view";
+import { renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260910-explorer-benchmark-preview";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -79,7 +76,7 @@ const pendingUrlRow = getUrlRowParam();
 const pendingUrlColumn = getUrlColumnParam();
 const pendingUrlTab = getUrlTabParam();
 let explorerStickyFrame = 0;
-let explorerBenchmarkViewActive = false;
+let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
 let explorerBenchmarkLastSmoothingWindow = 4;
 let explorerBenchmarkFocusYAxis = false;
@@ -102,6 +99,9 @@ const elements = {
   },
   explorerActiveFilters: document.querySelector("#explorer-active-filters"),
   explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
+  explorerBenchmarkExpand: document.querySelector("#explorer-benchmark-expand"),
+  explorerBenchmarkExpandedSlot: document.querySelector("#explorer-benchmark-expanded-slot"),
+  explorerBenchmarkPreviewSlot: document.querySelector("#explorer-benchmark-preview-slot"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
@@ -178,6 +178,11 @@ export function wireExplorerUi(actions, rerender) {
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
   elements.explorerExcelExport?.addEventListener("click", exportVisibleExplorerTable);
+  elements.explorerBenchmarkExpand?.addEventListener("click", () => {
+    saveExplorerScrollPosition();
+    explorerBenchmarkExpanded = !explorerBenchmarkExpanded;
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
 }
 
 export function showExplorerPeerSelection(actions) {
@@ -437,6 +442,26 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
   }
 }
 
+function syncExplorerBenchmarkPlacement() {
+  const target = explorerBenchmarkExpanded
+    ? elements.explorerBenchmarkExpandedSlot
+    : elements.explorerBenchmarkPreviewSlot;
+  if (target && elements.explorerBenchmarkView?.parentElement !== target) {
+    target.append(elements.explorerBenchmarkView);
+  }
+  if (elements.explorerMainPane) {
+    elements.explorerMainPane.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
+  }
+  if (elements.explorerTableWrap) elements.explorerTableWrap.hidden = explorerBenchmarkExpanded;
+  if (elements.explorerBenchmarkExpandedSlot) elements.explorerBenchmarkExpandedSlot.hidden = !explorerBenchmarkExpanded;
+  if (elements.explorerBenchmarkExpand) {
+    elements.explorerBenchmarkExpand.setAttribute("aria-expanded", String(explorerBenchmarkExpanded));
+    elements.explorerBenchmarkExpand.setAttribute("aria-label", explorerBenchmarkExpanded ? "Collapse benchmark" : "Expand benchmark");
+    elements.explorerBenchmarkExpand.setAttribute("title", explorerBenchmarkExpanded ? "Return to table" : "Expand benchmark");
+    elements.explorerBenchmarkExpand.classList.toggle("is-expanded", explorerBenchmarkExpanded);
+  }
+}
+
 export function renderExplorer(state) {
   clearExplorerCellRangeSelection();
   ensureActiveExplorerTemplate(state);
@@ -450,36 +475,22 @@ export function renderExplorer(state) {
   renderExplorerActiveFilters(state);
   renderExplorerContextPanel(state);
 
-  // The benchmark chart no longer replaces the table: it splits the main
-  // pane the same way Cost of Risk's tab panels do — data on top, the
-  // time-series chart in a fixed band underneath (see .has-benchmark).
-  if (elements.explorerMainPane) elements.explorerMainPane.classList.toggle("has-benchmark", explorerBenchmarkViewActive);
-  if (elements.explorerBenchmarkView) elements.explorerBenchmarkView.hidden = !explorerBenchmarkViewActive;
-
-  // The table keeps rendering/updating even while the benchmark chart is
-  // open (selection changes and the chart's own JST callback both need to
-  // keep reaching it) — only the benchmark chart itself is torn down once
-  // it's actually closed.
-  if (explorerBenchmarkViewActive) {
-    const benchmark = buildExplorerBenchmark();
-    // No on-chart title: the context panel's selection summary card already
-    // describes the selection, so the chart itself just shows the plot.
-    renderExplorerBenchmarkView({
-      benchmark,
-      container: elements.explorerBenchmarkChart,
-      focusYAxis: explorerBenchmarkFocusYAxis,
-      formatValue: (value) => formatBenchmarkValue(value, benchmark),
-      onClearSmoothing: clearExplorerBenchmarkSmoothing,
-      onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
-      onSelectJst: selectExplorerBenchmarkJst,
-      onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
-      peerDisplayMode: state.peerDisplayMode,
-      selectedJst: state.selectedJst,
-      smoothingWindow: explorerBenchmarkSmoothingWindow
-    });
-  } else {
-    destroyExplorerBenchmarkChart();
-  }
+  syncExplorerBenchmarkPlacement();
+  const benchmark = buildExplorerBenchmark();
+  renderExplorerBenchmarkView({
+    benchmark,
+    compact: !explorerBenchmarkExpanded,
+    container: elements.explorerBenchmarkChart,
+    focusYAxis: explorerBenchmarkFocusYAxis,
+    formatValue: (value) => formatBenchmarkValue(value, benchmark),
+    onClearSmoothing: clearExplorerBenchmarkSmoothing,
+    onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
+    onSelectJst: selectExplorerBenchmarkJst,
+    onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
+    peerDisplayMode: state.peerDisplayMode,
+    selectedJst: state.selectedJst,
+    smoothingWindow: explorerBenchmarkSmoothingWindow
+  });
 
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
@@ -1526,11 +1537,7 @@ function renderExplorerActiveFilters(state) {
   benchmarkToggle.setAttribute("aria-label", "Change benchmark display");
   const benchmarkLabel = document.createElement("span");
   benchmarkLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  benchmarkLabel.textContent = !explorerBenchmarkViewActive
-    ? "No benchmark"
-    : state?.peerDisplayMode === "anonymised"
-      ? "Anonymous benchmark"
-      : "Benchmark";
+  benchmarkLabel.textContent = state?.peerDisplayMode === "anonymised" ? "Anonymous benchmark" : "Benchmark";
   benchmarkToggle.append(benchmarkLabel);
   benchmarkToggle.addEventListener("click", () => {
     explorerContextTopic = "benchmark-mode";
@@ -1975,11 +1982,10 @@ function renderExplorerBenchmarkModePanel(state) {
   list.setAttribute("aria-label", "Benchmark display");
 
   [
-    { value: "none", label: "No benchmark", detail: "Table only" },
     { value: "explicit", label: "Benchmark", detail: "Named peer curves" },
     { value: "anonymised", label: "Anonymous benchmark", detail: "Anonymized percentile bands" }
   ].forEach((option) => {
-    const activeMode = explorerBenchmarkViewActive ? (state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit") : "none";
+    const activeMode = state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
     const isActive = activeMode === option.value;
     const row = document.createElement("button");
     row.type = "button";
@@ -1994,14 +2000,9 @@ function renderExplorerBenchmarkModePanel(state) {
     row.append(label, detail);
     row.addEventListener("click", () => {
       if (activeMode === option.value) return;
-      explorerBenchmarkViewActive = option.value !== "none";
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
-      if (option.value === "explicit" || option.value === "anonymised") {
-        updatePeerDisplayMode(option.value);
-      } else if (getLatestState()) {
-        rerenderApp(getLatestState());
-      }
+      updatePeerDisplayMode(option.value);
     });
     list.append(row);
   });

@@ -29,6 +29,7 @@ export function destroyExplorerBenchmarkChart() {
 
 export function renderExplorerBenchmarkView({
   benchmark,
+  compact = false,
   container,
   focusYAxis,
   formatValue,
@@ -78,16 +79,22 @@ export function renderExplorerBenchmarkView({
           } else {
             clearPeerDistributionBands(this);
           }
-          renderBenchmarkEndpointLabels(this, selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
-          renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
-          renderCostOfRiskYAxisFocusBadge(this, focusYAxis, onToggleYAxisFocus);
+          if (compact) {
+            clearBenchmarkEndpointLabels(this);
+          } else {
+            renderBenchmarkEndpointLabels(this, selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+            renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
+            renderCostOfRiskYAxisFocusBadge(this, focusYAxis, onToggleYAxisFocus);
+          }
         }
       },
       // Fixed regardless of whether the anonymised-mode subtitle has text:
       // letting Highcharts auto-size that margin shifted the plot area (and
       // every axis label with it) whenever the subtitle appeared/disappeared.
-      marginTop: 40,
-      spacingRight: 128,
+      marginTop: compact ? 8 : 40,
+      spacingBottom: compact ? 4 : 10,
+      spacingLeft: compact ? 2 : 10,
+      spacingRight: compact ? 6 : 128,
       type: "line",
       zooming: { type: "xy" },
       zoomType: "xy"
@@ -101,8 +108,8 @@ export function renderExplorerBenchmarkView({
       onSelectJst(seriesName);
     }, selectedJst),
     series,
-    subtitle: isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
-    title: createCostOfRiskHighchartsTitle("temporal benchmark of the current selection"),
+    subtitle: !compact && isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
+    title: compact ? { text: "" } : createCostOfRiskHighchartsTitle("temporal benchmark of the current selection"),
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
@@ -114,7 +121,7 @@ export function renderExplorerBenchmarkView({
       xDateFormat: "%d/%m/%Y"
     },
     xAxis: {
-      labels: { style: { color: "#5f6b65" } },
+      labels: { style: { color: "#5f6b65", fontSize: compact ? "9px" : undefined } },
       lineColor: "#c2cac5",
       lineWidth: 1,
       tickColor: "#d9dedb",
@@ -126,7 +133,7 @@ export function renderExplorerBenchmarkView({
         formatter() {
           return formatValue(this.value);
         },
-        style: { color: "#5f6b65" }
+        style: { color: "#5f6b65", fontSize: compact ? "9px" : undefined }
       },
       lineColor: "#aeb8b2",
       lineWidth: 1,
@@ -134,21 +141,27 @@ export function renderExplorerBenchmarkView({
       min: yBounds.min,
       startOnTick: false,
       endOnTick: false,
-      tickAmount: 8,
+      tickAmount: compact ? 4 : 8,
       title: { text: null }
     }
   };
 
-  if (hasBenchmarkChartModeChanged(explorerBenchmarkChart, chartModel.peerDisplayMode)) destroyExplorerBenchmarkChart();
+  if (hasBenchmarkChartModeChanged(explorerBenchmarkChart, chartModel.peerDisplayMode)
+      || (explorerBenchmarkChart && explorerBenchmarkChart.__explorerCompact !== compact)) {
+    destroyExplorerBenchmarkChart();
+  }
   if (explorerBenchmarkChart) {
     clearBenchmarkEndpointLabels(explorerBenchmarkChart);
     explorerBenchmarkChart.update(options, true, true, false);
     markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
-    scheduleBenchmarkEndpointLabels(explorerBenchmarkChart, selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+    if (!compact) {
+      scheduleBenchmarkEndpointLabels(explorerBenchmarkChart, selectedJst, onSelectJst, { peerDisplayMode: chartModel.peerDisplayMode });
+    }
   } else {
     explorerBenchmarkChart = window.Highcharts.chart(container, options);
     markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
   }
+  explorerBenchmarkChart.__explorerCompact = compact;
   // The container is only unhidden a moment before this runs (see
   // renderExplorer), so force a reflow in case Highcharts measured its
   // width before the surrounding grid track had finished laying out.

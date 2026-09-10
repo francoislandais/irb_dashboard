@@ -1372,7 +1372,7 @@ button:focus-visible {
 
 .explorer-workspace {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
   min-width: 0;
@@ -1389,22 +1389,8 @@ button:focus-visible {
   min-width: 0;
 }
 
-/* Same row sizing as Cost of Risk's tab panels (see the
-   [data-cost-of-risk-panel="..."] rule) AND the same top-anchored packing
-   (align-content: start, see .cost-of-risk-tab-panel) instead of a
-   flexible middle row. A flexible row would absorb all the leftover
-   height and push the chart down to whatever the viewport happens to be,
-   so it would only ever coincide with Cost of Risk's chart position by
-   accident, at one specific window height. Matching both the clamped
-   row sizes and the top-packed alignment puts the chart at the same
-   deterministic offset from the top as Cost of Risk, at every viewport size. */
-.explorer-main-pane.has-benchmark {
-  align-content: start;
-  grid-template-rows:
-    auto
-    auto
-    minmax(200px, 320px)
-    minmax(220px, 460px);
+.explorer-main-pane.is-benchmark-expanded {
+  grid-template-rows: auto auto minmax(0, 1fr);
 }
 
 .explorer-context-panel {
@@ -1415,7 +1401,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 12px;
-  grid-template-rows: 132px minmax(0, 1fr);
+  grid-template-rows: 132px minmax(0, 1fr) 210px;
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1722,12 +1708,15 @@ table {
   overflow: auto;
 }
 
+.metric-table-wrap[hidden] {
+  display: none;
+}
+
 /* Same width contract as Cost of Risk's .cost-of-risk-split-section, so
    .cost-of-risk-chart's width: 80% resolves against the exact same basis. */
 .explorer-benchmark-view {
   position: relative;
-  grid-row: 4;
-  width: min(100%, 900px);
+  width: 100%;
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -1735,17 +1724,101 @@ table {
      doesn't clip either) — it was cutting off the chart's own bottom axis
      line whenever the row's actual height rounded a fraction of a pixel
      short of the chart's rendered height. */
-  /* Match Credit Risk's 14px separation between its principal blocks. */
-  margin-top: 8px;
+  margin: 0;
 }
 
 .explorer-benchmark-view[hidden] {
   display: none;
 }
 
-/* No size override here on purpose: it inherits .cost-of-risk-chart's
-   height: 300px / width: 80% as-is, so this is pixel-identical to every
-   Cost of Risk benchmark chart. */
+.explorer-benchmark-preview {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #dfe6e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.explorer-benchmark-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 4px 7px 3px 11px;
+  color: var(--primary-dark);
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.explorer-benchmark-expand-button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #66736d;
+  cursor: pointer;
+}
+
+.explorer-benchmark-expand-button:hover,
+.explorer-benchmark-expand-button:focus-visible,
+.explorer-benchmark-expand-button.is-expanded {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+  outline: 0;
+}
+
+.explorer-benchmark-expand-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.explorer-benchmark-expand-button.is-expanded svg {
+  transform: rotate(180deg);
+}
+
+.explorer-benchmark-preview-slot,
+.explorer-benchmark-expanded-slot {
+  min-width: 0;
+  min-height: 0;
+}
+
+.explorer-benchmark-preview-slot {
+  overflow: hidden;
+  padding: 0 5px 5px;
+}
+
+.explorer-benchmark-preview-slot .explorer-benchmark-view,
+.explorer-benchmark-preview-slot .explorer-benchmark-chart {
+  height: 165px;
+}
+
+.explorer-benchmark-expanded-slot {
+  grid-row: 3;
+  height: 100%;
+  overflow: hidden;
+}
+
+.explorer-benchmark-expanded-slot[hidden] {
+  display: none;
+}
+
+.explorer-benchmark-expanded-slot .explorer-benchmark-view,
+.explorer-benchmark-expanded-slot .explorer-benchmark-chart {
+  height: 100%;
+  min-height: 360px;
+}
 
 .template-tabs {
   display: flex;
@@ -2994,7 +3067,8 @@ table {
   .explorer-context-panel {
     grid-column: 1;
     grid-row: 2;
-    max-height: 220px;
+    grid-template-rows: 116px minmax(150px, 1fr) 190px;
+    max-height: 480px;
   }
 
   .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active),

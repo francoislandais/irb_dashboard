@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260910-explorer-selected-ancestors">
+    <link rel="stylesheet" href="./src/styles.css?v=20260910-explorer-benchmark-preview">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -97,13 +97,26 @@
                 <div class="metric-table-wrap">
                   <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
                 </div>
-                <div id="explorer-benchmark-view" class="explorer-benchmark-view" hidden>
-                  <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
-                </div>
+                <div id="explorer-benchmark-expanded-slot" class="explorer-benchmark-expanded-slot" hidden></div>
               </div>
               <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information">
                 <div id="explorer-context-selection" class="cost-of-risk-context-selected-pane" aria-label="Current Explorer selection"></div>
                 <div id="explorer-context-detail" class="cost-of-risk-context-detail-pane" aria-label="Explorer selection options"></div>
+                <section class="explorer-benchmark-preview" aria-label="Benchmark preview">
+                  <div class="explorer-benchmark-preview-header">
+                    <span>Benchmark</span>
+                    <button id="explorer-benchmark-expand" class="explorer-benchmark-expand-button" type="button" aria-label="Expand benchmark" aria-expanded="false" title="Expand benchmark">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M8.5 4H4v4.5M15.5 4H20v4.5M20 15.5V20h-4.5M8.5 20H4v-4.5"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div id="explorer-benchmark-preview-slot" class="explorer-benchmark-preview-slot">
+                    <div id="explorer-benchmark-view" class="explorer-benchmark-view">
+                      <div id="explorer-benchmark-chart" class="cost-of-risk-chart explorer-benchmark-chart" aria-label="Explorer benchmark time series"></div>
+                    </div>
+                  </div>
+                </section>
               </aside>
             </div>
           </article>
@@ -338,6 +351,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260910-explorer-empty-cells"></script>
+    <script type="module" src="./src/main.js?v=20260910-explorer-benchmark-preview"></script>
   </body>
 </html>
