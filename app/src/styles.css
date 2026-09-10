@@ -2747,38 +2747,6 @@ table {
   z-index: 45;
 }
 
-.metric-table tbody tr.is-leaf-sibling-highlight > th,
-.metric-table tbody tr.is-leaf-sibling-highlight > td {
-  background: #f3f5f4;
-  border-bottom-color: #ffffff;
-}
-
-.metric-table tbody tr.is-leaf-sibling-highlight > th.description-column {
-  background: linear-gradient(
-    to right,
-    #ffffff 0,
-    #ffffff var(--highlight-start),
-    #f3f5f4 var(--highlight-start),
-    #f3f5f4 100%
-  );
-}
-
-.metric-table tbody tr.is-leaf-parent-highlight > th,
-.metric-table tbody tr.is-leaf-parent-highlight > td {
-  background: #e2e8e5;
-  border-bottom-color: #ffffff;
-}
-
-.metric-table tbody tr.is-leaf-parent-highlight > th.description-column {
-  background: linear-gradient(
-    to right,
-    #ffffff 0,
-    #ffffff var(--highlight-start),
-    #e2e8e5 var(--highlight-start),
-    #e2e8e5 100%
-  );
-}
-
 /* This row's code is incompatible with whatever is currently selected on
    the other axis (see assets/ITS_impossible_x_y.csv) — there will never be
    data for it. A pale, washed-out grey reads as "unavailable" precisely
@@ -2823,9 +2791,7 @@ table {
   background: linear-gradient(
     to right,
     #ffffff 0,
-    #ffffff var(--parent-highlight-start, var(--highlight-start)),
-    #f3f5f4 var(--parent-highlight-start, var(--highlight-start)),
-    #f3f5f4 var(--highlight-start),
+    #ffffff var(--highlight-start),
     #eaf2fa var(--highlight-start),
     #eaf2fa 100%
   ) !important;
