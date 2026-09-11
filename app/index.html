@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260911-explicit-black-values">
+    <link rel="stylesheet" href="./src/styles.css?v=20260911-benchmark-order">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -126,6 +126,7 @@
               </div>
               <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information">
                 <div id="explorer-context-selection" class="cost-of-risk-context-selected-pane" aria-label="Current Explorer selection"></div>
+                <div id="explorer-context-detail" class="cost-of-risk-context-detail-pane" aria-label="Explorer selection options"></div>
                 <section class="explorer-benchmark-preview" aria-label="Benchmark preview" hidden>
                   <div id="explorer-benchmark-preview-slot" class="explorer-benchmark-preview-slot">
                     <div id="explorer-benchmark-view" class="explorer-benchmark-view">
@@ -138,7 +139,6 @@
                     </div>
                   </div>
                 </section>
-                <div id="explorer-context-detail" class="cost-of-risk-context-detail-pane" aria-label="Explorer selection options"></div>
               </aside>
             </div>
           </article>
@@ -373,6 +373,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260911-explicit-black-values"></script>
+    <script type="module" src="./src/main.js?v=20260911-benchmark-order"></script>
   </body>
 </html>

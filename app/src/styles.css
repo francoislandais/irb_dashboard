@@ -1446,8 +1446,8 @@ button:focus-visible {
   align-content: stretch;
   box-sizing: border-box;
   display: grid;
-  gap: 12px;
-  grid-template-rows: 112px minmax(0, 1fr);
+  gap: 8px;
+  grid-template-rows: 88px minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1461,7 +1461,8 @@ button:focus-visible {
 }
 
 .explorer-context-panel.has-benchmark-preview {
-  grid-template-rows: 112px clamp(150px, 23vh, 205px) minmax(0, 1fr);
+  align-content: start;
+  grid-template-rows: 88px auto clamp(190px, 29vh, 250px);
 }
 
 .explorer-context-panel > .cost-of-risk-context-selected-pane,
@@ -3312,12 +3313,12 @@ table {
   .explorer-context-panel {
     grid-column: 1;
     grid-row: 1;
-    grid-template-rows: 112px minmax(0, 1fr);
+    grid-template-rows: 88px minmax(0, 1fr);
     max-height: 100%;
   }
 
   .explorer-context-panel.has-benchmark-preview {
-    grid-template-rows: 112px clamp(115px, 17vh, 155px) minmax(0, 1fr);
+    grid-template-rows: 88px auto clamp(170px, 24vh, 220px);
   }
 
   .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active),
