@@ -2121,16 +2121,32 @@ table {
   white-space: normal;
 }
 
-.explorer-template-static {
+.axis-tab.explorer-template-static {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+  gap: 7px;
   width: auto;
   max-width: none;
   height: auto;
   margin-right: 0;
-  padding: 8px 16px;
+  padding: 8px 4px 7px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
   cursor: pointer;
+}
+
+.axis-tab.explorer-template-static::after {
+  border-bottom: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  content: "";
+  flex: 0 0 6px;
+  height: 6px;
+  margin: -3px 2px 0 0;
+  transform: rotate(45deg);
+  width: 6px;
 }
 
 .explorer-template-static-value {
@@ -2161,10 +2177,13 @@ table {
   display: none;
 }
 
-.axis-tab.explorer-template-static:hover {
-  border-color: #c2cac5;
-  background: #eef2ef;
+.axis-tab.explorer-template-static:hover,
+.axis-tab.explorer-template-static:focus-visible,
+.axis-tab.explorer-template-static.is-panel-active {
+  border-bottom-color: color-mix(in srgb, var(--primary-dark) 55%, #ffffff);
+  background: transparent;
   color: var(--primary-dark);
+  outline: none;
 }
 
 .cost-of-risk-active-filters.explorer-active-filters {
