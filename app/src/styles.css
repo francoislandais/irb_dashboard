@@ -1622,44 +1622,11 @@ button:focus-visible {
 }
 
 .explorer-selection-summary-change {
-  align-items: center;
-  display: inline-flex;
-  gap: 5px;
-}
-
-.explorer-selection-summary-metric.is-change {
-  align-items: stretch;
-  display: grid;
-  gap: 3px;
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.explorer-selection-summary-metric.is-change > .explorer-selection-summary-change {
-  justify-self: end;
   white-space: nowrap;
 }
 
-.explorer-selection-summary-trend {
-  align-items: center;
-  display: inline-flex;
-  flex: 0 0 18px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  height: 18px;
-  justify-content: center;
-  line-height: 1;
-}
-
-.explorer-selection-summary-trend.is-positive {
-  color: #267358;
-}
-
-.explorer-selection-summary-trend.is-negative {
-  color: #a55249;
-}
-
-.explorer-selection-summary-trend.is-neutral {
-  color: #68746e;
+.explorer-selection-summary-change-row {
+  min-height: 16px;
 }
 
 .explorer-selection-summary-actions {

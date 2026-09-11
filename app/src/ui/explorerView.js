@@ -2459,14 +2459,21 @@ function getExplorerSelectedPointMetrics() {
   if (!row || currentIndex < 0) return null;
 
   const currentValue = row.values[currentIndex]?.value ?? null;
-  const previousValue = currentIndex > 0 ? row.values[currentIndex - 1]?.value ?? null : null;
-  const absoluteChange = Number.isFinite(currentValue) && Number.isFinite(previousValue)
-    ? currentValue - previousValue
-    : null;
-  const relativeChange = Number.isFinite(absoluteChange) && previousValue !== 0
-    ? absoluteChange / Math.abs(previousValue)
-    : null;
-  return { absoluteChange, currentValue, format: row.format, relativeChange, selectedUnit: state.selectedUnit };
+  const changes = [
+    { label: "Quarter-on-quarter", offset: 1 },
+    { label: "Six-month change", offset: 2 },
+    { label: "Year-on-year", offset: 4 }
+  ].map(({ label, offset }) => {
+    const previousValue = currentIndex >= offset ? row.values[currentIndex - offset]?.value ?? null : null;
+    const absolute = Number.isFinite(currentValue) && Number.isFinite(previousValue)
+      ? currentValue - previousValue
+      : null;
+    const relative = Number.isFinite(absolute) && previousValue !== 0
+      ? absolute / Math.abs(previousValue)
+      : null;
+    return { absolute, label, relative };
+  });
+  return { changes, currentValue, format: row.format, selectedUnit: state.selectedUnit };
 }
 
 function createExplorerSelectionMetrics(metrics) {
@@ -2483,30 +2490,24 @@ function createExplorerSelectionMetrics(metrics) {
     : "-";
   value.append(valueLabel, valueText);
 
-  const change = document.createElement("p");
-  change.className = "explorer-selection-summary-metric is-change";
-  const changeLabel = document.createElement("span");
-  changeLabel.textContent = "Quarterly change";
-  const changeText = document.createElement("span");
-  changeText.className = "explorer-selection-summary-value explorer-selection-summary-change";
-  const absoluteText = Number.isFinite(metrics.absoluteChange)
+  const changeRows = metrics.changes.map((change) => {
+    const row = document.createElement("p");
+    row.className = "explorer-selection-summary-metric explorer-selection-summary-change-row";
+    const label = document.createElement("span");
+    label.textContent = change.label;
+    const displayedValue = document.createElement("span");
+    displayedValue.className = "explorer-selection-summary-value explorer-selection-summary-change";
+    const absoluteText = Number.isFinite(change.absolute)
       ? isPercentFormat(metrics.format)
-      ? `${metrics.absoluteChange > 0 ? "+" : ""}${formatMetricValue(metrics.absoluteChange, "euros", metrics.format).replace(" %", " pp")}`
-      : formatSignedMetricValue(metrics.absoluteChange, metrics.selectedUnit)
-    : "-";
-  if (Number.isFinite(metrics.absoluteChange)) {
-    const trend = document.createElement("span");
-    const direction = metrics.absoluteChange > 0 ? "positive" : metrics.absoluteChange < 0 ? "negative" : "neutral";
-    trend.className = `explorer-selection-summary-trend is-${direction}`;
-    trend.setAttribute("aria-hidden", "true");
-    trend.textContent = direction === "positive" ? "↗" : direction === "negative" ? "↘" : "→";
-    changeText.append(trend);
-  }
-  const changeValues = document.createElement("span");
-  changeValues.textContent = absoluteText;
-  changeText.append(changeValues);
-  change.append(changeLabel, changeText);
-  wrapper.append(value, change);
+        ? `${change.absolute > 0 ? "+" : ""}${formatMetricValue(change.absolute, "euros", metrics.format).replace(" %", " pp")}`
+        : formatSignedMetricValue(change.absolute, metrics.selectedUnit)
+      : "-";
+    const relativeText = Number.isFinite(change.relative) ? ` (${formatSignedPercent(change.relative)})` : "";
+    displayedValue.textContent = `${absoluteText}${relativeText}`;
+    row.append(label, displayedValue);
+    return row;
+  });
+  wrapper.append(value, ...changeRows);
   return wrapper;
 }
 
