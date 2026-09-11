@@ -1595,12 +1595,12 @@ button:focus-visible {
 }
 
 .explorer-selection-summary-label {
-  color: #000000;
+  color: var(--primary-dark);
   font-weight: 500;
 }
 
 .explorer-selection-summary-value-label {
-  color: #000000;
+  color: var(--primary-dark);
   font-weight: 500;
 }
 
