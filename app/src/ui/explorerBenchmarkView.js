@@ -103,12 +103,13 @@ export function renderExplorerBenchmarkView({
             renderCostOfRiskSmoothingBadge(this, smoothingWindow, onClearSmoothing, onChangeSmoothing);
             renderCostOfRiskYAxisFocusBadge(this, focusYAxis, onToggleYAxisFocus);
           }
+          positionExplorerBenchmarkControls(this, compact);
         }
       },
       // Fixed regardless of whether the anonymised-mode subtitle has text:
       // letting Highcharts auto-size that margin shifted the plot area (and
       // every axis label with it) whenever the subtitle appeared/disappeared.
-      marginTop: compact ? 8 : 40,
+      marginTop: compact ? 32 : 40,
       spacingBottom: compact ? 4 : 10,
       spacingLeft: compact ? 2 : 10,
       spacingRight: compact ? 6 : 128,
@@ -196,4 +197,33 @@ export function renderExplorerBenchmarkView({
   // renderExplorer), so force a reflow in case Highcharts measured its
   // width before the surrounding grid track had finished laying out.
   explorerBenchmarkChart.reflow();
+}
+
+function positionExplorerBenchmarkControls(chart, compact) {
+  const view = chart?.renderTo?.closest?.(".explorer-benchmark-view");
+  if (!view) return;
+
+  const plotRight = chart.plotLeft + chart.plotWidth;
+  const expandOrClose = view.querySelector(".explorer-benchmark-expand-button");
+  if (compact) {
+    if (!expandOrClose) return;
+    expandOrClose.style.left = `${Math.max(chart.plotLeft, plotRight - expandOrClose.offsetWidth)}px`;
+    expandOrClose.style.right = "auto";
+    expandOrClose.style.top = "1px";
+    return;
+  }
+
+  const controls = [
+    expandOrClose,
+    chart.renderTo.querySelector(".cost-of-risk-chart-y-focus-badge"),
+    chart.renderTo.querySelector(".cost-of-risk-chart-smoothing-badge")
+  ].filter(Boolean);
+  let cursor = plotRight;
+  controls.forEach((control) => {
+    cursor -= control.offsetWidth;
+    control.style.left = `${Math.max(chart.plotLeft, cursor)}px`;
+    control.style.right = "auto";
+    control.style.top = `${chart.plotTop + 6}px`;
+    cursor -= 7;
+  });
 }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260911-axis-pill-spacing">
+    <link rel="stylesheet" href="./src/styles.css?v=20260911-benchmark-controls">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -112,9 +112,9 @@
                 </div>
                 <div id="explorer-benchmark-expanded-slot" class="explorer-benchmark-expanded-slot" hidden>
                   <div class="explorer-benchmark-view explorer-benchmark-expanded-view">
-                    <button id="explorer-benchmark-collapse" class="explorer-benchmark-expand-button is-expanded" type="button" aria-label="Collapse benchmark" title="Return to table">
+                    <button id="explorer-benchmark-collapse" class="explorer-benchmark-expand-button explorer-benchmark-close-button" type="button" aria-label="Close expanded benchmark" title="Return to table">
                       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M8.5 4H4v4.5M15.5 4H20v4.5M20 15.5V20h-4.5M8.5 20H4v-4.5"/>
+                        <path d="M6 6l12 12M18 6 6 18"/>
                       </svg>
                     </button>
                     <div id="explorer-benchmark-expanded-chart" class="cost-of-risk-chart explorer-benchmark-chart explorer-benchmark-expanded-chart" aria-label="Expanded Explorer benchmark time series"></div>
@@ -370,6 +370,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260911-benchmark-column-scroll"></script>
+    <script type="module" src="./src/main.js?v=20260911-benchmark-controls"></script>
   </body>
 </html>
