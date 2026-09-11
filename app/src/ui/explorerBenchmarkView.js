@@ -137,7 +137,14 @@ export function renderExplorerBenchmarkView({
       xDateFormat: "%d/%m/%Y"
     },
     xAxis: {
-      labels: { style: { color: "#5f6b65", fontSize: compact ? "9px" : undefined } },
+      labels: {
+        style: {
+          color: "#5f6b65",
+          fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontSize: compact ? "9px" : "0.76rem",
+          fontWeight: "400"
+        }
+      },
       lineColor: "#c2cac5",
       lineWidth: 1,
       plotLines: selectedReferencePoint?.date instanceof Date ? [{
@@ -159,7 +166,12 @@ export function renderExplorerBenchmarkView({
         formatter() {
           return formatValue(this.value);
         },
-        style: { color: "#5f6b65", fontSize: compact ? "9px" : undefined }
+        style: {
+          color: "#5f6b65",
+          fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontSize: compact ? "9px" : "0.76rem",
+          fontWeight: "400"
+        }
       },
       lineColor: "#aeb8b2",
       lineWidth: compact ? 0 : 1,

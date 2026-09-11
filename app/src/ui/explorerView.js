@@ -13,7 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260804-lazy-index";
-import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-benchmark-controls";
+import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-benchmark-axis-font";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
