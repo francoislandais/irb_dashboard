@@ -1724,7 +1724,37 @@ function renderExplorerActiveFilters(state) {
     if (getLatestState()) rerenderApp(getLatestState());
   });
   benchmarkChip.append(benchmarkToggle);
-  elements.explorerActiveFilters.replaceChildren(jstChip, dateChip, unitChip, evolutionChip, displayChip, benchmarkChip);
+
+  const descriptionChip = document.createElement("span");
+  descriptionChip.className = "cost-of-risk-filter-chip explorer-filter-chip-description";
+  descriptionChip.classList.toggle("is-open", explorerContextTopic === "description");
+  const descriptionToggle = document.createElement("button");
+  descriptionToggle.type = "button";
+  descriptionToggle.className = "cost-of-risk-filter-chip-toggle";
+  descriptionToggle.setAttribute("aria-expanded", String(explorerContextTopic === "description"));
+  descriptionToggle.setAttribute("aria-controls", "explorer-context-detail");
+  descriptionToggle.setAttribute("aria-label", "Show selection description");
+  const descriptionLabel = document.createElement("span");
+  descriptionLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  descriptionLabel.textContent = "Description";
+  descriptionToggle.append(descriptionLabel);
+  descriptionToggle.addEventListener("click", () => {
+    explorerContextTopic = "description";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
+  });
+  descriptionChip.append(descriptionToggle);
+
+  elements.explorerActiveFilters.replaceChildren(
+    jstChip,
+    dateChip,
+    unitChip,
+    evolutionChip,
+    displayChip,
+    benchmarkChip,
+    descriptionChip
+  );
 }
 
 function getSelectedExplorerReference(state = getLatestState()) {
@@ -1934,6 +1964,11 @@ function renderExplorerContextPanel(state) {
 
   if (explorerContextTopic === "benchmark-mode") {
     renderExplorerBenchmarkModePanel(state);
+    return;
+  }
+
+  if (explorerContextTopic === "description") {
+    renderExplorerDescriptionPanel();
     return;
   }
 
@@ -2466,7 +2501,8 @@ function getExplorerSelectedPointMetrics() {
     templateSelections: getExplorerTemplateSelections(),
     templates: getExplorerTemplates(state)
   });
-  const row = series.rows.map(normalizeExplorerSeriesRow).find((item) => item.code === selectedCode);
+  const rows = series.rows.map(normalizeExplorerSeriesRow);
+  const row = rows.find((item) => item.code === selectedCode);
   const selectedReference = getSelectedExplorerReference(state);
   const currentIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
   if (!row || currentIndex < 0) return null;
@@ -2484,9 +2520,25 @@ function getExplorerSelectedPointMetrics() {
     const relative = Number.isFinite(absolute) && previousValue !== 0
       ? absolute / Math.abs(previousValue)
       : null;
-    return { absolute, label, relative };
+    return { absolute, label, previousValue, relative };
   });
-  return { changes, currentValue, format: row.format, selectedUnit: state.selectedUnit };
+  const parentPath = normalizeHierarchyPath(row.parentPath);
+  const parentRow = parentPath
+    ? rows.find((item) => normalizeHierarchyPath(item.hierarchyPath) === parentPath)
+    : null;
+  const parentValue = parentRow?.values?.[currentIndex]?.value ?? null;
+  const parentShare = Number.isFinite(currentValue) && Number.isFinite(parentValue) && parentValue !== 0
+    ? currentValue / Math.abs(parentValue)
+    : null;
+  return {
+    changes,
+    currentValue,
+    format: row.format,
+    parentLabel: parentRow?.description ?? "",
+    parentShare,
+    parentValue,
+    selectedUnit: state.selectedUnit
+  };
 }
 
 function createExplorerSelectionMetrics(metrics) {
@@ -2495,6 +2547,7 @@ function createExplorerSelectionMetrics(metrics) {
   const value = document.createElement("p");
   value.className = "explorer-selection-summary-metric";
   const valueLabel = document.createElement("span");
+  valueLabel.className = "explorer-selection-summary-value-label";
   valueLabel.textContent = "Value";
   const valueText = document.createElement("span");
   valueText.className = "explorer-selection-summary-value";
@@ -2503,25 +2556,76 @@ function createExplorerSelectionMetrics(metrics) {
     : "-";
   value.append(valueLabel, valueText);
 
-  const changeRows = metrics.changes.map((change) => {
-    const row = document.createElement("p");
-    row.className = "explorer-selection-summary-metric explorer-selection-summary-change-row";
-    const label = document.createElement("span");
-    label.textContent = change.label;
-    const displayedValue = document.createElement("span");
-    displayedValue.className = "explorer-selection-summary-value explorer-selection-summary-change";
-    const absoluteText = Number.isFinite(change.absolute)
-      ? isPercentFormat(metrics.format)
-        ? `${change.absolute > 0 ? "+" : ""}${formatMetricValue(change.absolute, "euros", metrics.format).replace(" %", " pp")}`
-        : formatSignedMetricValue(change.absolute, metrics.selectedUnit)
-      : "-";
-    const relativeText = Number.isFinite(change.relative) ? ` (${formatSignedPercent(change.relative)})` : "";
-    displayedValue.textContent = `${absoluteText}${relativeText}`;
-    row.append(label, displayedValue);
-    return row;
-  });
-  wrapper.append(value, ...changeRows);
+  wrapper.append(value);
   return wrapper;
+}
+
+function renderExplorerDescriptionPanel() {
+  const article = document.createElement("article");
+  article.className = "explorer-context-article explorer-description-panel";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Description";
+  article.append(title);
+
+  const metrics = getExplorerSelectedPointMetrics();
+  if (!metrics || !Number.isFinite(metrics.currentValue)) {
+    const empty = document.createElement("p");
+    empty.className = "explorer-description-empty";
+    empty.textContent = "No value is available for the current selection.";
+    article.append(empty);
+    replaceExplorerContextDetail(article);
+    return;
+  }
+
+  const formatValue = (value, signed = false) => {
+    if (!Number.isFinite(value)) return "-";
+    if (isPercentFormat(metrics.format)) {
+      const formatted = formatMetricValue(value, "euros", metrics.format);
+      return signed && value > 0 ? `+${formatted}` : formatted;
+    }
+    return signed
+      ? formatSignedMetricValue(value, metrics.selectedUnit)
+      : formatMetricValue(value, metrics.selectedUnit, metrics.format);
+  };
+
+  const lead = document.createElement("p");
+  lead.className = "explorer-description-lead";
+  lead.textContent = `The selected figure is ${formatValue(metrics.currentValue)}.`;
+  article.append(lead);
+
+  const movements = document.createElement("div");
+  movements.className = "explorer-description-movements";
+  metrics.changes.forEach((change) => {
+    const section = document.createElement("section");
+    section.className = "explorer-description-movement";
+    const heading = document.createElement("h3");
+    heading.textContent = change.label;
+    const copy = document.createElement("p");
+    if (!Number.isFinite(change.previousValue) || !Number.isFinite(change.absolute)) {
+      copy.textContent = "No comparable figure is available for this horizon.";
+    } else if (change.absolute === 0) {
+      copy.textContent = `The selected figure remained unchanged at ${formatValue(metrics.currentValue)}.`;
+    } else {
+      const direction = change.absolute > 0 ? "increased" : "decreased";
+      const relativeText = Number.isFinite(change.relative) ? ` (${formatSignedPercent(change.relative)})` : "";
+      copy.textContent = `The selected figure ${direction} from ${formatValue(change.previousValue)} to ${formatValue(metrics.currentValue)}: ${formatValue(change.absolute, true)}${relativeText}.`;
+    }
+    section.append(heading, copy);
+    movements.append(section);
+  });
+  article.append(movements);
+
+  if (Number.isFinite(metrics.parentShare) && metrics.parentLabel) {
+    const parent = document.createElement("p");
+    parent.className = "explorer-description-parent";
+    const share = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(metrics.parentShare * 100);
+    parent.textContent = `The selected figure represents ${share} % of its parent, ${metrics.parentLabel}.`;
+    article.append(parent);
+  }
+
+  replaceExplorerContextDetail(article);
 }
 
 // The template axis-tab is now a static display only (see index.html):
