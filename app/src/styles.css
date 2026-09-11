@@ -1641,28 +1641,24 @@ button:focus-visible {
 
 .explorer-selection-summary-trend {
   align-items: center;
-  border-radius: 50%;
   display: inline-flex;
-  flex: 0 0 16px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  height: 16px;
+  flex: 0 0 18px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  height: 18px;
   justify-content: center;
   line-height: 1;
 }
 
 .explorer-selection-summary-trend.is-positive {
-  background: #e4f2eb;
   color: #267358;
 }
 
 .explorer-selection-summary-trend.is-negative {
-  background: #f6e9e7;
   color: #a55249;
 }
 
 .explorer-selection-summary-trend.is-neutral {
-  background: #e9edeb;
   color: #68746e;
 }
 
