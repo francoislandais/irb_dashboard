@@ -404,14 +404,29 @@ function getExplorerConceptIndex(state = getLatestState()) {
     if (kind) concept.kinds.add(kind);
   };
 
-  templates.forEach((template) => addConcept(template.description || template.label, template.tableId, "Template"));
+  const addSegmentConcepts = (segment, tableId, kind) => {
+    const cleanSegment = String(segment ?? "").trim();
+    if (!cleanSegment) return;
+
+    // Parenthetical regulatory concepts such as "stage 1" are useful on
+    // their own, whereas the sentence containing them often is not.
+    [...cleanSegment.matchAll(/\(([^)]+)\)/g)].forEach((match) => {
+      const parenthetical = match[1].trim();
+      if (parenthetical.length <= 40) addConcept(parenthetical, tableId, kind);
+    });
+
+    const withoutQualifier = cleanSegment.replace(/^of which\s*:\s*/i, "").trim();
+    const wordCount = normalizeExplorerMetadataSearchText(withoutQualifier).split(/\s+/).filter(Boolean).length;
+    if (withoutQualifier.length <= 64 && wordCount <= 9) addConcept(withoutQualifier, tableId, kind);
+  };
+
   (state?.explorerPoints ?? []).forEach((point) => {
     if (!templateIds.has(point.tableId)) return;
     const axis = String(point.coordinate ?? "").charAt(0).toUpperCase();
     const kind = /^[XYZ]$/.test(axis) ? `Axis ${axis}` : "Metadata";
     const description = String(point.description ?? "").trim();
     const segments = description.split(/\s*(?:>|\/)\s*/).filter(Boolean);
-    (segments.length > 0 ? segments : [description]).forEach((segment) => addConcept(segment, point.tableId, kind));
+    (segments.length > 0 ? segments : [description]).forEach((segment) => addSegmentConcepts(segment, point.tableId, kind));
   });
 
   const items = [...concepts.values()].sort((left, right) => left.label.localeCompare(right.label, "en", {
@@ -469,12 +484,7 @@ function renderExplorerSearchSuggestions() {
     const label = document.createElement("span");
     label.className = "explorer-search-suggestion-label";
     label.textContent = concept.label;
-    const meta = document.createElement("span");
-    meta.className = "explorer-search-suggestion-meta";
-    const kinds = [...concept.kinds].join(" · ");
-    const templateCount = concept.tableIds.size;
-    meta.textContent = `${kinds}${kinds && templateCount ? " · " : ""}${templateCount} template${templateCount === 1 ? "" : "s"}`;
-    button.append(label, meta);
+    button.append(label);
     button.addEventListener("pointerdown", (event) => event.preventDefault());
     button.addEventListener("click", () => selectExplorerSearchSuggestion(concept.label));
     list.append(button);

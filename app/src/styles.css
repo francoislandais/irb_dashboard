@@ -2096,8 +2096,7 @@ table {
 }
 
 .explorer-search-suggestion {
-  display: grid;
-  gap: 2px;
+  display: block;
   width: 100%;
   border: 0;
   border-bottom: 1px solid #edf0ee;
@@ -2126,13 +2125,6 @@ table {
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.explorer-search-suggestion-meta {
-  color: #7b8781;
-  font-size: 0.67rem;
-  font-weight: 400;
-  line-height: 1.25;
 }
 
 .explorer-template-search-empty {
