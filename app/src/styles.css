@@ -1447,7 +1447,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 12px;
-  grid-template-rows: 178px clamp(125px, 19vh, 175px) minmax(0, 1fr);
+  grid-template-rows: 178px minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1458,6 +1458,10 @@ button:focus-visible {
   border: 0;
   border-radius: 0;
   background: transparent;
+}
+
+.explorer-context-panel.has-benchmark-preview {
+  grid-template-rows: 178px clamp(150px, 23vh, 205px) minmax(0, 1fr);
 }
 
 .explorer-context-panel > .cost-of-risk-context-selected-pane,
@@ -1829,6 +1833,10 @@ table {
   border: 0;
   border-radius: 0;
   background: transparent;
+}
+
+.explorer-benchmark-preview[hidden] {
+  display: none;
 }
 
 .explorer-benchmark-expand-button {
@@ -2271,7 +2279,8 @@ table {
 }
 
 .explorer-display-mode-row,
-.explorer-evolution-frequency-row {
+.explorer-evolution-frequency-row,
+.explorer-benchmark-mode-row {
   align-content: center;
   align-items: start;
   gap: 2px;
@@ -2280,14 +2289,16 @@ table {
 }
 
 .explorer-display-mode-row > span,
-.explorer-evolution-frequency-row > span {
+.explorer-evolution-frequency-row > span,
+.explorer-benchmark-mode-row > span {
   display: block;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .explorer-display-mode-row > span:last-child,
-.explorer-evolution-frequency-row > span:last-child {
+.explorer-evolution-frequency-row > span:last-child,
+.explorer-benchmark-mode-row > span:last-child {
   color: #66736d;
   font-size: 0.7rem;
   font-weight: 400;
@@ -2295,7 +2306,8 @@ table {
 }
 
 .explorer-display-mode-row.is-active > span:last-child,
-.explorer-evolution-frequency-row.is-active > span:last-child {
+.explorer-evolution-frequency-row.is-active > span:last-child,
+.explorer-benchmark-mode-row.is-active > span:last-child {
   color: color-mix(in srgb, var(--primary-dark) 72%, #ffffff);
 }
 

@@ -112,6 +112,7 @@ const elements = {
   explorerBenchmarkExpandedChart: document.querySelector("#explorer-benchmark-expanded-chart"),
   explorerBenchmarkExpandedSlot: document.querySelector("#explorer-benchmark-expanded-slot"),
   explorerBenchmarkPreviewSlot: document.querySelector("#explorer-benchmark-preview-slot"),
+  explorerBenchmarkPreview: document.querySelector(".explorer-benchmark-preview"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
@@ -594,6 +595,10 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 }
 
 function syncExplorerBenchmarkPlacement() {
+  const benchmarkVisible = explorerContextTopic === "benchmark-mode";
+  if (!benchmarkVisible) explorerBenchmarkExpanded = false;
+  if (elements.explorerBenchmarkPreview) elements.explorerBenchmarkPreview.hidden = !benchmarkVisible;
+  elements.explorerContextPanel?.classList.toggle("has-benchmark-preview", benchmarkVisible);
   if (elements.explorerMainPane) {
     elements.explorerMainPane.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
   }
@@ -622,24 +627,29 @@ export function renderExplorer(state) {
   renderExplorerContextPanel(state);
 
   syncExplorerBenchmarkPlacement();
-  const benchmark = buildExplorerBenchmark();
-  renderExplorerBenchmarkView({
-    benchmark,
-    compact: true,
-    container: elements.explorerBenchmarkChart,
-    focusYAxis: explorerBenchmarkFocusYAxis,
-    formatValue: (value) => formatBenchmarkValue(value, benchmark),
-    onClearSmoothing: clearExplorerBenchmarkSmoothing,
-    onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
-    onSelectJst: selectExplorerBenchmarkJst,
-    onSelectReference: selectExplorerBenchmarkReferenceDate,
-    onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
-    peerDisplayMode: "anonymised",
-    selectedReferenceLabel: context.selectedReferenceLabel,
-    selectedJst: state.selectedJst,
-    smoothingWindow: explorerBenchmarkSmoothingWindow
-  });
-  if (explorerBenchmarkExpanded) {
+  const benchmarkVisible = explorerContextTopic === "benchmark-mode";
+  const benchmark = benchmarkVisible ? buildExplorerBenchmark() : null;
+  if (benchmarkVisible) {
+    renderExplorerBenchmarkView({
+      benchmark,
+      compact: true,
+      container: elements.explorerBenchmarkChart,
+      focusYAxis: explorerBenchmarkFocusYAxis,
+      formatValue: (value) => formatBenchmarkValue(value, benchmark),
+      onClearSmoothing: clearExplorerBenchmarkSmoothing,
+      onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
+      onSelectJst: selectExplorerBenchmarkJst,
+      onSelectReference: selectExplorerBenchmarkReferenceDate,
+      onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
+      peerDisplayMode: "anonymised",
+      selectedReferenceLabel: context.selectedReferenceLabel,
+      selectedJst: state.selectedJst,
+      smoothingWindow: explorerBenchmarkSmoothingWindow
+    });
+  } else {
+    destroyExplorerBenchmarkChart(elements.explorerBenchmarkChart);
+  }
+  if (benchmarkVisible && explorerBenchmarkExpanded) {
     renderExplorerBenchmarkView({
       benchmark,
       compact: false,
@@ -1707,13 +1717,11 @@ function renderExplorerActiveFilters(state) {
   benchmarkToggle.setAttribute("aria-label", "Change benchmark display");
   const benchmarkLabel = document.createElement("span");
   benchmarkLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  benchmarkLabel.textContent = state?.peerDisplayMode === "anonymised" ? "Anonymous benchmark" : "Benchmark";
+  benchmarkLabel.textContent = "Benchmark display";
   benchmarkToggle.append(benchmarkLabel);
   benchmarkToggle.addEventListener("click", () => {
     explorerContextTopic = "benchmark-mode";
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
+    if (getLatestState()) rerenderApp(getLatestState());
   });
   benchmarkChip.append(benchmarkToggle);
   elements.explorerActiveFilters.replaceChildren(jstChip, dateChip, unitChip, evolutionChip, displayChip, benchmarkChip);
@@ -1889,6 +1897,11 @@ function createExplorerTemplateCaption(activeTemplate) {
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
 
+  syncExplorerBenchmarkPlacement();
+  if (explorerContextTopic !== "benchmark-mode") {
+    destroyExplorerBenchmarkChart(elements.explorerBenchmarkChart);
+    destroyExplorerBenchmarkChart(elements.explorerBenchmarkExpandedChart);
+  }
   renderExplorerSelectionPane();
 
   if (explorerContextTopic === "jst-code") {
@@ -2177,8 +2190,8 @@ function renderExplorerBenchmarkModePanel(state) {
   list.setAttribute("aria-label", "Benchmark display");
 
   [
-    { value: "explicit", label: "Benchmark", detail: "Named peer curves" },
-    { value: "anonymised", label: "Anonymous benchmark", detail: "Anonymized percentile bands" }
+    { value: "explicit", label: "Benchmark", detail: "Named institutions and peer curves" },
+    { value: "anonymised", label: "Anonymous benchmark", detail: "Anonymized peer percentile distribution" }
   ].forEach((option) => {
     const activeMode = state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
     const isActive = activeMode === option.value;
