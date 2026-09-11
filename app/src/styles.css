@@ -1591,19 +1591,19 @@ button:focus-visible {
 
 .explorer-selection-summary-label {
   color: var(--primary-dark);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .explorer-selection-summary-metrics {
   border-top: 1px solid #e2e8e4;
   display: grid;
-  gap: 4px;
+  gap: 6px;
   margin-top: 5px;
   padding-top: 6px;
 }
 
 .explorer-selection-summary-metric {
-  align-items: baseline;
+  align-items: center;
   display: flex;
   gap: 8px;
   justify-content: space-between;
@@ -1614,10 +1614,56 @@ button:focus-visible {
   color: #7b8580;
 }
 
-.explorer-selection-summary-metric > strong {
+.explorer-selection-summary-value {
   color: #26332d;
-  font-weight: 600;
+  font-size: 0.74rem;
+  font-weight: 450;
   text-align: right;
+}
+
+.explorer-selection-summary-change {
+  align-items: center;
+  display: inline-flex;
+  gap: 5px;
+}
+
+.explorer-selection-summary-metric.is-change {
+  align-items: stretch;
+  display: grid;
+  gap: 3px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.explorer-selection-summary-metric.is-change > .explorer-selection-summary-change {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.explorer-selection-summary-trend {
+  align-items: center;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 16px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  height: 16px;
+  justify-content: center;
+  line-height: 1;
+}
+
+.explorer-selection-summary-trend.is-positive {
+  background: #e4f2eb;
+  color: #267358;
+}
+
+.explorer-selection-summary-trend.is-negative {
+  background: #f6e9e7;
+  color: #a55249;
+}
+
+.explorer-selection-summary-trend.is-neutral {
+  background: #e9edeb;
+  color: #68746e;
 }
 
 .explorer-selection-summary-actions {

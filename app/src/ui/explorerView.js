@@ -2476,24 +2476,36 @@ function createExplorerSelectionMetrics(metrics) {
   value.className = "explorer-selection-summary-metric";
   const valueLabel = document.createElement("span");
   valueLabel.textContent = "Value";
-  const valueText = document.createElement("strong");
+  const valueText = document.createElement("span");
+  valueText.className = "explorer-selection-summary-value";
   valueText.textContent = Number.isFinite(metrics.currentValue)
     ? `${formatMetricValue(metrics.currentValue, metrics.selectedUnit, metrics.format)}${isPercentFormat(metrics.format) ? "" : ` ${getUnitFilterLabel(metrics.selectedUnit)}`}`
     : "-";
   value.append(valueLabel, valueText);
 
   const change = document.createElement("p");
-  change.className = "explorer-selection-summary-metric";
+  change.className = "explorer-selection-summary-metric is-change";
   const changeLabel = document.createElement("span");
   changeLabel.textContent = "Quarterly change";
-  const changeText = document.createElement("strong");
+  const changeText = document.createElement("span");
+  changeText.className = "explorer-selection-summary-value explorer-selection-summary-change";
   const absoluteText = Number.isFinite(metrics.absoluteChange)
     ? isPercentFormat(metrics.format)
       ? `${metrics.absoluteChange > 0 ? "+" : ""}${formatMetricValue(metrics.absoluteChange, "euros", metrics.format).replace(" %", " pp")}`
       : `${formatSignedMetricValue(metrics.absoluteChange, metrics.selectedUnit)} ${getUnitFilterLabel(metrics.selectedUnit)}`
     : "-";
   const relativeText = Number.isFinite(metrics.relativeChange) ? formatSignedPercent(metrics.relativeChange) : "-";
-  changeText.textContent = `${absoluteText} · ${relativeText}`;
+  if (Number.isFinite(metrics.absoluteChange)) {
+    const trend = document.createElement("span");
+    const direction = metrics.absoluteChange > 0 ? "positive" : metrics.absoluteChange < 0 ? "negative" : "neutral";
+    trend.className = `explorer-selection-summary-trend is-${direction}`;
+    trend.setAttribute("aria-hidden", "true");
+    trend.textContent = direction === "positive" ? "↑" : direction === "negative" ? "↓" : "→";
+    changeText.append(trend);
+  }
+  const changeValues = document.createElement("span");
+  changeValues.textContent = `${absoluteText} · ${relativeText}`;
+  changeText.append(changeValues);
   change.append(changeLabel, changeText);
   wrapper.append(value, change);
   return wrapper;
