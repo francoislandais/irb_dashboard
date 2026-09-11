@@ -1893,6 +1893,71 @@ table {
   display: none;
 }
 
+.explorer-advanced-search {
+  display: flex;
+  align-items: center;
+  flex: 1 1 230px;
+  min-width: 150px;
+  max-width: 290px;
+  height: 34px;
+  margin-left: 4px;
+  border: 1px solid #d8dfdb;
+  border-radius: 999px;
+  background: #fff;
+  color: #7c8882;
+  padding: 0 11px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.explorer-advanced-search:focus-within {
+  border-color: #96b9d1;
+  box-shadow: 0 0 0 2px rgba(1, 104, 160, .10);
+  color: var(--primary-dark);
+}
+
+.explorer-advanced-search svg {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.explorer-advanced-search input {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: .82rem;
+  padding: 0 6px;
+}
+
+.explorer-advanced-search input::placeholder {
+  color: #98a39d;
+}
+
+.metric-table tbody tr.is-metadata-search-match .tree-label {
+  color: var(--primary-dark);
+}
+
+.metric-table tbody tr.is-metadata-search-match .code-column-badge {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+}
+
+.explorer-template-search-empty {
+  padding: 12px 4px;
+  color: #7c8882;
+  font-size: .8rem;
+  line-height: 1.35;
+}
+
 .explorer-excel-export-button {
   display: inline-flex;
   align-items: center;

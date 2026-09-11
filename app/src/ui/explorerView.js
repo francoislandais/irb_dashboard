@@ -54,6 +54,7 @@ const AXIS_URL_PARAM = "axis";
 const ROW_URL_PARAM = "row";
 const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
+const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
 const EXPLORER_EVOLUTION_OPTIONS = [
   { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
   { value: "semiannual", label: "Semiannual", step: 2, description: "Every six months" },
@@ -88,6 +89,10 @@ let explorerCellRangePreview = null;
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
 let explorerPeerSelectionActions = null;
+let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
+let explorerAdvancedSearchTimer = 0;
+let explorerAdvancedSearchCache = null;
+let explorerAdvancedSearchAutoFocusKey = "";
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -98,6 +103,7 @@ const elements = {
     z: document.querySelector('[data-axis-caption="z"]')
   },
   explorerActiveFilters: document.querySelector("#explorer-active-filters"),
+  explorerAdvancedSearch: document.querySelector("#explorer-advanced-search"),
   explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
   explorerBenchmarkExpand: document.querySelector("#explorer-benchmark-expand"),
   explorerBenchmarkExpandedSlot: document.querySelector("#explorer-benchmark-expanded-slot"),
@@ -178,6 +184,11 @@ export function wireExplorerUi(actions, rerender) {
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
   elements.explorerExcelExport?.addEventListener("click", exportVisibleExplorerTable);
+  if (elements.explorerAdvancedSearch) {
+    elements.explorerAdvancedSearch.value = explorerAdvancedSearchQuery;
+    elements.explorerAdvancedSearch.addEventListener("input", updateExplorerAdvancedSearch);
+    elements.explorerAdvancedSearch.addEventListener("search", updateExplorerAdvancedSearch);
+  }
   elements.explorerBenchmarkExpand?.addEventListener("click", () => {
     saveExplorerScrollPosition();
     explorerBenchmarkExpanded = !explorerBenchmarkExpanded;
@@ -328,6 +339,129 @@ function replaceExplorerUrlState(url) {
   replaceUrlState(url);
 }
 
+function updateExplorerAdvancedSearch(event) {
+  explorerAdvancedSearchQuery = event.target.value;
+  const url = createUrlState();
+  setOrDeleteUrlParam(url, EXPLORER_SEARCH_URL_PARAM, explorerAdvancedSearchQuery.trim());
+  replaceExplorerUrlState(url);
+  window.clearTimeout(explorerAdvancedSearchTimer);
+  explorerAdvancedSearchTimer = window.setTimeout(() => {
+    explorerAdvancedSearchCache = null;
+    saveExplorerScrollPosition();
+    if (getLatestState()) rerenderApp(getLatestState());
+  }, 110);
+}
+
+function normalizeExplorerMetadataSearchText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("fr-FR")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function explorerMetadataMatches(values, tokens) {
+  const text = normalizeExplorerMetadataSearchText(values.join(" "));
+  const compactText = text.replaceAll(" ", "");
+  return tokens.every((token) => text.includes(token) || compactText.includes(token.replaceAll(" ", "")));
+}
+
+function getExplorerAdvancedSearchResults(state) {
+  const query = normalizeExplorerMetadataSearchText(explorerAdvancedSearchQuery);
+  const templates = getExplorerTemplates(state);
+  if (!query) return { byTemplate: new Map(), hasQuery: false, templates };
+
+  const templateKey = templates.map((template) => template.tableId).join("|");
+  if (explorerAdvancedSearchCache
+      && explorerAdvancedSearchCache.query === query
+      && explorerAdvancedSearchCache.points === state?.explorerPoints
+      && explorerAdvancedSearchCache.selectedJst === state?.selectedJst
+      && explorerAdvancedSearchCache.templateKey === templateKey) {
+    return explorerAdvancedSearchCache.results;
+  }
+
+  const tokens = query.split(/\s+/).filter(Boolean);
+  const pointsByTemplate = new Map();
+  (state?.explorerPoints ?? []).forEach((point) => {
+    if (!pointsByTemplate.has(point.tableId)) pointsByTemplate.set(point.tableId, []);
+    pointsByTemplate.get(point.tableId).push(point);
+  });
+
+  const byTemplate = new Map();
+  const matchingTemplates = [];
+  templates.forEach((template) => {
+    const axisOptions = getExplorerAxisOptions(state, template.tableId);
+    const availableByAxis = Object.fromEntries(["x", "y", "z"].map((axis) => [axis, new Set(axisOptions[axis]?.codes ?? [])]));
+    const matchesByAxis = { x: new Set(), y: new Set(), z: new Set() };
+    const templateMatch = explorerMetadataMatches([template.tableId, template.label, template.description], tokens);
+
+    (pointsByTemplate.get(template.tableId) ?? []).forEach((point) => {
+      const axis = String(point.coordinate ?? "").charAt(0).toLowerCase();
+      if (!matchesByAxis[axis]) return;
+      const code = normalizeAxisCode(point.code, axis);
+      if (!availableByAxis[axis].has(code)) return;
+      if (explorerMetadataMatches([point.code, code, point.description, point.coordinate], tokens)) {
+        matchesByAxis[axis].add(code);
+      }
+    });
+
+    const matchedAxes = ["x", "y", "z"].filter((axis) => matchesByAxis[axis].size > 0);
+    if (!templateMatch && matchedAxes.length === 0) return;
+
+    // Union semantics: a dimension is restricted only when it is the sole
+    // source of matches. A match in another dimension makes every value of
+    // this one potentially relevant to that result.
+    const restrictedAxis = !templateMatch && matchedAxes.length === 1 ? matchedAxes[0] : "";
+    const result = { matchesByAxis, restrictedAxis, templateMatch };
+    byTemplate.set(template.tableId, result);
+    matchingTemplates.push(template);
+  });
+
+  const results = { byTemplate, hasQuery: true, templates: matchingTemplates };
+  explorerAdvancedSearchCache = {
+    points: state?.explorerPoints,
+    query,
+    results,
+    selectedJst: state?.selectedJst,
+    templateKey
+  };
+  return results;
+}
+
+function ensureActiveExplorerTemplateMatchesSearch(state) {
+  const results = getExplorerAdvancedSearchResults(state);
+  if (!results.hasQuery || results.templates.length === 0) {
+    explorerAdvancedSearchAutoFocusKey = "";
+    return;
+  }
+  if (!results.byTemplate.has(activeExplorerTemplateId)) {
+    activeExplorerTemplateId = results.templates[0].tableId;
+    updateUrlTemplateParam(activeExplorerTemplateId);
+  }
+  const templateResult = results.byTemplate.get(activeExplorerTemplateId);
+  const autoFocusKey = `${normalizeExplorerMetadataSearchText(explorerAdvancedSearchQuery)}|${activeExplorerTemplateId}`;
+  if (templateResult?.restrictedAxis && explorerAdvancedSearchAutoFocusKey !== autoFocusKey) {
+    getActiveExplorerContext().activeAxis = templateResult.restrictedAxis;
+  }
+  explorerAdvancedSearchAutoFocusKey = autoFocusKey;
+}
+
+function filterExplorerSeriesByAdvancedSearch(series, state, tableId, activeAxis) {
+  const results = getExplorerAdvancedSearchResults(state);
+  const templateResult = results.byTemplate.get(tableId);
+  if (!results.hasQuery) return series;
+  if (!templateResult) return { ...series, rows: [], status: "No metadata matches this search." };
+  if (templateResult.restrictedAxis !== activeAxis) return series;
+  const matchingCodes = templateResult.matchesByAxis[activeAxis];
+  const rows = series.rows.filter((row) => matchingCodes.has(normalizeExplorerSeriesRow(row).code));
+  return {
+    ...series,
+    rows,
+    status: rows.length > 0 ? series.status : "No metadata matches this search."
+  };
+}
+
 // Switches the active template from the context panel's template list.
 // Deliberately does not touch context.activeAxis: each template keeps its
 // own remembered row/column/tab selection (see getExplorerContextForTemplate),
@@ -465,6 +599,7 @@ function syncExplorerBenchmarkPlacement() {
 export function renderExplorer(state) {
   clearExplorerCellRangeSelection();
   ensureActiveExplorerTemplate(state);
+  ensureActiveExplorerTemplateMatchesSearch(state);
   const context = getActiveExplorerContext();
   const template = getActiveExplorerTemplate();
   const templates = getExplorerTemplates(state);
@@ -501,19 +636,21 @@ export function renderExplorer(state) {
     templateSelections: getExplorerTemplateSelections(),
     templates
   });
-  const displayedTableSeries = buildExplorerEvolutionSeries(tableSeries, state);
+  const searchedTableSeries = filterExplorerSeriesByAdvancedSearch(tableSeries, state, template?.tableId, context.activeAxis);
+  const displayedTableSeries = buildExplorerEvolutionSeries(searchedTableSeries, state);
   elements.explorerTable.replaceChildren();
   if (elements.explorerExcelExport) {
     elements.explorerExcelExport.disabled = displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0;
   }
 
-  elements.explorerEmpty.hidden = !tableSeries.status;
-  elements.explorerEmpty.textContent = tableSeries.status;
+  elements.explorerEmpty.hidden = !searchedTableSeries.status;
+  elements.explorerEmpty.textContent = searchedTableSeries.status;
 
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) return;
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
   applyExplorerSelection();
+  applyExplorerAdvancedSearchHighlights(state, template?.tableId, context.activeAxis);
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
     revealSelectedExplorerRowPath();
@@ -522,6 +659,14 @@ export function renderExplorer(state) {
   } else {
     restoreExplorerScrollPosition();
   }
+}
+
+function applyExplorerAdvancedSearchHighlights(state, tableId, activeAxis) {
+  const results = getExplorerAdvancedSearchResults(state);
+  const matchingCodes = results.byTemplate.get(tableId)?.matchesByAxis?.[activeAxis] ?? new Set();
+  elements.explorerTable.querySelectorAll("tbody tr[data-point-code]").forEach((row) => {
+    row.classList.toggle("is-metadata-search-match", results.hasQuery && matchingCodes.has(row.dataset.pointCode));
+  });
 }
 
 function exportVisibleExplorerTable() {
@@ -782,7 +927,7 @@ function renderExplorerTable(series, selectedUnit) {
   descriptionHeader.className = "description-column";
   descriptionHeader.dataset.explorerExportColumn = "true";
   if (!isDateFocus) descriptionHeader.rowSpan = 2;
-  descriptionHeader.append(createExplorerSearchInput());
+  descriptionHeader.textContent = getExplorerAxisDisplayName(activeAxis);
   headerRow.append(descriptionHeader);
 
   const codeHeader = document.createElement("th");
@@ -1769,7 +1914,8 @@ function renderExplorerContextPanel(state) {
 
   // The lower pane shows templates by default. The selection and its actions
   // live in a separate, permanent pane above and cannot be replaced here.
-  article.append(createExplorerTemplateList(getExplorerTemplates(state), activeTemplate?.tableId ?? activeExplorerTemplateId));
+  const searchResults = getExplorerAdvancedSearchResults(state);
+  article.append(createExplorerTemplateList(searchResults.templates, activeTemplate?.tableId ?? activeExplorerTemplateId));
   replaceExplorerContextDetail(article);
 }
 
@@ -2257,6 +2403,13 @@ function createExplorerTemplateList(templates, activeTemplateId) {
   list.className = "explorer-template-list";
   list.setAttribute("role", "listbox");
   list.setAttribute("aria-label", "Template");
+
+  if (templates.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "explorer-template-search-empty";
+    empty.textContent = "No metadata matches this search.";
+    list.append(empty);
+  }
 
   templates.forEach((template) => {
     const isActive = template.tableId === activeTemplateId;

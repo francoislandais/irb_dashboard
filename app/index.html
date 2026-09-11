@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260911-fixed-selection-pane-tall">
+    <link rel="stylesheet" href="./src/styles.css?v=20260911-advanced-search">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -85,6 +85,13 @@
                   <button class="axis-tab" type="button" role="tab" aria-selected="false" data-explorer-axis="z">
                     <span class="axis-tab-value" data-axis-caption="z">Tab : -</span>
                   </button>
+                  <label class="explorer-advanced-search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <circle cx="10.5" cy="10.5" r="5.75"/>
+                      <path d="m15 15 4.25 4.25"/>
+                    </svg>
+                    <input id="explorer-advanced-search" type="search" autocomplete="off" placeholder="Search all metadata" aria-label="Search all Explorer metadata">
+                  </label>
                   <button id="explorer-excel-export" class="explorer-excel-export-button" type="button" aria-label="Export visible table to Excel" title="Export visible table to Excel" disabled>
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                       <rect class="excel-workbook" x="7" y="3" width="14" height="18" rx="1.4"/>
@@ -349,6 +356,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260910-explorer-context-title-only"></script>
+    <script type="module" src="./src/main.js?v=20260911-advanced-search"></script>
   </body>
 </html>
