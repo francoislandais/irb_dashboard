@@ -257,15 +257,15 @@ export function getExplorerAxisOptions(state, tableId) {
     },
     x: {
       codes: availableXCodes,
-      isVisible: availableXCodes.length > 1
+      isVisible: availableXCodes.length > 0
     },
     y: {
       codes: yCodes,
-      isVisible: yCodes.length > 1
+      isVisible: yCodes.length > 0
     },
     z: {
       codes: zCodes,
-      isVisible: zCodes.length > 1
+      isVisible: zCodes.length > 0
     }
   };
 }

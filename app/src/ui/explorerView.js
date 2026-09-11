@@ -30,7 +30,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260805-template-desc";
+} from "../data/explorer.js?v=20260911-single-axis";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
@@ -650,7 +650,6 @@ export function renderExplorer(state) {
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
   applyExplorerSelection();
-  applyExplorerAdvancedSearchHighlights(state, template?.tableId, context.activeAxis);
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
     revealSelectedExplorerRowPath();
@@ -659,14 +658,6 @@ export function renderExplorer(state) {
   } else {
     restoreExplorerScrollPosition();
   }
-}
-
-function applyExplorerAdvancedSearchHighlights(state, tableId, activeAxis) {
-  const results = getExplorerAdvancedSearchResults(state);
-  const matchingCodes = results.byTemplate.get(tableId)?.matchesByAxis?.[activeAxis] ?? new Set();
-  elements.explorerTable.querySelectorAll("tbody tr[data-point-code]").forEach((row) => {
-    row.classList.toggle("is-metadata-search-match", results.hasQuery && matchingCodes.has(row.dataset.pointCode));
-  });
 }
 
 function exportVisibleExplorerTable() {

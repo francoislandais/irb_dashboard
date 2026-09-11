@@ -1986,15 +1986,6 @@ table {
   color: #98a39d;
 }
 
-.metric-table tbody tr.is-metadata-search-match .tree-label {
-  color: var(--primary-dark);
-}
-
-.metric-table tbody tr.is-metadata-search-match .code-column-badge {
-  background: #eaf2fa;
-  color: var(--primary-dark);
-}
-
 .explorer-template-search-empty {
   padding: 12px 4px;
   color: #7c8882;
@@ -2176,9 +2167,10 @@ table {
   color: var(--primary-dark);
 }
 
-.explorer-active-filters {
+.cost-of-risk-active-filters.explorer-active-filters {
   grid-row: 2;
   min-height: 28px;
+  padding-left: 18px;
 }
 
 .explorer-filter-chip-jst.is-open .cost-of-risk-filter-chip-toggle {
