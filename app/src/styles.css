@@ -1965,7 +1965,7 @@ table {
   flex: 0 0 auto;
   min-height: 34px;
   border: 1px solid #d8dfdb;
-  border-radius: 999px;
+  border-radius: 9px;
   background: #ffffff;
   color: #5f6b65;
   cursor: pointer;
@@ -2166,27 +2166,15 @@ table {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: 7px;
   width: auto;
   max-width: none;
   height: auto;
-  margin-right: 12px;
-  padding: 8px 13px 7px 16px;
+  margin-right: 20px;
+  padding: 8px 16px 7px;
   border: 1px solid #d8dfdb;
   border-radius: 9px;
   background: #ffffff;
   cursor: pointer;
-}
-
-.axis-tab.explorer-template-static::after {
-  border-bottom: 1.5px solid currentColor;
-  border-right: 1.5px solid currentColor;
-  content: "";
-  flex: 0 0 6px;
-  height: 6px;
-  margin: -3px 2px 0 0;
-  transform: rotate(45deg);
-  width: 6px;
 }
 
 .explorer-template-static-value {
