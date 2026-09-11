@@ -2931,9 +2931,6 @@ function applyExplorerSelection() {
     const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
     const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
     selectedHeader?.classList.add("is-selected-date-header");
-    rows.forEach((row) => {
-      row.querySelector(`td[data-explorer-cell-column="${selectedColumnIndex}"]`)?.classList.add("is-selected-date-column");
-    });
   }
 
   const selectedCode = getSelectedExplorerCodeForActiveAxis();

@@ -142,6 +142,50 @@ button:disabled {
   display: none;
 }
 
+.header-visibility-toggle {
+  align-items: center;
+  background: var(--primary-dark);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 0 0 8px 8px;
+  color: #ffffff;
+  display: inline-flex;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  height: 13px;
+  justify-content: center;
+  justify-self: center;
+  padding: 0;
+  position: relative;
+  top: 40px;
+  width: 38px;
+  z-index: 90;
+}
+
+.header-visibility-toggle:hover,
+.header-visibility-toggle:focus-visible {
+  background: color-mix(in srgb, var(--primary-dark) 84%, #ffffff);
+  outline: none;
+}
+
+.header-visibility-toggle svg {
+  fill: none;
+  height: 8px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  width: 14px;
+}
+
+.app-shell.is-header-hidden .header-visibility-toggle {
+  border-radius: 0 0 8px 8px;
+  top: 0;
+}
+
+.app-shell.is-header-hidden .header-visibility-toggle svg {
+  transform: rotate(180deg);
+}
+
 .app-shell.is-header-hidden .sidebar,
 .app-shell.is-header-hidden .main-view {
   grid-row: 1;
@@ -2724,14 +2768,6 @@ table {
   color: #ffffff;
 }
 
-.metric-table tbody td.is-selected-date-column {
-  background: #eaf2fa;
-}
-
-.metric-table tbody td.is-selected-date-column:hover {
-  background: #dfeef8;
-}
-
 .metric-table td {
   font-variant-numeric: tabular-nums;
   max-width: none;
@@ -2841,13 +2877,13 @@ table {
 }
 
 .metric-table tbody tr.is-tree-parent > th.description-column .tree-label {
-  color: var(--primary-dark);
+  color: #1d2823;
   font-weight: 400;
 }
 
 .metric-table tbody tr[data-is-virtual="true"] > th,
 .metric-table tbody tr[data-is-virtual="true"] > td {
-  color: #3d5549;
+  color: #1d2823;
 }
 
 .tree-cell-content {
@@ -2943,16 +2979,8 @@ table {
   z-index: 45;
 }
 
-.metric-table tbody tr.is-sticky-parent > td.is-selected-date-column {
-  background: #eaf2fa;
-}
-
 .metric-table tbody tr.is-sticky-parent > td:hover {
   background: #eef4f1;
-}
-
-.metric-table tbody tr.is-sticky-parent > td.is-selected-date-column:hover {
-  background: #dfeef8;
 }
 
 .metric-table tbody tr.is-sticky-parent > th.description-column:hover {

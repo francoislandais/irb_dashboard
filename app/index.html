@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260911-advanced-search">
+    <link rel="stylesheet" href="./src/styles.css?v=20260911-header-collapse">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -56,6 +56,11 @@
           </div>
         </section>
       </header>
+      <button id="header-visibility-toggle" class="header-visibility-toggle" type="button" aria-label="Hide application header" aria-expanded="true" title="Hide header">
+        <svg viewBox="0 0 20 12" aria-hidden="true" focusable="false">
+          <path d="m4 8 6-5 6 5"/>
+        </svg>
+      </button>
 
       <aside class="sidebar" aria-label="Modules">
         <nav class="module-list" aria-label="Navigation des modules">
@@ -356,6 +361,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260911-advanced-search"></script>
+    <script type="module" src="./src/main.js?v=20260911-header-collapse"></script>
   </body>
 </html>

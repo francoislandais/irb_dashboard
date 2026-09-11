@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260911-advanced-search";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260911-header-collapse";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -520,11 +520,30 @@ function createDatasetId(source) {
 }
 
 applyUrlHeaderVisibility();
+wireHeaderVisibilityToggle();
 startApplication();
 
 function applyUrlHeaderVisibility() {
   const shouldHideHeader = readUrlStateParams().get(HEADER_URL_PARAM) === "hidden";
-  document.querySelector(".app-shell")?.classList.toggle("is-header-hidden", shouldHideHeader);
+  const shell = document.querySelector(".app-shell");
+  const toggle = document.querySelector("#header-visibility-toggle");
+  shell?.classList.toggle("is-header-hidden", shouldHideHeader);
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", String(!shouldHideHeader));
+    toggle.setAttribute("aria-label", shouldHideHeader ? "Show application header" : "Hide application header");
+    toggle.title = shouldHideHeader ? "Show header" : "Hide header";
+  }
+}
+
+function wireHeaderVisibilityToggle() {
+  document.querySelector("#header-visibility-toggle")?.addEventListener("click", () => {
+    const url = createUrlState();
+    const shouldHideHeader = !document.querySelector(".app-shell")?.classList.contains("is-header-hidden");
+    if (shouldHideHeader) url.searchParams.set(HEADER_URL_PARAM, "hidden");
+    else url.searchParams.delete(HEADER_URL_PARAM);
+    replaceUrlState(url);
+    applyUrlHeaderVisibility();
+  });
 }
 
 async function startApplication() {
