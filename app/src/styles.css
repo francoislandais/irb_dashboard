@@ -2756,8 +2756,8 @@ table {
 }
 
 .metric-table thead .explorer-quarter-header-row th.is-selected-date-header {
-  background: var(--primary-dark);
-  color: #ffffff;
+  background: #eaf2fa;
+  color: var(--primary-dark);
 }
 
 .metric-table td {
