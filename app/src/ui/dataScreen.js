@@ -1,8 +1,9 @@
 import { setLatestState } from "./appState.js";
-import { renderCreditRisk, showCreditRiskPeerSelection, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260910-context-title-only";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260911-year-header-highlight";
+import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260910-context-title-only";
+import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260911-year-header-highlight";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260910-context-title-only";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
+import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
@@ -40,12 +41,7 @@ export function wireUi(actions) {
     showDatasetDialog(actions.getState());
   });
   elements.peersButton?.addEventListener("click", () => {
-    const activeModule = actions.getState().activeModule;
-    if (activeModule === "credit-risk") {
-      showCreditRiskPeerSelection(actions);
-    } else if (activeModule === "explorer") {
-      showExplorerPeerSelection(actions);
-    }
+    showPeerSelectionDialog(actions.getState(), actions);
   });
   elements.datasetSelect?.addEventListener("change", async (event) => {
     if (event.target.value === ADD_DATASET_OPTION) {
@@ -114,6 +110,7 @@ function updateSidebarToggleAccessibility(isCollapsed) {
 
 export function renderAppState(state) {
   setLatestState(state);
+  updatePeerSelectionDialog(state);
   const hasData = state.rows.length > 0 || state.columns.length > 0;
   const activeDataset = state.datasets.find((dataset) => dataset.id === state.activeDatasetId) ?? null;
 
