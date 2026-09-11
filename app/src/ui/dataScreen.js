@@ -3,9 +3,11 @@ import { renderCreditRisk, showCreditRiskPeerSelection, syncCreditRiskUrlParams,
 import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, showExplorerPeerSelection, wireExplorerUi } from "./explorerView.js?v=20260911-single-axis";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260910-context-title-only";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
+import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
+const SIDEBAR_URL_PARAM = "sidebar";
 const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
@@ -28,6 +30,7 @@ const elements = {
 };
 
 export function wireUi(actions) {
+  applyUrlSidebarVisibility();
   elements.sidebarToggle?.addEventListener("click", toggleSidebar);
   elements.chooseFileButton?.addEventListener("click", actions.chooseFile);
   elements.reloadFileButton?.addEventListener("click", actions.reloadFile);
@@ -86,12 +89,27 @@ function toggleSidebar() {
   if (!elements.appShell || !elements.sidebarToggle) return;
 
   const isCollapsed = elements.appShell.classList.toggle("is-sidebar-collapsed");
+  updateSidebarToggleAccessibility(isCollapsed);
+  const url = createUrlState();
+  if (isCollapsed) url.searchParams.set(SIDEBAR_URL_PARAM, "collapsed");
+  else url.searchParams.delete(SIDEBAR_URL_PARAM);
+  replaceUrlState(url);
+  window.setTimeout(scheduleExplorerStickyParentsUpdate, 180);
+}
+
+function applyUrlSidebarVisibility() {
+  if (!elements.appShell || !elements.sidebarToggle) return;
+  const isCollapsed = readUrlStateParams().get(SIDEBAR_URL_PARAM) === "collapsed";
+  elements.appShell.classList.toggle("is-sidebar-collapsed", isCollapsed);
+  updateSidebarToggleAccessibility(isCollapsed);
+}
+
+function updateSidebarToggleAccessibility(isCollapsed) {
   elements.sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
   elements.sidebarToggle.setAttribute(
     "aria-label",
     isCollapsed ? "Afficher la navigation" : "Masquer la navigation"
   );
-  window.setTimeout(scheduleExplorerStickyParentsUpdate, 180);
 }
 
 export function renderAppState(state) {

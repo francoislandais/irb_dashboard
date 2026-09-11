@@ -146,7 +146,8 @@ button:disabled {
   align-items: center;
   background: var(--primary-dark);
   border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 0 0 8px 8px;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
   color: #ffffff;
   display: inline-flex;
   grid-column: 1 / -1;
@@ -156,7 +157,7 @@ button:disabled {
   justify-self: center;
   padding: 0;
   position: relative;
-  top: 40px;
+  top: 27px;
   width: 38px;
   z-index: 90;
 }
@@ -178,6 +179,7 @@ button:disabled {
 }
 
 .app-shell.is-header-hidden .header-visibility-toggle {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 0 0 8px 8px;
   top: 0;
 }
