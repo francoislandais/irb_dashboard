@@ -94,6 +94,7 @@ let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_P
 let explorerAdvancedSearchTimer = 0;
 let explorerAdvancedSearchCache = null;
 let explorerAdvancedSearchAutoFocusKey = "";
+let shouldCenterExplorerReferenceColumn = false;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
@@ -631,7 +632,7 @@ export function renderExplorer(state) {
     onClearSmoothing: clearExplorerBenchmarkSmoothing,
     onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
     onSelectJst: selectExplorerBenchmarkJst,
-    onSelectReference: selectExplorerReferenceDate,
+    onSelectReference: selectExplorerBenchmarkReferenceDate,
     onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
     peerDisplayMode: "anonymised",
     selectedReferenceLabel: context.selectedReferenceLabel,
@@ -648,7 +649,7 @@ export function renderExplorer(state) {
       onClearSmoothing: clearExplorerBenchmarkSmoothing,
       onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
       onSelectJst: selectExplorerBenchmarkJst,
-      onSelectReference: selectExplorerReferenceDate,
+      onSelectReference: selectExplorerBenchmarkReferenceDate,
       onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
       peerDisplayMode: state.peerDisplayMode,
       selectedReferenceLabel: context.selectedReferenceLabel,
@@ -690,6 +691,7 @@ export function renderExplorer(state) {
   } else {
     restoreExplorerScrollPosition();
   }
+  scheduleExplorerReferenceColumnCentering();
 }
 
 function exportVisibleExplorerTable() {
@@ -2041,11 +2043,48 @@ function renderExplorerReferenceDatePanel(state) {
 
 function selectExplorerReferenceDate(referenceLabel) {
   const context = getActiveExplorerContext();
-  if (!referenceLabel || context.selectedReferenceLabel === referenceLabel) return;
+  if (!referenceLabel || context.selectedReferenceLabel === referenceLabel) return false;
   context.selectedReferenceLabel = referenceLabel;
   context.selectedCellColumnIndex = 0;
   saveExplorerScrollPosition();
   if (getLatestState()) rerenderApp(getLatestState());
+  return true;
+}
+
+function selectExplorerBenchmarkReferenceDate(referenceLabel) {
+  shouldCenterExplorerReferenceColumn = true;
+  const changed = selectExplorerReferenceDate(referenceLabel);
+  if (!changed) scheduleExplorerReferenceColumnCentering();
+}
+
+function scheduleExplorerReferenceColumnCentering() {
+  if (!shouldCenterExplorerReferenceColumn || elements.explorerTableWrap?.hidden) return;
+  requestAnimationFrame(() => {
+    if (!shouldCenterExplorerReferenceColumn || elements.explorerTableWrap?.hidden) return;
+    const context = getActiveExplorerContext();
+    const selectedColumnIndex = Math.max(0, Number(context.selectedCellColumnIndex) || 0);
+    const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
+    if (!selectedHeader) return;
+
+    shouldCenterExplorerReferenceColumn = false;
+    const viewport = elements.explorerTableWrap.getBoundingClientRect();
+    const column = selectedHeader.getBoundingClientRect();
+    const isFullyVisible = column.left >= viewport.left && column.right <= viewport.right;
+    if (isFullyVisible) return;
+
+    const targetLeft = Math.max(0, Math.min(
+      elements.explorerTableWrap.scrollWidth - elements.explorerTableWrap.clientWidth,
+      elements.explorerTableWrap.scrollLeft
+        + column.left - viewport.left
+        + (column.width / 2)
+        - (viewport.width / 2)
+    ));
+    context.scrollByAxis[context.activeAxis] = {
+      left: targetLeft,
+      top: elements.explorerTableWrap.scrollTop
+    };
+    elements.explorerTableWrap.scrollTo({ left: targetLeft, behavior: "smooth" });
+  });
 }
 
 function renderExplorerEvolutionFrequencyPanel() {
