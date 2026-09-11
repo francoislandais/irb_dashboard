@@ -1539,7 +1539,7 @@ button:focus-visible {
 .explorer-context-item p,
 .explorer-context-hint {
   margin: 0;
-  color: #66736d;
+  color: #000000;
   font-size: 0.72rem;
   line-height: 1.38;
   overflow-wrap: anywhere;
@@ -1595,12 +1595,12 @@ button:focus-visible {
 }
 
 .explorer-selection-summary-label {
-  color: var(--primary-dark);
+  color: #000000;
   font-weight: 500;
 }
 
 .explorer-selection-summary-value-label {
-  color: var(--primary-dark);
+  color: #000000;
   font-weight: 500;
 }
 
