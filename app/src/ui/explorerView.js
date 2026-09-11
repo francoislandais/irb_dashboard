@@ -13,7 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260804-lazy-index";
-import { renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260910-explorer-benchmark-mini";
+import { renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-reference-marker";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -630,8 +630,10 @@ export function renderExplorer(state) {
     onClearSmoothing: clearExplorerBenchmarkSmoothing,
     onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
     onSelectJst: selectExplorerBenchmarkJst,
+    onSelectReference: selectExplorerReferenceDate,
     onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
     peerDisplayMode: explorerBenchmarkExpanded ? state.peerDisplayMode : "anonymised",
+    selectedReferenceLabel: context.selectedReferenceLabel,
     selectedJst: state.selectedJst,
     smoothingWindow: explorerBenchmarkSmoothingWindow
   });
@@ -2007,18 +2009,22 @@ function renderExplorerReferenceDatePanel(state) {
     metric.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
     row.append(label, metric);
     row.addEventListener("click", () => {
-      const context = getActiveExplorerContext();
-      if (context.selectedReferenceLabel === reference.label) return;
-      context.selectedReferenceLabel = reference.label;
-      context.selectedCellColumnIndex = 0;
-      saveExplorerScrollPosition();
-      if (getLatestState()) rerenderApp(getLatestState());
+      selectExplorerReferenceDate(reference.label);
     });
     list.append(row);
   });
 
   article.append(title, list);
   replaceExplorerContextDetail(article);
+}
+
+function selectExplorerReferenceDate(referenceLabel) {
+  const context = getActiveExplorerContext();
+  if (!referenceLabel || context.selectedReferenceLabel === referenceLabel) return;
+  context.selectedReferenceLabel = referenceLabel;
+  context.selectedCellColumnIndex = 0;
+  saveExplorerScrollPosition();
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 function renderExplorerEvolutionFrequencyPanel() {

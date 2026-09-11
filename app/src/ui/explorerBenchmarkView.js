@@ -36,8 +36,10 @@ export function renderExplorerBenchmarkView({
   onClearSmoothing,
   onChangeSmoothing,
   onSelectJst,
+  onSelectReference,
   onToggleYAxisFocus,
   peerDisplayMode,
+  selectedReferenceLabel,
   selectedJst,
   smoothingWindow
 }) {
@@ -68,6 +70,7 @@ export function renderExplorerBenchmarkView({
     }))
     : chartModel.series;
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
+  const selectedReferencePoint = benchmark.dates.find((reference) => reference.label === selectedReferenceLabel);
 
   if (series.length === 0) {
     destroyExplorerBenchmarkChart();
@@ -112,10 +115,8 @@ export function renderExplorerBenchmarkView({
     },
     credits: { enabled: false },
     legend: { enabled: false },
-    // No reference-date callback yet: the first argument (referenceLabel) is
-    // intentionally ignored, per spec ("aucun callback sur la date de
-    // référence n'est implémenté à ce stade").
     plotOptions: getBenchmarkLinePlotOptions((referenceLabel, seriesName) => {
+      onSelectReference(referenceLabel);
       onSelectJst(seriesName);
     }, selectedJst),
     series,
@@ -135,6 +136,13 @@ export function renderExplorerBenchmarkView({
       labels: { style: { color: "#5f6b65", fontSize: compact ? "9px" : undefined } },
       lineColor: "#c2cac5",
       lineWidth: 1,
+      plotLines: selectedReferencePoint?.date instanceof Date ? [{
+        color: "#7f8984",
+        dashStyle: "ShortDash",
+        value: selectedReferencePoint.date.getTime(),
+        width: 1,
+        zIndex: 3
+      }] : [],
       tickColor: "#d9dedb",
       type: "datetime"
     },
