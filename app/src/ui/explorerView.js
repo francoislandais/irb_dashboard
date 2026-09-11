@@ -13,7 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260804-lazy-index";
-import { renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-reference-marker";
+import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-stable-benchmark";
 import {
   buildExplorerDisplayRows,
   getExplicitPaths,
@@ -106,7 +106,9 @@ const elements = {
   explorerActiveFilters: document.querySelector("#explorer-active-filters"),
   explorerAdvancedSearch: document.querySelector("#explorer-advanced-search"),
   explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
+  explorerBenchmarkCollapse: document.querySelector("#explorer-benchmark-collapse"),
   explorerBenchmarkExpand: document.querySelector("#explorer-benchmark-expand"),
+  explorerBenchmarkExpandedChart: document.querySelector("#explorer-benchmark-expanded-chart"),
   explorerBenchmarkExpandedSlot: document.querySelector("#explorer-benchmark-expanded-slot"),
   explorerBenchmarkPreviewSlot: document.querySelector("#explorer-benchmark-preview-slot"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
@@ -201,6 +203,11 @@ export function wireExplorerUi(actions, rerender) {
   elements.explorerBenchmarkExpand?.addEventListener("click", () => {
     saveExplorerScrollPosition();
     explorerBenchmarkExpanded = !explorerBenchmarkExpanded;
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
+  elements.explorerBenchmarkCollapse?.addEventListener("click", () => {
+    saveExplorerScrollPosition();
+    explorerBenchmarkExpanded = false;
     if (getLatestState()) rerenderApp(getLatestState());
   });
 }
@@ -586,12 +593,6 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 }
 
 function syncExplorerBenchmarkPlacement() {
-  const target = explorerBenchmarkExpanded
-    ? elements.explorerBenchmarkExpandedSlot
-    : elements.explorerBenchmarkPreviewSlot;
-  if (target && elements.explorerBenchmarkView?.parentElement !== target) {
-    target.append(elements.explorerBenchmarkView);
-  }
   if (elements.explorerMainPane) {
     elements.explorerMainPane.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
   }
@@ -623,7 +624,7 @@ export function renderExplorer(state) {
   const benchmark = buildExplorerBenchmark();
   renderExplorerBenchmarkView({
     benchmark,
-    compact: !explorerBenchmarkExpanded,
+    compact: true,
     container: elements.explorerBenchmarkChart,
     focusYAxis: explorerBenchmarkFocusYAxis,
     formatValue: (value) => formatBenchmarkValue(value, benchmark),
@@ -632,11 +633,31 @@ export function renderExplorer(state) {
     onSelectJst: selectExplorerBenchmarkJst,
     onSelectReference: selectExplorerReferenceDate,
     onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
-    peerDisplayMode: explorerBenchmarkExpanded ? state.peerDisplayMode : "anonymised",
+    peerDisplayMode: "anonymised",
     selectedReferenceLabel: context.selectedReferenceLabel,
     selectedJst: state.selectedJst,
     smoothingWindow: explorerBenchmarkSmoothingWindow
   });
+  if (explorerBenchmarkExpanded) {
+    renderExplorerBenchmarkView({
+      benchmark,
+      compact: false,
+      container: elements.explorerBenchmarkExpandedChart,
+      focusYAxis: explorerBenchmarkFocusYAxis,
+      formatValue: (value) => formatBenchmarkValue(value, benchmark),
+      onClearSmoothing: clearExplorerBenchmarkSmoothing,
+      onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
+      onSelectJst: selectExplorerBenchmarkJst,
+      onSelectReference: selectExplorerReferenceDate,
+      onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
+      peerDisplayMode: state.peerDisplayMode,
+      selectedReferenceLabel: context.selectedReferenceLabel,
+      selectedJst: state.selectedJst,
+      smoothingWindow: explorerBenchmarkSmoothingWindow
+    });
+  } else {
+    destroyExplorerBenchmarkChart(elements.explorerBenchmarkExpandedChart);
+  }
 
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,

@@ -1901,6 +1901,23 @@ table {
   min-height: 0;
 }
 
+.explorer-benchmark-expanded-chart .cost-of-risk-chart-smoothing-badge {
+  left: auto !important;
+  right: 104px;
+  top: 8px !important;
+}
+
+.explorer-benchmark-expanded-chart .cost-of-risk-chart-y-focus-badge {
+  left: auto !important;
+  right: 38px;
+  top: 8px !important;
+}
+
+.explorer-benchmark-expanded-view > .explorer-benchmark-expand-button {
+  right: 4px;
+  top: 4px;
+}
+
 .template-tabs {
   display: flex;
   align-items: center;

@@ -1,6 +1,5 @@
 import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
-  createCostOfRiskHighchartsTitle,
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
   renderCostOfRiskYAxisFocusBadge
@@ -19,12 +18,16 @@ import {
 } from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
-let explorerBenchmarkChart = null;
+const explorerBenchmarkCharts = new Map();
 
-export function destroyExplorerBenchmarkChart() {
-  if (!explorerBenchmarkChart) return;
-  explorerBenchmarkChart.destroy();
-  explorerBenchmarkChart = null;
+export function destroyExplorerBenchmarkChart(container = null) {
+  if (container) {
+    explorerBenchmarkCharts.get(container)?.destroy();
+    explorerBenchmarkCharts.delete(container);
+    return;
+  }
+  explorerBenchmarkCharts.forEach((chart) => chart.destroy());
+  explorerBenchmarkCharts.clear();
 }
 
 export function renderExplorerBenchmarkView({
@@ -44,7 +47,7 @@ export function renderExplorerBenchmarkView({
   smoothingWindow
 }) {
   if (benchmark.series.length === 0 || benchmark.dates.length === 0) {
-    destroyExplorerBenchmarkChart();
+    destroyExplorerBenchmarkChart(container);
     if (container) container.textContent = "No data available for this point.";
     return;
   }
@@ -73,7 +76,7 @@ export function renderExplorerBenchmarkView({
   const selectedReferencePoint = benchmark.dates.find((reference) => reference.label === selectedReferenceLabel);
 
   if (series.length === 0) {
-    destroyExplorerBenchmarkChart();
+    destroyExplorerBenchmarkChart(container);
     container.textContent = "No data available for this point.";
     return;
   }
@@ -121,7 +124,7 @@ export function renderExplorerBenchmarkView({
     }, selectedJst),
     series,
     subtitle: !compact && isAnonymised && chartModel.status ? { text: chartModel.status, style: { color: "#8a7248", fontSize: "10px" } } : { text: "" },
-    title: compact ? { text: "" } : createCostOfRiskHighchartsTitle("temporal benchmark of the current selection"),
+    title: { text: "" },
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
@@ -170,9 +173,11 @@ export function renderExplorerBenchmarkView({
     }
   };
 
+  let explorerBenchmarkChart = explorerBenchmarkCharts.get(container) ?? null;
   if (hasBenchmarkChartModeChanged(explorerBenchmarkChart, chartModel.peerDisplayMode)
       || (explorerBenchmarkChart && explorerBenchmarkChart.__explorerCompact !== compact)) {
-    destroyExplorerBenchmarkChart();
+    destroyExplorerBenchmarkChart(container);
+    explorerBenchmarkChart = null;
   }
   if (explorerBenchmarkChart) {
     clearBenchmarkEndpointLabels(explorerBenchmarkChart);
@@ -183,6 +188,7 @@ export function renderExplorerBenchmarkView({
     }
   } else {
     explorerBenchmarkChart = window.Highcharts.chart(container, options);
+    explorerBenchmarkCharts.set(container, explorerBenchmarkChart);
     markBenchmarkChartMode(explorerBenchmarkChart, chartModel.peerDisplayMode);
   }
   explorerBenchmarkChart.__explorerCompact = compact;

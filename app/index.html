@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260911-denominator-menu">
+    <link rel="stylesheet" href="./src/styles.css?v=20260911-stable-benchmark">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -110,7 +110,16 @@
                 <div class="metric-table-wrap">
                   <table id="explorer-table" class="metric-table" aria-label="Série temporelle RWA IRB"></table>
                 </div>
-                <div id="explorer-benchmark-expanded-slot" class="explorer-benchmark-expanded-slot" hidden></div>
+                <div id="explorer-benchmark-expanded-slot" class="explorer-benchmark-expanded-slot" hidden>
+                  <div class="explorer-benchmark-view explorer-benchmark-expanded-view">
+                    <button id="explorer-benchmark-collapse" class="explorer-benchmark-expand-button is-expanded" type="button" aria-label="Collapse benchmark" title="Return to table">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M8.5 4H4v4.5M15.5 4H20v4.5M20 15.5V20h-4.5M8.5 20H4v-4.5"/>
+                      </svg>
+                    </button>
+                    <div id="explorer-benchmark-expanded-chart" class="cost-of-risk-chart explorer-benchmark-chart explorer-benchmark-expanded-chart" aria-label="Expanded Explorer benchmark time series"></div>
+                  </div>
+                </div>
               </div>
               <aside id="explorer-context-panel" class="explorer-context-panel" aria-label="Explorer contextual information">
                 <div id="explorer-context-selection" class="cost-of-risk-context-selected-pane" aria-label="Current Explorer selection"></div>
@@ -361,6 +370,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260911-reference-marker"></script>
+    <script type="module" src="./src/main.js?v=20260911-stable-benchmark"></script>
   </body>
 </html>
