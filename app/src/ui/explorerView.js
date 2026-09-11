@@ -1137,13 +1137,17 @@ function renderExplorerTable(series, selectedUnit) {
   headerRow.append(codeHeader);
 
   if (!isDateFocus) {
+    let yearColumnOffset = 0;
     buildExplorerYearGroups(orderedDates).forEach(({ count, year }) => {
       const th = document.createElement("th");
       th.className = "explorer-year-header";
       th.colSpan = count;
       th.scope = "colgroup";
+      th.dataset.explorerYearColumnStart = String(yearColumnOffset);
+      th.dataset.explorerYearColumnEnd = String(yearColumnOffset + count - 1);
       th.textContent = year;
       yearHeaderRow.append(th);
+      yearColumnOffset += count;
     });
     yearHeaderRow.prepend(descriptionHeader, codeHeader);
   }
@@ -3318,8 +3322,8 @@ function selectExplorerRow(pointCode, options = {}) {
 function applyExplorerSelection() {
   const rows = [...elements.explorerTable.querySelectorAll("tbody tr")];
 
-  elements.explorerTable.querySelectorAll(".is-selected-date-column, .is-selected-date-header").forEach((element) => {
-    element.classList.remove("is-selected-date-column", "is-selected-date-header");
+  elements.explorerTable.querySelectorAll(".is-selected-date-column, .is-selected-date-header, .is-selected-year-header").forEach((element) => {
+    element.classList.remove("is-selected-date-column", "is-selected-date-header", "is-selected-year-header");
   });
 
   rows.forEach((row) => {
@@ -3342,6 +3346,11 @@ function applyExplorerSelection() {
     const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
     const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
     selectedHeader?.classList.add("is-selected-date-header");
+    const selectedYearHeader = [...elements.explorerTable.querySelectorAll("thead th.explorer-year-header")].find((header) => (
+      selectedColumnIndex >= Number(header.dataset.explorerYearColumnStart)
+      && selectedColumnIndex <= Number(header.dataset.explorerYearColumnEnd)
+    ));
+    selectedYearHeader?.classList.add("is-selected-year-header");
   }
 
   const selectedCode = getSelectedExplorerCodeForActiveAxis();

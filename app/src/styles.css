@@ -2893,10 +2893,12 @@ table {
 }
 
 .metric-table thead th.explorer-year-header {
+  box-sizing: border-box;
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
-  border-right: 12px solid #ffffff;
+  border-right: 5px solid #ffffff;
+  border-bottom: 5px solid #ffffff;
   background: #f2f3f2;
   color: #26332d;
   text-align: center;
@@ -2904,6 +2906,11 @@ table {
 
 .metric-table thead th.explorer-year-header:last-child {
   border-right: 0;
+}
+
+.metric-table thead th.explorer-year-header.is-selected-year-header {
+  background: #eaf2fa;
+  color: var(--primary-dark);
 }
 
 .metric-table thead .explorer-quarter-header-row th.is-selected-date-header {
