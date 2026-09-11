@@ -94,6 +94,8 @@ let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_P
 let explorerAdvancedSearchTimer = 0;
 let explorerAdvancedSearchCache = null;
 let explorerAdvancedSearchAutoFocusKey = "";
+let explorerConceptIndexCache = null;
+let explorerSearchSuggestionIndex = -1;
 let shouldCenterExplorerReferenceColumn = false;
 
 const elements = {
@@ -106,6 +108,8 @@ const elements = {
   },
   explorerActiveFilters: document.querySelector("#explorer-active-filters"),
   explorerAdvancedSearch: document.querySelector("#explorer-advanced-search"),
+  explorerSearchControl: document.querySelector(".explorer-search-control"),
+  explorerSearchSuggestions: document.querySelector("#explorer-search-suggestions"),
   explorerBenchmarkChart: document.querySelector("#explorer-benchmark-chart"),
   explorerBenchmarkCollapse: document.querySelector("#explorer-benchmark-collapse"),
   explorerBenchmarkExpand: document.querySelector("#explorer-benchmark-expand"),
@@ -201,7 +205,12 @@ export function wireExplorerUi(actions, rerender) {
     elements.explorerAdvancedSearch.value = explorerAdvancedSearchQuery;
     elements.explorerAdvancedSearch.addEventListener("input", updateExplorerAdvancedSearch);
     elements.explorerAdvancedSearch.addEventListener("search", updateExplorerAdvancedSearch);
+    elements.explorerAdvancedSearch.addEventListener("focus", renderExplorerSearchSuggestions);
+    elements.explorerAdvancedSearch.addEventListener("keydown", handleExplorerSearchKeydown);
   }
+  document.addEventListener("pointerdown", (event) => {
+    if (!elements.explorerSearchControl?.contains(event.target)) hideExplorerSearchSuggestions();
+  });
   elements.explorerBenchmarkExpand?.addEventListener("click", () => {
     saveExplorerScrollPosition();
     explorerBenchmarkExpanded = !explorerBenchmarkExpanded;
@@ -359,6 +368,8 @@ function replaceExplorerUrlState(url) {
 
 function updateExplorerAdvancedSearch(event) {
   explorerAdvancedSearchQuery = event.target.value;
+  explorerSearchSuggestionIndex = -1;
+  renderExplorerSearchSuggestions();
   const url = createUrlState();
   setOrDeleteUrlParam(url, EXPLORER_SEARCH_URL_PARAM, explorerAdvancedSearchQuery.trim());
   replaceExplorerUrlState(url);
@@ -368,6 +379,148 @@ function updateExplorerAdvancedSearch(event) {
     saveExplorerScrollPosition();
     if (getLatestState()) rerenderApp(getLatestState());
   }, 110);
+}
+
+function getExplorerConceptIndex(state = getLatestState()) {
+  const templates = getExplorerTemplates(state);
+  const templateIds = new Set(templates.map((template) => template.tableId));
+  const templateKey = [...templateIds].join("|");
+  if (explorerConceptIndexCache
+      && explorerConceptIndexCache.points === state?.explorerPoints
+      && explorerConceptIndexCache.templateKey === templateKey) {
+    return explorerConceptIndexCache.items;
+  }
+
+  const concepts = new Map();
+  const addConcept = (label, tableId, kind) => {
+    const normalized = normalizeExplorerMetadataSearchText(label);
+    if (!normalized || normalized.length < 2) return;
+    const key = normalized;
+    if (!concepts.has(key)) {
+      concepts.set(key, { kinds: new Set(), label: String(label).trim(), normalized, tableIds: new Set() });
+    }
+    const concept = concepts.get(key);
+    if (tableId) concept.tableIds.add(tableId);
+    if (kind) concept.kinds.add(kind);
+  };
+
+  templates.forEach((template) => addConcept(template.description || template.label, template.tableId, "Template"));
+  (state?.explorerPoints ?? []).forEach((point) => {
+    if (!templateIds.has(point.tableId)) return;
+    const axis = String(point.coordinate ?? "").charAt(0).toUpperCase();
+    const kind = /^[XYZ]$/.test(axis) ? `Axis ${axis}` : "Metadata";
+    const description = String(point.description ?? "").trim();
+    const segments = description.split(/\s*(?:>|\/)\s*/).filter(Boolean);
+    (segments.length > 0 ? segments : [description]).forEach((segment) => addConcept(segment, point.tableId, kind));
+  });
+
+  const items = [...concepts.values()].sort((left, right) => left.label.localeCompare(right.label, "en", {
+    numeric: true,
+    sensitivity: "base"
+  }));
+  explorerConceptIndexCache = { items, points: state?.explorerPoints, templateKey };
+  return items;
+}
+
+function rankExplorerConcept(concept, query, tokens) {
+  if (concept.normalized === query) return 0;
+  if (concept.normalized.startsWith(query)) return 1;
+  if (concept.normalized.split(" ").some((word) => word.startsWith(query))) return 2;
+  if (tokens.every((token) => concept.normalized.includes(token))) return 3;
+  const compactConcept = concept.normalized.replaceAll(" ", "");
+  const compactQuery = query.replaceAll(" ", "");
+  if (compactConcept.includes(compactQuery)) return 4;
+  return Number.POSITIVE_INFINITY;
+}
+
+function getExplorerConceptSuggestions(state = getLatestState()) {
+  const query = normalizeExplorerMetadataSearchText(elements.explorerAdvancedSearch?.value);
+  if (!query) return [];
+  const tokens = query.split(/\s+/).filter(Boolean);
+  return getExplorerConceptIndex(state)
+    .map((concept) => ({ concept, score: rankExplorerConcept(concept, query, tokens) }))
+    .filter(({ score }) => Number.isFinite(score))
+    .sort((left, right) => left.score - right.score
+      || left.concept.label.length - right.concept.label.length
+      || left.concept.label.localeCompare(right.concept.label, "en", { sensitivity: "base" }))
+    .slice(0, 8)
+    .map(({ concept }) => concept);
+}
+
+function renderExplorerSearchSuggestions() {
+  const list = elements.explorerSearchSuggestions;
+  const input = elements.explorerAdvancedSearch;
+  if (!list || !input || document.activeElement !== input) return;
+  const suggestions = getExplorerConceptSuggestions();
+  list.replaceChildren();
+  explorerSearchSuggestionIndex = Math.min(explorerSearchSuggestionIndex, suggestions.length - 1);
+  if (suggestions.length === 0) {
+    hideExplorerSearchSuggestions();
+    return;
+  }
+
+  suggestions.forEach((concept, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "explorer-search-suggestion";
+    button.setAttribute("role", "option");
+    button.setAttribute("aria-selected", String(index === explorerSearchSuggestionIndex));
+    button.classList.toggle("is-active", index === explorerSearchSuggestionIndex);
+    const label = document.createElement("span");
+    label.className = "explorer-search-suggestion-label";
+    label.textContent = concept.label;
+    const meta = document.createElement("span");
+    meta.className = "explorer-search-suggestion-meta";
+    const kinds = [...concept.kinds].join(" · ");
+    const templateCount = concept.tableIds.size;
+    meta.textContent = `${kinds}${kinds && templateCount ? " · " : ""}${templateCount} template${templateCount === 1 ? "" : "s"}`;
+    button.append(label, meta);
+    button.addEventListener("pointerdown", (event) => event.preventDefault());
+    button.addEventListener("click", () => selectExplorerSearchSuggestion(concept.label));
+    list.append(button);
+  });
+  list.hidden = false;
+  input.setAttribute("aria-expanded", "true");
+}
+
+function selectExplorerSearchSuggestion(label) {
+  if (!elements.explorerAdvancedSearch) return;
+  elements.explorerAdvancedSearch.value = label;
+  explorerAdvancedSearchQuery = label;
+  explorerAdvancedSearchCache = null;
+  explorerAdvancedSearchAutoFocusKey = "";
+  explorerSearchSuggestionIndex = -1;
+  const url = createUrlState();
+  setOrDeleteUrlParam(url, EXPLORER_SEARCH_URL_PARAM, label);
+  replaceExplorerUrlState(url);
+  hideExplorerSearchSuggestions();
+  saveExplorerScrollPosition();
+  if (getLatestState()) rerenderApp(getLatestState());
+  elements.explorerAdvancedSearch.focus();
+}
+
+function handleExplorerSearchKeydown(event) {
+  const suggestions = getExplorerConceptSuggestions();
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    if (suggestions.length === 0) return;
+    event.preventDefault();
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    explorerSearchSuggestionIndex = (explorerSearchSuggestionIndex + direction + suggestions.length) % suggestions.length;
+    renderExplorerSearchSuggestions();
+    return;
+  }
+  if (event.key === "Enter" && explorerSearchSuggestionIndex >= 0) {
+    event.preventDefault();
+    selectExplorerSearchSuggestion(suggestions[explorerSearchSuggestionIndex]?.label ?? "");
+    return;
+  }
+  if (event.key === "Escape") hideExplorerSearchSuggestions();
+}
+
+function hideExplorerSearchSuggestions() {
+  if (elements.explorerSearchSuggestions) elements.explorerSearchSuggestions.hidden = true;
+  elements.explorerAdvancedSearch?.setAttribute("aria-expanded", "false");
+  explorerSearchSuggestionIndex = -1;
 }
 
 function normalizeExplorerMetadataSearchText(value) {

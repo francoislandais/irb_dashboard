@@ -2027,14 +2027,20 @@ table {
   display: none;
 }
 
-.explorer-advanced-search {
-  display: flex;
-  align-items: center;
+.explorer-search-control {
+  position: relative;
   flex: 0 1 290px;
   min-width: 150px;
   max-width: 290px;
-  height: 34px;
   margin-left: auto;
+}
+
+.explorer-advanced-search {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 34px;
+  box-sizing: border-box;
   border: 1px solid #d8dfdb;
   border-radius: 999px;
   background: #fff;
@@ -2074,6 +2080,59 @@ table {
 
 .explorer-advanced-search input::placeholder {
   color: #98a39d;
+}
+
+.explorer-search-suggestions {
+  position: absolute;
+  z-index: 45;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(380px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid #dce4df;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(28, 43, 36, 0.14);
+}
+
+.explorer-search-suggestion {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #edf0ee;
+  background: #ffffff;
+  color: #26332d;
+  cursor: pointer;
+  padding: 9px 12px;
+  text-align: left;
+}
+
+.explorer-search-suggestion:last-child {
+  border-bottom: 0;
+}
+
+.explorer-search-suggestion:hover,
+.explorer-search-suggestion:focus-visible,
+.explorer-search-suggestion.is-active {
+  background: #eaf2fa;
+  outline: none;
+}
+
+.explorer-search-suggestion-label {
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explorer-search-suggestion-meta {
+  color: #7b8781;
+  font-size: 0.67rem;
+  font-weight: 400;
+  line-height: 1.25;
 }
 
 .explorer-template-search-empty {
