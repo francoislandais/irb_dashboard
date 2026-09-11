@@ -34,6 +34,7 @@ import {
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
+import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
 let rerenderApp = () => {};
 let setActiveModule = () => {};
@@ -166,6 +167,14 @@ export function wireExplorerUi(actions, rerender) {
       const cellDate = cell?.dataset.explorerCellDate ?? "";
       selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex, cellDate });
     }
+  });
+  elements.explorerTable.addEventListener("contextmenu", (event) => {
+    const row = event.target.closest("tbody tr[data-point-code]");
+    if (!row) return;
+    showContextMenu([{
+      label: "Use as denominator",
+      action: () => setExplorerContributionBase(row)
+    }], event);
   });
   elements.explorerTable.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -2355,32 +2364,73 @@ function createExplorerSelectionSummaryCard() {
     });
   }
 
-  const actions = document.createElement("div");
-  actions.className = "explorer-selection-summary-actions";
+  const metrics = getExplorerSelectedPointMetrics();
+  if (metrics) description.append(createExplorerSelectionMetrics(metrics));
 
-  const selectedRow = getSelectedExplorerRowElement();
-  const canUseAsDenominator = Boolean(selectedRow?.dataset.pointCode) && selectedRow?.dataset.isParent === "true";
-  const denominatorButton = document.createElement("button");
-  denominatorButton.type = "button";
-  denominatorButton.className = "explorer-selection-summary-benchmark-button";
-  denominatorButton.textContent = "Use as denominator";
-  denominatorButton.disabled = !canUseAsDenominator;
-  denominatorButton.addEventListener("click", () => {
-    if (selectedRow) setExplorerContributionBase(selectedRow);
-  });
-  actions.append(denominatorButton);
-
-  pane.append(description, actions);
+  pane.append(description);
   return pane;
 }
 
-// The right-click context menu is gone (see wireExplorerUi): "Use as
-// denominator" now only acts on whatever is currently selected on the
-// active axis, so it needs that row's actual DOM node.
-function getSelectedExplorerRowElement() {
+function getExplorerSelectedPointMetrics() {
+  const state = getLatestState();
+  const template = getActiveExplorerTemplate();
+  const context = getActiveExplorerContext();
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
-  if (!selectedCode) return null;
-  return elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
+  if (!state || !selectedCode) return null;
+
+  const series = buildExplorerAxisSeries(state, {
+    axis: context.activeAxis,
+    selectedXCode: context.selectedXCode,
+    selectedYCode: context.selectedYCode,
+    selectedZCode: context.selectedZCode,
+    tableId: template?.tableId,
+    templateSelections: getExplorerTemplateSelections(),
+    templates: getExplorerTemplates(state)
+  });
+  const row = series.rows.map(normalizeExplorerSeriesRow).find((item) => item.code === selectedCode);
+  const selectedReference = getSelectedExplorerReference(state);
+  const currentIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
+  if (!row || currentIndex < 0) return null;
+
+  const currentValue = row.values[currentIndex]?.value ?? null;
+  const previousValue = currentIndex > 0 ? row.values[currentIndex - 1]?.value ?? null : null;
+  const absoluteChange = Number.isFinite(currentValue) && Number.isFinite(previousValue)
+    ? currentValue - previousValue
+    : null;
+  const relativeChange = Number.isFinite(absoluteChange) && previousValue !== 0
+    ? absoluteChange / Math.abs(previousValue)
+    : null;
+  return { absoluteChange, currentValue, format: row.format, relativeChange, selectedUnit: state.selectedUnit };
+}
+
+function createExplorerSelectionMetrics(metrics) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "explorer-selection-summary-metrics";
+  const value = document.createElement("p");
+  value.className = "explorer-selection-summary-metric";
+  const valueLabel = document.createElement("span");
+  valueLabel.textContent = "Value";
+  const valueText = document.createElement("strong");
+  valueText.textContent = Number.isFinite(metrics.currentValue)
+    ? `${formatMetricValue(metrics.currentValue, metrics.selectedUnit, metrics.format)}${isPercentFormat(metrics.format) ? "" : ` ${getUnitFilterLabel(metrics.selectedUnit)}`}`
+    : "-";
+  value.append(valueLabel, valueText);
+
+  const change = document.createElement("p");
+  change.className = "explorer-selection-summary-metric";
+  const changeLabel = document.createElement("span");
+  changeLabel.textContent = "Quarterly change";
+  const changeText = document.createElement("strong");
+  const absoluteText = Number.isFinite(metrics.absoluteChange)
+    ? isPercentFormat(metrics.format)
+      ? `${metrics.absoluteChange > 0 ? "+" : ""}${formatMetricValue(metrics.absoluteChange, "euros", metrics.format).replace(" %", " pp")}`
+      : `${formatSignedMetricValue(metrics.absoluteChange, metrics.selectedUnit)} ${getUnitFilterLabel(metrics.selectedUnit)}`
+    : "-";
+  const relativeText = Number.isFinite(metrics.relativeChange) ? formatSignedPercent(metrics.relativeChange) : "-";
+  changeText.textContent = `${absoluteText} · ${relativeText}`;
+  change.append(changeLabel, changeText);
+  wrapper.append(value, change);
+  return wrapper;
 }
 
 // The template axis-tab is now a static display only (see index.html):

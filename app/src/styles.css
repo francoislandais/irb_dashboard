@@ -1447,7 +1447,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 12px;
-  grid-template-rows: 148px clamp(125px, 19vh, 175px) minmax(0, 1fr);
+  grid-template-rows: 178px clamp(125px, 19vh, 175px) minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1566,8 +1566,6 @@ button:focus-visible {
 
 .explorer-selection-summary-pane {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: 6px;
   box-sizing: border-box;
   height: 100%;
 }
@@ -1594,6 +1592,32 @@ button:focus-visible {
 .explorer-selection-summary-label {
   color: var(--primary-dark);
   font-weight: 700;
+}
+
+.explorer-selection-summary-metrics {
+  border-top: 1px solid #e2e8e4;
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+  padding-top: 6px;
+}
+
+.explorer-selection-summary-metric {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.explorer-selection-summary-metric > span {
+  color: #7b8580;
+}
+
+.explorer-selection-summary-metric > strong {
+  color: #26332d;
+  font-weight: 600;
+  text-align: right;
 }
 
 .explorer-selection-summary-actions {
@@ -2130,11 +2154,10 @@ table {
   max-width: none;
   height: auto;
   margin-right: 12px;
-  padding: 8px 4px 7px 16px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
+  padding: 8px 13px 7px 16px;
+  border: 1px solid #d8dfdb;
+  border-radius: 9px;
+  background: #ffffff;
   cursor: pointer;
 }
 
@@ -2180,8 +2203,8 @@ table {
 .axis-tab.explorer-template-static:hover,
 .axis-tab.explorer-template-static:focus-visible,
 .axis-tab.explorer-template-static.is-panel-active {
-  border-bottom-color: transparent;
-  background: transparent;
+  border-color: #cfe0f0;
+  background: #eaf2fa;
   color: var(--primary-dark);
   outline: none;
 }
