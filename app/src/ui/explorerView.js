@@ -2637,7 +2637,10 @@ function createExplorerSelectionSummaryCard() {
       const strong = document.createElement("span");
       strong.className = "explorer-selection-summary-label";
       strong.textContent = `${label}: `;
-      line.append(strong, document.createTextNode(value));
+      const content = document.createElement("span");
+      content.className = "explorer-selection-summary-content";
+      content.textContent = value;
+      line.append(strong, content);
       description.append(line);
     });
   }
@@ -2650,7 +2653,10 @@ function createExplorerSelectionSummaryCard() {
     const referenceLabel = document.createElement("span");
     referenceLabel.className = "explorer-selection-summary-label";
     referenceLabel.textContent = "Reference date: ";
-    referenceLine.append(referenceLabel, document.createTextNode(formatReferenceQuarterLabel(selectedReference.label)));
+    const referenceValue = document.createElement("span");
+    referenceValue.className = "explorer-selection-summary-content";
+    referenceValue.textContent = formatReferenceQuarterLabel(selectedReference.label);
+    referenceLine.append(referenceLabel, referenceValue);
     description.append(referenceLine);
   }
 
