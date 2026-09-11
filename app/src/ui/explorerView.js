@@ -2615,6 +2615,7 @@ function createExplorerContextItem(label, value) {
 // now retains only the action tied directly to the selected hierarchy node.
 function createExplorerSelectionSummaryCard() {
   const captions = getExplorerAxisCaptions();
+  const selectedReference = getSelectedExplorerReference();
   const pane = document.createElement("div");
   pane.className = "explorer-selection-summary-pane";
 
@@ -2643,6 +2644,15 @@ function createExplorerSelectionSummaryCard() {
 
   const metrics = getExplorerSelectedPointMetrics();
   if (metrics) description.append(createExplorerSelectionMetrics(metrics));
+  if (selectedReference) {
+    const referenceLine = document.createElement("p");
+    referenceLine.className = "explorer-selection-summary-line";
+    const referenceLabel = document.createElement("span");
+    referenceLabel.className = "explorer-selection-summary-label";
+    referenceLabel.textContent = "Reference date: ";
+    referenceLine.append(referenceLabel, document.createTextNode(formatReferenceQuarterLabel(selectedReference.label)));
+    description.append(referenceLine);
+  }
 
   pane.append(description);
   return pane;
@@ -2705,22 +2715,18 @@ function getExplorerSelectedPointMetrics() {
 }
 
 function createExplorerSelectionMetrics(metrics) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "explorer-selection-summary-metrics";
   const value = document.createElement("p");
-  value.className = "explorer-selection-summary-metric";
+  value.className = "explorer-selection-summary-line explorer-selection-summary-value-line";
   const valueLabel = document.createElement("span");
   valueLabel.className = "explorer-selection-summary-value-label";
-  valueLabel.textContent = "Value";
+  valueLabel.textContent = "Value: ";
   const valueText = document.createElement("span");
   valueText.className = "explorer-selection-summary-value";
   valueText.textContent = Number.isFinite(metrics.currentValue)
     ? formatMetricValue(metrics.currentValue, metrics.selectedUnit, metrics.format)
     : "-";
   value.append(valueLabel, valueText);
-
-  wrapper.append(value);
-  return wrapper;
+  return value;
 }
 
 function renderExplorerDescriptionPanel() {
