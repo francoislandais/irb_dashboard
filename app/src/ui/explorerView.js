@@ -71,7 +71,7 @@ const EXPLORER_GEOGRAPHY_LAYOUTS = [
   { value: "euro-first", label: "Euro area first", description: "Euro area, other EU countries, then the rest of the world" },
   { value: "world-regions", label: "World regions", description: "Countries grouped into broad geographical areas" },
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
-  { value: "relevance", label: "Top 10 contributors", description: "The ten largest country values at the latest reference date" }
+  { value: "relevance", label: "Top 10 contributors", description: "The ten largest country values at the latest populated reference date" }
 ];
 const EURO_AREA_CODES = new Set("AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES".split(" "));
 const EU_CODES = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
@@ -2690,10 +2690,17 @@ function applyExplorerGeographyPresentation(series, state) {
 }
 
 function getTopExplorerGeographyCountries(countries, latestDateIndex) {
+  let rankingDateIndex = latestDateIndex;
+  while (rankingDateIndex > 0 && !countries.some((country) => {
+    const value = country.row.values[rankingDateIndex]?.value;
+    return Number.isFinite(value) && value !== 0;
+  })) {
+    rankingDateIndex -= 1;
+  }
   return countries
     .map((country) => ({
       ...country,
-      latestValue: country.row.values[latestDateIndex]?.value
+      latestValue: country.row.values[rankingDateIndex]?.value
     }))
     .filter((country) => Number.isFinite(country.latestValue))
     .sort((left, right) => right.latestValue - left.latestValue || left.name.localeCompare(right.name, "en"))
