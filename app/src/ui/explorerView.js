@@ -2595,7 +2595,7 @@ function applyExplorerGeographyPresentation(series, state) {
   if (!geographyAxis || getActiveExplorerAxis() !== geographyAxis) return series;
 
   const countriesByCode = new Map(getExplorerGeographyCountries(state).map((country) => [country.code, country]));
-  const query = normalizeExplorerMetadataSearchText(explorerGeographySearch);
+  const selectedCountryCode = normalizeAxisCode(explorerGeographySearch, geographyAxis);
   const countries = series.rows.map((row) => {
     const code = normalizeAxisCode(row.code, geographyAxis);
     const country = countriesByCode.get(code) ?? { code, name: row.displayDescription || row.description || code };
@@ -2603,9 +2603,7 @@ function applyExplorerGeographyPresentation(series, state) {
       ...country,
       row
     };
-  }).filter((country) => (
-    !query || normalizeExplorerMetadataSearchText(`${country.code} ${country.name}`).includes(query)
-  ));
+  }).filter((country) => !selectedCountryCode || country.code === selectedCountryCode);
   const groups = explorerGeographyLayout === "relevance"
     ? [{ label: "", countries: getTopExplorerGeographyCountries(countries, series.dateColumns.length - 1) }]
     : groupExplorerCountries(countries);
@@ -2621,7 +2619,7 @@ function applyExplorerGeographyPresentation(series, state) {
   return {
     ...series,
     rows,
-    status: rows.length === 0 && query ? "No country matches this search." : series.status
+    status: rows.length === 0 && selectedCountryCode ? "No country matches this selection." : series.status
   };
 }
 
