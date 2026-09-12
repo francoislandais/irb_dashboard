@@ -78,6 +78,16 @@ const EUROPE_CODES = new Set("AD AL AM AT AX BA BE BG BY CH CY CZ DE DK EE ES FI
 const AFRICA_CODES = new Set("AO BF BI BJ BW CD CF CG CI CM CV DJ DZ EG EH ER ET GA GH GM GN GQ GW KE KM LR LS LY MA MG ML MR MU MW MZ NA NE NG RE RW SC SD SH SL SN SO SS ST SZ TD TG TN TZ UG YT ZA ZM ZW".split(" "));
 const AMERICAS_CODES = new Set("AG AI AR AW BB BL BM BO BQ BR BS BZ CA CL CO CR CU CW DM DO EC FK GD GF GL GP GS GT GY HN HT JM KN KY LC MF MQ MS MX NI PA PE PM PR PY SR SV SX TC TT US UY VC VE VG VI".split(" "));
 const MIDDLE_EAST_CODES = new Set("AE BH EG IL IQ IR JO KW LB OM PS QA SA SY YE".split(" "));
+const EXPLORER_COUNTRY_SEARCH_ALIASES = new Map([
+  ["GB", "uk united kingdom great britain britain england"],
+  ["US", "usa united states america"],
+  ["KR", "south korea korea republic"],
+  ["KP", "north korea democratic peoples republic korea"],
+  ["CZ", "czech republic czechia"],
+  ["NL", "holland netherlands"],
+  ["AE", "uae united arab emirates"],
+  ["RU", "russia russian federation"]
+]);
 const REGION_DISPLAY_NAMES = typeof Intl.DisplayNames === "function"
   ? new Intl.DisplayNames(["en"], { type: "region" })
   : null;
@@ -119,8 +129,7 @@ let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
 let explorerGeographySearch = readUrlStateParams().get(EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM) ?? "";
-let explorerGeographySearchTimer = 0;
-let shouldFocusExplorerGeographySearch = false;
+let explorerGeographySearchDraft = explorerGeographySearch;
 let explorerAdvancedSearchTimer = 0;
 let explorerAdvancedSearchCache = null;
 let explorerAdvancedSearchAutoFocusKey = "";
@@ -2485,44 +2494,95 @@ function renderExplorerGeographyPanel(state) {
     layoutList.append(button);
   });
 
+  const countries = getExplorerGeographyCountries(state);
+  const selectedCountry = countries.find((country) => country.code === explorerGeographySearch);
+  if (selectedCountry && explorerGeographySearchDraft === explorerGeographySearch) {
+    explorerGeographySearchDraft = selectedCountry.name;
+  }
+  const searchControl = document.createElement("div");
+  searchControl.className = "explorer-geography-search-control";
   const search = document.createElement("input");
   search.type = "search";
   search.className = "explorer-geography-search";
   search.placeholder = "Search for a country…";
   search.setAttribute("aria-label", "Search for a country by name or ISO code");
   search.autocomplete = "off";
-  search.value = explorerGeographySearch;
-  const suggestions = document.createElement("datalist");
-  suggestions.id = "explorer-geography-country-suggestions";
-  getExplorerGeographyCountries(state).forEach((country) => {
-    const option = document.createElement("option");
-    option.value = country.name;
-    option.label = country.code;
-    suggestions.append(option);
-  });
-  search.setAttribute("list", suggestions.id);
-  search.addEventListener("input", () => {
-    explorerGeographySearch = search.value;
-    const url = createUrlState();
-    setOrDeleteUrlParam(url, EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM, explorerGeographySearch.trim());
-    replaceExplorerUrlState(url);
-    shouldFocusExplorerGeographySearch = true;
-    window.clearTimeout(explorerGeographySearchTimer);
-    explorerGeographySearchTimer = window.setTimeout(() => {
-      saveExplorerScrollPosition();
-      if (getLatestState()) rerenderApp(getLatestState());
-    }, 90);
-  });
-
-  article.append(title, layoutList, search, suggestions);
-  replaceExplorerContextDetail(article);
-  if (shouldFocusExplorerGeographySearch) {
-    shouldFocusExplorerGeographySearch = false;
-    window.requestAnimationFrame(() => {
-      search.focus({ preventScroll: true });
-      search.setSelectionRange(search.value.length, search.value.length);
+  search.value = explorerGeographySearchDraft;
+  const suggestions = document.createElement("div");
+  suggestions.className = "explorer-geography-suggestions";
+  suggestions.setAttribute("role", "listbox");
+  suggestions.hidden = true;
+  const renderSuggestions = () => {
+    const matches = getExplorerCountrySearchMatches(countries, explorerGeographySearchDraft).slice(0, 8);
+    suggestions.replaceChildren();
+    matches.forEach((country) => {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "explorer-geography-suggestion";
+      option.setAttribute("role", "option");
+      const name = document.createElement("span");
+      name.textContent = country.name;
+      const code = document.createElement("span");
+      code.textContent = country.code;
+      option.append(name, code);
+      option.addEventListener("mousedown", (event) => event.preventDefault());
+      option.addEventListener("click", () => applyExplorerCountrySearch(country));
+      suggestions.append(option);
     });
+    suggestions.hidden = explorerGeographySearchDraft.trim().length === 0 || matches.length === 0;
+  };
+  search.addEventListener("input", () => {
+    explorerGeographySearchDraft = search.value;
+    renderSuggestions();
+  });
+  search.addEventListener("focus", renderSuggestions);
+  search.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const firstSuggestion = suggestions.querySelector(".explorer-geography-suggestion");
+    if (!firstSuggestion) return;
+    event.preventDefault();
+    firstSuggestion.click();
+  });
+  search.addEventListener("blur", () => window.setTimeout(() => { suggestions.hidden = true; }, 0));
+  searchControl.append(search, suggestions);
+
+  article.append(title, layoutList, searchControl);
+  if (explorerGeographySearch) {
+    const clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "explorer-geography-clear";
+    clear.textContent = "Clear country filter";
+    clear.addEventListener("click", () => applyExplorerCountrySearch(null));
+    article.append(clear);
   }
+  replaceExplorerContextDetail(article);
+}
+
+function getExplorerCountrySearchMatches(countries, query) {
+  const normalizedQuery = normalizeExplorerMetadataSearchText(query);
+  if (!normalizedQuery) return [];
+  return countries.map((country) => {
+    const code = normalizeExplorerMetadataSearchText(country.code);
+    const name = normalizeExplorerMetadataSearchText(country.name);
+    const aliases = normalizeExplorerMetadataSearchText(EXPLORER_COUNTRY_SEARCH_ALIASES.get(country.code) ?? "");
+    const terms = `${code} ${name} ${aliases}`;
+    let score = 0;
+    if (code === normalizedQuery || aliases.split(" ").includes(normalizedQuery)) score = 100;
+    else if (name === normalizedQuery) score = 95;
+    else if (name.startsWith(normalizedQuery)) score = 80;
+    else if (aliases.split(" ").some((term) => term.startsWith(normalizedQuery))) score = 70;
+    else if (terms.includes(normalizedQuery)) score = 50;
+    return { ...country, score };
+  }).filter((country) => country.score > 0)
+    .sort((left, right) => right.score - left.score || left.name.localeCompare(right.name, "en"));
+}
+
+function applyExplorerCountrySearch(country) {
+  explorerGeographySearch = country?.code ?? "";
+  explorerGeographySearchDraft = country?.name ?? "";
+  updateUrlExplorerSelectionParams();
+  saveExplorerScrollPosition();
+  if (getLatestState()) rerenderApp(getLatestState());
 }
 
 function applyExplorerGeographyPresentation(series, state) {
