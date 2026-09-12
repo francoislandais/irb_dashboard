@@ -70,7 +70,7 @@ const EXPLORER_GEOGRAPHY_LAYOUTS = [
   { value: "euro-first", label: "Euro area first", description: "Euro area, other EU countries, then the rest of the world" },
   { value: "world-regions", label: "World regions", description: "Countries grouped into broad geographical areas" },
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
-  { value: "relevance", label: "Reporting relevance", description: "Keep the regulatory table order unchanged" }
+  { value: "relevance", label: "Top 10 contributors", description: "Keep the regulatory table order unchanged" }
 ];
 const EURO_AREA_CODES = new Set("AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES".split(" "));
 const EU_CODES = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
