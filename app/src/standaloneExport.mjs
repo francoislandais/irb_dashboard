@@ -62,13 +62,13 @@ const moduleUrls = new Map();
 const nativeFetch = window.fetch.bind(window);
 
 function setStartupStage(activeStage) {
-  const stages = ["downloading", "decompressing", "indexing"];
-  const activeIndex = stages.indexOf(activeStage);
-  document.querySelectorAll("[data-startup-stage]").forEach((element) => {
-    const stageIndex = stages.indexOf(element.dataset.startupStage);
-    element.classList.toggle("is-active", stageIndex === activeIndex);
-    element.classList.toggle("is-complete", activeIndex >= 0 && stageIndex < activeIndex);
-  });
+  const labels = {
+    downloading: "Downloading...",
+    decompressing: "Decompressing...",
+    indexing: "Indexing..."
+  };
+  const status = document.querySelector("#startup-stage");
+  if (status && labels[activeStage]) status.textContent = labels[activeStage];
 }
 
 async function decompressStandaloneText(base64) {
