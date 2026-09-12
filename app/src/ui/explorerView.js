@@ -2067,10 +2067,14 @@ function buildExplorerEvolutionSeries(series, state) {
     return series;
   }
   const step = getActiveExplorerEvolutionOption().step;
-  const anchorYear = series.dateColumns[resolvedSelectedIndex]?.date?.getFullYear();
+  // Temporal visibility is a stable window anchored on the latest available
+  // reference date. The selected reference only controls highlighting. Using
+  // it as the window anchor progressively discarded every newer column each
+  // time an older cell was clicked.
+  const anchorYear = series.dateColumns[latestIndex]?.date?.getFullYear();
   const oldestYear = Number.isFinite(anchorYear) ? anchorYear - context.historyYears : Number.NEGATIVE_INFINITY;
   const selectedIndexes = [];
-  for (let index = resolvedSelectedIndex; index >= 0; index -= step) {
+  for (let index = latestIndex; index >= 0; index -= step) {
     const year = series.dateColumns[index]?.date?.getFullYear();
     if (Number.isFinite(year) && year < oldestYear) break;
     selectedIndexes.push(index);
@@ -2078,7 +2082,8 @@ function buildExplorerEvolutionSeries(series, state) {
   selectedIndexes.sort((left, right) => left - right);
 
   context.selectedReferenceLabel = series.dateColumns[resolvedSelectedIndex]?.label ?? "";
-  context.selectedCellColumnIndex = [...selectedIndexes].reverse().indexOf(resolvedSelectedIndex);
+  const visibleSelectedIndex = [...selectedIndexes].reverse().indexOf(resolvedSelectedIndex);
+  context.selectedCellColumnIndex = visibleSelectedIndex >= 0 ? visibleSelectedIndex : 0;
 
   return {
     ...series,
