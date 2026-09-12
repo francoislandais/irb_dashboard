@@ -2407,6 +2407,38 @@ table {
   color: color-mix(in srgb, var(--primary-dark) 72%, #ffffff);
 }
 
+.explorer-history-depth-control {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+  padding-top: 13px;
+  border-top: 1px solid #e5eae7;
+}
+
+.explorer-history-depth-heading {
+  display: grid;
+  gap: 3px;
+  color: #26332d;
+  font-size: 0.76rem;
+}
+
+.explorer-history-depth-value {
+  color: #66736d;
+  font-size: 0.7rem;
+}
+
+.explorer-history-depth-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary-dark);
+}
+
+.explorer-history-depth-control p {
+  margin: 0;
+  color: #66736d;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
 .axis-tab-ratio {
   align-items: start;
   border-top: 1px solid rgba(23, 72, 63, 0.14);

@@ -56,6 +56,8 @@ const ROW_URL_PARAM = "row";
 const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
 const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
+const EXPLORER_HISTORY_YEARS_URL_PARAM = "explorer_history_years";
+const DEFAULT_EXPLORER_HISTORY_YEARS = 2;
 const EXPLORER_EVOLUTION_OPTIONS = [
   { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
   { value: "semiannual", label: "Semiannual", step: 2, description: "Every six months" },
@@ -77,6 +79,7 @@ const pendingUrlAxis = getUrlAxisParam();
 const pendingUrlRow = getUrlRowParam();
 const pendingUrlColumn = getUrlColumnParam();
 const pendingUrlTab = getUrlTabParam();
+const pendingUrlHistoryYears = getUrlHistoryYearsParam();
 let explorerStickyFrame = 0;
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
@@ -271,7 +274,8 @@ function createExplorerTemplateContext() {
     selectedCellColumnIndex: 0,
     selectedReferenceLabel: "",
     evolutionFrequency: "quarterly",
-    displayMode: "temporal"
+    displayMode: "temporal",
+    historyYears: pendingUrlHistoryYears
   };
 }
 
@@ -321,6 +325,11 @@ function updateUrlExplorerSelectionParams() {
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
+  if (context.historyYears === DEFAULT_EXPLORER_HISTORY_YEARS) {
+    url.searchParams.delete(EXPLORER_HISTORY_YEARS_URL_PARAM);
+  } else {
+    url.searchParams.set(EXPLORER_HISTORY_YEARS_URL_PARAM, String(context.historyYears));
+  }
   replaceExplorerUrlState(url);
 }
 
@@ -350,6 +359,15 @@ function getUrlTabParam() {
 
 function getUrlTemplateParam() {
   return readUrlStateParams().get(TEMPLATE_URL_PARAM) ?? "";
+}
+
+function getUrlHistoryYearsParam() {
+  const rawParam = readUrlStateParams().get(EXPLORER_HISTORY_YEARS_URL_PARAM);
+  if (rawParam === null || rawParam === "") return DEFAULT_EXPLORER_HISTORY_YEARS;
+  const rawValue = Number(rawParam);
+  return Number.isInteger(rawValue) && rawValue >= 0
+    ? rawValue
+    : DEFAULT_EXPLORER_HISTORY_YEARS;
 }
 
 function updateUrlTemplateParam(templateId) {
@@ -1958,9 +1976,14 @@ function buildExplorerEvolutionSeries(series, state) {
     return series;
   }
   const step = getActiveExplorerEvolutionOption().step;
+  const anchorYear = series.dateColumns[resolvedSelectedIndex]?.date?.getFullYear();
+  const oldestYear = Number.isFinite(anchorYear) ? anchorYear - context.historyYears : Number.NEGATIVE_INFINITY;
   const selectedIndexes = [];
-  for (let index = latestIndex; index >= 0; index -= step) selectedIndexes.push(index);
-  if (!selectedIndexes.includes(resolvedSelectedIndex)) selectedIndexes.push(resolvedSelectedIndex);
+  for (let index = resolvedSelectedIndex; index >= 0; index -= step) {
+    const year = series.dateColumns[index]?.date?.getFullYear();
+    if (Number.isFinite(year) && year < oldestYear) break;
+    selectedIndexes.push(index);
+  }
   selectedIndexes.sort((left, right) => left - right);
 
   context.selectedReferenceLabel = series.dateColumns[resolvedSelectedIndex]?.label ?? "";
@@ -2064,7 +2087,7 @@ function renderExplorerAxisTabs() {
       return;
     }
 
-    element.title = [captions[axis], ratioCaptions[axis]].filter(Boolean).join("\n");
+    element.title = captions[axis];
     element.replaceChildren(createAxisCaptionLine(axisCodes[axis], axis));
   });
 }
@@ -2376,7 +2399,56 @@ function renderExplorerDisplayModePanel() {
   });
 
   article.append(title, list);
+  if (context.displayMode === "temporal") {
+    article.append(createExplorerHistoryDepthControl());
+  }
   replaceExplorerContextDetail(article);
+}
+
+function createExplorerHistoryDepthControl() {
+  const context = getActiveExplorerContext();
+  const references = getReferenceColumns(getLatestState()?.columns ?? []);
+  const selectedReference = getSelectedExplorerReference();
+  const anchorYear = selectedReference?.date?.getFullYear() ?? references.at(-1)?.date?.getFullYear();
+  const firstYear = references[0]?.date?.getFullYear() ?? anchorYear;
+  const maximumYears = Math.max(0, (anchorYear ?? firstYear ?? 0) - (firstYear ?? anchorYear ?? 0));
+  context.historyYears = Math.min(context.historyYears, maximumYears);
+
+  const section = document.createElement("section");
+  section.className = "explorer-history-depth-control";
+  const heading = document.createElement("div");
+  heading.className = "explorer-history-depth-heading";
+  const label = document.createElement("span");
+  label.textContent = "History depth";
+  const value = document.createElement("span");
+  value.className = "explorer-history-depth-value";
+  const updateValue = (years) => {
+    value.textContent = years === 0
+      ? "Current year"
+      : `Current year + ${years} prior ${years === 1 ? "year" : "years"}`;
+  };
+  updateValue(context.historyYears);
+  heading.append(label, value);
+
+  const input = document.createElement("input");
+  input.type = "range";
+  input.min = "0";
+  input.max = String(maximumYears);
+  input.step = "1";
+  input.value = String(context.historyYears);
+  input.disabled = maximumYears === 0;
+  input.setAttribute("aria-label", "History depth in prior calendar years");
+  input.addEventListener("input", () => updateValue(Number(input.value)));
+  input.addEventListener("change", () => {
+    context.historyYears = Number(input.value);
+    saveExplorerScrollPosition();
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
+
+  const hint = document.createElement("p");
+  hint.textContent = "Limits the table only. The benchmark always uses the full available history.";
+  section.append(heading, input, hint);
+  return section;
 }
 
 function renderExplorerBenchmarkModePanel(state) {
