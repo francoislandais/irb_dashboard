@@ -528,6 +528,88 @@ p {
   background: #ffffff;
 }
 
+.global-reference-control {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.global-reference-button {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.global-reference-button > span {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.global-reference-button > strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.global-reference-button:disabled {
+  border-color: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.38);
+  cursor: default;
+}
+
+.global-reference-menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 168px;
+  max-height: min(420px, calc(100dvh - 62px));
+  padding: 5px;
+  border: 1px solid #d9e0dc;
+  border-radius: 7px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(18, 38, 29, 0.18);
+}
+
+.global-reference-option {
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 0;
+  border-bottom: 1px solid #edf0ee;
+  background: #ffffff;
+  color: #26332d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.74rem;
+  text-align: left;
+}
+
+.global-reference-option:last-child {
+  border-bottom: 0;
+}
+
+.global-reference-option:hover,
+.global-reference-option:focus-visible,
+.global-reference-option.is-active {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+  outline: 0;
+}
+
+.global-reference-option.is-active {
+  font-weight: 600;
+}
+
 .field input:focus,
 .field select:focus,
 button:focus-visible {

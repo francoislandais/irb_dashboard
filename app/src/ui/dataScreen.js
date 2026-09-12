@@ -1,6 +1,6 @@
 import { setLatestState } from "./appState.js";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260910-context-title-only";
-import { renderExplorer, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260912-country-filter-badge";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260912-global-reference-anchor";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260910-context-title-only";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
@@ -125,6 +125,7 @@ export function renderAppState(state) {
   if (elements.peersButton) elements.peersButton.disabled = state.jstOptions.length === 0;
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
   renderJstSelect(state.jstOptions, state.selectedJst);
+  renderExplorerHeaderReferenceControl(state);
   renderActiveModule(state.activeModule, state.availableModules);
 
   if (elements.fileStatus) {

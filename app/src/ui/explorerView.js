@@ -59,6 +59,7 @@ const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
 const EXPLORER_HISTORY_YEARS_URL_PARAM = "explorer_history_years";
 const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
 const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
+const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
 const DEFAULT_EXPLORER_HISTORY_YEARS = 2;
 const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map([
   ["F_20.04", "z"],
@@ -113,6 +114,8 @@ const pendingUrlRow = getUrlRowParam();
 const pendingUrlColumn = getUrlColumnParam();
 const pendingUrlTab = getUrlTabParam();
 const pendingUrlHistoryYears = getUrlHistoryYearsParam();
+const pendingUrlAnchorReference = readUrlStateParams().get(EXPLORER_ANCHOR_REFERENCE_URL_PARAM) ?? "";
+let explorerAnchorReferenceLabel = pendingUrlAnchorReference;
 let explorerStickyFrame = 0;
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
@@ -159,6 +162,9 @@ const elements = {
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
+  globalReferenceButton: document.querySelector("#global-reference-button"),
+  globalReferenceMenu: document.querySelector("#global-reference-menu"),
+  globalReferenceValue: document.querySelector("#global-reference-value"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerExcelExport: document.querySelector("#explorer-excel-export"),
@@ -175,6 +181,7 @@ export function wireExplorerUi(actions, rerender) {
   updateSelectedJst = actions.updateSelectedJst;
   updateSelectedUnit = actions.updateSelectedUnit;
   updatePeerDisplayMode = actions.updatePeerDisplayMode;
+  elements.globalReferenceButton?.addEventListener("click", toggleExplorerHeaderReferenceMenu);
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
       if (button.disabled) return;
@@ -249,6 +256,7 @@ export function wireExplorerUi(actions, rerender) {
   }
   document.addEventListener("pointerdown", (event) => {
     if (!elements.explorerSearchControl?.contains(event.target)) hideExplorerSearchSuggestions();
+    if (!event.target.closest(".global-reference-control")) closeExplorerHeaderReferenceMenu();
   });
   elements.explorerBenchmarkExpand?.addEventListener("click", () => {
     saveExplorerScrollPosition();
@@ -361,6 +369,7 @@ function updateUrlExplorerSelectionParams() {
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
+  setOrDeleteUrlParam(url, EXPLORER_ANCHOR_REFERENCE_URL_PARAM, explorerAnchorReferenceLabel);
   if (context.historyYears === DEFAULT_EXPLORER_HISTORY_YEARS) {
     url.searchParams.delete(EXPLORER_HISTORY_YEARS_URL_PARAM);
   } else {
@@ -2033,6 +2042,53 @@ function getActiveExplorerGeographyAxis() {
   return EXPLORER_GEOGRAPHIC_TEMPLATES.get(getActiveExplorerTemplate()?.tableId) ?? "";
 }
 
+export function renderExplorerHeaderReferenceControl(state) {
+  if (!elements.globalReferenceButton || !elements.globalReferenceMenu || !elements.globalReferenceValue) return;
+  const references = getReferenceColumns(state?.columns ?? []);
+  const latestReference = references.at(-1) ?? null;
+  const anchorReference = references.find((reference) => reference.label === explorerAnchorReferenceLabel) ?? latestReference;
+  if (explorerAnchorReferenceLabel && !references.some((reference) => reference.label === explorerAnchorReferenceLabel)) {
+    explorerAnchorReferenceLabel = "";
+  }
+  elements.globalReferenceButton.disabled = references.length === 0;
+  elements.globalReferenceValue.textContent = anchorReference ? formatReferenceQuarterLabel(anchorReference.label) : "—";
+  elements.globalReferenceMenu.replaceChildren();
+  [...references].reverse().forEach((reference) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "global-reference-option";
+    const isActive = reference.label === anchorReference?.label;
+    option.classList.toggle("is-active", isActive);
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", String(isActive));
+    option.textContent = formatReferenceQuarterLabel(reference.label);
+    option.addEventListener("click", () => {
+      explorerAnchorReferenceLabel = reference.label === latestReference?.label ? "" : reference.label;
+      const context = getActiveExplorerContext();
+      context.selectedReferenceLabel = reference.label;
+      context.selectedCellColumnIndex = 0;
+      closeExplorerHeaderReferenceMenu();
+      updateUrlExplorerSelectionParams();
+      saveExplorerScrollPosition();
+      if (getLatestState()) rerenderApp(getLatestState());
+    });
+    elements.globalReferenceMenu.append(option);
+  });
+}
+
+function toggleExplorerHeaderReferenceMenu() {
+  if (!elements.globalReferenceButton || !elements.globalReferenceMenu || elements.globalReferenceButton.disabled) return;
+  const willOpen = elements.globalReferenceMenu.hidden;
+  elements.globalReferenceMenu.hidden = !willOpen;
+  elements.globalReferenceButton.setAttribute("aria-expanded", String(willOpen));
+}
+
+function closeExplorerHeaderReferenceMenu() {
+  if (!elements.globalReferenceButton || !elements.globalReferenceMenu) return;
+  elements.globalReferenceMenu.hidden = true;
+  elements.globalReferenceButton.setAttribute("aria-expanded", "false");
+}
+
 function getSelectedExplorerReference(state = getLatestState()) {
   const references = getReferenceColumns(state?.columns ?? []);
   const selectedLabel = getActiveExplorerContext().selectedReferenceLabel;
@@ -2071,10 +2127,13 @@ function buildExplorerEvolutionSeries(series, state) {
   // reference date. The selected reference only controls highlighting. Using
   // it as the window anchor progressively discarded every newer column each
   // time an older cell was clicked.
-  const anchorYear = series.dateColumns[latestIndex]?.date?.getFullYear();
+  const requestedAnchorIndex = series.dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
+  const anchorIndex = requestedAnchorIndex >= 0 ? requestedAnchorIndex : latestIndex;
+  explorerAnchorReferenceLabel = requestedAnchorIndex >= 0 ? explorerAnchorReferenceLabel : "";
+  const anchorYear = series.dateColumns[anchorIndex]?.date?.getFullYear();
   const oldestYear = Number.isFinite(anchorYear) ? anchorYear - context.historyYears : Number.NEGATIVE_INFINITY;
   const selectedIndexes = [];
-  for (let index = latestIndex; index >= 0; index -= step) {
+  for (let index = anchorIndex; index >= 0; index -= step) {
     const year = series.dateColumns[index]?.date?.getFullYear();
     if (Number.isFinite(year) && year < oldestYear) break;
     selectedIndexes.push(index);
