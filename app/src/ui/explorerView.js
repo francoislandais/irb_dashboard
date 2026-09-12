@@ -70,7 +70,7 @@ const EXPLORER_GEOGRAPHY_LAYOUTS = [
   { value: "euro-first", label: "Euro area first", description: "Euro area, other EU countries, then the rest of the world" },
   { value: "world-regions", label: "World regions", description: "Countries grouped into broad geographical areas" },
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
-  { value: "relevance", label: "Top 10 contributors", description: "Keep the regulatory table order unchanged" }
+  { value: "relevance", label: "Top 10 contributors", description: "The ten largest country values at the latest reference date" }
 ];
 const EURO_AREA_CODES = new Set("AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES".split(" "));
 const EU_CODES = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
@@ -2607,7 +2607,7 @@ function applyExplorerGeographyPresentation(series, state) {
     !query || normalizeExplorerMetadataSearchText(`${country.code} ${country.name}`).includes(query)
   ));
   const groups = explorerGeographyLayout === "relevance"
-    ? [{ label: "", countries }]
+    ? [{ label: "", countries: getTopExplorerGeographyCountries(countries, series.dateColumns.length - 1) }]
     : groupExplorerCountries(countries);
   const groupedLayout = explorerGeographyLayout === "euro-first" || explorerGeographyLayout === "world-regions";
   const rows = groups.flatMap(({ label, countries: groupedCountries }) => groupedCountries.map((country) => ({
@@ -2623,6 +2623,17 @@ function applyExplorerGeographyPresentation(series, state) {
     rows,
     status: rows.length === 0 && query ? "No country matches this search." : series.status
   };
+}
+
+function getTopExplorerGeographyCountries(countries, latestDateIndex) {
+  return countries
+    .map((country) => ({
+      ...country,
+      latestValue: country.row.values[latestDateIndex]?.value
+    }))
+    .filter((country) => Number.isFinite(country.latestValue))
+    .sort((left, right) => right.latestValue - left.latestValue || left.name.localeCompare(right.name, "en"))
+    .slice(0, 10);
 }
 
 function getExplorerGeographyCountries(state) {
