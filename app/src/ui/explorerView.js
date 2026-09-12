@@ -57,7 +57,30 @@ const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
 const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
 const EXPLORER_HISTORY_YEARS_URL_PARAM = "explorer_history_years";
+const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
+const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
 const DEFAULT_EXPLORER_HISTORY_YEARS = 2;
+const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map([
+  ["F_20.04", "z"],
+  ["F_20.05", "z"],
+  ["F_20.06", "z"],
+  ["F_20.07.1", "z"]
+]);
+const EXPLORER_GEOGRAPHY_LAYOUTS = [
+  { value: "euro-first", label: "Euro area first", description: "Euro area, other EU countries, then the rest of the world" },
+  { value: "world-regions", label: "World regions", description: "Countries grouped into broad geographical areas" },
+  { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
+  { value: "relevance", label: "Reporting relevance", description: "Countries ranked by the selected figure" }
+];
+const EURO_AREA_CODES = new Set("AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES".split(" "));
+const EU_CODES = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
+const EUROPE_CODES = new Set("AD AL AM AT AX BA BE BG BY CH CY CZ DE DK EE ES FI FO FR GB GE GG GI GR HR HU IE IM IS IT JE LI LT LU LV MC MD ME MK MT NL NO PL PT RO RS RU SE SI SJ SK SM TR UA VA XK".split(" "));
+const AFRICA_CODES = new Set("AO BF BI BJ BW CD CF CG CI CM CV DJ DZ EG EH ER ET GA GH GM GN GQ GW KE KM LR LS LY MA MG ML MR MU MW MZ NA NE NG RE RW SC SD SH SL SN SO SS ST SZ TD TG TN TZ UG YT ZA ZM ZW".split(" "));
+const AMERICAS_CODES = new Set("AG AI AR AW BB BL BM BO BQ BR BS BZ CA CL CO CR CU CW DM DO EC FK GD GF GL GP GS GT GY HN HT JM KN KY LC MF MQ MS MX NI PA PE PM PR PY SR SV SX TC TT US UY VC VE VG VI".split(" "));
+const MIDDLE_EAST_CODES = new Set("AE BH EG IL IQ IR JO KW LB OM PS QA SA SY YE".split(" "));
+const REGION_DISPLAY_NAMES = typeof Intl.DisplayNames === "function"
+  ? new Intl.DisplayNames(["en"], { type: "region" })
+  : null;
 const EXPLORER_EVOLUTION_OPTIONS = [
   { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
   { value: "semiannual", label: "Semiannual", step: 2, description: "Every six months" },
@@ -94,6 +117,8 @@ let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
+let explorerGeographyLayout = getUrlGeographyLayoutParam();
+let explorerGeographySearch = readUrlStateParams().get(EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM) ?? "";
 let explorerAdvancedSearchTimer = 0;
 let explorerAdvancedSearchCache = null;
 let explorerAdvancedSearchAutoFocusKey = "";
@@ -330,6 +355,12 @@ function updateUrlExplorerSelectionParams() {
   } else {
     url.searchParams.set(EXPLORER_HISTORY_YEARS_URL_PARAM, String(context.historyYears));
   }
+  if (explorerGeographyLayout === "euro-first") {
+    url.searchParams.delete(EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM);
+  } else {
+    url.searchParams.set(EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM, explorerGeographyLayout);
+  }
+  setOrDeleteUrlParam(url, EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM, explorerGeographySearch.trim());
   replaceExplorerUrlState(url);
 }
 
@@ -368,6 +399,13 @@ function getUrlHistoryYearsParam() {
   return Number.isInteger(rawValue) && rawValue >= 0
     ? rawValue
     : DEFAULT_EXPLORER_HISTORY_YEARS;
+}
+
+function getUrlGeographyLayoutParam() {
+  const value = readUrlStateParams().get(EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM) ?? "";
+  return EXPLORER_GEOGRAPHY_LAYOUTS.some((option) => option.value === value)
+    ? value
+    : "euro-first";
 }
 
 function updateUrlTemplateParam(templateId) {
@@ -1847,6 +1885,7 @@ function renderExplorerActiveFilters(state) {
       renderExplorerContextPanel(getLatestState());
     }
   });
+  const geographyChip = createExplorerGeographyFilterChip();
   const evolutionOption = getActiveExplorerEvolutionOption();
   const evolutionChip = document.createElement("span");
   evolutionChip.className = "cost-of-risk-filter-chip explorer-filter-chip-evolution";
@@ -1931,15 +1970,50 @@ function renderExplorerActiveFilters(state) {
   });
   descriptionChip.append(descriptionToggle);
 
-  elements.explorerActiveFilters.replaceChildren(
+  const chips = [
     jstChip,
     dateChip,
-    unitChip,
+    unitChip
+  ];
+  if (geographyChip) chips.push(geographyChip);
+  chips.push(
     evolutionChip,
     displayChip,
     benchmarkChip,
     descriptionChip
   );
+  elements.explorerActiveFilters.replaceChildren(...chips);
+}
+
+function createExplorerGeographyFilterChip() {
+  if (!getActiveExplorerGeographyAxis()) return null;
+  const option = EXPLORER_GEOGRAPHY_LAYOUTS.find((candidate) => candidate.value === explorerGeographyLayout)
+    ?? EXPLORER_GEOGRAPHY_LAYOUTS[0];
+  const chip = document.createElement("span");
+  chip.className = "cost-of-risk-filter-chip explorer-filter-chip-geography";
+  chip.classList.toggle("is-open", explorerContextTopic === "geography");
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.setAttribute("aria-expanded", String(explorerContextTopic === "geography"));
+  toggle.setAttribute("aria-controls", "explorer-context-detail");
+  toggle.setAttribute("aria-label", "Change geography layout");
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  label.textContent = option.label;
+  toggle.append(label);
+  toggle.addEventListener("click", () => {
+    explorerContextTopic = "geography";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
+  });
+  chip.append(toggle);
+  return chip;
+}
+
+function getActiveExplorerGeographyAxis() {
+  return EXPLORER_GEOGRAPHIC_TEMPLATES.get(getActiveExplorerTemplate()?.tableId) ?? "";
 }
 
 function getSelectedExplorerReference(state = getLatestState()) {
@@ -2116,6 +2190,11 @@ function createExplorerTemplateCaption(activeTemplate) {
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
 
+  if (explorerContextTopic === "geography" && !getActiveExplorerGeographyAxis()) {
+    explorerContextTopic = "";
+    explorerGeographySearch = "";
+  }
+
   syncExplorerBenchmarkPlacement();
   if (explorerContextTopic !== "benchmark-mode") {
     destroyExplorerBenchmarkChart(elements.explorerBenchmarkChart);
@@ -2138,6 +2217,11 @@ function renderExplorerContextPanel(state) {
       selectedUnit: state?.selectedUnit,
       onSelect: (unit) => updateSelectedUnit(unit)
     }));
+    return;
+  }
+
+  if (explorerContextTopic === "geography") {
+    renderExplorerGeographyPanel(state);
     return;
   }
 
@@ -2361,6 +2445,209 @@ function renderExplorerEvolutionFrequencyPanel() {
 
   article.append(title, list);
   replaceExplorerContextDetail(article);
+}
+
+function renderExplorerGeographyPanel(state) {
+  const article = document.createElement("article");
+  article.className = "explorer-context-article explorer-geography-panel";
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Geography";
+
+  const layoutList = document.createElement("div");
+  layoutList.className = "explorer-geography-layout-list";
+  EXPLORER_GEOGRAPHY_LAYOUTS.forEach((option) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "explorer-geography-layout-option";
+    button.classList.toggle("is-active", option.value === explorerGeographyLayout);
+    button.setAttribute("aria-pressed", String(option.value === explorerGeographyLayout));
+    const label = document.createElement("span");
+    label.textContent = option.label;
+    const detail = document.createElement("span");
+    detail.textContent = option.description;
+    button.append(label, detail);
+    button.addEventListener("click", () => {
+      if (explorerGeographyLayout === option.value) return;
+      explorerGeographyLayout = option.value;
+      updateUrlExplorerSelectionParams();
+      renderExplorerActiveFilters(getLatestState());
+      renderExplorerGeographyPanel(getLatestState());
+    });
+    layoutList.append(button);
+  });
+
+  const search = document.createElement("input");
+  search.type = "search";
+  search.className = "explorer-geography-search";
+  search.placeholder = "Search for a country…";
+  search.setAttribute("aria-label", "Search for a country by name or ISO code");
+  search.autocomplete = "off";
+  search.value = explorerGeographySearch;
+
+  const countryList = document.createElement("div");
+  countryList.className = "explorer-geography-country-list";
+  const renderCountries = () => {
+    const countries = getExplorerGeographyCountries(state);
+    const query = normalizeExplorerMetadataSearchText(explorerGeographySearch);
+    const filtered = query
+      ? countries.filter((country) => normalizeExplorerMetadataSearchText(`${country.code} ${country.name}`).includes(query))
+      : countries;
+    countryList.replaceChildren(...createExplorerGeographyGroups(filtered, state));
+    if (filtered.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "explorer-geography-empty";
+      empty.textContent = "No country matches this search.";
+      countryList.append(empty);
+    }
+  };
+  search.addEventListener("input", () => {
+    explorerGeographySearch = search.value;
+    const url = createUrlState();
+    setOrDeleteUrlParam(url, EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM, explorerGeographySearch.trim());
+    replaceExplorerUrlState(url);
+    renderCountries();
+  });
+  search.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const firstMatch = countryList.querySelector(".explorer-geography-country-option");
+    if (!firstMatch) return;
+    event.preventDefault();
+    firstMatch.click();
+  });
+
+  renderCountries();
+  article.append(title, layoutList, search, countryList);
+  replaceExplorerContextDetail(article);
+}
+
+function getExplorerGeographyCountries(state) {
+  const tableId = getActiveExplorerTemplate()?.tableId;
+  const axis = getActiveExplorerGeographyAxis();
+  if (!tableId || !axis) return [];
+  const codes = getExplorerAxisOptions(state, tableId)[axis]?.codes ?? [];
+  const descriptions = new Map((state?.explorerPoints ?? [])
+    .filter((point) => point.tableId === tableId && point.coordinate === `${axis}_axis_rc_code`)
+    .map((point) => [normalizeAxisCode(point.code, axis), point.description]));
+  const values = getExplorerGeographyValues(state, axis);
+  return codes.map((code) => {
+    const normalizedCode = normalizeAxisCode(code, axis);
+    let displayName = "";
+    try {
+      displayName = REGION_DISPLAY_NAMES?.of(normalizedCode) ?? "";
+    } catch {
+      displayName = "";
+    }
+    return {
+      code: normalizedCode,
+      name: displayName && displayName !== normalizedCode
+        ? displayName
+        : descriptions.get(normalizedCode) || normalizedCode,
+      value: values.get(normalizedCode) ?? null
+    };
+  });
+}
+
+function getExplorerGeographyValues(state, axis) {
+  const context = getActiveExplorerContext();
+  const series = buildExplorerAxisSeries(state, {
+    axis,
+    selectedXCode: context.selectedXCode,
+    selectedYCode: context.selectedYCode,
+    selectedZCode: context.selectedZCode,
+    tableId: getActiveExplorerTemplate()?.tableId,
+    templateSelections: getExplorerTemplateSelections(),
+    templates: getExplorerTemplates(state)
+  });
+  const selectedReference = getSelectedExplorerReference(state);
+  const dateIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
+  return new Map(series.rows.map((row) => [
+    normalizeAxisCode(row.code, axis),
+    dateIndex >= 0 ? row.values[dateIndex]?.value ?? null : null
+  ]));
+}
+
+function createExplorerGeographyGroups(countries, state) {
+  const groups = groupExplorerCountries(countries);
+  return groups.map(({ label, countries: groupCountries }) => {
+    const section = document.createElement("section");
+    section.className = "explorer-geography-group";
+    if (label) {
+      const heading = document.createElement("h3");
+      heading.textContent = label;
+      section.append(heading);
+    }
+    groupCountries.forEach((country) => section.append(createExplorerCountryOption(country, state)));
+    return section;
+  });
+}
+
+function groupExplorerCountries(countries) {
+  const alphabetic = (values) => [...values].sort((left, right) => left.name.localeCompare(right.name, "en", { sensitivity: "base" }));
+  if (explorerGeographySearch || explorerGeographyLayout === "alphabetical") {
+    return [{ label: "", countries: alphabetic(countries) }];
+  }
+  if (explorerGeographyLayout === "relevance") {
+    return [{
+      label: "Largest selected figures first",
+      countries: [...countries].sort((left, right) => {
+        const leftValue = Number.isFinite(left.value) ? Math.abs(left.value) : Number.NEGATIVE_INFINITY;
+        const rightValue = Number.isFinite(right.value) ? Math.abs(right.value) : Number.NEGATIVE_INFINITY;
+        return rightValue - leftValue || left.name.localeCompare(right.name, "en");
+      })
+    }];
+  }
+  const definitions = explorerGeographyLayout === "world-regions"
+    ? [
+        ["Europe", (code) => EUROPE_CODES.has(code)],
+        ["Middle East", (code) => MIDDLE_EAST_CODES.has(code)],
+        ["Africa", (code) => AFRICA_CODES.has(code)],
+        ["Americas", (code) => AMERICAS_CODES.has(code)],
+        ["Asia-Pacific", () => true]
+      ]
+    : [
+        ["Euro area", (code) => EURO_AREA_CODES.has(code)],
+        ["European Union outside the euro area", (code) => EU_CODES.has(code)],
+        ["Other European countries", (code) => EUROPE_CODES.has(code)],
+        ["Rest of the world", () => true]
+      ];
+  const remaining = new Set(countries);
+  return definitions.map(([label, matches]) => {
+    const matchesForGroup = alphabetic([...remaining].filter((country) => matches(country.code)));
+    matchesForGroup.forEach((country) => remaining.delete(country));
+    return { countries: matchesForGroup, label };
+  }).filter((group) => group.countries.length > 0);
+}
+
+function createExplorerCountryOption(country, state) {
+  const context = getActiveExplorerContext();
+  const axis = getActiveExplorerGeographyAxis();
+  const selectedCode = getSelectedExplorerCodeForAxis(context, axis);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "explorer-geography-country-option";
+  button.classList.toggle("is-active", country.code === selectedCode);
+  button.setAttribute("aria-pressed", String(country.code === selectedCode));
+  const identity = document.createElement("span");
+  identity.className = "explorer-geography-country-identity";
+  const name = document.createElement("span");
+  name.textContent = country.name;
+  const code = document.createElement("span");
+  code.textContent = country.code;
+  identity.append(name, code);
+  const value = document.createElement("span");
+  value.className = "explorer-geography-country-value";
+  value.textContent = Number.isFinite(country.value)
+    ? formatMetricValue(country.value, state?.selectedUnit)
+    : "—";
+  button.append(identity, value);
+  button.addEventListener("click", () => {
+    context[`selected${axis.toUpperCase()}Code`] = country.code;
+    hasInteractedWithExplorerSelection = true;
+    saveExplorerScrollPosition();
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
+  return button;
 }
 
 function renderExplorerDisplayModePanel() {
