@@ -2517,21 +2517,6 @@ table {
   display: grid;
 }
 
-.explorer-geography-relevance {
-  display: grid;
-  margin-top: 2px;
-}
-
-.explorer-geography-relevance > h3 {
-  margin: 0;
-  padding: 5px 8px;
-  color: #66736d;
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.035em;
-  text-transform: uppercase;
-}
-
 .explorer-geography-group + .explorer-geography-group {
   margin-top: 12px;
 }
