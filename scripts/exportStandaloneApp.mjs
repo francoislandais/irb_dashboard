@@ -20,7 +20,7 @@ export async function exportStandaloneApp(dataFilePath, options = {}) {
   if (!csvText.trim()) throw new Error(`Le fichier de données est vide : ${absoluteDataPath}`);
 
   const bundle = await buildStandaloneBundle(appDirectory);
-  const html = buildStandaloneHtml(bundle, {
+  const html = await buildStandaloneHtml(bundle, {
     csvText,
     fileName: basename(absoluteDataPath)
   });

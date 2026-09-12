@@ -225,12 +225,12 @@ function getExtractionTimestamp(columns, rows) {
 }
 
 async function loadStandaloneData() {
-  if (!standaloneData?.csvText) return false;
+  if (!hasStandaloneCsvData()) return false;
 
-  currentCsvText = standaloneData.csvText;
+  currentCsvText = await readStandaloneCsvText(standaloneData);
   currentCsvFileName = standaloneData.fileName || "embedded-data.csv";
   await loadCsvText(
-    standaloneData.csvText,
+    currentCsvText,
     currentCsvFileName,
     null,
     new Date(standaloneData.loadedAt || Date.now()),
@@ -242,6 +242,29 @@ async function loadStandaloneData() {
   );
   store.setCapabilityNotice("Version portable : les données sont intégrées dans ce fichier HTML.");
   return true;
+}
+
+function hasStandaloneCsvData() {
+  return Boolean(standaloneData?.csvText || standaloneData?.csvBase64);
+}
+
+async function readStandaloneCsvText(payload) {
+  if (payload?.csvCompression === "gzip-base64" && payload.csvBase64) {
+    if (typeof DecompressionStream !== "function") {
+      throw new Error("Ce navigateur ne permet pas de décompresser les données de cette version portable.");
+    }
+    const compressed = base64ToUint8Array(payload.csvBase64);
+    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Response(stream).text();
+  }
+  return payload?.csvText ?? "";
+}
+
+function base64ToUint8Array(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
 }
 
 function getUrlJstParam() {
@@ -377,7 +400,7 @@ async function exportStandaloneHtml() {
   }
 
   const bundle = await getStandaloneBundle();
-  const html = buildStandaloneHtml(bundle, { csvText, fileName: csvFileName });
+  const html = await buildStandaloneHtml(bundle, { csvText, fileName: csvFileName });
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const link = document.createElement("a");
   const safeName = csvFileName
@@ -556,7 +579,7 @@ async function startApplication() {
       loadInternalMapping(),
       loadImpossibleCombinations(),
       loadExplorerConfiguration(),
-      standaloneData?.csvText ? loadStandaloneData() : restoreLastFile()
+      hasStandaloneCsvData() ? loadStandaloneData() : restoreLastFile()
     ]);
   } catch (error) {
     store.setError(error);

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import gzip
 import json
 import posixpath
 import re
@@ -136,8 +138,12 @@ def _resolve_module_path(from_path: str, specifier: str) -> str:
 
 
 def _build_standalone_html(bundle: dict, *, csv_text: str, file_name: str) -> str:
+    csv_bytes = csv_text.encode("utf-8")
+    compressed_csv = gzip.compress(csv_bytes, compresslevel=9, mtime=0)
     payload = {
-        "csvText": csv_text,
+        "csvCompression": "gzip-base64",
+        "csvBase64": base64.b64encode(compressed_csv).decode("ascii"),
+        "csvByteLength": len(csv_bytes),
         "fileName": file_name or "embedded-data.csv",
         "loadedAt": datetime.now(timezone.utc)
         .isoformat(timespec="milliseconds")

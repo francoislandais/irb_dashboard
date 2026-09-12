@@ -20,10 +20,13 @@ export function resolveStandaloneModulePath(fromPath, specifier) {
   return new URL(cleanSpecifier, `https://standalone.local/${fromPath}`).pathname.slice(1);
 }
 
-export function buildStandaloneHtml(bundle, activeDataset) {
+export async function buildStandaloneHtml(bundle, activeDataset) {
   const appMarkup = extractAppMarkup(bundle.indexHtml);
+  const compressedCsv = await compressStandaloneCsv(activeDataset.csvText);
   const standalonePayload = {
-    csvText: activeDataset.csvText,
+    csvCompression: "gzip-base64",
+    csvBase64: compressedCsv.base64,
+    csvByteLength: compressedCsv.originalByteLength,
     fileName: activeDataset.fileName || "embedded-data.csv",
     loadedAt: new Date().toISOString()
   };
@@ -98,6 +101,28 @@ await import(getModuleUrl("src/main.js"));
     </script>
   </body>
 </html>`;
+}
+
+export async function compressStandaloneCsv(csvText) {
+  if (typeof CompressionStream !== "function") {
+    throw new Error("Ce navigateur ne prend pas en charge la compression nécessaire à l’export portable.");
+  }
+  const source = new TextEncoder().encode(String(csvText ?? ""));
+  const stream = new Blob([source]).stream().pipeThrough(new CompressionStream("gzip"));
+  const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+  return {
+    base64: uint8ArrayToBase64(compressed),
+    originalByteLength: source.byteLength
+  };
+}
+
+function uint8ArrayToBase64(bytes) {
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
 }
 
 export function serializeForInlineScript(value) {
