@@ -70,7 +70,7 @@ const EXPLORER_GEOGRAPHY_LAYOUTS = [
   { value: "euro-first", label: "Euro area first", description: "Euro area, other EU countries, then the rest of the world" },
   { value: "world-regions", label: "World regions", description: "Countries grouped into broad geographical areas" },
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
-  { value: "relevance", label: "Reporting relevance", description: "Keep the table stable and preview the ten largest contributors" }
+  { value: "relevance", label: "Reporting relevance", description: "Keep the regulatory table order unchanged" }
 ];
 const EURO_AREA_CODES = new Set("AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES".split(" "));
 const EU_CODES = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
@@ -2515,21 +2515,6 @@ function renderExplorerGeographyPanel(state) {
   });
 
   article.append(title, layoutList, search, suggestions);
-  if (explorerGeographyLayout === "relevance") {
-    const relevance = document.createElement("section");
-    relevance.className = "explorer-geography-relevance";
-    const relevanceTitle = document.createElement("h3");
-    relevanceTitle.textContent = "Top contributors";
-    const topCountries = [...getExplorerGeographyCountries(state)]
-      .filter((country) => Number.isFinite(country.value))
-      .sort((left, right) => Math.abs(right.value) - Math.abs(left.value) || left.name.localeCompare(right.name, "en"))
-      .slice(0, 10);
-    const list = document.createElement("div");
-    list.className = "explorer-geography-country-list";
-    topCountries.forEach((country) => list.append(createExplorerCountryOption(country, state)));
-    relevance.append(relevanceTitle, list);
-    article.append(relevance);
-  }
   replaceExplorerContextDetail(article);
   if (shouldFocusExplorerGeographySearch) {
     shouldFocusExplorerGeographySearch = false;
@@ -2549,12 +2534,9 @@ function applyExplorerGeographyPresentation(series, state) {
   const countries = series.rows.map((row) => {
     const code = normalizeAxisCode(row.code, geographyAxis);
     const country = countriesByCode.get(code) ?? { code, name: row.displayDescription || row.description || code };
-    const selectedReference = getSelectedExplorerReference(state);
-    const dateIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
     return {
       ...country,
-      row,
-      value: dateIndex >= 0 ? row.values[dateIndex]?.value ?? null : null
+      row
     };
   }).filter((country) => (
     !query || normalizeExplorerMetadataSearchText(`${country.code} ${country.name}`).includes(query)
@@ -2586,7 +2568,6 @@ function getExplorerGeographyCountries(state) {
   const descriptions = new Map((state?.explorerPoints ?? [])
     .filter((point) => point.tableId === tableId && point.coordinate === `${axis}_axis_rc_code`)
     .map((point) => [normalizeAxisCode(point.code, axis), point.description]));
-  const values = getExplorerGeographyValues(state, axis);
   return codes.map((code) => {
     const normalizedCode = normalizeAxisCode(code, axis);
     let displayName = "";
@@ -2599,29 +2580,9 @@ function getExplorerGeographyCountries(state) {
       code: normalizedCode,
       name: displayName && displayName !== normalizedCode
         ? displayName
-        : descriptions.get(normalizedCode) || normalizedCode,
-      value: values.get(normalizedCode) ?? null
+        : descriptions.get(normalizedCode) || normalizedCode
     };
   });
-}
-
-function getExplorerGeographyValues(state, axis) {
-  const context = getActiveExplorerContext();
-  const series = buildExplorerAxisSeries(state, {
-    axis,
-    selectedXCode: context.selectedXCode,
-    selectedYCode: context.selectedYCode,
-    selectedZCode: context.selectedZCode,
-    tableId: getActiveExplorerTemplate()?.tableId,
-    templateSelections: getExplorerTemplateSelections(),
-    templates: getExplorerTemplates(state)
-  });
-  const selectedReference = getSelectedExplorerReference(state);
-  const dateIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
-  return new Map(series.rows.map((row) => [
-    normalizeAxisCode(row.code, axis),
-    dateIndex >= 0 ? row.values[dateIndex]?.value ?? null : null
-  ]));
 }
 
 function groupExplorerCountries(countries) {
@@ -2649,38 +2610,6 @@ function groupExplorerCountries(countries) {
     matchesForGroup.forEach((country) => remaining.delete(country));
     return { countries: matchesForGroup, label };
   }).filter((group) => group.countries.length > 0);
-}
-
-function createExplorerCountryOption(country, state) {
-  const context = getActiveExplorerContext();
-  const axis = getActiveExplorerGeographyAxis();
-  const selectedCode = getSelectedExplorerCodeForAxis(context, axis);
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "explorer-geography-country-option";
-  button.classList.toggle("is-active", country.code === selectedCode);
-  button.setAttribute("aria-pressed", String(country.code === selectedCode));
-  const identity = document.createElement("span");
-  identity.className = "explorer-geography-country-identity";
-  const name = document.createElement("span");
-  name.textContent = country.name;
-  const code = document.createElement("span");
-  code.textContent = country.code;
-  identity.append(name, code);
-  const value = document.createElement("span");
-  value.className = "explorer-geography-country-value";
-  value.textContent = Number.isFinite(country.value)
-    ? formatMetricValue(country.value, state?.selectedUnit)
-    : "—";
-  button.append(identity, value);
-  button.addEventListener("click", () => {
-    context[`selected${axis.toUpperCase()}Code`] = country.code;
-    hasInteractedWithExplorerSelection = true;
-    explorerContextTopic = "geography";
-    saveExplorerScrollPosition();
-    if (getLatestState()) rerenderApp(getLatestState());
-  });
-  return button;
 }
 
 function renderExplorerDisplayModePanel() {
