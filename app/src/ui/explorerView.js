@@ -2553,12 +2553,19 @@ function renderExplorerGeographyPanel(state) {
 
   article.append(title, layoutList, searchControl);
   if (explorerGeographySearch) {
+    const badge = document.createElement("span");
+    badge.className = "explorer-geography-country-badge";
+    const badgeLabel = document.createElement("span");
+    badgeLabel.textContent = selectedCountry?.name ?? explorerGeographySearch;
     const clear = document.createElement("button");
     clear.type = "button";
-    clear.className = "explorer-geography-clear";
-    clear.textContent = "Clear country filter";
+    clear.className = "explorer-geography-country-badge-clear";
+    clear.setAttribute("aria-label", `Remove ${badgeLabel.textContent} country filter`);
+    clear.title = "Remove country filter";
+    clear.textContent = "×";
     clear.addEventListener("click", () => applyExplorerCountrySearch(null));
-    article.append(clear);
+    badge.append(badgeLabel, clear);
+    article.append(badge);
   }
   replaceExplorerContextDetail(article);
 }
