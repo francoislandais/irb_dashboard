@@ -184,10 +184,21 @@ window.__AGORA_STANDALONE_BUNDLE_GZIP__ = {_serialize_inline(base64.b64encode(co
 
 
 def _portable_module_loader() -> str:
-    return r'''const bundle = JSON.parse(await decompressStandaloneText(window.__AGORA_STANDALONE_BUNDLE_GZIP__));
+    return r'''setStartupStage("decompressing");
+const bundle = JSON.parse(await decompressStandaloneText(window.__AGORA_STANDALONE_BUNDLE_GZIP__));
 window.__AGORA_STANDALONE_BUNDLE__ = bundle;
 const moduleUrls = new Map();
 const nativeFetch = window.fetch.bind(window);
+
+function setStartupStage(activeStage) {
+  const stages = ["downloading", "decompressing", "indexing"];
+  const activeIndex = stages.indexOf(activeStage);
+  document.querySelectorAll("[data-startup-stage]").forEach((element) => {
+    const stageIndex = stages.indexOf(element.dataset.startupStage);
+    element.classList.toggle("is-active", stageIndex === activeIndex);
+    element.classList.toggle("is-complete", activeIndex >= 0 && stageIndex < activeIndex);
+  });
+}
 
 async function decompressStandaloneText(base64) {
   if (typeof DecompressionStream !== "function") {

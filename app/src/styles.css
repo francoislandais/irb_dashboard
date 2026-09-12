@@ -58,7 +58,7 @@ body {
 
 .startup-copy {
   display: grid;
-  gap: 4px;
+  gap: 9px;
 }
 
 .startup-copy strong {
@@ -67,9 +67,44 @@ body {
   font-weight: 600;
 }
 
-.startup-copy span {
-  color: var(--muted);
-  font-size: 0.78rem;
+.startup-steps {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.startup-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #9aa5a0;
+  font-size: 0.74rem;
+  transition: color 150ms ease;
+}
+
+.startup-step i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d7dfdb;
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.startup-step.is-active {
+  color: var(--primary-dark);
+}
+
+.startup-step.is-active i {
+  background: var(--primary-dark);
+  box-shadow: 0 0 0 3px #dcebf4;
+}
+
+.startup-step.is-complete {
+  color: #64716b;
+}
+
+.startup-step.is-complete i {
+  background: #8ea09a;
 }
 
 .is-app-loading .app-shell {

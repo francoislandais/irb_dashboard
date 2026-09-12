@@ -55,10 +55,21 @@ window.__AGORA_STANDALONE_DATA__ = ${serializeForInlineScript(standalonePayload)
 window.__AGORA_STANDALONE_BUNDLE_GZIP__ = ${serializeForInlineScript(compressedBundle.base64)};
     </script>
     <script type="module">
+setStartupStage("decompressing");
 const bundle = JSON.parse(await decompressStandaloneText(window.__AGORA_STANDALONE_BUNDLE_GZIP__));
 window.__AGORA_STANDALONE_BUNDLE__ = bundle;
 const moduleUrls = new Map();
 const nativeFetch = window.fetch.bind(window);
+
+function setStartupStage(activeStage) {
+  const stages = ["downloading", "decompressing", "indexing"];
+  const activeIndex = stages.indexOf(activeStage);
+  document.querySelectorAll("[data-startup-stage]").forEach((element) => {
+    const stageIndex = stages.indexOf(element.dataset.startupStage);
+    element.classList.toggle("is-active", stageIndex === activeIndex);
+    element.classList.toggle("is-complete", activeIndex >= 0 && stageIndex < activeIndex);
+  });
+}
 
 async function decompressStandaloneText(base64) {
   if (typeof DecompressionStream !== "function") {

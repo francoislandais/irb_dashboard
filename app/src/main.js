@@ -180,6 +180,7 @@ updateUrlUnitParam(store.getState().selectedUnit);
 
 async function loadFile(file, handle, options = {}) {
   const text = await file.text();
+  setStartupStage("indexing");
   currentCsvText = text;
   currentCsvFileName = file.name;
   await loadCsvText(text, file.name, handle, new Date(), options);
@@ -228,6 +229,7 @@ async function loadStandaloneData() {
   if (!hasStandaloneCsvData()) return false;
 
   currentCsvText = await readStandaloneCsvText(standaloneData);
+  setStartupStage("indexing");
   currentCsvFileName = standaloneData.fileName || "embedded-data.csv";
   await loadCsvText(
     currentCsvText,
@@ -573,6 +575,7 @@ async function startApplication() {
   wireUi(actions);
   store.subscribe(renderAppState);
   renderAppState(store.getState());
+  if (!hasStandaloneCsvData()) setStartupStage("indexing");
 
   try {
     await Promise.all([
@@ -588,6 +591,16 @@ async function startApplication() {
     await waitForApplicationPaint();
     revealApplication();
   }
+}
+
+function setStartupStage(activeStage) {
+  const stages = ["downloading", "decompressing", "indexing"];
+  const activeIndex = stages.indexOf(activeStage);
+  document.querySelectorAll("[data-startup-stage]").forEach((element) => {
+    const stageIndex = stages.indexOf(element.dataset.startupStage);
+    element.classList.toggle("is-active", stageIndex === activeIndex);
+    element.classList.toggle("is-complete", activeIndex >= 0 && stageIndex < activeIndex);
+  });
 }
 
 function waitForApplicationPaint() {
