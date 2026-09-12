@@ -140,6 +140,10 @@ def _resolve_module_path(from_path: str, specifier: str) -> str:
 def _build_standalone_html(bundle: dict, *, csv_text: str, file_name: str) -> str:
     csv_bytes = csv_text.encode("utf-8")
     compressed_csv = gzip.compress(csv_bytes, compresslevel=9, mtime=0)
+    bundle_json = json.dumps(bundle, ensure_ascii=False, separators=(",", ":"))
+    compressed_bundle = gzip.compress(
+        bundle_json.encode("utf-8"), compresslevel=9, mtime=0
+    )
     payload = {
         "csvCompression": "gzip-base64",
         "csvBase64": base64.b64encode(compressed_csv).decode("ascii"),
@@ -170,7 +174,7 @@ def _build_standalone_html(bundle: dict, *, csv_text: str, file_name: str) -> st
     </script>
     <script>
 window.__AGORA_STANDALONE_DATA__ = {_serialize_inline(payload)};
-window.__AGORA_STANDALONE_BUNDLE__ = {_serialize_inline(bundle)};
+window.__AGORA_STANDALONE_BUNDLE_GZIP__ = {_serialize_inline(base64.b64encode(compressed_bundle).decode("ascii"))};
     </script>
     <script type="module">
 {_portable_module_loader()}
@@ -180,9 +184,21 @@ window.__AGORA_STANDALONE_BUNDLE__ = {_serialize_inline(bundle)};
 
 
 def _portable_module_loader() -> str:
-    return r'''const bundle = window.__AGORA_STANDALONE_BUNDLE__;
+    return r'''const bundle = JSON.parse(await decompressStandaloneText(window.__AGORA_STANDALONE_BUNDLE_GZIP__));
+window.__AGORA_STANDALONE_BUNDLE__ = bundle;
 const moduleUrls = new Map();
 const nativeFetch = window.fetch.bind(window);
+
+async function decompressStandaloneText(base64) {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("Ce navigateur ne permet pas de décompresser cette application portable.");
+  }
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Response(stream).text();
+}
 
 window.fetch = async (resource, options) => {
   const url = typeof resource === "string" ? resource : resource?.url ?? "";

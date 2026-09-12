@@ -23,6 +23,7 @@ export function resolveStandaloneModulePath(fromPath, specifier) {
 export async function buildStandaloneHtml(bundle, activeDataset) {
   const appMarkup = extractAppMarkup(bundle.indexHtml);
   const compressedCsv = await compressStandaloneCsv(activeDataset.csvText);
+  const compressedBundle = await compressStandaloneText(JSON.stringify(bundle));
   const standalonePayload = {
     csvCompression: "gzip-base64",
     csvBase64: compressedCsv.base64,
@@ -51,12 +52,24 @@ ${escapeInlineScriptSource(bundle.highchartsTreemapJs ?? "")}
     </script>
     <script>
 window.__AGORA_STANDALONE_DATA__ = ${serializeForInlineScript(standalonePayload)};
-window.__AGORA_STANDALONE_BUNDLE__ = ${serializeForInlineScript(bundle)};
+window.__AGORA_STANDALONE_BUNDLE_GZIP__ = ${serializeForInlineScript(compressedBundle.base64)};
     </script>
     <script type="module">
-const bundle = window.__AGORA_STANDALONE_BUNDLE__;
+const bundle = JSON.parse(await decompressStandaloneText(window.__AGORA_STANDALONE_BUNDLE_GZIP__));
+window.__AGORA_STANDALONE_BUNDLE__ = bundle;
 const moduleUrls = new Map();
 const nativeFetch = window.fetch.bind(window);
+
+async function decompressStandaloneText(base64) {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("Ce navigateur ne permet pas de décompresser cette application portable.");
+  }
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Response(stream).text();
+}
 
 window.fetch = async (resource, options) => {
   const url = typeof resource === "string" ? resource : resource?.url ?? "";
@@ -104,10 +117,14 @@ await import(getModuleUrl("src/main.js"));
 }
 
 export async function compressStandaloneCsv(csvText) {
+  return compressStandaloneText(csvText);
+}
+
+export async function compressStandaloneText(text) {
   if (typeof CompressionStream !== "function") {
     throw new Error("Ce navigateur ne prend pas en charge la compression nécessaire à l’export portable.");
   }
-  const source = new TextEncoder().encode(String(csvText ?? ""));
+  const source = new TextEncoder().encode(String(text ?? ""));
   const stream = new Blob([source]).stream().pipeThrough(new CompressionStream("gzip"));
   const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
   return {
