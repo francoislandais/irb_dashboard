@@ -2029,7 +2029,6 @@ function updateExplorerSearch(event) {
 
 function renderExplorerAxisTabs() {
   const captions = getExplorerAxisCaptions();
-  const ratioCaptions = getExplorerAxisRatioCaptions();
   const activeAxis = getActiveExplorerAxis();
   const context = getActiveExplorerContext();
   const axisCodes = { x: context.selectedXCode, y: context.selectedYCode, z: context.selectedZCode };
@@ -2066,7 +2065,7 @@ function renderExplorerAxisTabs() {
     }
 
     element.title = [captions[axis], ratioCaptions[axis]].filter(Boolean).join("\n");
-    element.replaceChildren(createAxisCaptionLine(axisCodes[axis], ratioCaptions[axis], axis));
+    element.replaceChildren(createAxisCaptionLine(axisCodes[axis], axis));
   });
 }
 
@@ -2867,22 +2866,13 @@ function getExplorerAxisDisplayName(axis) {
 // full description (previously shown as a second line) is still available
 // as a hover tooltip (see the element.title assignment in
 // renderExplorerAxisTabs), it's just not duplicated inline anymore.
-function createAxisCaptionLine(code, ratioCaption = "", axis = "") {
+function createAxisCaptionLine(code, axis = "") {
   const wrapper = document.createElement("span");
   wrapper.className = "axis-tab-lines";
   const line = document.createElement("span");
   line.className = "axis-tab-line axis-tab-main";
   line.textContent = `${getExplorerAxisDisplayName(axis)} : ${code || "none"}`;
   wrapper.append(line);
-
-  if (ratioCaption) {
-    const ratioLine = document.createElement("span");
-    ratioLine.className = "axis-tab-line axis-tab-ratio";
-    const ratioText = document.createElement("span");
-    ratioText.textContent = ratioCaption;
-    ratioLine.append(ratioText, createAxisRatioClearButton(axis));
-    wrapper.append(ratioLine);
-  }
 
   return wrapper;
 }
@@ -2937,15 +2927,6 @@ function getExplorerAxisCaptions() {
 function formatExplorerAxisCaption(code, label) {
   if (!code) return label || "";
   return label ? `${code} - ${label}` : code;
-}
-
-function getExplorerAxisRatioCaptions() {
-  return Object.fromEntries(["template", "x", "y", "z"].map((axis) => {
-    const contribution = ["x", "y", "z"].includes(axis)
-      ? getExplorerOwnAxisContribution(axis)
-      : null;
-    return [axis, contribution ? `as % of ${contribution.label}` : ""];
-  }));
 }
 
 function getExplorerOwnAxisContribution(axis) {
