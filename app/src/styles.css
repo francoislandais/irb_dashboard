@@ -1663,6 +1663,30 @@ button:focus-visible {
   line-height: 1.1 !important;
 }
 
+.explorer-cell-range-banner {
+  position: sticky;
+  left: 426px;
+  bottom: 8px;
+  z-index: 5;
+  display: inline-flex;
+  width: fit-content;
+  align-items: baseline;
+  gap: 5px;
+  margin: 6px 0 0 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #eef4f8;
+  color: var(--primary-dark);
+  font-size: 0.76rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.explorer-cell-range-banner-value {
+  font-weight: 600;
+}
+
 .explorer-context-hint {
   padding: 9px;
   border-radius: 7px;

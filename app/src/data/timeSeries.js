@@ -69,7 +69,7 @@ export function buildExplorerAxisSeries(state, options = {}) {
   const inheritedFormat = getSelectedFilterFormat(state, tableId, axis, selections);
   const rowSeries = axis === "template"
     ? buildTemplateSeriesRows(state, indexes, dateColumns, options.templates ?? [], options.templateSelections ?? {})
-    : axis === "x"
+    : axis === "x" && pointsConfig.length === 0
       ? buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat)
       : buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, {
       selectedXCode,

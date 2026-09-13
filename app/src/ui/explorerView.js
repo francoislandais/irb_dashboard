@@ -166,6 +166,7 @@ const elements = {
   globalReferenceMenu: document.querySelector("#global-reference-menu"),
   globalReferenceValue: document.querySelector("#global-reference-value"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
+  explorerCellRangeBanner: document.querySelector("#explorer-cell-range-banner"),
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerExcelExport: document.querySelector("#explorer-excel-export"),
   explorerMainPane: document.querySelector(".explorer-main-pane"),
@@ -1624,6 +1625,7 @@ function clearExplorerCellRangeSelection() {
   clearExplorerCellRangeHighlight();
   explorerCellRanges = [];
   explorerCellRangePreview = null;
+  renderExplorerCellRangeBanner();
 }
 
 function clearExplorerCellRangeHighlight() {
@@ -1637,6 +1639,30 @@ function renderExplorerCellRangeHighlights() {
   getActiveExplorerCellRanges().forEach((range) => {
     range.cells.forEach((cell) => cell.classList.add("is-cell-range-selected"));
   });
+  renderExplorerCellRangeBanner();
+}
+
+function renderExplorerCellRangeBanner() {
+  if (!elements.explorerCellRangeBanner) return;
+
+  const aggregate = buildExplorerCellRangeAggregate();
+  if (!aggregate) {
+    elements.explorerCellRangeBanner.hidden = true;
+    elements.explorerCellRangeBanner.replaceChildren();
+    return;
+  }
+
+  const selectedUnit = getLatestState()?.selectedUnit;
+
+  const label = document.createElement("span");
+  label.textContent = "Sum of the selected range:";
+
+  const value = document.createElement("span");
+  value.className = "explorer-cell-range-banner-value";
+  value.textContent = formatExplorerCellRangeValue(aggregate, selectedUnit);
+
+  elements.explorerCellRangeBanner.replaceChildren(label, value);
+  elements.explorerCellRangeBanner.hidden = false;
 }
 
 function getExplorerCellRangeCells(startCell, endCell) {
