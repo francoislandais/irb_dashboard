@@ -162,9 +162,7 @@ const elements = {
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
-  globalReferenceButton: document.querySelector("#global-reference-button"),
-  globalReferenceMenu: document.querySelector("#global-reference-menu"),
-  globalReferenceValue: document.querySelector("#global-reference-value"),
+  globalReferenceSelect: document.querySelector("#global-reference-select"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
   explorerCellRangeBanner: document.querySelector("#explorer-cell-range-banner"),
   explorerEmpty: document.querySelector("#explorer-empty"),
@@ -182,7 +180,9 @@ export function wireExplorerUi(actions, rerender) {
   updateSelectedJst = actions.updateSelectedJst;
   updateSelectedUnit = actions.updateSelectedUnit;
   updatePeerDisplayMode = actions.updatePeerDisplayMode;
-  elements.globalReferenceButton?.addEventListener("click", toggleExplorerHeaderReferenceMenu);
+  elements.globalReferenceSelect?.addEventListener("change", (event) => {
+    setExplorerHeaderReference(event.target.value);
+  });
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
       if (button.disabled) return;
@@ -257,7 +257,6 @@ export function wireExplorerUi(actions, rerender) {
   }
   document.addEventListener("pointerdown", (event) => {
     if (!elements.explorerSearchControl?.contains(event.target)) hideExplorerSearchSuggestions();
-    if (!event.target.closest(".global-reference-control")) closeExplorerHeaderReferenceMenu();
   });
   elements.explorerBenchmarkExpand?.addEventListener("click", () => {
     saveExplorerScrollPosition();
@@ -2069,50 +2068,35 @@ function getActiveExplorerGeographyAxis() {
 }
 
 export function renderExplorerHeaderReferenceControl(state) {
-  if (!elements.globalReferenceButton || !elements.globalReferenceMenu || !elements.globalReferenceValue) return;
+  if (!elements.globalReferenceSelect) return;
   const references = getReferenceColumns(state?.columns ?? []);
   const latestReference = references.at(-1) ?? null;
   const anchorReference = references.find((reference) => reference.label === explorerAnchorReferenceLabel) ?? latestReference;
   if (explorerAnchorReferenceLabel && !references.some((reference) => reference.label === explorerAnchorReferenceLabel)) {
     explorerAnchorReferenceLabel = "";
   }
-  elements.globalReferenceButton.disabled = references.length === 0;
-  elements.globalReferenceValue.textContent = anchorReference ? formatReferenceQuarterLabel(anchorReference.label) : "—";
-  elements.globalReferenceMenu.replaceChildren();
+  elements.globalReferenceSelect.disabled = references.length === 0;
+  elements.globalReferenceSelect.replaceChildren();
   [...references].reverse().forEach((reference) => {
-    const option = document.createElement("button");
-    option.type = "button";
-    option.className = "global-reference-option";
-    const isActive = reference.label === anchorReference?.label;
-    option.classList.toggle("is-active", isActive);
-    option.setAttribute("role", "option");
-    option.setAttribute("aria-selected", String(isActive));
-    option.textContent = formatReferenceQuarterLabel(reference.label);
-    option.addEventListener("click", () => {
-      explorerAnchorReferenceLabel = reference.label === latestReference?.label ? "" : reference.label;
-      const context = getActiveExplorerContext();
-      context.selectedReferenceLabel = reference.label;
-      context.selectedCellColumnIndex = 0;
-      closeExplorerHeaderReferenceMenu();
-      updateUrlExplorerSelectionParams();
-      saveExplorerScrollPosition();
-      if (getLatestState()) rerenderApp(getLatestState());
-    });
-    elements.globalReferenceMenu.append(option);
+    const option = new Option(formatReferenceQuarterLabel(reference.label), reference.label, false, reference.label === anchorReference?.label);
+    elements.globalReferenceSelect.append(option);
   });
 }
 
-function toggleExplorerHeaderReferenceMenu() {
-  if (!elements.globalReferenceButton || !elements.globalReferenceMenu || elements.globalReferenceButton.disabled) return;
-  const willOpen = elements.globalReferenceMenu.hidden;
-  elements.globalReferenceMenu.hidden = !willOpen;
-  elements.globalReferenceButton.setAttribute("aria-expanded", String(willOpen));
-}
+function setExplorerHeaderReference(referenceLabel) {
+  const state = getLatestState();
+  const references = getReferenceColumns(state?.columns ?? []);
+  const latestReference = references.at(-1) ?? null;
+  const reference = references.find((candidate) => candidate.label === referenceLabel);
+  if (!reference) return;
 
-function closeExplorerHeaderReferenceMenu() {
-  if (!elements.globalReferenceButton || !elements.globalReferenceMenu) return;
-  elements.globalReferenceMenu.hidden = true;
-  elements.globalReferenceButton.setAttribute("aria-expanded", "false");
+  explorerAnchorReferenceLabel = reference.label === latestReference?.label ? "" : reference.label;
+  const context = getActiveExplorerContext();
+  context.selectedReferenceLabel = reference.label;
+  context.selectedCellColumnIndex = 0;
+  updateUrlExplorerSelectionParams();
+  saveExplorerScrollPosition();
+  if (state) rerenderApp(state);
 }
 
 function getSelectedExplorerReference(state = getLatestState()) {

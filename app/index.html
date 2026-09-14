@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260914-sidebar-locked-collapsed">
+    <link rel="stylesheet" href="./src/styles.css?v=20260914-reference-date-nowrap">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -44,13 +44,12 @@
               <option value="euros">€</option>
             </select>
           </label>
-          <div class="global-reference-control">
-            <button id="global-reference-button" class="global-reference-button" type="button" aria-haspopup="listbox" aria-expanded="false" disabled>
-              <span>Reference date</span>
-              <strong id="global-reference-value">—</strong>
-            </button>
-            <div id="global-reference-menu" class="global-reference-menu" role="listbox" aria-label="First reference date displayed" hidden></div>
-          </div>
+          <label class="field compact-field reference-date-field">
+            <span>Reference date</span>
+            <select id="global-reference-select" disabled>
+              <option value="">—</option>
+            </select>
+          </label>
           <button id="peers-button" class="topbar-button" type="button" disabled>Peers</button>
           <div class="dataset-controls" aria-label="Datasets">
             <div class="field dataset-field">
@@ -381,6 +380,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260914-sidebar-locked-collapsed"></script>
+    <script type="module" src="./src/main.js?v=20260914-reference-date-nowrap"></script>
   </body>
 </html>

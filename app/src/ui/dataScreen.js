@@ -1,6 +1,6 @@
 import { setLatestState } from "./appState.js";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260910-context-title-only";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260912-top-populated-date";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260914-reference-date-nowrap";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260910-context-title-only";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260914-extraction-timestamp";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
