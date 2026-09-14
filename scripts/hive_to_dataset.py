@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from pathlib import Path
 from typing import Iterable, Protocol
@@ -9,6 +10,11 @@ from typing import Iterable, Protocol
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET_DIRECTORY = PROJECT_DIRECTORY / "datasets"
+
+_TEMPLATE_RANGE_PATTERN = re.compile(
+    r"^(?P<prefix>[A-Za-z]+)_xx%(?:\s+xx<(?P<upper_bound>\d+))$",
+    re.IGNORECASE,
+)
 
 
 class HiveClient(Protocol):
@@ -23,6 +29,12 @@ def build_hive_query(
     jst_codes: Iterable[str],
 ) -> str:
     """Construit la requête Hive au format pivoté attendu par l'application.
+
+    En plus des identifiants explicites, ``templates`` accepte :
+
+    - une plage comme ``F_xx% xx<48`` (préfixes ``F_01%`` à ``F_47%``) ;
+    - un joker final comme ``F_20.04%`` ;
+    - une exclusion précédée de ``!``, comme ``!F_20.04%``.
 
     ``extraction_timestamp`` est dérivée de la colonne implicite Devo
     ``eventdate``. Si cette table ne l'expose pas sous ce nom, adapter la
@@ -41,9 +53,6 @@ def build_hive_query(
     END) AS ref_{reference_date.replace("-", "_")}"""
         for reference_date in reference_dates
     )
-    template_list = ",\n".join(
-        f"          {_sql_literal(template)}" for template in templates
-    )
     date_list = ",\n".join(
         f"          {_sql_literal(reference_date)}"
         for reference_date in reference_dates
@@ -51,6 +60,7 @@ def build_hive_query(
     jst_code_list = ",\n".join(
         f"          {_sql_literal(jst_code)}" for jst_code in jst_codes
     )
+    template_filter = _build_template_filter(templates)
 
     return f"""SELECT
     table_id,
@@ -79,9 +89,7 @@ FROM (
       AND reference_period IN (
 {date_list}
       )
-      AND regexp_replace(table_id, '\\\\.[A-Za-z]+$', '') IN (
-{template_list}
-      )
+      AND {template_filter}
 ) t
 GROUP BY
     table_id,
@@ -131,10 +139,61 @@ def run_hive_query_to_csv(
     return dataframe
 
 
+def _build_template_filter(templates: Iterable[str]) -> str:
+    """Construit le filtre SQL pour inclusions, plages et exclusions."""
+
+    table_id = "regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')"
+    included: list[str] = []
+    excluded: list[str] = []
+
+    for expression in templates:
+        is_exclusion = expression.startswith("!")
+        template = expression[1:].strip() if is_exclusion else expression
+        if not template:
+            raise ValueError(f"Expression de template invalide : {expression!r}.")
+
+        target = excluded if is_exclusion else included
+        match = _TEMPLATE_RANGE_PATTERN.fullmatch(template)
+        if match is None:
+            if "%" in template[:-1] or "_" in template.replace("_", "", 1):
+                raise ValueError(
+                    f"Joker invalide dans l'expression {expression!r}. "
+                    "Seul un % final est accepté."
+                )
+            operator = "LIKE" if template.endswith("%") else "="
+            target.append(f"{table_id} {operator} {_sql_literal(template)}")
+            continue
+
+        prefix = match.group("prefix").upper()
+        upper_bound = int(match.group("upper_bound"))
+        if upper_bound <= 1 or upper_bound > 100:
+            raise ValueError(
+                f"Borne invalide dans l'expression de template {template!r}. "
+                "La borne doit être comprise entre 2 et 100."
+            )
+
+        target.extend(
+            f"{table_id} LIKE {_sql_literal(f'{prefix}_{number:02d}%')}"
+            for number in range(1, upper_bound)
+        )
+
+    if not included:
+        raise ValueError("Au moins un template à inclure doit être indiqué.")
+
+    include_filter = "(\n          " + "\n          OR ".join(included) + "\n      )"
+    if not excluded:
+        return include_filter
+
+    exclude_filter = "(\n          " + "\n          OR ".join(excluded) + "\n      )"
+    return f"{include_filter}\n      AND NOT {exclude_filter}"
+
+
 def _clean_values(values: Iterable[str], label: str) -> list[str]:
     if values is None:
         raise ValueError(f"La liste des {label} ne peut pas être vide.")
-    cleaned = list(dict.fromkeys(str(value).strip() for value in values if str(value).strip()))
+    cleaned = list(
+        dict.fromkeys(str(value).strip() for value in values if str(value).strip())
+    )
     if not cleaned:
         raise ValueError(f"La liste des {label} ne peut pas être vide.")
     return cleaned
@@ -146,11 +205,13 @@ def _validate_reference_dates(reference_dates: Iterable[str]) -> None:
             parsed = date.fromisoformat(reference_date)
         except ValueError as error:
             raise ValueError(
-                f"Date de référence invalide : {reference_date!r}. Format attendu : YYYY-MM-DD."
+                f"Date de référence invalide : {reference_date!r}. "
+                "Format attendu : YYYY-MM-DD."
             ) from error
         if parsed.isoformat() != reference_date:
             raise ValueError(
-                f"Date de référence invalide : {reference_date!r}. Format attendu : YYYY-MM-DD."
+                f"Date de référence invalide : {reference_date!r}. "
+                "Format attendu : YYYY-MM-DD."
             )
 
 
@@ -170,6 +231,7 @@ def _load_default_devo_client() -> HiveClient:
         import devo  # type: ignore[import-not-found]
     except ImportError as error:
         raise RuntimeError(
-            "Aucun client devo n'est disponible. Passez le client avec devo_client=devo."
+            "Aucun client devo n'est disponible. "
+            "Passez le client avec devo_client=devo."
         ) from error
     return devo
