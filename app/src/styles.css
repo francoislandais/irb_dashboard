@@ -194,6 +194,12 @@ button:disabled {
   grid-row: 1;
 }
 
+/* Header collapse is temporarily disabled: the header always stays
+   visible, so its toggle button is hidden until this is revisited. */
+.header-visibility-toggle {
+  display: none;
+}
+
 .app-header {
   display: grid;
   grid-column: 1 / -1;
@@ -264,6 +270,10 @@ button:disabled {
 }
 
 .app-shell.is-sidebar-collapsed .module-list {
+  display: none;
+}
+
+.app-shell.is-sidebar-locked .sidebar-toggle {
   display: none;
 }
 
@@ -427,6 +437,15 @@ button:disabled {
 
 .dataset-info-button:hover {
   color: #ffffff;
+}
+
+.is-standalone-app #dataset-select,
+.is-standalone-app #export-standalone-button {
+  display: none;
+}
+
+.is-standalone-app .dataset-field {
+  width: auto;
 }
 
 .topbar-button {

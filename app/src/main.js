@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260912-top-populated-date";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260914-sidebar-locked-collapsed";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -39,6 +39,8 @@ const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";
 let currentCsvFileName = standaloneData?.fileName ?? "";
 const csvTextByDatasetId = new Map();
+
+if (standaloneData) document.body.classList.add("is-standalone-app");
 
 const actions = {
   getState() {
@@ -548,8 +550,10 @@ applyUrlHeaderVisibility();
 wireHeaderVisibilityToggle();
 startApplication();
 
+// Header collapse is temporarily disabled: the header always stays visible,
+// regardless of the "header" URL param, until this is revisited.
 function applyUrlHeaderVisibility() {
-  const shouldHideHeader = readUrlStateParams().get(HEADER_URL_PARAM) === "hidden";
+  const shouldHideHeader = false;
   const shell = document.querySelector(".app-shell");
   const toggle = document.querySelector("#header-visibility-toggle");
   shell?.classList.toggle("is-header-hidden", shouldHideHeader);

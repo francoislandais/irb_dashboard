@@ -2,13 +2,15 @@ import { setLatestState } from "./appState.js";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260910-context-title-only";
 import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260912-top-populated-date";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260910-context-title-only";
-import { showDatasetDialog } from "./datasetDialog.js?v=20260814-dataset-query";
+import { showDatasetDialog } from "./datasetDialog.js?v=20260914-extraction-timestamp";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 
 const ADD_DATASET_OPTION = "__add_dataset__";
 const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
 const SIDEBAR_URL_PARAM = "sidebar";
+const SIDEBAR_COLLAPSED_VALUE = "collapsed";
+const SIDEBAR_LOCKED_VALUE = "locked";
 const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
@@ -83,20 +85,27 @@ export function wireUi(actions) {
 
 function toggleSidebar() {
   if (!elements.appShell || !elements.sidebarToggle) return;
+  if (readUrlStateParams().get(SIDEBAR_URL_PARAM) === SIDEBAR_LOCKED_VALUE) return;
 
   const isCollapsed = elements.appShell.classList.toggle("is-sidebar-collapsed");
   updateSidebarToggleAccessibility(isCollapsed);
   const url = createUrlState();
-  if (isCollapsed) url.searchParams.set(SIDEBAR_URL_PARAM, "collapsed");
+  if (isCollapsed) url.searchParams.set(SIDEBAR_URL_PARAM, SIDEBAR_COLLAPSED_VALUE);
   else url.searchParams.delete(SIDEBAR_URL_PARAM);
   replaceUrlState(url);
   window.setTimeout(scheduleExplorerStickyParentsUpdate, 180);
 }
 
+// "locked" keeps the sidebar collapsed and hides its toggle button
+// entirely (no way to bring it back from the UI), driven by the
+// "sidebar" URL param so it can be enabled per-link (e.g. an exported app).
 function applyUrlSidebarVisibility() {
   if (!elements.appShell || !elements.sidebarToggle) return;
-  const isCollapsed = readUrlStateParams().get(SIDEBAR_URL_PARAM) === "collapsed";
+  const sidebarParam = readUrlStateParams().get(SIDEBAR_URL_PARAM);
+  const isLocked = sidebarParam === SIDEBAR_LOCKED_VALUE;
+  const isCollapsed = isLocked || sidebarParam === SIDEBAR_COLLAPSED_VALUE;
   elements.appShell.classList.toggle("is-sidebar-collapsed", isCollapsed);
+  elements.appShell.classList.toggle("is-sidebar-locked", isLocked);
   updateSidebarToggleAccessibility(isCollapsed);
 }
 

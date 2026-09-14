@@ -22,7 +22,12 @@ def build_hive_query(
     reference_dates: Iterable[str],
     jst_codes: Iterable[str],
 ) -> str:
-    """Construit la requête Hive au format pivoté attendu par l'application."""
+    """Construit la requête Hive au format pivoté attendu par l'application.
+
+    ``extraction_timestamp`` est dérivée de la colonne implicite Devo
+    ``eventdate``. Si cette table ne l'expose pas sous ce nom, adapter la
+    colonne source ici (et dans ``buildDatasetUpdateQuery`` côté JS).
+    """
 
     templates = _clean_values(templates, "templates")
     reference_dates = _clean_values(reference_dates, "dates de référence")
@@ -53,6 +58,7 @@ def build_hive_query(
     x_axis_rc_code,
     y_axis_rc_code,
     z_axis_rc_code,
+    MAX(eventdate) AS extraction_timestamp,
 {date_columns}
 FROM (
     SELECT
@@ -62,7 +68,8 @@ FROM (
         y_axis_rc_code,
         z_axis_rc_code,
         reference_period,
-        value_decimal
+        value_decimal,
+        eventdate
     FROM crp_agora.agora_its_bft_current
     WHERE jst_code IN (
 {jst_code_list}
