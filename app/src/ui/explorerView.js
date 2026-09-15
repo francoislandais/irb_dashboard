@@ -94,6 +94,7 @@ const EXPLORER_COUNTRY_SEARCH_ALIASES = new Map([
 const REGION_DISPLAY_NAMES = typeof Intl.DisplayNames === "function"
   ? new Intl.DisplayNames(["en"], { type: "region" })
   : null;
+const EXPLORER_MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat("en", { month: "short" });
 const EXPLORER_EVOLUTION_OPTIONS = [
   { value: "monthly", label: "Monthly", step: 1, description: "Every reporting month" },
   { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
@@ -340,6 +341,7 @@ function createExplorerTemplateContext() {
     selectedCellColumnIndex: 0,
     selectedReferenceLabel: "",
     evolutionFrequency: "quarterly",
+    hasDetectedEvolutionFrequency: false,
     displayMode: "temporal",
     historyYears: pendingUrlHistoryYears
   };
@@ -793,6 +795,36 @@ function getActiveExplorerExpandedPaths() {
   return context.expandedPathsByAxis[context.activeAxis];
 }
 
+// Looks at which reference-date columns actually carry a reported value
+// for this table (any JST, so one bank reporting late doesn't skew it) and
+// infers the reporting cadence from the smallest gap between populated
+// columns, so each template opens on a sensible default instead of always
+// "quarterly".
+const EVOLUTION_FREQUENCY_BY_MONTH_GAP = { 1: "monthly", 3: "quarterly", 6: "semiannual", 12: "annual" };
+
+function detectExplorerTemplateEvolutionFrequency(state, tableId) {
+  const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
+  const references = getReferenceColumns(state?.columns ?? []);
+  if (!indexes || references.length < 2) return "quarterly";
+
+  const tableRows = (state.rows ?? []).filter((row) => row[indexes.tableId] === tableId);
+  if (tableRows.length === 0) return "quarterly";
+
+  const populatedDates = references
+    .filter((reference) => tableRows.some((row) => String(row[reference.index] ?? "").trim() !== ""))
+    .map((reference) => reference.date)
+    .sort((left, right) => left - right);
+  if (populatedDates.length < 2) return "quarterly";
+
+  const monthGaps = populatedDates.slice(1).map((date, index) => {
+    const previous = populatedDates[index];
+    return (date.getFullYear() - previous.getFullYear()) * 12 + (date.getMonth() - previous.getMonth());
+  });
+  const smallestGap = Math.min(...monthGaps.filter((gap) => gap > 0));
+
+  return EVOLUTION_FREQUENCY_BY_MONTH_GAP[smallestGap] ?? "quarterly";
+}
+
 function ensureExplorerSelections(state) {
   const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
   ensureExplorerTemplateSelections(state, tableId);
@@ -800,6 +832,10 @@ function ensureExplorerSelections(state) {
 
 function ensureExplorerTemplateSelections(state, tableId) {
   const context = getExplorerContextForTemplate(tableId);
+  if (!context.hasDetectedEvolutionFrequency) {
+    context.evolutionFrequency = detectExplorerTemplateEvolutionFrequency(state, tableId);
+    context.hasDetectedEvolutionFrequency = true;
+  }
   const axisOptions = getExplorerAxisOptions(state, tableId);
   const yCodes = axisOptions.y.codes;
   const zCodes = axisOptions.z.codes;
@@ -1259,7 +1295,7 @@ function renderExplorerTable(series, selectedUnit) {
     if (isDateFocus && index > 0) th.classList.add("date-focus-variation-column");
     if (isDateFocus && index === 1) th.classList.add("variation-column-start");
     th.dataset.explorerExportColumn = "true";
-    th.dataset.explorerExportLabel = isDateFocus ? dateColumn.label : formatReferenceQuarterLabel(dateColumn.label);
+    th.dataset.explorerExportLabel = isDateFocus ? dateColumn.label : getExplorerFullDateColumnLabel(dateColumn);
     th.dataset.explorerDateColumn = String(index);
     th.textContent = isDateFocus ? dateColumn.label : getExplorerQuarterLabel(dateColumn);
     headerRow.append(th);
@@ -1397,7 +1433,20 @@ function buildExplorerYearGroups(dateColumns) {
 }
 
 function getExplorerQuarterLabel(dateColumn) {
+  if (getActiveExplorerEvolutionOption().value === "monthly" && dateColumn.date) {
+    return EXPLORER_MONTH_LABEL_FORMATTER.format(dateColumn.date);
+  }
   return formatReferenceQuarterLabel(dateColumn.label).match(/^Q[1-4]/)?.[0] || dateColumn.label;
+}
+
+// Column header shown in exports (Excel), where a bare "Jun" would be
+// ambiguous across years unlike the on-screen header (already grouped
+// under its year row).
+function getExplorerFullDateColumnLabel(dateColumn) {
+  if (getActiveExplorerEvolutionOption().value === "monthly" && dateColumn.date) {
+    return `${EXPLORER_MONTH_LABEL_FORMATTER.format(dateColumn.date)} ${dateColumn.date.getFullYear()}`;
+  }
+  return formatReferenceQuarterLabel(dateColumn.label);
 }
 
 function applyExplorerDateFocusValueIntensity(entries) {
