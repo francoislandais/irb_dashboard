@@ -967,7 +967,7 @@ function refreshExplorerSelectionChrome(state) {
       onSelectJst: selectExplorerBenchmarkJst,
       onSelectReference: selectExplorerBenchmarkReferenceDate,
       onToggleYAxisFocus: toggleExplorerBenchmarkFocusYAxis,
-      peerDisplayMode: "anonymised",
+      peerDisplayMode: state.peerDisplayMode,
       selectedReferenceLabel: context.selectedReferenceLabel,
       selectedJst: state.selectedJst,
       smoothingWindow: explorerBenchmarkSmoothingWindow
