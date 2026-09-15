@@ -97,6 +97,7 @@ const EXPLORER_TEMPLATE_LABELS = {
   "C_73.00": "LCR - Operational deposits",
   "C_74.00": "LCR - Secured lending",
   "C_75.00": "LCR - Collateral swaps",
+  "C_75.01": "LCR - Collateral swaps by residual maturity",
   "C_76.00": "LCR - Liquidity buffer",
   "C_77.00": "LCR - Monitoring metrics",
 
@@ -247,14 +248,38 @@ export function getExplorerTemplateLabel(tableId) {
   return description ? `${tableId} - ${description}` : tableId;
 }
 
+// Some templates have so many y-axis rows (a table reused for several
+// unrelated counterparty/memorandum blocks) that a single view is too
+// heavy to render. Splitting it into several selectable entries keeps the
+// real, single table_id used for every actual data lookup - only the
+// y-axis reference points shown are scoped to a section-specific id in
+// ITS_all_dimension_mapping.csv (e.g. "C_75.01#central-bank"). See
+// `id` (selection identity, also the y-axis config lookup key) vs
+// `tableId` (the real table_id data rows are matched against).
+export const EXPLORER_TEMPLATE_ROW_SECTIONS = {
+  "C_75.01": [
+    { id: "C_75.01#non-central-bank", label: "Counterparty: non-central bank" },
+    { id: "C_75.01#central-bank", label: "Counterparty: central bank" },
+    { id: "C_75.01#memorandum", label: "Memorandum items" }
+  ]
+};
+
 export function getExplorerTemplates(state) {
   const tableIds = getExplorerTableIds(state);
 
-  return tableIds.map((tableId) => ({
-    description: getExplorerTemplateDescription(tableId),
-    label: getExplorerTemplateLabel(tableId),
-    tableId
-  }));
+  return tableIds.flatMap((tableId) => {
+    const description = getExplorerTemplateDescription(tableId);
+    const label = getExplorerTemplateLabel(tableId);
+    const sections = EXPLORER_TEMPLATE_ROW_SECTIONS[tableId];
+    if (!sections) return [{ description, id: tableId, label, tableId }];
+
+    return sections.map((section) => ({
+      description: section.label,
+      id: section.id,
+      label: `${label} — ${section.label}`,
+      tableId
+    }));
+  });
 }
 
 export function getExplorerTableIds(state) {
@@ -272,21 +297,40 @@ export function getExplorerTableIds(state) {
     .sort((left, right) => left.localeCompare(right, "fr", { numeric: true }));
 }
 
-export function getExplorerAxisOptions(state, tableId) {
+// Sentinel z-code standing for "ignore the z-axis filter, aggregate across
+// every value" - offered first on any table whose z-axis is a currency
+// breakdown (see explorerTableHasCurrencyZAxis). Not a real point, so it's
+// injected here and in buildExplorerAxisSeries rather than added to the
+// CSV reference.
+export const EXPLORER_ALL_CURRENCIES_CODE = "__ALL__";
+export const EXPLORER_ALL_CURRENCIES_LABEL = "All Currency";
+
+// EUR is present on every currency z-axis breakdown in the reference
+// config, so its presence is a reliable signal without hand-maintaining a
+// list of table_ids - any newly-added currency table picks this up for
+// free.
+export function explorerTableHasCurrencyZAxis(state, tableId) {
+  return getConfiguredExplorerAxisCodes(state, tableId, "z").includes("EUR");
+}
+
+export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId) {
   const templates = getExplorerTemplates(state);
   const configuredXCodes = getConfiguredExplorerAxisCodes(state, tableId, "x");
-  const configuredYCodes = getConfiguredExplorerAxisCodes(state, tableId, "y");
+  const configuredYCodes = getConfiguredExplorerAxisCodes(state, yConfigTableId, "y");
   const configuredZCodes = getConfiguredExplorerAxisCodes(state, tableId, "z");
   const availableXCodes = getAvailableExplorerAxisCodes(state, tableId, "x");
   const availableYCodes = getAvailableExplorerAxisCodes(state, tableId, "y");
   const availableZCodes = getAvailableExplorerAxisCodes(state, tableId, "z");
   const xCodes = getPreferredExplorerAxisCodes(configuredXCodes, availableXCodes);
   const yCodes = getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
-  const zCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
+  const preferredZCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
+  const zCodes = preferredZCodes.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
+    ? [EXPLORER_ALL_CURRENCIES_CODE, ...preferredZCodes]
+    : preferredZCodes;
 
   return {
     template: {
-      codes: templates.map((template) => template.tableId),
+      codes: templates.map((template) => template.id),
       isVisible: templates.length > 1
     },
     x: {
@@ -321,10 +365,14 @@ export function hasExplorerSelectedCombination(rows, columns, context) {
   const indexes = getCompleteAxisColumnIndexes(columns);
   if (!indexes) return true;
 
+  // "All Currency" never appears as a literal z_axis_rc_code value in the
+  // data - it means "any currency", so treat it like no z filter at all.
+  const selectedZCode = context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE ? "" : context.selectedZCode;
+
   return rows.some((row) => (
     (!context.selectedXCode || normalizeAxisCode(row[indexes.xAxisRcCode], "x") === context.selectedXCode)
     && (!context.selectedYCode || normalizeAxisCode(row[indexes.yAxisRcCode], "y") === context.selectedYCode)
-    && (!context.selectedZCode || normalizeAxisCode(row[indexes.zAxisRcCode], "z") === context.selectedZCode)
+    && (!selectedZCode || normalizeAxisCode(row[indexes.zAxisRcCode], "z") === selectedZCode)
   ));
 }
 

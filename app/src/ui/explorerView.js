@@ -1,4 +1,4 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260915-stable-lists";
+import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260915-all-currency";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
@@ -12,10 +12,13 @@ import {
   getBenchmarkValueFormat,
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
-} from "../data/explorerBenchmark.js?v=20260804-lazy-index";
+} from "../data/explorerBenchmark.js?v=20260915-all-currency";
 import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-benchmark-axis-font";
 import {
   buildExplorerDisplayRows,
+  EXPLORER_ALL_CURRENCIES_CODE,
+  EXPLORER_ALL_CURRENCIES_LABEL,
+  getConfiguredExplorerAxisCodes,
   getExplicitPaths,
   getExplorerAxisOptions,
   getExplorerContributionRatio,
@@ -30,11 +33,11 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260915-stable-lists";
+} from "../data/explorer.js?v=20260915-all-currency";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
-import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js";
+import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260915-all-currency";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
@@ -58,11 +61,14 @@ const ROW_URL_PARAM = "row";
 const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
 const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
-const EXPLORER_HISTORY_YEARS_URL_PARAM = "explorer_history_years";
+const EXPLORER_HISTORY_PERIODS_URL_PARAM = "explorer_history_periods";
 const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
 const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
 const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
-const DEFAULT_EXPLORER_HISTORY_YEARS = 2;
+// 8 prior periods at quarterly cadence is roughly the old default (current
+// year + 2 prior years); other frequencies now get the same period count,
+// just in their own unit (see getExplorerHistoryUnitLabel).
+const DEFAULT_EXPLORER_HISTORY_PERIODS = 8;
 const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map([
   ["F_20.04", "z"],
   ["F_20.05", "z"],
@@ -95,11 +101,15 @@ const REGION_DISPLAY_NAMES = typeof Intl.DisplayNames === "function"
   ? new Intl.DisplayNames(["en"], { type: "region" })
   : null;
 const EXPLORER_MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat("en", { month: "short" });
+// "months" is the calendar spacing this frequency represents; the actual
+// column step is derived at render time from the table's own underlying
+// granularity (see getExplorerDateColumnGapMonths), since a mixed dataset
+// has some templates reporting monthly and others quarterly.
 const EXPLORER_EVOLUTION_OPTIONS = [
-  { value: "monthly", label: "Monthly", step: 1, description: "Every reporting month" },
-  { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
-  { value: "semiannual", label: "Semiannual", step: 2, description: "Every six months" },
-  { value: "annual", label: "Annual", step: 4, description: "Every twelve months" }
+  { value: "monthly", label: "Monthly", months: 1, description: "Every reporting month" },
+  { value: "quarterly", label: "Quarterly", months: 3, description: "Every reporting quarter" },
+  { value: "semiannual", label: "Semiannual", months: 6, description: "Every six months" },
+  { value: "annual", label: "Annual", months: 12, description: "Every twelve months" }
 ];
 const EXPLORER_DISPLAY_OPTIONS = [
   { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" },
@@ -117,7 +127,7 @@ const pendingUrlAxis = getUrlAxisParam();
 const pendingUrlRow = getUrlRowParam();
 const pendingUrlColumn = getUrlColumnParam();
 const pendingUrlTab = getUrlTabParam();
-const pendingUrlHistoryYears = getUrlHistoryYearsParam();
+const pendingUrlHistoryPeriods = getUrlHistoryPeriodsParam();
 const pendingUrlAnchorReference = readUrlStateParams().get(EXPLORER_ANCHOR_REFERENCE_URL_PARAM) ?? "";
 let explorerAnchorReferenceLabel = pendingUrlAnchorReference;
 let explorerStickyFrame = 0;
@@ -343,15 +353,16 @@ function createExplorerTemplateContext() {
     evolutionFrequency: "quarterly",
     hasDetectedEvolutionFrequency: false,
     displayMode: "temporal",
-    historyYears: pendingUrlHistoryYears
+    historyPeriods: pendingUrlHistoryPeriods
   };
 }
 
 function getActiveExplorerTemplate() {
   const templates = getExplorerTemplates(getLatestState());
-  return templates.find((template) => template.tableId === activeExplorerTemplateId) ?? templates[0] ?? {
-    tableId: activeExplorerTemplateId || EXPLORER_TARGET.tableId,
-    label: activeExplorerTemplateId || EXPLORER_TARGET.tableId
+  return templates.find((template) => template.id === activeExplorerTemplateId) ?? templates[0] ?? {
+    id: activeExplorerTemplateId || EXPLORER_TARGET.tableId,
+    label: activeExplorerTemplateId || EXPLORER_TARGET.tableId,
+    tableId: activeExplorerTemplateId || EXPLORER_TARGET.tableId
   };
 }
 
@@ -369,8 +380,8 @@ function ensureActiveExplorerTemplate(state) {
     if (urlTemplateId) activeExplorerTemplateId = urlTemplateId;
   }
 
-  if (!templates.some((template) => template.tableId === activeExplorerTemplateId)) {
-    activeExplorerTemplateId = templates[0].tableId;
+  if (!templates.some((template) => template.id === activeExplorerTemplateId)) {
+    activeExplorerTemplateId = templates[0].id;
     updateUrlTemplateParam(activeExplorerTemplateId);
   }
 
@@ -394,10 +405,10 @@ function updateUrlExplorerSelectionParams() {
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
   setOrDeleteUrlParam(url, EXPLORER_ANCHOR_REFERENCE_URL_PARAM, explorerAnchorReferenceLabel);
-  if (context.historyYears === DEFAULT_EXPLORER_HISTORY_YEARS) {
-    url.searchParams.delete(EXPLORER_HISTORY_YEARS_URL_PARAM);
+  if (context.historyPeriods === DEFAULT_EXPLORER_HISTORY_PERIODS) {
+    url.searchParams.delete(EXPLORER_HISTORY_PERIODS_URL_PARAM);
   } else {
-    url.searchParams.set(EXPLORER_HISTORY_YEARS_URL_PARAM, String(context.historyYears));
+    url.searchParams.set(EXPLORER_HISTORY_PERIODS_URL_PARAM, String(context.historyPeriods));
   }
   if (explorerGeographyLayout === "euro-first") {
     url.searchParams.delete(EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM);
@@ -436,13 +447,13 @@ function getUrlTemplateParam() {
   return readUrlStateParams().get(TEMPLATE_URL_PARAM) ?? "";
 }
 
-function getUrlHistoryYearsParam() {
-  const rawParam = readUrlStateParams().get(EXPLORER_HISTORY_YEARS_URL_PARAM);
-  if (rawParam === null || rawParam === "") return DEFAULT_EXPLORER_HISTORY_YEARS;
+function getUrlHistoryPeriodsParam() {
+  const rawParam = readUrlStateParams().get(EXPLORER_HISTORY_PERIODS_URL_PARAM);
+  if (rawParam === null || rawParam === "") return DEFAULT_EXPLORER_HISTORY_PERIODS;
   const rawValue = Number(rawParam);
   return Number.isInteger(rawValue) && rawValue >= 0
     ? rawValue
-    : DEFAULT_EXPLORER_HISTORY_YEARS;
+    : DEFAULT_EXPLORER_HISTORY_PERIODS;
 }
 
 function getUrlGeographyLayoutParam() {
@@ -483,7 +494,7 @@ function updateExplorerAdvancedSearch(event) {
 
 function getExplorerConceptIndex(state = getLatestState()) {
   const templates = getExplorerTemplates(state);
-  const templateIds = new Set(templates.map((template) => template.tableId));
+  const templateIds = new Set(templates.flatMap((template) => [template.tableId, template.id]));
   const templateKey = [...templateIds].join("|");
   if (explorerConceptIndexCache
       && explorerConceptIndexCache.points === state?.explorerPoints
@@ -653,7 +664,7 @@ function getExplorerAdvancedSearchResults(state) {
   const templates = getExplorerTemplates(state);
   if (!query) return { byTemplate: new Map(), hasQuery: false, templates };
 
-  const templateKey = templates.map((template) => template.tableId).join("|");
+  const templateKey = templates.map((template) => template.id).join("|");
   if (explorerAdvancedSearchCache
       && explorerAdvancedSearchCache.query === query
       && explorerAdvancedSearchCache.points === state?.explorerPoints
@@ -672,12 +683,19 @@ function getExplorerAdvancedSearchResults(state) {
   const byTemplate = new Map();
   const matchingTemplates = [];
   templates.forEach((template) => {
-    const axisOptions = getExplorerAxisOptions(state, template.tableId);
+    const axisOptions = getExplorerAxisOptions(state, template.tableId, template.id);
     const availableByAxis = Object.fromEntries(["x", "y", "z"].map((axis) => [axis, new Set(axisOptions[axis]?.codes ?? [])]));
     const matchesByAxis = { x: new Set(), y: new Set(), z: new Set() };
     const templateMatch = explorerMetadataMatches([template.tableId, template.label, template.description], tokens);
 
-    (pointsByTemplate.get(template.tableId) ?? []).forEach((point) => {
+    // A sectioned template's y-axis points live under its own section id
+    // in the CSV (see EXPLORER_TEMPLATE_ROW_SECTIONS) while its x/z points
+    // stay under the real table_id, so both need checking here.
+    const templatePoints = template.id === template.tableId
+      ? (pointsByTemplate.get(template.tableId) ?? [])
+      : [...(pointsByTemplate.get(template.tableId) ?? []), ...(pointsByTemplate.get(template.id) ?? [])];
+
+    templatePoints.forEach((point) => {
       const axis = String(point.coordinate ?? "").charAt(0).toLowerCase();
       if (!matchesByAxis[axis]) return;
       const code = normalizeAxisCode(point.code, axis);
@@ -695,7 +713,7 @@ function getExplorerAdvancedSearchResults(state) {
     // this one potentially relevant to that result.
     const restrictedAxis = !templateMatch && matchedAxes.length === 1 ? matchedAxes[0] : "";
     const result = { matchesByAxis, restrictedAxis, templateMatch };
-    byTemplate.set(template.tableId, result);
+    byTemplate.set(template.id, result);
     matchingTemplates.push(template);
   });
 
@@ -717,7 +735,7 @@ function ensureActiveExplorerTemplateMatchesSearch(state) {
     return;
   }
   if (!results.byTemplate.has(activeExplorerTemplateId)) {
-    activeExplorerTemplateId = results.templates[0].tableId;
+    activeExplorerTemplateId = results.templates[0].id;
     updateUrlTemplateParam(activeExplorerTemplateId);
   }
   const templateResult = results.byTemplate.get(activeExplorerTemplateId);
@@ -763,13 +781,13 @@ function setActiveExplorerTemplate(tableId) {
 function findMatchingExplorerTemplateId(templates, requestedTemplateId) {
   if (!requestedTemplateId) return "";
 
-  const exactMatch = templates.find((template) => template.tableId === requestedTemplateId);
-  if (exactMatch) return exactMatch.tableId;
+  const exactMatch = templates.find((template) => template.id === requestedTemplateId);
+  if (exactMatch) return exactMatch.id;
 
   const normalizedRequestedTemplateId = normalizeUrlTemplateValue(requestedTemplateId);
   return templates.find((template) => (
-    normalizeUrlTemplateValue(template.tableId) === normalizedRequestedTemplateId
-  ))?.tableId ?? "";
+    normalizeUrlTemplateValue(template.id) === normalizedRequestedTemplateId
+  ))?.id ?? "";
 }
 
 function normalizeUrlTemplateValue(value) {
@@ -826,17 +844,18 @@ function detectExplorerTemplateEvolutionFrequency(state, tableId) {
 }
 
 function ensureExplorerSelections(state) {
-  const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
-  ensureExplorerTemplateSelections(state, tableId);
+  ensureExplorerTemplateSelections(state, getActiveExplorerTemplate());
 }
 
-function ensureExplorerTemplateSelections(state, tableId) {
-  const context = getExplorerContextForTemplate(tableId);
+function ensureExplorerTemplateSelections(state, template) {
+  const templateId = template?.id ?? EXPLORER_TARGET.tableId;
+  const tableId = template?.tableId ?? EXPLORER_TARGET.tableId;
+  const context = getExplorerContextForTemplate(templateId);
   if (!context.hasDetectedEvolutionFrequency) {
     context.evolutionFrequency = detectExplorerTemplateEvolutionFrequency(state, tableId);
     context.hasDetectedEvolutionFrequency = true;
   }
-  const axisOptions = getExplorerAxisOptions(state, tableId);
+  const axisOptions = getExplorerAxisOptions(state, tableId, templateId);
   const yCodes = axisOptions.y.codes;
   const zCodes = axisOptions.z.codes;
   const xCodes = axisOptions.x.codes;
@@ -876,9 +895,17 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
   const rows = getExplorerRowsForTemplate(state, tableId);
   if (rows.length === 0 || hasExplorerSelectedCombination(rows, state.columns, context)) return;
 
-  const firstRow = rows[0];
   const indexes = getCompleteAxisColumnIndexes(state.columns);
   if (!indexes) return;
+
+  // A template split into sections (see EXPLORER_TEMPLATE_ROW_SECTIONS)
+  // shares its real table_id across every section, so the unscoped rows
+  // above can include another section's data - only pick a row whose
+  // y-code actually belongs to this section's own list when possible.
+  const yCodeSet = new Set(axisOptions.y.codes);
+  const firstRow = (yCodeSet.size > 0
+    ? rows.find((row) => yCodeSet.has(normalizeAxisCode(row[indexes.yAxisRcCode], "y")))
+    : null) ?? rows[0];
 
   if (axisOptions.x.codes.length > 0) {
     context.selectedXCode = normalizeAxisCode(firstRow[indexes.xAxisRcCode], "x");
@@ -909,14 +936,14 @@ function syncExplorerBenchmarkPlacement() {
   }
 }
 
-export function renderExplorer(state) {
-  clearExplorerCellRangeSelection();
-  ensureActiveExplorerTemplate(state);
-  ensureActiveExplorerTemplateMatchesSearch(state);
+// Everything around the big table that a pure selection change (clicking a
+// different row/cell) also needs refreshed: URL, axis caption chips,
+// filters bar, context panel and the benchmark chart. Shared by the full
+// render and by refreshExplorerSelectionOnly, which skips the expensive
+// table rebuild below since selecting a row never changes which rows or
+// columns are shown - only which one is highlighted.
+function refreshExplorerSelectionChrome(state) {
   const context = getActiveExplorerContext();
-  const template = getActiveExplorerTemplate();
-  const templates = getExplorerTemplates(state);
-  ensureExplorerSelections(state);
   updateUrlExplorerSelectionParams();
   elements.unitSelect.value = state.selectedUnit;
   renderExplorerAxisTabs();
@@ -966,6 +993,35 @@ export function renderExplorer(state) {
   } else {
     destroyExplorerBenchmarkChart(elements.explorerBenchmarkExpandedChart);
   }
+}
+
+// Fast path for selecting a row/cell: the set of rows and columns shown
+// never changes just because a different one got selected, so this avoids
+// tearing down and rebuilding the whole (potentially 100+ row) table -
+// see renderExplorer for the full rebuild this intentionally skips.
+function refreshExplorerSelectionOnly(state) {
+  clearExplorerCellRangeSelection();
+  ensureActiveExplorerTemplate(state);
+  ensureActiveExplorerTemplateMatchesSearch(state);
+  ensureExplorerSelections(state);
+  // The full render's buildExplorerEvolutionSeries would normally translate
+  // the clicked reference date into a visible column position (see
+  // recomputeExplorerSelectedCellColumnIndex) - redo just that here since
+  // this path skips rebuilding the series entirely.
+  recomputeExplorerSelectedCellColumnIndex(getExplorerActiveDateColumns(), state);
+  refreshExplorerSelectionChrome(state);
+  applyExplorerSelection();
+}
+
+export function renderExplorer(state) {
+  clearExplorerCellRangeSelection();
+  ensureActiveExplorerTemplate(state);
+  ensureActiveExplorerTemplateMatchesSearch(state);
+  const context = getActiveExplorerContext();
+  const template = getActiveExplorerTemplate();
+  const templates = getExplorerTemplates(state);
+  ensureExplorerSelections(state);
+  refreshExplorerSelectionChrome(state);
 
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
@@ -974,9 +1030,10 @@ export function renderExplorer(state) {
     selectedZCode: context.selectedZCode,
     tableId: template?.tableId,
     templateSelections: getExplorerTemplateSelections(),
-    templates
+    templates,
+    yConfigTableId: template?.id
   });
-  const searchedTableSeries = filterExplorerSeriesByAdvancedSearch(tableSeries, state, template?.tableId, context.activeAxis);
+  const searchedTableSeries = filterExplorerSeriesByAdvancedSearch(tableSeries, state, template?.id, context.activeAxis);
   const geographicTableSeries = applyExplorerGeographyPresentation(searchedTableSeries, state);
   const displayedTableSeries = buildExplorerEvolutionSeries(geographicTableSeries, state);
   elements.explorerTable.replaceChildren();
@@ -1056,7 +1113,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
     metadata.push({ label: "Reference date", value: formatReferenceQuarterLabel(selectedReference.label) });
   }
 
-  const templateId = template?.tableId || activeExplorerTemplateId || "Template";
+  const templateId = template?.id || activeExplorerTemplateId || "Template";
   return {
     columns,
     fileName: sanitizeExcelFileName(`Agora Explorer_${templateId}_${displayedDimension}.xlsx`),
@@ -1097,6 +1154,27 @@ function sanitizeExcelFileName(fileName) {
   return fileName.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
 }
 
+// External callers only know the real table_id (e.g. IRB/Credit Risk deep
+// links). When that table is split into sections, resolve to the section
+// whose y-axis config actually has this code, defaulting to the first
+// section so the link still lands somewhere sensible.
+function resolveExplorerTemplateSelectionId(tableId, yCode) {
+  const candidates = getExplorerTemplates(getLatestState()).filter((template) => template.tableId === tableId);
+  if (candidates.length <= 1) return tableId;
+
+  if (yCode) {
+    const normalizedYCode = normalizeAxisCode(yCode, "y");
+    const match = candidates.find((candidate) => (getLatestState()?.explorerPoints ?? []).some((point) => (
+      point.tableId === candidate.id
+      && point.coordinate === "y_axis_rc_code"
+      && point.code === normalizedYCode
+    )));
+    if (match) return match.id;
+  }
+
+  return candidates[0].id;
+}
+
 export function openExplorerPoint({
   returnTarget = null,
   tableId,
@@ -1108,7 +1186,7 @@ export function openExplorerPoint({
 
   hasInteractedWithExplorerSelection = true;
   explorerReturnTarget = returnTarget?.module ? returnTarget : null;
-  activeExplorerTemplateId = tableId;
+  activeExplorerTemplateId = resolveExplorerTemplateSelectionId(tableId, yCode);
   updateUrlTemplateParam(activeExplorerTemplateId);
 
   const context = getExplorerContextForTemplate(activeExplorerTemplateId);
@@ -1154,14 +1232,14 @@ function selectExplorerBenchmarkJst(jstCode) {
 
 function ensureAllExplorerTemplateSelections(state) {
   getExplorerTemplates(state).forEach((template) => {
-    ensureExplorerTemplateSelections(state, template.tableId);
+    ensureExplorerTemplateSelections(state, template);
   });
 }
 
 function getExplorerTemplateSelections(state = getLatestState()) {
   return Object.fromEntries(getExplorerTemplates(state).map((template) => {
-    const context = getExplorerContextForTemplate(template.tableId);
-    return [template.tableId, {
+    const context = getExplorerContextForTemplate(template.id);
+    return [template.id, {
       selectedXCode: context.selectedXCode,
       selectedYCode: context.selectedYCode,
       selectedZCode: context.selectedZCode
@@ -1339,7 +1417,7 @@ function renderExplorerTable(series, selectedUnit) {
 
     const code = document.createElement("td");
     code.className = "code-column";
-    if (!seriesRow.isVirtual && seriesRow.code) {
+    if (!seriesRow.isVirtual && seriesRow.code && seriesRow.code !== EXPLORER_ALL_CURRENCIES_CODE) {
       const codeBadge = document.createElement("span");
       codeBadge.className = "code-column-badge";
       codeBadge.textContent = seriesRow.code;
@@ -1473,7 +1551,7 @@ function getExplorerDateFocusSelection(series) {
   const latestIndex = Math.max(0, series.dateColumns.length - 1);
   const selectedIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
   const currentIndex = selectedIndex >= 0 ? selectedIndex : latestIndex;
-  const comparisonIndex = currentIndex - getActiveExplorerEvolutionOption().step;
+  const comparisonIndex = currentIndex - getExplorerEvolutionStep(series.dateColumns);
   const context = getActiveExplorerContext();
   context.selectedReferenceLabel = series.dateColumns[currentIndex]?.label ?? "";
   context.selectedCellColumnIndex = 0;
@@ -1854,7 +1932,8 @@ function getExplorerPropagatedContribution(activeAxis) {
 }
 
 function getExplorerAxisCodePath(axis, code) {
-  const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
+  const activeTemplate = getActiveExplorerTemplate();
+  const tableId = activeTemplate?.tableId ?? EXPLORER_TARGET.tableId;
   if (!code) return "";
 
   if (axis === "x") {
@@ -1862,8 +1941,9 @@ function getExplorerAxisCodePath(axis, code) {
     return normalizeHierarchyPath(splitHierarchyPath(String(description ?? "").replaceAll("/", ">")).join(" > "));
   }
 
+  const pointTableId = axis === "y" ? (activeTemplate?.id ?? tableId) : tableId;
   const point = getLatestState()?.explorerPoints?.find((item) => (
-    item.tableId === tableId
+    item.tableId === pointTableId
     && item.coordinate === `${axis}_axis_rc_code`
     && item.code === code
   ));
@@ -2213,44 +2293,92 @@ function getActiveExplorerEvolutionOption() {
   return EXPLORER_EVOLUTION_OPTIONS.find((option) => option.value === frequency) ?? EXPLORER_EVOLUTION_OPTIONS[0];
 }
 
+// Smallest positive gap (in months) between consecutive date columns, i.e.
+// this table's actual reporting granularity - 1 for a monthly table, 3 for
+// a quarterly one, etc. Falls back to 3 (quarterly) when it can't be
+// determined from fewer than two columns.
+function getExplorerDateColumnGapMonths(dateColumns) {
+  const gaps = dateColumns
+    .slice(1)
+    .map((column, index) => {
+      const previous = dateColumns[index];
+      if (!column.date || !previous.date) return null;
+      return (column.date.getFullYear() - previous.date.getFullYear()) * 12 + (column.date.getMonth() - previous.date.getMonth());
+    })
+    .filter((gap) => Number.isFinite(gap) && gap > 0);
+
+  return gaps.length > 0 ? Math.min(...gaps) : 3;
+}
+
+function getExplorerEvolutionStep(dateColumns) {
+  const gapMonths = getExplorerDateColumnGapMonths(dateColumns);
+  return Math.max(1, Math.round(getActiveExplorerEvolutionOption().months / gapMonths));
+}
+
 function getActiveExplorerDisplayOption() {
   const displayMode = getActiveExplorerContext().displayMode;
   return EXPLORER_DISPLAY_OPTIONS.find((option) => option.value === displayMode) ?? EXPLORER_DISPLAY_OPTIONS[0];
 }
 
+// Which indexes into a full (per-table) dateColumns array are actually
+// shown, given the current evolution frequency (step) and history depth -
+// anchored on the latest available date, or on explorerAnchorReferenceLabel
+// once the user has clicked an older cell.
+function computeExplorerVisibleDateIndexes(dateColumns, context) {
+  const latestIndex = dateColumns.length - 1;
+  const step = getExplorerEvolutionStep(dateColumns);
+  const requestedAnchorIndex = dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
+  const anchorIndex = requestedAnchorIndex >= 0 ? requestedAnchorIndex : latestIndex;
+  explorerAnchorReferenceLabel = requestedAnchorIndex >= 0 ? explorerAnchorReferenceLabel : "";
+  // History depth is a plain count of periods at the current frequency
+  // (see createExplorerHistoryDepthControl) - the anchor itself plus that
+  // many prior periods, regardless of calendar-year boundaries.
+  const maxVisiblePoints = context.historyPeriods + 1;
+  const selectedIndexes = [];
+  for (let index = anchorIndex; index >= 0 && selectedIndexes.length < maxVisiblePoints; index -= step) {
+    selectedIndexes.push(index);
+  }
+  return selectedIndexes.sort((left, right) => left - right);
+}
+
+// Translates context.selectedReferenceLabel (a stable identity - which
+// column's data is highlighted) into context.selectedCellColumnIndex (a
+// position within whatever's currently visible - what applyExplorerSelection
+// actually highlights). Needs redoing whenever the visible column set could
+// have changed: full renders always do; refreshExplorerSelectionOnly calls
+// it directly since it skips rebuilding the series that would otherwise
+// carry this out. Pass the already-computed selectedIndexes when the caller
+// has one, to avoid working it out twice.
+function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIndexes = null) {
+  const context = getActiveExplorerContext();
+  if (!dateColumns.length) return;
+
+  const selectedReference = getSelectedExplorerReference(state);
+  const latestIndex = dateColumns.length - 1;
+  const selectedIndex = dateColumns.findIndex((column) => column.label === selectedReference?.label);
+  const resolvedSelectedIndex = selectedIndex >= 0 ? selectedIndex : latestIndex;
+  context.selectedReferenceLabel = dateColumns[resolvedSelectedIndex]?.label ?? "";
+
+  if (context.displayMode === "focus") {
+    context.selectedCellColumnIndex = 0;
+    return;
+  }
+
+  const resolvedIndexes = selectedIndexes ?? computeExplorerVisibleDateIndexes(dateColumns, context);
+  const visibleSelectedIndex = [...resolvedIndexes].reverse().indexOf(resolvedSelectedIndex);
+  context.selectedCellColumnIndex = visibleSelectedIndex >= 0 ? visibleSelectedIndex : 0;
+}
+
 function buildExplorerEvolutionSeries(series, state) {
   if (!series?.dateColumns?.length) return series;
   const context = getActiveExplorerContext();
-  const selectedReference = getSelectedExplorerReference(state);
-  const latestIndex = series.dateColumns.length - 1;
-  const selectedIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
-  const resolvedSelectedIndex = selectedIndex >= 0 ? selectedIndex : latestIndex;
   if (context.displayMode === "focus") {
-    context.selectedReferenceLabel = series.dateColumns[resolvedSelectedIndex]?.label ?? "";
-    context.selectedCellColumnIndex = 0;
+    recomputeExplorerSelectedCellColumnIndex(series.dateColumns, state);
     return series;
   }
-  const step = getActiveExplorerEvolutionOption().step;
-  // Temporal visibility is a stable window anchored on the latest available
-  // reference date. The selected reference only controls highlighting. Using
-  // it as the window anchor progressively discarded every newer column each
-  // time an older cell was clicked.
-  const requestedAnchorIndex = series.dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
-  const anchorIndex = requestedAnchorIndex >= 0 ? requestedAnchorIndex : latestIndex;
-  explorerAnchorReferenceLabel = requestedAnchorIndex >= 0 ? explorerAnchorReferenceLabel : "";
-  const anchorYear = series.dateColumns[anchorIndex]?.date?.getFullYear();
-  const oldestYear = Number.isFinite(anchorYear) ? anchorYear - context.historyYears : Number.NEGATIVE_INFINITY;
-  const selectedIndexes = [];
-  for (let index = anchorIndex; index >= 0; index -= step) {
-    const year = series.dateColumns[index]?.date?.getFullYear();
-    if (Number.isFinite(year) && year < oldestYear) break;
-    selectedIndexes.push(index);
-  }
-  selectedIndexes.sort((left, right) => left - right);
 
-  context.selectedReferenceLabel = series.dateColumns[resolvedSelectedIndex]?.label ?? "";
-  const visibleSelectedIndex = [...selectedIndexes].reverse().indexOf(resolvedSelectedIndex);
-  context.selectedCellColumnIndex = visibleSelectedIndex >= 0 ? visibleSelectedIndex : 0;
+  const selectedIndexes = computeExplorerVisibleDateIndexes(series.dateColumns, context);
+  recomputeExplorerSelectedCellColumnIndex(series.dateColumns, state, selectedIndexes);
 
   return {
     ...series,
@@ -2318,8 +2446,9 @@ function renderExplorerAxisTabs() {
   const activeAxis = getActiveExplorerAxis();
   const context = getActiveExplorerContext();
   const axisCodes = { x: context.selectedXCode, y: context.selectedYCode, z: context.selectedZCode };
-  const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
-  const axisOptions = getExplorerAxisOptions(getLatestState() ?? { columns: [], rows: [], explorerPoints: [] }, tableId);
+  const activeTemplate = getActiveExplorerTemplate();
+  const tableId = activeTemplate?.tableId ?? EXPLORER_TARGET.tableId;
+  const axisOptions = getExplorerAxisOptions(getLatestState() ?? { columns: [], rows: [], explorerPoints: [] }, tableId, activeTemplate?.id);
 
   if (elements.explorerTemplateControl) {
     const showsTemplates = explorerContextTopic === "";
@@ -2450,7 +2579,7 @@ function renderExplorerContextPanel(state) {
   // The lower pane shows templates by default. The selection and its actions
   // live in a separate, permanent pane above and cannot be replaced here.
   const searchResults = getExplorerAdvancedSearchResults(state);
-  article.append(createExplorerTemplateList(searchResults.templates, activeTemplate?.tableId ?? activeExplorerTemplateId));
+  article.append(createExplorerTemplateList(searchResults.templates, activeTemplate?.id ?? activeExplorerTemplateId));
   replaceExplorerContextDetail(article);
 }
 
@@ -2909,14 +3038,42 @@ function renderExplorerDisplayModePanel() {
   replaceExplorerContextDetail(article);
 }
 
+// The unit of "history depth" tracks whatever period the evolution
+// frequency currently walks (see getExplorerEvolutionStep) - months for
+// Monthly, quarters for Quarterly, and so on - instead of a fixed
+// calendar-year window that didn't mean the same thing across tables.
+function getExplorerHistoryUnitLabel(count) {
+  const singular = {
+    annual: "year",
+    monthly: "month",
+    quarterly: "quarter",
+    semiannual: "semester"
+  }[getActiveExplorerEvolutionOption().value] ?? "period";
+  return count === 1 ? singular : `${singular}s`;
+}
+
+function getExplorerActiveDateColumns() {
+  const state = getLatestState();
+  const template = getActiveExplorerTemplate();
+  const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
+  const references = getReferenceColumns(state?.columns ?? []);
+  if (!indexes || !template?.tableId || !state?.rows) return references;
+
+  return references.filter((reference) => (
+    state.rows.some((row) => row[indexes.tableId] === template.tableId && String(row[reference.index] ?? "").trim() !== "")
+  ));
+}
+
 function createExplorerHistoryDepthControl() {
   const context = getActiveExplorerContext();
-  const references = getReferenceColumns(getLatestState()?.columns ?? []);
-  const selectedReference = getSelectedExplorerReference();
-  const anchorYear = selectedReference?.date?.getFullYear() ?? references.at(-1)?.date?.getFullYear();
-  const firstYear = references[0]?.date?.getFullYear() ?? anchorYear;
-  const maximumYears = Math.max(0, (anchorYear ?? firstYear ?? 0) - (firstYear ?? anchorYear ?? 0));
-  context.historyYears = Math.min(context.historyYears, maximumYears);
+  const dateColumns = getExplorerActiveDateColumns();
+  const step = getExplorerEvolutionStep(dateColumns);
+  const requestedAnchorIndex = dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
+  const anchorIndex = requestedAnchorIndex >= 0 ? requestedAnchorIndex : dateColumns.length - 1;
+
+  let maximumPeriods = 0;
+  for (let index = anchorIndex - step; index >= 0; index -= step) maximumPeriods += 1;
+  context.historyPeriods = Math.min(context.historyPeriods, maximumPeriods);
 
   const section = document.createElement("section");
   section.className = "explorer-history-depth-control";
@@ -2926,25 +3083,25 @@ function createExplorerHistoryDepthControl() {
   label.textContent = "History depth";
   const value = document.createElement("span");
   value.className = "explorer-history-depth-value";
-  const updateValue = (years) => {
-    value.textContent = years === 0
-      ? "Current year"
-      : `Current year + ${years} prior ${years === 1 ? "year" : "years"}`;
+  const updateValue = (periods) => {
+    value.textContent = periods === 0
+      ? "Latest period only"
+      : `Latest + ${periods} prior ${getExplorerHistoryUnitLabel(periods)}`;
   };
-  updateValue(context.historyYears);
+  updateValue(context.historyPeriods);
   heading.append(label, value);
 
   const input = document.createElement("input");
   input.type = "range";
   input.min = "0";
-  input.max = String(maximumYears);
+  input.max = String(maximumPeriods);
   input.step = "1";
-  input.value = String(context.historyYears);
-  input.disabled = maximumYears === 0;
-  input.setAttribute("aria-label", "History depth in prior calendar years");
+  input.value = String(context.historyPeriods);
+  input.disabled = maximumPeriods === 0;
+  input.setAttribute("aria-label", `History depth in prior ${getExplorerHistoryUnitLabel(2)}`);
   input.addEventListener("input", () => updateValue(Number(input.value)));
   input.addEventListener("change", () => {
-    context.historyYears = Number(input.value);
+    context.historyPeriods = Number(input.value);
     saveExplorerScrollPosition();
     if (getLatestState()) rerenderApp(getLatestState());
   });
@@ -3257,7 +3414,8 @@ function getExplorerSelectedPointMetrics() {
     selectedZCode: context.selectedZCode,
     tableId: template?.tableId,
     templateSelections: getExplorerTemplateSelections(),
-    templates: getExplorerTemplates(state)
+    templates: getExplorerTemplates(state),
+    yConfigTableId: template?.id
   });
   const rows = series.rows.map(normalizeExplorerSeriesRow);
   const row = rows.find((item) => item.code === selectedCode);
@@ -3385,6 +3543,27 @@ function renderExplorerDescriptionPanel() {
 // The template axis-tab is now a static display only (see index.html):
 // this list is the only way left to switch templates, so it's always
 // visible in the context panel rather than behind a click.
+// A row with no data for the selected JST already shows as dashes in the
+// table (see getPreferredExplorerAxisCodes), which is enough feedback once
+// you're looking at it - but there's no reason to open a template at all if
+// the whole thing is empty for this JST, hence the badge in the list.
+function isExplorerTemplateEmptyForJst(state, template) {
+  if (!state?.selectedJst) return false;
+
+  const rows = getExplorerRowsForTemplate(state, template.tableId);
+  if (rows.length === 0) return true;
+  if (template.id === template.tableId) return false;
+
+  // Sectioned template (see EXPLORER_TEMPLATE_ROW_SECTIONS): the real
+  // table can have rows while none of them belong to this section's own
+  // y-axis codes.
+  const indexes = getCompleteAxisColumnIndexes(state.columns);
+  const sectionYCodes = new Set(getConfiguredExplorerAxisCodes(state, template.id, "y"));
+  if (!indexes || sectionYCodes.size === 0) return false;
+
+  return !rows.some((row) => sectionYCodes.has(normalizeAxisCode(row[indexes.yAxisRcCode], "y")));
+}
+
 function createExplorerTemplateList(templates, activeTemplateId) {
   const section = document.createElement("section");
   section.className = "explorer-template-list-section";
@@ -3401,8 +3580,9 @@ function createExplorerTemplateList(templates, activeTemplateId) {
     list.append(empty);
   }
 
+  const state = getLatestState();
   templates.forEach((template) => {
-    const isActive = template.tableId === activeTemplateId;
+    const isActive = template.id === activeTemplateId;
     const option = document.createElement("button");
     option.type = "button";
     option.className = "explorer-template-option";
@@ -3423,7 +3603,14 @@ function createExplorerTemplateList(templates, activeTemplateId) {
       option.append(description);
     }
 
-    option.addEventListener("click", () => setActiveExplorerTemplate(template.tableId));
+    if (isExplorerTemplateEmptyForJst(state, template)) {
+      const badge = document.createElement("span");
+      badge.className = "explorer-template-option-empty-badge";
+      badge.textContent = "Empty";
+      option.append(badge);
+    }
+
+    option.addEventListener("click", () => setActiveExplorerTemplate(template.id));
     list.append(option);
   });
 
@@ -3469,9 +3656,11 @@ function createAxisRatioClearButton(axis) {
 
 function getExplorerAxisCaptions() {
   const context = getActiveExplorerContext();
-  const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
+  const activeTemplateForCaptions = getActiveExplorerTemplate();
+  const tableId = activeTemplateForCaptions?.tableId ?? EXPLORER_TARGET.tableId;
+  const yConfigTableId = activeTemplateForCaptions?.id ?? tableId;
   const yPoint = getLatestState()?.explorerPoints?.find((point) => (
-    point.tableId === tableId
+    point.tableId === yConfigTableId
     && point.code === context.selectedYCode
     && point.coordinate === "y_axis_rc_code"
   ));
@@ -3484,17 +3673,17 @@ function getExplorerAxisCaptions() {
     ?.find(tableId, "x_axis_rc_code", context.selectedXCode)
     ?.description;
 
-  const activeTemplate = getActiveExplorerTemplate();
-
   return {
     // activeTemplate.label is already "<tableId> - <description>" (see
     // getExplorerTemplateLabel), so it's used as-is here instead of going
     // through formatExplorerAxisCaption like the other axes, which would
     // double the table ID (e.g. "F_01.01 - F_01.01 - Own funds").
-    template: activeTemplate?.label || activeExplorerTemplateId,
+    template: activeTemplateForCaptions?.label || activeExplorerTemplateId,
     x: formatExplorerAxisCaption(context.selectedXCode, xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : "")),
     y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
-    z: formatExplorerAxisCaption(context.selectedZCode, zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
+    z: context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE
+      ? EXPLORER_ALL_CURRENCIES_LABEL
+      : formatExplorerAxisCaption(context.selectedZCode, zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
   };
 }
 
@@ -3867,7 +4056,7 @@ function selectExplorerRow(pointCode, options = {}) {
 
   if (getLatestState()) {
     saveExplorerScrollPosition();
-    rerenderApp(getLatestState());
+    refreshExplorerSelectionOnly(getLatestState());
     if (shouldFocus && selectedCode) focusSelectedExplorerRow();
     return;
   }

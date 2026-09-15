@@ -1780,6 +1780,7 @@ button:focus-visible {
 
 /* Flat option rows, aligned with the Evolution frequency selector. */
 .explorer-template-option {
+  position: relative;
   display: grid;
   align-content: center;
   gap: 3px;
@@ -1794,6 +1795,20 @@ button:focus-visible {
   padding: 8px;
   text-align: left;
   transition: background .15s ease;
+}
+
+.explorer-template-option-empty-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #eef1ef;
+  color: #66736d;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .explorer-template-option:hover {

@@ -1,12 +1,16 @@
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { parseNumericValue } from "./core/referenceColumns.js";
+import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL } from "./explorer.js?v=20260915-all-currency";
 
 export function getExplorerSelectionsForAxisCode(context, activeAxis, axisCode) {
+  const zCode = normalizeAxisCode(activeAxis === "z" ? axisCode : context.selectedZCode, "z");
   return {
     selectedXCode: normalizeAxisCode(activeAxis === "x" ? axisCode : context.selectedXCode, "x"),
     selectedYCode: normalizeAxisCode(activeAxis === "y" ? axisCode : context.selectedYCode, "y"),
-    selectedZCode: normalizeAxisCode(activeAxis === "z" ? axisCode : context.selectedZCode, "z")
+    // "All Currency" is a display-only sentinel (see explorer.js) - it
+    // should never be used to filter rows, only to mean "any currency".
+    selectedZCode: zCode === EXPLORER_ALL_CURRENCIES_CODE ? "" : zCode
   };
 }
 
@@ -61,6 +65,7 @@ export function getBenchmarkLabel(state, tableId, context, activeAxis, activeTem
       || `Column ${context.selectedXCode}`;
   }
   if (activeAxis === "z") {
+    if (context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE) return EXPLORER_ALL_CURRENCIES_LABEL;
     return state?.explorerPoints?.find((point) => (
       point.tableId === tableId
       && point.coordinate === "z_axis_rc_code"

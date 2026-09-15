@@ -1,5 +1,7 @@
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { normalizeAxisCode } from "./core/axisCode.js";
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
+import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260915-all-currency";
 
 // Builds a Hive query that reproduces one or several selected Explorer
 // cells, against the same table used by scripts/hive_to_dataset.py. Values
@@ -38,11 +40,22 @@ ORDER BY reference_period;`;
 function buildPointCondition(state, indexes, point, includeDateFilter) {
   if (!point?.tableId) return null;
 
-  const matchedRows = getIndexedRowsByCoordinates(state, point.tableId, {
-    selectedXCode: point.selectedXCode,
-    selectedYCode: point.selectedYCode,
-    selectedZCode: point.selectedZCode
-  }, state.selectedJst);
+  // "All Currency" (see explorer.js) has no single matching row to look
+  // up by exact coordinates - find any row for this x/y instead and drop
+  // the z filter entirely, matching every currency.
+  const isAllCurrencies = point.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE;
+  const matchedRows = isAllCurrencies
+    ? (state.rows ?? []).filter((row) => (
+      row[indexes.tableId] === point.tableId
+      && row[indexes.jstCode] === state.selectedJst
+      && normalizeAxisCode(row[indexes.xAxisRcCode], "x") === normalizeAxisCode(point.selectedXCode, "x")
+      && normalizeAxisCode(row[indexes.yAxisRcCode], "y") === normalizeAxisCode(point.selectedYCode, "y")
+    ))
+    : getIndexedRowsByCoordinates(state, point.tableId, {
+      selectedXCode: point.selectedXCode,
+      selectedYCode: point.selectedYCode,
+      selectedZCode: point.selectedZCode
+    }, state.selectedJst);
   const row = matchedRows[0];
   if (!row) return null;
 
@@ -50,7 +63,7 @@ function buildPointCondition(state, indexes, point, includeDateFilter) {
   const rawJstCode = row[indexes.jstCode];
   const rawXCode = row[indexes.xAxisRcCode];
   const rawYCode = row[indexes.yAxisRcCode];
-  const rawZCode = row[indexes.zAxisRcCode];
+  const rawZCode = isAllCurrencies ? "" : row[indexes.zAxisRcCode];
 
   const conditions = [
     `regexp_replace(table_id, '\\.[A-Za-z]+$', '') = ${sqlLiteral(rawTableId)}`,
