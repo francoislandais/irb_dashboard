@@ -34,6 +34,8 @@ import {
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
+import { buildExplorerSelectionHiveQuery } from "../data/explorerHiveQuery.js";
+import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
 let rerenderApp = () => {};
@@ -3142,7 +3144,39 @@ function createExplorerSelectionSummaryCard() {
   }
 
   pane.append(description);
+  if (metrics) pane.append(createExplorerHiveQueryButton());
   return pane;
+}
+
+function createExplorerHiveQueryButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "explorer-hive-query-button";
+  button.textContent = "Requête Hive";
+  button.addEventListener("click", () => {
+    showExplorerQueryDialog((options) => {
+      const state = getLatestState();
+      const params = getExplorerSelectionHiveQueryParams();
+      return params ? buildExplorerSelectionHiveQuery(state, params, options) : "";
+    });
+  });
+  return button;
+}
+
+function getExplorerSelectionHiveQueryParams() {
+  const state = getLatestState();
+  const template = getActiveExplorerTemplate();
+  const context = getActiveExplorerContext();
+  const selectedReference = getSelectedExplorerReference(state);
+  if (!state || !template?.tableId || !selectedReference) return null;
+
+  return {
+    referenceDateIso: selectedReference.name.replace(/^ref_/, "").replaceAll("_", "-"),
+    selectedXCode: context.selectedXCode,
+    selectedYCode: context.selectedYCode,
+    selectedZCode: context.selectedZCode,
+    tableId: template.tableId
+  };
 }
 
 function getExplorerSelectedPointMetrics() {
