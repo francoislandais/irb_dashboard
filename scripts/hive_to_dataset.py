@@ -36,9 +36,9 @@ def build_hive_query(
     - un joker final comme ``F_20.04%`` ;
     - une exclusion précédée de ``!``, comme ``!F_20.04%``.
 
-    ``extraction_timestamp`` est dérivée de la colonne implicite Devo
-    ``eventdate``. Si cette table ne l'expose pas sous ce nom, adapter la
-    colonne source ici (et dans ``buildDatasetUpdateQuery`` côté JS).
+    Cette table Hive n'expose aucune colonne d'horodatage d'extraction :
+    ``extraction_timestamp`` est ajoutée après coup par
+    ``run_hive_query_to_csv`` avec la date du jour, pas par cette requête.
     """
 
     templates = _clean_values(templates, "templates")
@@ -68,7 +68,6 @@ def build_hive_query(
     x_axis_rc_code,
     y_axis_rc_code,
     z_axis_rc_code,
-    MAX(eventdate) AS extraction_timestamp,
 {date_columns}
 FROM (
     SELECT
@@ -78,8 +77,7 @@ FROM (
         y_axis_rc_code,
         z_axis_rc_code,
         reference_period,
-        value_decimal,
-        eventdate
+        value_decimal
     FROM crp_agora.agora_its_bft_current
     WHERE jst_code IN (
 {jst_code_list}
@@ -124,6 +122,7 @@ def run_hive_query_to_csv(
     sql = build_hive_query(templates, reference_dates, jst_codes)
     client = devo_client or _load_default_devo_client()
     dataframe = client.read_sql(sql)
+    dataframe["extraction_timestamp"] = date.today().isoformat()
 
     dataset_directory = (
         Path(output_dir).expanduser().resolve()

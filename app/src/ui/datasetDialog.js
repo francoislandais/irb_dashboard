@@ -13,9 +13,9 @@ export function hideDatasetDialog() {
   activeDatasetDialog = null;
 }
 
-// extraction_timestamp is derived from Devo's implicit eventdate column.
-// If this table exposes it under another name, adjust the source column
-// here and in build_hive_query (scripts/hive_to_dataset.py).
+// This table has no extraction-timestamp column: extraction_timestamp is
+// stamped with today's date after running the query (see
+// run_hive_query_to_csv in scripts/hive_to_dataset.py), not selected here.
 export function buildDatasetUpdateQuery(state) {
   const references = getReferenceColumns(state?.columns ?? []);
   const tableIds = getDatasetTableIds(state?.dataIndexes);
@@ -37,7 +37,6 @@ export function buildDatasetUpdateQuery(state) {
     x_axis_rc_code,
     y_axis_rc_code,
     z_axis_rc_code,
-    MAX(eventdate) AS extraction_timestamp,
 ${referenceExpressions}
 FROM (
     SELECT
@@ -47,8 +46,7 @@ FROM (
         y_axis_rc_code,
         z_axis_rc_code,
         reference_period,
-        value_decimal,
-        eventdate
+        value_decimal
     FROM crp_agora.agora_its_bft_current
     WHERE jst_code IN (
 ${jstList}
