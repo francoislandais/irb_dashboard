@@ -3,6 +3,7 @@ import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchem
 import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260915-stable-lists";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260915-order-first-fix";
+import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js";
 import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js";
 import {
   clearStoredDatasetFileHandle,
@@ -16,8 +17,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260915-benchmark-preview-mode";
+import { createDataStore } from "./data/dataStore.js?v=20260915-default-expand-depth";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260915-default-expand-depth";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -425,12 +426,13 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("src/creditRiskStyles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
     fetchAppText("assets/ITS_impossible_x_y.csv"),
+    fetchAppText("assets/ITS_explorer_default_expand_depth.csv"),
     fetchAppText("vendor/highcharts.js"),
     fetchAppText("vendor/highcharts-treemap.js"),
     collectStandaloneModuleSources("src/main.js")
@@ -439,7 +441,8 @@ async function getStandaloneBundle() {
   return {
     assets: {
       "assets/ITS_all_dimension_mapping.csv": mappingCsv,
-      "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv
+      "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv,
+      "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv
     },
     highchartsJs,
     highchartsTreemapJs,
@@ -586,6 +589,7 @@ async function startApplication() {
       loadInternalMapping(),
       loadImpossibleCombinations(),
       loadExplorerConfiguration(),
+      loadExplorerDefaultExpandDepthConfig(),
       hasStandaloneCsvData() ? loadStandaloneData() : restoreLastFile()
     ]);
   } catch (error) {
@@ -642,5 +646,13 @@ async function loadExplorerConfiguration() {
     store.setExplorerPoints(await loadExplorerPoints());
   } catch (error) {
     store.setExplorerPointsError(error);
+  }
+}
+
+async function loadExplorerDefaultExpandDepthConfig() {
+  try {
+    store.setExplorerDefaultExpandDepth(await loadExplorerDefaultExpandDepth());
+  } catch (error) {
+    store.setExplorerDefaultExpandDepthError(error);
   }
 }

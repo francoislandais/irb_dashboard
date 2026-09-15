@@ -21,6 +21,8 @@ const initialState = {
   loadedAt: null,
   explorerPoints: [],
   explorerPointsError: "",
+  explorerDefaultExpandDepth: null,
+  explorerDefaultExpandDepthError: "",
   peerDisplayMode: "explicit",
   peerJstCodes: [],
   rememberedFileReady: false,
@@ -248,6 +250,23 @@ export function createDataStore() {
       emit();
     },
 
+    setExplorerDefaultExpandDepth(explorerDefaultExpandDepth) {
+      state = {
+        ...state,
+        explorerDefaultExpandDepth,
+        explorerDefaultExpandDepthError: ""
+      };
+      emit();
+    },
+
+    setExplorerDefaultExpandDepthError(error) {
+      state = {
+        ...state,
+        explorerDefaultExpandDepthError: error?.message ?? "La configuration interne des niveaux de dépliement par défaut n'a pas pu être chargée."
+      };
+      emit();
+    },
+
     setRememberedFileReady(fileHandle, fileName = "") {
       state = {
         ...state,
@@ -324,6 +343,8 @@ export function createDataStore() {
         impossibleXYCombinationsSource: state.impossibleXYCombinationsSource,
         explorerPoints: state.explorerPoints,
         explorerPointsError: state.explorerPointsError,
+        explorerDefaultExpandDepth: state.explorerDefaultExpandDepth,
+        explorerDefaultExpandDepthError: state.explorerDefaultExpandDepthError,
         peerDisplayMode: state.peerDisplayMode,
         rememberedFileReady: false,
         selectedJst: "",

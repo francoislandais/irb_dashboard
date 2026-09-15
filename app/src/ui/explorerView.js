@@ -34,6 +34,7 @@ import {
   normalizeHierarchyPath,
   splitHierarchyPath
 } from "../data/explorer.js?v=20260915-all-currency";
+import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
@@ -3753,16 +3754,33 @@ function expandExplorerAncestorsForSelectedCode(tableRows) {
   });
 }
 
+// Falls back to this when a template has no entry (or no value for this
+// axis) in ITS_explorer_default_expand_depth.csv.
+const DEFAULT_EXPLORER_EXPAND_DEPTH = 3;
+
+function getExplorerDefaultExpandDepthForAxis(activeAxis) {
+  const template = getActiveExplorerTemplate();
+  if (!template) return DEFAULT_EXPLORER_EXPAND_DEPTH;
+
+  // y-axis depth is configured per row-section (see
+  // EXPLORER_TEMPLATE_ROW_SECTIONS in explorer.js), same as its axis codes -
+  // x/z are configured against the real table shared by every section.
+  const tableId = activeAxis === "y" ? template.id : template.tableId;
+  const configuredDepth = getExplorerDefaultExpandDepth(getLatestState()?.explorerDefaultExpandDepth, tableId, activeAxis);
+  return configuredDepth ?? DEFAULT_EXPLORER_EXPAND_DEPTH;
+}
+
 function expandDefaultExplorerPaths(rows, parentPaths) {
   const context = getActiveExplorerContext();
   const activeAxis = context.activeAxis;
   if (context.defaultExpandedPathsInitializedByAxis[activeAxis]) return;
 
   const expandedPaths = context.expandedPathsByAxis[activeAxis];
+  const defaultDepth = getExplorerDefaultExpandDepthForAxis(activeAxis);
 
   rows.forEach((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
-    if (parentPaths.has(path) && (row.indentLevel ?? 0) < 3) {
+    if (parentPaths.has(path) && (row.indentLevel ?? 0) < defaultDepth) {
       expandedPaths.add(path);
     }
   });
