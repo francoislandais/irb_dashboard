@@ -137,6 +137,8 @@ let explorerBenchmarkLastSmoothingWindow = 4;
 let explorerBenchmarkFocusYAxis = false;
 let explorerReturnTarget = null;
 let shouldFocusOpenedExplorerPoint = false;
+let lastRenderedExplorerTableSeries = null;
+let lastRenderedExplorerSelectedUnit = null;
 let explorerCellDrag = null;
 let explorerCellRanges = [];
 let explorerCellRangePreview = null;
@@ -1050,8 +1052,6 @@ export function renderExplorer(state) {
   applyExplorerSelection();
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
-    revealSelectedExplorerRowPath();
-    applyExplorerSelection();
     focusSelectedExplorerRow();
   } else {
     restoreExplorerScrollPosition();
@@ -1305,6 +1305,8 @@ function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
 }
 
 function renderExplorerTable(series, selectedUnit) {
+  lastRenderedExplorerTableSeries = series;
+  lastRenderedExplorerSelectedUnit = selectedUnit;
   clearExplorerCellRangeSelection();
   const activeAxis = getActiveExplorerAxis();
   const isDateFocus = getActiveExplorerContext().displayMode === "focus";
@@ -1331,7 +1333,16 @@ function renderExplorerTable(series, selectedUnit) {
   headerRow.className = isDateFocus ? "explorer-focus-header-row" : "explorer-quarter-header-row";
   const tbody = document.createElement("tbody");
 
+  if (shouldFocusOpenedExplorerPoint) expandExplorerAncestorsForSelectedCode(tableRows);
   expandDefaultExplorerPaths(displayRows, parentPaths);
+
+  // Collapsed branches never get a <tr> at all (instead of being built and
+  // then hidden with CSS) - heavy templates can have thousands of descendant
+  // rows behind a handful of collapsed top-level nodes, and skipping their
+  // DOM creation is what actually saves the render cost.
+  const visibleDisplayRows = displayRows.filter((seriesRow) => (
+    !hasCollapsedExplicitAncestor(normalizeHierarchyPath(seriesRow.hierarchyPath), nodePaths)
+  ));
 
   const descriptionHeader = document.createElement("th");
   descriptionHeader.scope = "col";
@@ -1379,7 +1390,7 @@ function renderExplorerTable(series, selectedUnit) {
     headerRow.append(th);
   });
 
-  displayRows.forEach((seriesRow, rowIndex) => {
+  visibleDisplayRows.forEach((seriesRow, rowIndex) => {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
@@ -3725,6 +3736,23 @@ function getSelectedExplorerCodeForActiveAxis() {
 }
 
 
+// A deep-linked/searched point can land inside a collapsed branch. Since
+// collapsed rows no longer exist in the DOM to expand from, this expands
+// its ancestors against the row data itself, before the visible-rows filter
+// runs, so the target row is simply part of this render's output.
+function expandExplorerAncestorsForSelectedCode(tableRows) {
+  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  if (!selectedCode) return;
+
+  const selectedRow = tableRows.find((row) => row.code === selectedCode);
+  if (!selectedRow) return;
+
+  const expandedPaths = getActiveExplorerExpandedPaths();
+  getHierarchyAncestorPaths(selectedRow.hierarchyPath).forEach((path) => {
+    expandedPaths.add(path);
+  });
+}
+
 function expandDefaultExplorerPaths(rows, parentPaths) {
   const context = getActiveExplorerContext();
   const activeAxis = context.activeAxis;
@@ -3842,8 +3870,15 @@ function toggleExplorerPath(path) {
     expandedPaths.add(path);
   }
 
-  if (getLatestState()) {
-    rerenderApp(getLatestState());
+  // Expanding/collapsing a branch only changes which rows are visible, not
+  // the underlying series - rebuild just the table from the series already
+  // computed for the last full render instead of running the whole app
+  // render pipeline again.
+  if (lastRenderedExplorerTableSeries) {
+    elements.explorerTable.replaceChildren();
+    renderExplorerTable(lastRenderedExplorerTableSeries, lastRenderedExplorerSelectedUnit);
+    applyExplorerSelection();
+    restoreExplorerScrollPosition();
     return;
   }
 
@@ -4207,20 +4242,6 @@ function focusSelectedExplorerRow() {
 
   row.focus({ preventScroll: true });
   row.scrollIntoView({ block: "nearest", inline: "nearest" });
-}
-
-function revealSelectedExplorerRowPath() {
-  const selectedCode = getSelectedExplorerCodeForActiveAxis();
-  const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
-  if (!row?.dataset.hierarchyPath) return;
-
-  const expandedPaths = getActiveExplorerExpandedPaths();
-  getHierarchyAncestorPaths(row.dataset.hierarchyPath).forEach((path) => {
-    expandedPaths.add(path);
-  });
-
-  const rows = [...elements.explorerTable.querySelectorAll("tbody tr[data-normalized-path]")];
-  applyExplorerTreeState(getParentPathsFromRenderedRows(rows), getExplicitPathsFromRenderedRows(rows));
 }
 
 export function saveExplorerScrollPosition() {
