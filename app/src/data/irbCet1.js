@@ -1,7 +1,7 @@
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { getIndexedJstCodes, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260804-lazy-index";
+import { getIndexedJstCodes, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260915-stable-lists";
 
 const C01_TABLE_ID = "C_01.00";
 const C02_TABLE_ID = "C_02.00";

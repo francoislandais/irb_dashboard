@@ -1,4 +1,4 @@
-import { getIndexedAxisCodes, getIndexedRowsByTableJst, getIndexedTableIds } from "./dataIndex.js?v=20260804-lazy-index";
+import { getAllIndexedTableIds, getIndexedAxisCodesAnyJst, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260915-stable-lists";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 
@@ -260,14 +260,13 @@ export function getExplorerTemplates(state) {
 export function getExplorerTableIds(state) {
   if (!state) return [];
 
-  const indexedTableIds = getIndexedTableIds(state);
+  const indexedTableIds = getAllIndexedTableIds(state);
   if (indexedTableIds.length > 0 || state.dataIndexes) return indexedTableIds;
 
   const indexes = getCompleteAxisColumnIndexes(state.columns);
-  if (!indexes || !state.selectedJst) return [];
+  if (!indexes) return [];
 
   return [...new Set(state.rows
-    .filter((row) => row[indexes.jstCode] === state.selectedJst)
     .map((row) => row[indexes.tableId])
     .filter(Boolean))]
     .sort((left, right) => left.localeCompare(right, "fr", { numeric: true }));
@@ -275,11 +274,13 @@ export function getExplorerTableIds(state) {
 
 export function getExplorerAxisOptions(state, tableId) {
   const templates = getExplorerTemplates(state);
+  const configuredXCodes = getConfiguredExplorerAxisCodes(state, tableId, "x");
   const configuredYCodes = getConfiguredExplorerAxisCodes(state, tableId, "y");
   const configuredZCodes = getConfiguredExplorerAxisCodes(state, tableId, "z");
   const availableXCodes = getAvailableExplorerAxisCodes(state, tableId, "x");
   const availableYCodes = getAvailableExplorerAxisCodes(state, tableId, "y");
   const availableZCodes = getAvailableExplorerAxisCodes(state, tableId, "z");
+  const xCodes = getPreferredExplorerAxisCodes(configuredXCodes, availableXCodes);
   const yCodes = getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
   const zCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
 
@@ -289,8 +290,8 @@ export function getExplorerAxisOptions(state, tableId) {
       isVisible: templates.length > 1
     },
     x: {
-      codes: availableXCodes,
-      isVisible: availableXCodes.length > 0
+      codes: xCodes,
+      isVisible: xCodes.length > 0
     },
     y: {
       codes: yCodes,
@@ -303,14 +304,13 @@ export function getExplorerAxisOptions(state, tableId) {
   };
 }
 
+// A code that is part of the reference configuration always stays
+// selectable, even when the current dataset has no data for it anywhere
+// (e.g. a currency no institution reported): the configured list is the
+// source of truth. Data-derived codes are only used as a fallback for
+// axes with no static configuration at all.
 export function getPreferredExplorerAxisCodes(configuredCodes, availableCodes) {
-  if (configuredCodes.length === 0) return [];
-  if (availableCodes.length === 0) return configuredCodes;
-
-  const availableCodeSet = new Set(availableCodes);
-  const matchingCodes = configuredCodes.filter((code) => availableCodeSet.has(code));
-
-  return matchingCodes.length > 0 ? matchingCodes : availableCodes;
+  return configuredCodes.length > 0 ? configuredCodes : availableCodes;
 }
 
 export function getVisibleExplorerAxes(axisOptions) {
@@ -352,23 +352,19 @@ export function getConfiguredExplorerAxisCodes(state, tableId, axis) {
 }
 
 export function getAvailableExplorerAxisCodes(state, tableId, axis) {
-  const indexedCodes = getIndexedAxisCodes(state, tableId, axis);
+  const indexedCodes = getIndexedAxisCodesAnyJst(state, tableId, axis);
   if (indexedCodes.length > 0 || state.dataIndexes) return indexedCodes;
 
   const columnName = `${axis}_axis_rc_code`;
   const indexes = {
-    jstCode: state.columns.indexOf("jst_code"),
     tableId: state.columns.indexOf("table_id"),
     axisCode: state.columns.indexOf(columnName)
   };
 
-  if (Object.values(indexes).some((index) => index === -1) || !state.selectedJst) return [];
+  if (Object.values(indexes).some((index) => index === -1)) return [];
 
   return [...new Set(state.rows
-    .filter((row) => (
-      row[indexes.jstCode] === state.selectedJst
-      && row[indexes.tableId] === tableId
-    ))
+    .filter((row) => row[indexes.tableId] === tableId)
     .map((row) => normalizeAxisCode(row[indexes.axisCode], axis))
     .filter(Boolean))]
     .sort((left, right) => left.localeCompare(right, "fr"));

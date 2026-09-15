@@ -86,11 +86,26 @@ export function getIndexedAxisCodes(state, tableId, axis, jstCode = state.select
   return [...codes].sort((left, right) => left.localeCompare(right, "fr"));
 }
 
-export function getIndexedTableIds(state, jstCode = state.selectedJst) {
-  const tableIds = state.dataIndexes?.tableIdsByJst?.get(String(jstCode ?? ""));
-  if (!tableIds) return [];
-
+// Union across every JST in the dataset, so the template list stays stable
+// regardless of which JST is currently selected.
+export function getAllIndexedTableIds(state) {
+  const tableIds = new Set();
+  state.dataIndexes?.tableIdsByJst?.forEach((ids) => ids?.forEach((tableId) => tableIds.add(tableId)));
   return [...tableIds].sort((left, right) => left.localeCompare(right, "fr", { numeric: true }));
+}
+
+// Union across every JST that reports this table, so a row/column/tab code
+// stays selectable even for a JST that has no data for it.
+export function getIndexedAxisCodesAnyJst(state, tableId, axis) {
+  const codes = new Set();
+  state.dataIndexes?.tableIdsByJst?.forEach((tableIdsForJst, jstCode) => {
+    if (!tableIdsForJst?.has(tableId)) return;
+
+    ensureDetailedTableJstIndex(state, tableId, jstCode);
+    const tableCodes = state.dataIndexes?.axisCodes?.get(makeDataKey(tableId, jstCode, axis));
+    tableCodes?.forEach((code) => codes.add(code));
+  });
+  return [...codes].sort((left, right) => left.localeCompare(right, "fr"));
 }
 
 export function getIndexedJstCodes(state) {

@@ -1,4 +1,4 @@
-import { getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates } from "../dataIndex.js?v=20260804-lazy-index";
+import { getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates } from "../dataIndex.js?v=20260915-stable-lists";
 import { normalizeAxisCode } from "../core/axisCode.js";
 import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "../core/axisColumns.js";
 import { getReferenceColumns, parseNumericValue } from "../core/referenceColumns.js";

@@ -1,8 +1,8 @@
 import { parseCsv } from "./data/csvParser.js";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js";
-import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260804-lazy-index";
+import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260915-stable-lists";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
-import { loadExplorerPoints } from "./data/explorerConfig.js";
+import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260915-order-first-fix";
 import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js";
 import {
   clearStoredDatasetFileHandle,
@@ -17,7 +17,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260806-impossible-combinations";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260915-hive-query-context-menu";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260915-stable-lists";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

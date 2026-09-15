@@ -1,5 +1,5 @@
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
-import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260804-lazy-index";
+import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
 
 // Builds a Hive query that reproduces one or several selected Explorer
 // cells, against the same table used by scripts/hive_to_dataset.py. Values

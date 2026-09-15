@@ -71,6 +71,9 @@ function parseDescriptionHierarchy(description) {
 }
 
 function parseOrder(value, fallback) {
-  const parsed = Number(value);
+  const trimmed = String(value ?? "").trim();
+  if (trimmed === "") return fallback;
+
+  const parsed = Number(trimmed);
   return Number.isFinite(parsed) ? parsed : fallback;
 }

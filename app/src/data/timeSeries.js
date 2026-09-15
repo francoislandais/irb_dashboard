@@ -1,4 +1,4 @@
-import { getIndexedAxisCodes, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260804-lazy-index";
+import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260915-stable-lists";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
@@ -116,11 +116,13 @@ function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axi
 
 function buildXAxisSeriesRows(state, indexes, dateColumns, tableId, selectedYCode, selectedZCode, inheritedFormat) {
   const matchedRowsByXCode = new Map();
-  const tableRows = getRowsForTableJst(state, indexes, tableId);
-  const indexedXCodes = getIndexedAxisCodes(state, tableId, "x");
+  const indexedXCodes = getIndexedAxisCodesAnyJst(state, tableId, "x");
   const xCodes = indexedXCodes.length > 0 || state.dataIndexes
     ? indexedXCodes
-    : [...new Set(tableRows.map((row) => normalizeAxisCode(row[indexes.xAxisRcCode], "x")).filter(Boolean))]
+    : [...new Set(state.rows
+        .filter((row) => row[indexes.tableId] === tableId)
+        .map((row) => normalizeAxisCode(row[indexes.xAxisRcCode], "x"))
+        .filter(Boolean))]
       .sort((left, right) => left.localeCompare(right, "fr"));
   const rowsToGroup = getRowsForPartialSelection(state, indexes, tableId, {
     selectedXCode: "",
