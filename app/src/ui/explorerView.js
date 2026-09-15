@@ -34,7 +34,7 @@ import {
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
-import { buildExplorerSelectionHiveQuery } from "../data/explorerHiveQuery.js";
+import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
@@ -128,6 +128,7 @@ let shouldFocusOpenedExplorerPoint = false;
 let explorerCellDrag = null;
 let explorerCellRanges = [];
 let explorerCellRangePreview = null;
+let explorerQueryPoints = [];
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
 let explorerPeerSelectionActions = null;
@@ -167,6 +168,7 @@ const elements = {
   globalReferenceSelect: document.querySelector("#global-reference-select"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
   explorerCellRangeBanner: document.querySelector("#explorer-cell-range-banner"),
+  explorerQueryButton: document.querySelector("#explorer-query-button"),
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerExcelExport: document.querySelector("#explorer-excel-export"),
   explorerMainPane: document.querySelector(".explorer-main-pane"),
@@ -228,10 +230,21 @@ export function wireExplorerUi(actions, rerender) {
   elements.explorerTable.addEventListener("contextmenu", (event) => {
     const row = event.target.closest("tbody tr[data-point-code]");
     if (!row) return;
-    showContextMenu([{
-      label: "Use as denominator",
-      action: () => setExplorerContributionBase(row)
-    }], event);
+    const cell = event.target.closest("td[data-explorer-cell-column]");
+    showContextMenu([
+      {
+        label: "Use as denominator",
+        action: () => setExplorerContributionBase(row)
+      },
+      {
+        label: "Generate query",
+        action: () => setExplorerQueryPoints([getExplorerCellQueryPoint(row, cell)])
+      },
+      {
+        label: "Add to query",
+        action: () => setExplorerQueryPoints([...explorerQueryPoints, getExplorerCellQueryPoint(row, cell)])
+      }
+    ], event);
   });
   elements.explorerTable.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -250,6 +263,12 @@ export function wireExplorerUi(actions, rerender) {
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
   elements.explorerExcelExport?.addEventListener("click", exportVisibleExplorerTable);
+  elements.explorerQueryButton?.addEventListener("click", () => {
+    showExplorerQueryDialog((options) => {
+      const state = getLatestState();
+      return buildExplorerQueryFromPoints(state, explorerQueryPoints, options) || "";
+    });
+  });
   if (elements.explorerAdvancedSearch) {
     elements.explorerAdvancedSearch.value = explorerAdvancedSearchQuery;
     elements.explorerAdvancedSearch.addEventListener("input", updateExplorerAdvancedSearch);
@@ -1821,6 +1840,33 @@ function setExplorerContributionBase(row) {
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
+function getExplorerCellQueryPoint(row, cell) {
+  const state = getLatestState();
+  const template = getActiveExplorerTemplate();
+  const context = getActiveExplorerContext();
+  const activeAxis = context.activeAxis;
+  const pointCode = row?.dataset.pointCode ?? "";
+
+  const references = getReferenceColumns(state?.columns ?? []);
+  const cellDateLabel = cell?.dataset.explorerCellDate;
+  const reference = cellDateLabel
+    ? references.find((candidate) => candidate.label === cellDateLabel)
+    : getSelectedExplorerReference(state);
+
+  return {
+    referenceDateIso: reference ? reference.name.replace(/^ref_/, "").replaceAll("_", "-") : "",
+    selectedXCode: activeAxis === "x" ? pointCode : context.selectedXCode,
+    selectedYCode: activeAxis === "y" ? pointCode : context.selectedYCode,
+    selectedZCode: activeAxis === "z" ? pointCode : context.selectedZCode,
+    tableId: template?.tableId ?? EXPLORER_TARGET.tableId
+  };
+}
+
+function setExplorerQueryPoints(points) {
+  explorerQueryPoints = points;
+  if (elements.explorerQueryButton) elements.explorerQueryButton.disabled = explorerQueryPoints.length === 0;
+}
+
 function clearExplorerContributionBase(axis = getActiveExplorerContext().activeAxis) {
   const context = getActiveExplorerContext();
   context.contributionBaseByAxis[axis] = null;
@@ -3144,39 +3190,7 @@ function createExplorerSelectionSummaryCard() {
   }
 
   pane.append(description);
-  if (metrics) pane.append(createExplorerHiveQueryButton());
   return pane;
-}
-
-function createExplorerHiveQueryButton() {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "explorer-hive-query-button";
-  button.textContent = "Requête Hive";
-  button.addEventListener("click", () => {
-    showExplorerQueryDialog((options) => {
-      const state = getLatestState();
-      const params = getExplorerSelectionHiveQueryParams();
-      return params ? buildExplorerSelectionHiveQuery(state, params, options) : "";
-    });
-  });
-  return button;
-}
-
-function getExplorerSelectionHiveQueryParams() {
-  const state = getLatestState();
-  const template = getActiveExplorerTemplate();
-  const context = getActiveExplorerContext();
-  const selectedReference = getSelectedExplorerReference(state);
-  if (!state || !template?.tableId || !selectedReference) return null;
-
-  return {
-    referenceDateIso: selectedReference.name.replace(/^ref_/, "").replaceAll("_", "-"),
-    selectedXCode: context.selectedXCode,
-    selectedYCode: context.selectedYCode,
-    selectedZCode: context.selectedZCode,
-    tableId: template.tableId
-  };
 }
 
 function getExplorerSelectedPointMetrics() {

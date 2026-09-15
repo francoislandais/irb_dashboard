@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260915-hive-query-generator">
+    <link rel="stylesheet" href="./src/styles.css?v=20260915-hive-query-context-menu">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -51,6 +51,7 @@
             </select>
           </label>
           <button id="peers-button" class="topbar-button" type="button" disabled>Peers</button>
+          <button id="explorer-query-button" class="topbar-button" type="button" disabled title="View the generated Hive query">Query</button>
           <div class="dataset-controls" aria-label="Datasets">
             <div class="field dataset-field">
               <button id="dataset-info-button" class="dataset-info-button" type="button">Dataset</button>
@@ -380,6 +381,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260915-hive-query-generator"></script>
+    <script type="module" src="./src/main.js?v=20260915-hive-query-context-menu"></script>
   </body>
 </html>

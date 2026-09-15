@@ -1,19 +1,47 @@
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260804-lazy-index";
 
-// Builds a Hive query that reproduces exactly one selected Explorer cell,
-// against the same table used by scripts/hive_to_dataset.py. Values are
-// read back from the matched raw CSV row rather than the app's normalized
-// axis codes, so the filters match whatever Hive actually stores (no
-// zero-padding guesswork).
-export function buildExplorerSelectionHiveQuery(state, selection, { includeDateFilter = true } = {}) {
+// Builds a Hive query that reproduces one or several selected Explorer
+// cells, against the same table used by scripts/hive_to_dataset.py. Values
+// are read back from each point's matched raw CSV row rather than the
+// app's normalized axis codes, so the filters match whatever Hive
+// actually stores (no zero-padding guesswork). Each point becomes its own
+// parenthesized AND-group, combined with OR.
+export function buildExplorerQueryFromPoints(state, points, { includeDateFilter = true } = {}) {
   const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
-  if (!indexes || !selection?.tableId || !state?.selectedJst) return null;
+  if (!indexes || !state?.selectedJst) return null;
 
-  const matchedRows = getIndexedRowsByCoordinates(state, selection.tableId, {
-    selectedXCode: selection.selectedXCode,
-    selectedYCode: selection.selectedYCode,
-    selectedZCode: selection.selectedZCode
+  const groups = (points ?? [])
+    .map((point) => buildPointCondition(state, indexes, point, includeDateFilter))
+    .filter(Boolean);
+  if (groups.length === 0) return null;
+
+  const pointsFilter = groups.length === 1
+    ? groups[0]
+    : `(\n    ${groups.join("\n    OR ")}\n  )`;
+
+  return `SELECT
+    table_id,
+    jst_code,
+    x_axis_rc_code,
+    y_axis_rc_code,
+    z_axis_rc_code,
+    reference_period,
+    value_decimal
+FROM crp_agora.agora_its_bft_current
+WHERE is_group_head = 'Y'
+  AND is_highest_cons = 'Y'
+  AND ${pointsFilter}
+ORDER BY reference_period;`;
+}
+
+function buildPointCondition(state, indexes, point, includeDateFilter) {
+  if (!point?.tableId) return null;
+
+  const matchedRows = getIndexedRowsByCoordinates(state, point.tableId, {
+    selectedXCode: point.selectedXCode,
+    selectedYCode: point.selectedYCode,
+    selectedZCode: point.selectedZCode
   }, state.selectedJst);
   const row = matchedRows[0];
   if (!row) return null;
@@ -28,26 +56,14 @@ export function buildExplorerSelectionHiveQuery(state, selection, { includeDateF
     `regexp_replace(table_id, '\\.[A-Za-z]+$', '') = ${sqlLiteral(rawTableId)}`,
     `jst_code = ${sqlLiteral(rawJstCode)}`,
     `x_axis_rc_code = ${sqlLiteral(rawXCode)}`,
-    `y_axis_rc_code = ${sqlLiteral(rawYCode)}`,
-    "is_group_head = 'Y'",
-    "is_highest_cons = 'Y'"
+    `y_axis_rc_code = ${sqlLiteral(rawYCode)}`
   ];
   if (rawZCode) conditions.push(`z_axis_rc_code = ${sqlLiteral(rawZCode)}`);
-  if (includeDateFilter && selection.referenceDateIso) {
-    conditions.push(`reference_period = ${sqlLiteral(selection.referenceDateIso)}`);
+  if (includeDateFilter && point.referenceDateIso) {
+    conditions.push(`reference_period = ${sqlLiteral(point.referenceDateIso)}`);
   }
 
-  return `SELECT
-    table_id,
-    jst_code,
-    x_axis_rc_code,
-    y_axis_rc_code,
-    z_axis_rc_code,
-    reference_period,
-    value_decimal
-FROM crp_agora.agora_its_bft_current
-WHERE ${conditions.join("\n  AND ")}
-ORDER BY reference_period;`;
+  return `(${conditions.join(" AND ")})`;
 }
 
 function sqlLiteral(value) {

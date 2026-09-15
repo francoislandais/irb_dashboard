@@ -31,7 +31,7 @@ function createDialog(buildQuery) {
   eyebrow.className = "audit-trail-eyebrow";
   eyebrow.textContent = "Requête Hive";
   const title = document.createElement("strong");
-  title.textContent = "Sélection courante";
+  title.textContent = "Requête générée";
   headerText.append(eyebrow, title);
 
   const closeButton = document.createElement("button");
@@ -62,7 +62,7 @@ function createDialog(buildQuery) {
 
   const renderQuery = () => {
     const sql = buildQuery({ includeDateFilter: dateFilterCheckbox.checked });
-    pre.textContent = sql || "Aucune donnée ne correspond à la sélection courante.";
+    pre.textContent = sql || "Aucun point de données n'a encore été ajouté à cette requête.";
     copyButton.disabled = !sql;
   };
 
