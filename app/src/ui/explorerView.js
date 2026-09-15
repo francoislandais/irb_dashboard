@@ -95,6 +95,7 @@ const REGION_DISPLAY_NAMES = typeof Intl.DisplayNames === "function"
   ? new Intl.DisplayNames(["en"], { type: "region" })
   : null;
 const EXPLORER_EVOLUTION_OPTIONS = [
+  { value: "monthly", label: "Monthly", step: 1, description: "Every reporting month" },
   { value: "quarterly", label: "Quarterly", step: 1, description: "Every reporting quarter" },
   { value: "semiannual", label: "Semiannual", step: 2, description: "Every six months" },
   { value: "annual", label: "Annual", step: 4, description: "Every twelve months" }
