@@ -20,7 +20,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260917-kri-formula";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-benchmark-height";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-benchmark-controls";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

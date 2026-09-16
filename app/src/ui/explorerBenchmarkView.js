@@ -236,7 +236,7 @@ function positionExplorerBenchmarkControls(chart, compact) {
     chart.renderTo.querySelector(".cost-of-risk-chart-y-focus-badge"),
     chart.renderTo.querySelector(".cost-of-risk-chart-smoothing-badge")
   ].filter(Boolean);
-  let cursor = plotRight;
+  let cursor = plotRight - 24;
   controls.forEach((control) => {
     cursor -= control.offsetWidth;
     control.style.left = `${Math.max(chart.plotLeft, cursor)}px`;
