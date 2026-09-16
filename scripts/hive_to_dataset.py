@@ -314,6 +314,12 @@ def _build_template_filter(templates: Iterable[str]) -> str:
 def _clean_values(values: Iterable[str], label: str) -> list[str]:
     if values is None:
         raise ValueError(f"La liste des {label} ne peut pas être vide.")
+    # A bare string is iterable character by character in Python - silently
+    # exploding e.g. templates="F_01%" into ["F", "_", "0", "1", "%"] would
+    # turn a single intended filter into several, the lone "%" among them
+    # matching everything on its own. Treat a bare string as one value.
+    if isinstance(values, (str, bytes)):
+        values = [values]
     cleaned = list(
         dict.fromkeys(str(value).strip() for value in values if str(value).strip())
     )

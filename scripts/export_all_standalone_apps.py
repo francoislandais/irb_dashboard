@@ -96,6 +96,11 @@ def export_consolidated_standalone_app(
     pour cette colonne plutôt que de faire échouer la fusion.
     """
 
+    # A bare string is iterable character by character in Python - guard
+    # against dataset_names="LIQ_KRI" silently exploding into one file per
+    # letter (see the equivalent guard in hive_to_dataset.py's _clean_values).
+    if isinstance(dataset_names, (str, bytes)):
+        dataset_names = [dataset_names]
     dataset_names = list(dataset_names)
     if not dataset_names:
         raise ValueError("La liste des datasets à consolider ne peut pas être vide.")
