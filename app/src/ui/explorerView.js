@@ -1,4 +1,4 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260916-phase2-lazy-values";
+import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260916-unsplit-c75";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
@@ -12,7 +12,7 @@ import {
   getBenchmarkValueFormat,
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
-} from "../data/explorerBenchmark.js?v=20260916-phase2-lazy-values";
+} from "../data/explorerBenchmark.js?v=20260916-unsplit-c75";
 import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-benchmark-axis-font";
 import {
   buildExplorerDisplayRows,
@@ -30,17 +30,16 @@ import {
   getVisibleExplorerAxes,
   hasExplorerSelectedCombination,
   isExplorerContributionChild,
-  isExplorerLazyValueTemplate,
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260916-phase2-lazy-values";
+} from "../data/explorer.js?v=20260916-unsplit-c75";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
-import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260916-phase2-lazy-values";
+import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260916-unsplit-c75";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
@@ -1018,47 +1017,18 @@ function refreshExplorerSelectionOnly(state) {
   applyExplorerSelection();
 }
 
-// A collapsed row's ancestors need to already be known before the axis
-// series is built (see isExplorerLazyValueTemplate in explorer.js) - not
-// just after, like the DOM-only visibility filter in renderExplorerTable.
-// Reuses the exact same expandDefaultExplorerPaths/
-// expandExplorerAncestorsForSelectedCode logic used there, against the
-// static point config instead of the (not yet computed) series rows -
-// both only ever need hierarchyPath/indentLevel/code, never real values.
-function prepareExplorerLazyExpandState(state, template, activeAxis) {
-  if (!template) return;
-
-  const configTableId = activeAxis === "y" ? template.id : template.tableId;
-  if (!isExplorerLazyValueTemplate(configTableId)) return;
-
-  const context = getActiveExplorerContext();
-  if (context.defaultExpandedPathsInitializedByAxis[activeAxis]) return;
-
-  const coordinate = `${activeAxis}_axis_rc_code`;
-  const points = (state?.explorerPoints ?? []).filter((point) => (
-    point.tableId === configTableId && point.coordinate === coordinate
-  ));
-  const parentPaths = getParentPaths(points);
-
-  if (shouldFocusOpenedExplorerPoint) expandExplorerAncestorsForSelectedCode(points);
-  expandDefaultExplorerPaths(points, parentPaths);
-}
-
-// Shared by the full render and the lazy-template expand/collapse fast path
-// (see toggleExplorerPath) - both need to rebuild the axis series and table,
-// neither needs to touch the surrounding chrome (axis tabs, context panel...).
-function buildAndRenderExplorerTable(state) {
+export function renderExplorer(state) {
+  clearExplorerCellRangeSelection();
+  ensureActiveExplorerTemplate(state);
+  ensureActiveExplorerTemplateMatchesSearch(state);
   const context = getActiveExplorerContext();
   const template = getActiveExplorerTemplate();
   const templates = getExplorerTemplates(state);
+  ensureExplorerSelections(state);
+  refreshExplorerSelectionChrome(state);
 
-  prepareExplorerLazyExpandState(state, template, context.activeAxis);
-
-  const contributionBasePath = context.contributionBaseByAxis[context.activeAxis]?.path;
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
-    expandedPaths: context.expandedPathsByAxis[context.activeAxis],
-    forceVisiblePaths: contributionBasePath ? new Set([normalizeHierarchyPath(contributionBasePath)]) : null,
     selectedXCode: context.selectedXCode,
     selectedYCode: context.selectedYCode,
     selectedZCode: context.selectedZCode,
@@ -1078,21 +1048,9 @@ function buildAndRenderExplorerTable(state) {
   elements.explorerEmpty.hidden = !searchedTableSeries.status;
   elements.explorerEmpty.textContent = searchedTableSeries.status;
 
-  if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) return false;
+  if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) return;
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
-  return true;
-}
-
-export function renderExplorer(state) {
-  clearExplorerCellRangeSelection();
-  ensureActiveExplorerTemplate(state);
-  ensureActiveExplorerTemplateMatchesSearch(state);
-  ensureExplorerSelections(state);
-  refreshExplorerSelectionChrome(state);
-
-  if (!buildAndRenderExplorerTable(state)) return;
-
   applyExplorerSelection();
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
@@ -3941,22 +3899,6 @@ function toggleExplorerPath(path) {
     collapseExplorerPath(path);
   } else {
     expandedPaths.add(path);
-  }
-
-  const state = getLatestState();
-  const context = getActiveExplorerContext();
-  const template = getActiveExplorerTemplate();
-  const configTableId = template && (context.activeAxis === "y" ? template.id : template.tableId);
-
-  // A lazy-value template (see isExplorerLazyValueTemplate) only ever
-  // computed real values for the rows visible before this toggle - reusing
-  // the cached series here would show blanks for whatever this just
-  // revealed, so its series has to be rebuilt against the new expand state.
-  if (state && isExplorerLazyValueTemplate(configTableId)) {
-    const rendered = buildAndRenderExplorerTable(state);
-    if (rendered) applyExplorerSelection();
-    restoreExplorerScrollPosition();
-    return;
   }
 
   // Expanding/collapsing a branch only changes which rows are visible, not

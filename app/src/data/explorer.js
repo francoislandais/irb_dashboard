@@ -261,20 +261,6 @@ export function getExplorerTemplateLabel(tableId) {
 // `tableId` (the real table_id data rows are matched against).
 export const EXPLORER_TEMPLATE_ROW_SECTIONS = {};
 
-// The DOM-only fix above skips building <tr> elements for collapsed rows,
-// but every row's VALUES are still computed on every render regardless of
-// visibility (see buildConfiguredAxisSeriesRows in timeSeries.js) - for a
-// table with as many rows as C_75.01 that's still enough numeric work to
-// notice on a slow machine. This is a targeted, opt-in test of also
-// skipping value computation for collapsed rows (stubbing them with "-"
-// until expanded) - scoped to specific templates so every other template's
-// behaviour is provably unchanged.
-export const EXPLORER_LAZY_VALUE_TABLE_IDS = new Set(["C_75.01"]);
-
-export function isExplorerLazyValueTemplate(tableId) {
-  return EXPLORER_LAZY_VALUE_TABLE_IDS.has(tableId);
-}
-
 export function getExplorerTemplates(state) {
   const tableIds = getExplorerTableIds(state);
 
