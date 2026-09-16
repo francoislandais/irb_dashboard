@@ -2652,6 +2652,11 @@ function refreshExplorerSelectionDependentContextPanel(state) {
     renderExplorerDescriptionPanel();
   } else if (explorerContextTopic === "reference-date") {
     renderExplorerReferenceDatePanel(state);
+  } else if (explorerContextTopic === "jst-code") {
+    // Each row shows the selected point's value for that JST (see
+    // buildExplorerBenchmark below) - it changes with the selection just
+    // like the reference-date panel above.
+    renderExplorerJstSelectionPanel(state);
   }
 }
 
