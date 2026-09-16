@@ -337,11 +337,17 @@ function getModuleUrl(path) {
   const source = bundle.moduleSources[path];
   if (!source) throw new Error(`Module introuvable dans le fichier portable: ${path}`);
 
+  // Anchored to the start of a line (this codebase never indents a static
+  // import/export) so a comment mentioning "from \"...\"" or "import \"...\""
+  // in plain English - which has bitten this exact bundler twice - can never
+  // be mistaken for a real specifier: a "//" comment line can never match
+  // "^\\s*(?:import|export)\\b". A multi-line destructured import (import {\n
+  // ...\n} from "...") is still matched via the bounded, non-greedy [\\s\\S].
   const transformed = source
-    .replace(/(\bfrom\s*["'])([^"']+)(["'])/g, (match, prefix, specifier, suffix) => {
+    .replace(/^(\s*(?:import|export)\b[\s\S]{0,4000}?\bfrom\s*["'])([^"']+)(["'])/gm, (match, prefix, specifier, suffix) => {
       return `${prefix}${getModuleUrl(resolveModulePath(path, specifier))}${suffix}`;
     })
-    .replace(/(\bimport\s*["'])([^"']+)(["'])/g, (match, prefix, specifier, suffix) => {
+    .replace(/^(\s*import\s*["'])([^"']+)(["'])/gm, (match, prefix, specifier, suffix) => {
       return `${prefix}${getModuleUrl(resolveModulePath(path, specifier))}${suffix}`;
     })
     .replace(/(\bimport\s*\(\s*["'])([^"']+)(["']\s*\))/g, (match, prefix, specifier, suffix) => {

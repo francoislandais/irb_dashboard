@@ -59,7 +59,7 @@ import {
   destroyCostOfRiskStageReconciliationChart,
   getCostOfRiskStageReconciliationChart,
   renderCostOfRiskStageReconciliationView
-} from "./costOfRiskStageReconciliationView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskStageReconciliationView.js?v=20260917-kri-unit-fix";
 import {
   createCostOfRiskHighchartsTitle
 } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
@@ -70,7 +70,7 @@ import {
   getCostOfRiskSummaryCellRowKey,
   renderCostOfRiskCounterpartySummaryTable as renderCounterpartySummaryTable,
   renderCostOfRiskStageSummaryTable as renderStageSummaryTable
-} from "./costOfRiskSummaryTablesView.js?v=20260827-summary-header";
+} from "./costOfRiskSummaryTablesView.js?v=20260917-kri-unit-fix";
 import {
   destroyCostOfRiskCounterpartySummaryChart,
   destroyCostOfRiskStageSummaryChart,
@@ -78,13 +78,13 @@ import {
   getCostOfRiskStageSummaryChart,
   renderCostOfRiskCounterpartySummaryChart as renderCounterpartySummaryTimeChart,
   renderCostOfRiskStageSummaryChart as renderStageSummaryTimeChart
-} from "./costOfRiskSummaryChartsView.js?v=20260827-summary-header";
+} from "./costOfRiskSummaryChartsView.js?v=20260917-kri-unit-fix";
 import { renderCostOfRiskStageTransferFlowView } from "./costOfRiskStageTransferFlowView.js?v=20260812-costofrisk-domain-split";
 import {
   destroyCostOfRiskStageTransferFlowChart,
   getCostOfRiskStageTransferFlowChart,
   renderCostOfRiskStageTransferFlowTimeSeriesChart as renderStageTransferFlowTimeSeriesChart
-} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskStageTransferTimeSeriesView.js?v=20260917-kri-unit-fix";
 import {
   destroyCostOfRiskStageRatioChart,
   formatCostOfRiskStageRatioCellValue,
@@ -92,7 +92,7 @@ import {
   getCostOfRiskStageRatioMetricLabel,
   renderCostOfRiskStageRatioChart,
   renderCostOfRiskStageRatioTable
-} from "./costOfRiskStageRatioView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskStageRatioView.js?v=20260917-kri-unit-fix";
 import {
   destroyCostOfRiskCoverageRatioChart,
   formatCostOfRiskCoverageRatioCellValue,
@@ -100,7 +100,7 @@ import {
   getCostOfRiskCoverageRatioMetricLabel,
   renderCostOfRiskCoverageRatioChart,
   renderCostOfRiskCoverageRatioTable
-} from "./costOfRiskCoverageRatioView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskCoverageRatioView.js?v=20260917-kri-unit-fix";
 import {
   destroyCostOfRiskCollateralRatioChart,
   formatCostOfRiskCollateralRatioCellValue,
@@ -108,12 +108,12 @@ import {
   getCostOfRiskCollateralRatioMetricLabel,
   renderCostOfRiskCollateralRatioChart,
   renderCostOfRiskCollateralRatioTable
-} from "./costOfRiskCollateralRatioView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskCollateralRatioView.js?v=20260917-kri-unit-fix";
 import {
   destroyCostOfRiskF2VsF12Chart,
   getCostOfRiskF2VsF12Chart,
   renderCostOfRiskF2VsF12Chart as renderF2VsF12Chart
-} from "./costOfRiskF2VsF12ChartView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskF2VsF12ChartView.js?v=20260917-kri-unit-fix";
 import {
   getCostOfRiskTreemapChart,
   renderCostOfRiskTreemap as renderTreemapChart
@@ -123,15 +123,15 @@ import {
   formatCostOfRiskGeographyCellValue,
   getCostOfRiskGeographyChart,
   renderCostOfRiskGeographyView
-} from "./costOfRiskGeographyView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskGeographyView.js?v=20260917-kri-unit-fix";
 import {
   destroyCostOfRiskMovementChart,
   getCostOfRiskMovementChart,
   renderCostOfRiskMovementTimeSeriesChart as renderMovementTimeSeriesChart
-} from "./costOfRiskMovementTimeSeriesView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskMovementTimeSeriesView.js?v=20260917-kri-unit-fix";
 import {
   renderCostOfRiskDefinitionView
-} from "./costOfRiskDefinitionView.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskDefinitionView.js?v=20260917-kri-unit-fix";
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
@@ -146,7 +146,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260812-costofrisk-domain-split";
-import { openExplorerPoint } from "./explorerView.js?v=20260917-kri-formula-8";
+import { openExplorerPoint } from "./explorerView.js?v=20260917-kri-unit-fix";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260828-summary-display-mode";
 import {
   clearCostOfRiskEmptyPanelsView,
@@ -178,7 +178,7 @@ import {
   updateCostOfRiskCoreSelection
 } from "./costOfRiskCoreSelection.js?v=20260802-readable-selection-phrases";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
-import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
 import { getLatestState } from "./appState.js";
 import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260806-cell-selection";
 import {
@@ -212,7 +212,7 @@ import {
   createManualWaterfallData,
   renderManualCostOfRiskWaterfall,
   wireCostOfRiskWaterfallAxisLabels
-} from "./costOfRiskManualWaterfall.js?v=20260812-costofrisk-domain-split";
+} from "./costOfRiskManualWaterfall.js?v=20260917-kri-unit-fix";
 import {
   appendCostOfRiskHighlightedSelectionText,
   createCostOfRiskAuditInfoSection,

@@ -1,4 +1,4 @@
-import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatContributionPercentValue, formatMetricValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
 import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
   buildBenchmarkChartModel,

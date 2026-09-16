@@ -2,7 +2,7 @@ import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
-import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat } from "../data/core/formatting.js?v=20260917-kri-native-unit-scale";
+import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
@@ -164,7 +164,7 @@ let explorerCellRangePreview = null;
 let explorerQueryPoints = [];
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
-// Which KRI's formula the "Query formula" panel shows - tracked separately
+// Which KRI's formula the "KRI formula" panel shows - tracked separately
 // from the current axis selection so that jumping to a referenced cell's
 // own template (see openExplorerKriFormulaCellRef) can change the active
 // template/selection without the formula panel itself changing.
@@ -2345,10 +2345,10 @@ function createExplorerKriFormulaFilterChip() {
   toggle.className = "cost-of-risk-filter-chip-toggle";
   toggle.setAttribute("aria-expanded", String(explorerContextTopic === "kri-formula"));
   toggle.setAttribute("aria-controls", "explorer-context-detail");
-  toggle.setAttribute("aria-label", "Show the KRI's query formula");
+  toggle.setAttribute("aria-label", "Show the KRI formula");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  label.textContent = "Query formula";
+  label.textContent = "KRI formula";
   toggle.append(label);
   toggle.addEventListener("click", () => {
     explorerContextTopic = "kri-formula";
@@ -3744,7 +3744,7 @@ function renderExplorerKriFormulaPanel(state) {
 
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
-  title.textContent = "Query formula";
+  title.textContent = "KRI formula";
   article.append(title);
 
   const selectedCode = pinnedKriFormulaCode ?? getSelectedExplorerCodeForActiveAxis();
@@ -3885,8 +3885,8 @@ function collectExplorerKriFormulaDimAnchors(values, axis) {
 
 // Only a code actually present among this table/section's own points is
 // ever returned - a code that doesn't exist is dropped rather than guessed
-// at, so the caller can tell "nothing found" from "found it" and refuse to
-// navigate on the former (see openExplorerKriFormulaCellRef).
+// at, so an empty result reliably means nothing matched and the caller can
+// refuse to navigate (see openExplorerKriFormulaCellRef).
 function expandExplorerKriFormulaDimCodes(values, axis, tableId) {
   if (!Array.isArray(values)) return [];
   const coordinate = EXPLORER_KRI_FORMULA_AXIS_COORDINATES[axis];

@@ -1,5 +1,5 @@
 import { COST_OF_RISK_TOTAL_CONTRIBUTION_X_CODE } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
-import { formatBasisPointsValue } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatBasisPointsValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
 import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { getCostOfRiskCoreSectionLabel } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
 import { flowArrowColor, primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
