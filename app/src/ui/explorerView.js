@@ -174,6 +174,19 @@ let pinnedKriFormulaCode = null;
 // openExplorerKriFormulaCellRef), the rest are queued here to get the
 // peek-only highlight once the freshly switched template's table exists.
 let pendingExplorerCellRefPeekCodes = null;
+// KRI can list thousands of indicators, and rendering them all up front is
+// exactly the heavy-table cost this app otherwise avoids via lazy tree
+// rendering - so, for KRI's row axis only, the table grows progressively as
+// the user scrolls (see renderExplorerTable's isKriRowAxis branch and
+// createExplorerKriLoadMoreRow) instead of building every row at once.
+const EXPLORER_KRI_ROW_BATCH_SIZE = 20;
+let explorerKriVisibleRowCount = EXPLORER_KRI_ROW_BATCH_SIZE;
+// Identifies the current row set (length + endpoints) so a genuinely new
+// list (dataset/JST/search change) resets the window back to one batch,
+// while re-rendering the same list (scrolling, a plain selection click)
+// keeps whatever the user already scrolled down to.
+let explorerKriRowWindowKey = "";
+let explorerKriLoadMoreObserver = null;
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
@@ -1436,6 +1449,21 @@ function renderExplorerTable(series, selectedUnit) {
     !hasCollapsedExplicitAncestor(normalizeHierarchyPath(seriesRow.hierarchyPath), nodePaths)
   ));
 
+  // See EXPLORER_KRI_ROW_BATCH_SIZE - every other template still renders its
+  // full (lazily-collapsed) row list exactly as before.
+  const isKriRowAxis = activeAxis === "y" && getActiveExplorerTemplate()?.tableId === "KRI";
+  let renderedDisplayRows = visibleDisplayRows;
+  let hasMoreExplorerKriRows = false;
+  if (isKriRowAxis) {
+    const rowWindowKey = `${visibleDisplayRows.length}:${visibleDisplayRows[0]?.code ?? ""}:${visibleDisplayRows.at(-1)?.code ?? ""}`;
+    if (rowWindowKey !== explorerKriRowWindowKey) {
+      explorerKriRowWindowKey = rowWindowKey;
+      explorerKriVisibleRowCount = EXPLORER_KRI_ROW_BATCH_SIZE;
+    }
+    hasMoreExplorerKriRows = visibleDisplayRows.length > explorerKriVisibleRowCount;
+    renderedDisplayRows = visibleDisplayRows.slice(0, explorerKriVisibleRowCount);
+  }
+
   const descriptionHeader = document.createElement("th");
   descriptionHeader.scope = "col";
   descriptionHeader.className = "description-column";
@@ -1482,7 +1510,7 @@ function renderExplorerTable(series, selectedUnit) {
     headerRow.append(th);
   });
 
-  visibleDisplayRows.forEach((seriesRow, rowIndex) => {
+  renderedDisplayRows.forEach((seriesRow, rowIndex) => {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
@@ -1596,11 +1624,49 @@ function renderExplorerTable(series, selectedUnit) {
     tbody.append(valueRow);
   });
 
+  const kriLoadMoreRow = hasMoreExplorerKriRows
+    ? createExplorerKriLoadMoreRow(orderedDates.length)
+    : null;
+  if (kriLoadMoreRow) tbody.append(kriLoadMoreRow);
+
   applyExplorerDateFocusValueIntensity(dateFocusPrimaryCells);
 
   thead.append(...(isDateFocus ? [headerRow] : [yearHeaderRow, headerRow]));
   elements.explorerTable.append(thead, tbody);
   applyExplorerTreeState(parentPaths, nodePaths);
+  observeExplorerKriLoadMoreRow(kriLoadMoreRow);
+}
+
+// Building the first EXPLORER_KRI_ROW_BATCH_SIZE rows only keeps the initial
+// render light; this sentinel is what grows the window as the user actually
+// scrolls to it, instead of loading every remaining KRI up front.
+function createExplorerKriLoadMoreRow(dateColumnCount) {
+  const row = document.createElement("tr");
+  row.className = "explorer-kri-load-more-row";
+  const cell = document.createElement("td");
+  cell.colSpan = 2 + dateColumnCount;
+  cell.className = "explorer-kri-load-more-cell";
+  cell.textContent = "Loading more KRIs…";
+  row.append(cell);
+  return row;
+}
+
+// Re-created on every render since renderExplorerTable always rebuilds a
+// fresh tbody - the previous observer's target is gone along with it.
+function observeExplorerKriLoadMoreRow(row) {
+  explorerKriLoadMoreObserver?.disconnect();
+  explorerKriLoadMoreObserver = null;
+  if (!row) return;
+
+  explorerKriLoadMoreObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    explorerKriLoadMoreObserver?.disconnect();
+    explorerKriLoadMoreObserver = null;
+    explorerKriVisibleRowCount += EXPLORER_KRI_ROW_BATCH_SIZE;
+    const state = getLatestState();
+    if (state) rerenderApp(state);
+  }, { root: elements.explorerTableWrap, rootMargin: "200px" });
+  explorerKriLoadMoreObserver.observe(row);
 }
 
 function buildExplorerYearGroups(dateColumns) {
@@ -4882,11 +4948,33 @@ function peekExplorerRowByCode(code) {
     row.classList.remove("is-peek-highlighted");
   });
 
+  ensureExplorerKriRowRendered(code);
   const target = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(code)}"]`);
   if (!target) return;
 
   target.classList.add("is-peek-highlighted");
   scrollExplorerRowIntoViewQuickly(target);
+}
+
+// KRI's row axis only ever renders explorerKriVisibleRowCount rows at a
+// time (see renderExplorerTable) - a code beyond that window doesn't exist
+// in the DOM yet, so jumping to it (a kriref peek, or opening a real
+// selection via focusSelectedExplorerRow) has to grow the window first.
+function ensureExplorerKriRowRendered(code) {
+  if (!code || getActiveExplorerTemplate()?.tableId !== "KRI") return;
+
+  const rows = lastRenderedExplorerTableSeries?.rows;
+  if (!rows) return;
+
+  const index = rows.findIndex((row) => row.code === code);
+  if (index === -1 || index < explorerKriVisibleRowCount) return;
+
+  explorerKriVisibleRowCount = Math.ceil((index + 1) / EXPLORER_KRI_ROW_BATCH_SIZE) * EXPLORER_KRI_ROW_BATCH_SIZE;
+  // renderExplorer() normally clears the table before calling
+  // renderExplorerTable - required here too since this calls it directly.
+  elements.explorerTable.replaceChildren();
+  renderExplorerTable(lastRenderedExplorerTableSeries, lastRenderedExplorerSelectedUnit);
+  applyExplorerSelection();
 }
 
 // A plain instant jump feels like nothing happened, and the browser's native
@@ -4919,6 +5007,7 @@ function scrollExplorerRowIntoViewQuickly(target, duration = 160) {
 
 function focusSelectedExplorerRow() {
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  ensureExplorerKriRowRendered(selectedCode);
   const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
   if (!row || row.hidden) return;
 

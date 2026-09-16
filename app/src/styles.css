@@ -3413,6 +3413,14 @@ table {
   --tree-highlight-offset: 18px;
 }
 
+.explorer-kri-load-more-cell {
+  padding: 10px 12px;
+  color: #66736d;
+  font-size: 0.72rem;
+  font-style: italic;
+  text-align: center;
+}
+
 .metric-table th,
 .metric-table td {
   border: 0;
