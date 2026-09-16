@@ -235,6 +235,7 @@ const elements = {
   explorerWorkspace: document.querySelector(".explorer-workspace"),
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
+  explorerKriPagination: document.querySelector("#explorer-kri-pagination"),
   explorerTemplateControl: document.querySelector("[data-explorer-template-control]"),
   unitSelect: document.querySelector("#unit-select")
 };
@@ -1190,7 +1191,10 @@ export function renderExplorer(state) {
   elements.explorerEmpty.hidden = !searchedTableSeries.status;
   elements.explorerEmpty.textContent = searchedTableSeries.status;
 
-  if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) return;
+  if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) {
+    if (elements.explorerKriPagination) elements.explorerKriPagination.hidden = true;
+    return;
+  }
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
   // Now that the fresh series is cached, redo the selection-dependent parts
@@ -1670,24 +1674,24 @@ function renderExplorerTable(series, selectedUnit) {
 
   thead.append(...(isDateFocus ? [headerRow] : [yearHeaderRow, headerRow]));
   elements.explorerTable.append(thead, tbody);
-  if (isKriRowAxis) {
-    elements.explorerTable.append(createExplorerKriPaginationFoot(orderedDates.length));
-  }
   applyExplorerTreeState(parentPaths, nodePaths);
+  renderExplorerKriPaginationBar(isKriRowAxis);
 }
 
-// A strict page (see EXPLORER_KRI_PAGE_SIZE) instead of infinite scroll:
-// always exactly one page's worth of rows on screen, never more, and
-// switching pages is an explicit, cheap re-render (see changeExplorerKriPage)
-// rather than a growing window.
-function createExplorerKriPaginationFoot(dateColumnCount) {
+// A separate element outside .metric-table-wrap entirely (see index.html
+// and .explorer-main-pane's grid rows) rather than a table <tfoot> - a
+// short KRI page (see EXPLORER_KRI_PAGE_SIZE) never makes that wrap
+// actually scroll, so a sticky-positioned tfoot had nothing to stick
+// against and just sat right under the last row instead of staying pinned
+// to the screen. Being its own grid row means it is always visible without
+// depending on any scroll state.
+function renderExplorerKriPaginationBar(isKriRowAxis) {
+  if (!elements.explorerKriPagination) return;
+
+  elements.explorerKriPagination.hidden = !isKriRowAxis;
+  if (!isKriRowAxis) return;
+
   const pageCount = Math.max(1, Math.ceil(explorerKriTotalMatchCount / EXPLORER_KRI_PAGE_SIZE));
-  const tfoot = document.createElement("tfoot");
-  const row = document.createElement("tr");
-  row.className = "explorer-kri-pagination-row";
-  const cell = document.createElement("td");
-  cell.colSpan = 2 + dateColumnCount;
-  cell.className = "explorer-kri-pagination-cell";
 
   const previousButton = document.createElement("button");
   previousButton.type = "button";
@@ -1707,10 +1711,7 @@ function createExplorerKriPaginationFoot(dateColumnCount) {
   nextButton.disabled = explorerKriPageIndex >= pageCount - 1;
   nextButton.addEventListener("click", () => changeExplorerKriPage(explorerKriPageIndex + 1));
 
-  cell.append(previousButton, label, nextButton);
-  row.append(cell);
-  tfoot.append(row);
-  return tfoot;
+  elements.explorerKriPagination.replaceChildren(previousButton, label, nextButton);
 }
 
 function changeExplorerKriPage(pageIndex) {
