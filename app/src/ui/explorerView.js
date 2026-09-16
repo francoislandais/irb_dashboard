@@ -36,6 +36,11 @@ import {
 } from "../data/explorer.js?v=20260917-kri-data-only-rows";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js";
+import {
+  describeExplorerKriOffset,
+  EXPLORER_KRI_FORMULA_FUNCTION_LABELS,
+  parseKriFormula
+} from "../data/explorerKriFormula.js?v=20260917-kri-formula";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
@@ -2290,6 +2295,8 @@ function renderExplorerActiveFilters(state) {
   });
   descriptionChip.append(descriptionToggle);
 
+  const kriFormulaChip = createExplorerKriFormulaFilterChip();
+
   const chips = [
     jstChip,
     dateChip,
@@ -2302,7 +2309,37 @@ function renderExplorerActiveFilters(state) {
     benchmarkChip,
     descriptionChip
   );
+  if (kriFormulaChip) chips.push(kriFormulaChip);
   elements.explorerActiveFilters.replaceChildren(...chips);
+}
+
+// Only KRI's dictionary carries a "formula" per row-axis code - every other
+// template's dictionary has nothing here to explain, so the chip stays
+// hidden rather than showing an item that would always say "not available".
+function createExplorerKriFormulaFilterChip() {
+  if (getActiveExplorerTemplate()?.tableId !== "KRI") return null;
+
+  const chip = document.createElement("span");
+  chip.className = "cost-of-risk-filter-chip explorer-filter-chip-kri-formula";
+  chip.classList.toggle("is-open", explorerContextTopic === "kri-formula");
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "cost-of-risk-filter-chip-toggle";
+  toggle.setAttribute("aria-expanded", String(explorerContextTopic === "kri-formula"));
+  toggle.setAttribute("aria-controls", "explorer-context-detail");
+  toggle.setAttribute("aria-label", "Show the KRI's query formula");
+  const label = document.createElement("span");
+  label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
+  label.textContent = "Query formula";
+  toggle.append(label);
+  toggle.addEventListener("click", () => {
+    explorerContextTopic = "kri-formula";
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
+  });
+  chip.append(toggle);
+  return chip;
 }
 
 function createExplorerGeographyFilterChip() {
@@ -2662,6 +2699,11 @@ function renderExplorerContextPanel(state) {
     return;
   }
 
+  if (explorerContextTopic === "kri-formula") {
+    renderExplorerKriFormulaPanel(state);
+    return;
+  }
+
   if (explorerContextTopic === "peer-selection") {
     renderExplorerPeerSelectionPanel(state);
     return;
@@ -2707,6 +2749,10 @@ function refreshExplorerSelectionDependentContextPanel(state) {
     // buildExplorerBenchmark below) - it changes with the selection just
     // like the reference-date panel above.
     renderExplorerJstSelectionPanel(state);
+  } else if (explorerContextTopic === "kri-formula") {
+    // The formula shown is the selected KRI's own - changes with the
+    // selection just like the description panel above.
+    renderExplorerKriFormulaPanel(state);
   }
 }
 
@@ -3670,6 +3716,249 @@ function renderExplorerDescriptionPanel() {
   replaceExplorerContextDetail(article);
 }
 
+// Phrasing for the handful of functions common enough in the KRI dictionary
+// to warrant a dedicated shape (see renderExplorerKriFormulaNode) instead of
+// the generic "NAME(...)" block every other function still gets.
+function renderExplorerKriFormulaPanel(state) {
+  const article = document.createElement("article");
+  article.className = "explorer-context-article explorer-kri-formula-panel";
+
+  const title = document.createElement("h2");
+  title.className = "explorer-context-title";
+  title.textContent = "Query formula";
+  article.append(title);
+
+  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  const entry = selectedCode ? state?.explorerKriFormulas?.get(selectedCode) : null;
+
+  if (!selectedCode || !entry?.formula) {
+    const empty = document.createElement("p");
+    empty.className = "explorer-description-empty";
+    empty.textContent = "No formula is documented for this indicator.";
+    article.append(empty);
+    replaceExplorerContextDetail(article);
+    return;
+  }
+
+  const lead = document.createElement("p");
+  lead.className = "explorer-description-lead";
+  lead.append("How ", createExplorerKriFormulaCodeButton(selectedCode), " is computed:");
+  article.append(lead);
+
+  const node = parseKriFormula(entry.formula);
+  const tree = document.createElement("div");
+  tree.className = "explorer-kri-formula-tree";
+  tree.append(renderExplorerKriFormulaNode(node, state));
+  article.append(tree);
+
+  replaceExplorerContextDetail(article);
+}
+
+function renderExplorerKriFormulaNode(node, state) {
+  switch (node.type) {
+    case "call":
+      return renderExplorerKriFormulaCall(node, state);
+    case "binary":
+      return renderExplorerKriFormulaBinary(node, state);
+    case "unary": {
+      const wrapper = document.createElement("span");
+      wrapper.className = "explorer-kri-formula-inline";
+      const minus = document.createElement("span");
+      minus.className = "explorer-kri-formula-op";
+      minus.textContent = "−";
+      wrapper.append(minus, renderExplorerKriFormulaNode(node.operand, state));
+      return wrapper;
+    }
+    case "cellref":
+      return createExplorerKriFormulaChip(describeExplorerKriCellRef(node));
+    case "spedpi":
+      return createExplorerKriFormulaChip(`Internal data point ${node.code}${formatExplorerKriOffsetSuffix(node.offset)}`);
+    case "kriref":
+      return createExplorerKriFormulaReferenceNode(node, state);
+    case "list":
+      return createExplorerKriFormulaChip(`[${node.values.map((value) => describeExplorerKriLiteral(value)).join(", ")}]`);
+    case "number":
+      return createExplorerKriFormulaChip(node.value, true);
+    case "string":
+      return createExplorerKriFormulaChip(`"${node.value}"`, true);
+    case "wildcard":
+      return createExplorerKriFormulaChip("(all)", true);
+    case "ident":
+      return createExplorerKriFormulaChip(node.value, true);
+    case "text":
+    default:
+      return createExplorerKriFormulaRawText(node.value ?? "");
+  }
+}
+
+function describeExplorerKriLiteral(node) {
+  if (typeof node === "string") return node;
+  if (node.type === "string") return `"${node.value}"`;
+  if (node.type === "number") return node.value;
+  return "?";
+}
+
+function formatExplorerKriOffsetSuffix(offset) {
+  const description = describeExplorerKriOffset(offset);
+  return description ? ` (${description})` : "";
+}
+
+function describeExplorerKriCellRef(node) {
+  const parts = [`Template ${node.template}`];
+  if (node.row) parts.push(`Row ${node.row.join(", ")}`);
+  if (node.column) parts.push(`Column ${node.column.join(", ")}`);
+  if (node.sheet) parts.push(`Sheet ${node.sheet.join(", ")}`);
+  return parts.join(" — ") + formatExplorerKriOffsetSuffix(node.offset);
+}
+
+function createExplorerKriFormulaChip(text, isLiteral = false) {
+  const chip = document.createElement("span");
+  chip.className = "explorer-kri-formula-chip";
+  chip.classList.toggle("is-literal", isLiteral);
+  chip.textContent = text;
+  return chip;
+}
+
+// Only the KRI code itself is clickable (not its description), rendered as
+// plain inline text - not a boxed chip - to keep the tree readable. Clicking
+// it must not act like a real selection: it only scrolls to and briefly
+// highlights the referenced row in the main table (see peekExplorerRowByCode)
+// - the formula panel itself must stay exactly as it is, since it was
+// reached from an explicit user choice that a table click should not
+// silently override.
+// Shared by every place a KRI code should let the user peek at that KRI's
+// row (see peekExplorerRowByCode) without changing font size - it always
+// inherits its container's font, so it reads as plain text made clickable.
+function createExplorerKriFormulaCodeButton(code) {
+  const codeButton = document.createElement("button");
+  codeButton.type = "button";
+  codeButton.className = "explorer-kri-formula-kriref-code";
+  codeButton.textContent = code;
+  codeButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    peekExplorerRowByCode(code);
+  });
+  return codeButton;
+}
+
+function createExplorerKriFormulaReferenceNode(node, state) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "explorer-kri-formula-kriref";
+  wrapper.append(createExplorerKriFormulaCodeButton(node.code));
+
+  const name = state?.explorerKriFormulas?.get(node.code)?.name;
+  const rest = (name ? ` — ${name}` : "") + formatExplorerKriOffsetSuffix(node.offset);
+  if (rest) wrapper.append(document.createTextNode(rest));
+
+  return wrapper;
+}
+
+function createExplorerKriFormulaRawText(text) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "explorer-kri-formula-raw";
+  const note = document.createElement("p");
+  note.className = "explorer-description-empty";
+  note.textContent = text.startsWith("http")
+    ? "No structured formula is available - see the reference below:"
+    : "No structured formula could be parsed for this indicator - raw definition:";
+  const value = document.createElement("p");
+  value.className = "explorer-kri-formula-raw-value";
+  value.textContent = text;
+  wrapper.append(note, value);
+  return wrapper;
+}
+
+const EXPLORER_KRI_FORMULA_BINARY_SYMBOLS = {
+  PLUS: "+",
+  MINUS: "−",
+  STAR: "×",
+  SLASH: "÷",
+  POW: "^",
+  EQ: "=",
+  DEQ: "=",
+  NE: "≠",
+  CARETEQ: "≠",
+  LE: "≤",
+  GE: "≥",
+  LT: "<",
+  GT: ">",
+  AND: "AND",
+  OR: "OR",
+  IN: "is one of"
+};
+
+function renderExplorerKriFormulaBinary(node, state) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "explorer-kri-formula-inline";
+  const op = document.createElement("span");
+  op.className = "explorer-kri-formula-op";
+  op.textContent = EXPLORER_KRI_FORMULA_BINARY_SYMBOLS[node.op] ?? node.op;
+  wrapper.append(
+    renderExplorerKriFormulaNode(node.left, state),
+    op,
+    renderExplorerKriFormulaNode(node.right, state)
+  );
+  return wrapper;
+}
+
+// DIVIDE and IFN read much more clearly with their arguments explicitly
+// labelled (numerator/denominator, condition/then/else) than as a plain
+// numbered list - every other known function just gets a label and a list
+// of its arguments, and anything unrecognised falls back to its own name.
+function renderExplorerKriFormulaCall(node, state) {
+  const name = node.name.toUpperCase();
+
+  if (name === "DIVIDE" && node.args.length === 2) {
+    return createExplorerKriFormulaBlock("Ratio", [
+      ["Numerator", node.args[0]],
+      ["Denominator", node.args[1]]
+    ], state);
+  }
+
+  if (name === "IFN" && node.args.length === 3) {
+    return createExplorerKriFormulaBlock("Conditional value", [
+      ["If", node.args[0]],
+      ["Then", node.args[1]],
+      ["Else", node.args[2]]
+    ], state);
+  }
+
+  if (name === "COALESCE") {
+    return createExplorerKriFormulaBlock("First available value among", node.args.map((arg, index) => (
+      [`Option ${index + 1}`, arg]
+    )), state);
+  }
+
+  const label = EXPLORER_KRI_FORMULA_FUNCTION_LABELS[name] ?? `${node.name}(...)`;
+  return createExplorerKriFormulaBlock(label, node.args.map((arg) => [null, arg]), state);
+}
+
+function createExplorerKriFormulaBlock(label, items, state) {
+  const block = document.createElement("div");
+  block.className = "explorer-kri-formula-block";
+  const heading = document.createElement("p");
+  heading.className = "explorer-kri-formula-block-label";
+  heading.textContent = label;
+  block.append(heading);
+
+  const list = document.createElement("div");
+  list.className = "explorer-kri-formula-block-items";
+  items.forEach(([itemLabel, node]) => {
+    const item = document.createElement("div");
+    item.className = "explorer-kri-formula-item";
+    if (itemLabel) {
+      const itemHeading = document.createElement("span");
+      itemHeading.className = "explorer-kri-formula-item-label";
+      itemHeading.textContent = `${itemLabel}:`;
+      item.append(itemHeading);
+    }
+    item.append(renderExplorerKriFormulaNode(node, state));
+    list.append(item);
+  });
+  block.append(list);
+  return block;
+}
+
 // The template axis-tab is now a static display only (see index.html):
 // this list is the only way left to switch templates, so it's always
 // visible in the context panel rather than behind a click.
@@ -4263,7 +4552,10 @@ function applyExplorerSelection() {
       "is-descendant",
       "is-selected-child",
       "is-leaf-parent-highlight",
-      "is-leaf-sibling-highlight"
+      "is-leaf-sibling-highlight",
+      // A real selection/render is exactly when a formula-panel "peek"
+      // highlight (see peekExplorerRowByCode) should stop being shown.
+      "is-peek-highlighted"
     );
     row.removeAttribute("aria-selected");
     row.style.removeProperty("--highlight-start");
@@ -4381,6 +4673,55 @@ function setSelectedExplorerCodeForActiveAxis(pointCode) {
 function getVisibleSelectableExplorerRows() {
   return [...elements.explorerTable.querySelectorAll("tbody tr[data-point-code]")]
     .filter((row) => !row.hidden);
+}
+
+// Clicking a KRI reference inside the formula panel (see
+// renderExplorerKriFormulaNode) should let the user see which row that
+// reference points to, without treating it as an actual selection: the
+// formula panel itself must stay exactly as it is - only an explicit click
+// on a row in the table changes the real selection (see selectExplorerRow).
+// So this only scrolls to and highlights the row, deliberately not touching
+// context.selectedYCode/applyExplorerSelection - it's a preview, not a pick.
+function peekExplorerRowByCode(code) {
+  if (!code) return;
+
+  elements.explorerTable.querySelectorAll("tbody tr.is-peek-highlighted").forEach((row) => {
+    row.classList.remove("is-peek-highlighted");
+  });
+
+  const target = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(code)}"]`);
+  if (!target) return;
+
+  target.classList.add("is-peek-highlighted");
+  scrollExplorerRowIntoViewQuickly(target);
+}
+
+// A plain instant jump feels like nothing happened, and the browser's native
+// "smooth" scrollIntoView can take a while on a long table (it scales with
+// distance) - so animate the scroll ourselves over a short, fixed duration:
+// fast, but still visibly a scroll.
+function scrollExplorerRowIntoViewQuickly(target, duration = 160) {
+  const wrap = elements.explorerTableWrap;
+  if (!wrap) {
+    target.scrollIntoView({ block: "center", behavior: "instant" });
+    return;
+  }
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const delta = (targetRect.top - wrapRect.top) - (wrapRect.height / 2 - targetRect.height / 2);
+  const startTop = wrap.scrollTop;
+  const endTop = Math.max(0, Math.min(startTop + delta, wrap.scrollHeight - wrap.clientHeight));
+  const startTime = performance.now();
+
+  function step(now) {
+    const progress = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - (1 - progress) * (1 - progress);
+    wrap.scrollTop = startTop + (endTop - startTop) * eased;
+    if (progress < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
 }
 
 function focusSelectedExplorerRow() {

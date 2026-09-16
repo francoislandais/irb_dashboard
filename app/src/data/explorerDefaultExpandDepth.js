@@ -1,4 +1,4 @@
-import { parseCsv } from "./csvParser.js";
+import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 
 const EXPLORER_DEFAULT_EXPAND_DEPTH_URL = "./assets/ITS_explorer_default_expand_depth.csv";
 

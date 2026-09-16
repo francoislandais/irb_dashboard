@@ -15,6 +15,13 @@ export function parseCsv(text) {
   };
 }
 
+// Low-level access to the quote-aware record tokenizer, for a file whose
+// delimiter can't be auto-detected reliably (see parseKriDictionaryCsv) -
+// exposed instead of duplicating this logic elsewhere.
+export function parseCsvRecords(text, delimiter) {
+  return parseRecords(text, delimiter);
+}
+
 function normalizeRecord(record, columnCount) {
   return Array.from({ length: columnCount }, (_, index) => record[index] ?? "");
 }

@@ -1,4 +1,4 @@
-import { parseCsv } from "./csvParser.js";
+import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 import { normalizeAxisCode } from "./core/axisCode.js";
 
 const EXPLORER_CONFIG_URL = "./assets/ITS_all_dimension_mapping.csv";

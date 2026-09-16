@@ -25,6 +25,8 @@ const initialState = {
   explorerDefaultExpandDepthError: "",
   explorerTemplateGroups: null,
   explorerTemplateGroupsError: "",
+  explorerKriFormulas: null,
+  explorerKriFormulasError: "",
   peerDisplayMode: "explicit",
   peerJstCodes: [],
   rememberedFileReady: false,
@@ -286,6 +288,23 @@ export function createDataStore() {
       emit();
     },
 
+    setExplorerKriFormulas(explorerKriFormulas) {
+      state = {
+        ...state,
+        explorerKriFormulas,
+        explorerKriFormulasError: ""
+      };
+      emit();
+    },
+
+    setExplorerKriFormulasError(error) {
+      state = {
+        ...state,
+        explorerKriFormulasError: error?.message ?? "Le dictionnaire des formules KRI n'a pas pu être chargé."
+      };
+      emit();
+    },
+
     setRememberedFileReady(fileHandle, fileName = "") {
       state = {
         ...state,
@@ -366,6 +385,8 @@ export function createDataStore() {
         explorerDefaultExpandDepthError: state.explorerDefaultExpandDepthError,
         explorerTemplateGroups: state.explorerTemplateGroups,
         explorerTemplateGroupsError: state.explorerTemplateGroupsError,
+        explorerKriFormulas: state.explorerKriFormulas,
+        explorerKriFormulasError: state.explorerKriFormulasError,
         peerDisplayMode: state.peerDisplayMode,
         rememberedFileReady: false,
         selectedJst: "",

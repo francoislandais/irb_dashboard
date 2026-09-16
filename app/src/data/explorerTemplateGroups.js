@@ -1,4 +1,4 @@
-import { parseCsv } from "./csvParser.js";
+import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 
 const EXPLORER_TEMPLATE_GROUPS_URL = "./assets/ITS_explorer_template_groups.csv";
 

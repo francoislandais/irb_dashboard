@@ -1,11 +1,12 @@
-import { parseCsv } from "./data/csvParser.js";
+import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js";
 import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260915-stable-lists";
-import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
-import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260915-order-first-fix";
-import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js";
-import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js";
-import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js";
+import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260917-kri-formula";
+import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260917-kri-formula";
+import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
+import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-kri-formula";
+import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
+import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js?v=20260917-kri-formula";
 import {
   clearStoredDatasetFileHandle,
   clearStoredFileHandle,
@@ -18,8 +19,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260916-template-groups";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260917-peer-mode-toggle-fast-path";
+import { createDataStore } from "./data/dataStore.js?v=20260917-kri-formula";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260917-kri-formula";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -427,7 +428,7 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, kriDictionaryCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("src/creditRiskStyles.css"),
@@ -435,6 +436,7 @@ async function getStandaloneBundle() {
     fetchAppText("assets/ITS_impossible_x_y.csv"),
     fetchAppText("assets/ITS_explorer_default_expand_depth.csv"),
     fetchAppText("assets/ITS_explorer_template_groups.csv"),
+    fetchAppText("assets/KRI_dictionnary.csv"),
     fetchAppText("vendor/highcharts.js"),
     fetchAppText("vendor/highcharts-treemap.js"),
     collectStandaloneModuleSources("src/main.js")
@@ -445,7 +447,8 @@ async function getStandaloneBundle() {
       "assets/ITS_all_dimension_mapping.csv": mappingCsv,
       "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv,
       "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv,
-      "assets/ITS_explorer_template_groups.csv": templateGroupsCsv
+      "assets/ITS_explorer_template_groups.csv": templateGroupsCsv,
+      "assets/KRI_dictionnary.csv": kriDictionaryCsv
     },
     highchartsJs,
     highchartsTreemapJs,
@@ -594,6 +597,7 @@ async function startApplication() {
       loadExplorerConfiguration(),
       loadExplorerDefaultExpandDepthConfig(),
       loadExplorerTemplateGroupsConfig(),
+      loadExplorerKriFormulasConfig(),
       hasStandaloneCsvData() ? loadStandaloneData() : restoreLastFile()
     ]);
   } catch (error) {
@@ -666,5 +670,13 @@ async function loadExplorerTemplateGroupsConfig() {
     store.setExplorerTemplateGroups(await loadExplorerTemplateGroups());
   } catch (error) {
     store.setExplorerTemplateGroupsError(error);
+  }
+}
+
+async function loadExplorerKriFormulasConfig() {
+  try {
+    store.setExplorerKriFormulas(await loadExplorerKriFormulas());
+  } catch (error) {
+    store.setExplorerKriFormulasError(error);
   }
 }

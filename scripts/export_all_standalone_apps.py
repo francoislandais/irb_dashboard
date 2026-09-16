@@ -189,6 +189,9 @@ def _build_standalone_bundle(app_directory: Path) -> dict:
             "assets/ITS_explorer_template_groups.csv": _read_app_text(
                 app_directory, "assets/ITS_explorer_template_groups.csv"
             ),
+            "assets/KRI_dictionnary.csv": _read_app_text(
+                app_directory, "assets/KRI_dictionnary.csv"
+            ),
         },
         "highchartsJs": _read_app_text(app_directory, "vendor/highcharts.js"),
         "highchartsTreemapJs": _read_app_text(

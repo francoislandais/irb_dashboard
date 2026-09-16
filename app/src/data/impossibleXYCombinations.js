@@ -1,4 +1,4 @@
-import { parseCsv } from "./csvParser.js";
+import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 import { normalizeAxisCode } from "./core/axisCode.js";
 
 const IMPOSSIBLE_COMBINATIONS_URL = "./assets/ITS_impossible_x_y.csv";
