@@ -988,16 +988,13 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 function syncExplorerBenchmarkPlacement() {
   const benchmarkVisible = explorerContextTopic === "benchmark-mode";
   if (!benchmarkVisible) explorerBenchmarkExpanded = false;
-  // Expanded mode is a fullscreen-style view of the chart - no point also
-  // keeping the small preview rendering behind it, and the sidebar (with
-  // its own preview slot) is hidden entirely too (see .is-benchmark-expanded
-  // in styles.css) so the chart gets the full workspace width and height.
+  // Expanded mode swaps the table for the chart within the exact same
+  // spot (see #explorer-benchmark-expanded-slot's grid-row in styles.css) -
+  // the context panel, axis tabs and filter bar all stay exactly where
+  // they are. No point also keeping the small preview rendering behind it.
   if (elements.explorerBenchmarkPreview) elements.explorerBenchmarkPreview.hidden = !benchmarkVisible || explorerBenchmarkExpanded;
-  elements.explorerContextPanel?.classList.toggle("has-benchmark-preview", benchmarkVisible);
-  elements.explorerWorkspace?.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
-  if (elements.explorerMainPane) {
-    elements.explorerMainPane.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
-  }
+  elements.explorerContextPanel?.classList.toggle("has-benchmark-preview", benchmarkVisible && !explorerBenchmarkExpanded);
+  elements.explorerMainPane?.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
   if (elements.explorerTableWrap) elements.explorerTableWrap.hidden = explorerBenchmarkExpanded;
   if (elements.explorerBenchmarkExpandedSlot) elements.explorerBenchmarkExpandedSlot.hidden = !explorerBenchmarkExpanded;
   if (elements.explorerBenchmarkExpand) {

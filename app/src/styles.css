@@ -1445,6 +1445,7 @@ button:focus-visible {
 }
 
 .explorer-workspace {
+  grid-row: 2;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 16px;
@@ -1454,40 +1455,14 @@ button:focus-visible {
   width: 100%;
 }
 
-/* Fullscreen-style expanded benchmark: the sidebar (template list, own
-   preview slot included) is dropped entirely so the chart gets the whole
-   workspace, not just its usual column. */
-.explorer-workspace.is-benchmark-expanded {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.explorer-workspace.is-benchmark-expanded .explorer-context-panel {
-  display: none;
-}
-
 .explorer-main-pane {
   grid-column: 2;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 6px;
   min-height: 0;
   min-width: 0;
-}
-
-.explorer-workspace.is-benchmark-expanded .explorer-main-pane {
-  grid-column: 1;
-}
-
-/* The axis tabs and active-filters bars sit above the table normally, but
-   serve no purpose while the chart fills the pane instead - hiding them
-   frees the vertical space for the chart too. */
-.explorer-main-pane.is-benchmark-expanded .axis-tabs,
-.explorer-main-pane.is-benchmark-expanded .explorer-active-filters {
-  display: none;
-}
-
-.explorer-main-pane.is-benchmark-expanded {
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
 }
 
 .explorer-context-panel {
@@ -2173,7 +2148,9 @@ table {
 }
 
 .explorer-benchmark-expanded-slot {
-  grid-row: 3;
+  /* Use the table and pagination space within the existing main column. */
+  grid-column: 1;
+  grid-row: 3 / 5;
   height: 100%;
   overflow: hidden;
 }
@@ -3423,6 +3400,7 @@ table {
   border-top: 1px solid #e2e7e4;
 }
 
+.explorer-main-pane.is-benchmark-expanded .explorer-kri-pagination-bar,
 .explorer-kri-pagination-bar[hidden] {
   display: none;
 }
