@@ -30,6 +30,25 @@ export function destroyExplorerBenchmarkChart(container = null) {
   explorerBenchmarkCharts.clear();
 }
 
+// Display-only filtering: omit a reference date only when every plotted
+// institution is zero or missing. Keep individual zeros on populated dates.
+export function filterExplorerBenchmarkEmptyDates(benchmark) {
+  const populatedDates = new Set();
+  benchmark.series.forEach((serie) => {
+    serie.values.forEach((point) => {
+      if (Number.isFinite(point.value) && point.value !== 0) populatedDates.add(point.label);
+    });
+  });
+  return {
+    ...benchmark,
+    dates: benchmark.dates.filter((date) => populatedDates.has(date.label)),
+    series: benchmark.series.map((serie) => ({
+      ...serie,
+      values: serie.values.filter((point) => populatedDates.has(point.label))
+    }))
+  };
+}
+
 export function renderExplorerBenchmarkView({
   benchmark,
   compact = false,
@@ -46,6 +65,7 @@ export function renderExplorerBenchmarkView({
   selectedJst,
   smoothingWindow
 }) {
+  benchmark = filterExplorerBenchmarkEmptyDates(benchmark);
   if (benchmark.series.length === 0 || benchmark.dates.length === 0) {
     destroyExplorerBenchmarkChart(container);
     if (container) container.textContent = "No data available for this point.";

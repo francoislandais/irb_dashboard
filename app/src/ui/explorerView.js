@@ -13,7 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260917-kri-data-only-rows";
-import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260916-benchmark-controls";
+import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260916-benchmark-empty-dates";
 import {
   buildExplorerDisplayRows,
   EXPLORER_ALL_CURRENCIES_CODE,
