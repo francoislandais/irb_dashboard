@@ -1,3 +1,7 @@
 table_id;x_axis_default_depth;y_axis_default_depth;z_axis_default_depth
-C_75.01;1;1;
+C_75.01;0;1;
 C_72.00;2;2;
+C_73.00;2;2;
+C_74.00;2;2;
+C_80.00;1;1;
+C_81.00;1;1;

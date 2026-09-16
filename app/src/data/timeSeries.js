@@ -2,7 +2,15 @@ import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByC
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-unsplit-c75";
+import {
+  EXPLORER_ALL_CURRENCIES_CODE,
+  EXPLORER_ALL_CURRENCIES_LABEL,
+  explorerTableHasCurrencyZAxis,
+  getParentPaths,
+  isExplorerLazyValueTemplate,
+  normalizeHierarchyPath,
+  splitHierarchyPath
+} from "./explorer.js?v=20260916-phase2-lazy-values";
 
 export const EXPLORER_TARGET = {
   tableId: "C_02.00",
@@ -83,11 +91,23 @@ export function buildExplorerAxisSeries(state, options = {}) {
   const zPointsConfig = axis === "z" && pointsConfig.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
     ? [createAllCurrenciesPoint(), ...pointsConfig]
     : pointsConfig;
+  // See isExplorerLazyValueTemplate: opt-in, per-template test of skipping
+  // value computation for collapsed rows. `options.expandedPaths` is the
+  // live UI expand-state Set for this axis (see prepareExplorerLazyExpandState
+  // in explorerView.js) - every other template gets `null` here and keeps
+  // computing every row's values exactly as before.
+  const lazyValueVisibility = pointsConfig.length > 0 && isExplorerLazyValueTemplate(axis === "y" ? yConfigTableId : tableId)
+    ? {
+      expandedPaths: options.expandedPaths ?? new Set(),
+      forceVisiblePaths: options.forceVisiblePaths ?? null,
+      parentPaths: getParentPaths(pointsConfig)
+    }
+    : null;
   const rowSeries = axis === "template"
     ? buildTemplateSeriesRows(state, indexes, dateColumns, options.templates ?? [], options.templateSelections ?? {})
     : pointsConfig.length === 0
       ? buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, axis, selections, inheritedFormat)
-      : buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, zPointsConfig, selections, inheritedFormat);
+      : buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, zPointsConfig, selections, inheritedFormat, lazyValueVisibility);
 
   const matchCount = rowSeries.reduce((total, row) => total + row.matchCount, 0);
 
@@ -125,9 +145,10 @@ function createAllCurrenciesPoint() {
   };
 }
 
-function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, selections, inheritedFormat) {
+function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axis, pointsConfig, selections, inheritedFormat, lazyValueVisibility) {
   return pointsConfig.map((point) => {
-    const matchedRows = getRowsForAxisPoint(state, indexes, tableId, axis, point.code, selections);
+    const isHiddenByCollapse = lazyValueVisibility && isConfiguredPointHiddenByCollapse(point, lazyValueVisibility);
+    const matchedRows = isHiddenByCollapse ? [] : getRowsForAxisPoint(state, indexes, tableId, axis, point.code, selections);
     return {
       code: point.code,
       description: point.description,
@@ -140,6 +161,24 @@ function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axi
       values: buildValues(dateColumns, matchedRows)
     };
   });
+}
+
+// A collapsed row's real value is skipped (stubbed to "-", same shape as a
+// virtual ancestor row - see createVirtualExplorerRow in explorer.js) unless
+// it's force-kept for something that still needs its real numbers behind
+// the scenes, like an active contribution/denominator base on that exact
+// row (see forceVisiblePaths in renderExplorer).
+function isConfiguredPointHiddenByCollapse(point, { expandedPaths, forceVisiblePaths, parentPaths }) {
+  const normalizedPath = normalizeHierarchyPath(point.hierarchyPath);
+  if (forceVisiblePaths?.has(normalizedPath)) return false;
+
+  const parts = splitHierarchyPath(point.hierarchyPath);
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    const ancestorPath = normalizeHierarchyPath(parts.slice(0, index + 1).join(" > "));
+    if (parentPaths.has(ancestorPath) && !expandedPaths.has(ancestorPath)) return true;
+  }
+
+  return false;
 }
 
 // Fallback for a table with no static row/column/tab reference at all for
