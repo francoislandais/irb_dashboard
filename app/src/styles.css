@@ -1779,19 +1779,17 @@ button:focus-visible {
 }
 
 .explorer-template-group-header {
-  margin-top: 10px;
-  padding: 6px 8px 4px;
-  border-top: 1px solid #dde3df;
-  color: #66736d;
-  font-size: 0.68rem;
+  margin-top: 22px;
+  padding: 0 8px 7px;
+  color: #52605a;
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .explorer-template-group-header:first-child {
   margin-top: 0;
-  border-top: 0;
 }
 
 /* Flat option rows, aligned with the Evolution frequency selector. */
