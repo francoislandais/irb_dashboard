@@ -2,7 +2,13 @@ import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByC
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-all-currencies-wording";
+import {
+  EXPLORER_ALL_CURRENCIES_CODE,
+  EXPLORER_ALL_CURRENCIES_LABEL,
+  explorerTableHasCurrencyZAxis,
+  getAvailableExplorerAxisCodes,
+  isExplorerDataOnlyRowTemplate
+} from "./explorer.js?v=20260917-kri-data-only-rows";
 
 export const EXPLORER_TARGET = {
   tableId: "C_02.00",
@@ -50,7 +56,19 @@ export function buildExplorerAxisSeries(state, options = {}) {
   // currency - see the requireBlankZ option threaded through below.
   const selectedZCode = rawSelectedZCode === EXPLORER_ALL_CURRENCIES_CODE ? "" : rawSelectedZCode;
   const indexes = getCompleteAxisColumnIndexes(state.columns);
-  const pointsConfig = getAxisPoints(state.explorerPoints ?? [], axis === "y" ? yConfigTableId : tableId, axis);
+  const rawPointsConfig = getAxisPoints(state.explorerPoints ?? [], axis === "y" ? yConfigTableId : tableId, axis);
+  // Unlike every other template (whose configured row/column/tab codes stay
+  // selectable even without data for the current JST - see
+  // getPreferredExplorerAxisCodes), KRI's dictionary lists every known
+  // indicator across every institution: one dataset only ever covers a
+  // small subset. Restricting to what's actually present keeps the row
+  // list from being buried under thousands of empty entries.
+  const pointsConfig = axis === "y" && isExplorerDataOnlyRowTemplate(yConfigTableId)
+    ? (() => {
+      const availableCodes = new Set(getAvailableExplorerAxisCodes(state, tableId, "y"));
+      return rawPointsConfig.filter((point) => availableCodes.has(point.code));
+    })()
+    : rawPointsConfig;
 
   if (state.explorerPointsError) {
     return {

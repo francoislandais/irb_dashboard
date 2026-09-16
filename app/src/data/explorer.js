@@ -261,6 +261,19 @@ export function getExplorerTemplateLabel(tableId) {
 // `tableId` (the real table_id data rows are matched against).
 export const EXPLORER_TEMPLATE_ROW_SECTIONS = {};
 
+// KRI's dictionary lists every known indicator across every institution -
+// unlike every other template, one particular dataset only ever covers a
+// small subset of them. Unlike the general "stay selectable even without
+// data" stability rule (see getPreferredExplorerAxisCodes), KRI's row axis
+// is restricted to codes actually present in the loaded dataset instead -
+// the full dictionary would otherwise bury the handful that matter under
+// thousands of rows with no data at all.
+const EXPLORER_DATA_ONLY_ROW_TABLE_IDS = new Set(["KRI"]);
+
+export function isExplorerDataOnlyRowTemplate(tableId) {
+  return EXPLORER_DATA_ONLY_ROW_TABLE_IDS.has(tableId);
+}
+
 export function getExplorerTemplates(state) {
   const tableIds = getExplorerTableIds(state);
 
@@ -319,7 +332,9 @@ export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId)
   const availableYCodes = getAvailableExplorerAxisCodes(state, tableId, "y");
   const availableZCodes = getAvailableExplorerAxisCodes(state, tableId, "z");
   const xCodes = getPreferredExplorerAxisCodes(configuredXCodes, availableXCodes);
-  const yCodes = getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
+  const yCodes = isExplorerDataOnlyRowTemplate(yConfigTableId)
+    ? configuredYCodes.filter((code) => availableYCodes.includes(code))
+    : getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
   const preferredZCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
   const zCodes = preferredZCodes.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
     ? [EXPLORER_ALL_CURRENCIES_CODE, ...preferredZCodes]
