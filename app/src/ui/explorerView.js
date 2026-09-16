@@ -147,6 +147,12 @@ let explorerReturnTarget = null;
 let shouldFocusOpenedExplorerPoint = false;
 let lastRenderedExplorerTableSeries = null;
 let lastRenderedExplorerSelectedUnit = null;
+// The exact state object last passed to renderExplorer - used only to tell
+// "the store produced a new state, but nothing on it besides peerDisplayMode
+// changed" (see isExplorerTableUnaffectedByStateChange) from "a local UI
+// action wants a full re-render" (rerenderApp reuses the same state object,
+// so it's never mistaken for the former).
+let lastExplorerRenderedState = null;
 let explorerCellDrag = null;
 let explorerCellRanges = [];
 let explorerCellRangePreview = null;
@@ -1037,7 +1043,39 @@ function refreshExplorerSelectionOnly(state) {
   applyExplorerSelection();
 }
 
+// peerDisplayMode is store-level state shared with Credit Risk, so toggling
+// it goes through the generic store subscription (renderAppState -> this
+// function) rather than a local Explorer click handler that could opt into
+// the fast chrome-only path directly (see the "Benchmark display" toggle).
+// It never affects the table itself - only the benchmark chart - so when
+// it's the only field that changed on a genuinely new state object, skip
+// straight to the same chrome refresh instead of rebuilding the table.
+// Guarded on `previousState !== state`: a local action that calls
+// rerenderApp(getLatestState()) reuses the same object, so it always falls
+// through to the full render below, exactly as before.
+function isExplorerTableUnaffectedByStateChange(previousState, nextState) {
+  const keys = new Set([...Object.keys(previousState), ...Object.keys(nextState)]);
+  for (const key of keys) {
+    if (key === "peerDisplayMode") continue;
+    if (previousState[key] !== nextState[key]) return false;
+  }
+  return true;
+}
+
 export function renderExplorer(state) {
+  const previousState = lastExplorerRenderedState;
+  lastExplorerRenderedState = state;
+  if (
+    previousState
+    && previousState !== state
+    && lastRenderedExplorerTableSeries
+    && isExplorerTableUnaffectedByStateChange(previousState, state)
+  ) {
+    clearExplorerCellRangeSelection();
+    refreshExplorerSelectionChrome(state);
+    return;
+  }
+
   clearExplorerCellRangeSelection();
   ensureActiveExplorerTemplate(state);
   ensureActiveExplorerTemplateMatchesSearch(state);
