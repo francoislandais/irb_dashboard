@@ -132,6 +132,12 @@ const pendingUrlTab = getUrlTabParam();
 const pendingUrlHistoryPeriods = getUrlHistoryPeriodsParam();
 const pendingUrlAnchorReference = readUrlStateParams().get(EXPLORER_ANCHOR_REFERENCE_URL_PARAM) ?? "";
 let explorerAnchorReferenceLabel = pendingUrlAnchorReference;
+// Evolution frequency and history depth are shared across every template
+// (not stored per-template context like the axis selections) - switching
+// templates keeps whatever the user picked instead of resetting it.
+let explorerGlobalEvolutionFrequency = "quarterly";
+let explorerHasDetectedEvolutionFrequency = false;
+let explorerGlobalHistoryPeriods = pendingUrlHistoryPeriods;
 let explorerStickyFrame = 0;
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
@@ -354,10 +360,7 @@ function createExplorerTemplateContext() {
     // first visible column until the user clicks a specific cell.
     selectedCellColumnIndex: 0,
     selectedReferenceLabel: "",
-    evolutionFrequency: "quarterly",
-    hasDetectedEvolutionFrequency: false,
-    displayMode: "temporal",
-    historyPeriods: pendingUrlHistoryPeriods
+    displayMode: "temporal"
   };
 }
 
@@ -409,10 +412,10 @@ function updateUrlExplorerSelectionParams() {
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
   setOrDeleteUrlParam(url, EXPLORER_ANCHOR_REFERENCE_URL_PARAM, explorerAnchorReferenceLabel);
-  if (context.historyPeriods === DEFAULT_EXPLORER_HISTORY_PERIODS) {
+  if (explorerGlobalHistoryPeriods === DEFAULT_EXPLORER_HISTORY_PERIODS) {
     url.searchParams.delete(EXPLORER_HISTORY_PERIODS_URL_PARAM);
   } else {
-    url.searchParams.set(EXPLORER_HISTORY_PERIODS_URL_PARAM, String(context.historyPeriods));
+    url.searchParams.set(EXPLORER_HISTORY_PERIODS_URL_PARAM, String(explorerGlobalHistoryPeriods));
   }
   if (explorerGeographyLayout === "euro-first") {
     url.searchParams.delete(EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM);
@@ -855,9 +858,11 @@ function ensureExplorerTemplateSelections(state, template) {
   const templateId = template?.id ?? EXPLORER_TARGET.tableId;
   const tableId = template?.tableId ?? EXPLORER_TARGET.tableId;
   const context = getExplorerContextForTemplate(templateId);
-  if (!context.hasDetectedEvolutionFrequency) {
-    context.evolutionFrequency = detectExplorerTemplateEvolutionFrequency(state, tableId);
-    context.hasDetectedEvolutionFrequency = true;
+  // Detected once, ever, from whichever template happens to load first -
+  // not per template, since the frequency is now a single shared choice.
+  if (!explorerHasDetectedEvolutionFrequency) {
+    explorerGlobalEvolutionFrequency = detectExplorerTemplateEvolutionFrequency(state, tableId);
+    explorerHasDetectedEvolutionFrequency = true;
   }
   const axisOptions = getExplorerAxisOptions(state, tableId, templateId);
   const yCodes = axisOptions.y.codes;
@@ -2044,7 +2049,17 @@ function buildExplorerBenchmark(jstCodes = null) {
   const selections = getCompleteExplorerSelectionsForBenchmark(context, activeAxis);
   const contribution = getExplorerBenchmarkContributionContext(context, activeAxis);
   const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
-  const dates = getReferenceColumns(state?.columns ?? []);
+  // Same per-table filter as buildExplorerAxisSeries: without it, a
+  // quarterly-only table's benchmark line still carried every monthly
+  // column from other tables in the dataset, each with no data for this
+  // table - alternating real quarter-end points with null months made the
+  // line saw-tooth instead of just following the populated quarters, the
+  // same as the table itself already does.
+  const dates = indexes
+    ? getReferenceColumns(state.columns).filter((reference) => (
+      state.rows.some((row) => row[indexes.tableId] === tableId && String(row[reference.index] ?? "").trim() !== "")
+    ))
+    : [];
   const format = getBenchmarkValueFormat(state, tableId, context);
   const label = getBenchmarkLabel(state, tableId, context, activeAxis, getActiveExplorerTemplate()?.label);
 
@@ -2320,8 +2335,7 @@ function getSelectedExplorerReference(state = getLatestState()) {
 }
 
 function getActiveExplorerEvolutionOption() {
-  const frequency = getActiveExplorerContext().evolutionFrequency;
-  return EXPLORER_EVOLUTION_OPTIONS.find((option) => option.value === frequency) ?? EXPLORER_EVOLUTION_OPTIONS[0];
+  return EXPLORER_EVOLUTION_OPTIONS.find((option) => option.value === explorerGlobalEvolutionFrequency) ?? EXPLORER_EVOLUTION_OPTIONS[0];
 }
 
 // Smallest positive gap (in months) between consecutive date columns, i.e.
@@ -2355,7 +2369,7 @@ function getActiveExplorerDisplayOption() {
 // shown, given the current evolution frequency (step) and history depth -
 // anchored on the latest available date, or on explorerAnchorReferenceLabel
 // once the user has clicked an older cell.
-function computeExplorerVisibleDateIndexes(dateColumns, context) {
+function computeExplorerVisibleDateIndexes(dateColumns) {
   const latestIndex = dateColumns.length - 1;
   const step = getExplorerEvolutionStep(dateColumns);
   const requestedAnchorIndex = dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
@@ -2364,7 +2378,7 @@ function computeExplorerVisibleDateIndexes(dateColumns, context) {
   // History depth is a plain count of periods at the current frequency
   // (see createExplorerHistoryDepthControl) - the anchor itself plus that
   // many prior periods, regardless of calendar-year boundaries.
-  const maxVisiblePoints = context.historyPeriods + 1;
+  const maxVisiblePoints = explorerGlobalHistoryPeriods + 1;
   const selectedIndexes = [];
   for (let index = anchorIndex; index >= 0 && selectedIndexes.length < maxVisiblePoints; index -= step) {
     selectedIndexes.push(index);
@@ -2395,7 +2409,7 @@ function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIn
     return;
   }
 
-  const resolvedIndexes = selectedIndexes ?? computeExplorerVisibleDateIndexes(dateColumns, context);
+  const resolvedIndexes = selectedIndexes ?? computeExplorerVisibleDateIndexes(dateColumns);
   const visibleSelectedIndex = [...resolvedIndexes].reverse().indexOf(resolvedSelectedIndex);
   context.selectedCellColumnIndex = visibleSelectedIndex >= 0 ? visibleSelectedIndex : 0;
 }
@@ -2408,7 +2422,7 @@ function buildExplorerEvolutionSeries(series, state) {
     return series;
   }
 
-  const selectedIndexes = computeExplorerVisibleDateIndexes(series.dateColumns, context);
+  const selectedIndexes = computeExplorerVisibleDateIndexes(series.dateColumns);
   recomputeExplorerSelectedCellColumnIndex(series.dateColumns, state, selectedIndexes);
 
   return {
@@ -2780,7 +2794,6 @@ function scheduleExplorerReferenceColumnCentering() {
 }
 
 function renderExplorerEvolutionFrequencyPanel() {
-  const context = getActiveExplorerContext();
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-evolution-frequency-panel";
 
@@ -2793,7 +2806,7 @@ function renderExplorerEvolutionFrequencyPanel() {
   list.setAttribute("aria-label", "Evolution frequency");
 
   EXPLORER_EVOLUTION_OPTIONS.forEach((option) => {
-    const isActive = option.value === context.evolutionFrequency;
+    const isActive = option.value === explorerGlobalEvolutionFrequency;
     const row = document.createElement("button");
     row.type = "button";
     row.className = "explorer-jst-selection-row explorer-evolution-frequency-row";
@@ -2806,8 +2819,8 @@ function renderExplorerEvolutionFrequencyPanel() {
     detail.textContent = option.description;
     row.append(label, detail);
     row.addEventListener("click", () => {
-      if (context.evolutionFrequency === option.value) return;
-      context.evolutionFrequency = option.value;
+      if (explorerGlobalEvolutionFrequency === option.value) return;
+      explorerGlobalEvolutionFrequency = option.value;
       saveExplorerScrollPosition();
       if (getLatestState()) rerenderApp(getLatestState());
     });
@@ -3118,7 +3131,6 @@ function getExplorerActiveDateColumns() {
 }
 
 function createExplorerHistoryDepthControl() {
-  const context = getActiveExplorerContext();
   const dateColumns = getExplorerActiveDateColumns();
   const step = getExplorerEvolutionStep(dateColumns);
   const requestedAnchorIndex = dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
@@ -3126,7 +3138,7 @@ function createExplorerHistoryDepthControl() {
 
   let maximumPeriods = 0;
   for (let index = anchorIndex - step; index >= 0; index -= step) maximumPeriods += 1;
-  context.historyPeriods = Math.min(context.historyPeriods, maximumPeriods);
+  explorerGlobalHistoryPeriods = Math.min(explorerGlobalHistoryPeriods, maximumPeriods);
 
   const section = document.createElement("section");
   section.className = "explorer-history-depth-control";
@@ -3141,7 +3153,7 @@ function createExplorerHistoryDepthControl() {
       ? "Latest period only"
       : `Latest + ${periods} prior ${getExplorerHistoryUnitLabel(periods)}`;
   };
-  updateValue(context.historyPeriods);
+  updateValue(explorerGlobalHistoryPeriods);
   heading.append(label, value);
 
   const input = document.createElement("input");
@@ -3149,12 +3161,12 @@ function createExplorerHistoryDepthControl() {
   input.min = "0";
   input.max = String(maximumPeriods);
   input.step = "1";
-  input.value = String(context.historyPeriods);
+  input.value = String(explorerGlobalHistoryPeriods);
   input.disabled = maximumPeriods === 0;
   input.setAttribute("aria-label", `History depth in prior ${getExplorerHistoryUnitLabel(2)}`);
   input.addEventListener("input", () => updateValue(Number(input.value)));
   input.addEventListener("change", () => {
-    context.historyPeriods = Number(input.value);
+    explorerGlobalHistoryPeriods = Number(input.value);
     saveExplorerScrollPosition();
     if (getLatestState()) rerenderApp(getLatestState());
   });
