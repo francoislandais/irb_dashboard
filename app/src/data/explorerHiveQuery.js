@@ -1,7 +1,7 @@
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
-import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260916-unsplit-c75";
+import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260916-all-currency-blank-z-fix";
 
 // Builds a Hive query that reproduces one or several selected Explorer
 // cells, against the same table used by scripts/hive_to_dataset.py. Values
@@ -40,9 +40,10 @@ ORDER BY reference_period;`;
 function buildPointCondition(state, indexes, point, includeDateFilter) {
   if (!point?.tableId) return null;
 
-  // "All Currency" (see explorer.js) has no single matching row to look
-  // up by exact coordinates - find any row for this x/y instead and drop
-  // the z filter entirely, matching every currency.
+  // "All Currency" (see explorer.js) matches the row whose own
+  // z_axis_rc_code is blank - the pre-aggregated total the source data
+  // already provides - not every row for this x/y regardless of currency,
+  // which would sum that total together with every individual currency.
   const isAllCurrencies = point.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE;
   const matchedRows = isAllCurrencies
     ? (state.rows ?? []).filter((row) => (
@@ -50,6 +51,7 @@ function buildPointCondition(state, indexes, point, includeDateFilter) {
       && row[indexes.jstCode] === state.selectedJst
       && normalizeAxisCode(row[indexes.xAxisRcCode], "x") === normalizeAxisCode(point.selectedXCode, "x")
       && normalizeAxisCode(row[indexes.yAxisRcCode], "y") === normalizeAxisCode(point.selectedYCode, "y")
+      && normalizeAxisCode(row[indexes.zAxisRcCode], "z") === ""
     ))
     : getIndexedRowsByCoordinates(state, point.tableId, {
       selectedXCode: point.selectedXCode,
@@ -63,7 +65,7 @@ function buildPointCondition(state, indexes, point, includeDateFilter) {
   const rawJstCode = row[indexes.jstCode];
   const rawXCode = row[indexes.xAxisRcCode];
   const rawYCode = row[indexes.yAxisRcCode];
-  const rawZCode = isAllCurrencies ? "" : row[indexes.zAxisRcCode];
+  const rawZCode = row[indexes.zAxisRcCode];
 
   const conditions = [
     `regexp_replace(table_id, '\\.[A-Za-z]+$', '') = ${sqlLiteral(rawTableId)}`,
@@ -71,7 +73,13 @@ function buildPointCondition(state, indexes, point, includeDateFilter) {
     `x_axis_rc_code = ${sqlLiteral(rawXCode)}`,
     `y_axis_rc_code = ${sqlLiteral(rawYCode)}`
   ];
-  if (rawZCode) conditions.push(`z_axis_rc_code = ${sqlLiteral(rawZCode)}`);
+  if (isAllCurrencies) {
+    // Match explicitly blank rather than omitting the condition - an
+    // omitted z_axis_rc_code filter would match every currency again.
+    conditions.push("(z_axis_rc_code IS NULL OR z_axis_rc_code = '')");
+  } else if (rawZCode) {
+    conditions.push(`z_axis_rc_code = ${sqlLiteral(rawZCode)}`);
+  }
   if (includeDateFilter && point.referenceDateIso) {
     conditions.push(`reference_period = ${sqlLiteral(point.referenceDateIso)}`);
   }

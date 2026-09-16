@@ -19,7 +19,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260916-template-groups";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-selection-fast-path";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-all-currency-blank-z-fix";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

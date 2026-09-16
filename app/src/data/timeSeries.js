@@ -2,7 +2,7 @@ import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByC
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-unsplit-c75";
+import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-all-currency-blank-z-fix";
 
 export const EXPLORER_TARGET = {
   tableId: "C_02.00",
@@ -37,10 +37,11 @@ export function buildExplorerAxisSeries(state, options = {}) {
   const selectedXCode = normalizeAxisCode(options.selectedXCode || EXPLORER_TARGET.xAxisRcCode, "x");
   const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
   const rawSelectedZCode = normalizeAxisCode(options.selectedZCode || "", "z");
-  // "All Currency" (see explorerTableHasCurrencyZAxis) means "ignore the
-  // z-axis filter, aggregate across every value" for matching purposes -
-  // everywhere except when the z-axis row for it is itself being built
-  // (handled directly in getRowsForAxisPoint).
+  // "All Currency" (see explorerTableHasCurrencyZAxis) resolves to an empty
+  // selectedZCode, which matchesSelectedAxis then requires to be an
+  // explicit blank z_axis_rc_code on the row (the pre-aggregated total the
+  // source data already provides) rather than a wildcard across every
+  // currency - see the requireBlankZ option threaded through below.
   const selectedZCode = rawSelectedZCode === EXPLORER_ALL_CURRENCIES_CODE ? "" : rawSelectedZCode;
   const indexes = getCompleteAxisColumnIndexes(state.columns);
   const pointsConfig = getAxisPoints(state.explorerPoints ?? [], axis === "y" ? yConfigTableId : tableId, axis);
@@ -228,9 +229,9 @@ function normalizeTemplateSelections(selections = {}) {
 
 function getRowsForAxisPoint(state, indexes, tableId, axis, pointCode, selections) {
   // Building the synthetic "All Currency" row itself (only reachable when
-  // z is the browsed axis - see createAllCurrenciesPoint): match x/y only,
-  // ignoring z entirely, instead of trying to exact-match this sentinel
-  // against a real z_axis_rc_code value that will never exist.
+  // z is the browsed axis - see createAllCurrenciesPoint): match x/y, and
+  // (see matchesSelectedAxis) the row whose own z_axis_rc_code is blank -
+  // not a real z_axis_rc_code value, which this sentinel will never equal.
   if (axis === "z" && pointCode === EXPLORER_ALL_CURRENCIES_CODE) {
     return getRowsForPartialSelection(state, indexes, tableId, { ...selections, selectedZCode: "" });
   }
@@ -250,10 +251,11 @@ function getRowsForAxisPoint(state, indexes, tableId, axis, pointCode, selection
     ? indexedRows
     : getRowsForTableJst(state, indexes, tableId);
 
+  const zMatchOptions = { requireBlankZ: explorerTableHasCurrencyZAxis(state, tableId) };
   return rowsToFilter.filter((row) => (
     matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, axis)
     && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, axis)
-    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis)
+    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis, zMatchOptions)
     && normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === pointCode
   ));
 }
@@ -274,10 +276,11 @@ function getRowsForPartialSelection(state, indexes, tableId, selections) {
 
   if ((anchor && rowsToFilter.length === 0 && state.dataIndexes) || rowsToFilter.length === 0) return [];
 
+  const zMatchOptions = { requireBlankZ: explorerTableHasCurrencyZAxis(state, tableId) };
   return rowsToFilter.filter((row) => (
     matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template")
     && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template")
-    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template")
+    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template", zMatchOptions)
   ));
 }
 
@@ -353,9 +356,22 @@ function getAxisCodeFormat(state, tableId, coordinate, code) {
   return state.dimensionMapping?.find(tableId, coordinate, code)?.format || "";
 }
 
-function matchesSelectedAxis(row, indexes, axis, selectedCode, activeAxis) {
-  if (axis === activeAxis || !selectedCode) return true;
+function matchesSelectedAxis(row, indexes, axis, selectedCode, activeAxis, { requireBlankZ = false } = {}) {
+  if (axis === activeAxis) return true;
+  if (!selectedCode) {
+    // A currency Z-axis table's "All Currency" selection resolves to an
+    // empty selectedZCode (see buildExplorerAxisSeries), meaning "match
+    // only the row whose own z_axis_rc_code is blank" - the pre-aggregated
+    // total the source data already provides. Treating it as "ignore Z"
+    // instead would sum that total together with every individual
+    // currency row on top of it.
+    return axis === "z" && requireBlankZ ? isBlankAxisCode(row, indexes, axis) : true;
+  }
   return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === selectedCode;
+}
+
+function isBlankAxisCode(row, indexes, axis) {
+  return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === "";
 }
 
 function buildValues(dateColumns, matchedRows) {

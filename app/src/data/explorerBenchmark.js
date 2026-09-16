@@ -1,15 +1,16 @@
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { parseNumericValue } from "./core/referenceColumns.js";
-import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL } from "./explorer.js?v=20260916-unsplit-c75";
+import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-all-currency-blank-z-fix";
 
 export function getExplorerSelectionsForAxisCode(context, activeAxis, axisCode) {
   const zCode = normalizeAxisCode(activeAxis === "z" ? axisCode : context.selectedZCode, "z");
   return {
     selectedXCode: normalizeAxisCode(activeAxis === "x" ? axisCode : context.selectedXCode, "x"),
     selectedYCode: normalizeAxisCode(activeAxis === "y" ? axisCode : context.selectedYCode, "y"),
-    // "All Currency" is a display-only sentinel (see explorer.js) - it
-    // should never be used to filter rows, only to mean "any currency".
+    // "All Currency" (see explorer.js) resolves to an empty selectedZCode -
+    // getBenchmarkRows then requires the row's own z_axis_rc_code to be
+    // blank rather than treating it as "match any currency".
     selectedZCode: zCode === EXPLORER_ALL_CURRENCIES_CODE ? "" : zCode
   };
 }
@@ -40,12 +41,17 @@ export function getBenchmarkRows(state, indexes, tableId, selections, jstCode) {
     if (indexedRows.length > 0 || state.dataIndexes) return indexedRows;
   }
 
+  // An "All Currency" selection resolves to an empty selectedZCode (see
+  // getExplorerSelectionsForAxisCode) meaning "match the row whose own
+  // z_axis_rc_code is blank", not "ignore z" - which would sum that
+  // pre-aggregated total together with every individual currency row too.
+  const requireBlankZ = explorerTableHasCurrencyZAxis(state, tableId);
   return state.rows.filter((row) => (
     row[indexes.jstCode] === jstCode
     && row[indexes.tableId] === tableId
     && matchesBenchmarkSelection(row, indexes, "x", selections.selectedXCode)
     && matchesBenchmarkSelection(row, indexes, "y", selections.selectedYCode)
-    && matchesBenchmarkSelection(row, indexes, "z", selections.selectedZCode)
+    && matchesBenchmarkSelection(row, indexes, "z", selections.selectedZCode, requireBlankZ)
   ));
 }
 
@@ -53,8 +59,12 @@ function hasCompleteBenchmarkSelection(selections) {
   return Boolean(selections.selectedXCode && selections.selectedYCode && selections.selectedZCode);
 }
 
-function matchesBenchmarkSelection(row, indexes, axis, selectedCode) {
-  if (!selectedCode) return true;
+function matchesBenchmarkSelection(row, indexes, axis, selectedCode, requireBlankZ = false) {
+  if (!selectedCode) {
+    return axis === "z" && requireBlankZ
+      ? normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === ""
+      : true;
+  }
   return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === selectedCode;
 }
 
