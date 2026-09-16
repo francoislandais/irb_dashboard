@@ -249,20 +249,17 @@ export function getExplorerTemplateLabel(tableId) {
 }
 
 // Some templates have so many y-axis rows (a table reused for several
-// unrelated counterparty/memorandum blocks) that a single view is too
-// heavy to render. Splitting it into several selectable entries keeps the
-// real, single table_id used for every actual data lookup - only the
-// y-axis reference points shown are scoped to a section-specific id in
+// unrelated counterparty/memorandum blocks) that a single view used to be
+// too heavy to render. Now that the Explorer tree only builds DOM rows for
+// expanded branches (see the visible-rows filter in renderExplorerTable),
+// that's no longer needed - kept empty as the mechanism for a future table
+// that would still warrant splitting. Splitting keeps the real, single
+// table_id used for every actual data lookup - only the y-axis reference
+// points shown are scoped to a section-specific id in
 // ITS_all_dimension_mapping.csv (e.g. "C_75.01#central-bank"). See
 // `id` (selection identity, also the y-axis config lookup key) vs
 // `tableId` (the real table_id data rows are matched against).
-export const EXPLORER_TEMPLATE_ROW_SECTIONS = {
-  "C_75.01": [
-    { id: "C_75.01#non-central-bank", label: "Counterparty: non-central bank" },
-    { id: "C_75.01#central-bank", label: "Counterparty: central bank" },
-    { id: "C_75.01#memorandum", label: "Memorandum items" }
-  ]
-};
+export const EXPLORER_TEMPLATE_ROW_SECTIONS = {};
 
 export function getExplorerTemplates(state) {
   const tableIds = getExplorerTableIds(state);

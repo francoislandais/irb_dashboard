@@ -1,7 +1,7 @@
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { parseNumericValue } from "./core/referenceColumns.js";
-import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL } from "./explorer.js?v=20260915-all-currency";
+import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL } from "./explorer.js?v=20260916-unsplit-c75";
 
 export function getExplorerSelectionsForAxisCode(context, activeAxis, axisCode) {
   const zCode = normalizeAxisCode(activeAxis === "z" ? axisCode : context.selectedZCode, "z");

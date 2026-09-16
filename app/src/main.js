@@ -18,7 +18,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260915-default-expand-depth";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-expand-depth-key-fix";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-unsplit-c75";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

@@ -1,7 +1,7 @@
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
-import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260915-all-currency";
+import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260916-unsplit-c75";
 
 // Builds a Hive query that reproduces one or several selected Explorer
 // cells, against the same table used by scripts/hive_to_dataset.py. Values
