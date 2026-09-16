@@ -3676,6 +3676,11 @@ table {
   --tree-highlight-offset: 8px;
 }
 
+/* Match selection to the KRI text inset, overriding the inherited tree offset. */
+.metric-table.is-kri-row-axis .description-column {
+  --highlight-start: calc(var(--tree-highlight-offset) + (var(--indent-level, 0) * 18px));
+}
+
 .metric-table.is-kri-row-axis .tree-toggle-spacer {
   display: none;
 }
