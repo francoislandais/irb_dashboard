@@ -23,6 +23,8 @@ const initialState = {
   explorerPointsError: "",
   explorerDefaultExpandDepth: null,
   explorerDefaultExpandDepthError: "",
+  explorerTemplateGroups: null,
+  explorerTemplateGroupsError: "",
   peerDisplayMode: "explicit",
   peerJstCodes: [],
   rememberedFileReady: false,
@@ -267,6 +269,23 @@ export function createDataStore() {
       emit();
     },
 
+    setExplorerTemplateGroups(explorerTemplateGroups) {
+      state = {
+        ...state,
+        explorerTemplateGroups,
+        explorerTemplateGroupsError: ""
+      };
+      emit();
+    },
+
+    setExplorerTemplateGroupsError(error) {
+      state = {
+        ...state,
+        explorerTemplateGroupsError: error?.message ?? "La configuration interne des groupes de templates n'a pas pu être chargée."
+      };
+      emit();
+    },
+
     setRememberedFileReady(fileHandle, fileName = "") {
       state = {
         ...state,
@@ -345,6 +364,8 @@ export function createDataStore() {
         explorerPointsError: state.explorerPointsError,
         explorerDefaultExpandDepth: state.explorerDefaultExpandDepth,
         explorerDefaultExpandDepthError: state.explorerDefaultExpandDepthError,
+        explorerTemplateGroups: state.explorerTemplateGroups,
+        explorerTemplateGroupsError: state.explorerTemplateGroupsError,
         peerDisplayMode: state.peerDisplayMode,
         rememberedFileReady: false,
         selectedJst: "",

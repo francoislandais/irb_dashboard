@@ -35,6 +35,7 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js?v=20260916-unsplit-c75";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
+import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
@@ -3593,41 +3594,53 @@ function createExplorerTemplateList(templates, activeTemplateId) {
   }
 
   const state = getLatestState();
-  templates.forEach((template) => {
-    const isActive = template.id === activeTemplateId;
-    const option = document.createElement("button");
-    option.type = "button";
-    option.className = "explorer-template-option";
-    option.classList.toggle("is-active", isActive);
-    option.setAttribute("role", "option");
-    option.setAttribute("aria-selected", String(isActive));
-    option.title = template.label;
+  const sections = groupExplorerTemplatesByFamily(templates, state?.explorerTemplateGroups);
+  sections.forEach(({ group, templates: groupTemplates }) => {
+    if (group) list.append(createExplorerTemplateGroupHeader(group));
 
-    const code = document.createElement("span");
-    code.className = "explorer-template-option-code";
-    code.textContent = template.tableId;
-    option.append(code);
+    groupTemplates.forEach((template) => {
+      const isActive = template.id === activeTemplateId;
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "explorer-template-option";
+      option.classList.toggle("is-active", isActive);
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-selected", String(isActive));
+      option.title = template.label;
 
-    if (template.description) {
-      const description = document.createElement("span");
-      description.className = "explorer-template-option-description";
-      description.textContent = template.description;
-      option.append(description);
-    }
+      const code = document.createElement("span");
+      code.className = "explorer-template-option-code";
+      code.textContent = template.tableId;
+      option.append(code);
 
-    if (isExplorerTemplateEmptyForJst(state, template)) {
-      const badge = document.createElement("span");
-      badge.className = "explorer-template-option-empty-badge";
-      badge.textContent = "Empty";
-      option.append(badge);
-    }
+      if (template.description) {
+        const description = document.createElement("span");
+        description.className = "explorer-template-option-description";
+        description.textContent = template.description;
+        option.append(description);
+      }
 
-    option.addEventListener("click", () => setActiveExplorerTemplate(template.id));
-    list.append(option);
+      if (isExplorerTemplateEmptyForJst(state, template)) {
+        const badge = document.createElement("span");
+        badge.className = "explorer-template-option-empty-badge";
+        badge.textContent = "Empty";
+        option.append(badge);
+      }
+
+      option.addEventListener("click", () => setActiveExplorerTemplate(template.id));
+      list.append(option);
+    });
   });
 
   section.append(list);
   return section;
+}
+
+function createExplorerTemplateGroupHeader(group) {
+  const header = document.createElement("div");
+  header.className = "explorer-template-group-header";
+  header.textContent = group;
+  return header;
 }
 
 function getExplorerAxisDisplayName(axis) {

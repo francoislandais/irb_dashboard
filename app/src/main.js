@@ -4,6 +4,7 @@ import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=2026
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260704-cost-risk";
 import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260915-order-first-fix";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js";
+import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js";
 import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js";
 import {
   clearStoredDatasetFileHandle,
@@ -17,8 +18,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260915-default-expand-depth";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-unsplit-c75";
+import { createDataStore } from "./data/dataStore.js?v=20260916-template-groups";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260916-template-groups";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -426,13 +427,14 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("src/creditRiskStyles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
     fetchAppText("assets/ITS_impossible_x_y.csv"),
     fetchAppText("assets/ITS_explorer_default_expand_depth.csv"),
+    fetchAppText("assets/ITS_explorer_template_groups.csv"),
     fetchAppText("vendor/highcharts.js"),
     fetchAppText("vendor/highcharts-treemap.js"),
     collectStandaloneModuleSources("src/main.js")
@@ -442,7 +444,8 @@ async function getStandaloneBundle() {
     assets: {
       "assets/ITS_all_dimension_mapping.csv": mappingCsv,
       "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv,
-      "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv
+      "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv,
+      "assets/ITS_explorer_template_groups.csv": templateGroupsCsv
     },
     highchartsJs,
     highchartsTreemapJs,
@@ -590,6 +593,7 @@ async function startApplication() {
       loadImpossibleCombinations(),
       loadExplorerConfiguration(),
       loadExplorerDefaultExpandDepthConfig(),
+      loadExplorerTemplateGroupsConfig(),
       hasStandaloneCsvData() ? loadStandaloneData() : restoreLastFile()
     ]);
   } catch (error) {
@@ -654,5 +658,13 @@ async function loadExplorerDefaultExpandDepthConfig() {
     store.setExplorerDefaultExpandDepth(await loadExplorerDefaultExpandDepth());
   } catch (error) {
     store.setExplorerDefaultExpandDepthError(error);
+  }
+}
+
+async function loadExplorerTemplateGroupsConfig() {
+  try {
+    store.setExplorerTemplateGroups(await loadExplorerTemplateGroups());
+  } catch (error) {
+    store.setExplorerTemplateGroupsError(error);
   }
 }
