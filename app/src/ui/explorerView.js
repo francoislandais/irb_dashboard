@@ -18,6 +18,7 @@ import {
   buildExplorerDisplayRows,
   EXPLORER_ALL_CURRENCIES_CODE,
   EXPLORER_ALL_CURRENCIES_LABEL,
+  getAvailableExplorerAxisCodes,
   getConfiguredExplorerAxisCodes,
   getExplicitPaths,
   getExplorerAxisOptions,
@@ -200,6 +201,7 @@ let explorerAdvancedSearchTimer = 0;
 let explorerAdvancedSearchCache = null;
 let explorerAdvancedSearchAutoFocusKey = "";
 let explorerConceptIndexCache = null;
+let explorerSearchablePointsCache = null;
 let explorerSearchSuggestionIndex = -1;
 let shouldCenterExplorerReferenceColumn = false;
 
@@ -539,13 +541,45 @@ function updateExplorerAdvancedSearch(event) {
   }, 110);
 }
 
+// Search the active dataset across all institutions and dates, rather than
+// the complete regulatory dictionary or just the current JST selection.
+function getExplorerSearchablePoints(state, templates) {
+  const templateKey = templates.map((template) => template.id).join("|");
+  const cached = explorerSearchablePointsCache;
+  if (cached && cached.points === state?.explorerPoints
+      && cached.rows === state?.rows && cached.columns === state?.columns
+      && cached.dataIndexes === state?.dataIndexes && cached.templateKey === templateKey) {
+    return cached.items;
+  }
+
+  const availableByTable = new Map();
+  templates.forEach((template) => {
+    let axes = availableByTable.get(template.tableId);
+    if (!axes) {
+      axes = Object.fromEntries(["x", "y", "z"].map((axis) => [
+        axis, new Set(getAvailableExplorerAxisCodes(state, template.tableId, axis))
+      ]));
+      availableByTable.set(template.tableId, axes);
+    }
+    // Section metadata uses a separate id, but its values use the base table.
+    if (template.id !== template.tableId) availableByTable.set(template.id, axes);
+  });
+  const items = (state?.explorerPoints ?? []).filter((point) => {
+    const axis = String(point.coordinate ?? "").charAt(0).toLowerCase();
+    return availableByTable.get(point.tableId)?.[axis]?.has(normalizeAxisCode(point.code, axis));
+  });
+  explorerSearchablePointsCache = {
+    items, points: state?.explorerPoints, rows: state?.rows,
+    columns: state?.columns, dataIndexes: state?.dataIndexes, templateKey
+  };
+  return items;
+}
+
 function getExplorerConceptIndex(state = getLatestState()) {
   const templates = getExplorerTemplates(state);
-  const templateIds = new Set(templates.flatMap((template) => [template.tableId, template.id]));
-  const templateKey = [...templateIds].join("|");
+  const searchablePoints = getExplorerSearchablePoints(state, templates);
   if (explorerConceptIndexCache
-      && explorerConceptIndexCache.points === state?.explorerPoints
-      && explorerConceptIndexCache.templateKey === templateKey) {
+      && explorerConceptIndexCache.points === searchablePoints) {
     return explorerConceptIndexCache.items;
   }
 
@@ -578,8 +612,7 @@ function getExplorerConceptIndex(state = getLatestState()) {
     if (withoutQualifier.length <= 64 && wordCount <= 9) addConcept(withoutQualifier, tableId, kind);
   };
 
-  (state?.explorerPoints ?? []).forEach((point) => {
-    if (!templateIds.has(point.tableId)) return;
+  searchablePoints.forEach((point) => {
     const axis = String(point.coordinate ?? "").charAt(0).toUpperCase();
     const kind = /^[XYZ]$/.test(axis) ? `Axis ${axis}` : "Metadata";
     const description = String(point.description ?? "").trim();
@@ -591,7 +624,7 @@ function getExplorerConceptIndex(state = getLatestState()) {
     numeric: true,
     sensitivity: "base"
   }));
-  explorerConceptIndexCache = { items, points: state?.explorerPoints, templateKey };
+  explorerConceptIndexCache = { items, points: searchablePoints };
   return items;
 }
 
@@ -711,10 +744,11 @@ function getExplorerAdvancedSearchResults(state) {
   const templates = getExplorerTemplates(state);
   if (!query) return { byTemplate: new Map(), hasQuery: false, templates };
 
+  const searchablePoints = getExplorerSearchablePoints(state, templates);
   const templateKey = templates.map((template) => template.id).join("|");
   if (explorerAdvancedSearchCache
       && explorerAdvancedSearchCache.query === query
-      && explorerAdvancedSearchCache.points === state?.explorerPoints
+      && explorerAdvancedSearchCache.points === searchablePoints
       && explorerAdvancedSearchCache.selectedJst === state?.selectedJst
       && explorerAdvancedSearchCache.templateKey === templateKey) {
     return explorerAdvancedSearchCache.results;
@@ -722,7 +756,7 @@ function getExplorerAdvancedSearchResults(state) {
 
   const tokens = query.split(/\s+/).filter(Boolean);
   const pointsByTemplate = new Map();
-  (state?.explorerPoints ?? []).forEach((point) => {
+  searchablePoints.forEach((point) => {
     if (!pointsByTemplate.has(point.tableId)) pointsByTemplate.set(point.tableId, []);
     pointsByTemplate.get(point.tableId).push(point);
   });
@@ -766,7 +800,7 @@ function getExplorerAdvancedSearchResults(state) {
 
   const results = { byTemplate, hasQuery: true, templates: matchingTemplates };
   explorerAdvancedSearchCache = {
-    points: state?.explorerPoints,
+    points: searchablePoints,
     query,
     results,
     selectedJst: state?.selectedJst,
