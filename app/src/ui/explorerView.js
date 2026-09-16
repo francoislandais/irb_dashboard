@@ -2221,7 +2221,13 @@ function renderExplorerActiveFilters(state) {
   benchmarkToggle.append(benchmarkLabel);
   benchmarkToggle.addEventListener("click", () => {
     explorerContextTopic = "benchmark-mode";
-    if (getLatestState()) rerenderApp(getLatestState());
+    // Unlike its sibling topic toggles, opening this panel also needs the
+    // compact benchmark chart itself built (refreshExplorerSelectionChrome
+    // does that, alongside axis tabs/filters/panel) - a full rerenderApp
+    // would additionally rebuild the entire table and axis series for
+    // nothing, which is what made this one noticeably slower to open.
+    const state = getLatestState();
+    if (state) refreshExplorerSelectionChrome(state);
   });
   benchmarkChip.append(benchmarkToggle);
 
