@@ -169,6 +169,11 @@ let explorerContextTopic = "";
 // own template (see openExplorerKriFormulaCellRef) can change the active
 // template/selection without the formula panel itself changing.
 let pinnedKriFormulaCode = null;
+// A cellref range (e.g. Row 0030-0070) resolves to more than one real row -
+// only the first becomes the real selection (see
+// openExplorerKriFormulaCellRef), the rest are queued here to get the
+// peek-only highlight once the freshly switched template's table exists.
+let pendingExplorerCellRefPeekCodes = null;
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
@@ -1134,6 +1139,14 @@ export function renderExplorer(state) {
     focusSelectedExplorerRow();
   } else {
     restoreExplorerScrollPosition();
+  }
+  // Runs after applyExplorerSelection (which clears is-peek-highlighted from
+  // every row) so a cellref range's extra rows - beyond the one real
+  // selection above - stay visibly highlighted too (see
+  // openExplorerKriFormulaCellRef).
+  if (pendingExplorerCellRefPeekCodes) {
+    applyExplorerCellRefRangePeek(pendingExplorerCellRefPeekCodes);
+    pendingExplorerCellRefPeekCodes = null;
   }
   scheduleExplorerReferenceColumnCentering();
 }
@@ -3835,26 +3848,138 @@ function createExplorerKriFormulaCellRefChip(node) {
   return chip;
 }
 
-// Ranges (e.g. "0030-0070") and comma lists resolve to their first value -
-// good enough to land on a sensible cell without trying to reproduce the
-// full dimension logic here.
-function firstExplorerKriFormulaDimValue(values) {
-  if (!Array.isArray(values) || values.length === 0) return "";
-  const [first] = values;
-  if (typeof first !== "string" || first === "*") return "";
-  return first.split("-")[0];
+const EXPLORER_KRI_FORMULA_AXIS_COORDINATES = {
+  x: "x_axis_rc_code",
+  y: "y_axis_rc_code",
+  z: "z_axis_rc_code"
+};
+
+// The Hive extraction strips a trailing annex letter from table_id (see
+// hive_to_dataset.py's regexp_replace) before it ever reaches the app, so a
+// formula's own "C_69.00.a" cellref never matches any of the app's actual
+// template ids ("C_69.00") - without this, resolution below always fails.
+function stripExplorerKriFormulaTemplateAnnex(templateId) {
+  return String(templateId ?? "").replace(/\.[A-Za-z]+$/, "");
 }
 
-function openExplorerKriFormulaCellRef(node) {
-  if (!node.template) return;
+function dimValuesAreWildcard(values) {
+  return Array.isArray(values) && values.some((value) => value === "*");
+}
 
-  const opened = openExplorerPoint({
-    tableId: node.template,
-    xCode: firstExplorerKriFormulaDimValue(node.column),
-    yCode: firstExplorerKriFormulaDimValue(node.row),
-    zCode: firstExplorerKriFormulaDimValue(node.sheet)
+// Both ends of a dash range (or the single value itself) are candidate
+// "anchor" codes, just to find which section of a multi-section template
+// (see resolveExplorerTemplateSelectionId) this cellref actually belongs to
+// - the full range itself is only expanded afterwards, against that
+// section's own points (see expandExplorerKriFormulaDimCodes).
+function collectExplorerKriFormulaDimAnchors(values, axis) {
+  if (!Array.isArray(values)) return [];
+  const anchors = new Set();
+  values.forEach((value) => {
+    if (typeof value !== "string" || value === "*") return;
+    const [start, end = start] = value.split("-");
+    anchors.add(normalizeAxisCode(start, axis));
+    anchors.add(normalizeAxisCode(end, axis));
   });
-  if (!opened) return;
+  return [...anchors];
+}
+
+// Only a code actually present among this table/section's own points is
+// ever returned - a code that doesn't exist is dropped rather than guessed
+// at, so the caller can tell "nothing found" from "found it" and refuse to
+// navigate on the former (see openExplorerKriFormulaCellRef).
+function expandExplorerKriFormulaDimCodes(values, axis, tableId) {
+  if (!Array.isArray(values)) return [];
+  const coordinate = EXPLORER_KRI_FORMULA_AXIS_COORDINATES[axis];
+  const points = getLatestState()?.explorerPoints ?? [];
+  const codes = new Set();
+
+  values.forEach((value) => {
+    if (typeof value !== "string" || value === "*") return;
+    const [start, end = start] = value.split("-");
+    const normalizedStart = normalizeAxisCode(start, axis);
+    const normalizedEnd = normalizeAxisCode(end, axis);
+    const matches = points.filter((point) => (
+      point.tableId === tableId
+      && point.coordinate === coordinate
+      && point.code >= normalizedStart
+      && point.code <= normalizedEnd
+    ));
+    matches.forEach((point) => codes.add(point.code));
+  });
+
+  return [...codes];
+}
+
+// A table split into sections sharing the same tableId (see
+// resolveExplorerTemplateSelectionId, used elsewhere for deep links) needs
+// its own strict resolution here: unlike that one, this never defaults to
+// the first section when it can't tell which one actually has this row - it
+// returns null instead, so the caller does not move at all.
+function resolveExplorerKriFormulaCellRefSectionId(rootTableId, node) {
+  const candidates = getExplorerTemplates(getLatestState()).filter((template) => template.tableId === rootTableId);
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0].id;
+
+  const anchors = collectExplorerKriFormulaDimAnchors(node.row, "y");
+  if (anchors.length === 0) return null;
+
+  const points = getLatestState()?.explorerPoints ?? [];
+  const match = candidates.find((candidate) => anchors.some((code) => points.some((point) => (
+    point.tableId === candidate.id && point.coordinate === "y_axis_rc_code" && point.code === code
+  ))));
+  return match?.id ?? null;
+}
+
+function applyExplorerCellRefRangePeek(codes) {
+  codes.forEach((code) => {
+    const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(code)}"]`);
+    if (row) row.classList.add("is-peek-highlighted");
+  });
+}
+
+// Opens the classic template/row/column/tab view for a formula's cellref,
+// with the referenced cell(s) actually highlighted there - the same view
+// reachable by picking that template and selecting that row by hand. If any
+// part of it can't be confidently resolved (wrong/unknown template, a row
+// that isn't actually in this dataset, an ambiguous section...) this does
+// nothing at all rather than falling back to some other template or row.
+function openExplorerKriFormulaCellRef(node) {
+  const rootTableId = stripExplorerKriFormulaTemplateAnnex(node.template);
+  if (!rootTableId) return;
+
+  const selectionId = resolveExplorerKriFormulaCellRefSectionId(rootTableId, node);
+  if (!selectionId) return;
+
+  const rowCodes = expandExplorerKriFormulaDimCodes(node.row, "y", selectionId);
+  if (rowCodes.length === 0) return;
+
+  let columnCode = "";
+  if (node.column && !dimValuesAreWildcard(node.column)) {
+    const columnCodes = expandExplorerKriFormulaDimCodes(node.column, "x", selectionId);
+    if (columnCodes.length === 0) return;
+    [columnCode] = columnCodes;
+  }
+
+  let sheetCode = "";
+  if (node.sheet && !dimValuesAreWildcard(node.sheet)) {
+    const sheetCodes = expandExplorerKriFormulaDimCodes(node.sheet, "z", selectionId);
+    if (sheetCodes.length === 0) return;
+    [sheetCode] = sheetCodes;
+  }
+
+  hasInteractedWithExplorerSelection = true;
+  activeExplorerTemplateId = selectionId;
+  updateUrlTemplateParam(activeExplorerTemplateId);
+
+  const context = getExplorerContextForTemplate(selectionId);
+  context.activeAxis = "y";
+  context.selectedYCode = rowCodes[0];
+  if (columnCode) context.selectedXCode = columnCode;
+  if (sheetCode) context.selectedZCode = sheetCode;
+
+  shouldFocusOpenedExplorerPoint = true;
+  pendingExplorerCellRefPeekCodes = rowCodes.length > 1 ? rowCodes.slice(1) : null;
+  updateUrlExplorerSelectionParams();
 
   const state = getLatestState();
   if (state) rerenderApp(state);
