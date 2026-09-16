@@ -946,13 +946,22 @@ function syncExplorerBenchmarkPlacement() {
 // render and by refreshExplorerSelectionOnly, which skips the expensive
 // table rebuild below since selecting a row never changes which rows or
 // columns are shown - only which one is highlighted.
-function refreshExplorerSelectionChrome(state) {
+function refreshExplorerSelectionChrome(state, { selectionOnly = false } = {}) {
   const context = getActiveExplorerContext();
   updateUrlExplorerSelectionParams();
   elements.unitSelect.value = state.selectedUnit;
   renderExplorerAxisTabs();
   renderExplorerActiveFilters(state);
-  renderExplorerContextPanel(state);
+  // A plain row/cell selection never changes the template list, JST list,
+  // geography panel, etc. - only whichever piece actually reflects the
+  // selection itself (see refreshExplorerSelectionDependentContextPanel).
+  // Skipping the full renderExplorerContextPanel here is what avoids
+  // rebuilding a ~190-entry template list on every single click.
+  if (selectionOnly) {
+    refreshExplorerSelectionDependentContextPanel(state);
+  } else {
+    renderExplorerContextPanel(state);
+  }
 
   syncExplorerBenchmarkPlacement();
   const benchmarkVisible = explorerContextTopic === "benchmark-mode";
@@ -1013,7 +1022,7 @@ function refreshExplorerSelectionOnly(state) {
   // recomputeExplorerSelectedCellColumnIndex) - redo just that here since
   // this path skips rebuilding the series entirely.
   recomputeExplorerSelectedCellColumnIndex(getExplorerActiveDateColumns(), state);
-  refreshExplorerSelectionChrome(state);
+  refreshExplorerSelectionChrome(state, { selectionOnly: true });
   applyExplorerSelection();
 }
 
@@ -1025,6 +1034,11 @@ export function renderExplorer(state) {
   const template = getActiveExplorerTemplate();
   const templates = getExplorerTemplates(state);
   ensureExplorerSelections(state);
+  // The chrome refresh below (axis tabs, selection summary...) runs before
+  // this render's series is computed - clear the previous template's cached
+  // series first so getExplorerSelectedPointMetrics doesn't briefly show
+  // stale numbers from whatever was rendered before this call.
+  lastRenderedExplorerTableSeries = null;
   refreshExplorerSelectionChrome(state);
 
   const tableSeries = buildExplorerAxisSeries(state, {
@@ -1051,6 +1065,10 @@ export function renderExplorer(state) {
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) return;
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
+  // Now that the fresh series is cached, redo the selection-dependent parts
+  // of the context panel the early chrome refresh rendered with the
+  // (just-cleared) previous series.
+  refreshExplorerSelectionDependentContextPanel(state);
   applyExplorerSelection();
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
@@ -2601,6 +2619,24 @@ function renderExplorerSelectionPane() {
   elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
 }
 
+// The only parts of the context panel whose content actually depends on
+// which row/cell/column is selected - everything else there (template
+// list, JST list, geography, evolution frequency, ...) stays exactly the
+// same when the selection changes. Used both for the row/cell click fast
+// path (see refreshExplorerSelectionChrome) instead of the full
+// renderExplorerContextPanel, and again after a full render's table is
+// rebuilt so this reads the freshly rendered series instead of the
+// previous template's (see getExplorerSelectedPointMetrics).
+function refreshExplorerSelectionDependentContextPanel(state) {
+  renderExplorerSelectionPane();
+
+  if (explorerContextTopic === "description") {
+    renderExplorerDescriptionPanel();
+  } else if (explorerContextTopic === "reference-date") {
+    renderExplorerReferenceDatePanel(state);
+  }
+}
+
 function replaceExplorerContextDetail(...nodes) {
   if (!elements.explorerContextDetail) return;
   elements.explorerContextDetail.replaceChildren(...nodes);
@@ -3413,27 +3449,20 @@ function createExplorerSelectionSummaryCard() {
   return pane;
 }
 
+// Reuses the series already computed for the currently rendered table
+// (lastRenderedExplorerTableSeries - see renderExplorerTable) instead of
+// calling buildExplorerAxisSeries again: this used to redo the exact same
+// per-row, per-date-column computation as the full table render just to
+// read one row's values, on every single row/cell click.
 function getExplorerSelectedPointMetrics() {
   const state = getLatestState();
-  const template = getActiveExplorerTemplate();
-  const context = getActiveExplorerContext();
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
-  if (!state || !selectedCode) return null;
+  if (!state || !selectedCode || !lastRenderedExplorerTableSeries) return null;
 
-  const series = buildExplorerAxisSeries(state, {
-    axis: context.activeAxis,
-    selectedXCode: context.selectedXCode,
-    selectedYCode: context.selectedYCode,
-    selectedZCode: context.selectedZCode,
-    tableId: template?.tableId,
-    templateSelections: getExplorerTemplateSelections(),
-    templates: getExplorerTemplates(state),
-    yConfigTableId: template?.id
-  });
-  const rows = series.rows.map(normalizeExplorerSeriesRow);
+  const rows = lastRenderedExplorerTableSeries.rows.map(normalizeExplorerSeriesRow);
   const row = rows.find((item) => item.code === selectedCode);
   const selectedReference = getSelectedExplorerReference(state);
-  const currentIndex = series.dateColumns.findIndex((column) => column.label === selectedReference?.label);
+  const currentIndex = lastRenderedExplorerTableSeries.dateColumns.findIndex((column) => column.label === selectedReference?.label);
   if (!row || currentIndex < 0) return null;
 
   const currentValue = row.values[currentIndex]?.value ?? null;
