@@ -104,6 +104,76 @@ ORDER BY
 """
 
 
+def build_kri_hive_query(
+    kri_data_point_ids: Iterable[str],
+    reference_dates: Iterable[str],
+    jst_codes: Iterable[str],
+) -> str:
+    """Construit la requête Hive KRI, pivotée au même format que ``build_hive_query``.
+
+    Il n'y a pas de paramètre ``templates`` : le template produit est
+    toujours unique et fixe, appelé ``KRI`` (voir ``table_id`` ci-dessous) -
+    ``kri_data_point_ids`` en tient lieu, sur l'unique axe y du template.
+
+    Chaque valeur de ``kri_data_point_ids`` est un identifiant exact
+    (``LIQ52``) ou, si elle se termine par ``%``, un préfixe (``LIQ%``) pour
+    matcher tout KRI dont l'identifiant commence par ce préfixe (``LIKE``).
+    Les deux formes peuvent être mélangées dans la même liste.
+
+    ``x_axis_rc_code`` et ``z_axis_rc_code`` sont vides pour chaque ligne -
+    ce template n'a pas ces axes - mais restent présentes dans le résultat
+    pour que le CSV garde exactement les mêmes colonnes que le dataset ITS
+    existant, sans rien changer au chargement côté application.
+    """
+
+    kri_data_point_ids = _clean_values(kri_data_point_ids, "KRI data point ids")
+    reference_dates = _clean_values(reference_dates, "dates de référence")
+    jst_codes = _clean_values(jst_codes, "JST codes")
+    _validate_reference_dates(reference_dates)
+
+    date_columns = ",\n".join(
+        f"""    MAX(CASE
+        WHEN reference_period = {_sql_literal(reference_date)}
+        THEN value_decimal
+    END) AS ref_{reference_date.replace("-", "_")}"""
+        for reference_date in reference_dates
+    )
+    date_list = ",\n".join(
+        f"          {_sql_literal(reference_date)}"
+        for reference_date in reference_dates
+    )
+    jst_code_list = ",\n".join(
+        f"          {_sql_literal(jst_code)}" for jst_code in jst_codes
+    )
+    kri_filter = _build_kri_filter(kri_data_point_ids)
+
+    return f"""SELECT
+    'KRI' AS table_id,
+    jst_code,
+    '' AS x_axis_rc_code,
+    kri_data_point_id AS y_axis_rc_code,
+    '' AS z_axis_rc_code,
+{date_columns}
+FROM crp_agora.agora_dm_imas_kris_raw
+WHERE jst_code IN (
+{jst_code_list}
+    )
+  AND is_group_head = 'Y'
+  AND is_highest_cons = 'Y'
+  AND value_decimal IS NOT NULL
+  AND reference_period IN (
+{date_list}
+      )
+  AND {kri_filter}
+GROUP BY
+    jst_code,
+    kri_data_point_id
+ORDER BY
+    jst_code,
+    kri_data_point_id
+"""
+
+
 def run_hive_query_to_csv(
     templates: Iterable[str],
     reference_dates: Iterable[str],
@@ -136,6 +206,60 @@ def run_hive_query_to_csv(
     print(f"CSV sauvegardé : {output_path}")
     print(f"Nombre de lignes : {len(dataframe):,}")
     return dataframe
+
+
+def run_kri_hive_query_to_csv(
+    kri_data_point_ids: Iterable[str],
+    reference_dates: Iterable[str],
+    jst_codes: Iterable[str],
+    output_name: str,
+    output_dir: str | Path | None = None,
+    devo_client: HiveClient | None = None,
+):
+    """Exécute la requête KRI et enregistre le CSV directement dans ``datasets/``.
+
+    ``devo_client`` peut être omis lorsque le package ``devo`` est importable.
+    Dans un notebook où ``devo`` est déjà initialisé, le passer simplement avec
+    ``devo_client=devo``.
+    """
+
+    sql = build_kri_hive_query(kri_data_point_ids, reference_dates, jst_codes)
+    client = devo_client or _load_default_devo_client()
+    dataframe = client.read_sql(sql)
+    dataframe["extraction_timestamp"] = date.today().isoformat()
+
+    dataset_directory = (
+        Path(output_dir).expanduser().resolve()
+        if output_dir is not None
+        else DEFAULT_DATASET_DIRECTORY
+    )
+    dataset_directory.mkdir(parents=True, exist_ok=True)
+    output_path = dataset_directory / _normalize_csv_name(output_name)
+    dataframe.to_csv(output_path, index=False)
+
+    print(f"CSV sauvegardé : {output_path}")
+    print(f"Nombre de lignes : {len(dataframe):,}")
+    return dataframe
+
+
+def _build_kri_filter(kri_data_point_ids: Iterable[str]) -> str:
+    """Construit le filtre SQL sur ``kri_data_point_id``.
+
+    Chaque valeur est un identifiant exact (``=``) ou, si elle se termine
+    par ``%``, un préfixe (``LIKE``) - les deux formes peuvent être
+    mélangées dans la même liste.
+    """
+
+    conditions = [
+        f"kri_data_point_id LIKE {_sql_literal(kri_id)}"
+        if kri_id.endswith("%")
+        else f"kri_data_point_id = {_sql_literal(kri_id)}"
+        for kri_id in kri_data_point_ids
+    ]
+    if len(conditions) == 1:
+        return conditions[0]
+
+    return "(\n          " + "\n          OR ".join(conditions) + "\n      )"
 
 
 def _build_template_filter(templates: Iterable[str]) -> str:

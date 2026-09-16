@@ -9,6 +9,7 @@ import posixpath
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Iterable
 from urllib.parse import urlsplit
 
 
@@ -72,6 +73,78 @@ def export_standalone_app(
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(html, encoding="utf-8")
     return destination
+
+
+def export_consolidated_standalone_app(
+    dataset_names: Iterable[str],
+    output_name: str,
+    datasets_directory: str | Path | None = None,
+    outputs_directory: str | Path | None = None,
+) -> Path:
+    """Concatène plusieurs CSV déjà générés dans ``datasets/`` et exporte une
+    unique application portable consolidée.
+
+    ``dataset_names`` désigne des fichiers déjà présents dans le dossier de
+    données (avec ou sans l'extension ``.csv``, comme ``output_name`` dans
+    ``run_hive_query_to_csv``). Tous doivent partager exactement le même
+    en-tête (mêmes colonnes, dans le même ordre) - une simple concaténation
+    de lignes sous des en-têtes différents alignerait des valeurs sous les
+    mauvaises colonnes plutôt que de les fusionner correctement.
+    """
+
+    dataset_names = list(dataset_names)
+    if not dataset_names:
+        raise ValueError("La liste des datasets à consolider ne peut pas être vide.")
+
+    datasets_path = _resolve_directory(datasets_directory, DEFAULT_DATASETS_DIRECTORY)
+    outputs_path = _resolve_directory(outputs_directory, DEFAULT_OUTPUTS_DIRECTORY)
+    outputs_path.mkdir(parents=True, exist_ok=True)
+
+    csv_paths = [datasets_path / _normalize_csv_name(name) for name in dataset_names]
+    merged_csv_text = _concatenate_csv_files(csv_paths)
+
+    bundle = _build_standalone_bundle(APP_DIRECTORY)
+    output_csv_name = _normalize_csv_name(output_name)
+    html = _build_standalone_html(
+        bundle, csv_text=merged_csv_text, file_name=output_csv_name
+    )
+    destination = outputs_path / f"Agora Explorer_{Path(output_csv_name).stem}.html"
+    destination.write_text(html, encoding="utf-8")
+    return destination
+
+
+def _concatenate_csv_files(csv_paths: list[Path]) -> str:
+    header: str | None = None
+    first_path = csv_paths[0]
+    merged_lines: list[str] = []
+
+    for csv_path in csv_paths:
+        if not csv_path.is_file():
+            raise ValueError(f"Dataset introuvable : {csv_path}")
+
+        lines = csv_path.read_bytes().decode("utf-8", errors="replace").splitlines()
+        if not lines:
+            raise ValueError(f"Le dataset est vide : {csv_path}")
+
+        if header is None:
+            header = lines[0]
+            merged_lines.append(header)
+        elif lines[0] != header:
+            raise ValueError(
+                "Les datasets à concaténer n'ont pas exactement le même en-tête "
+                f"({first_path.name} vs {csv_path.name})."
+            )
+
+        merged_lines.extend(lines[1:])
+
+    return "\n".join(merged_lines)
+
+
+def _normalize_csv_name(output_name: str) -> str:
+    name = Path(str(output_name).strip()).name
+    if not name:
+        raise ValueError("Le nom du fichier CSV ne peut pas être vide.")
+    return name if name.lower().endswith(".csv") else f"{name}.csv"
 
 
 def _build_standalone_bundle(app_directory: Path) -> dict:
