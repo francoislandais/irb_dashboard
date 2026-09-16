@@ -19,7 +19,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260916-template-groups";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260917-summary-text-truncate";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260917-expanded-benchmark-fullscreen";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

@@ -13,7 +13,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260916-all-currencies-wording";
-import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-benchmark-axis-font";
+import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260917-expanded-benchmark-fullscreen";
 import {
   buildExplorerDisplayRows,
   EXPLORER_ALL_CURRENCIES_CODE,
@@ -194,6 +194,7 @@ const elements = {
   explorerEmpty: document.querySelector("#explorer-empty"),
   explorerExcelExport: document.querySelector("#explorer-excel-export"),
   explorerMainPane: document.querySelector(".explorer-main-pane"),
+  explorerWorkspace: document.querySelector(".explorer-workspace"),
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
   explorerTemplateControl: document.querySelector("[data-explorer-template-control]"),
@@ -930,8 +931,13 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 function syncExplorerBenchmarkPlacement() {
   const benchmarkVisible = explorerContextTopic === "benchmark-mode";
   if (!benchmarkVisible) explorerBenchmarkExpanded = false;
-  if (elements.explorerBenchmarkPreview) elements.explorerBenchmarkPreview.hidden = !benchmarkVisible;
+  // Expanded mode is a fullscreen-style view of the chart - no point also
+  // keeping the small preview rendering behind it, and the sidebar (with
+  // its own preview slot) is hidden entirely too (see .is-benchmark-expanded
+  // in styles.css) so the chart gets the full workspace width and height.
+  if (elements.explorerBenchmarkPreview) elements.explorerBenchmarkPreview.hidden = !benchmarkVisible || explorerBenchmarkExpanded;
   elements.explorerContextPanel?.classList.toggle("has-benchmark-preview", benchmarkVisible);
+  elements.explorerWorkspace?.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
   if (elements.explorerMainPane) {
     elements.explorerMainPane.classList.toggle("is-benchmark-expanded", explorerBenchmarkExpanded);
   }

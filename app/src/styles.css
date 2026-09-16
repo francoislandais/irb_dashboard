@@ -1454,6 +1454,17 @@ button:focus-visible {
   width: 100%;
 }
 
+/* Fullscreen-style expanded benchmark: the sidebar (template list, own
+   preview slot included) is dropped entirely so the chart gets the whole
+   workspace, not just its usual column. */
+.explorer-workspace.is-benchmark-expanded {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.explorer-workspace.is-benchmark-expanded .explorer-context-panel {
+  display: none;
+}
+
 .explorer-main-pane {
   grid-column: 2;
   display: grid;
@@ -1461,6 +1472,18 @@ button:focus-visible {
   gap: 6px;
   min-height: 0;
   min-width: 0;
+}
+
+.explorer-workspace.is-benchmark-expanded .explorer-main-pane {
+  grid-column: 1;
+}
+
+/* The axis tabs and active-filters bars sit above the table normally, but
+   serve no purpose while the chart fills the pane instead - hiding them
+   frees the vertical space for the chart too. */
+.explorer-main-pane.is-benchmark-expanded .axis-tabs,
+.explorer-main-pane.is-benchmark-expanded .explorer-active-filters {
+  display: none;
 }
 
 .explorer-main-pane.is-benchmark-expanded {
@@ -2045,9 +2068,44 @@ table {
   min-height: 0;
 }
 
+/* A standalone, explicit button rather than a small icon swept into the
+   chart's own control row (see positionExplorerBenchmarkControls) - fixed
+   in the corner so it's always easy to find regardless of the chart's
+   plot area. */
+.explorer-benchmark-close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--primary-dark);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 7px 12px;
+}
+
+.explorer-benchmark-close-button:hover,
+.explorer-benchmark-close-button:focus-visible {
+  background: var(--primary-dark);
+  color: #ffffff;
+  outline: 0;
+}
+
 .explorer-benchmark-close-button svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .template-tabs {

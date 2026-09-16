@@ -71,7 +71,11 @@ export function renderExplorerBenchmarkView({
         ? { ...serie.states, hover: { ...serie.states?.hover, halo: { size: 2 }, lineWidth: 2.4 } }
         : serie.states
     }))
-    : chartModel.series;
+    // The default per-point marker (a large white-filled circle on the
+    // selected line - see buildBenchmarkLineSeries) is redundant once the
+    // line itself is already highlighted and endpoint-labelled here; the
+    // curve alone reads more cleanly at this size.
+    : chartModel.series.map((serie) => ({ ...serie, marker: { ...serie.marker, enabled: false } }));
   const isAnonymised = chartModel.peerDisplayMode === "anonymised";
   const selectedReferencePoint = benchmark.dates.find((reference) => reference.label === selectedReferenceLabel);
 
@@ -216,17 +220,19 @@ function positionExplorerBenchmarkControls(chart, compact) {
   if (!view) return;
 
   const plotRight = chart.plotLeft + chart.plotWidth;
-  const expandOrClose = view.querySelector(".explorer-benchmark-expand-button");
   if (compact) {
-    if (!expandOrClose) return;
-    expandOrClose.style.left = `${Math.max(chart.plotLeft, plotRight - expandOrClose.offsetWidth)}px`;
-    expandOrClose.style.right = "auto";
-    expandOrClose.style.top = "1px";
+    const expandButton = view.querySelector(".explorer-benchmark-expand-button");
+    if (!expandButton) return;
+    expandButton.style.left = `${Math.max(chart.plotLeft, plotRight - expandButton.offsetWidth)}px`;
+    expandButton.style.right = "auto";
+    expandButton.style.top = "1px";
     return;
   }
 
+  // The close button (.explorer-benchmark-close-button) is fixed via CSS
+  // instead of tracking the plot area like the badges below - it needs to
+  // stay easy to find regardless of how the chart itself is laid out.
   const controls = [
-    expandOrClose,
     chart.renderTo.querySelector(".cost-of-risk-chart-y-focus-badge"),
     chart.renderTo.querySelector(".cost-of-risk-chart-smoothing-badge")
   ].filter(Boolean);

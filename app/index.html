@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260916-template-groups-align">
+    <link rel="stylesheet" href="./src/styles.css?v=20260917-expanded-benchmark-fullscreen">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -123,10 +123,11 @@
                 </div>
                 <div id="explorer-benchmark-expanded-slot" class="explorer-benchmark-expanded-slot" hidden>
                   <div class="explorer-benchmark-view explorer-benchmark-expanded-view">
-                    <button id="explorer-benchmark-collapse" class="explorer-benchmark-expand-button explorer-benchmark-close-button" type="button" aria-label="Close expanded benchmark" title="Return to table">
+                    <button id="explorer-benchmark-collapse" class="explorer-benchmark-close-button" type="button" aria-label="Close expanded benchmark and return to the table" title="Return to table">
                       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M6 6l12 12M18 6 6 18"/>
                       </svg>
+                      <span>Close</span>
                     </button>
                     <div id="explorer-benchmark-expanded-chart" class="cost-of-risk-chart explorer-benchmark-chart explorer-benchmark-expanded-chart" aria-label="Expanded Explorer benchmark time series"></div>
                   </div>
@@ -381,6 +382,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260917-summary-text-truncate"></script>
+    <script type="module" src="./src/main.js?v=20260917-expanded-benchmark-fullscreen"></script>
   </body>
 </html>
