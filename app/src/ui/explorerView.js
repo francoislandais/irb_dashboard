@@ -1,4 +1,4 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260917-kri-row-limit";
+import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
@@ -176,17 +176,21 @@ let pinnedKriFormulaCode = null;
 let pendingExplorerCellRefPeekCodes = null;
 // KRI can list thousands of indicators, and rendering them all up front is
 // exactly the heavy-table cost this app otherwise avoids via lazy tree
-// rendering - so, for KRI's row axis only, the table grows progressively as
-// the user scrolls (see renderExplorerTable's isKriRowAxis branch and
-// createExplorerKriLoadMoreRow) instead of building every row at once.
-const EXPLORER_KRI_ROW_BATCH_SIZE = 20;
-let explorerKriVisibleRowCount = EXPLORER_KRI_ROW_BATCH_SIZE;
-// Identifies the current row set (length + endpoints) so a genuinely new
-// list (dataset/JST/search change) resets the window back to one batch,
-// while re-rendering the same list (scrolling, a plain selection click)
-// keeps whatever the user already scrolled down to.
-let explorerKriRowWindowKey = "";
-let explorerKriLoadMoreObserver = null;
+// rendering - so, for KRI's row axis only, the table shows one strict page
+// of EXPLORER_KRI_PAGE_SIZE rows at a time (see renderExplorer's
+// isKriRowAxis branch and createExplorerKriPaginationFoot) instead of
+// building - or even computing - every row at once. No infinite scroll here
+// on purpose: a page always caps at exactly this many rows, never more.
+const EXPLORER_KRI_PAGE_SIZE = 20;
+let explorerKriPageIndex = 0;
+// Identifies the current row set (template/dataset/JST/search) so a
+// genuinely new list resets back to the first page, while re-rendering the
+// same list (a plain selection click) keeps whatever page the user is on.
+let explorerKriPageResetKey = "";
+// How many KRIs actually match the current view (post-search) - set right
+// before building the series (see renderExplorer), read by
+// createExplorerKriPaginationFoot to show "Page X of Y".
+let explorerKriTotalMatchCount = 0;
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
@@ -792,20 +796,33 @@ function filterExplorerSeriesByAdvancedSearch(series, state, tableId, activeAxis
   const results = getExplorerAdvancedSearchResults(state);
   const templateResult = results.byTemplate.get(tableId);
   if (!results.hasQuery) return series;
-  if (!templateResult) return { ...series, rows: [], totalRowCount: 0, status: "No metadata matches this search." };
+  if (!templateResult) return { ...series, rows: [], status: "No metadata matches this search." };
   if (templateResult.restrictedAxis !== activeAxis) return series;
   const matchingCodes = templateResult.matchesByAxis[activeAxis];
   const rows = series.rows.filter((row) => matchingCodes.has(normalizeExplorerSeriesRow(row).code));
   return {
     ...series,
     rows,
-    // A search always computes every matching row's series in full (see
-    // buildExplorerAxisSeries's rowLimit), so this reflects the true match
-    // count - unlike the unfiltered series.totalRowCount, which counts the
-    // whole KRI dictionary regardless of what actually matched.
-    totalRowCount: rows.length,
     status: rows.length > 0 ? series.status : "No metadata matches this search."
   };
+}
+
+// Same matching rules as filterExplorerSeriesByAdvancedSearch, but over the
+// cheap code/description config (see getExplorerAxisPointsConfig) instead
+// of an already-built series - used to decide which codes belong on the
+// current KRI page (renderExplorer) and to find which page a given code is
+// on (jumpToExplorerKriPage), both before paying for any value computation.
+function getExplorerKriMatchingCodesInOrder(state, template) {
+  const allCodes = getExplorerAxisPointsConfig(state, template.tableId, "y", template.id).map((point) => point.code);
+  const results = getExplorerAdvancedSearchResults(state);
+  if (!results.hasQuery) return allCodes;
+
+  const templateResult = results.byTemplate.get(template.id);
+  if (!templateResult) return [];
+  if (templateResult.restrictedAxis !== "y") return allCodes;
+
+  const matchingCodes = templateResult.matchesByAxis.y;
+  return allCodes.filter((code) => matchingCodes.has(code));
 }
 
 // Switches the active template from the context panel's template list.
@@ -1123,24 +1140,37 @@ export function renderExplorer(state) {
   lastRenderedExplorerTableSeries = null;
   refreshExplorerSelectionChrome(state);
 
-  // Windowing the DOM alone (see renderExplorerTable) doesn't help if the
-  // expensive part - computing every KRI's full date-by-date series - still
-  // runs for the whole list on every render. Skip that work for whatever's
-  // beyond the current window too, unless a search is active: search
-  // matches on metadata alone (see filterExplorerSeriesByAdvancedSearch), so
-  // it still needs every row computed to know what actually matches.
+  // Rendering only a page's worth of rows (see renderExplorerTable) doesn't
+  // help if the expensive part - computing every KRI's full date-by-date
+  // series - still runs for the whole list on every render. Work out
+  // exactly which codes belong on the current page (matching the active
+  // search, if any - search itself only needs metadata, computed
+  // separately below) and skip that computation for everything else.
   const isKriRowAxis = context.activeAxis === "y" && template?.tableId === "KRI";
-  const kriResetKey = `${activeExplorerTemplateId}:${state.activeDatasetId}:${state.selectedJst}:${explorerAdvancedSearchQuery}`;
-  if (isKriRowAxis && kriResetKey !== explorerKriRowWindowKey) {
-    explorerKriRowWindowKey = kriResetKey;
-    explorerKriVisibleRowCount = EXPLORER_KRI_ROW_BATCH_SIZE;
+  let kriOnlyCodes;
+  if (isKriRowAxis) {
+    const kriResetKey = `${activeExplorerTemplateId}:${state.activeDatasetId}:${state.selectedJst}:${explorerAdvancedSearchQuery}`;
+    if (kriResetKey !== explorerKriPageResetKey) {
+      explorerKriPageResetKey = kriResetKey;
+      explorerKriPageIndex = 0;
+    }
+    const matchingCodes = getExplorerKriMatchingCodesInOrder(state, template);
+    explorerKriTotalMatchCount = matchingCodes.length;
+    // A point opened elsewhere (e.g. openExplorerPoint, used by
+    // peekExplorerRowByCode's cross-template fallback) sets selectedYCode
+    // and asks to be focused - make sure that code's own page is what
+    // actually gets fetched below, instead of whatever page was showing.
+    if (shouldFocusOpenedExplorerPoint && context.selectedYCode) {
+      const selectedIndex = matchingCodes.indexOf(context.selectedYCode);
+      if (selectedIndex !== -1) explorerKriPageIndex = Math.floor(selectedIndex / EXPLORER_KRI_PAGE_SIZE);
+    }
+    const pageStart = explorerKriPageIndex * EXPLORER_KRI_PAGE_SIZE;
+    kriOnlyCodes = new Set(matchingCodes.slice(pageStart, pageStart + EXPLORER_KRI_PAGE_SIZE));
   }
-  const hasActiveKriSearch = isKriRowAxis && getExplorerAdvancedSearchResults(state).hasQuery;
-  const kriRowLimit = isKriRowAxis && !hasActiveKriSearch ? explorerKriVisibleRowCount : undefined;
 
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
-    rowLimit: kriRowLimit,
+    onlyCodes: kriOnlyCodes,
     selectedXCode: context.selectedXCode,
     selectedYCode: context.selectedYCode,
     selectedZCode: context.selectedZCode,
@@ -1470,20 +1500,11 @@ function renderExplorerTable(series, selectedUnit) {
     !hasCollapsedExplicitAncestor(normalizeHierarchyPath(seriesRow.hierarchyPath), nodePaths)
   ));
 
-  // See EXPLORER_KRI_ROW_BATCH_SIZE - every other template still renders its
-  // full (lazily-collapsed) row list exactly as before. The window itself
-  // (and resetting it on a genuinely new row set) is decided in
-  // renderExplorer, before series was even computed - series.totalRowCount
-  // is the true count regardless of what got fetched (see
-  // buildExplorerAxisSeries's rowLimit and filterExplorerSeriesByAdvancedSearch).
+  // See EXPLORER_KRI_PAGE_SIZE - every other template still renders its
+  // full (lazily-collapsed) row list exactly as before. renderExplorer
+  // already only fetched this page's rows (see its kriOnlyCodes), so
+  // visibleDisplayRows is the page as-is here - nothing left to slice.
   const isKriRowAxis = activeAxis === "y" && getActiveExplorerTemplate()?.tableId === "KRI";
-  let renderedDisplayRows = visibleDisplayRows;
-  let hasMoreExplorerKriRows = false;
-  if (isKriRowAxis) {
-    const totalRowCount = series.totalRowCount ?? visibleDisplayRows.length;
-    hasMoreExplorerKriRows = totalRowCount > explorerKriVisibleRowCount;
-    renderedDisplayRows = visibleDisplayRows.slice(0, explorerKriVisibleRowCount);
-  }
 
   const descriptionHeader = document.createElement("th");
   descriptionHeader.scope = "col";
@@ -1531,7 +1552,7 @@ function renderExplorerTable(series, selectedUnit) {
     headerRow.append(th);
   });
 
-  renderedDisplayRows.forEach((seriesRow, rowIndex) => {
+  visibleDisplayRows.forEach((seriesRow, rowIndex) => {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
@@ -1645,49 +1666,62 @@ function renderExplorerTable(series, selectedUnit) {
     tbody.append(valueRow);
   });
 
-  const kriLoadMoreRow = hasMoreExplorerKriRows
-    ? createExplorerKriLoadMoreRow(orderedDates.length)
-    : null;
-  if (kriLoadMoreRow) tbody.append(kriLoadMoreRow);
-
   applyExplorerDateFocusValueIntensity(dateFocusPrimaryCells);
 
   thead.append(...(isDateFocus ? [headerRow] : [yearHeaderRow, headerRow]));
   elements.explorerTable.append(thead, tbody);
+  if (isKriRowAxis) {
+    elements.explorerTable.append(createExplorerKriPaginationFoot(orderedDates.length));
+  }
   applyExplorerTreeState(parentPaths, nodePaths);
-  observeExplorerKriLoadMoreRow(kriLoadMoreRow);
 }
 
-// Building the first EXPLORER_KRI_ROW_BATCH_SIZE rows only keeps the initial
-// render light; this sentinel is what grows the window as the user actually
-// scrolls to it, instead of loading every remaining KRI up front.
-function createExplorerKriLoadMoreRow(dateColumnCount) {
+// A strict page (see EXPLORER_KRI_PAGE_SIZE) instead of infinite scroll:
+// always exactly one page's worth of rows on screen, never more, and
+// switching pages is an explicit, cheap re-render (see changeExplorerKriPage)
+// rather than a growing window.
+function createExplorerKriPaginationFoot(dateColumnCount) {
+  const pageCount = Math.max(1, Math.ceil(explorerKriTotalMatchCount / EXPLORER_KRI_PAGE_SIZE));
+  const tfoot = document.createElement("tfoot");
   const row = document.createElement("tr");
-  row.className = "explorer-kri-load-more-row";
+  row.className = "explorer-kri-pagination-row";
   const cell = document.createElement("td");
   cell.colSpan = 2 + dateColumnCount;
-  cell.className = "explorer-kri-load-more-cell";
-  cell.textContent = "Loading more KRIs…";
+  cell.className = "explorer-kri-pagination-cell";
+
+  const previousButton = document.createElement("button");
+  previousButton.type = "button";
+  previousButton.className = "explorer-kri-pagination-button";
+  previousButton.textContent = "‹ Previous";
+  previousButton.disabled = explorerKriPageIndex <= 0;
+  previousButton.addEventListener("click", () => changeExplorerKriPage(explorerKriPageIndex - 1));
+
+  const label = document.createElement("span");
+  label.className = "explorer-kri-pagination-label";
+  label.textContent = `Page ${explorerKriPageIndex + 1} of ${pageCount}`;
+
+  const nextButton = document.createElement("button");
+  nextButton.type = "button";
+  nextButton.className = "explorer-kri-pagination-button";
+  nextButton.textContent = "Next ›";
+  nextButton.disabled = explorerKriPageIndex >= pageCount - 1;
+  nextButton.addEventListener("click", () => changeExplorerKriPage(explorerKriPageIndex + 1));
+
+  cell.append(previousButton, label, nextButton);
   row.append(cell);
-  return row;
+  tfoot.append(row);
+  return tfoot;
 }
 
-// Re-created on every render since renderExplorerTable always rebuilds a
-// fresh tbody - the previous observer's target is gone along with it.
-function observeExplorerKriLoadMoreRow(row) {
-  explorerKriLoadMoreObserver?.disconnect();
-  explorerKriLoadMoreObserver = null;
-  if (!row) return;
+function changeExplorerKriPage(pageIndex) {
+  const state = getLatestState();
+  if (!state) return;
 
-  explorerKriLoadMoreObserver = new IntersectionObserver((entries) => {
-    if (!entries.some((entry) => entry.isIntersecting)) return;
-    explorerKriLoadMoreObserver?.disconnect();
-    explorerKriLoadMoreObserver = null;
-    explorerKriVisibleRowCount += EXPLORER_KRI_ROW_BATCH_SIZE;
-    const state = getLatestState();
-    if (state) rerenderApp(state);
-  }, { root: elements.explorerTableWrap, rootMargin: "200px" });
-  explorerKriLoadMoreObserver.observe(row);
+  explorerKriPageIndex = Math.max(0, pageIndex);
+  // A new page reads from the top, not wherever the previous one happened
+  // to be scrolled to.
+  getActiveExplorerContext().scrollByAxis.y = { left: 0, top: 0 };
+  rerenderApp(state);
 }
 
 function buildExplorerYearGroups(dateColumns) {
@@ -4969,7 +5003,7 @@ function peekExplorerRowByCode(code) {
     row.classList.remove("is-peek-highlighted");
   });
 
-  ensureExplorerKriRowRendered(code);
+  if (!jumpToExplorerKriPageForCode(code)) return;
   const target = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(code)}"]`);
   if (!target) return;
 
@@ -4977,23 +5011,46 @@ function peekExplorerRowByCode(code) {
   scrollExplorerRowIntoViewQuickly(target);
 }
 
-// KRI's row axis only ever renders explorerKriVisibleRowCount rows at a
-// time (see renderExplorerTable) - a code beyond that window doesn't exist
-// in the DOM yet, so jumping to it (a kriref peek, or opening a real
-// selection via focusSelectedExplorerRow) has to grow the window first.
-function ensureExplorerKriRowRendered(code) {
-  if (!code || getActiveExplorerTemplate()?.tableId !== "KRI") return;
-  // Not just hidden - a code beyond the window was never fetched at all
-  // (see renderExplorer's kriRowLimit), so there is no cheap way to know
-  // where it sits without the full list. Since jumping to an arbitrary KRI
-  // like this is a deliberate, occasional action (not the default browsing
-  // case this feature optimizes), just load everything for this row set -
-  // the next reset (template/JST/dataset/search change) goes back to 20.
-  if (lastRenderedExplorerTableSeries?.rows?.some((row) => row.code === code)) return;
+// KRI's row axis only ever renders one page at a time (see
+// EXPLORER_KRI_PAGE_SIZE) - a code not on the current page doesn't exist in
+// the DOM (or even in the computed series) yet, so jumping to it (a kriref
+// peek, or opening a real selection via focusSelectedExplorerRow) means
+// finding which page it's actually on and switching there first. If an
+// active search would hide it, the search is cleared - the point of
+// jumping to a specific reference is to see it, not to stay filtered.
+// Returns false only when the code genuinely doesn't exist in this dataset.
+function jumpToExplorerKriPageForCode(code) {
+  const template = getActiveExplorerTemplate();
+  if (!code || template?.tableId !== "KRI") return false;
 
-  explorerKriVisibleRowCount = Number.MAX_SAFE_INTEGER;
   const state = getLatestState();
-  if (state) rerenderApp(state);
+  if (!state) return false;
+
+  const hadSearch = Boolean(explorerAdvancedSearchQuery);
+  if (hadSearch) clearExplorerAdvancedSearch();
+
+  const allCodes = getExplorerAxisPointsConfig(state, template.tableId, "y", template.id).map((point) => point.code);
+  const index = allCodes.indexOf(code);
+  if (index === -1) return false;
+
+  const targetPage = Math.floor(index / EXPLORER_KRI_PAGE_SIZE);
+  const pageChanged = targetPage !== explorerKriPageIndex;
+  explorerKriPageIndex = targetPage;
+  // renderExplorer resets the page to 0 whenever this key changes (a
+  // genuinely new row set) - update it to match the post-clear state here
+  // too, or that reset would immediately override the jump just made above.
+  explorerKriPageResetKey = `${activeExplorerTemplateId}:${state.activeDatasetId}:${state.selectedJst}:${explorerAdvancedSearchQuery}`;
+  if (pageChanged || hadSearch) rerenderApp(state);
+  return true;
+}
+
+function clearExplorerAdvancedSearch() {
+  explorerAdvancedSearchQuery = "";
+  explorerAdvancedSearchCache = null;
+  if (elements.explorerAdvancedSearch) elements.explorerAdvancedSearch.value = "";
+  const url = createUrlState();
+  setOrDeleteUrlParam(url, EXPLORER_SEARCH_URL_PARAM, "");
+  replaceExplorerUrlState(url);
 }
 
 // A plain instant jump feels like nothing happened, and the browser's native
@@ -5025,8 +5082,10 @@ function scrollExplorerRowIntoViewQuickly(target, duration = 160) {
 }
 
 function focusSelectedExplorerRow() {
+  // For KRI, renderExplorer already made sure the selected code's own page
+  // was what got fetched (see its shouldFocusOpenedExplorerPoint check) -
+  // nothing left to do here but find the row it already rendered.
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
-  ensureExplorerKriRowRendered(selectedCode);
   const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
   if (!row || row.hidden) return;
 

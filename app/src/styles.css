@@ -3413,12 +3413,38 @@ table {
   --tree-highlight-offset: 18px;
 }
 
-.explorer-kri-load-more-cell {
+.explorer-kri-pagination-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
   padding: 10px 12px;
+  border-top: 1px solid #e2e7e4;
+}
+
+.explorer-kri-pagination-button {
+  border: 1px solid #d7ded8;
+  border-radius: 5px;
+  background: #ffffff;
+  padding: 4px 10px;
+  color: var(--primary-dark);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.explorer-kri-pagination-button:hover:not(:disabled) {
+  background: #eaf2fa;
+}
+
+.explorer-kri-pagination-button:disabled {
+  border-color: #eceef0;
+  color: #a8b0ac;
+  cursor: default;
+}
+
+.explorer-kri-pagination-label {
   color: #66736d;
   font-size: 0.72rem;
-  font-style: italic;
-  text-align: center;
 }
 
 .metric-table th,
