@@ -3762,11 +3762,11 @@ function getExplorerDefaultExpandDepthForAxis(activeAxis) {
   const template = getActiveExplorerTemplate();
   if (!template) return DEFAULT_EXPLORER_EXPAND_DEPTH;
 
-  // y-axis depth is configured per row-section (see
-  // EXPLORER_TEMPLATE_ROW_SECTIONS in explorer.js), same as its axis codes -
-  // x/z are configured against the real table shared by every section.
-  const tableId = activeAxis === "y" ? template.id : template.tableId;
-  const configuredDepth = getExplorerDefaultExpandDepth(getLatestState()?.explorerDefaultExpandDepth, tableId, activeAxis);
+  // Keyed by the template's own selection id (what shows up in the template
+  // list and the URL) for every axis - for a table split into row-sections
+  // (see EXPLORER_TEMPLATE_ROW_SECTIONS in explorer.js) that's the section
+  // id (e.g. "C_75.01#central-bank"), not the shared real table_id.
+  const configuredDepth = getExplorerDefaultExpandDepth(getLatestState()?.explorerDefaultExpandDepth, template.id, activeAxis);
   return configuredDepth ?? DEFAULT_EXPLORER_EXPAND_DEPTH;
 }
 

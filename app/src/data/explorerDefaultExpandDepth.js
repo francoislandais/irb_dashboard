@@ -12,10 +12,10 @@ export async function loadExplorerDefaultExpandDepth() {
   return parseExplorerDefaultExpandDepth(parsed.columns, parsed.rows);
 }
 
-// One row per template - table_id is the real table_id for the x/z columns,
-// and the section id (EXPLORER_TEMPLATE_ROW_SECTIONS' .id, see explorer.js)
-// for the y column, matching how y-axis config is already keyed in
-// ITS_all_dimension_mapping.csv.
+// One row per template, keyed by the template's own selection id (the one
+// picked in the template list / carried in the URL) - for a table split
+// into row-sections (EXPLORER_TEMPLATE_ROW_SECTIONS in explorer.js), that's
+// the section id (e.g. "C_75.01#central-bank"), not the shared table_id.
 export function parseExplorerDefaultExpandDepth(columns, rows) {
   const indexes = {
     tableId: columns.indexOf("table_id"),
