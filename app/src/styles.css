@@ -1780,10 +1780,10 @@ button:focus-visible {
 
 .explorer-template-group-header {
   margin-top: 22px;
-  padding: 0 8px 7px;
-  color: #52605a;
+  padding: 0 0 7px;
+  color: #8a948e;
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
