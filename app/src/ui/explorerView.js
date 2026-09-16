@@ -1506,6 +1506,7 @@ function renderExplorerTable(series, selectedUnit) {
   // already only fetched this page's rows (see its kriOnlyCodes), so
   // visibleDisplayRows is the page as-is here - nothing left to slice.
   const isKriRowAxis = activeAxis === "y" && getActiveExplorerTemplate()?.tableId === "KRI";
+  elements.explorerTable.classList.toggle("is-kri-row-axis", isKriRowAxis);
 
   const descriptionHeader = document.createElement("th");
   descriptionHeader.scope = "col";

@@ -3670,6 +3670,16 @@ table {
   transform: translateX(var(--tree-content-offset));
 }
 
+/* KRI rows are flat: do not reserve space for hierarchy controls. */
+.metric-table.is-kri-row-axis {
+  --tree-content-offset: 0px;
+  --tree-highlight-offset: 8px;
+}
+
+.metric-table.is-kri-row-axis .tree-toggle-spacer {
+  display: none;
+}
+
 .tree-connector {
   position: absolute;
   top: 0;
