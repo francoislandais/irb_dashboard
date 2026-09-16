@@ -1825,6 +1825,18 @@ button:focus-visible {
   color: #52605a;
 }
 
+.explorer-kri-formula-chip.is-clickable {
+  cursor: pointer;
+  appearance: none;
+  font-family: inherit;
+  text-align: left;
+}
+
+.explorer-kri-formula-chip.is-clickable:hover {
+  border-color: var(--primary-dark);
+  background: #eaf2fa;
+}
+
 .explorer-kri-formula-kriref {
   font-size: 0.72rem;
   line-height: 1.4;

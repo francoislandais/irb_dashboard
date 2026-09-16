@@ -153,10 +153,10 @@ let shouldFocusOpenedExplorerPoint = false;
 let lastRenderedExplorerTableSeries = null;
 let lastRenderedExplorerSelectedUnit = null;
 // The exact state object last passed to renderExplorer - used only to tell
-// "the store produced a new state, but nothing on it besides peerDisplayMode
-// changed" (see isExplorerTableUnaffectedByStateChange) from "a local UI
-// action wants a full re-render" (rerenderApp reuses the same state object,
-// so it's never mistaken for the former).
+// the store producing a new state with nothing but peerDisplayMode different
+// (see isExplorerTableUnaffectedByStateChange) apart from a local UI action
+// wanting a full re-render (rerenderApp reuses the same state object, so it
+// is never mistaken for the former).
 let lastExplorerRenderedState = null;
 let explorerCellDrag = null;
 let explorerCellRanges = [];
@@ -164,6 +164,11 @@ let explorerCellRangePreview = null;
 let explorerQueryPoints = [];
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
+// Which KRI's formula the "Query formula" panel shows - tracked separately
+// from the current axis selection so that jumping to a referenced cell's
+// own template (see openExplorerKriFormulaCellRef) can change the active
+// template/selection without the formula panel itself changing.
+let pinnedKriFormulaCode = null;
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
@@ -2334,6 +2339,7 @@ function createExplorerKriFormulaFilterChip() {
   toggle.append(label);
   toggle.addEventListener("click", () => {
     explorerContextTopic = "kri-formula";
+    pinnedKriFormulaCode = getSelectedExplorerCodeForActiveAxis();
     renderExplorerAxisTabs();
     renderExplorerActiveFilters(getLatestState());
     renderExplorerContextPanel(getLatestState());
@@ -3728,7 +3734,7 @@ function renderExplorerKriFormulaPanel(state) {
   title.textContent = "Query formula";
   article.append(title);
 
-  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  const selectedCode = pinnedKriFormulaCode ?? getSelectedExplorerCodeForActiveAxis();
   const entry = selectedCode ? state?.explorerKriFormulas?.get(selectedCode) : null;
 
   if (!selectedCode || !entry?.formula) {
@@ -3770,7 +3776,7 @@ function renderExplorerKriFormulaNode(node, state) {
       return wrapper;
     }
     case "cellref":
-      return createExplorerKriFormulaChip(describeExplorerKriCellRef(node));
+      return createExplorerKriFormulaCellRefChip(node);
     case "spedpi":
       return createExplorerKriFormulaChip(`Internal data point ${node.code}${formatExplorerKriOffsetSuffix(node.offset)}`);
     case "kriref":
@@ -3809,6 +3815,49 @@ function describeExplorerKriCellRef(node) {
   if (node.column) parts.push(`Column ${node.column.join(", ")}`);
   if (node.sheet) parts.push(`Sheet ${node.sheet.join(", ")}`);
   return parts.join(" — ") + formatExplorerKriOffsetSuffix(node.offset);
+}
+
+// Whole card is clickable - unlike a kriref, there's no separate "code" part
+// here worth isolating. Clicking it opens the classic template/row/column
+// view for that cell (the same screen reachable via the normal template
+// selection), highlighted on the referenced point - while the "Query
+// formula" panel itself stays exactly as it is (see pinnedKriFormulaCode)
+// so the user can keep exploring the KRI's other referenced cells.
+function createExplorerKriFormulaCellRefChip(node) {
+  const chip = document.createElement("button");
+  chip.type = "button";
+  chip.className = "explorer-kri-formula-chip is-clickable";
+  chip.textContent = describeExplorerKriCellRef(node);
+  chip.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openExplorerKriFormulaCellRef(node);
+  });
+  return chip;
+}
+
+// Ranges (e.g. "0030-0070") and comma lists resolve to their first value -
+// good enough to land on a sensible cell without trying to reproduce the
+// full dimension logic here.
+function firstExplorerKriFormulaDimValue(values) {
+  if (!Array.isArray(values) || values.length === 0) return "";
+  const [first] = values;
+  if (typeof first !== "string" || first === "*") return "";
+  return first.split("-")[0];
+}
+
+function openExplorerKriFormulaCellRef(node) {
+  if (!node.template) return;
+
+  const opened = openExplorerPoint({
+    tableId: node.template,
+    xCode: firstExplorerKriFormulaDimValue(node.column),
+    yCode: firstExplorerKriFormulaDimValue(node.row),
+    zCode: firstExplorerKriFormulaDimValue(node.sheet)
+  });
+  if (!opened) return;
+
+  const state = getLatestState();
+  if (state) rerenderApp(state);
 }
 
 function createExplorerKriFormulaChip(text, isLiteral = false) {
@@ -4526,6 +4575,14 @@ function selectExplorerRow(pointCode, options = {}) {
   }
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
 
+  // A genuine click on a KRI row is the one case where the formula panel
+  // SHOULD follow the selection - as opposed to browsing another template's
+  // cells via a formula's own cellref/kriref links (see
+  // openExplorerKriFormulaCellRef and peekExplorerRowByCode).
+  if (explorerContextTopic === "kri-formula" && activeAxis === "y" && getActiveExplorerTemplate()?.tableId === "KRI") {
+    pinnedKriFormulaCode = selectedCode;
+  }
+
   if (getLatestState()) {
     saveExplorerScrollPosition();
     refreshExplorerSelectionOnly(getLatestState());
@@ -4684,6 +4741,17 @@ function getVisibleSelectableExplorerRows() {
 // context.selectedYCode/applyExplorerSelection - it's a preview, not a pick.
 function peekExplorerRowByCode(code) {
   if (!code) return;
+
+  // If a cellref click (see openExplorerKriFormulaCellRef) has since
+  // navigated the main view away from the KRI template, there is no KRI row
+  // left to scroll to in place - fall back to a real jump back to it.
+  if (getActiveExplorerTemplate()?.tableId !== "KRI") {
+    if (openExplorerPoint({ tableId: "KRI", yCode: code })) {
+      const state = getLatestState();
+      if (state) rerenderApp(state);
+    }
+    return;
+  }
 
   elements.explorerTable.querySelectorAll("tbody tr.is-peek-highlighted").forEach((row) => {
     row.classList.remove("is-peek-highlighted");
