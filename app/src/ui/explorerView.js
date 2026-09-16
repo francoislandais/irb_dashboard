@@ -2,7 +2,7 @@ import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
-import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat } from "../data/core/formatting.js?v=20260710-bp-format";
+import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat } from "../data/core/formatting.js?v=20260917-kri-native-unit-scale";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
@@ -1656,7 +1656,7 @@ function formatExplorerFocusedValue({ columnKind, contributionValue, pointValue,
     if (isPercentFormat(valueFormat)) {
       return `${pointValue > 0 ? "+" : ""}${formatMetricValue(pointValue, selectedUnit, valueFormat)}`;
     }
-    return formatSignedMetricValue(pointValue, selectedUnit);
+    return formatSignedMetricValue(pointValue, selectedUnit, valueFormat);
   }
   return formatMetricValue(pointValue, selectedUnit, valueFormat);
 }
@@ -3584,7 +3584,7 @@ function renderExplorerDescriptionPanel() {
       return signed && value > 0 ? `+${formatted}` : formatted;
     }
     return signed
-      ? formatSignedMetricValue(value, metrics.selectedUnit)
+      ? formatSignedMetricValue(value, metrics.selectedUnit, metrics.format)
       : formatMetricValue(value, metrics.selectedUnit, metrics.format);
   };
 
