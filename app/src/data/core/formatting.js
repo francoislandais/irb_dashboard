@@ -1,4 +1,5 @@
 export function formatMetricValue(value, selectedUnit, valueFormat = "") {
+  if (isUnitFormat(valueFormat)) return String(value);
   if (isPercentFormat(valueFormat)) return formatPercentValue(value);
 
   const unit = getUnitDefinition(selectedUnit);
@@ -9,12 +10,17 @@ export function formatMetricValue(value, selectedUnit, valueFormat = "") {
 }
 
 export function formatSignedMetricValue(value, selectedUnit, valueFormat = "") {
+  if (isUnitFormat(valueFormat)) return String(value);
   const unit = getUnitDefinition(selectedUnit);
   return new Intl.NumberFormat("fr-FR", {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0,
     signDisplay: "exceptZero"
   }).format(value / unit.divisor);
+}
+
+export function isUnitFormat(valueFormat) {
+  return String(valueFormat ?? "").trim().toLowerCase() === "unit";
 }
 
 export function isPercentFormat(valueFormat) {

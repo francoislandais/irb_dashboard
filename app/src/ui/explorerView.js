@@ -2,7 +2,7 @@ import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig }
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
-import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
+import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260916-raw-unit";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
 import {
@@ -44,7 +44,7 @@ import {
 } from "../data/explorerKriFormula.js?v=20260917-kri-formula";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
-import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
+import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260917-kri-data-only-rows";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
@@ -1335,10 +1335,10 @@ function buildExplorerExcelCell(cell, index, row, state) {
   const isRatio = cell.dataset.explorerCellKind === "ratio" || columnKind === "relative-change" || isPercentFormat(valueFormat);
   const value = isRatio
     ? (cell.dataset.explorerCellKind === "ratio" || columnKind === "relative-change" || Math.abs(rawValue) <= 1 ? rawValue : rawValue / 100)
-    : rawValue / getUnitDefinition(state.selectedUnit).divisor;
+    : isUnitFormat(valueFormat) ? rawValue : rawValue / getUnitDefinition(state.selectedUnit).divisor;
   const opacity = Number(cell.style.getPropertyValue("--date-focus-value-opacity")) || 0;
   const emphasis = opacity >= 0.115 ? 3 : opacity >= 0.075 ? 2 : opacity > 0 ? 1 : 0;
-  return { type: "number", value, numberFormat: isRatio ? "percent" : "amount", emphasis };
+  return { type: "number", value, numberFormat: isRatio ? "percent" : isUnitFormat(valueFormat) ? "unit" : "amount", emphasis };
 }
 
 function sanitizeExcelFileName(fileName) {
@@ -1682,7 +1682,7 @@ function renderExplorerTable(series, selectedUnit) {
       if (!seriesRow.isVirtual) {
         td.dataset.explorerCellRow = String(rowIndex);
         td.dataset.explorerCellColumn = String(index);
-        td.dataset.explorerCellKind = contributionValue === null ? "amount" : "ratio";
+        td.dataset.explorerCellKind = contributionValue !== null ? "ratio" : isUnitFormat(seriesRow.format) ? "unit" : "amount";
         td.dataset.explorerCellDate = columnKind === "current" ? orderedDates[index]?.label ?? "" : "";
         td.dataset.explorerCellLabel = seriesRow.description || seriesRow.code || "";
       }
@@ -3659,7 +3659,7 @@ function createExplorerCellRangeContext(range, selectedUnit) {
 function formatExplorerCellRangeValue(range, selectedUnit) {
   if (range.kind === "ratio") return formatContributionPercentValue(range.sum);
 
-  return formatMetricValue(range.sum, selectedUnit);
+  return formatMetricValue(range.sum, selectedUnit, range.kind === "unit" ? "Unit" : "");
 }
 
 function getExplorerCellRangeLabel(range) {

@@ -92,7 +92,7 @@ function buildSheetXml({ columns, metadata, rows, subtitle, title }) {
 
 function getNumericStyle(cell) {
   const fillOffset = cell.emphasis >= 3 ? 3 : cell.emphasis === 2 ? 2 : cell.emphasis === 1 ? 1 : 0;
-  return (cell.numberFormat === "percent" ? 15 : 11) + fillOffset;
+  return (cell.numberFormat === "unit" ? 20 : cell.numberFormat === "percent" ? 15 : 11) + fillOffset;
 }
 
 function xmlRow(number, cells, height = null) {
@@ -129,7 +129,11 @@ function stylesXml() {
     xf({ numberFormat: 10, fill: 4 }),
     xf({ numberFormat: 10, fill: 5 }),
     xf({ numberFormat: 10, fill: 6 }),
-    xf({ align: "center", fill: 3 })
+    xf({ align: "center", fill: 3 }),
+    xf({ numberFormat: 1 }),
+    xf({ numberFormat: 1, fill: 4 }),
+    xf({ numberFormat: 1, fill: 5 }),
+    xf({ numberFormat: 1, fill: 6 })
   ];
   return xmlDocument(`<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <fonts count="3">
