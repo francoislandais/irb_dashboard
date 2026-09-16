@@ -1,4 +1,4 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260917-kri-data-only-rows";
+import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260917-kri-row-limit";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
@@ -792,13 +792,18 @@ function filterExplorerSeriesByAdvancedSearch(series, state, tableId, activeAxis
   const results = getExplorerAdvancedSearchResults(state);
   const templateResult = results.byTemplate.get(tableId);
   if (!results.hasQuery) return series;
-  if (!templateResult) return { ...series, rows: [], status: "No metadata matches this search." };
+  if (!templateResult) return { ...series, rows: [], totalRowCount: 0, status: "No metadata matches this search." };
   if (templateResult.restrictedAxis !== activeAxis) return series;
   const matchingCodes = templateResult.matchesByAxis[activeAxis];
   const rows = series.rows.filter((row) => matchingCodes.has(normalizeExplorerSeriesRow(row).code));
   return {
     ...series,
     rows,
+    // A search always computes every matching row's series in full (see
+    // buildExplorerAxisSeries's rowLimit), so this reflects the true match
+    // count - unlike the unfiltered series.totalRowCount, which counts the
+    // whole KRI dictionary regardless of what actually matched.
+    totalRowCount: rows.length,
     status: rows.length > 0 ? series.status : "No metadata matches this search."
   };
 }
@@ -1118,8 +1123,24 @@ export function renderExplorer(state) {
   lastRenderedExplorerTableSeries = null;
   refreshExplorerSelectionChrome(state);
 
+  // Windowing the DOM alone (see renderExplorerTable) doesn't help if the
+  // expensive part - computing every KRI's full date-by-date series - still
+  // runs for the whole list on every render. Skip that work for whatever's
+  // beyond the current window too, unless a search is active: search
+  // matches on metadata alone (see filterExplorerSeriesByAdvancedSearch), so
+  // it still needs every row computed to know what actually matches.
+  const isKriRowAxis = context.activeAxis === "y" && template?.tableId === "KRI";
+  const kriResetKey = `${activeExplorerTemplateId}:${state.activeDatasetId}:${state.selectedJst}:${explorerAdvancedSearchQuery}`;
+  if (isKriRowAxis && kriResetKey !== explorerKriRowWindowKey) {
+    explorerKriRowWindowKey = kriResetKey;
+    explorerKriVisibleRowCount = EXPLORER_KRI_ROW_BATCH_SIZE;
+  }
+  const hasActiveKriSearch = isKriRowAxis && getExplorerAdvancedSearchResults(state).hasQuery;
+  const kriRowLimit = isKriRowAxis && !hasActiveKriSearch ? explorerKriVisibleRowCount : undefined;
+
   const tableSeries = buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
+    rowLimit: kriRowLimit,
     selectedXCode: context.selectedXCode,
     selectedYCode: context.selectedYCode,
     selectedZCode: context.selectedZCode,
@@ -1450,17 +1471,17 @@ function renderExplorerTable(series, selectedUnit) {
   ));
 
   // See EXPLORER_KRI_ROW_BATCH_SIZE - every other template still renders its
-  // full (lazily-collapsed) row list exactly as before.
+  // full (lazily-collapsed) row list exactly as before. The window itself
+  // (and resetting it on a genuinely new row set) is decided in
+  // renderExplorer, before series was even computed - series.totalRowCount
+  // is the true count regardless of what got fetched (see
+  // buildExplorerAxisSeries's rowLimit and filterExplorerSeriesByAdvancedSearch).
   const isKriRowAxis = activeAxis === "y" && getActiveExplorerTemplate()?.tableId === "KRI";
   let renderedDisplayRows = visibleDisplayRows;
   let hasMoreExplorerKriRows = false;
   if (isKriRowAxis) {
-    const rowWindowKey = `${visibleDisplayRows.length}:${visibleDisplayRows[0]?.code ?? ""}:${visibleDisplayRows.at(-1)?.code ?? ""}`;
-    if (rowWindowKey !== explorerKriRowWindowKey) {
-      explorerKriRowWindowKey = rowWindowKey;
-      explorerKriVisibleRowCount = EXPLORER_KRI_ROW_BATCH_SIZE;
-    }
-    hasMoreExplorerKriRows = visibleDisplayRows.length > explorerKriVisibleRowCount;
+    const totalRowCount = series.totalRowCount ?? visibleDisplayRows.length;
+    hasMoreExplorerKriRows = totalRowCount > explorerKriVisibleRowCount;
     renderedDisplayRows = visibleDisplayRows.slice(0, explorerKriVisibleRowCount);
   }
 
@@ -4962,19 +4983,17 @@ function peekExplorerRowByCode(code) {
 // selection via focusSelectedExplorerRow) has to grow the window first.
 function ensureExplorerKriRowRendered(code) {
   if (!code || getActiveExplorerTemplate()?.tableId !== "KRI") return;
+  // Not just hidden - a code beyond the window was never fetched at all
+  // (see renderExplorer's kriRowLimit), so there is no cheap way to know
+  // where it sits without the full list. Since jumping to an arbitrary KRI
+  // like this is a deliberate, occasional action (not the default browsing
+  // case this feature optimizes), just load everything for this row set -
+  // the next reset (template/JST/dataset/search change) goes back to 20.
+  if (lastRenderedExplorerTableSeries?.rows?.some((row) => row.code === code)) return;
 
-  const rows = lastRenderedExplorerTableSeries?.rows;
-  if (!rows) return;
-
-  const index = rows.findIndex((row) => row.code === code);
-  if (index === -1 || index < explorerKriVisibleRowCount) return;
-
-  explorerKriVisibleRowCount = Math.ceil((index + 1) / EXPLORER_KRI_ROW_BATCH_SIZE) * EXPLORER_KRI_ROW_BATCH_SIZE;
-  // renderExplorer() normally clears the table before calling
-  // renderExplorerTable - required here too since this calls it directly.
-  elements.explorerTable.replaceChildren();
-  renderExplorerTable(lastRenderedExplorerTableSeries, lastRenderedExplorerSelectedUnit);
-  applyExplorerSelection();
+  explorerKriVisibleRowCount = Number.MAX_SAFE_INTEGER;
+  const state = getLatestState();
+  if (state) rerenderApp(state);
 }
 
 // A plain instant jump feels like nothing happened, and the browser's native

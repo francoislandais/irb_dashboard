@@ -70,11 +70,23 @@ export function buildExplorerAxisSeries(state, options = {}) {
     })()
     : rawPointsConfig;
 
+  // KRI can list thousands of indicators; computing every one's full
+  // date-by-date series (see buildValues) - not just rendering it - is the
+  // actual heavy cost. When the caller only needs the first N rows (see
+  // explorerView.js's KRI row window, threaded through as rowLimit), skip
+  // that computation for the rest entirely instead of just hiding them in
+  // the DOM afterwards. totalRowCount below still reports the true count,
+  // so the caller knows there's more to load.
+  const limitedPointsConfig = axis === "y" && Number.isFinite(options.rowLimit)
+    ? pointsConfig.slice(0, options.rowLimit)
+    : pointsConfig;
+
   if (state.explorerPointsError) {
     return {
       dateColumns: [],
       matchCount: 0,
       rows: [],
+      totalRowCount: 0,
       status: state.explorerPointsError
     };
   }
@@ -84,6 +96,7 @@ export function buildExplorerAxisSeries(state, options = {}) {
       dateColumns: [],
       matchCount: 0,
       rows: [],
+      totalRowCount: 0,
       status: "Chargez un CSV puis choisissez une JST."
     };
   }
@@ -105,9 +118,9 @@ export function buildExplorerAxisSeries(state, options = {}) {
     selectedZCode
   };
   const inheritedFormat = getSelectedFilterFormat(state, tableId, axis, selections);
-  const zPointsConfig = axis === "z" && pointsConfig.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
-    ? [createAllCurrenciesPoint(), ...pointsConfig]
-    : pointsConfig;
+  const zPointsConfig = axis === "z" && limitedPointsConfig.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
+    ? [createAllCurrenciesPoint(), ...limitedPointsConfig]
+    : limitedPointsConfig;
   const rowSeries = axis === "template"
     ? buildTemplateSeriesRows(state, indexes, dateColumns, options.templates ?? [], options.templateSelections ?? {})
     : pointsConfig.length === 0
@@ -123,6 +136,10 @@ export function buildExplorerAxisSeries(state, options = {}) {
     })),
     matchCount,
     rows: rowSeries,
+    // The true row count regardless of rowLimit, so a windowed caller
+    // (explorerView.js's KRI row window) knows there's more to load even
+    // though rows itself only has the first batch.
+    totalRowCount: axis === "y" ? pointsConfig.length : rowSeries.length,
     // A row-with-no-data-for-this-JST just shows as dashes (see the
     // stability fix in getPreferredExplorerAxisCodes) rather than being
     // flagged with a banner - see the "Empty" badge on the template list
