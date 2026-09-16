@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import base64
+import csv
 import gzip
+import io
 import json
 import posixpath
 import re
@@ -81,15 +83,17 @@ def export_consolidated_standalone_app(
     datasets_directory: str | Path | None = None,
     outputs_directory: str | Path | None = None,
 ) -> Path:
-    """Concatène plusieurs CSV déjà générés dans ``datasets/`` et exporte une
+    """Fusionne plusieurs CSV déjà générés dans ``datasets/`` et exporte une
     unique application portable consolidée.
 
     ``dataset_names`` désigne des fichiers déjà présents dans le dossier de
     données (avec ou sans l'extension ``.csv``, comme ``output_name`` dans
-    ``run_hive_query_to_csv``). Tous doivent partager exactement le même
-    en-tête (mêmes colonnes, dans le même ordre) - une simple concaténation
-    de lignes sous des en-têtes différents alignerait des valeurs sous les
-    mauvaises colonnes plutôt que de les fusionner correctement.
+    ``run_hive_query_to_csv``). Ils n'ont pas besoin de partager le même
+    en-tête : la colonne finale est l'union de toutes les colonnes
+    rencontrées (dans l'ordre où elles apparaissent, fichier par fichier) -
+    une ligne provenant d'un fichier qui n'a pas une colonne donnée (par ex.
+    une date de référence absente de son extraction) reçoit une valeur vide
+    pour cette colonne plutôt que de faire échouer la fusion.
     """
 
     dataset_names = list(dataset_names)
@@ -101,7 +105,7 @@ def export_consolidated_standalone_app(
     outputs_path.mkdir(parents=True, exist_ok=True)
 
     csv_paths = [datasets_path / _normalize_csv_name(name) for name in dataset_names]
-    merged_csv_text = _concatenate_csv_files(csv_paths)
+    merged_csv_text = _merge_csv_files(csv_paths)
 
     bundle = _build_standalone_bundle(APP_DIRECTORY)
     output_csv_name = _normalize_csv_name(output_name)
@@ -113,10 +117,14 @@ def export_consolidated_standalone_app(
     return destination
 
 
-def _concatenate_csv_files(csv_paths: list[Path]) -> str:
-    header: str | None = None
-    first_path = csv_paths[0]
-    merged_lines: list[str] = []
+def _merge_csv_files(csv_paths: list[Path]) -> str:
+    """Reads every CSV's rows keyed by its own header, then writes them all
+    back out under the union of every column encountered - a row missing a
+    column found in another file just gets a blank value there."""
+
+    all_columns: list[str] = []
+    seen_columns: set[str] = set()
+    rows_by_file: list[list[dict[str, str]]] = []
 
     for csv_path in csv_paths:
         if not csv_path.is_file():
@@ -126,18 +134,32 @@ def _concatenate_csv_files(csv_paths: list[Path]) -> str:
         if not lines:
             raise ValueError(f"Le dataset est vide : {csv_path}")
 
-        if header is None:
-            header = lines[0]
-            merged_lines.append(header)
-        elif lines[0] != header:
-            raise ValueError(
-                "Les datasets à concaténer n'ont pas exactement le même en-tête "
-                f"({first_path.name} vs {csv_path.name})."
-            )
+        delimiter = _detect_csv_delimiter(lines[0])
+        reader = csv.reader(lines, delimiter=delimiter)
+        header = next(reader)
+        for column in header:
+            if column not in seen_columns:
+                seen_columns.add(column)
+                all_columns.append(column)
 
-        merged_lines.extend(lines[1:])
+        rows_by_file.append([dict(zip(header, row)) for row in reader])
 
-    return "\n".join(merged_lines)
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(all_columns)
+    for rows in rows_by_file:
+        for row in rows:
+            writer.writerow([row.get(column, "") for column in all_columns])
+
+    return output.getvalue().rstrip("\n")
+
+
+def _detect_csv_delimiter(header_line: str) -> str:
+    """Same heuristic as the app's own CSV parser (see csvParser.js): the
+    delimiter that appears most often in the header line wins."""
+
+    candidates = (",", ";", "\t")
+    return max(candidates, key=header_line.count)
 
 
 def _normalize_csv_name(output_name: str) -> str:
