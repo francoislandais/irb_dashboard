@@ -300,7 +300,7 @@ export function getExplorerTableIds(state) {
 // injected here and in buildExplorerAxisSeries rather than added to the
 // CSV reference.
 export const EXPLORER_ALL_CURRENCIES_CODE = "__ALL__";
-export const EXPLORER_ALL_CURRENCIES_LABEL = "All Currency";
+export const EXPLORER_ALL_CURRENCIES_LABEL = "All currencies";
 
 // EUR is present on every currency z-axis breakdown in the reference
 // config, so its presence is a reliable signal without hand-maintaining a

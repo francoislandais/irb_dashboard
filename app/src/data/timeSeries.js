@@ -2,7 +2,7 @@ import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByC
 import { normalizeAxisCode } from "./core/axisCode.js";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-all-currency-blank-z-fix";
+import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260916-all-currencies-wording";
 
 export const EXPLORER_TARGET = {
   tableId: "C_02.00",

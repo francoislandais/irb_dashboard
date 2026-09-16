@@ -1,4 +1,4 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260916-all-currency-blank-z-fix";
+import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260916-all-currencies-wording";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
@@ -12,7 +12,7 @@ import {
   getBenchmarkValueFormat,
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
-} from "../data/explorerBenchmark.js?v=20260916-all-currency-blank-z-fix";
+} from "../data/explorerBenchmark.js?v=20260916-all-currencies-wording";
 import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260911-benchmark-axis-font";
 import {
   buildExplorerDisplayRows,
@@ -33,13 +33,13 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260916-all-currency-blank-z-fix";
+} from "../data/explorer.js?v=20260916-all-currencies-wording";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js";
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260910-explorer-excel";
-import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260916-all-currency-blank-z-fix";
+import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260916-all-currencies-wording";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
@@ -2511,7 +2511,11 @@ function renderExplorerAxisTabs() {
     }
 
     element.title = captions[axis];
-    element.replaceChildren(createAxisCaptionLine(axisCodes[axis], axis));
+    // The raw code is normally what a "<Row|Column|Tab> : <code>" pill
+    // shows, but "All Currency" (see explorer.js) is a display sentinel,
+    // not a real code meant to be shown as-is.
+    const displayCode = axisCodes[axis] === EXPLORER_ALL_CURRENCIES_CODE ? EXPLORER_ALL_CURRENCIES_LABEL : axisCodes[axis];
+    element.replaceChildren(createAxisCaptionLine(displayCode, axis));
   });
 }
 
