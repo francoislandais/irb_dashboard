@@ -3416,6 +3416,22 @@ function createExplorerContextItem(label, value) {
   return item;
 }
 
+// A row's full hierarchy path can run to several hundred characters (every
+// ancestor level joined together) - truncating the middle keeps the code
+// and the start of the path (usually a generic top-level label repeated
+// across many rows) while preserving the tail, which carries the actual
+// specific detail for this exact row. The full text is still available on
+// hover (see the .title assignment at the call site).
+const EXPLORER_SUMMARY_TEXT_MAX_LENGTH = 130;
+const EXPLORER_SUMMARY_TEXT_PREFIX_LENGTH = 30;
+
+function truncateExplorerSummaryText(text) {
+  if (text.length <= EXPLORER_SUMMARY_TEXT_MAX_LENGTH) return text;
+
+  const suffixLength = EXPLORER_SUMMARY_TEXT_MAX_LENGTH - EXPLORER_SUMMARY_TEXT_PREFIX_LENGTH - 3;
+  return `${text.slice(0, EXPLORER_SUMMARY_TEXT_PREFIX_LENGTH)}...${text.slice(-suffixLength)}`;
+}
+
 // Mirrors the size/shape of Credit Risk's small selected-data card. Benchmark
 // display is controlled exclusively from the filter row; this permanent pane
 // now retains only the action tied directly to the selected hierarchy node.
@@ -3445,7 +3461,8 @@ function createExplorerSelectionSummaryCard() {
       strong.textContent = `${label}: `;
       const content = document.createElement("span");
       content.className = "explorer-selection-summary-content";
-      content.textContent = value;
+      content.textContent = truncateExplorerSummaryText(value);
+      content.title = value;
       line.append(strong, content);
       description.append(line);
     });
