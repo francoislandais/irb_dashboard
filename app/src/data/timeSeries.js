@@ -34,7 +34,13 @@ export function buildExplorerAxisSeries(state, options = {}) {
   // under this section-specific id while every actual data row still
   // matches on the real tableId.
   const yConfigTableId = options.yConfigTableId || tableId;
-  const selectedXCode = normalizeAxisCode(options.selectedXCode || EXPLORER_TARGET.xAxisRcCode, "x");
+  // Not defaulted to EXPLORER_TARGET.xAxisRcCode like the very first render
+  // used to need: ensureExplorerTemplateSelections (the only real caller,
+  // via renderExplorer) always resolves this first, to either a real code
+  // or a genuinely empty string for a template with no x axis at all (e.g.
+  // KRI) - substituting another template's code here would silently filter
+  // out every row for one that has none.
+  const selectedXCode = normalizeAxisCode(options.selectedXCode || "", "x");
   const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
   const rawSelectedZCode = normalizeAxisCode(options.selectedZCode || "", "z");
   // "All Currency" (see explorerTableHasCurrencyZAxis) resolves to an empty

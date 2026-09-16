@@ -1,4 +1,4 @@
-import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260916-all-currencies-wording";
+import { buildExplorerAxisSeries, EXPLORER_TARGET } from "../data/timeSeries.js?v=20260917-single-axis-x-default-fix";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
