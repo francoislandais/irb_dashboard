@@ -61,10 +61,11 @@ const templates = [
 const sections = groupExplorerTemplatesByFamily(templates, config);
 assert.equal(sections[0].group, "Key Risk Indicator");
 assert.deepEqual(sections[0].templates.map(({ id }) => id), ["KRI"]);
-assert.equal(sections[1].group, "Funding Plan");
+assert.equal(sections.at(-1).group, "Funding Plan");
 assert.deepEqual(
-  sections[1].templates.map(({ id }) => id),
+  sections.at(-1).templates.map(({ id }) => id),
   Object.keys(expectedFundingPlanLabels)
 );
+assert.deepEqual(sections.at(-2).templates.map(({ id }) => id), ["C_01.00"]);
 
-console.log("PASS: Funding Plan catalog labels, grouping, and KRI-first ordering.");
+console.log("PASS: Funding Plan catalog labels, KRI-first ordering, and Funding Plan-last ordering.");

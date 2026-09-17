@@ -39,7 +39,7 @@ import {
   splitHierarchyPath
 } from "../data/explorer.js?v=20260917-funding-plan-currencies";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
-import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-catalog";
+import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import {
   describeExplorerKriOffset,
   EXPLORER_KRI_FORMULA_FUNCTION_LABELS,

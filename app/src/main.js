@@ -4,7 +4,7 @@ import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=2026
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260917-kri-formula";
 import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260917-kri-formula";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
-import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-catalog";
+import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
 import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js?v=20260917-kri-formula";
 import {
@@ -20,7 +20,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260917-kri-formula";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260917-funding-plan-currencies";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260917-funding-plan-last";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

@@ -1,6 +1,7 @@
 import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 
 const EXPLORER_TEMPLATE_GROUPS_URL = "./assets/ITS_explorer_template_groups.csv";
+const EXPLORER_LAST_TEMPLATE_GROUP = "Funding Plan";
 
 export async function loadExplorerTemplateGroups() {
   const response = await fetch(EXPLORER_TEMPLATE_GROUPS_URL, { cache: "no-store" });
@@ -41,9 +42,9 @@ export function parseExplorerTemplateGroups(columns, rows) {
   return { groupByTemplateId, groupOrder };
 }
 
-// Templates with no configured group (the default, until this CSV is filled
-// in) are kept in their given order with no group of their own - so an
-// empty/partial config looks exactly like the ungrouped list did before.
+// Templates with no configured group keep their given order. Funding Plan
+// is deliberately appended after them and every configured group so it
+// remains the final section regardless of the CSV's group order.
 export function groupExplorerTemplatesByFamily(templates, config) {
   if (!config || config.groupByTemplateId.size === 0) {
     return [{ group: "", templates }];
@@ -63,10 +64,16 @@ export function groupExplorerTemplatesByFamily(templates, config) {
   });
 
   const sections = config.groupOrder
-    .filter((group) => templatesByGroup.has(group))
+    .filter((group) => group !== EXPLORER_LAST_TEMPLATE_GROUP && templatesByGroup.has(group))
     .map((group) => ({ group, templates: templatesByGroup.get(group) }));
 
   if (ungrouped.length > 0) sections.push({ group: "", templates: ungrouped });
+  if (templatesByGroup.has(EXPLORER_LAST_TEMPLATE_GROUP)) {
+    sections.push({
+      group: EXPLORER_LAST_TEMPLATE_GROUP,
+      templates: templatesByGroup.get(EXPLORER_LAST_TEMPLATE_GROUP)
+    });
+  }
 
   return sections;
 }
