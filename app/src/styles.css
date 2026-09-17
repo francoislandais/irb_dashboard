@@ -4102,3 +4102,37 @@ table {
   overflow-wrap: anywhere;
   line-height: 1.65;
 }
+
+.explorer-query-code-area {
+  position: relative;
+  min-width: 0;
+}
+
+.explorer-query-code-area .explorer-query-dialog-sql {
+  padding-right: 58px;
+}
+
+.explorer-query-copy-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #52615a;
+  border-radius: 6px;
+  background: #25352d;
+  color: #e8f0eb;
+  cursor: pointer;
+}
+
+.explorer-query-copy-icon:hover:not(:disabled) {
+  background: #384e42;
+}
+
+.explorer-query-copy-icon:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

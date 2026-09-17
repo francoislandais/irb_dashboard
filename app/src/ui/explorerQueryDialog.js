@@ -57,13 +57,18 @@ function createDialog(buildQuery) {
 
   const copyButton = document.createElement("button");
   copyButton.type = "button";
-  copyButton.className = "topbar-button";
-  copyButton.textContent = "Copier la requête";
-  copyButton.title = "Copier la requête dans le presse-papiers";
-  const headerActions = document.createElement("div");
-  headerActions.className = "dataset-dialog-header-actions";
-  headerActions.append(copyButton, closeButton);
-  header.append(headerActions);
+  copyButton.className = "explorer-query-copy-icon";
+  const copyIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>';
+  const setCopyStatus = (label, icon = copyIcon) => {
+    copyButton.innerHTML = icon;
+    copyButton.title = label;
+    copyButton.setAttribute("aria-label", label);
+  };
+  setCopyStatus("Copier la requête dans le presse-papiers");
+  header.append(closeButton);
+  const queryArea = document.createElement("div");
+  queryArea.className = "explorer-query-code-area";
+  queryArea.append(pre, copyButton);
 
   const renderQuery = () => {
     const sql = buildQuery({ includeDateFilter: dateFilterCheckbox.checked });
@@ -75,16 +80,16 @@ function createDialog(buildQuery) {
   copyButton.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(pre.textContent);
-      copyButton.textContent = "Requête copiée";
+      setCopyStatus("Requête copiée", '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>');
     } catch {
-      copyButton.textContent = "Copie indisponible";
+      setCopyStatus("Copie indisponible", "!");
     }
-    window.setTimeout(() => { copyButton.textContent = "Copier la requête"; }, 1200);
+    window.setTimeout(() => setCopyStatus("Copier la requête dans le presse-papiers"), 1600);
   });
 
   renderQuery();
 
-  body.append(dateFilterLabel, pre);
+  body.append(dateFilterLabel, queryArea);
   dialog.append(header, body);
   overlay.append(dialog);
   return overlay;
