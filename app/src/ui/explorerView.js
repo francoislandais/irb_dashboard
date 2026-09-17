@@ -163,6 +163,7 @@ let explorerBenchmarkLastSmoothingWindow = 4;
 let explorerBenchmarkFocusYAxis = false;
 let explorerReturnTarget = null;
 let shouldFocusOpenedExplorerPoint = false;
+let shouldRevealExplorerAxisSelection = false;
 let lastRenderedExplorerTableSeries = null;
 let lastRenderedExplorerSelectedUnit = null;
 // The exact state object last passed to renderExplorer - used only to tell
@@ -270,7 +271,10 @@ export function wireExplorerUi(actions, rerender) {
 
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
-      getActiveExplorerContext().activeAxis = button.getAttribute("data-explorer-axis") || "y";
+      const requestedAxis = button.getAttribute("data-explorer-axis") || "y";
+      getActiveExplorerContext().activeAxis = requestedAxis;
+      shouldRevealExplorerAxisSelection = true;
+      if (requestedAxis === "x" && isExplorerXYView()) shouldCenterExplorerReferenceColumn = true;
       rerenderApp(actions.getState());
     });
   });
@@ -1222,7 +1226,7 @@ export function renderExplorer(state) {
     // peekExplorerRowByCode's cross-template fallback) sets selectedYCode
     // and asks to be focused - make sure that code's own page is what
     // actually gets fetched below, instead of whatever page was showing.
-    if (shouldFocusOpenedExplorerPoint && context.selectedYCode) {
+    if ((shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection) && context.selectedYCode) {
       const selectedIndex = matchingCodes.indexOf(context.selectedYCode);
       if (selectedIndex !== -1) explorerKriPageIndex = Math.floor(selectedIndex / EXPLORER_KRI_PAGE_SIZE);
     }
@@ -1260,6 +1264,7 @@ export function renderExplorer(state) {
   elements.explorerEmpty.textContent = searchedTableSeries.status;
 
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) {
+    shouldRevealExplorerAxisSelection = false;
     explorerSearchSelectionCache = null;
     recordExplorerSelectionHistory(state);
     renderExplorerSelectionPane();
@@ -1279,6 +1284,9 @@ export function renderExplorer(state) {
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
     focusSelectedExplorerRow();
+  } else if (shouldRevealExplorerAxisSelection) {
+    shouldRevealExplorerAxisSelection = false;
+    scrollSelectedExplorerRowIntoView();
   } else {
     restoreExplorerScrollPosition();
   }
@@ -1617,7 +1625,9 @@ function renderExplorerTable(series, selectedUnit) {
   headerRow.className = isDateFocus ? "explorer-focus-header-row" : "explorer-quarter-header-row";
   const tbody = document.createElement("tbody");
 
-  if (shouldFocusOpenedExplorerPoint) expandExplorerAncestorsForSelectedCode(tableRows);
+  if (shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection) {
+    expandExplorerAncestorsForSelectedCode(tableRows);
+  }
   expandDefaultExplorerPaths(displayRows, parentPaths);
 
   // Collapsed branches never get a <tr> at all (instead of being built and
@@ -4632,7 +4642,22 @@ function createExplorerTemplateList(templates, activeTemplateId) {
   });
 
   section.append(list);
+  scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
   return section;
+}
+
+function scheduleExplorerContextOptionReveal(selector) {
+  requestAnimationFrame(() => {
+    const container = elements.explorerContextDetail;
+    const target = container?.querySelector(selector);
+    if (!target) return;
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    if (targetRect.top >= containerRect.top && targetRect.bottom <= containerRect.bottom) return;
+    const centeredDelta = (targetRect.top - containerRect.top)
+      - (containerRect.height / 2 - targetRect.height / 2);
+    container.scrollTop = Math.max(0, container.scrollTop + centeredDelta);
+  });
 }
 
 function createExplorerTemplateGroupHeader(group) {
@@ -5401,6 +5426,13 @@ function focusSelectedExplorerRow() {
 
   row.focus({ preventScroll: true });
   row.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+function scrollSelectedExplorerRowIntoView() {
+  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
+  if (!row || row.hidden) return;
+  scrollExplorerRowIntoViewQuickly(row);
 }
 
 export function saveExplorerScrollPosition() {
