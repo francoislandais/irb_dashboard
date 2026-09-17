@@ -1,4 +1,4 @@
-import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260917-global-xy";
+import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260917-xy-forbidden";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
@@ -287,6 +287,8 @@ export function wireExplorerUi(actions, rerender) {
       return;
     }
 
+    if (event.target.closest("td.is-xy-impossible")) return;
+
     const toggle = event.target.closest("[data-toggle-path]");
     if (toggle) {
       toggleExplorerPath(toggle.dataset.togglePath);
@@ -302,6 +304,7 @@ export function wireExplorerUi(actions, rerender) {
     }
   });
   elements.explorerTable.addEventListener("contextmenu", (event) => {
+    if (event.target.closest("td.is-xy-impossible")) { event.preventDefault(); return; }
     const row = event.target.closest("tbody tr[data-point-code]");
     if (!row) return;
     const cell = event.target.closest("td[data-explorer-cell-column]");
@@ -1735,6 +1738,14 @@ function renderExplorerTable(series, selectedUnit) {
       td.dataset.explorerExportKind = columnKind;
       const valueFormat = isXY ? point.format ?? "" : seriesRow.format ?? "";
       td.dataset.explorerExportFormat = valueFormat;
+      if (isXY && point.isImpossible) {
+        td.classList.add("is-xy-impossible");
+        td.setAttribute("aria-disabled", "true");
+        td.title = "This X/Y combination is not allowed";
+        td.textContent = "";
+        valueRow.append(td);
+        return;
+      }
       const contributionValue = isContributionFocus
         ? point.value
         : isContributionChild
@@ -5073,8 +5084,13 @@ function getExplicitPathsFromRenderedRows(rows) {
 
 function selectExplorerRow(pointCode, options = {}) {
   const { shouldFocus = false, cellColumnIndex, cellDate = "", xyColumnCode } = options;
-  hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
+  if (isExplorerXYView() && getLatestState()?.impossibleXYCombinations?.isImpossible(
+    getActiveExplorerTemplate()?.tableId,
+    xyColumnCode ?? context.selectedXCode,
+    pointCode || context.selectedYCode
+  )) return;
+  hasInteractedWithExplorerSelection = true;
   const activeAxis = context.activeAxis;
 
   // Only overwrite the highlighted cell when a specific cell was clicked

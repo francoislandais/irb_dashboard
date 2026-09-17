@@ -4089,3 +4089,10 @@ table {
   background: #eaf2fa;
   color: var(--primary-dark);
 }
+
+/* Forbidden XY coordinates stay distinct from selectable missing values. */
+.metric-table.is-xy-view tbody tr > td.is-xy-impossible {
+  background: #e2e5e7 !important;
+  cursor: default;
+  box-shadow: none;
+}

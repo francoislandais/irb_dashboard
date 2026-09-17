@@ -139,3 +139,21 @@ assert.equal(buildExplorerXYSeries({...base,explorerPoints:[...points,points[0]]
 const missing=buildExplorerXYSeries({...base,rows:[],explorerPoints:[]},{tableId:"TEST"});assert.ok(missing.status);assert.equal(missing.rows.length,0);
 context.activeAxis="z";assert.equal(vm.runInContext('isExplorerXYView()',ctx),true);
 console.log("PASS: XY values, fixed orientation, global display mode, dates, Z/JST filters, missing vs zero, formats, merged header coverage, real table rendering, coordinate selection and inert axis buttons.");
+
+// Forbidden coordinates differ from ordinary missing data and cannot be selected.
+base.impossibleXYCombinations = { isImpossible: (tableId,x,y) => tableId === "TEST" && x === "0020" && y === "0010" };
+sandbox.matrix=buildExplorerXYSeries(base,{tableId:"TEST",selectedZCode:"EUR",referenceLabel:dates[0].label});
+assert.equal(sandbox.matrix.rows[0].values[1].isImpossible,true);
+assert.equal(sandbox.matrix.rows[0].values[2].isImpossible,false);
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"millions")',ctx);
+const forbidden=table.children.find(n=>n.tagName==="TBODY").rows[0].cells[3];
+assert.equal(forbidden["aria-disabled"],"true");
+assert.equal(forbidden.textContent,"");
+assert.equal(forbidden.dataset.explorerCellColumn,undefined);
+assert.equal(forbidden.dataset.explorerCellValue,undefined);
+const selectionBefore=JSON.stringify(context),callsBefore=selectedCalls;
+vm.runInContext('selectExplorerRow("0010",{xyColumnCode:"0020",cellColumnIndex:1})',ctx);
+assert.equal(JSON.stringify(context),selectionBefore);
+assert.equal(selectedCalls,callsBefore);
+console.log("PASS: forbidden XY cells are disabled; missing-data cells remain available; invalid selection has no side effects.");

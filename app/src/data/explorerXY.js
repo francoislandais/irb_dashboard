@@ -50,7 +50,8 @@ export function buildExplorerXYSeries(state, { tableId, yConfigTableId = tableId
       values: columns.map((column) => {
         const x = column;
         const y = row;
-        return { xCode: x.code, yCode: y.code, label: reference.label, date: reference.date,
+        return { isImpossible: Boolean(state.impossibleXYCombinations?.isImpossible(tableId, x.code, y.code)),
+          xCode: x.code, yCode: y.code, label: reference.label, date: reference.date,
           format: y.format || zFormat || x.format || "",
           value: values.get(JSON.stringify([x.code, y.code])) ?? null };
       })
