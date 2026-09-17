@@ -1555,6 +1555,8 @@ function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
 }
 
 function isExplorerXYView() {
+  // KRI has no X/Y matrix; preserve the global choice for other templates.
+  if (getActiveExplorerTemplate()?.tableId === "KRI") return false;
   const context = getActiveExplorerContext();
   return explorerGlobalDisplayMode === "xy" && (context.selectedAxis ?? context.activeAxis) !== "z";
 }

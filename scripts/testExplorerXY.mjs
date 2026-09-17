@@ -207,3 +207,15 @@ table.children=[];
 vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
 assert.equal(table.children.find(n=>n.tagName==="TBODY").rows.find(row=>row.dataset.pointCode==="1010").cells[2].dataset.explorerCellValue,"20");
 console.log("PASS: XY denominator uses each matching X column for children and grandchildren, handles zero/missing/forbidden bases and resets to amounts.");
+
+// KRI always renders temporally without changing the global display choice.
+const originalTemplateGetter=sandbox.getActiveExplorerTemplate;
+sandbox.getActiveExplorerTemplate=()=>({tableId:"KRI"});
+for(const mode of ["temporal","xy"]) {
+  vm.runInContext(`explorerGlobalDisplayMode="${mode}"`,ctx);
+  assert.equal(vm.runInContext('isExplorerXYView()',ctx),false);
+  assert.equal(vm.runInContext('explorerGlobalDisplayMode',ctx),mode);
+}
+sandbox.getActiveExplorerTemplate=originalTemplateGetter;
+assert.equal(vm.runInContext('isExplorerXYView()',ctx),true);
+console.log("PASS: KRI temporal fallback preserves XY preference for the next template.");
