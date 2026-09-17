@@ -1,3 +1,4 @@
+import { getExplorerTemplateReferenceDates } from "../data/explorerReferenceDates.js";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260917-xy-forbidden";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
@@ -3679,13 +3680,7 @@ function getExplorerHistoryUnitLabel(count) {
 function getExplorerActiveDateColumns() {
   const state = getLatestState();
   const template = getActiveExplorerTemplate();
-  const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
-  const references = getReferenceColumns(state?.columns ?? []);
-  if (!indexes || !template?.tableId || !state?.rows) return references;
-
-  return references.filter((reference) => (
-    state.rows.some((row) => row[indexes.tableId] === template.tableId && String(row[reference.index] ?? "").trim() !== "")
-  ));
+  return getExplorerTemplateReferenceDates(state, template?.tableId);
 }
 
 function createExplorerHistoryDepthControl() {
