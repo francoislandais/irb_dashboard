@@ -3829,7 +3829,7 @@ table {
    without competing with the strong highlight reserved for the one cell
    the user actually clicked (see .is-selected-cell below). */
 .metric-table tbody tr.is-selected > th,
-.metric-table tbody tr.is-selected > td {
+.metric-table tbody tr.is-selected > td:not(.is-xy-impossible) {
   background: #eaf2fa !important;
   color: var(--primary-dark) !important;
   border-bottom-color: #ffffff !important;
@@ -3862,20 +3862,20 @@ table {
    clicking a KRI reference chip inside the formula panel, just to show the
    user where that referenced row lives without changing anything else. */
 .metric-table tbody tr.is-peek-highlighted > th,
-.metric-table tbody tr.is-peek-highlighted > td {
+.metric-table tbody tr.is-peek-highlighted > td:not(.is-xy-impossible) {
   background: #eaf2fa !important;
   transition: background 0.2s ease;
 }
 
 /* The strong highlight belongs to a single cell: whichever date column was
    last clicked within the selected row. */
-.metric-table tbody tr.is-selected > td.is-selected-cell {
+.metric-table tbody tr.is-selected > td.is-selected-cell:not(.is-xy-impossible) {
   background: var(--primary-dark) !important;
   color: #f4fbf8 !important;
 }
 
-.metric-table tbody tr > td.is-cell-range-selected,
-.metric-table tbody tr:hover > td.is-cell-range-selected {
+.metric-table tbody tr > td.is-cell-range-selected:not(.is-xy-impossible),
+.metric-table tbody tr:hover > td.is-cell-range-selected:not(.is-xy-impossible) {
   background: #d7e4de !important;
   color: var(--primary-dark) !important;
 }
@@ -4090,7 +4090,7 @@ table {
   color: var(--primary-dark);
 }
 
-/* Forbidden XY coordinates stay distinct from selectable missing values. */
+/* Forbidden XY coordinates keep their gray fill in every selection/hover state. */
 .metric-table.is-xy-view tbody tr > td.is-xy-impossible {
   background: #e2e5e7 !important;
   cursor: default;
