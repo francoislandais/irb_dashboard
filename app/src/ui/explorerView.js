@@ -3253,6 +3253,16 @@ function renderExplorerJstSelectionPanel(state) {
   replaceExplorerContextDetail(article);
 }
 
+function getExplorerReferencePanelDates(dates) {
+  if (isExplorerXYView()) return [...dates].reverse();
+  // Reuse the rendered columns so frequency, history depth and anchor match
+  // exactly. Before the table is rendered, apply its same date selection.
+  const visibleDates = lastRenderedExplorerTableSeries && !lastRenderedExplorerTableSeries.xy
+    ? lastRenderedExplorerTableSeries.dateColumns
+    : computeExplorerVisibleDateIndexes(dates).map(index => dates[index]);
+  return [...visibleDates].reverse();
+}
+
 function renderExplorerReferenceDatePanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-reference-date-panel";
@@ -3269,7 +3279,7 @@ function renderExplorerReferenceDatePanel(state) {
   list.setAttribute("role", "listbox");
   list.setAttribute("aria-label", "Reference date");
 
-  [...benchmark.dates].reverse().forEach((reference) => {
+  getExplorerReferencePanelDates(benchmark.dates).forEach((reference) => {
     const isActive = reference.label === selectedReference?.label;
     const row = document.createElement("button");
     row.type = "button";
