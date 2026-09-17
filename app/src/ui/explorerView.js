@@ -263,7 +263,7 @@ export function wireExplorerUi(actions, rerender) {
   });
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      if (button.disabled || isExplorerXYView()) return;
+      if (button.disabled) return;
 
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
@@ -372,8 +372,9 @@ export function showExplorerPeerSelection(actions) {
 function createExplorerTemplateContext() {
   let activeAxis = "y";
   return {
-    // XY always uses Y rows; keep the ordinary browsing axis for other modes.
-    get activeAxis() { return isExplorerXYView() ? "y" : activeAxis; },
+    // Retain the chosen axis while XY renders Y rows; Z always stays temporal.
+    get selectedAxis() { return activeAxis; },
+    get activeAxis() { return explorerGlobalDisplayMode === "xy" && activeAxis !== "z" ? "y" : activeAxis; },
     set activeAxis(value) { activeAxis = value; },
     defaultExpandedPathsInitializedByAxis: {
       template: false,
@@ -460,7 +461,7 @@ function updateUrlExplorerSelectionParams() {
   const context = getActiveExplorerContext();
   const url = createUrlState();
   url.searchParams.set(EXPLORER_DISPLAY_URL_PARAM, explorerGlobalDisplayMode);
-  setOrDeleteUrlParam(url, AXIS_URL_PARAM, context.activeAxis);
+  setOrDeleteUrlParam(url, AXIS_URL_PARAM, context.selectedAxis ?? context.activeAxis);
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
@@ -1554,7 +1555,8 @@ function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
 }
 
 function isExplorerXYView() {
-  return explorerGlobalDisplayMode === "xy";
+  const context = getActiveExplorerContext();
+  return explorerGlobalDisplayMode === "xy" && (context.selectedAxis ?? context.activeAxis) !== "z";
 }
 
 function syncExplorerXYColumnSelection(series = lastRenderedExplorerTableSeries) {
@@ -2920,8 +2922,8 @@ function updateExplorerSearch(event) {
 
 function renderExplorerAxisTabs() {
   const captions = getExplorerAxisCaptions();
-  const activeAxis = getActiveExplorerAxis();
   const context = getActiveExplorerContext();
+  const activeAxis = context.selectedAxis ?? context.activeAxis;
   const axisCodes = { x: context.selectedXCode, y: context.selectedYCode, z: context.selectedZCode };
   const activeTemplate = getActiveExplorerTemplate();
   const tableId = activeTemplate?.tableId ?? EXPLORER_TARGET.tableId;
@@ -3113,7 +3115,7 @@ function navigateExplorerSelectionHistory(direction) {
   // template rather than restoring that template's previous viewing mode.
   const current = getActiveExplorerContext();
   const view = {
-    activeAxis: current.activeAxis,
+    activeAxis: current.selectedAxis ?? current.activeAxis,
     selectedReferenceLabel: current.selectedReferenceLabel,
     selectedCellColumnIndex: current.selectedCellColumnIndex
   };
@@ -3634,7 +3636,7 @@ function renderExplorerDisplayModePanel() {
   });
 
   article.append(title, list);
-  if (explorerGlobalDisplayMode === "temporal") {
+  if (!isExplorerXYView()) {
     article.append(createExplorerHistoryDepthControl());
   }
   replaceExplorerContextDetail(article);

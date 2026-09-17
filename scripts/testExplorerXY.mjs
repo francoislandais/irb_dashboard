@@ -95,17 +95,28 @@ vm.runInContext(source.slice(source.indexOf("function createExplorerTemplateCont
 const first=vm.runInContext('createExplorerTemplateContext()',ctx);
 const second=vm.runInContext('createExplorerTemplateContext()',ctx);
 first.activeAxis="x"; second.activeAxis="z";
-assert.equal(first.activeAxis,"y"); assert.equal(second.activeAxis,"y");
+assert.equal(first.activeAxis,"y"); assert.equal(second.activeAxis,"z");
 vm.runInContext('explorerGlobalDisplayMode="temporal"',ctx);
 assert.equal(first.activeAxis,"x"); assert.equal(second.activeAxis,"z");
 vm.runInContext('explorerGlobalDisplayMode="xy"',ctx);
 Object.assign(first,context); context=first;
-// Axis button clicks in XY return before any selection or render side effect.
-const axisHandler=source.slice(source.indexOf('if (button.disabled || isExplorerXYView()) return;'),source.indexOf('hasInteractedWithExplorerSelection = true;',source.indexOf('if (button.disabled || isExplorerXYView()) return;')));
+// Actual axis clicks retain the choice but only Tab changes matrix rendering.
+const handlerStart=source.indexOf('if (button.disabled) return;',source.indexOf('elements.explorerAxisButtons.forEach'));
+const axisHandler=source.slice(handlerStart,source.indexOf('    });',handlerStart));
+sandbox.actions={getState:()=>base}; sandbox.rerenderApp=()=>{};
 for(const axis of ["x","y","z"]) {
-  sandbox.button={disabled:false,dataset:{explorerAxis:axis}};
-  assert.equal(vm.runInContext('(function(){'+axisHandler+'throw new Error("Axis click changed XY");})()',ctx),undefined);
+  sandbox.button={disabled:false,getAttribute:()=>axis};
+  vm.runInContext('(function(){'+axisHandler+'})()',ctx);
+  assert.equal(context.selectedAxis,axis);
+  assert.equal(context.activeAxis,axis==="z"?"z":"y");
+  assert.equal(vm.runInContext('isExplorerXYView()',ctx),axis!=="z");
+  assert.equal(vm.runInContext('explorerGlobalDisplayMode',ctx),"xy");
 }
+context.activeAxis="x";
+vm.runInContext('explorerGlobalDisplayMode="temporal"',ctx);
+assert.equal(context.activeAxis,"x");
+vm.runInContext('explorerGlobalDisplayMode="xy"',ctx);
+assert.equal(context.activeAxis,"y");
 sandbox.matrix=matrix;
 vm.runInContext('renderExplorerTable(matrix,"millions")',ctx);
 const thead=table.children.find(n=>n.tagName==="THEAD");
@@ -137,8 +148,9 @@ const filtered=vm.runInContext('filterExplorerSeriesByAdvancedSearch(matrix,{},"
 assert.equal(filtered.dateColumns.length,1);assert.equal(filtered.dateColumns[0].code,"0020");assert.equal(filtered.rows[0].values[0].value,0);
 assert.equal(buildExplorerXYSeries({...base,explorerPoints:[...points,points[0]]},{tableId:"TEST",selectedZCode:"EUR"}).dateColumns.length,3);
 const missing=buildExplorerXYSeries({...base,rows:[],explorerPoints:[]},{tableId:"TEST"});assert.ok(missing.status);assert.equal(missing.rows.length,0);
-context.activeAxis="z";assert.equal(vm.runInContext('isExplorerXYView()',ctx),true);
-console.log("PASS: XY values, fixed orientation, global display mode, dates, Z/JST filters, missing vs zero, formats, merged header coverage, real table rendering, coordinate selection and inert axis buttons.");
+context.activeAxis="z";assert.equal(vm.runInContext('isExplorerXYView()',ctx),false);
+context.activeAxis="y";
+console.log("PASS: XY values, fixed orientation, global display mode, dates, Z/JST filters, missing vs zero, formats, merged header coverage, real table rendering, coordinate selection and retained axis choices with temporal Tab fallback.");
 
 // Forbidden coordinates differ from ordinary missing data and cannot be selected.
 base.impossibleXYCombinations = { isImpossible: (tableId,x,y) => tableId === "TEST" && x === "0020" && y === "0010" };
