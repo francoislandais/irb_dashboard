@@ -4075,6 +4075,7 @@ table {
 .metric-table.is-xy-view thead th.description-column,
 .metric-table.is-xy-view thead th.code-column {
   border: 0;
+  color: transparent;
 }
 
 .metric-table.is-xy-view .explorer-xy-group {
