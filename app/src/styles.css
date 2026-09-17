@@ -524,6 +524,10 @@ p {
   width: 226px;
 }
 
+.reference-date-field[hidden] {
+  display: none;
+}
+
 .field input,
 .field select {
   min-height: 28px;
