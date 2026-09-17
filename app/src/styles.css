@@ -2269,6 +2269,7 @@ table {
 
 .explorer-search-control {
   position: relative;
+  z-index: 2000;
   flex: 0 1 290px;
   min-width: 150px;
   max-width: 290px;
@@ -2324,7 +2325,7 @@ table {
 
 .explorer-search-suggestions {
   position: absolute;
-  z-index: 45;
+  z-index: 2001;
   top: calc(100% + 6px);
   right: 0;
   width: min(380px, calc(100vw - 32px));
