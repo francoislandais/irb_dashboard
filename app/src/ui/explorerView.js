@@ -57,7 +57,6 @@ let updateSelectedJst = () => {};
 let updateSelectedUnit = () => {};
 let updatePeerDisplayMode = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
-let explorerGlobalDisplayMode = "temporal";
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
 const explorerTemplateContexts = new Map();
@@ -76,6 +75,7 @@ const AXIS_URL_PARAM = "axis";
 const ROW_URL_PARAM = "row";
 const COLUMN_URL_PARAM = "column";
 const TAB_URL_PARAM = "tab";
+const EXPLORER_DISPLAY_URL_PARAM = "explorer_display";
 const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
 const EXPLORER_HISTORY_PERIODS_URL_PARAM = "explorer_history_periods";
 const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
@@ -129,7 +129,6 @@ const EXPLORER_EVOLUTION_OPTIONS = [
 ];
 const EXPLORER_DISPLAY_OPTIONS = [
   { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" },
-  { value: "focus", label: "Date focus", description: "Selected date with absolute and relative changes" },
   { value: "xy", label: "XY view", description: "Y rows × X columns at the selected date, for every template" }
 ];
 // "template" used to be a fourth browsable axis (clicking the template tab
@@ -140,6 +139,7 @@ const EXPLORER_DISPLAY_OPTIONS = [
 const EXPLORER_AXIS_VALUES = new Set(["x", "y", "z"]);
 // Captured synchronously at module load, before any render can mutate the URL,
 // so the originally bookmarked/refreshed selection is never lost to a premature render.
+let explorerGlobalDisplayMode = getUrlDisplayModeParam();
 const pendingUrlAxis = getUrlAxisParam();
 const pendingUrlRow = getUrlRowParam();
 const pendingUrlColumn = getUrlColumnParam();
@@ -459,6 +459,7 @@ function applyPendingUrlExplorerSelection(context) {
 function updateUrlExplorerSelectionParams() {
   const context = getActiveExplorerContext();
   const url = createUrlState();
+  url.searchParams.set(EXPLORER_DISPLAY_URL_PARAM, explorerGlobalDisplayMode);
   setOrDeleteUrlParam(url, AXIS_URL_PARAM, context.activeAxis);
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
@@ -484,6 +485,10 @@ function setOrDeleteUrlParam(url, key, value) {
   } else {
     url.searchParams.delete(key);
   }
+}
+
+function getUrlDisplayModeParam() {
+  return readUrlStateParams().get(EXPLORER_DISPLAY_URL_PARAM) === "xy" ? "xy" : "temporal";
 }
 
 function getUrlAxisParam() {
@@ -3620,6 +3625,7 @@ function renderExplorerDisplayModePanel() {
     row.addEventListener("click", () => {
       if (explorerGlobalDisplayMode === option.value) return;
       explorerGlobalDisplayMode = option.value;
+      updateUrlExplorerSelectionParams();
       context.selectedCellColumnIndex = 0;
       saveExplorerScrollPosition();
       if (getLatestState()) rerenderApp(getLatestState());
