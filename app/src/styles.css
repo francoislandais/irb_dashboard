@@ -2618,7 +2618,6 @@ table {
 }
 
 .explorer-display-mode-row,
-.explorer-evolution-frequency-row,
 .explorer-benchmark-mode-row {
   align-content: center;
   align-items: start;
@@ -2628,7 +2627,6 @@ table {
 }
 
 .explorer-display-mode-row > span,
-.explorer-evolution-frequency-row > span,
 .explorer-benchmark-mode-row > span {
   display: block;
   min-width: 0;
@@ -2636,7 +2634,6 @@ table {
 }
 
 .explorer-display-mode-row > span:last-child,
-.explorer-evolution-frequency-row > span:last-child,
 .explorer-benchmark-mode-row > span:last-child {
   color: #66736d;
   font-size: 0.7rem;
@@ -2645,7 +2642,6 @@ table {
 }
 
 .explorer-display-mode-row.is-active > span:last-child,
-.explorer-evolution-frequency-row.is-active > span:last-child,
 .explorer-benchmark-mode-row.is-active > span:last-child {
   color: color-mix(in srgb, var(--primary-dark) 72%, #ffffff);
 }
@@ -2680,6 +2676,28 @@ table {
   color: #66736d;
   font-size: 0.68rem;
   line-height: 1.35;
+}
+
+.explorer-evolution-frequency-control {
+  margin-top: 13px;
+}
+
+.explorer-evolution-frequency-ticks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  color: #66736d;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.explorer-evolution-frequency-ticks span:first-child {
+  text-align: left;
+}
+
+.explorer-evolution-frequency-ticks span:last-child {
+  text-align: right;
 }
 
 .explorer-geography-panel {

@@ -130,8 +130,8 @@ const EXPLORER_EVOLUTION_OPTIONS = [
   { value: "annual", label: "Annual", months: 12, description: "Every twelve months" }
 ];
 const EXPLORER_DISPLAY_OPTIONS = [
-  { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" },
-  { value: "xy", label: "XY view", description: "Y rows × X columns at the selected date, for every template" }
+  { value: "xy", label: "XY view", description: "Y rows × X columns at the selected date, for every template" },
+  { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" }
 ];
 // "template" used to be a fourth browsable axis (clicking the template tab
 // turned the main table into a list of templates); that mode is retired in
@@ -495,7 +495,7 @@ function setOrDeleteUrlParam(url, key, value) {
 }
 
 function getUrlDisplayModeParam() {
-  return readUrlStateParams().get(EXPLORER_DISPLAY_URL_PARAM) === "xy" ? "xy" : "temporal";
+  return readUrlStateParams().get(EXPLORER_DISPLAY_URL_PARAM) === "temporal" ? "temporal" : "xy";
 }
 
 function getUrlAxisParam() {
@@ -2565,28 +2565,6 @@ function renderExplorerActiveFilters(state) {
     }
   });
   const geographyChip = createExplorerGeographyFilterChip();
-  const evolutionOption = getActiveExplorerEvolutionOption();
-  const evolutionChip = document.createElement("span");
-  evolutionChip.className = "cost-of-risk-filter-chip explorer-filter-chip-evolution";
-  evolutionChip.classList.toggle("is-open", explorerContextTopic === "evolution-frequency");
-  const evolutionToggle = document.createElement("button");
-  evolutionToggle.type = "button";
-  evolutionToggle.className = "cost-of-risk-filter-chip-toggle";
-  evolutionToggle.setAttribute("aria-expanded", String(explorerContextTopic === "evolution-frequency"));
-  evolutionToggle.setAttribute("aria-controls", "explorer-context-detail");
-  evolutionToggle.setAttribute("aria-label", "Change evolution frequency");
-  const evolutionLabel = document.createElement("span");
-  evolutionLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  evolutionLabel.textContent = evolutionOption.label;
-  evolutionToggle.append(evolutionLabel);
-  evolutionToggle.addEventListener("click", () => {
-    explorerContextTopic = "evolution-frequency";
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
-  });
-  evolutionChip.append(evolutionToggle);
-
   const displayOption = getActiveExplorerDisplayOption();
   const displayChip = document.createElement("span");
   displayChip.className = "cost-of-risk-filter-chip explorer-filter-chip-display";
@@ -2664,7 +2642,6 @@ function renderExplorerActiveFilters(state) {
   ];
   if (geographyChip) chips.push(geographyChip);
   chips.push(
-    evolutionChip,
     displayChip,
     benchmarkChip,
     descriptionChip
@@ -3037,11 +3014,6 @@ function renderExplorerContextPanel(state) {
     return;
   }
 
-  if (explorerContextTopic === "evolution-frequency") {
-    renderExplorerEvolutionFrequencyPanel();
-    return;
-  }
-
   if (explorerContextTopic === "display-mode") {
     renderExplorerDisplayModePanel();
     return;
@@ -3351,44 +3323,6 @@ function scheduleExplorerReferenceColumnCentering() {
   });
 }
 
-function renderExplorerEvolutionFrequencyPanel() {
-  const article = document.createElement("article");
-  article.className = "explorer-context-article explorer-evolution-frequency-panel";
-
-  const title = document.createElement("h2");
-  title.className = "explorer-context-title";
-  title.textContent = "Evolution frequency";
-  const list = document.createElement("div");
-  list.className = "explorer-jst-selection-list explorer-evolution-frequency-list";
-  list.setAttribute("role", "listbox");
-  list.setAttribute("aria-label", "Evolution frequency");
-
-  EXPLORER_EVOLUTION_OPTIONS.forEach((option) => {
-    const isActive = option.value === explorerGlobalEvolutionFrequency;
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = "explorer-jst-selection-row explorer-evolution-frequency-row";
-    row.classList.toggle("is-active", isActive);
-    row.setAttribute("role", "option");
-    row.setAttribute("aria-selected", String(isActive));
-    const label = document.createElement("span");
-    label.textContent = option.label;
-    const detail = document.createElement("span");
-    detail.textContent = option.description;
-    row.append(label, detail);
-    row.addEventListener("click", () => {
-      if (explorerGlobalEvolutionFrequency === option.value) return;
-      explorerGlobalEvolutionFrequency = option.value;
-      saveExplorerScrollPosition();
-      if (getLatestState()) rerenderApp(getLatestState());
-    });
-    list.append(row);
-  });
-
-  article.append(title, list);
-  replaceExplorerContextDetail(article);
-}
-
 function renderExplorerGeographyPanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-geography-panel";
@@ -3658,7 +3592,7 @@ function renderExplorerDisplayModePanel() {
 
   article.append(title, list);
   if (!isExplorerXYView()) {
-    article.append(createExplorerHistoryDepthControl());
+    article.append(createExplorerHistoryDepthControl(), createExplorerEvolutionFrequencyControl());
   }
   replaceExplorerContextDetail(article);
 }
@@ -3727,6 +3661,51 @@ function createExplorerHistoryDepthControl() {
   const hint = document.createElement("p");
   hint.textContent = "Limits the table only. The benchmark always uses the full available history.";
   section.append(heading, input, hint);
+  return section;
+}
+
+function createExplorerEvolutionFrequencyControl() {
+  const section = document.createElement("section");
+  section.className = "explorer-history-depth-control explorer-evolution-frequency-control";
+  const heading = document.createElement("div");
+  heading.className = "explorer-history-depth-heading";
+  const label = document.createElement("span");
+  label.textContent = "Evolution frequency";
+  const value = document.createElement("span");
+  value.className = "explorer-history-depth-value";
+  const activeIndex = Math.max(0, EXPLORER_EVOLUTION_OPTIONS.findIndex((option) => (
+    option.value === explorerGlobalEvolutionFrequency
+  )));
+  const updateValue = (index) => {
+    value.textContent = EXPLORER_EVOLUTION_OPTIONS[index]?.label ?? EXPLORER_EVOLUTION_OPTIONS[0].label;
+  };
+  updateValue(activeIndex);
+  heading.append(label, value);
+
+  const input = document.createElement("input");
+  input.type = "range";
+  input.min = "0";
+  input.max = String(EXPLORER_EVOLUTION_OPTIONS.length - 1);
+  input.step = "1";
+  input.value = String(activeIndex);
+  input.setAttribute("aria-label", "Evolution frequency");
+  input.addEventListener("input", () => updateValue(Number(input.value)));
+  input.addEventListener("change", () => {
+    const option = EXPLORER_EVOLUTION_OPTIONS[Number(input.value)];
+    if (!option || explorerGlobalEvolutionFrequency === option.value) return;
+    explorerGlobalEvolutionFrequency = option.value;
+    saveExplorerScrollPosition();
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
+
+  const ticks = document.createElement("div");
+  ticks.className = "explorer-evolution-frequency-ticks";
+  EXPLORER_EVOLUTION_OPTIONS.forEach((option) => {
+    const tick = document.createElement("span");
+    tick.textContent = option.label;
+    ticks.append(tick);
+  });
+  section.append(heading, input, ticks);
   return section;
 }
 

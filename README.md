@@ -159,6 +159,12 @@ Vérification sans navigateur : `node scripts/testExplorerSelectionHistory.mjs`.
 Dans Explorer, le choix **Table display → XY view** affiche une matrice à la
 date de référence sélectionnée, pour la JST et le Tab/Z courants :
 
+**XY view** est le choix proposé en premier et le mode utilisé par défaut en
+l’absence de paramètre dans l’URL. **Temporal** reste restauré lorsqu’il est
+explicitement présent dans l’URL. En mode Temporal, **History depth** et
+**Evolution frequency** sont réunis dans le panneau **Table display** sous
+forme de curseurs. Le choix de fréquence reste global entre les templates.
+
 Y est toujours en lignes et X en colonnes. **ROW** et **COLUMN** mémorisent
 l’axe choisi sans transposer la matrice ; cet axe est utilisé au retour en
 Temporal. **TAB** affiche Z en temporel tout en conservant le mode XY, qui
