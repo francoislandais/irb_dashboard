@@ -4040,3 +4040,41 @@ table {
   opacity: 0.3;
   cursor: default;
 }
+
+/* XY column widths are fixed by colgroup, including headers spanning groups. */
+.metric-table.is-xy-view thead th:not(.description-column):not(.code-column),
+.metric-table.is-xy-view td[data-explorer-cell-column] {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+
+.metric-table.is-xy-view thead th:not(.description-column):not(.code-column) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #dce4df;
+}
+
+.metric-table.is-xy-view .explorer-xy-group {
+  background: #edf2ef;
+}
+
+.metric-table.is-xy-view .explorer-xy-leaf {
+  background: #ffffff;
+}
+
+.explorer-xy-header-code {
+  display: block;
+  margin-top: 4px;
+  color: #74817a;
+  font-size: 0.68rem;
+}
+
+.metric-table.is-xy-view thead th.is-selected-date-header {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+}

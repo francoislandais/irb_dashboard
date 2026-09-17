@@ -1,3 +1,4 @@
+import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
@@ -60,6 +61,7 @@ let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
 const explorerTemplateContexts = new Map();
 const explorerSelectionHistories = new Map();
+let explorerXYHeaderObserver = null;
 let explorerHistoryReplay = false;
 let explorerHistoryRestoredSelection = null;
 
@@ -126,7 +128,8 @@ const EXPLORER_EVOLUTION_OPTIONS = [
 ];
 const EXPLORER_DISPLAY_OPTIONS = [
   { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" },
-  { value: "focus", label: "Date focus", description: "Selected date with absolute and relative changes" }
+  { value: "focus", label: "Date focus", description: "Selected date with absolute and relative changes" },
+  { value: "xy", label: "XY view", description: "Row × Column at the selected date; Temporal for Tab" }
 ];
 // "template" used to be a fourth browsable axis (clicking the template tab
 // turned the main table into a list of templates); that mode is retired in
@@ -294,7 +297,7 @@ export function wireExplorerUi(actions, rerender) {
       const cell = event.target.closest("td[data-explorer-cell-column]");
       const cellColumnIndex = cell ? Number(cell.dataset.explorerCellColumn) : 0;
       const cellDate = cell?.dataset.explorerCellDate ?? "";
-      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex, cellDate });
+      selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true, cellColumnIndex, cellDate, xyColumnCode: cell?.dataset.explorerXyColumnCode });
     }
   });
   elements.explorerTable.addEventListener("contextmenu", (event) => {
@@ -839,6 +842,11 @@ function filterExplorerSeriesByAdvancedSearch(series, state, tableId, activeAxis
   const templateResult = results.byTemplate.get(tableId);
   if (!results.hasQuery) return series;
   if (!templateResult) return { ...series, rows: [], status: "No metadata matches this search." };
+  if (series.xy && templateResult.restrictedAxis === series.columnAxis) {
+    const indices = series.dateColumns.flatMap((column, index) => templateResult.matchesByAxis[series.columnAxis].has(column.code) ? [index] : []);
+    return { ...series, dateColumns: indices.map((index) => series.dateColumns[index]),
+      rows: series.rows.map((row) => ({ ...row, values: indices.map((index) => row.values[index]) })) };
+  }
   if (templateResult.restrictedAxis !== activeAxis) return series;
   const matchingCodes = templateResult.matchesByAxis[activeAxis];
   const rows = series.rows.filter((row) => matchingCodes.has(normalizeExplorerSeriesRow(row).code));
@@ -1208,7 +1216,13 @@ export function renderExplorer(state) {
     kriOnlyCodes = new Set(matchingCodes.slice(pageStart, pageStart + EXPLORER_KRI_PAGE_SIZE));
   }
 
-  const tableSeries = buildExplorerAxisSeries(state, {
+  const tableSeries = isExplorerXYView()
+    ? buildExplorerXYSeries(state, {
+      axis: context.activeAxis, tableId: template?.tableId, yConfigTableId: template?.id,
+      selectedZCode: context.selectedZCode, referenceLabel: getSelectedExplorerReference(state)?.label,
+      onlyCodes: kriOnlyCodes
+    })
+    : buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
     onlyCodes: kriOnlyCodes,
     selectedXCode: context.selectedXCode,
@@ -1220,8 +1234,9 @@ export function renderExplorer(state) {
     yConfigTableId: template?.id
   });
   const searchedTableSeries = filterExplorerSeriesByAdvancedSearch(tableSeries, state, template?.id, context.activeAxis);
-  const geographicTableSeries = applyExplorerGeographyPresentation(searchedTableSeries, state);
+  const geographicTableSeries = searchedTableSeries.xy ? searchedTableSeries : applyExplorerGeographyPresentation(searchedTableSeries, state);
   const displayedTableSeries = buildExplorerEvolutionSeries(geographicTableSeries, state);
+  explorerXYHeaderObserver?.disconnect();
   elements.explorerTable.replaceChildren();
   if (elements.explorerExcelExport) {
     elements.explorerExcelExport.disabled = displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0;
@@ -1240,6 +1255,7 @@ export function renderExplorer(state) {
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
   selectFirstExplorerSearchResult(state);
+  if (displayedTableSeries.xy) refreshExplorerSelectionChrome(state, { selectionOnly: true });
   recordExplorerSelectionHistory(state);
   // Now that the fresh series is cached, redo the selection-dependent parts
   // of the context panel the early chrome refresh rendered with the
@@ -1312,6 +1328,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
   const template = getActiveExplorerTemplate();
   const selectedReference = getSelectedExplorerReference(state);
   const headerCells = [...table.tHead.querySelectorAll("th[data-explorer-export-column]")];
+  if (lastRenderedExplorerTableSeries?.xy) headerCells.sort((a, b) => Number(a.dataset.explorerColumnOrder) - Number(b.dataset.explorerColumnOrder));
   const columns = headerCells.map((cell, index) => ({
     label: index === 0 ? displayedDimension : cell.dataset.explorerExportLabel || cell.textContent.trim(),
     width: index === 0 ? 54 : index === 1 ? 13 : 20
@@ -1335,7 +1352,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
     { label: "Table display", value: getActiveExplorerDisplayOption().label },
     { label: "Evolution frequency", value: getActiveExplorerEvolutionOption().label }
   ];
-  if (getActiveExplorerContext().displayMode === "focus" && selectedReference) {
+  if ((getActiveExplorerContext().displayMode === "focus" || isExplorerXYView()) && selectedReference) {
     metadata.push({ label: "Reference date", value: formatReferenceQuarterLabel(selectedReference.label) });
   }
 
@@ -1530,14 +1547,39 @@ function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
   }));
 }
 
+function isExplorerXYView() {
+  const context = getActiveExplorerContext();
+  return context.displayMode === "xy" && ["x", "y"].includes(context.activeAxis);
+}
+
+function syncExplorerXYColumnSelection(series = lastRenderedExplorerTableSeries) {
+  if (!series?.xy) return;
+  const context = getActiveExplorerContext();
+  const code = series.columnAxis === "x" ? context.selectedXCode : context.selectedYCode;
+  let index = series.dateColumns.findIndex((column) => column.code === code);
+  if (index < 0 && series.dateColumns.length && !isExplorerHistorySelectionActive()) {
+    index = 0;
+    context[series.columnAxis === "x" ? "selectedXCode" : "selectedYCode"] = series.dateColumns[0].code;
+  }
+  context.selectedCellColumnIndex = index;
+  if (!context.selectedReferenceLabel && series.reference) context.selectedReferenceLabel = series.reference.label;
+}
+
 function renderExplorerTable(series, selectedUnit) {
   lastRenderedExplorerTableSeries = series;
   lastRenderedExplorerSelectedUnit = selectedUnit;
   clearExplorerCellRangeSelection();
+  const isXY = Boolean(series.xy);
+  explorerXYHeaderObserver?.disconnect();
+  explorerXYHeaderObserver = null;
+  elements.explorerTable.classList.toggle("is-xy-view", isXY);
+  elements.explorerTable.style.width = isXY ? `${426 + series.dateColumns.length * 150}px` : "";
+  elements.explorerTable.setAttribute("aria-label", isXY ? "XY matrix at selected reference date" : "Explorer time series");
+  syncExplorerXYColumnSelection(series);
   const activeAxis = getActiveExplorerAxis();
   const isDateFocus = getActiveExplorerContext().displayMode === "focus";
   const focusSelection = isDateFocus ? getExplorerDateFocusSelection(series) : null;
-  const orderedDates = isDateFocus
+  const orderedDates = isXY ? series.dateColumns : isDateFocus
     ? [
         { ...focusSelection.currentColumn, kind: "current" },
         { label: "Absolute change", kind: "absolute-change" },
@@ -1546,11 +1588,11 @@ function renderExplorerTable(series, selectedUnit) {
     : [...series.dateColumns].reverse();
   const tableRows = series.rows.map(normalizeExplorerSeriesRow);
   const displayRows = buildExplorerDisplayRows(tableRows);
-  const contributionBase = getExplorerContributionBase(displayRows, activeAxis);
-  const propagatedContribution = getExplorerPropagatedContribution(activeAxis);
+  const contributionBase = isXY ? null : getExplorerContributionBase(displayRows, activeAxis);
+  const propagatedContribution = isXY ? null : getExplorerPropagatedContribution(activeAxis);
   const parentPaths = getParentPaths(tableRows);
   const nodePaths = getExplicitPaths(displayRows);
-  const axisImpossibleByPath = getExplorerAxisImpossiblePaths(displayRows, activeAxis, parentPaths);
+  const axisImpossibleByPath = isXY ? new Map() : getExplorerAxisImpossiblePaths(displayRows, activeAxis, parentPaths);
   const dateFocusPrimaryCells = [];
   const thead = document.createElement("thead");
   const yearHeaderRow = document.createElement("tr");
@@ -1593,7 +1635,7 @@ function renderExplorerTable(series, selectedUnit) {
   if (!isDateFocus) codeHeader.rowSpan = 2;
   headerRow.append(codeHeader);
 
-  if (!isDateFocus) {
+  if (!isDateFocus && !isXY) {
     let yearColumnOffset = 0;
     buildExplorerYearGroups(orderedDates).forEach(({ count, year }) => {
       const th = document.createElement("th");
@@ -1609,7 +1651,7 @@ function renderExplorerTable(series, selectedUnit) {
     yearHeaderRow.prepend(descriptionHeader, codeHeader);
   }
 
-  orderedDates.forEach((dateColumn, index) => {
+  if (!isXY) orderedDates.forEach((dateColumn, index) => {
     const th = document.createElement("th");
     th.scope = "col";
     th.className = index === 0 ? "latest-column" : "";
@@ -1670,7 +1712,7 @@ function renderExplorerTable(series, selectedUnit) {
     valueRow.append(code);
 
     const isContributionFocus = isDateFocus && isContributionChild;
-    const reversedValues = isContributionFocus
+    const reversedValues = isXY ? seriesRow.values : isContributionFocus
       ? buildExplorerDateFocusContributionValues(seriesRow.values, contributionValues, focusSelection)
       : isDateFocus
         ? buildExplorerDateFocusValues(seriesRow.values, focusSelection)
@@ -1689,7 +1731,8 @@ function renderExplorerTable(series, selectedUnit) {
       if (isDateFocus && index === 1) td.classList.add("variation-column-start");
       const columnKind = orderedDates[index]?.kind ?? "current";
       td.dataset.explorerExportKind = columnKind;
-      td.dataset.explorerExportFormat = seriesRow.format ?? "";
+      const valueFormat = isXY ? point.format ?? "" : seriesRow.format ?? "";
+      td.dataset.explorerExportFormat = valueFormat;
       const contributionValue = isContributionFocus
         ? point.value
         : isContributionChild
@@ -1711,14 +1754,15 @@ function renderExplorerTable(series, selectedUnit) {
                 contributionValue,
                 pointValue: point.value,
                 selectedUnit,
-                valueFormat: seriesRow.format
+                valueFormat
               });
       }
       if (!seriesRow.isVirtual) {
         td.dataset.explorerCellRow = String(rowIndex);
         td.dataset.explorerCellColumn = String(index);
-        td.dataset.explorerCellKind = contributionValue !== null ? "ratio" : isUnitFormat(seriesRow.format) ? "unit" : "amount";
-        td.dataset.explorerCellDate = columnKind === "current" ? orderedDates[index]?.label ?? "" : "";
+        td.dataset.explorerCellKind = contributionValue !== null ? "ratio" : isUnitFormat(valueFormat) ? "unit" : "amount";
+        if (isXY) td.dataset.explorerXyColumnCode = orderedDates[index].code;
+        td.dataset.explorerCellDate = isXY ? series.reference.label : columnKind === "current" ? orderedDates[index]?.label ?? "" : "";
         td.dataset.explorerCellLabel = seriesRow.description || seriesRow.code || "";
       }
       if (!seriesRow.isVirtual && Number.isFinite(displayValue)) {
@@ -1739,10 +1783,74 @@ function renderExplorerTable(series, selectedUnit) {
 
   applyExplorerDateFocusValueIntensity(dateFocusPrimaryCells);
 
-  thead.append(...(isDateFocus ? [headerRow] : [yearHeaderRow, headerRow]));
+  if (isXY) {
+    renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader);
+  } else {
+    thead.append(...(isDateFocus ? [headerRow] : [yearHeaderRow, headerRow]));
+  }
+  if (isXY) {
+    const colgroup = document.createElement("colgroup");
+    [350, 76, ...series.dateColumns.map(() => 150)].forEach((width) => {
+      const col = document.createElement("col");
+      col.style.width = `${width}px`;
+      colgroup.append(col);
+    });
+    elements.explorerTable.append(colgroup);
+  }
   elements.explorerTable.append(thead, tbody);
+  if (isXY) {
+    const updateOffsets = () => {
+      let top = 0;
+      [...thead.rows].forEach((row) => {
+        [...row.cells].forEach((cell) => { cell.style.top = `${top}px`; });
+        top += row.getBoundingClientRect().height;
+      });
+    };
+    updateOffsets();
+    if (typeof ResizeObserver !== "undefined") {
+      explorerXYHeaderObserver = new ResizeObserver(() => {
+        updateOffsets();
+        scheduleExplorerStickyParentsUpdate();
+      });
+      explorerXYHeaderObserver.observe(thead);
+    }
+  }
   applyExplorerTreeState(parentPaths, nodePaths);
   renderExplorerKriPaginationBar(isKriRowAxis);
+}
+
+function renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader) {
+  const levels = buildExplorerXYHeaders(series.dateColumns);
+  descriptionHeader.rowSpan = codeHeader.rowSpan = levels.length;
+  descriptionHeader.dataset.explorerColumnOrder = "-2";
+  codeHeader.dataset.explorerColumnOrder = "-1";
+  levels.forEach((cells, level) => {
+    const row = document.createElement("tr");
+    row.className = "explorer-xy-header-row";
+    if (level === 0) row.append(descriptionHeader, codeHeader);
+    cells.forEach((header) => {
+      const cell = document.createElement("th");
+      cell.scope = header.leaf ? "col" : "colgroup";
+      cell.colSpan = header.colSpan;
+      cell.rowSpan = header.rowSpan;
+      cell.className = header.leaf ? "explorer-xy-leaf" : "explorer-xy-group";
+      const label = document.createElement("span");
+      label.textContent = header.label;
+      cell.append(label);
+      if (header.leaf) {
+        const code = document.createElement("span");
+        code.className = "explorer-xy-header-code";
+        code.textContent = header.code;
+        cell.append(code);
+        cell.dataset.explorerDateColumn = String(header.columnIndex);
+        cell.dataset.explorerColumnOrder = String(header.columnIndex);
+        cell.dataset.explorerExportColumn = "true";
+        cell.dataset.explorerExportLabel = `${series.dateColumns[header.columnIndex].label} (${header.code})`;
+      }
+      row.append(cell);
+    });
+    thead.append(row);
+  });
 }
 
 // A separate element outside .metric-table-wrap entirely (see index.html
@@ -2277,8 +2385,8 @@ function getExplorerCellQueryPoint(row, cell) {
 
   return {
     referenceDateIso: reference ? reference.name.replace(/^ref_/, "").replaceAll("_", "-") : "",
-    selectedXCode: activeAxis === "x" ? pointCode : context.selectedXCode,
-    selectedYCode: activeAxis === "y" ? pointCode : context.selectedYCode,
+    selectedXCode: activeAxis === "x" ? pointCode : cell?.dataset.explorerXyColumnCode ?? context.selectedXCode,
+    selectedYCode: activeAxis === "y" ? pointCode : cell?.dataset.explorerXyColumnCode ?? context.selectedYCode,
     selectedZCode: activeAxis === "z" ? pointCode : context.selectedZCode,
     tableId: template?.tableId ?? EXPLORER_TARGET.tableId
   };
@@ -2625,7 +2733,7 @@ function getSelectedExplorerReference(state = getLatestState()) {
     const selectedReference = references.find((reference) => reference.label === selectedLabel);
     if (selectedReference) return selectedReference;
   }
-  const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
+  const selectedColumnIndex = isExplorerXYView() ? 0 : Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
   return references[references.length - 1 - selectedColumnIndex] ?? references.at(-1) ?? null;
 }
 
@@ -2656,7 +2764,8 @@ function getExplorerEvolutionStep(dateColumns) {
 }
 
 function getActiveExplorerDisplayOption() {
-  const displayMode = getActiveExplorerContext().displayMode;
+  const context = getActiveExplorerContext();
+  const displayMode = context.displayMode === "xy" && !isExplorerXYView() ? "temporal" : context.displayMode;
   return EXPLORER_DISPLAY_OPTIONS.find((option) => option.value === displayMode) ?? EXPLORER_DISPLAY_OPTIONS[0];
 }
 
@@ -2691,6 +2800,7 @@ function computeExplorerVisibleDateIndexes(dateColumns) {
 // has one, to avoid working it out twice.
 function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIndexes = null) {
   const context = getActiveExplorerContext();
+  if (isExplorerXYView()) { syncExplorerXYColumnSelection(); return; }
   if (!dateColumns.length) return;
 
   const selectedReference = getSelectedExplorerReference(state);
@@ -2710,6 +2820,7 @@ function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIn
 }
 
 function buildExplorerEvolutionSeries(series, state) {
+  if (series.xy) return series;
   if (!series?.dateColumns?.length) return series;
   const context = getActiveExplorerContext();
   if (context.displayMode === "focus") {
@@ -3496,7 +3607,7 @@ function renderExplorerDisplayModePanel() {
   });
 
   article.append(title, list);
-  if (context.displayMode === "temporal") {
+  if (context.displayMode === "temporal" || (context.displayMode === "xy" && !isExplorerXYView())) {
     article.append(createExplorerHistoryDepthControl());
   }
   replaceExplorerContextDetail(article);
@@ -3893,6 +4004,13 @@ function getExplorerSelectedPointMetrics() {
   const rows = lastRenderedExplorerTableSeries.rows.map(normalizeExplorerSeriesRow);
   const row = rows.find((item) => item.code === selectedCode);
   const selectedReference = getSelectedExplorerReference(state);
+  if (lastRenderedExplorerTableSeries.xy) {
+    const oppositeCode = getActiveExplorerContext()[lastRenderedExplorerTableSeries.columnAxis === "x" ? "selectedXCode" : "selectedYCode"];
+    const index = lastRenderedExplorerTableSeries.dateColumns.findIndex((column) => column.code === oppositeCode);
+    const point = row?.values[index];
+    return { currentValue: point?.value ?? null, format: point?.format || "", changes: [],
+      parentLabel: "", parentShare: null, parentValue: null, selectedUnit: state.selectedUnit };
+  }
   const currentIndex = lastRenderedExplorerTableSeries.dateColumns.findIndex((column) => column.label === selectedReference?.label);
   if (!row || currentIndex < 0) return null;
 
@@ -4953,7 +5071,7 @@ function getExplicitPathsFromRenderedRows(rows) {
 }
 
 function selectExplorerRow(pointCode, options = {}) {
-  const { shouldFocus = false, cellColumnIndex, cellDate = "" } = options;
+  const { shouldFocus = false, cellColumnIndex, cellDate = "", xyColumnCode } = options;
   hasInteractedWithExplorerSelection = true;
   const context = getActiveExplorerContext();
   const activeAxis = context.activeAxis;
@@ -4976,6 +5094,11 @@ function selectExplorerRow(pointCode, options = {}) {
   } else {
     context.selectedXCode = pointCode || context.selectedXCode;
   }
+  if (isExplorerXYView() && xyColumnCode !== undefined) {
+    if (activeAxis === "y") context.selectedXCode = xyColumnCode;
+    else context.selectedYCode = xyColumnCode;
+  }
+  syncExplorerXYColumnSelection();
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
 
   // A genuine click on a KRI row is the one case where the formula panel

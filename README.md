@@ -153,3 +153,22 @@ sélection après un retour arrière remplace les étapes suivantes. Si le stock
 local est indisponible, l’historique reste utilisable pendant la session.
 
 Vérification sans navigateur : `node scripts/testExplorerSelectionHistory.mjs`.
+
+## Vue XY
+
+Dans Explorer, le choix **Table display → XY view** affiche une matrice à la
+date de référence sélectionnée, pour la JST et le Tab/Z courants :
+
+- axe **ROW** : Y en lignes, X en colonnes ;
+- axe **COLUMN** : X en lignes, Y en colonnes ;
+- axe **TAB** : retour à l’affichage Temporal, sans perdre le choix XY.
+
+Les en-têtes suivent la hiérarchie des métadonnées, avec fusions horizontales
+pour les groupes et verticales pour les branches moins profondes. Un clic sur
+une cellule sélectionne ses coordonnées X/Y pour les détails, le benchmark et
+l’historique. Les données absentes sont affichées par un tiret ; les vrais zéros
+restent à zéro. Les templates sans les deux dimensions X et Y affichent une
+indication d’indisponibilité. L’export Excel conserve les libellés complets et
+les codes des colonnes.
+
+Vérification sans navigateur : `node scripts/testExplorerXY.mjs`.
