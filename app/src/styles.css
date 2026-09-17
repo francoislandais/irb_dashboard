@@ -4098,6 +4098,8 @@ table {
 }
 
 .explorer-query-dialog-sql {
+  background: #ffffff;
+  color: #000000;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.65;
@@ -4121,15 +4123,15 @@ table {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid #52615a;
+  border: 1px solid #d8dfda;
   border-radius: 6px;
-  background: #25352d;
-  color: #e8f0eb;
+  background: #ffffff;
+  color: #000000;
   cursor: pointer;
 }
 
 .explorer-query-copy-icon:hover:not(:disabled) {
-  background: #384e42;
+  background: #f2f4f3;
 }
 
 .explorer-query-copy-icon:focus-visible {

@@ -29,9 +29,9 @@ function createDialog(buildQuery) {
   const headerText = document.createElement("div");
   const eyebrow = document.createElement("span");
   eyebrow.className = "audit-trail-eyebrow";
-  eyebrow.textContent = "Requête Hive";
+  eyebrow.textContent = "Hive query";
   const title = document.createElement("strong");
-  title.textContent = "Requête générée";
+  title.textContent = "Generated query";
   headerText.append(eyebrow, title);
 
   const closeButton = document.createElement("button");
@@ -50,7 +50,7 @@ function createDialog(buildQuery) {
   const dateFilterCheckbox = document.createElement("input");
   dateFilterCheckbox.type = "checkbox";
   dateFilterCheckbox.checked = true;
-  dateFilterLabel.append(dateFilterCheckbox, document.createTextNode(" Filtrer sur les dates de référence sélectionnées"));
+  dateFilterLabel.append(dateFilterCheckbox, document.createTextNode(" Filter by selected reference dates"));
 
   const pre = document.createElement("pre");
   pre.className = "dataset-dialog-query explorer-query-dialog-sql";
@@ -64,7 +64,7 @@ function createDialog(buildQuery) {
     copyButton.title = label;
     copyButton.setAttribute("aria-label", label);
   };
-  setCopyStatus("Copier la requête dans le presse-papiers");
+  setCopyStatus("Copy query to clipboard");
   header.append(closeButton);
   const queryArea = document.createElement("div");
   queryArea.className = "explorer-query-code-area";
@@ -72,7 +72,7 @@ function createDialog(buildQuery) {
 
   const renderQuery = () => {
     const sql = buildQuery({ includeDateFilter: dateFilterCheckbox.checked });
-    pre.textContent = sql || "Aucun point de données n'a encore été ajouté à cette requête.";
+    pre.textContent = sql || "No data points have been added to this query yet.";
     copyButton.disabled = !sql;
   };
 
@@ -80,11 +80,11 @@ function createDialog(buildQuery) {
   copyButton.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(pre.textContent);
-      setCopyStatus("Requête copiée", '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>');
+      setCopyStatus("Query copied", '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>');
     } catch {
-      setCopyStatus("Copie indisponible", "!");
+      setCopyStatus("Copy unavailable", "!");
     }
-    window.setTimeout(() => setCopyStatus("Copier la requête dans le presse-papiers"), 1600);
+    window.setTimeout(() => setCopyStatus("Copy query to clipboard"), 1600);
   });
 
   renderQuery();
