@@ -90,7 +90,7 @@ const sandbox={
 };
 for(const name of ["clearExplorerCellRangeSelection","expandDefaultExplorerPaths","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar"]) sandbox[name]=()=>{};
 const ctx=vm.createContext(sandbox);
-vm.runInContext('let explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
+vm.runInContext('let explorerGlobalReferenceLabel="",explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
 // Real template contexts share the display mode and preserve their normal axis.
 vm.runInContext(source.slice(source.indexOf("function createExplorerTemplateContext()"),source.indexOf("function getActiveExplorerTemplate(")),ctx);
 const first=vm.runInContext('createExplorerTemplateContext()',ctx);

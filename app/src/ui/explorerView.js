@@ -81,6 +81,7 @@ const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
 const EXPLORER_HISTORY_PERIODS_URL_PARAM = "explorer_history_periods";
 const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
 const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
+const EXPLORER_REFERENCE_URL_PARAM = "explorer_reference_date";
 const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
 // 8 prior periods at quarterly cadence is roughly the old default (current
 // year + 2 prior years); other frequencies now get the same period count,
@@ -148,6 +149,7 @@ const pendingUrlTab = getUrlTabParam();
 const pendingUrlHistoryPeriods = getUrlHistoryPeriodsParam();
 const pendingUrlAnchorReference = readUrlStateParams().get(EXPLORER_ANCHOR_REFERENCE_URL_PARAM) ?? "";
 let explorerAnchorReferenceLabel = pendingUrlAnchorReference;
+let explorerGlobalReferenceLabel = readUrlStateParams().get(EXPLORER_REFERENCE_URL_PARAM) || pendingUrlAnchorReference;
 // Evolution frequency and history depth are shared across every template
 // (not stored per-template context like the axis selections) - switching
 // templates keeps whatever the user picked instead of resetting it.
@@ -414,7 +416,8 @@ function createExplorerTemplateContext() {
     // within the selected row — see applyExplorerSelection. Defaults to the
     // first visible column until the user clicks a specific cell.
     selectedCellColumnIndex: 0,
-    selectedReferenceLabel: ""
+    get selectedReferenceLabel() { return explorerGlobalReferenceLabel; },
+    set selectedReferenceLabel(value) { explorerGlobalReferenceLabel = value; }
   };
 }
 
@@ -461,6 +464,8 @@ function applyPendingUrlExplorerSelection(context) {
 function updateUrlExplorerSelectionParams() {
   const context = getActiveExplorerContext();
   const url = createUrlState();
+  getSelectedExplorerReference();
+  setOrDeleteUrlParam(url, EXPLORER_REFERENCE_URL_PARAM, explorerGlobalReferenceLabel);
   url.searchParams.set(EXPLORER_DISPLAY_URL_PARAM, explorerGlobalDisplayMode);
   setOrDeleteUrlParam(url, AXIS_URL_PARAM, context.selectedAxis ?? context.activeAxis);
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
@@ -1074,6 +1079,7 @@ function refreshExplorerSelectionChrome(state, { selectionOnly = false } = {}) {
   elements.unitSelect.value = state.selectedUnit;
   renderExplorerAxisTabs();
   renderExplorerActiveFilters(state);
+  renderExplorerHeaderReferenceControl(state);
   // A plain row/cell selection never changes the template list, JST list,
   // geography panel, etc. - only whichever piece actually reflects the
   // selection itself (see refreshExplorerSelectionDependentContextPanel).
@@ -1979,7 +1985,6 @@ function getExplorerDateFocusSelection(series) {
   const currentIndex = selectedIndex >= 0 ? selectedIndex : latestIndex;
   const comparisonIndex = currentIndex - getExplorerEvolutionStep(series.dateColumns);
   const context = getActiveExplorerContext();
-  context.selectedReferenceLabel = series.dateColumns[currentIndex]?.label ?? "";
   context.selectedCellColumnIndex = 0;
   return {
     comparisonIndex: comparisonIndex >= 0 ? comparisonIndex : -1,
@@ -2738,7 +2743,7 @@ export function renderExplorerHeaderReferenceControl(state) {
   if (!elements.globalReferenceSelect) return;
   const references = getReferenceColumns(state?.columns ?? []);
   const latestReference = references.at(-1) ?? null;
-  const anchorReference = references.find((reference) => reference.label === explorerAnchorReferenceLabel) ?? latestReference;
+  const anchorReference = getSelectedExplorerReference(state);
   if (explorerAnchorReferenceLabel && !references.some((reference) => reference.label === explorerAnchorReferenceLabel)) {
     explorerAnchorReferenceLabel = "";
   }
@@ -2768,13 +2773,12 @@ function setExplorerHeaderReference(referenceLabel) {
 
 function getSelectedExplorerReference(state = getLatestState()) {
   const references = getReferenceColumns(state?.columns ?? []);
-  const selectedLabel = getActiveExplorerContext().selectedReferenceLabel;
-  if (selectedLabel) {
-    const selectedReference = references.find((reference) => reference.label === selectedLabel);
-    if (selectedReference) return selectedReference;
-  }
-  const selectedColumnIndex = isExplorerXYView() ? 0 : Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
-  return references[references.length - 1 - selectedColumnIndex] ?? references.at(-1) ?? null;
+  const selectedReference = references.find(reference => reference.label === explorerGlobalReferenceLabel);
+  if (selectedReference) return selectedReference;
+  // Only a dataset change (or initial load) may resolve to a new default.
+  const latest = references.at(-1) ?? null;
+  if (latest) explorerGlobalReferenceLabel = latest.label;
+  return latest;
 }
 
 function getActiveExplorerEvolutionOption() {
@@ -2817,7 +2821,6 @@ function computeExplorerVisibleDateIndexes(dateColumns) {
   const step = getExplorerEvolutionStep(dateColumns);
   const requestedAnchorIndex = dateColumns.findIndex((column) => column.label === explorerAnchorReferenceLabel);
   const anchorIndex = requestedAnchorIndex >= 0 ? requestedAnchorIndex : latestIndex;
-  explorerAnchorReferenceLabel = requestedAnchorIndex >= 0 ? explorerAnchorReferenceLabel : "";
   // History depth is a plain count of periods at the current frequency
   // (see createExplorerHistoryDepthControl) - the anchor itself plus that
   // many prior periods, regardless of calendar-year boundaries.
@@ -2843,10 +2846,7 @@ function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIn
   if (!dateColumns.length) return;
 
   const selectedReference = getSelectedExplorerReference(state);
-  const latestIndex = dateColumns.length - 1;
-  const selectedIndex = dateColumns.findIndex((column) => column.label === selectedReference?.label);
-  const resolvedSelectedIndex = selectedIndex >= 0 ? selectedIndex : latestIndex;
-  context.selectedReferenceLabel = dateColumns[resolvedSelectedIndex]?.label ?? "";
+  const resolvedSelectedIndex = dateColumns.findIndex((column) => column.label === selectedReference?.label);
 
   if (explorerGlobalDisplayMode === "focus") {
     context.selectedCellColumnIndex = 0;
@@ -2855,7 +2855,7 @@ function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIn
 
   const resolvedIndexes = selectedIndexes ?? computeExplorerVisibleDateIndexes(dateColumns);
   const visibleSelectedIndex = [...resolvedIndexes].reverse().indexOf(resolvedSelectedIndex);
-  context.selectedCellColumnIndex = visibleSelectedIndex >= 0 ? visibleSelectedIndex : 0;
+  context.selectedCellColumnIndex = visibleSelectedIndex;
 }
 
 function buildExplorerEvolutionSeries(series, state) {
@@ -5196,7 +5196,7 @@ function applyExplorerSelection() {
   });
 
   if (explorerGlobalDisplayMode !== "focus") {
-    const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
+    const selectedColumnIndex = getActiveExplorerContext().selectedCellColumnIndex ?? 0;
     const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
     selectedHeader?.classList.add("is-selected-date-header");
     const selectedYearHeader = [...elements.explorerTable.querySelectorAll("thead th.explorer-year-header")].find((header) => (
