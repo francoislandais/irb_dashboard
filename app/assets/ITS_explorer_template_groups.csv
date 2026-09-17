@@ -1,4 +1,20 @@
 template;groupe
+KRI;Key Risk Indicator
+P_00.01;Funding Plan
+P_01.01;Funding Plan
+P_01.02;Funding Plan
+P_01.03;Funding Plan
+P_02.01;Funding Plan
+P_02.02;Funding Plan
+P_02.03;Funding Plan
+P_02.04;Funding Plan
+P_02.05;Funding Plan
+P_02.06;Funding Plan
+P_02.07;Funding Plan
+P_02.08;Funding Plan
+P_04.01;Funding Plan
+P_04.02;Funding Plan
+P_05.00;Funding Plan
 C_01.00;
 C_02.00;
 C_03.00;
@@ -188,4 +204,3 @@ F_45.02;FINREP
 F_45.03;FINREP
 F_46.00;FINREP
 F_47.00;FINREP
-KRI;Key Risk Indicator

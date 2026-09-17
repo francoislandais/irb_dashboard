@@ -111,6 +111,26 @@ const EXPLORER_TEMPLATE_LABELS = {
   "C_91.00": "Alternative Standardised Approach",
 
   // ------------------------------------------------------------------
+  // FUNDING PLANS
+  // ------------------------------------------------------------------
+
+  "P_00.01": "Nature of report (Funding Plans)",
+  "P_01.01": "Assets",
+  "P_01.02": "Liabilities",
+  "P_01.03": "Liquidity ratios",
+  "P_02.01": "Insured and uninsured deposits and uninsured deposit-like financial instruments",
+  "P_02.02": "Public sector and central bank sources of funding",
+  "P_02.03": "Innovative funding structures",
+  "P_02.04": "Pricing: loan assets",
+  "P_02.05": "Pricing: deposits and other liabilities",
+  "P_02.06": "Two largest significant currencies and reporting currency",
+  "P_02.07": "Loan asset acquisitions, run-offs and disposal plans",
+  "P_02.08": "Deposit liability acquisitions and disposal plans",
+  "P_04.01": "Statement of profit or loss",
+  "P_04.02": "Statement of profit or loss for small and non-complex credit institutions",
+  "P_05.00": "Debt securities: issuances and redemptions",
+
+  // ------------------------------------------------------------------
   // FINREP
   // ------------------------------------------------------------------
 

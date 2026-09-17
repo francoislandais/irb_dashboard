@@ -37,9 +37,9 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260917-kri-data-only-rows";
+} from "../data/explorer.js?v=20260917-funding-plan-catalog";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
-import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js";
+import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-catalog";
 import {
   describeExplorerKriOffset,
   EXPLORER_KRI_FORMULA_FUNCTION_LABELS,
