@@ -5,8 +5,8 @@ import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../app/src/data/e
 import { buildDataIndexes } from "../app/src/data/dataIndex.js";
 import { normalizeAxisCode } from "../app/src/data/core/axisCode.js";
 import { getReferenceColumns } from "../app/src/data/core/referenceColumns.js";
-import { buildExplorerDisplayRows, normalizeExplorerSeriesRow, normalizeHierarchyPath, getParentPaths, getExplicitPaths } from "../app/src/data/explorer.js";
-import { formatMetricValue, isUnitFormat } from "../app/src/data/core/formatting.js";
+import { buildExplorerDisplayRows, normalizeExplorerSeriesRow, normalizeHierarchyPath, getParentPaths, getExplicitPaths, getExplorerContributionRatio, isExplorerContributionChild } from "../app/src/data/explorer.js";
+import { formatMetricValue, isUnitFormat, formatContributionPercentValue } from "../app/src/data/core/formatting.js";
 
 const point = (axis, code, description, format = "") => {
   const parts = description.split(" / ");
@@ -82,6 +82,7 @@ const sandbox={
   getActiveExplorerContext:()=>context,getActiveExplorerAxis:()=>context.activeAxis,
   getActiveExplorerTemplate:()=>({tableId:"TEST"}),isExplorerHistorySelectionActive:()=>false,
   getExplorerAxisDisplayName:()=>"Row",getExplorerContributionBaseValues:()=>null,
+  getExplorerContributionBase:()=>null,getExplorerContributionRatio,isExplorerContributionChild,formatContributionPercentValue,formatMetricValue,
   hasCollapsedExplicitAncestor:()=>false,createExplorerSearchText:row=>row.description,
   createDescriptionContent:()=>new Element("span"),formatExplorerFocusedValue:o=>formatMetricValue(o.pointValue,o.selectedUnit,o.valueFormat),
   getLatestState:()=>base,getSelectedExplorerCodeForActiveAxis:()=>context.activeAxis==="y"?context.selectedYCode:context.selectedXCode,
@@ -169,3 +170,40 @@ vm.runInContext('selectExplorerRow("0010",{xyColumnCode:"0020",cellColumnIndex:1
 assert.equal(JSON.stringify(context),selectionBefore);
 assert.equal(selectedCalls,callsBefore);
 console.log("PASS: forbidden XY cells are disabled; missing-data cells remain available; invalid selection has no side effects.");
+
+// Exercise the real denominator helpers and formatter with a hierarchical XY matrix.
+vm.runInContext(source.slice(source.indexOf("function getExplorerContributionBase("),source.indexOf("function getExplorerDenominatorValues(")),ctx);
+vm.runInContext(source.slice(source.indexOf("function formatExplorerFocusedValue("),source.indexOf("function formatSignedPercent(")),ctx);
+context.activeAxis="x";
+context.contributionBaseByAxis.y={path:"total",pointCode:"1000",type:"axis"};
+const ratioPoints=[...points.filter(p=>p.coordinate!=="y_axis_rc_code"),point("y","1000","Total"),point("y","1010","Total / Child"),point("y","1020","Total / Child / Grandchild"),point("y","2000","Outside")];
+const ratioRows=[];
+for(const [y,values] of [["1000",[100,200,0]],["1010",[20,50,5]],["1020",[10,20,0]],["2000",[7,8,9]]]) {
+ values.forEach((value,i)=>ratioRows.push(["A","TEST",String((i+1)*10),y,"EUR",String(value),String(value)]));
+}
+sandbox.matrix=buildExplorerXYSeries({...base,rows:ratioRows,explorerPoints:ratioPoints,impossibleXYCombinations:null},{tableId:"TEST",selectedZCode:"EUR",referenceLabel:dates[0].label});
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
+let rendered=table.children.find(n=>n.tagName==="TBODY").rows;
+const child=rendered.find(row=>row.dataset.pointCode==="1010");
+assert.equal(child.cells[2].dataset.explorerCellValue,"0.2");
+assert.equal(child.cells[3].dataset.explorerCellValue,"0.25");
+assert.equal(child.cells[2].dataset.explorerCellKind,"ratio");
+assert.match(child.cells[2].textContent,/20.*%/);
+assert.equal(child.cells[4].textContent,"-");assert.equal(child.cells[4].dataset.explorerCellValue,undefined);
+assert.equal(rendered.find(row=>row.dataset.pointCode==="1020").cells[2].dataset.explorerCellValue,"0.1");
+assert.equal(rendered.find(row=>row.dataset.pointCode==="2000").cells[2].dataset.explorerCellValue,"7");
+assert.equal(rendered.find(row=>row.dataset.pointCode==="1000").cells[2].dataset.explorerCellValue,"100");
+// Missing and forbidden denominators are unavailable, never raw amounts.
+sandbox.matrix.rows[0].values[0].value=null;
+sandbox.matrix.rows[0].values[1].isImpossible=true;
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
+rendered=table.children.find(n=>n.tagName==="TBODY").rows;
+assert.equal(rendered.find(row=>row.dataset.pointCode==="1010").cells[2].textContent,"-");
+assert.equal(rendered.find(row=>row.dataset.pointCode==="1010").cells[3].textContent,"-");
+context.contributionBaseByAxis.y=null;
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
+assert.equal(table.children.find(n=>n.tagName==="TBODY").rows.find(row=>row.dataset.pointCode==="1010").cells[2].dataset.explorerCellValue,"20");
+console.log("PASS: XY denominator uses each matching X column for children and grandchildren, handles zero/missing/forbidden bases and resets to amounts.");

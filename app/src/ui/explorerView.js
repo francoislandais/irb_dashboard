@@ -1595,7 +1595,7 @@ function renderExplorerTable(series, selectedUnit) {
     : [...series.dateColumns].reverse();
   const tableRows = series.rows.map(normalizeExplorerSeriesRow);
   const displayRows = buildExplorerDisplayRows(tableRows);
-  const contributionBase = isXY ? null : getExplorerContributionBase(displayRows, activeAxis);
+  const contributionBase = getExplorerContributionBase(displayRows, activeAxis);
   const propagatedContribution = isXY ? null : getExplorerPropagatedContribution(activeAxis);
   const parentPaths = getParentPaths(tableRows);
   const nodePaths = getExplicitPaths(displayRows);
@@ -1725,7 +1725,9 @@ function renderExplorerTable(series, selectedUnit) {
         ? buildExplorerDateFocusValues(seriesRow.values, focusSelection)
       : [...seriesRow.values].reverse();
     const reversedBaseValues = contributionValues && !isContributionFocus
-      ? isDateFocus
+      ? isXY
+        ? contributionValues
+        : isDateFocus
         ? buildExplorerDateFocusValues(contributionValues, focusSelection)
         : [...contributionValues].reverse()
       : [];
@@ -1748,11 +1750,17 @@ function renderExplorerTable(series, selectedUnit) {
         valueRow.append(td);
         return;
       }
-      const contributionValue = isContributionFocus
+      let contributionValue = isContributionFocus
         ? point.value
         : isContributionChild
         ? getExplorerContributionRatio(point.value, reversedBaseValues[index]?.value)
         : null;
+      // A missing, forbidden or zero denominator must never display a raw
+      // amount among XY ratios. Keep columns aligned in their original order.
+      if (isXY && isContributionChild &&
+          (reversedBaseValues[index]?.isImpossible || !Number.isFinite(contributionValue))) {
+        contributionValue = NaN;
+      }
       const displayValue = contributionValue === null ? point.value : contributionValue;
       if (isAxisImpossible && !isParent && index === 0) {
         td.textContent = activeAxis === "y"
