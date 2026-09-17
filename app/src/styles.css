@@ -1473,7 +1473,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 8px;
-  grid-template-rows: 124px minmax(0, 1fr);
+  grid-template-rows: 154px minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1488,7 +1488,7 @@ button:focus-visible {
 
 .explorer-context-panel.has-benchmark-preview {
   align-content: start;
-  grid-template-rows: 124px auto clamp(190px, 29vh, 250px);
+  grid-template-rows: 154px auto clamp(190px, 29vh, 250px);
 }
 
 .explorer-context-panel > .cost-of-risk-context-selected-pane,
@@ -1639,6 +1639,7 @@ button:focus-visible {
 
 .explorer-selection-summary-pane {
   display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   box-sizing: border-box;
   height: 100%;
 }
@@ -3981,12 +3982,12 @@ table {
   .explorer-context-panel {
     grid-column: 1;
     grid-row: 1;
-    grid-template-rows: 124px minmax(0, 1fr);
+    grid-template-rows: 154px minmax(0, 1fr);
     max-height: 100%;
   }
 
   .explorer-context-panel.has-benchmark-preview {
-    grid-template-rows: 124px auto clamp(170px, 24vh, 220px);
+    grid-template-rows: 154px auto clamp(170px, 24vh, 220px);
   }
 
   .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active),
@@ -4008,4 +4009,34 @@ table {
     grid-row: 2;
     max-height: 220px;
   }
+}
+
+/* Compact history controls remain outside the selection text's scroller. */
+.explorer-selection-history {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  padding: 3px 4px 0;
+}
+
+.explorer-selection-history button {
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #d8dfdb;
+  border-radius: 5px;
+  background: transparent;
+  color: #52605a;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.explorer-selection-history button:hover:not(:disabled) {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+}
+
+.explorer-selection-history button:disabled {
+  opacity: 0.3;
+  cursor: default;
 }

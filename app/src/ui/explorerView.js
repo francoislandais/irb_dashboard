@@ -1,3 +1,4 @@
+import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
@@ -58,6 +59,10 @@ let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
 const explorerTemplateContexts = new Map();
+const explorerSelectionHistories = new Map();
+let explorerHistoryReplay = false;
+let explorerHistoryRestoredSelection = null;
+
 const explorerTemplateAxisState = {
   scroll: { left: 0, top: 0 },
   search: ""
@@ -811,6 +816,7 @@ function getExplorerAdvancedSearchResults(state) {
 }
 
 function ensureActiveExplorerTemplateMatchesSearch(state) {
+  if (isExplorerHistorySelectionActive()) return;
   const results = getExplorerAdvancedSearchResults(state);
   if (!results.hasQuery || results.templates.length === 0) {
     explorerAdvancedSearchAutoFocusKey = "";
@@ -944,6 +950,7 @@ function detectExplorerTemplateEvolutionFrequency(state, tableId) {
 }
 
 function ensureExplorerSelections(state) {
+  if (isExplorerHistorySelectionActive()) return;
   ensureExplorerTemplateSelections(state, getActiveExplorerTemplate());
 }
 
@@ -1121,6 +1128,7 @@ function refreshExplorerSelectionOnly(state) {
   // recomputeExplorerSelectedCellColumnIndex) - redo just that here since
   // this path skips rebuilding the series entirely.
   recomputeExplorerSelectedCellColumnIndex(getExplorerActiveDateColumns(), state);
+  recordExplorerSelectionHistory(state);
   refreshExplorerSelectionChrome(state, { selectionOnly: true });
   applyExplorerSelection();
 }
@@ -1224,12 +1232,15 @@ export function renderExplorer(state) {
 
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) {
     explorerSearchSelectionCache = null;
+    recordExplorerSelectionHistory(state);
+    renderExplorerSelectionPane();
     if (elements.explorerKriPagination) elements.explorerKriPagination.hidden = true;
     return;
   }
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
   selectFirstExplorerSearchResult(state);
+  recordExplorerSelectionHistory(state);
   // Now that the fresh series is cached, redo the selection-dependent parts
   // of the context panel the early chrome refresh rendered with the
   // (just-cleared) previous series.
@@ -1255,6 +1266,7 @@ export function renderExplorer(state) {
 // Select from the rendered rows so sorting, collapsed groups and KRI
 // pagination agree with what the user actually sees. Keep input focus.
 function selectFirstExplorerSearchResult(state) {
+  if (isExplorerHistorySelectionActive()) return;
   const query = normalizeExplorerMetadataSearchText(explorerAdvancedSearchQuery);
   if (!query) {
     explorerSearchSelectionCache = null;
@@ -2920,6 +2932,95 @@ function renderExplorerContextPanel(state) {
   replaceExplorerContextDetail(article);
 }
 
+function getExplorerSelectionSnapshot() {
+  const context = getActiveExplorerContext();
+  return { templateId: activeExplorerTemplateId, x: context.selectedXCode || "", y: context.selectedYCode || "", z: context.selectedZCode || "" };
+}
+
+function getExplorerSelectionHistory(state = getLatestState()) {
+  const dataset = state?.fileName || state?.activeDatasetId;
+  if (!dataset) return null;
+  const key = `agora-explorer:selection-history:v1:${dataset}`;
+  if (!explorerSelectionHistories.has(key)) {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(key)); } catch { /* Storage may be unavailable. */ }
+    explorerSelectionHistories.set(key, createExplorerSelectionHistory(saved));
+  }
+  return { key, history: explorerSelectionHistories.get(key) };
+}
+
+function persistExplorerSelectionHistory(entry) {
+  try { localStorage.setItem(entry.key, JSON.stringify(entry.history.serialize())); } catch { /* Keep in-memory navigation available. */ }
+}
+
+function recordExplorerSelectionHistory(state) {
+  if (explorerHistoryReplay || !state?.rows?.length) return;
+  const entry = getExplorerSelectionHistory(state);
+  if (entry?.history.record(getExplorerSelectionSnapshot())) persistExplorerSelectionHistory(entry);
+}
+
+function isExplorerHistorySelectionActive() {
+  return explorerHistoryReplay || Boolean(explorerHistoryRestoredSelection
+    && explorerHistoryRestoredSelection.dataset === getLatestState()?.activeDatasetId
+    && explorerHistoryRestoredSelection.query === explorerAdvancedSearchQuery
+    && sameExplorerSelection(explorerHistoryRestoredSelection.selection, getExplorerSelectionSnapshot()));
+}
+
+function navigateExplorerSelectionHistory(direction) {
+  const state = getLatestState();
+  const entry = getExplorerSelectionHistory(state);
+  const selection = entry?.history.peek(direction);
+  if (!selection || !getExplorerTemplates(state).some((template) => template.id === selection.templateId)) return;
+  saveExplorerScrollPosition();
+  // History stores coordinates only. Carry the current view to the target
+  // template rather than restoring that template's previous viewing mode.
+  const current = getActiveExplorerContext();
+  const view = {
+    activeAxis: current.activeAxis, displayMode: current.displayMode,
+    selectedReferenceLabel: current.selectedReferenceLabel,
+    selectedCellColumnIndex: current.selectedCellColumnIndex
+  };
+  hasInteractedWithExplorerSelection = true;
+  activeExplorerTemplateId = selection.templateId;
+  const target = getActiveExplorerContext();
+  Object.assign(target, view, { selectedXCode: selection.x, selectedYCode: selection.y, selectedZCode: selection.z });
+  explorerHistoryRestoredSelection = { selection, query: explorerAdvancedSearchQuery, dataset: state.activeDatasetId };
+  if (selection.templateId === "KRI" && explorerContextTopic === "kri-formula") pinnedKriFormulaCode = selection.y;
+  if (selection.templateId === "KRI" && view.activeAxis === "y") {
+    const codes = getExplorerKriMatchingCodesInOrder(state, getActiveExplorerTemplate());
+    const index = codes.indexOf(selection.y);
+    explorerKriPageResetKey = `${activeExplorerTemplateId}:${state.activeDatasetId}:${state.selectedJst}:${explorerAdvancedSearchQuery}`;
+    explorerKriPageIndex = index < 0 ? 0 : Math.floor(index / EXPLORER_KRI_PAGE_SIZE);
+  }
+  entry.history.move(direction);
+  persistExplorerSelectionHistory(entry);
+  updateUrlTemplateParam(activeExplorerTemplateId);
+  updateUrlExplorerSelectionParams();
+  explorerHistoryReplay = true;
+  try { rerenderApp(state); } finally { explorerHistoryReplay = false; }
+}
+
+function createExplorerSelectionHistoryControls() {
+  const controls = document.createElement("nav");
+  controls.className = "explorer-selection-history";
+  controls.setAttribute("aria-label", "Selection history");
+  const history = getExplorerSelectionHistory()?.history;
+  for (const [direction, label, icon, enabled] of [
+    [-1, "Previous selection", "←", history?.canBack],
+    [1, "Next selection", "→", history?.canForward]
+  ]) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = icon;
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.disabled = !enabled;
+    button.addEventListener("click", () => navigateExplorerSelectionHistory(direction));
+    controls.append(button);
+  }
+  return controls;
+}
+
 function renderExplorerSelectionPane() {
   if (!elements.explorerContextSelection) return;
   elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
@@ -3775,7 +3876,7 @@ function createExplorerSelectionSummaryCard() {
     description.append(referenceLine);
   }
 
-  pane.append(description);
+  pane.append(description, createExplorerSelectionHistoryControls());
   return pane;
 }
 
@@ -5012,6 +5113,8 @@ function moveExplorerSelection(direction) {
     : Math.min(Math.max(currentIndex + direction, 0), rows.length - 1);
 
   setSelectedExplorerCodeForActiveAxis(rows[nextIndex].dataset.pointCode);
+  recordExplorerSelectionHistory(getLatestState());
+  refreshExplorerSelectionChrome(getLatestState(), { selectionOnly: true });
   applyExplorerSelection();
   focusSelectedExplorerRow();
 }

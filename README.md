@@ -138,3 +138,18 @@ python3 scripts/export_all_standalone_apps.py
 - `app/src/data/costOfRisk/definitions.js` regroupe les constantes FINREP utilisées par le module Credit Risk, notamment par son onglet Cost of Risk.
 - `app/src/ui/` contient les vues, le cablage des controles et le rendu des graphiques/tableaux.
 - `app/src/data/csvSchema.js` centralise les validations minimales attendues pour un CSV exploitable.
+
+## Historique des sélections Explorer
+
+Les flèches sous le bloc de sélection permettent de revenir à la combinaison
+précédente ou suivante de template, ligne (Y), colonne (X) et onglet (Z).
+L’axe affiché, le mode de vue, la date sélectionnée et l’état du benchmark
+restent ceux de la vue courante. Les filtres de recherche ne sont pas restaurés.
+
+L’historique est conservé localement dans le navigateur, par nom de fichier de
+dataset. Il ne contient que les codes des sélections, pas les valeurs du CSV.
+Deux sélections consécutives identiques ne créent pas de doublon. Une nouvelle
+sélection après un retour arrière remplace les étapes suivantes. Si le stockage
+local est indisponible, l’historique reste utilisable pendant la session.
+
+Vérification sans navigateur : `node scripts/testExplorerSelectionHistory.mjs`.
