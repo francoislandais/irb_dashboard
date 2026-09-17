@@ -1178,7 +1178,7 @@ function isExplorerTableUnaffectedByStateChange(previousState, nextState) {
   return true;
 }
 
-export function renderExplorer(state) {
+export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   const previousState = lastExplorerRenderedState;
   lastExplorerRenderedState = state;
   if (
@@ -1204,7 +1204,7 @@ export function renderExplorer(state) {
   // series first so getExplorerSelectedPointMetrics doesn't briefly show
   // stale numbers from whatever was rendered before this call.
   lastRenderedExplorerTableSeries = null;
-  refreshExplorerSelectionChrome(state);
+  if (!deferChromeUntilTable) refreshExplorerSelectionChrome(state);
 
   // Rendering only a page's worth of rows (see renderExplorerTable) doesn't
   // help if the expensive part - computing every KRI's full date-by-date
@@ -1267,19 +1267,24 @@ export function renderExplorer(state) {
     shouldRevealExplorerAxisSelection = false;
     explorerSearchSelectionCache = null;
     recordExplorerSelectionHistory(state);
-    renderExplorerSelectionPane();
+    if (deferChromeUntilTable) {
+      refreshExplorerSelectionChrome(state, { selectionOnly: true });
+    } else {
+      renderExplorerSelectionPane();
+    }
     if (elements.explorerKriPagination) elements.explorerKriPagination.hidden = true;
     return;
   }
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
   selectFirstExplorerSearchResult(state);
-  if (displayedTableSeries.xy) refreshExplorerSelectionChrome(state, { selectionOnly: true });
+  const refreshedChromeAfterTable = Boolean(displayedTableSeries.xy);
+  if (refreshedChromeAfterTable) refreshExplorerSelectionChrome(state, { selectionOnly: true });
   recordExplorerSelectionHistory(state);
   // Now that the fresh series is cached, redo the selection-dependent parts
   // of the context panel the early chrome refresh rendered with the
   // (just-cleared) previous series.
-  refreshExplorerSelectionDependentContextPanel(state);
+  if (!refreshedChromeAfterTable) refreshExplorerSelectionDependentContextPanel(state);
   applyExplorerSelection();
   if (shouldFocusOpenedExplorerPoint) {
     shouldFocusOpenedExplorerPoint = false;
@@ -2474,11 +2479,7 @@ function buildExplorerBenchmark(jstCodes = null) {
   // table - alternating real quarter-end points with null months made the
   // line saw-tooth instead of just following the populated quarters, the
   // same as the table itself already does.
-  const dates = indexes
-    ? getReferenceColumns(state.columns).filter((reference) => (
-      state.rows.some((row) => row[indexes.tableId] === tableId && String(row[reference.index] ?? "").trim() !== "")
-    ))
-    : [];
+  const dates = indexes ? getExplorerTemplateReferenceDates(state, tableId) : [];
   const format = getBenchmarkValueFormat(state, tableId, context);
   const label = getBenchmarkLabel(state, tableId, context, activeAxis, getActiveExplorerTemplate()?.label);
 
@@ -3293,7 +3294,19 @@ function selectExplorerReferenceDate(referenceLabel) {
   context.selectedReferenceLabel = referenceLabel;
   context.selectedCellColumnIndex = 0;
   saveExplorerScrollPosition();
-  if (getLatestState()) rerenderApp(getLatestState());
+  const state = getLatestState();
+  if (state) {
+    // Temporal tables already contain every visible reference date: only
+    // the selected column and surrounding chrome need updating. XY values
+    // do depend on the date, so rebuild that table directly while deferring
+    // the chrome until the fresh series exists. This avoids a global app
+    // render and repeated reference-panel benchmark calculations.
+    if (isExplorerXYView()) {
+      renderExplorer(state, { deferChromeUntilTable: true });
+    } else {
+      refreshExplorerSelectionOnly(state);
+    }
+  }
   return true;
 }
 
