@@ -4068,8 +4068,13 @@ table {
   padding: 8px;
 }
 
-.metric-table.is-xy-view thead th {
-  border: 1px solid #dce4df;
+.metric-table.is-xy-view thead th:not(.description-column):not(.code-column) {
+  border: 0.5px solid #e4e8e5;
+}
+
+.metric-table.is-xy-view thead th.description-column,
+.metric-table.is-xy-view thead th.code-column {
+  border: 0;
 }
 
 .metric-table.is-xy-view .explorer-xy-group {
