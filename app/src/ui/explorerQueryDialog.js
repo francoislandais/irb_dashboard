@@ -50,7 +50,7 @@ function createDialog(buildQuery) {
   const dateFilterCheckbox = document.createElement("input");
   dateFilterCheckbox.type = "checkbox";
   dateFilterCheckbox.checked = true;
-  dateFilterLabel.append(dateFilterCheckbox, document.createTextNode(" Filtrer sur la date de référence sélectionnée"));
+  dateFilterLabel.append(dateFilterCheckbox, document.createTextNode(" Filtrer sur les dates de référence sélectionnées"));
 
   const pre = document.createElement("pre");
   pre.className = "dataset-dialog-query explorer-query-dialog-sql";

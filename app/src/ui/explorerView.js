@@ -47,8 +47,8 @@ import {
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
-import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260917-kri-data-only-rows";
-import { showExplorerQueryDialog } from "./explorerQueryDialog.js";
+import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260917-query-ranges";
+import { showExplorerQueryDialog } from "./explorerQueryDialog.js?v=20260917-query-ranges";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
 let rerenderApp = () => {};
@@ -315,11 +315,11 @@ export function wireExplorerUi(actions, rerender) {
       },
       {
         label: "Generate query",
-        action: () => setExplorerQueryPoints([getExplorerCellQueryPoint(row, cell)])
+        action: () => setExplorerQueryPoints(getExplorerQuerySelectionPoints(row, cell))
       },
       {
         label: "Add to query",
-        action: () => setExplorerQueryPoints([...explorerQueryPoints, getExplorerCellQueryPoint(row, cell)])
+        action: () => setExplorerQueryPoints([...explorerQueryPoints, ...getExplorerQuerySelectionPoints(row, cell)])
       }
     ], event);
   });
@@ -340,12 +340,7 @@ export function wireExplorerUi(actions, rerender) {
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
   elements.explorerExcelExport?.addEventListener("click", exportVisibleExplorerTable);
-  elements.explorerQueryButton?.addEventListener("click", () => {
-    showExplorerQueryDialog((options) => {
-      const state = getLatestState();
-      return buildExplorerQueryFromPoints(state, explorerQueryPoints, options) || "";
-    });
-  });
+  elements.explorerQueryButton?.addEventListener("click", openExplorerQuery);
   if (elements.explorerAdvancedSearch) {
     elements.explorerAdvancedSearch.value = explorerAdvancedSearchQuery;
     elements.explorerAdvancedSearch.addEventListener("input", updateExplorerAdvancedSearch);
@@ -2397,6 +2392,7 @@ function getExplorerCellQueryPoint(row, cell) {
     : getSelectedExplorerReference(state);
 
   return {
+    jstCode: state?.selectedJst ?? "",
     referenceDateIso: reference ? reference.name.replace(/^ref_/, "").replaceAll("_", "-") : "",
     selectedXCode: activeAxis === "x" ? pointCode : cell?.dataset.explorerXyColumnCode ?? context.selectedXCode,
     selectedYCode: activeAxis === "y" ? pointCode : cell?.dataset.explorerXyColumnCode ?? context.selectedYCode,
@@ -2405,9 +2401,22 @@ function getExplorerCellQueryPoint(row, cell) {
   };
 }
 
+function getExplorerQuerySelectionPoints(row, cell) {
+  const cells = [...new Set(getActiveExplorerCellRanges().flatMap(range => range.cells))];
+  return cells.length
+    ? cells.filter(item => !item.classList.contains("is-xy-impossible"))
+      .map(item => getExplorerCellQueryPoint(item.closest("tr"), item))
+    : [getExplorerCellQueryPoint(row, cell)];
+}
+
+function openExplorerQuery() {
+  showExplorerQueryDialog(options => buildExplorerQueryFromPoints(getLatestState(), explorerQueryPoints, options) || "");
+}
+
 function setExplorerQueryPoints(points) {
-  explorerQueryPoints = points;
+  explorerQueryPoints = [...new Map(points.map(point => [JSON.stringify(point), point])).values()];
   if (elements.explorerQueryButton) elements.explorerQueryButton.disabled = explorerQueryPoints.length === 0;
+  openExplorerQuery();
 }
 
 function clearExplorerContributionBase(axis = getActiveExplorerContext().activeAxis) {

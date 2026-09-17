@@ -4096,3 +4096,9 @@ table {
   cursor: default;
   box-shadow: none;
 }
+
+.explorer-query-dialog-sql {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}

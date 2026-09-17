@@ -173,3 +173,20 @@ indication d’indisponibilité. L’export Excel conserve les libellés complet
 les codes des colonnes.
 
 Vérification sans navigateur : `node scripts/testExplorerXY.mjs`.
+
+## Requêtes Explorer
+
+**Generate query** ouvre immédiatement la requête et la conserve dans le bouton
+**Query**. Les plages sélectionnées (y compris plusieurs plages avec Ctrl/Cmd)
+sont incluses ; **Add to query** les ajoute à la requête conservée. Les doublons
+sont éliminés. Les filtres X/Y et dates sont factorisés sans inclure de
+combinaisons non sélectionnées. La JST de chaque point est conservée.
+
+Les données ITS interrogent `crp_agora.agora_its_bft_current` ; les KRI
+interrogent `crp_agora.agora_dm_imas_kris_raw` via `kri_data_point_id`. Une
+sélection mixte produit une union avec les mêmes colonnes de sortie. Les
+coordonnées brutes proviennent du dataset. Le SQL est indenté et les listes
+`IN` sont réparties sur plusieurs lignes.
+
+Vérification sans navigateur ni connexion Hive :
+`node scripts/testExplorerHiveQuery.mjs` (exécution sur une base SQL de test).
