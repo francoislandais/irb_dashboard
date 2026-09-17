@@ -3766,8 +3766,19 @@ table {
   background: #ffffff;
 }
 
-.metric-table tbody tr.is-sticky-parent > th.description-column {
+/* The left columns stick on both axes and must paint above the scrolling
+   values of a vertically pinned row (z-index: 35), but below the header. */
+.metric-table tbody tr.is-sticky-parent > th.description-column,
+.metric-table tbody tr.is-sticky-parent > td.code-column {
   z-index: 45;
+}
+
+.metric-table tbody tr.is-sticky-parent > th.description-column {
+  left: 0;
+}
+
+.metric-table tbody tr.is-sticky-parent > td.code-column {
+  left: 350px;
 }
 
 .metric-table tbody tr.is-sticky-parent > td:hover {
