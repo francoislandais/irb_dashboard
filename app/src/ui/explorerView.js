@@ -200,6 +200,7 @@ let explorerGeographySearchDraft = explorerGeographySearch;
 let explorerAdvancedSearchTimer = 0;
 let explorerAdvancedSearchCache = null;
 let explorerAdvancedSearchAutoFocusKey = "";
+let explorerSearchSelectionCache = null;
 let explorerConceptIndexCache = null;
 let explorerSearchablePointsCache = null;
 let explorerSearchSuggestionIndex = -1;
@@ -1222,11 +1223,13 @@ export function renderExplorer(state) {
   elements.explorerEmpty.textContent = searchedTableSeries.status;
 
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) {
+    explorerSearchSelectionCache = null;
     if (elements.explorerKriPagination) elements.explorerKriPagination.hidden = true;
     return;
   }
 
   renderExplorerTable(displayedTableSeries, state.selectedUnit);
+  selectFirstExplorerSearchResult(state);
   // Now that the fresh series is cached, redo the selection-dependent parts
   // of the context panel the early chrome refresh rendered with the
   // (just-cleared) previous series.
@@ -1247,6 +1250,27 @@ export function renderExplorer(state) {
     pendingExplorerCellRefPeekCodes = null;
   }
   scheduleExplorerReferenceColumnCentering();
+}
+
+// Select from the rendered rows so sorting, collapsed groups and KRI
+// pagination agree with what the user actually sees. Keep input focus.
+function selectFirstExplorerSearchResult(state) {
+  const query = normalizeExplorerMetadataSearchText(explorerAdvancedSearchQuery);
+  if (!query) {
+    explorerSearchSelectionCache = null;
+    return;
+  }
+  const context = getActiveExplorerContext();
+  const key = `${query}|${activeExplorerTemplateId}|${context.activeAxis}|${state.activeDatasetId}`;
+  const rows = getVisibleSelectableExplorerRows();
+  const previous = explorerSearchSelectionCache;
+  const searchChanged = !previous || previous.key !== key || previous.rows !== state.rows;
+  const selectedVisible = rows.some((row) => row.dataset.pointCode === getSelectedExplorerCodeForActiveAxis());
+  explorerSearchSelectionCache = { key, rows: state.rows };
+  if ((!searchChanged && selectedVisible) || rows.length === 0) return;
+
+  selectExplorerRow(rows[0].dataset.pointCode);
+  context.scrollByAxis[context.activeAxis] = { left: 0, top: 0 };
 }
 
 function exportVisibleExplorerTable() {
