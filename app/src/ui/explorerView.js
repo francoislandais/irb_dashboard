@@ -1,7 +1,7 @@
 import { getExplorerTemplateReferenceDates } from "../data/explorerReferenceDates.js";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260917-xy-forbidden";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
-import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
+import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-funding-plan-currencies";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
@@ -37,7 +37,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260917-funding-plan-catalog";
+} from "../data/explorer.js?v=20260917-funding-plan-currencies";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-catalog";
 import {

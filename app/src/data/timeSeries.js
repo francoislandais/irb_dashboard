@@ -6,9 +6,10 @@ import {
   EXPLORER_ALL_CURRENCIES_CODE,
   EXPLORER_ALL_CURRENCIES_LABEL,
   explorerTableHasCurrencyZAxis,
+  explorerTableOffersAllCurrencies,
   getAvailableExplorerAxisCodes,
   isExplorerDataOnlyRowTemplate
-} from "./explorer.js?v=20260917-kri-data-only-rows";
+} from "./explorer.js?v=20260917-funding-plan-currencies";
 
 export const EXPLORER_TARGET = {
   tableId: "C_02.00",
@@ -123,7 +124,7 @@ export function buildExplorerAxisSeries(state, options = {}) {
     selectedZCode
   };
   const inheritedFormat = getSelectedFilterFormat(state, tableId, axis, selections);
-  const zPointsConfig = axis === "z" && limitedPointsConfig.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
+  const zPointsConfig = axis === "z" && limitedPointsConfig.length > 0 && explorerTableOffersAllCurrencies(state, tableId)
     ? [createAllCurrenciesPoint(), ...limitedPointsConfig]
     : limitedPointsConfig;
   const rowSeries = axis === "template"

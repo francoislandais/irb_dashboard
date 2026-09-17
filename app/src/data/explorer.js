@@ -343,6 +343,13 @@ export function explorerTableHasCurrencyZAxis(state, tableId) {
   return getConfiguredExplorerAxisCodes(state, tableId, "z").includes("EUR");
 }
 
+// Funding Plan currency tables are reported and reviewed currency by
+// currency. Other regulatory families keep their synthetic aggregate.
+export function explorerTableOffersAllCurrencies(state, tableId) {
+  return !String(tableId ?? "").startsWith("P_")
+    && explorerTableHasCurrencyZAxis(state, tableId);
+}
+
 export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId) {
   const templates = getExplorerTemplates(state);
   const configuredXCodes = getConfiguredExplorerAxisCodes(state, tableId, "x");
@@ -356,7 +363,7 @@ export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId)
     ? configuredYCodes.filter((code) => availableYCodes.includes(code))
     : getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
   const preferredZCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
-  const zCodes = preferredZCodes.length > 0 && explorerTableHasCurrencyZAxis(state, tableId)
+  const zCodes = preferredZCodes.length > 0 && explorerTableOffersAllCurrencies(state, tableId)
     ? [EXPLORER_ALL_CURRENCIES_CODE, ...preferredZCodes]
     : preferredZCodes;
 
