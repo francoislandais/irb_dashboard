@@ -1360,7 +1360,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
     { label: "Evolution frequency", value: getActiveExplorerEvolutionOption().label }
   ];
   if ((explorerGlobalDisplayMode === "focus" || isExplorerXYView()) && selectedReference) {
-    metadata.push({ label: "Reference date", value: formatReferenceQuarterLabel(selectedReference.label) });
+    metadata.push({ label: "Reference date", value: getExplorerFullDateColumnLabel(selectedReference) });
   }
 
   const templateId = template?.id || activeExplorerTemplateId || "Template";
@@ -2538,7 +2538,7 @@ function renderExplorerActiveFilters(state) {
 
   const dateValue = document.createElement("span");
   dateValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  dateValue.textContent = reference ? formatReferenceQuarterLabel(reference.label) : "Reference date";
+  dateValue.textContent = reference ? getExplorerFullDateColumnLabel(reference) : "Reference date";
   dateToggle.append(dateValue);
   dateToggle.addEventListener("click", () => {
     explorerContextTopic = "reference-date";
@@ -2744,7 +2744,7 @@ export function renderExplorerHeaderReferenceControl(state) {
   elements.globalReferenceSelect.disabled = references.length === 0;
   elements.globalReferenceSelect.replaceChildren();
   [...references].reverse().forEach((reference) => {
-    const option = new Option(formatReferenceQuarterLabel(reference.label), reference.label, false, reference.label === anchorReference?.label);
+    const option = new Option(getExplorerFullDateColumnLabel(reference), reference.label, false, reference.label === anchorReference?.label);
     elements.globalReferenceSelect.append(option);
   });
 }
@@ -3279,7 +3279,7 @@ function renderExplorerReferenceDatePanel(state) {
     row.setAttribute("aria-selected", String(isActive));
 
     const label = document.createElement("span");
-    label.textContent = formatReferenceQuarterLabel(reference.label);
+    label.textContent = getExplorerFullDateColumnLabel(reference);
     const metric = document.createElement("span");
     const rawValue = valuesByReference.get(reference.label);
     metric.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
@@ -4021,7 +4021,7 @@ function createExplorerSelectionSummaryCard() {
     referenceLabel.textContent = "Reference date: ";
     const referenceValue = document.createElement("span");
     referenceValue.className = "explorer-selection-summary-content";
-    referenceValue.textContent = formatReferenceQuarterLabel(selectedReference.label);
+    referenceValue.textContent = getExplorerFullDateColumnLabel(selectedReference);
     referenceLine.append(referenceLabel, referenceValue);
     description.append(referenceLine);
   }
