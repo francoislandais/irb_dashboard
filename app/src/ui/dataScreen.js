@@ -91,7 +91,7 @@ function toggleSidebar() {
   updateSidebarToggleAccessibility(isCollapsed);
   const url = createUrlState();
   if (isCollapsed) url.searchParams.set(SIDEBAR_URL_PARAM, SIDEBAR_COLLAPSED_VALUE);
-  else url.searchParams.delete(SIDEBAR_URL_PARAM);
+  else url.searchParams.set(SIDEBAR_URL_PARAM, "expanded");
   replaceUrlState(url);
   window.setTimeout(scheduleExplorerStickyParentsUpdate, 180);
 }
@@ -103,7 +103,7 @@ function applyUrlSidebarVisibility() {
   if (!elements.appShell || !elements.sidebarToggle) return;
   const sidebarParam = readUrlStateParams().get(SIDEBAR_URL_PARAM);
   const isLocked = sidebarParam === SIDEBAR_LOCKED_VALUE;
-  const isCollapsed = isLocked || sidebarParam === SIDEBAR_COLLAPSED_VALUE;
+  const isCollapsed = sidebarParam === null || isLocked || sidebarParam === SIDEBAR_COLLAPSED_VALUE;
   elements.appShell.classList.toggle("is-sidebar-collapsed", isCollapsed);
   elements.appShell.classList.toggle("is-sidebar-locked", isLocked);
   updateSidebarToggleAccessibility(isCollapsed);
