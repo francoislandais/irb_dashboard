@@ -25,11 +25,11 @@ const snapshot = history.serialize();
 snapshot.entries[0].x = "changed";
 assert.equal(history.serialize().entries[0].x, a.x);
 
-// Exercise the actual UI navigation with independent per-template views.
+// Exercise the actual UI navigation with a global display mode.
 const source = readFileSync(new URL("../app/src/ui/explorerView.js", import.meta.url), "utf8");
 const contexts = new Map([
-  [a.templateId, { selectedXCode: a.x, selectedYCode: a.y, selectedZCode: a.z, activeAxis: "y", displayMode: "temporal" }],
-  [b.templateId, { selectedXCode: b.x, selectedYCode: b.y, selectedZCode: b.z, activeAxis: "x", displayMode: "focus", selectedReferenceLabel: "2025-12-31", selectedCellColumnIndex: 2 }]
+  [a.templateId, { selectedXCode: a.x, selectedYCode: a.y, selectedZCode: a.z, activeAxis: "y" }],
+  [b.templateId, { selectedXCode: b.x, selectedYCode: b.y, selectedZCode: b.z, activeAxis: "x", selectedReferenceLabel: "2025-12-31", selectedCellColumnIndex: 2 }]
 ]);
 const storage = new Map();
 let state = { rows: [[1]], fileName: "dataset.csv", activeDatasetId: "one" };
@@ -48,7 +48,7 @@ vm.runInContext(`const explorerSelectionHistories = new Map();
 let activeExplorerTemplateId = "${a.templateId}", explorerHistoryReplay = false,
 explorerHistoryRestoredSelection = null, explorerAdvancedSearchQuery = "assets",
 hasInteractedWithExplorerSelection = false, explorerContextTopic = "", pinnedKriFormulaCode = "",
-explorerKriPageResetKey = "", explorerKriPageIndex = 0;
+explorerKriPageResetKey = "", explorerKriPageIndex = 0, explorerGlobalDisplayMode = "focus";
 const EXPLORER_KRI_PAGE_SIZE = 20;` + source.slice(source.indexOf("function getExplorerSelectionSnapshot()"), source.indexOf("function createExplorerSelectionHistoryControls()")), ctx);
 const run = code => vm.runInContext(code, ctx);
 run("recordExplorerSelectionHistory(getLatestState())");
@@ -56,7 +56,7 @@ run(`activeExplorerTemplateId = "${b.templateId}"; recordExplorerSelectionHistor
 run("navigateExplorerSelectionHistory(-1)");
 assert.equal(run("activeExplorerTemplateId"), a.templateId);
 assert.equal(contexts.get(a.templateId).activeAxis, "x");
-assert.equal(contexts.get(a.templateId).displayMode, "focus");
+assert.equal(run("explorerGlobalDisplayMode"), "focus");
 assert.equal(contexts.get(a.templateId).selectedReferenceLabel, "2025-12-31");
 assert.equal(contexts.get(a.templateId).selectedCellColumnIndex, 2);
 assert.equal(run("getExplorerSelectionHistory().history.serialize().entries.length"), 2);
@@ -81,7 +81,7 @@ run("recordExplorerSelectionHistory(getLatestState())");
 assert.equal(run("getExplorerSelectionHistory().history.serialize().entries.length"), 1);
 // Restoring a KRI on another page loads that page without changing the axis.
 state = { ...state, fileName: "kri.csv", activeDatasetId: "kri" };
-contexts.set("KRI", { selectedXCode: "", selectedYCode: "K45", selectedZCode: "", activeAxis: "y", displayMode: "temporal" });
+contexts.set("KRI", { selectedXCode: "", selectedYCode: "K45", selectedZCode: "", activeAxis: "y" });
 sandbox.getExplorerTemplates = () => [{ id: "KRI" }];
 sandbox.getActiveExplorerTemplate = () => ({ id: "KRI", tableId: "KRI" });
 sandbox.getExplorerKriMatchingCodesInOrder = () => Array.from({ length: 60 }, (_, i) => "K" + i);

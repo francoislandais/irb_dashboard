@@ -159,9 +159,10 @@ Vérification sans navigateur : `node scripts/testExplorerSelectionHistory.mjs`.
 Dans Explorer, le choix **Table display → XY view** affiche une matrice à la
 date de référence sélectionnée, pour la JST et le Tab/Z courants :
 
-- axe **ROW** : Y en lignes, X en colonnes ;
-- axe **COLUMN** : X en lignes, Y en colonnes ;
-- axe **TAB** : retour à l’affichage Temporal, sans perdre le choix XY.
+Y est toujours en lignes et X en colonnes. Les boutons **ROW**, **COLUMN** et
+**TAB** ne changent pas la vue XY. Le mode d’affichage est global : il reste
+actif lors du passage à un autre template, sans réglage template par template.
+Les boutons d’axe redeviennent actifs en Temporal ou Date focus.
 
 Les en-têtes suivent la hiérarchie des métadonnées, avec fusions horizontales
 pour les groupes et verticales pour les branches moins profondes. Un clic sur

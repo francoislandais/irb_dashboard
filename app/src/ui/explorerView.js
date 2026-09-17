@@ -1,4 +1,4 @@
-import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js";
+import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260917-global-xy";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-kri-pagination";
 import { normalizeAxisCode } from "../data/core/axisCode.js";
@@ -57,6 +57,7 @@ let updateSelectedJst = () => {};
 let updateSelectedUnit = () => {};
 let updatePeerDisplayMode = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
+let explorerGlobalDisplayMode = "temporal";
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
 const explorerTemplateContexts = new Map();
@@ -129,7 +130,7 @@ const EXPLORER_EVOLUTION_OPTIONS = [
 const EXPLORER_DISPLAY_OPTIONS = [
   { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" },
   { value: "focus", label: "Date focus", description: "Selected date with absolute and relative changes" },
-  { value: "xy", label: "XY view", description: "Row × Column at the selected date; Temporal for Tab" }
+  { value: "xy", label: "XY view", description: "Y rows × X columns at the selected date, for every template" }
 ];
 // "template" used to be a fourth browsable axis (clicking the template tab
 // turned the main table into a list of templates); that mode is retired in
@@ -262,7 +263,7 @@ export function wireExplorerUi(actions, rerender) {
   });
   elements.explorerAxisButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      if (button.disabled) return;
+      if (button.disabled || isExplorerXYView()) return;
 
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
@@ -371,8 +372,11 @@ export function showExplorerPeerSelection(actions) {
 }
 
 function createExplorerTemplateContext() {
+  let activeAxis = "y";
   return {
-    activeAxis: "y",
+    // XY always uses Y rows; keep the ordinary browsing axis for other modes.
+    get activeAxis() { return isExplorerXYView() ? "y" : activeAxis; },
+    set activeAxis(value) { activeAxis = value; },
     defaultExpandedPathsInitializedByAxis: {
       template: false,
       x: false,
@@ -410,8 +414,7 @@ function createExplorerTemplateContext() {
     // within the selected row — see applyExplorerSelection. Defaults to the
     // first visible column until the user clicks a specific cell.
     selectedCellColumnIndex: 0,
-    selectedReferenceLabel: "",
-    displayMode: "temporal"
+    selectedReferenceLabel: ""
   };
 }
 
@@ -1352,7 +1355,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
     { label: "Table display", value: getActiveExplorerDisplayOption().label },
     { label: "Evolution frequency", value: getActiveExplorerEvolutionOption().label }
   ];
-  if ((getActiveExplorerContext().displayMode === "focus" || isExplorerXYView()) && selectedReference) {
+  if ((explorerGlobalDisplayMode === "focus" || isExplorerXYView()) && selectedReference) {
     metadata.push({ label: "Reference date", value: formatReferenceQuarterLabel(selectedReference.label) });
   }
 
@@ -1548,8 +1551,7 @@ function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
 }
 
 function isExplorerXYView() {
-  const context = getActiveExplorerContext();
-  return context.displayMode === "xy" && ["x", "y"].includes(context.activeAxis);
+  return explorerGlobalDisplayMode === "xy";
 }
 
 function syncExplorerXYColumnSelection(series = lastRenderedExplorerTableSeries) {
@@ -1577,7 +1579,7 @@ function renderExplorerTable(series, selectedUnit) {
   elements.explorerTable.setAttribute("aria-label", isXY ? "XY matrix at selected reference date" : "Explorer time series");
   syncExplorerXYColumnSelection(series);
   const activeAxis = getActiveExplorerAxis();
-  const isDateFocus = getActiveExplorerContext().displayMode === "focus";
+  const isDateFocus = explorerGlobalDisplayMode === "focus";
   const focusSelection = isDateFocus ? getExplorerDateFocusSelection(series) : null;
   const orderedDates = isXY ? series.dateColumns : isDateFocus
     ? [
@@ -2764,8 +2766,7 @@ function getExplorerEvolutionStep(dateColumns) {
 }
 
 function getActiveExplorerDisplayOption() {
-  const context = getActiveExplorerContext();
-  const displayMode = context.displayMode === "xy" && !isExplorerXYView() ? "temporal" : context.displayMode;
+  const displayMode = explorerGlobalDisplayMode;
   return EXPLORER_DISPLAY_OPTIONS.find((option) => option.value === displayMode) ?? EXPLORER_DISPLAY_OPTIONS[0];
 }
 
@@ -2809,7 +2810,7 @@ function recomputeExplorerSelectedCellColumnIndex(dateColumns, state, selectedIn
   const resolvedSelectedIndex = selectedIndex >= 0 ? selectedIndex : latestIndex;
   context.selectedReferenceLabel = dateColumns[resolvedSelectedIndex]?.label ?? "";
 
-  if (context.displayMode === "focus") {
+  if (explorerGlobalDisplayMode === "focus") {
     context.selectedCellColumnIndex = 0;
     return;
   }
@@ -2823,7 +2824,7 @@ function buildExplorerEvolutionSeries(series, state) {
   if (series.xy) return series;
   if (!series?.dateColumns?.length) return series;
   const context = getActiveExplorerContext();
-  if (context.displayMode === "focus") {
+  if (explorerGlobalDisplayMode === "focus") {
     recomputeExplorerSelectedCellColumnIndex(series.dateColumns, state);
     return series;
   }
@@ -3087,7 +3088,7 @@ function navigateExplorerSelectionHistory(direction) {
   // template rather than restoring that template's previous viewing mode.
   const current = getActiveExplorerContext();
   const view = {
-    activeAxis: current.activeAxis, displayMode: current.displayMode,
+    activeAxis: current.activeAxis,
     selectedReferenceLabel: current.selectedReferenceLabel,
     selectedCellColumnIndex: current.selectedCellColumnIndex
   };
@@ -3584,7 +3585,7 @@ function renderExplorerDisplayModePanel() {
   list.setAttribute("aria-label", "Table display");
 
   EXPLORER_DISPLAY_OPTIONS.forEach((option) => {
-    const isActive = option.value === context.displayMode;
+    const isActive = option.value === explorerGlobalDisplayMode;
     const row = document.createElement("button");
     row.type = "button";
     row.className = "explorer-jst-selection-row explorer-display-mode-row";
@@ -3597,8 +3598,8 @@ function renderExplorerDisplayModePanel() {
     detail.textContent = option.description;
     row.append(label, detail);
     row.addEventListener("click", () => {
-      if (context.displayMode === option.value) return;
-      context.displayMode = option.value;
+      if (explorerGlobalDisplayMode === option.value) return;
+      explorerGlobalDisplayMode = option.value;
       context.selectedCellColumnIndex = 0;
       saveExplorerScrollPosition();
       if (getLatestState()) rerenderApp(getLatestState());
@@ -3607,7 +3608,7 @@ function renderExplorerDisplayModePanel() {
   });
 
   article.append(title, list);
-  if (context.displayMode === "temporal" || (context.displayMode === "xy" && !isExplorerXYView())) {
+  if (explorerGlobalDisplayMode === "temporal") {
     article.append(createExplorerHistoryDepthControl());
   }
   replaceExplorerContextDetail(article);
@@ -5146,7 +5147,7 @@ function applyExplorerSelection() {
     row.querySelectorAll("td.is-selected-cell").forEach((cell) => cell.classList.remove("is-selected-cell"));
   });
 
-  if (getActiveExplorerContext().displayMode !== "focus") {
+  if (explorerGlobalDisplayMode !== "focus") {
     const selectedColumnIndex = Math.max(0, Number(getActiveExplorerContext().selectedCellColumnIndex) || 0);
     const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
     selectedHeader?.classList.add("is-selected-date-header");

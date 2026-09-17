@@ -18,15 +18,15 @@ function axisPoints(state, tableId, axis, configId) {
 
 // Only the active reference date and Z are fixed; neither X nor Y is a
 // filter. Aggregate source records once before building the matrix.
-export function buildExplorerXYSeries(state, { axis = "y", tableId, yConfigTableId = tableId, selectedZCode = "", referenceLabel = "", onlyCodes } = {}) {
+export function buildExplorerXYSeries(state, { tableId, yConfigTableId = tableId, selectedZCode = "", referenceLabel = "", onlyCodes } = {}) {
   const reference = getReferenceColumns(state.columns).find((date) => date.label === referenceLabel)
     ?? getReferenceColumns(state.columns).at(-1);
   const indexes = getCompleteAxisColumnIndexes(state.columns);
-  const columnAxis = axis === "y" ? "x" : "y";
+  const columnAxis = "x";
   const xPoints = axisPoints(state, tableId, "x", yConfigTableId);
   const yPoints = axisPoints(state, tableId, "y", yConfigTableId);
-  const columns = (axis === "y" ? xPoints : yPoints).map((point) => ({ ...point, label: point.description || point.code }));
-  const rowPoints = (axis === "y" ? yPoints : xPoints).filter((point) => !onlyCodes || onlyCodes.has(point.code));
+  const columns = xPoints.map((point) => ({ ...point, label: point.description || point.code }));
+  const rowPoints = yPoints.filter((point) => !onlyCodes || onlyCodes.has(point.code));
   const empty = { xy: true, columnAxis, reference, dateColumns: columns, rows: [], status: "" };
   if (!reference || !indexes || !state.selectedJst) return { ...empty, status: "Select a dataset, JST and reference date." };
   if (!xPoints.length || !yPoints.length) return { ...empty, status: "XY view requires both Row and Column dimensions for this template." };
@@ -48,8 +48,8 @@ export function buildExplorerXYSeries(state, { axis = "y", tableId, yConfigTable
     rows: rowPoints.map((row) => ({
       ...row,
       values: columns.map((column) => {
-        const x = axis === "y" ? column : row;
-        const y = axis === "y" ? row : column;
+        const x = column;
+        const y = row;
         return { xCode: x.code, yCode: y.code, label: reference.label, date: reference.date,
           format: y.format || zFormat || x.format || "",
           value: values.get(JSON.stringify([x.code, y.code])) ?? null };

@@ -34,12 +34,8 @@ for (const indexed of [false,true]) {
   assert.deepEqual(matrix.rows.map(row => row.values.map(p => p.value)), [[12,0,null],[0.25,null,null]]);
   assert.equal(matrix.rows[0].values[0].format, "Unit");
   assert.equal(matrix.rows[1].values[0].format, "%");
-  const transposed = buildExplorerXYSeries(state,{...options,axis:"x"});
-  for (let y=0;y<2;y++) for(let x=0;x<3;x++) {
-    assert.equal(transposed.rows[x].values[y].value,matrix.rows[y].values[x].value);
-    assert.equal(transposed.rows[x].values[y].xCode,matrix.rows[y].values[x].xCode);
-    assert.equal(transposed.rows[x].values[y].yCode,matrix.rows[y].values[x].yCode);
-    assert.equal(transposed.rows[x].values[y].format,matrix.rows[y].values[x].format);
+  for (const axis of ["x", "z"]) {
+    assert.deepEqual(buildExplorerXYSeries(state, {...options, axis}), matrix);
   }
   assert.equal(buildExplorerXYSeries(state,{...options,referenceLabel:dates[1].label}).rows[0].values[0].value,23);
   assert.equal(buildExplorerXYSeries(state,{...options,selectedZCode:"__ALL__"}).rows[0].values[0].value,100);
@@ -76,7 +72,7 @@ class Element {
   getBoundingClientRect(){return {height:32};}
 }
 const source=readFileSync(new URL("../app/src/ui/explorerView.js",import.meta.url),"utf8");
-const context={activeAxis:"y",displayMode:"xy",selectedXCode:"0010",selectedYCode:"0010",selectedZCode:"EUR",selectedReferenceLabel:dates[0].label};
+let context={activeAxis:"y",selectedXCode:"0010",selectedYCode:"0010",selectedZCode:"EUR",selectedReferenceLabel:dates[0].label};
 const table=new Element("table");
 let selectedCalls=0;
 const sandbox={
@@ -93,7 +89,23 @@ const sandbox={
 };
 for(const name of ["clearExplorerCellRangeSelection","expandDefaultExplorerPaths","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar"]) sandbox[name]=()=>{};
 const ctx=vm.createContext(sandbox);
-vm.runInContext('let lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
+vm.runInContext('let explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
+// Real template contexts share the display mode and preserve their normal axis.
+vm.runInContext(source.slice(source.indexOf("function createExplorerTemplateContext()"),source.indexOf("function getActiveExplorerTemplate(")),ctx);
+const first=vm.runInContext('createExplorerTemplateContext()',ctx);
+const second=vm.runInContext('createExplorerTemplateContext()',ctx);
+first.activeAxis="x"; second.activeAxis="z";
+assert.equal(first.activeAxis,"y"); assert.equal(second.activeAxis,"y");
+vm.runInContext('explorerGlobalDisplayMode="temporal"',ctx);
+assert.equal(first.activeAxis,"x"); assert.equal(second.activeAxis,"z");
+vm.runInContext('explorerGlobalDisplayMode="xy"',ctx);
+Object.assign(first,context); context=first;
+// Axis button clicks in XY return before any selection or render side effect.
+const axisHandler=source.slice(source.indexOf('if (button.disabled || isExplorerXYView()) return;'),source.indexOf('hasInteractedWithExplorerSelection = true;',source.indexOf('if (button.disabled || isExplorerXYView()) return;')));
+for(const axis of ["x","y","z"]) {
+  sandbox.button={disabled:false,dataset:{explorerAxis:axis}};
+  assert.equal(vm.runInContext('(function(){'+axisHandler+'throw new Error("Axis click changed XY");})()',ctx),undefined);
+}
 sandbox.matrix=matrix;
 vm.runInContext('renderExplorerTable(matrix,"millions")',ctx);
 const thead=table.children.find(n=>n.tagName==="THEAD");
@@ -107,12 +119,12 @@ assert.equal(tbody.rows[0].cells[3].dataset.explorerXyColumnCode,"0020");
 assert.equal(tbody.rows[0].cells[3].dataset.explorerCellDate,dates[0].label);
 vm.runInContext('selectExplorerRow("0020", {xyColumnCode:"0020",cellColumnIndex:1})',ctx);
 assert.equal(context.selectedXCode,"0020");assert.equal(context.selectedYCode,"0020");assert.equal(context.activeAxis,"y");assert.equal(context.selectedCellColumnIndex,1);assert.equal(selectedCalls,1);
-// Transposed cells still select semantic X/Y, not their visual position.
+// An ordinary Column axis does not transpose XY or change cell semantics.
 context.activeAxis="x";
 sandbox.matrix=buildExplorerXYSeries(base,{tableId:"TEST",axis:"x",selectedZCode:"EUR",referenceLabel:dates[0].label});
 table.children=[];
-vm.runInContext('renderExplorerTable(matrix,"millions"); selectExplorerRow("0030", {xyColumnCode:"0010",cellColumnIndex:0})',ctx);
-assert.equal(context.selectedXCode,"0030");assert.equal(context.selectedYCode,"0010");assert.equal(context.activeAxis,"x");
+vm.runInContext('renderExplorerTable(matrix,"millions"); selectExplorerRow("0010", {xyColumnCode:"0030",cellColumnIndex:2})',ctx);
+assert.equal(context.selectedXCode,"0030");assert.equal(context.selectedYCode,"0010");assert.equal(context.activeAxis,"y");
 assert.equal(context.selectedReferenceLabel,dates[0].label);
 // The XY data is not fed through temporal frequency/history slicing.
 vm.runInContext(source.slice(source.indexOf("function buildExplorerEvolutionSeries("),source.indexOf("function getCompleteExplorerSelectionsForBenchmark(")),ctx);
@@ -125,5 +137,5 @@ const filtered=vm.runInContext('filterExplorerSeriesByAdvancedSearch(matrix,{},"
 assert.equal(filtered.dateColumns.length,1);assert.equal(filtered.dateColumns[0].code,"0020");assert.equal(filtered.rows[0].values[0].value,0);
 assert.equal(buildExplorerXYSeries({...base,explorerPoints:[...points,points[0]]},{tableId:"TEST",selectedZCode:"EUR"}).dateColumns.length,3);
 const missing=buildExplorerXYSeries({...base,rows:[],explorerPoints:[]},{tableId:"TEST"});assert.ok(missing.status);assert.equal(missing.rows.length,0);
-context.activeAxis="z";assert.equal(vm.runInContext('isExplorerXYView()',ctx),false);
-console.log("PASS: XY values, transpose, dates, Z/JST filters, missing vs zero, formats, merged header coverage, real table rendering, coordinate selection and Tab fallback.");
+context.activeAxis="z";assert.equal(vm.runInContext('isExplorerXYView()',ctx),true);
+console.log("PASS: XY values, fixed orientation, global display mode, dates, Z/JST filters, missing vs zero, formats, merged header coverage, real table rendering, coordinate selection and inert axis buttons.");
