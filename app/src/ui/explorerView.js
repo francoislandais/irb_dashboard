@@ -48,7 +48,7 @@ import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260917-query-ranges";
-import { showExplorerQueryDialog } from "./explorerQueryDialog.js?v=20260917-query-ranges";
+import { showExplorerQueryDialog } from "./explorerQueryDialog.js?v=20260917-query-copy";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
 let rerenderApp = () => {};

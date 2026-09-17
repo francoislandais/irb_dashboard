@@ -40,7 +40,7 @@ function createDialog(buildQuery) {
   closeButton.setAttribute("aria-label", "Close");
   closeButton.textContent = "×";
   closeButton.addEventListener("click", hideExplorerQueryDialog);
-  header.append(headerText, closeButton);
+  header.append(headerText);
 
   const body = document.createElement("div");
   body.className = "audit-trail-body dataset-dialog-body";
@@ -59,6 +59,11 @@ function createDialog(buildQuery) {
   copyButton.type = "button";
   copyButton.className = "topbar-button";
   copyButton.textContent = "Copier la requête";
+  copyButton.title = "Copier la requête dans le presse-papiers";
+  const headerActions = document.createElement("div");
+  headerActions.className = "dataset-dialog-header-actions";
+  headerActions.append(copyButton, closeButton);
+  header.append(headerActions);
 
   const renderQuery = () => {
     const sql = buildQuery({ includeDateFilter: dateFilterCheckbox.checked });
@@ -79,7 +84,7 @@ function createDialog(buildQuery) {
 
   renderQuery();
 
-  body.append(dateFilterLabel, pre, copyButton);
+  body.append(dateFilterLabel, pre);
   dialog.append(header, body);
   overlay.append(dialog);
   return overlay;
