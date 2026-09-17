@@ -345,7 +345,7 @@ export function wireExplorerUi(actions, rerender) {
   });
   elements.explorerBenchmarkExpand?.addEventListener("click", () => {
     saveExplorerScrollPosition();
-    explorerBenchmarkExpanded = !explorerBenchmarkExpanded;
+    explorerBenchmarkExpanded = true;
     if (getLatestState()) rerenderApp(getLatestState());
   });
   elements.explorerBenchmarkCollapse?.addEventListener("click", () => {
@@ -1021,7 +1021,6 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 
 function syncExplorerBenchmarkPlacement() {
   const benchmarkVisible = explorerContextTopic === "benchmark-mode";
-  if (!benchmarkVisible) explorerBenchmarkExpanded = false;
   // Expanded mode swaps the table for the chart within the exact same
   // spot (see #explorer-benchmark-expanded-slot's grid-row in styles.css) -
   // the context panel, axis tabs and filter bar all stay exactly where
@@ -1063,9 +1062,9 @@ function refreshExplorerSelectionChrome(state, { selectionOnly = false } = {}) {
   }
 
   syncExplorerBenchmarkPlacement();
-  const benchmarkVisible = explorerContextTopic === "benchmark-mode";
-  const benchmark = benchmarkVisible ? buildExplorerBenchmark() : null;
-  if (benchmarkVisible) {
+  const previewVisible = explorerContextTopic === "benchmark-mode" && !explorerBenchmarkExpanded;
+  const benchmark = previewVisible || explorerBenchmarkExpanded ? buildExplorerBenchmark() : null;
+  if (previewVisible) {
     renderExplorerBenchmarkView({
       benchmark,
       compact: true,
@@ -1085,7 +1084,7 @@ function refreshExplorerSelectionChrome(state, { selectionOnly = false } = {}) {
   } else {
     destroyExplorerBenchmarkChart(elements.explorerBenchmarkChart);
   }
-  if (benchmarkVisible && explorerBenchmarkExpanded) {
+  if (explorerBenchmarkExpanded) {
     renderExplorerBenchmarkView({
       benchmark,
       compact: false,
@@ -2825,7 +2824,7 @@ function renderExplorerContextPanel(state) {
   syncExplorerBenchmarkPlacement();
   if (explorerContextTopic !== "benchmark-mode") {
     destroyExplorerBenchmarkChart(elements.explorerBenchmarkChart);
-    destroyExplorerBenchmarkChart(elements.explorerBenchmarkExpandedChart);
+    if (!explorerBenchmarkExpanded) destroyExplorerBenchmarkChart(elements.explorerBenchmarkExpandedChart);
   }
   renderExplorerSelectionPane();
 
