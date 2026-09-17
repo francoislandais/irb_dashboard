@@ -4066,8 +4066,10 @@ table {
   text-align: center;
   vertical-align: middle;
   padding: 8px;
-  border-right: 1px solid #ffffff;
-  border-bottom: 1px solid #dce4df;
+}
+
+.metric-table.is-xy-view thead th {
+  border: 1px solid #dce4df;
 }
 
 .metric-table.is-xy-view .explorer-xy-group {
