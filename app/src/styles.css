@@ -4114,7 +4114,7 @@ table {
 }
 
 .metric-table.is-xy-view .explorer-xy-group.is-horizontally-merged {
-  text-align: left;
+  text-align: left !important;
 }
 
 /* The label stays within its own merged header cell, but remains visible just
@@ -4122,7 +4122,10 @@ table {
 .metric-table.is-xy-view .explorer-xy-group.is-horizontally-merged > .explorer-xy-header-label {
   position: sticky;
   left: 426px;
-  display: inline-block;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  text-align: left;
   z-index: 2;
 }
 
