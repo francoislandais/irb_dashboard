@@ -3847,6 +3847,15 @@ table {
   z-index: 1;
 }
 
+/* Keep ordinary Explorer labels and figures truly black. Selection-related
+   colors below remain authoritative, while unavailable XY combinations keep
+   their muted treatment above. */
+.metric-table tbody tr:not(.is-selected):not(.is-ancestor):not(.is-axis-impossible) > th.description-column,
+.metric-table tbody tr:not(.is-selected):not(.is-ancestor):not(.is-axis-impossible) > th.description-column .tree-label,
+.metric-table tbody tr:not(.is-selected):not(.is-axis-impossible) > td:not(.code-column):not(.is-cell-range-selected):not(.is-xy-impossible) {
+  color: #000000;
+}
+
 /* Row selection is the light highlight — it marks which row is active
    without competing with the strong highlight reserved for the one cell
    the user actually clicked (see .is-selected-cell below). */
