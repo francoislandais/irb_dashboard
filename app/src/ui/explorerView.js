@@ -244,6 +244,7 @@ const elements = {
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
   explorerContextDetailToggle: document.querySelector("#explorer-context-detail-toggle"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
+  explorerSelectionHistory: document.querySelector("#explorer-selection-history"),
   globalReferenceSelect: document.querySelector("#global-reference-select"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
   explorerCellRangeBanner: document.querySelector("#explorer-cell-range-banner"),
@@ -1109,7 +1110,6 @@ function syncExplorerContextDetailVisibility() {
   const collapsed = explorerContextDetailCollapsed;
   elements.explorerWorkspace?.classList.toggle("is-context-detail-collapsed", collapsed);
   elements.explorerContextPanel?.classList.toggle("is-detail-collapsed", collapsed);
-  if (elements.explorerContextDetail) elements.explorerContextDetail.hidden = collapsed;
   if (elements.explorerContextDetailToggle) {
     elements.explorerContextDetailToggle.setAttribute("aria-expanded", String(!collapsed));
     elements.explorerContextDetailToggle.setAttribute("aria-label", collapsed ? "Show Explorer options" : "Hide Explorer options");
@@ -1702,14 +1702,17 @@ function renderExplorerTable(series, selectedUnit) {
   descriptionHeader.className = "description-column";
   descriptionHeader.dataset.explorerExportColumn = "true";
   if (!isDateFocus) descriptionHeader.rowSpan = 2;
-  descriptionHeader.textContent = getExplorerAxisDisplayName(activeAxis);
+  descriptionHeader.setAttribute("aria-label", getExplorerAxisDisplayName(activeAxis));
+  descriptionHeader.textContent = isXY ? getExplorerAxisDisplayName(activeAxis) : "";
   headerRow.append(descriptionHeader);
 
   const codeHeader = document.createElement("th");
   codeHeader.scope = "col";
   codeHeader.className = "code-column";
-  codeHeader.textContent = "Code";
+  codeHeader.setAttribute("aria-label", "Code");
+  codeHeader.textContent = isXY ? "Code" : "";
   codeHeader.dataset.explorerExportColumn = "true";
+  codeHeader.dataset.explorerExportLabel = "Code";
   if (!isDateFocus) codeHeader.rowSpan = 2;
   headerRow.append(codeHeader);
 
@@ -3207,8 +3210,10 @@ function createExplorerSelectionHistoryControls() {
 }
 
 function renderExplorerSelectionPane() {
-  if (!elements.explorerContextSelection) return;
-  elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
+  if (elements.explorerContextSelection) {
+    elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
+  }
+  elements.explorerSelectionHistory?.replaceChildren(createExplorerSelectionHistoryControls());
 }
 
 // The only parts of the context panel whose content actually depends on
@@ -4085,7 +4090,7 @@ function createExplorerSelectionSummaryCard() {
     description.append(referenceLine);
   }
 
-  pane.append(description, createExplorerSelectionHistoryControls());
+  pane.append(description);
   return pane;
 }
 

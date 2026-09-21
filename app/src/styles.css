@@ -1458,6 +1458,7 @@ button:focus-visible {
   min-width: 0;
   height: 100%;
   width: 100%;
+  transition: grid-template-columns 220ms ease, gap 220ms ease;
 }
 
 .explorer-main-pane {
@@ -1478,7 +1479,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 8px;
-  grid-template-rows: 154px auto minmax(0, 1fr);
+  grid-template-rows: 154px minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1489,31 +1490,36 @@ button:focus-visible {
   border: 0;
   border-radius: 0;
   background: transparent;
+  transition: height 220ms ease;
 }
 
 .explorer-context-panel.has-benchmark-preview {
   align-content: start;
-  grid-template-rows: 154px auto auto clamp(190px, 29vh, 250px);
+  grid-template-rows: 154px auto clamp(190px, 29vh, 250px);
 }
 
 .explorer-context-detail-toggle {
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 24px;
+  position: absolute;
+  z-index: 2;
+  top: 68px;
+  right: -9px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 34px;
   border: 1px solid #d8dfdb;
-  border-radius: 5px;
+  border-radius: 0 6px 6px 0;
   background: #ffffff;
   color: #52605a;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   line-height: 1;
-  padding: 3px 7px;
+  padding: 0;
+  box-shadow: 1px 1px 3px rgb(31 51 42 / 8%);
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 220ms ease;
 }
 
 .explorer-context-detail-toggle > span:first-child {
-  font-size: 1rem;
-  line-height: 0.8;
+  line-height: 1;
 }
 
 .explorer-context-detail-toggle:hover,
@@ -1547,28 +1553,37 @@ button:focus-visible {
   padding-left: 8px;
   padding-right: 8px;
   scrollbar-gutter: stable;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 160ms ease, transform 220ms ease, visibility 0s linear;
 }
 
 /* In compact mode the selection card remains in place, while the table uses
    the column that previously held the contextual option list. */
 .explorer-workspace.is-context-detail-collapsed {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 0 minmax(0, 1fr);
+  gap: 0;
 }
 
 .explorer-workspace.is-context-detail-collapsed .explorer-main-pane {
-  grid-column: 1;
+  grid-column: 2;
 }
 
 .explorer-workspace.is-context-detail-collapsed .explorer-context-panel {
   position: absolute;
   z-index: 60;
   width: 300px;
-  height: auto;
-  grid-column: 1;
-  grid-row: 1;
-  grid-template-rows: 154px auto;
+  height: 154px;
   align-self: start;
   pointer-events: auto;
+}
+
+.explorer-workspace.is-context-detail-collapsed .explorer-context-panel > .cost-of-risk-context-detail-pane {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-14px);
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 220ms ease, visibility 0s linear 220ms;
 }
 
 .explorer-workspace.is-context-detail-collapsed .axis-tabs {
@@ -4087,12 +4102,12 @@ table {
   .explorer-context-panel {
     grid-column: 1;
     grid-row: 1;
-    grid-template-rows: 154px auto minmax(0, 1fr);
+    grid-template-rows: 154px minmax(0, 1fr);
     max-height: 100%;
   }
 
   .explorer-context-panel.has-benchmark-preview {
-    grid-template-rows: 154px auto auto clamp(170px, 24vh, 220px);
+    grid-template-rows: 154px auto clamp(170px, 24vh, 220px);
   }
 
   .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active),
@@ -4116,17 +4131,22 @@ table {
   }
 }
 
-/* Compact history controls remain outside the selection text's scroller. */
+/* History sits beside search in the top control line, leaving the selection
+   card entirely dedicated to the current coordinates. */
+.explorer-selection-history-host {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
 .explorer-selection-history {
   display: flex;
-  justify-content: flex-end;
   gap: 5px;
-  padding: 3px 4px 0;
 }
 
 .explorer-selection-history button {
   width: 28px;
-  height: 24px;
+  height: 28px;
   padding: 0;
   border: 1px solid #d8dfdb;
   border-radius: 5px;

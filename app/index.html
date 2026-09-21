@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260921-context-drawer">
+    <link rel="stylesheet" href="./src/styles.css?v=20260921-context-layout">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -107,6 +107,7 @@
                     </label>
                     <div id="explorer-search-suggestions" class="explorer-search-suggestions" role="listbox" aria-label="Metadata concepts" hidden></div>
                   </div>
+                  <div id="explorer-selection-history" class="explorer-selection-history-host" aria-label="Selection history"></div>
                   <button id="explorer-excel-export" class="explorer-excel-export-button" type="button" aria-label="Export visible table to Excel" title="Export visible table to Excel" disabled>
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                       <rect class="excel-workbook" x="7" y="3" width="14" height="18" rx="1.4"/>
@@ -138,7 +139,6 @@
                 <div id="explorer-context-selection" class="cost-of-risk-context-selected-pane" aria-label="Current Explorer selection"></div>
                 <button id="explorer-context-detail-toggle" class="explorer-context-detail-toggle" type="button" aria-controls="explorer-context-detail" aria-expanded="false" aria-label="Show Explorer options" title="Show Explorer options">
                   <span aria-hidden="true">›</span>
-                  <span class="explorer-context-detail-toggle-label">Options</span>
                 </button>
                 <div id="explorer-context-detail" class="cost-of-risk-context-detail-pane" aria-label="Explorer selection options"></div>
                 <section class="explorer-benchmark-preview" aria-label="Benchmark preview" hidden>
@@ -387,6 +387,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260921-context-drawer"></script>
+    <script type="module" src="./src/main.js?v=20260921-context-layout"></script>
   </body>
 </html>
