@@ -1491,7 +1491,7 @@ button:focus-visible {
   border: 0;
   border-radius: 0;
   background: transparent;
-  transition: height 220ms ease;
+  transition: opacity 160ms ease, transform 220ms ease, visibility 0s linear;
 }
 
 .explorer-context-panel.has-benchmark-preview {
@@ -1574,9 +1574,13 @@ button:focus-visible {
   position: absolute;
   z-index: 60;
   width: 300px;
-  height: 154px;
+  height: 100%;
   align-self: start;
-  pointer-events: auto;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-18px);
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 220ms ease, visibility 0s linear 220ms;
 }
 
 .explorer-workspace.is-context-detail-collapsed .explorer-context-panel > .cost-of-risk-context-detail-pane {
@@ -1587,13 +1591,6 @@ button:focus-visible {
   transition: opacity 140ms ease, transform 220ms ease, visibility 0s linear 220ms;
 }
 
-.explorer-workspace.is-context-detail-collapsed .axis-tabs {
-  --axis-tabs-offset-left: 316px;
-}
-
-.explorer-workspace.is-context-detail-collapsed .explorer-active-filters {
-  margin-left: 316px;
-}
 
 .explorer-context-panel .explorer-jst-selection-row,
 .explorer-context-panel .explorer-template-option,

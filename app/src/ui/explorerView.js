@@ -273,7 +273,6 @@ export function wireExplorerUi(actions, rerender) {
     button.addEventListener("click", () => {
       if (button.disabled) return;
 
-      if (typeof revealExplorerContextDetail === "function") revealExplorerContextDetail();
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       const requestedAxis = button.getAttribute("data-explorer-axis") || "y";
@@ -1115,6 +1114,7 @@ function syncExplorerContextDetailVisibility() {
     elements.explorerContextDetailToggle.setAttribute("aria-label", collapsed ? "Show Explorer options" : "Hide Explorer options");
     elements.explorerContextDetailToggle.setAttribute("title", collapsed ? "Show Explorer options" : "Hide Explorer options");
   }
+  elements.explorerTemplateControl?.setAttribute("aria-expanded", String(!collapsed));
   window.setTimeout(scheduleExplorerStickyParentsUpdate, 0);
 }
 
