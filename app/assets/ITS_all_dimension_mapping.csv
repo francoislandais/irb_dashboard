@@ -12781,3 +12781,18 @@ C_13.01;x_axis_rc_code;930;Memorandum items > Risk weighted exposure amount corr
 C_13.01;x_axis_rc_code;940;Memorandum items > Output floor - RWEA related to the impact of application of Article 465(7) of Regulation (EU) No 575.2013 > SEC-IRBA;;;
 C_13.01;x_axis_rc_code;950;Memorandum items > Output floor - RWEA related to the impact of application of Article 465(7) of Regulation (EU) No 575.2013 > Internal assessment approach;;;
 C_13.01;x_axis_rc_code;960;Memorandum items > Output floor - RWEA related to the impact of application of Article 465(7) of Regulation (EU) No 575.2013 > Specific treatment of senior tranches in qualifying NPE securitisations;;;
+C_16.01;y_axis_rc_code;0010;Business indicator component and ASA;;;
+C_16.01;y_axis_rc_code;0020;Business indicator;;;
+C_16.01;y_axis_rc_code;0030;Interest, leases and dividend component;;;
+C_16.01;y_axis_rc_code;0040;ILDC related to the individual institution and consolidated Group (excluding entities considered by Article 314(3) ;;;
+C_16.01;y_axis_rc_code;0050;ILDC for entities considered by Article 314(3);;;
+C_16.01;y_axis_rc_code;0060;Services component ;;;
+C_16.01;y_axis_rc_code;0070;Financial component ;;;
+C_16.01;y_axis_rc_code;0080;ASA under Article 314(4) (Retail banking);;;
+C_16.01;y_axis_rc_code;0090;ASA under Article 314(4) (Commercial banking);;;
+C_16.01;y_axis_rc_code;0100;Memorandum Item:ILDC related to the Individual institution and consolidated Group, including entities considered by Article 314(3);;;
+C_16.01;x_axis_rc_code;0010;Value;;;
+C_16.01;x_axis_rc_code;0020;Value/of which: adjustments due to merge & acquisition of entities or activities;;;
+C_16.01;x_axis_rc_code;0030;Value/(Adjustments due to disposal of entities or activities);;;
+C_16.01;x_axis_rc_code;0040;Own fund requirements;;;
+C_16.01;x_axis_rc_code;0050;Risk exposure amount;;;

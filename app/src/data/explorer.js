@@ -9,11 +9,12 @@ const EXPLORER_TEMPLATE_LABELS = {
   // ------------------------------------------------------------------
 
   "C_01.00": "Own funds",
-  "C_02.00": "Total risk exposure amount",
-  "C_03.00": "Capital ratios",
+  "C_02.00": "Own funds requirements",
+  "C_03.00": "Capital ratios and capital levels",
   "C_04.00": "Memorandum items",
   "C_05.01": "Transitional provisions",
-  "C_05.02": "Transitional provisions - details",
+  "C_05.02": "Grandfathered instruments - instruments not constituting state aid",
+  "C_06.01": "Group solvency - information on affiliates (total)",
 
   "C_07.00": "Credit risk - Standardised approach",
 
@@ -38,8 +39,12 @@ const EXPLORER_TEMPLATE_LABELS = {
   "C_15.00": "Securitisation - IRB approach",
 
   "C_16.00": "Operational risk",
-  "C_17.01": "Operational losses",
-  "C_17.02": "Operational loss events",
+  "C_16.01": "Operational risk - Own funds requirements",
+  "C_16.02": "Operational risk - Business indicator component",
+  "C_16.03": "Operational risk breakdown",
+  "C_16.04": "Operational risk - Information at subsidiary level (Article 314(2a))",
+  "C_17.01": "Operational risk losses and recoveries by business lines and loss event types",
+  "C_17.02": "Operational risk - Detailed information on the largest loss events",
 
   "C_18.00": "Market risk",
   "C_19.00": "Position risk",
