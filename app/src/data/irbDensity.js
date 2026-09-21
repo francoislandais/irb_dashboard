@@ -1,4 +1,4 @@
-import { normalizeAxisCode } from "./core/axisCode.js";
+import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 

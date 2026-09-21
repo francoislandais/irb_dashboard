@@ -1,4 +1,4 @@
-import { normalizeAxisCode } from "./core/axisCode.js";
+import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 
 const KEY_SEPARATOR = "\u001f";

@@ -1,8 +1,8 @@
 import { getExplorerTemplateReferenceDates } from "../data/explorerReferenceDates.js";
-import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260917-xy-forbidden";
+import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260921-hierarchy-gt-escape";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
-import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260917-funding-plan-currencies";
-import { normalizeAxisCode } from "../data/core/axisCode.js";
+import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260921-hierarchy-gt-escape";
+import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-padding";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260916-raw-unit";
@@ -37,7 +37,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260921-opr-templates";
+} from "../data/explorer.js?v=20260921-hierarchy-gt-escape";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import {
@@ -318,6 +318,12 @@ export function wireExplorerUi(actions, rerender) {
       return;
     }
 
+    const xyHeaderCell = event.target.closest("th.explorer-xy-leaf[data-explorer-xy-column-code]");
+    if (xyHeaderCell) {
+      selectExplorerXYColumn(xyHeaderCell.dataset.explorerXyColumnCode);
+      return;
+    }
+
     const row = event.target.closest("tbody tr[data-point-code]");
     if (row) {
       const cell = event.target.closest("td[data-explorer-cell-column]");
@@ -354,6 +360,13 @@ export function wireExplorerUi(actions, rerender) {
     }
 
     if (event.key !== "Enter" && event.key !== " ") return;
+
+    const xyHeaderCell = event.target.closest("th.explorer-xy-leaf[data-explorer-xy-column-code]");
+    if (xyHeaderCell) {
+      event.preventDefault();
+      selectExplorerXYColumn(xyHeaderCell.dataset.explorerXyColumnCode);
+      return;
+    }
 
     const row = event.target.closest("tbody tr[data-point-code]");
     if (!row) return;
@@ -658,7 +671,9 @@ function getExplorerConceptIndex(state = getLatestState()) {
     const axis = String(point.coordinate ?? "").charAt(0).toUpperCase();
     const kind = /^[XYZ]$/.test(axis) ? `Axis ${axis}` : "Metadata";
     const description = String(point.description ?? "").trim();
-    const segments = description.split(/\s*(?:>|\/)\s*/).filter(Boolean);
+    // Raw description, not the escaped hierarchyPath (see
+    // core/hierarchyPath.js) - guard the same ">=" case directly here too.
+    const segments = description.split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean);
     (segments.length > 0 ? segments : [description]).forEach((segment) => addSegmentConcepts(segment, point.tableId, kind));
   });
 
@@ -1945,6 +1960,11 @@ function renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader) {
         cell.dataset.explorerColumnOrder = String(header.columnIndex);
         cell.dataset.explorerExportColumn = "true";
         cell.dataset.explorerExportLabel = `${series.dateColumns[header.columnIndex].label} (${header.code})`;
+        // Lets clicking the header select that column, same as clicking a
+        // body cell already does (see selectExplorerXYColumn).
+        cell.dataset.explorerXyColumnCode = header.code;
+        cell.tabIndex = 0;
+        cell.setAttribute("role", "button");
       }
       row.append(cell);
     });
@@ -5186,6 +5206,34 @@ function getParentPathsFromRenderedRows(rows) {
 
 function getExplicitPathsFromRenderedRows(rows) {
   return new Set(rows.map((row) => row.dataset.normalizedPath).filter(Boolean));
+}
+
+// Clicking an XY header leaf (see renderExplorerXYHeader) selects that
+// column on its own, the same way clicking a body cell already sets both
+// the row and the column together (see selectExplorerRow's xyColumnCode) -
+// this just skips the row half of it, since no row was clicked.
+function selectExplorerXYColumn(code) {
+  const series = lastRenderedExplorerTableSeries;
+  if (!series?.xy || !code) return;
+
+  const context = getActiveExplorerContext();
+  const columnIsX = series.columnAxis === "x";
+  if (getLatestState()?.impossibleXYCombinations?.isImpossible(
+    getActiveExplorerTemplate()?.tableId,
+    columnIsX ? code : context.selectedXCode,
+    columnIsX ? context.selectedYCode : code
+  )) return;
+
+  hasInteractedWithExplorerSelection = true;
+  context[columnIsX ? "selectedXCode" : "selectedYCode"] = code;
+  syncExplorerXYColumnSelection(series);
+
+  if (getLatestState()) {
+    saveExplorerScrollPosition();
+    refreshExplorerSelectionOnly(getLatestState());
+    return;
+  }
+  applyExplorerSelection();
 }
 
 function selectExplorerRow(pointCode, options = {}) {

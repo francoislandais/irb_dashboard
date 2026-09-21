@@ -1,5 +1,5 @@
 import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
-import { normalizeAxisCode } from "./core/axisCode.js";
+import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 
 const MAPPING_URL = "./assets/ITS_all_dimension_mapping.csv";
 

@@ -1,8 +1,9 @@
-import { getExplorerAxisPointsConfig } from "./timeSeries.js?v=20260917-kri-pagination";
-import { getAvailableExplorerAxisCodes, getExplorerRowsForTemplate, EXPLORER_ALL_CURRENCIES_CODE, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260917-kri-data-only-rows";
+import { getExplorerAxisPointsConfig } from "./timeSeries.js?v=20260921-hierarchy-gt-escape";
+import { getAvailableExplorerAxisCodes, getExplorerRowsForTemplate, EXPLORER_ALL_CURRENCIES_CODE, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260921-hierarchy-gt-escape";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
-import { normalizeAxisCode } from "./core/axisCode.js";
+import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
+import { unescapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";
 
 function axisPoints(state, tableId, axis, configId) {
   const seen = new Set();
@@ -62,8 +63,15 @@ export function buildExplorerXYSeries(state, { tableId, yConfigTableId = tableId
 // Merge only adjacent siblings with identical full ancestry. A leaf spans
 // the remaining levels, so unequal-depth branches do not create blank cells.
 export function buildExplorerXYHeaders(columns) {
+  // column.hierarchyPath already has every literal ">" escaped by
+  // parseDescriptionHierarchy before being joined with " > " (see
+  // core/hierarchyPath.js), so splitting on ">" here is unambiguous - and
+  // unescaping each segment restores it for display. The (?!=) guard stays
+  // as a safety net for the column.description/column.code fallback below,
+  // which is raw, unescaped text (used only when a column has no
+  // hierarchyPath at all).
   const paths = columns.map((column) => String(column.hierarchyPath || column.description || column.code)
-    .split(/\s*(?:>|\/)\s*/).filter(Boolean));
+    .split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean).map(unescapeHierarchySegment));
   const depth = Math.max(1, ...paths.map((path) => path.length));
   return Array.from({ length: depth }, (_, level) => {
     const cells = [];

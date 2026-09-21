@@ -4230,6 +4230,11 @@ table {
 
 .metric-table.is-xy-view .explorer-xy-leaf {
   background: #ffffff;
+  cursor: pointer;
+}
+
+.metric-table.is-xy-view .explorer-xy-leaf:hover {
+  background: #eaf2fa;
 }
 
 .explorer-xy-header-code {

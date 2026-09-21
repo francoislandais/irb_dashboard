@@ -2,7 +2,7 @@ import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js";
 import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260915-stable-lists";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260917-kri-formula";
-import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260917-kri-formula";
+import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260921-hierarchy-gt-escape";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";

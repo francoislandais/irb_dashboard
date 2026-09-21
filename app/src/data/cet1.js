@@ -1,4 +1,4 @@
-import { normalizeAxisCode } from "./core/axisCode.js";
+import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
 import { formatBasisPointsValue, formatMetricValue } from "./core/formatting.js?v=20260917-kri-unit-fix";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";

@@ -1,6 +1,7 @@
 import { getAllIndexedTableIds, getIndexedAxisCodesAnyJst, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260915-stable-lists";
-import { normalizeAxisCode } from "./core/axisCode.js";
+import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { unescapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";
 
 const EXPLORER_TEMPLATE_LABELS = {
 
@@ -484,9 +485,14 @@ export function normalizeHierarchyPath(path) {
 }
 
 export function splitHierarchyPath(path) {
+  // parseDescriptionHierarchy already escaped every literal ">" it found
+  // inside a segment before joining with " > " (see core/hierarchyPath.js) -
+  // so any ">" still in the string here is genuinely a level separator, and
+  // splitting on it plainly is safe. Restore the escaped ones once split
+  // back into their own segment, for display or further "/"-based joins.
   return String(path ?? "")
     .split(">")
-    .map((part) => part.trim())
+    .map((part) => unescapeHierarchySegment(part.trim()))
     .filter(Boolean);
 }
 
