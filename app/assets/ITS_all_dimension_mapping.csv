@@ -381,10 +381,10 @@ C_05.01;y_axis_rc_code;10;Total adjustments;;;
 C_05.01;y_axis_rc_code;20;Total adjustments/Grandfathered instruments;;;
 C_05.01;y_axis_rc_code;60;Total adjustments/Grandfathered instruments/Instruments not constituting state aid;;;
 C_05.01;y_axis_rc_code;61;Total adjustments/Grandfathered instruments/Instruments issued through special purpose vehicles;;;
-C_05.01;y_axis_rc_code;62;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014/59/Eu or are subject to set-off or netting arrangements;;;
-C_05.01;y_axis_rc_code;63;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014/59/Eu or are subject to set-off or netting arrangements/Of which: instruments without legally or contractually mandatory write-down or conversion upon exercise of powers in accordance with article 59 of directive 2014/59/Eu;;;
-C_05.01;y_axis_rc_code;64;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014/59/Eu or are subject to set-off or netting arrangements/Of which: instruments governed by third-country law without effective and enforceable exercise of powers in accordance with article 59 of directive 2014/59/Eu;;;
-C_05.01;y_axis_rc_code;65;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014/59/Eu or are subject to set-off or netting arrangements/Of which: instruments subject to set-off or netting arrangements;;;
+C_05.01;y_axis_rc_code;62;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014-59-Eu or are subject to set-off or netting arrangements;;;
+C_05.01;y_axis_rc_code;63;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014-59-Eu or are subject to set-off or netting arrangements/Of which: instruments without legally or contractually mandatory write-down or conversion upon exercise of powers in accordance with article 59 of directive 2014-59-Eu;;;
+C_05.01;y_axis_rc_code;64;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014-59-Eu or are subject to set-off or netting arrangements/Of which: instruments governed by third-country law without effective and enforceable exercise of powers in accordance with article 59 of directive 2014-59-Eu;;;
+C_05.01;y_axis_rc_code;65;Total adjustments/Grandfathered instruments/Instruments issued before 27 june 2019 that do not meet the eligibility criteria related to write-down and conversion powers pursuant to article 59 of directive 2014-59-Eu or are subject to set-off or netting arrangements/Of which: instruments subject to set-off or netting arrangements;;;
 C_05.01;y_axis_rc_code;70;Total adjustments/Minority interests and equivalents;;;
 C_05.01;y_axis_rc_code;80;Total adjustments/Minority interests and equivalents/Capital instruments and items that do not qualify as minority interests;;;
 C_05.01;y_axis_rc_code;90;Total adjustments/Minority interests and equivalents/Transitional recognition in consolidated own funds of minority interests;;;
@@ -392,7 +392,7 @@ C_05.01;y_axis_rc_code;91;Total adjustments/Minority interests and equivalents/T
 C_05.01;y_axis_rc_code;92;Total adjustments/Minority interests and equivalents/Transitional recognition in consolidated own funds of qualifying tier 2 capital;;;
 C_05.01;y_axis_rc_code;100;Total adjustments/Other transitional adjustments;;;
 C_05.01;y_axis_rc_code;111;Total adjustments/Other transitional adjustments/Unrealised gains and losses from certain debt exposures to central governments, regional governments, local authorities and pses;;;
-C_05.01;y_axis_rc_code;112;Total adjustments/Other transitional adjustments/Unrealised gains and losses from certain debt exposures to central governments, regional governments, local authorities and pses/Of which: amount a;;;
+C_05.01;y_axis_rc_code;112;Total adjustments/Other transitional adjustments/Unrealised gains and losses from certain debt exposures to central governments, regional governments, local authorities and pses/Of which: amount A;;;
 C_05.01;y_axis_rc_code;140;Total adjustments/Other transitional adjustments/Deductions;;;
 C_05.01;y_axis_rc_code;170;Total adjustments/Other transitional adjustments/Deductions/Deferred tax assets that rely on future profitability and do not arise from temporary differences;;;
 C_05.01;y_axis_rc_code;380;Total adjustments/Other transitional adjustments/Deductions/Deferred tax assets that are dependent on future profitability and arise from temporary differences and cet1 instruments of financial sector entities where the institution has a significant investment;;;
@@ -401,8 +401,8 @@ C_05.01;y_axis_rc_code;425;Total adjustments/Other transitional adjustments/Dedu
 C_05.01;y_axis_rc_code;430;Total adjustments/Other transitional adjustments/Additional filters and deductions;;;
 C_05.01;y_axis_rc_code;440;Total adjustments/Other transitional adjustments/Adjustments due to ifrs 9 transitional arrangements;;;
 C_05.01;y_axis_rc_code;441;Total adjustments/Other transitional adjustments/Adjustments due to ifrs 9 transitional arrangements/Memorandum item: ecl impact of the static component;;;
-C_05.01;y_axis_rc_code;442;Total adjustments/Other transitional adjustments/Adjustments due to ifrs 9 transitional arrangements/Memorandum item: ecl impact of the dynamic component for the period 01/01/2018 - 31/12/2019;;;
-C_05.01;y_axis_rc_code;443;Total adjustments/Other transitional adjustments/Adjustments due to ifrs 9 transitional arrangements/Memorandum item: ecl impact of the dynamic component for the period starting on 01/01/2020;;;
+C_05.01;y_axis_rc_code;442;Total adjustments/Other transitional adjustments/Adjustments due to ifrs 9 transitional arrangements/Memorandum item: ecl impact of the dynamic component for the period 01.01.2018 - 31.12.2019;;;
+C_05.01;y_axis_rc_code;443;Total adjustments/Other transitional adjustments/Adjustments due to ifrs 9 transitional arrangements/Memorandum item: ecl impact of the dynamic component for the period starting on 01.01.2020;;;
 C_05.02;x_axis_rc_code;10;Amount of instruments plus related share premium;;;
 C_05.02;x_axis_rc_code;20;Base for calculating the limit;;;
 C_05.02;x_axis_rc_code;30;Applicable percentage;;;
@@ -434,12 +434,12 @@ C_06.01;x_axis_rc_code;310;Information on the contribution of entities to solven
 C_06.01;x_axis_rc_code;320;Information on the contribution of entities to solvency of the group/Qualifying own funds included in consolidated own funds/Qualifying tier 1 instruments included in consolidated tier 1 capital/Minority interests included in consolidated common equity tier 1 capital;;;
 C_06.01;x_axis_rc_code;330;Information on the contribution of entities to solvency of the group/Qualifying own funds included in consolidated own funds/Qualifying tier 1 instruments included in consolidated tier 1 capital/Qualifying tier 1 instruments included in consolidated additional tier 1 capital;;;
 C_06.01;x_axis_rc_code;340;Information on the contribution of entities to solvency of the group/Qualifying own funds included in consolidated own funds/Qualifying own funds instruments included in consolidated tier 2 capital;;;
-C_06.01;x_axis_rc_code;350;Information on the contribution of entities to solvency of the group/Qualifying own funds included in consolidated own funds/Memorandum item: goodwill (-) / (+) negative goodwill;;;
+C_06.01;x_axis_rc_code;350;Information on the contribution of entities to solvency of the group/Qualifying own funds included in consolidated own funds/Memorandum item: goodwill (-)  (+) negative goodwill;;;
 C_06.01;x_axis_rc_code;360;Information on the contribution of entities to solvency of the group/Consolidated own funds;;;
 C_06.01;x_axis_rc_code;370;Information on the contribution of entities to solvency of the group/Consolidated own funds/Of which: common equity tier 1;;;
 C_06.01;x_axis_rc_code;380;Information on the contribution of entities to solvency of the group/Consolidated own funds/Of which: additional tier 1;;;
 C_06.01;x_axis_rc_code;390;Information on the contribution of entities to solvency of the group/Consolidated own funds/Of which: conributions to consolidated result;;;
-C_06.01;x_axis_rc_code;400;Information on the contribution of entities to solvency of the group/Consolidated own funds/Of which: (-) goodwill / (+) negative goodwill;;;
+C_06.01;x_axis_rc_code;400;Information on the contribution of entities to solvency of the group/Consolidated own funds/Of which: (-) goodwill and (+) negative goodwill;;;
 C_06.01;x_axis_rc_code;410;Capital buffers/Combined buffer requirements;;;
 C_06.01;x_axis_rc_code;420;Capital buffers/Combined buffer requirements/Capital conservation buffer;;;
 C_06.01;x_axis_rc_code;430;Capital buffers/Combined buffer requirements/Institution specific countercyclical buffer;;;
@@ -530,14 +530,24 @@ C_07.00;y_axis_rc_code;150;Breakdown of total exposures by risk weights:/2%;;;
 C_07.00;y_axis_rc_code;160;Breakdown of total exposures by risk weights:/4%;;;
 C_07.00;y_axis_rc_code;170;Breakdown of total exposures by risk weights:/10%;;;
 C_07.00;y_axis_rc_code;180;Breakdown of total exposures by risk weights:/20%;;;
+C_07.00;y_axis_rc_code;185;Breakdown of total exposures by risk weights:/30%;;;
 C_07.00;y_axis_rc_code;190;Breakdown of total exposures by risk weights:/35%;;;
+C_07.00;y_axis_rc_code;195;Breakdown of total exposures by risk weights:/40%;;;
+C_07.00;y_axis_rc_code;196;Breakdown of total exposures by risk weights:/45%;;;
 C_07.00;y_axis_rc_code;200;Breakdown of total exposures by risk weights:/50%;;;
+C_07.00;y_axis_rc_code;205;Breakdown of total exposures by risk weights:/60%;;;
 C_07.00;y_axis_rc_code;210;Breakdown of total exposures by risk weights:/70%;;;
 C_07.00;y_axis_rc_code;220;Breakdown of total exposures by risk weights:/75%;;;
+C_07.00;y_axis_rc_code;225;Breakdown of total exposures by risk weights:/80%;;;
+C_07.00;y_axis_rc_code;226;Breakdown of total exposures by risk weights:/90%;;;
 C_07.00;y_axis_rc_code;230;Breakdown of total exposures by risk weights:/100%;;;
-C_07.00;y_axis_rc_code;240;Breakdown of total exposures by risk weights:/150%;;;
+C_07.00;y_axis_rc_code;231;Breakdown of total exposures by risk weights:/105%;;;
+C_07.00;y_axis_rc_code;232;Breakdown of total exposures by risk weights:/110%;;;
+C_07.00;y_axis_rc_code;235;Breakdown of total exposures by risk weights:/110%;;;
+C_07.00;y_axis_rc_code;240;Breakdown of total exposures by risk weights:/130%;;;
 C_07.00;y_axis_rc_code;250;Breakdown of total exposures by risk weights:/250%;;;
 C_07.00;y_axis_rc_code;260;Breakdown of total exposures by risk weights:/370%;;;
+C_07.00;y_axis_rc_code;265;Breakdown of total exposures by risk weights:/400%;;;
 C_07.00;y_axis_rc_code;270;Breakdown of total exposures by risk weights:/1250%;;;
 C_07.00;y_axis_rc_code;280;Breakdown of total exposures by risk weights:/Other risk weights;;;
 C_07.00;y_axis_rc_code;281;Breakdown of total exposures by approach (CIU):/Look-through approach;;;
@@ -547,6 +557,7 @@ C_07.00;y_axis_rc_code;290;Memorandum items/Exposures secured by mortgages on co
 C_07.00;y_axis_rc_code;310;Memorandum items/Exposures secured by mortgages on residential property;;;
 C_07.00;y_axis_rc_code;300;Memorandum items/Exposures in default subject to a risk weight of 100%;;;
 C_07.00;y_axis_rc_code;320;Memorandum items/Exposures in default subject to a risk weight of 150%;;;
+C_07.00;y_axis_rc_code;330;Memorandum items/Acquisition, development and construction (ADC);;;
 C_08.01;x_axis_rc_code;10;Internal rating scale - pd assigned to the obligor grade or pool;X;;%
 C_08.01;x_axis_rc_code;20;Original exposure pre conversion factors;X;;
 C_08.01;x_axis_rc_code;30;Original exposure pre conversion factors/Of which: large financial sector entities and unregulated financial entities;;;
@@ -3921,12 +3932,12 @@ C_80.00;z_axis_rc_code;USD;US Dollar;1;;
 C_80.00;z_axis_rc_code;CHF;Swiss Franc;;;
 C_80.00;z_axis_rc_code;GBP;Pound Sterling;;;
 C_80.00;x_axis_rc_code;10;Amount/Non-HQLA by maturity/< 6 months;;;
-C_80.00;x_axis_rc_code;20;Amount/Non-HQLA by maturity/â?¥ 6 months to < 1 year;;;
-C_80.00;x_axis_rc_code;30;Amount/Non-HQLA by maturity/â?¥ 1 year;;;
+C_80.00;x_axis_rc_code;20;Amount/Non-HQLA by maturity/ Over 6 months to < 1 year;;;
+C_80.00;x_axis_rc_code;30;Amount/Non-HQLA by maturity/over 1 year;;;
 C_80.00;x_axis_rc_code;40;Amount/HQLA;;;
 C_80.00;x_axis_rc_code;90;Applicable RSF factor/Non-HQLA by maturity/< 6 months;;;
-C_80.00;x_axis_rc_code;100;Applicable RSF factor/Non-HQLA by maturity/â?¥ 6 months to < 1 year;;;
-C_80.00;x_axis_rc_code;110;Applicable RSF factor/Non-HQLA by maturity/â?¥ 1 year;;;
+C_80.00;x_axis_rc_code;100;Applicable RSF factor/Non-HQLA by maturity/Over 6 months to < 1 year;;;
+C_80.00;x_axis_rc_code;110;;;;
 C_80.00;x_axis_rc_code;120;Applicable RSF factor/HQLA;;;
 C_80.00;x_axis_rc_code;130;Required stable funding;;;
 C_80.00;y_axis_rc_code;10;REQUIRED STABLE FUNDING;;;
@@ -11519,7 +11530,7 @@ KRI;y_axis_rc_code;CRED302;NPL Coverage Ratio - General governments;;;%
 KRI;y_axis_rc_code;CRED481;Total Capital Consumption of retained originated SRT tranches;;;Millions
 KRI;y_axis_rc_code;BSFA3200;Financial assets excluding those held for trading;;;Thousands
 KRI;y_axis_rc_code;CRMAT_A901;Absolute volume of CCR RWEA;;;Millions
-KRI;y_axis_rc_code;LIQ212;4 Quarter Standard Deviation of relative changes for Outflows;;;Unit
+KRI;y_axis_rc_code;LIQ212;4 Quarter Standard Deviation of relative changes for Outflows;;;Thousands
 KRI;y_axis_rc_code;LIQV0099;Non liquid assets collateral;;;Thousands
 KRI;y_axis_rc_code;CAP37;Composition of credit risk capital requirements: Credit risk capital requirements under standardised approach;;;%
 KRI;y_axis_rc_code;STCE0616;Total securitised exposures. Other;;;Thousands
@@ -11812,7 +11823,7 @@ KRI;y_axis_rc_code;MRFL1600;Financial liabilities designated at fair value throu
 KRI;y_axis_rc_code;CRED237;Variation rate of loans to NFC by NACE economic sector - Education;;;%
 KRI;y_axis_rc_code;IDCARD87_LSI_FI;Geographical breakdown of assets. SSM country - Finland;;;Thousands
 KRI;y_axis_rc_code;IRRBB220;Contribution of debt securities to NII+MVC sensitivity  (widening CS) (%);;;%
-KRI;y_axis_rc_code;LIQ233;Short-term unsecured WS funding ratio > 3M;;;%
+KRI;y_axis_rc_code;LIQ233;Short-term unsecured WS funding ratio more than 3M;;;%
 KRI;y_axis_rc_code;CRED235;Variation rate of loans to NFC by NACE economic sector - Administrative and support services activities;;;%
 KRI;y_axis_rc_code;CRED238;Variation rate of loans to NFC by NACE economic sector - Human health services and social work activities;;;%
 KRI;y_axis_rc_code;IRRBB249;Worst EVE impact with derivatives (across all IR scenarios) – Worst EVE impact without derivatives (across all IR scenarios);;;Months
@@ -12480,7 +12491,7 @@ KRI;y_axis_rc_code;CAP98;OCR and Pillar 2 Guidance (P2G);;;%
 KRI;y_axis_rc_code;IRRBB221;Contribution of sovereign debt securities to NII+MVC sensitivity  (widening CS) (%);;;%
 KRI;y_axis_rc_code;MR_RMR_FXR_7;Items denominated in a foreign currency (long positions - SA banks) to Total Assets;;;%
 KRI;y_axis_rc_code;CRED319;Texas Ratio;;;%
-KRI;y_axis_rc_code;LIQ213;4 Quarter Standard Deviation of relative changes of Inflows;;;Unit
+KRI;y_axis_rc_code;LIQ213;4 Quarter Standard Deviation of relative changes of Inflows;;;Thousands
 KRI;y_axis_rc_code;STCE0406;Total capital requirements before cap: off balance sheet items and derivatives as investor – traditional sec - IRB;;;Thousands
 KRI;y_axis_rc_code;MARK3;Breakdown of financial assets held for trading - Equity instruments held for trading;;;%
 KRI;y_axis_rc_code;PROF137_FWL;Core Revenue to Assets Ratio at t (aggregated by reported period for the sample of entities in BMA_FWL_ENTITIES);;;%
@@ -12537,7 +12548,7 @@ KRI;y_axis_rc_code;CRED127;Breakdown of total loans by NACE economic sector - Ce
 KRI;y_axis_rc_code;PROF8;Trading financial assets to total financial assets;;;%
 KRI;y_axis_rc_code;MR_PRR_FADJ_DENSITY_OTHER;Total FVadj on Other securities on total Other securities exposure;;;%
 KRI;y_axis_rc_code;CRED331;Foreclosure ratio over total assets;;;%
-KRI;y_axis_rc_code;LIQ211;4 Quarter Standard Deviation of relative changes of HQLA;;;Unit
+KRI;y_axis_rc_code;LIQ211;4 Quarter Standard Deviation of relative changes of HQLA;;;Thousands
 KRI;y_axis_rc_code;MR_RMR_FRTB_37;Difference of long and short JTD in relation to DRC OFR for securitisations included in the ACTP;;;%
 KRI;y_axis_rc_code;BSFA2200;Available-for-sale financial assets: Debt securities: Counterparty sectors other than credit institutions;;;Thousands
 KRI;y_axis_rc_code;CRED318;NPL ratio adjusted by foreclosure&performing forbearance, excl credit institutions;;;%
@@ -12585,3 +12596,188 @@ KRI;y_axis_rc_code;MR_OCI_BBFVPL;OCI changes from financial liabilities at FVPL 
 KRI;y_axis_rc_code;LIQST002;Survival Period Adverse case (days).;;;Days
 KRI;y_axis_rc_code;LIQV0069;6M ABS spread (in basis points);;;Unit
 KRI;y_axis_rc_code;IRRBB_SV_EVE_4;Change in the Supervisory EVE under IR short rates shock down divided by Tier 1 capital;;;%
+C_13.01;y_axis_rc_code;0010;Total exposures;;;
+C_13.01;y_axis_rc_code;0020;Total exposures / Securitisations;;;
+C_13.01;y_axis_rc_code;0030;Total exposures / Securitisations / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0040;Total exposures / Securitisations / Qualifying for differentiated capital treatment / Exposures in STS ABCP and non-ABCP traditional securitisations;;;
+C_13.01;y_axis_rc_code;0050;Total exposures / Securitisations / Qualifying for differentiated capital treatment / Grandfathered senior position in SMEs synthetic securitisations;;;
+C_13.01;y_axis_rc_code;0051;Total exposures / Securitisations / Qualifying for differentiated capital treatment / Senior positions in STS on-balance sheet securitisations;;;
+C_13.01;y_axis_rc_code;0060;Total exposures / Securitisations / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0070;Total exposures / Re-securitisations;;;
+C_13.01;y_axis_rc_code;0080;Total exposures / Originator;;;
+C_13.01;y_axis_rc_code;0090;Total exposures / Originator / Securitisations: on-balance sheet items;;;
+C_13.01;y_axis_rc_code;0100;Total exposures / Originator / Securitisations: on-balance sheet items / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0110;Total exposures / Originator / Securitisations: on-balance sheet items / Qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0120;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0121;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in non-NPE securitisations;;;
+C_13.01;y_axis_rc_code;0131;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in non-NPE securitisations / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0133;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations;;;
+C_13.01;y_axis_rc_code;0134;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: senior exposures in qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0135;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: senior exposures in non-qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0136;Total exposures / Originator / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: non-senior exposures in qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0140;Total exposures / Originator / Securitisations: off-balance sheet items and derivatives;;;
+C_13.01;y_axis_rc_code;0150;Total exposures / Originator / Securitisations: off-balance sheet items and derivatives / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0160;Total exposures / Originator / Securitisations: off-balance sheet items and derivatives / Qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0170;Total exposures / Originator / Securitisations: off-balance sheet items and derivatives / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0180;Total exposures / Originator / Securitisations: off-balance sheet items and derivatives / Not qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0190;Total exposures / Originator / Re-securitisations;;;
+C_13.01;y_axis_rc_code;0200;Total exposures / Investor;;;
+C_13.01;y_axis_rc_code;0210;Total exposures / Investor / Securitisations: on-balance sheet items;;;
+C_13.01;y_axis_rc_code;0220;Total exposures / Investor / Securitisations: on-balance sheet items / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0230;Total exposures / Investor / Securitisations: on-balance sheet items / Qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0240;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0241;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in non-NPE securitisations;;;
+C_13.01;y_axis_rc_code;0251;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in non-NPE securitisations / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0253;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations;;;
+C_13.01;y_axis_rc_code;0254;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: senior exposures in qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0255;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: senior exposures in non-qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0256;Total exposures / Investor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: non-senior exposures in qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0260;Total exposures / Investor / Securitisations: off-balance sheet items and derivatives;;;
+C_13.01;y_axis_rc_code;0270;Total exposures / Investor / Securitisations: off-balance sheet items and derivatives / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0280;Total exposures / Investor / Securitisations: off-balance sheet items and derivatives / Qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0290;Total exposures / Investor / Securitisations: off-balance sheet items and derivatives / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0300;Total exposures / Investor / Securitisations: off-balance sheet items and derivatives / Not qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0310;Total exposures / Investor / Re-securitisations;;;
+C_13.01;y_axis_rc_code;0320;Total exposures / Sponsor;;;
+C_13.01;y_axis_rc_code;0330;Total exposures / Sponsor / Securitisations: on-balance sheet items;;;
+C_13.01;y_axis_rc_code;0340;Total exposures / Sponsor / Securitisations: on-balance sheet items / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0350;Total exposures / Sponsor / Securitisations: on-balance sheet items / Qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0360;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0361;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in non-NPE securitisations;;;
+C_13.01;y_axis_rc_code;0371;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in non-NPE securitisations / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0373;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations;;;
+C_13.01;y_axis_rc_code;0374;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: senior exposures in qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0375;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: senior exposures in non-qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0376;Total exposures / Sponsor / Securitisations: on-balance sheet items / Not qualifying for differentiated capital treatment / Exposures in NPE securitisations / Of which: non-senior exposures in qualifying traditional NPE securitisations;;;
+C_13.01;y_axis_rc_code;0380;Total exposures / Sponsor / Securitisations: off-balance sheet items and derivatives;;;
+C_13.01;y_axis_rc_code;0390;Total exposures / Sponsor / Securitisations: off-balance sheet items and derivatives / Qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0400;Total exposures / Sponsor / Securitisations: off-balance sheet items and derivatives / Qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0410;Total exposures / Sponsor / Securitisations: off-balance sheet items and derivatives / Not qualifying for differentiated capital treatment;;;
+C_13.01;y_axis_rc_code;0420;Total exposures / Sponsor / Securitisations: off-balance sheet items and derivatives / Not qualifying for differentiated capital treatment / Of which: senior exposures;;;
+C_13.01;y_axis_rc_code;0430;Total exposures / Sponsor / Re-securitisations;;;
+C_13.01;y_axis_rc_code;;Breakdown of outstanding positions according to CQS at inception: short term;;;
+C_13.01;y_axis_rc_code;0450;0440 Breakdown of outstanding positions according to CQS at inception: short term / CQS 1;;;
+C_13.01;y_axis_rc_code;0460;0440 Breakdown of outstanding positions according to CQS at inception: short term / CQS 2;;;
+C_13.01;y_axis_rc_code;0470;0440 Breakdown of outstanding positions according to CQS at inception: short term / CQS 3;;;
+C_13.01;y_axis_rc_code;0480;0440 Breakdown of outstanding positions according to CQS at inception: short term / All other CQS;;;
+C_13.01;y_axis_rc_code;;Breakdown of outstanding positions according to CQS at inception: long term;;;
+C_13.01;y_axis_rc_code;0500;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 1;;;
+C_13.01;y_axis_rc_code;0510;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 2;;;
+C_13.01;y_axis_rc_code;0520;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 3;;;
+C_13.01;y_axis_rc_code;0530;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 4;;;
+C_13.01;y_axis_rc_code;0540;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 5;;;
+C_13.01;y_axis_rc_code;0550;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 6;;;
+C_13.01;y_axis_rc_code;0560;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 7;;;
+C_13.01;y_axis_rc_code;0570;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 8;;;
+C_13.01;y_axis_rc_code;0580;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 9;;;
+C_13.01;y_axis_rc_code;0590;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 10;;;
+C_13.01;y_axis_rc_code;0600;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 11;;;
+C_13.01;y_axis_rc_code;0610;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 12;;;
+C_13.01;y_axis_rc_code;0620;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 13;;;
+C_13.01;y_axis_rc_code;0630;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 14;;;
+C_13.01;y_axis_rc_code;0640;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 15;;;
+C_13.01;y_axis_rc_code;0650;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 16;;;
+C_13.01;y_axis_rc_code;0660;0490 Breakdown of outstanding positions according to CQS at inception: long term / CQS 17;;;
+C_13.01;y_axis_rc_code;0670;0490 Breakdown of outstanding positions according to CQS at inception: long term / All other CQS and unrated;;;
+C_13.01;x_axis_rc_code;10;Total amount of securitisation exposures originated;;;
+C_13.01;x_axis_rc_code;20;Synthetic securitisations: credit protection to the securitised exposures > (-) Funded credit protection (Cva);;;
+C_13.01;x_axis_rc_code;30;Synthetic securitisations: credit protection to the securitised exposures > (-) Total outflows > (-) Unfunded credit protection adjusted values (G*);;;
+C_13.01;x_axis_rc_code;40;Synthetic securitisations: credit protection to the securitised exposures > Notional amount retained or repurchased of credit protection;;;
+C_13.01;x_axis_rc_code;50;Securitisation positions > Original exposure pre conversion factors;;;
+C_13.01;x_axis_rc_code;60;(-) Value adjustments and provisions;;;
+C_13.01;x_axis_rc_code;70;Exposure net of value adjustments and provisions;;;
+C_13.01;x_axis_rc_code;80;Credit risk mitigation (CRM) techniques with substitution effects on the exposure > (-) Unfunded credit protection: adjusted values (Ga);;;
+C_13.01;x_axis_rc_code;90;Credit risk mitigation (CRM) techniques with substitution effects on the exposure > (-) Funded credit protection;;;
+C_13.01;x_axis_rc_code;100;Credit risk mitigation (CRM) techniques with substitution effects on the exposure > Substitution of the exposure due to CRM > (-) Total outflows;;;
+C_13.01;x_axis_rc_code;110;Credit risk mitigation (CRM) techniques with substitution effects on the exposure > Substitution of the exposure due to CRM > Total inflows;;;
+C_13.01;x_axis_rc_code;120;Net exposure after CRM substitution effects pre conversion factors;;;
+C_13.01;x_axis_rc_code;130;(-) Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection financial collateral comprehensive method adjusted value (Cvam);;;
+C_13.01;x_axis_rc_code;140;Fully adjusted exposure value (E*);;;
+C_13.01;x_axis_rc_code;150;Fully adjusted exposure value (E*) > Of which: subject to a CCF of 0%;;;
+C_13.01;x_axis_rc_code;160;(-) Non refundable price purchase discount;;;
+C_13.01;x_axis_rc_code;170;(-) Specific credit risk adjustments on underlying exposures;;;
+C_13.01;x_axis_rc_code;180;Exposure value;;;
+C_13.01;x_axis_rc_code;190;Exposure value > (-) Deducted from own funds;;;
+C_13.01;x_axis_rc_code;200;Exposure value > Subject to risk weights;;;
+C_13.01;x_axis_rc_code;210;Breakdown of the exposure value subject to risk weights > SEC-IRBA;;;
+C_13.01;x_axis_rc_code;220;Breakdown of the exposure value subject to risk weights > SEC-IRBA > Breakdown by RW bands > <=20% RW;;;
+C_13.01;x_axis_rc_code;230;Breakdown of the exposure value subject to risk weights > SEC-IRBA > Breakdown by RW bands > >20% to 50% RW;;;
+C_13.01;x_axis_rc_code;240;Breakdown of the exposure value subject to risk weights > SEC-IRBA > Breakdown by RW bands > >50% to 100% RW;;;
+C_13.01;x_axis_rc_code;250;Breakdown of the exposure value subject to risk weights > SEC-IRBA > Breakdown by RW bands > >100% to 1250% RW;;;
+C_13.01;x_axis_rc_code;260;Breakdown of the exposure value subject to risk weights > SEC-IRBA > Breakdown by RW bands > 1250% RW;;;
+C_13.01;x_axis_rc_code;270;Breakdown of the exposure value subject to risk weights > SEC-IRBA > Of which: calculated under Article 255(4) (purchased receivables);;;
+C_13.01;x_axis_rc_code;280;Breakdown of the exposure value subject to risk weights > SEC-SA;;;
+C_13.01;x_axis_rc_code;290;Breakdown of the exposure value subject to risk weights > SEC-SA > Breakdown by RW bands > <=20% RW;;;
+C_13.01;x_axis_rc_code;300;Breakdown of the exposure value subject to risk weights > SEC-SA > Breakdown by RW bands > >20% to 50% RW;;;
+C_13.01;x_axis_rc_code;310;Breakdown of the exposure value subject to risk weights > SEC-SA > Breakdown by RW bands > >50% to 100% RW;;;
+C_13.01;x_axis_rc_code;320;Breakdown of the exposure value subject to risk weights > SEC-SA > Breakdown by RW bands > >100% to 1250% RW;;;
+C_13.01;x_axis_rc_code;330;Breakdown of the exposure value subject to risk weights > SEC-SA > Breakdown by RW bands > 1250% RW (W unknown);;;
+C_13.01;x_axis_rc_code;340;Breakdown of the exposure value subject to risk weights > SEC-SA > Breakdown by RW bands > 1250% RW (other);;;
+C_13.01;x_axis_rc_code;350;Breakdown of the exposure value subject to risk weights > SEC-ERBA;;;
+C_13.01;x_axis_rc_code;360;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Short term credit quality steps > CQS 1;;;
+C_13.01;x_axis_rc_code;370;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Short term credit quality steps > CQS 2;;;
+C_13.01;x_axis_rc_code;380;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Short term credit quality steps > CQS 3;;;
+C_13.01;x_axis_rc_code;390;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Short term credit quality steps > All other CQS;;;
+C_13.01;x_axis_rc_code;400;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 1;;;
+C_13.01;x_axis_rc_code;410;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 2;;;
+C_13.01;x_axis_rc_code;420;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 3;;;
+C_13.01;x_axis_rc_code;430;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 4;;;
+C_13.01;x_axis_rc_code;440;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 5;;;
+C_13.01;x_axis_rc_code;450;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 6;;;
+C_13.01;x_axis_rc_code;460;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 7;;;
+C_13.01;x_axis_rc_code;470;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 8;;;
+C_13.01;x_axis_rc_code;480;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 9;;;
+C_13.01;x_axis_rc_code;490;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 10;;;
+C_13.01;x_axis_rc_code;500;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 11;;;
+C_13.01;x_axis_rc_code;510;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 12;;;
+C_13.01;x_axis_rc_code;520;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 13;;;
+C_13.01;x_axis_rc_code;530;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 14;;;
+C_13.01;x_axis_rc_code;540;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 15;;;
+C_13.01;x_axis_rc_code;550;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 16;;;
+C_13.01;x_axis_rc_code;560;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > CQS 17;;;
+C_13.01;x_axis_rc_code;570;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by credit quality steps > Long term credit quality steps > All other CQS;;;
+C_13.01;x_axis_rc_code;580;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by reasons for application of SEC-ERBA > Auto loans, auto leases and equipment leases;;;
+C_13.01;x_axis_rc_code;590;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by reasons for application of SEC-ERBA > SEC-ERBA option;;;
+C_13.01;x_axis_rc_code;600;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by reasons for application of SEC-ERBA > Positions subject to Article 254(2), point (a) of Regulation (EU) No 575.2013;;;
+C_13.01;x_axis_rc_code;610;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by reasons for application of SEC-ERBA > Positions subject to Article 254(2), point (b) of Regulation (EU) No 575.2013;;;
+C_13.01;x_axis_rc_code;620;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by reasons for application of SEC-ERBA > Positions subject to Articles 254(4) or 258(2) of Regulation (EU) No 575.2013;;;
+C_13.01;x_axis_rc_code;630;Breakdown of the exposure value subject to risk weights > SEC-ERBA > Breakdown by reasons for application of SEC-ERBA > Following the hierarchy of approaches;;;
+C_13.01;x_axis_rc_code;640;Breakdown of the exposure value subject to risk weights > Internal assessment approach;;;
+C_13.01;x_axis_rc_code;650;Breakdown of the exposure value subject to risk weights > Internal assessment approach > Breakdown by RW bands > <=20% RW;;;
+C_13.01;x_axis_rc_code;660;Breakdown of the exposure value subject to risk weights > Internal assessment approach > Breakdown by RW bands > >20% to 50% RW;;;
+C_13.01;x_axis_rc_code;670;Breakdown of the exposure value subject to risk weights > Internal assessment approach > Breakdown by RW bands > >50% to 100% RW;;;
+C_13.01;x_axis_rc_code;680;Breakdown of the exposure value subject to risk weights > Internal assessment approach > Breakdown by RW bands > >100% to 1250% RW;;;
+C_13.01;x_axis_rc_code;690;Breakdown of the exposure value subject to risk weights > Internal assessment approach > Breakdown by RW bands > 1250% RW;;;
+C_13.01;x_axis_rc_code;695;Breakdown of the exposure value subject to risk weights > Specific treatment for senior tranches of qualifying NPE securitisations;;;
+C_13.01;x_axis_rc_code;700;Breakdown of the exposure value subject to risk weights > Other (RW=1250%);;;
+C_13.01;x_axis_rc_code;710;Risk-weighted exposure amount;;;
+C_13.01;x_axis_rc_code;720;Risk-weighted exposure amount > SEC-IRBA;;;
+C_13.01;x_axis_rc_code;730;Risk-weighted exposure amount > SEC-IRBA > Of which: calculated under Article 255(4) (purchased receivables);;;
+C_13.01;x_axis_rc_code;740;Risk-weighted exposure amount > SEC-SA;;;
+C_13.01;x_axis_rc_code;750;Risk-weighted exposure amount > SEC-SA > Of which: RW=1250% (W unknown);;;
+C_13.01;x_axis_rc_code;760;Risk-weighted exposure amount > SEC-ERBA;;;
+C_13.01;x_axis_rc_code;770;Risk-weighted exposure amount > SEC-ERBA > Auto loans, auto leases and equipment leases;;;
+C_13.01;x_axis_rc_code;780;Risk-weighted exposure amount > SEC-ERBA > SEC-ERBA option;;;
+C_13.01;x_axis_rc_code;790;Risk-weighted exposure amount > SEC-ERBA > Positions subject to Article 254(2), point (a) of Regulation (EU) No 575.2013;;;
+C_13.01;x_axis_rc_code;800;Risk-weighted exposure amount > SEC-ERBA > Positions subject to Article 254(2), point (b) of Regulation (EU) No 575.2013;;;
+C_13.01;x_axis_rc_code;810;Risk-weighted exposure amount > SEC-ERBA > Positions subject to Articles 254(4) or 258(2) of Regulation (EU) No 575.2013;;;
+C_13.01;x_axis_rc_code;820;Risk-weighted exposure amount > SEC-ERBA > Following the hierarchy of approaches;;;
+C_13.01;x_axis_rc_code;830;Risk-weighted exposure amount > Internal assessment approach;;;
+C_13.01;x_axis_rc_code;840;Risk-weighted exposure amount > Average risk weight (%);;;
+C_13.01;x_axis_rc_code;845;Risk-weighted exposure amount > Specific treatment for senior tranches of qualifying NPE securitisations;;;
+C_13.01;x_axis_rc_code;850;Risk-weighted exposure amount > Other (RW=1250%);;;
+C_13.01;x_axis_rc_code;860;Risk-weighted exposure amount > Of which: synthetic securitisations;;;
+C_13.01;x_axis_rc_code;870;Adjustment to the risk-weighted exposure amount due to maturity mismatches;;;
+C_13.01;x_axis_rc_code;880;Overall effect (adjustment) due to infringement of Chapter 2 of Regulation (EU) 2017.2402;;;
+C_13.01;x_axis_rc_code;890;Total risk-weighted exposure amount > Before cap;;;
+C_13.01;x_axis_rc_code;900;Total risk-weighted exposure amount > (-) Reduction due to risk weight cap;;;
+C_13.01;x_axis_rc_code;910;Total risk-weighted exposure amount > (-) Reduction due to overall cap;;;
+C_13.01;x_axis_rc_code;920;Total risk-weighted exposure amount > After cap;;;
+C_13.01;x_axis_rc_code;921;Output floor S-TREA > Before cap;;;
+C_13.01;x_axis_rc_code;922;Output floor S-TREA > (-) Reduction due to risk weight cap;;;
+C_13.01;x_axis_rc_code;923;Output floor S-TREA > (-) Reduction due to overall cap;;;
+C_13.01;x_axis_rc_code;924;Output floor S-TREA > After cap;;;
+C_13.01;x_axis_rc_code;930;Memorandum items > Risk weighted exposure amount corresponding to the outflows from securitisations to other exposure classes;;;
+C_13.01;x_axis_rc_code;940;Memorandum items > Output floor - RWEA related to the impact of application of Article 465(7) of Regulation (EU) No 575.2013 > SEC-IRBA;;;
+C_13.01;x_axis_rc_code;950;Memorandum items > Output floor - RWEA related to the impact of application of Article 465(7) of Regulation (EU) No 575.2013 > Internal assessment approach;;;
+C_13.01;x_axis_rc_code;960;Memorandum items > Output floor - RWEA related to the impact of application of Article 465(7) of Regulation (EU) No 575.2013 > Specific treatment of senior tranches in qualifying NPE securitisations;;;
