@@ -1553,10 +1553,31 @@ button:focus-visible {
   overflow-y: auto;
   padding-left: 8px;
   padding-right: 8px;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(72 86 78 / 0.48) transparent;
   opacity: 1;
   transform: translateX(0);
   transition: opacity 160ms ease, transform 220ms ease, visibility 0s linear;
+}
+
+.explorer-context-panel > .cost-of-risk-context-detail-pane::-webkit-scrollbar {
+  width: 7px;
+}
+
+.explorer-context-panel > .cost-of-risk-context-detail-pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.explorer-context-panel > .cost-of-risk-context-detail-pane::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgb(72 86 78 / 0.48);
+  background-clip: padding-box;
+}
+
+.explorer-context-panel > .cost-of-risk-context-detail-pane::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(72 86 78 / 0.68);
 }
 
 /* In compact mode the selection card remains in place, while the table uses
