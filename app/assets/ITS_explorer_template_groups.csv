@@ -15,75 +15,76 @@ P_02.08;Funding Plan
 P_04.01;Funding Plan
 P_04.02;Funding Plan
 P_05.00;Funding Plan
-C_01.00;
-C_02.00;
-C_03.00;
-C_04.00;
-C_05.01;
-C_05.02;
-C_07.00;
-C_08.01;
-C_08.02;
-C_08.03;
-C_08.04;
-C_08.05;
-C_08.06;
-C_08.07;
-C_09.01;
-C_09.02;
-C_10.00;
-C_10.01;
-C_11.00;
-C_13.01;
-C_14.00;
-C_15.00;
-C_16.00;
-C_17.01;
-C_17.02;
-C_18.00;
-C_19.00;
-C_20.00;
-C_21.00;
-C_22.00;
-C_23.00;
-C_24.00;
-C_25.00;
-C_26.00;
-C_27.00;
-C_28.00;
-C_29.00;
-C_32.01;
-C_32.02;
-C_32.03;
-C_32.04;
-C_33.00;
-C_34.01;
-C_34.02;
-C_34.03;
-C_34.04;
-C_34.05;
-C_34.06;
-C_34.07;
-C_34.08;
-C_34.09;
-C_34.10;
-C_34.11;
-C_35.01;
-C_35.02;
-C_35.03;
-C_40.00;
-C_43.00;
-C_44.00;
-C_45.00;
-C_46.00;
-C_47.00;
-C_48.00;
-C_66.00;
-C_67.00;
-C_68.00;
-C_69.00;
-C_70.00;
-C_71.00;
+C_01.00;Own Funds
+C_02.00;Own Funds
+C_03.00;Own Funds
+C_04.00;Own Funds
+C_05.01;Own Funds
+C_05.02;Own Funds
+C_06.01;Own Funds
+C_07.00;Credit Risk
+C_08.01;Credit Risk
+C_08.02;Credit Risk
+C_08.03;Credit Risk
+C_08.04;Credit Risk
+C_08.05;Credit Risk
+C_08.06;Credit Risk
+C_08.07;Credit Risk
+C_09.01;Credit Risk
+C_09.02;Credit Risk
+C_10.00;Equity Exposures
+C_10.01;Equity Exposures
+C_11.00;Credit Risk
+C_13.01;Securitisation
+C_14.00;Securitisation
+C_15.00;Securitisation
+C_16.00;Operational Risk
+C_17.01;Operational Risk
+C_17.02;Operational Risk
+C_18.00;Market Risk
+C_19.00;Market Risk
+C_20.00;Market Risk
+C_21.00;Market Risk
+C_22.00;Market Risk
+C_23.00;CVA Risk
+C_24.00;Market Risk
+C_25.00;Market Risk
+C_26.00;Large Exposures
+C_27.00;Large Exposures
+C_28.00;Large Exposures
+C_29.00;Large Exposures
+C_32.01;Prudent Valuation
+C_32.02;Prudent Valuation
+C_32.03;Prudent Valuation
+C_32.04;Prudent Valuation
+C_33.00;Credit Risk
+C_34.01;Counterparty Credit Risk
+C_34.02;Counterparty Credit Risk
+C_34.03;Counterparty Credit Risk
+C_34.04;Counterparty Credit Risk
+C_34.05;Counterparty Credit Risk
+C_34.06;Counterparty Credit Risk
+C_34.07;Counterparty Credit Risk
+C_34.08;Counterparty Credit Risk
+C_34.09;Counterparty Credit Risk
+C_34.10;Counterparty Credit Risk
+C_34.11;Counterparty Credit Risk
+C_35.01;Non-Performing Exposures
+C_35.02;Non-Performing Exposures
+C_35.03;Non-Performing Exposures
+C_40.00;Leverage Ratio
+C_43.00;Leverage Ratio
+C_44.00;Leverage Ratio
+C_45.00;Leverage Ratio
+C_46.00;Leverage Ratio
+C_47.00;Leverage Ratio
+C_48.00;Leverage Ratio
+C_66.00;LCR
+C_67.00;LCR
+C_68.00;LCR
+C_69.00;LCR
+C_70.00;LCR
+C_71.00;LCR
 C_72.00;LCR
 C_73.00;LCR
 C_74.00;LCR
@@ -96,8 +97,8 @@ C_81.00;NSFR
 C_82.00;NSFR
 C_83.00;NSFR
 C_84.00;NSFR
-C_90.00;
-C_91.00;
+C_90.00;Own Funds
+C_91.00;Operational Risk
 F_01.01;FINREP
 F_01.02;FINREP
 F_01.03;FINREP
