@@ -1793,7 +1793,8 @@ function renderExplorerTable(series, selectedUnit) {
     description.title = seriesRow.description;
     description.append(createDescriptionContent(seriesRow, normalizedPath, isParent, {
       isDenominatorBase: Boolean(contributionBase?.row) && normalizedPath === contributionBase.path,
-      ratioAxis: activeAxis
+      ratioAxis: activeAxis,
+      isKriRowAxis
     }));
     valueRow.append(description);
 
@@ -4942,7 +4943,13 @@ function createDescriptionContent(seriesRow, normalizedPath, isParent, options =
 
   const label = document.createElement("span");
   label.className = "tree-label";
-  label.textContent = seriesRow.displayDescription || seriesRow.description;
+  const baseLabel = seriesRow.displayDescription || seriesRow.description;
+  // KRI folds its code column into this one (see the matching CSS hiding
+  // .code-column under .is-kri-row-axis) - the code still needs to show
+  // somewhere, so it's prefixed onto the description text itself instead.
+  label.textContent = options.isKriRowAxis && !seriesRow.isVirtual && seriesRow.code
+    ? `${seriesRow.code} - ${baseLabel}`
+    : baseLabel;
   content.append(label);
 
   if (options.isDenominatorBase) {

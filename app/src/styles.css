@@ -3803,6 +3803,20 @@ table {
   display: none;
 }
 
+/* The KRI code is folded into the description text itself (see
+   createDescriptionContent) instead of its own column - hiding the code
+   column and widening the description column to the combined width keeps
+   the same total table width as every other template. */
+.metric-table.is-kri-row-axis .code-column {
+  display: none;
+}
+
+.metric-table.is-kri-row-axis .description-column {
+  width: 426px;
+  min-width: 426px;
+  max-width: 426px;
+}
+
 .tree-connector {
   position: absolute;
   top: 0;

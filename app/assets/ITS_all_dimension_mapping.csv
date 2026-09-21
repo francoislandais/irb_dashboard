@@ -371,10 +371,10 @@ C_04.00;y_axis_rc_code;870;Output floor/Floor adjustment before application of t
 C_04.00;y_axis_rc_code;880;Output floor/Floor adjustment after application of transitional cap;;;
 C_04.00;y_axis_rc_code;890;Output floor/Fully loaded floor adjustment;;;
 C_04.00;y_axis_rc_code;900;Output floor/Output floor applied (%);;;
-C_05.01;x_axis_rc_code;10;Adjustments to cet1;;;
-C_05.01;x_axis_rc_code;20;Adjustments to at1;;;
-C_05.01;x_axis_rc_code;30;Adjustments to t2;;;
-C_05.01;x_axis_rc_code;40;Adjustments included in rwas;;;
+C_05.01;x_axis_rc_code;10;Adjustments to CET1;;;
+C_05.01;x_axis_rc_code;20;Adjustments to AT1;;;
+C_05.01;x_axis_rc_code;30;Adjustments to T2;;;
+C_05.01;x_axis_rc_code;40;Adjustments included in RWAs;;;
 C_05.01;x_axis_rc_code;50;Memorandum items/Applicable percentage;;;
 C_05.01;x_axis_rc_code;60;Memorandum items/Eligible amount without transitional provisions;;;
 C_05.01;y_axis_rc_code;10;Total adjustments;;;
