@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import re
 from datetime import date
 from pathlib import Path
@@ -10,11 +11,22 @@ from typing import Iterable, Protocol
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET_DIRECTORY = PROJECT_DIRECTORY / "datasets"
+DEFAULT_KRI_DICTIONARY_PATH = PROJECT_DIRECTORY / "app" / "assets" / "KRI_dictionnary.csv"
 
 _TEMPLATE_RANGE_PATTERN = re.compile(
     r"^(?P<prefix>[A-Za-z]+)_xx%(?:\s+xx<(?P<upper_bound>\d+))$",
     re.IGNORECASE,
 )
+# Only the annex markers actually observed in the KRI dictionary's own
+# cellrefs - deliberately not a catch-all "any trailing letters" pattern,
+# since some templates have a genuine, meaningful trailing ".1"/".2" (e.g.
+# FINREP's F_04.02.1 vs F_04.02.2) that must never be stripped.
+_TEMPLATE_ANNEX_SEGMENT_PATTERN = re.compile(
+    r"(?:\.(?:dp|a|b|c|d|e|w|x)|_dp)$", re.IGNORECASE
+)
+_CELLREF_TEMPLATE_PATTERN = re.compile(r"\{T\(([^)]+)\)")
+_BRACE_PATTERN = re.compile(r"\{([^{}]+)\}")
+_KRI_OFFSET_SUFFIX_PATTERN = re.compile(r"\[T-\d+[YQM]\]\s*$", re.IGNORECASE)
 
 
 class HiveClient(Protocol):
@@ -184,6 +196,203 @@ ORDER BY
 """
 
 
+def load_kri_dictionary(
+    path: str | Path | None = None,
+) -> dict[str, str]:
+    """Charge le dictionnaire KRI brut en un dict ``code -> formule``.
+
+    Le fichier n'est pas un CSV ordinaire : chaque ligne de données est un
+    unique champ, lui-même un triplet CSV ``id,nom,"formule"`` (la formule
+    étant ré-échappée, puisqu'elle peut contenir des virgules), suivi de
+    ``;;``. On le lit donc en deux passes - d'abord dé-échapper la ligne
+    entière, puis découper le triplet qui en ressort - au lieu d'un simple
+    ``csv.reader`` qui se tromperait sur la structure.
+    """
+
+    dictionary_path = Path(path) if path is not None else DEFAULT_KRI_DICTIONARY_PATH
+    text = dictionary_path.read_text(encoding="utf-8", errors="replace")
+
+    formulas: dict[str, str] = {}
+    for line in text.splitlines()[1:]:
+        line = line.strip()
+        if line.endswith(";;"):
+            line = line[:-2]
+        if not line:
+            continue
+
+        outer_fields = next(csv.reader([line]), [])
+        if not outer_fields:
+            continue
+
+        inner_fields = next(csv.reader([outer_fields[0]]), [])
+        if len(inner_fields) < 3:
+            continue
+
+        code = inner_fields[0].strip()
+        formula = inner_fields[2].strip()
+        if code:
+            formulas[code] = formula
+
+    return formulas
+
+
+def _normalize_template_id(template_id: str) -> str:
+    """Retire les suffixes d'annexe (``.a``, ``.dp``, ``.a_dp``, ``.b.dp``...)
+    d'un code de template - une formule KRI et le référentiel de données
+    doivent se retrouver sur le même identifiant normalisé, comme le fait
+    déjà la requête Hive elle-même (``regexp_replace(table_id,
+    '\\.[A-Za-z]+$', '')``) pour le cas à un seul segment.
+
+    Répété jusqu'à stabilité pour retirer les annexes composées (``.a.dp``,
+    ``.b_dp``...) sans jamais toucher un suffixe numérique réel et
+    significatif (``F_04.02.1`` reste ``F_04.02.1`` - ce n'est pas une
+    annexe, c'est un template FINREP distinct de ``F_04.02.2``).
+    """
+
+    normalized = template_id.strip()
+    while True:
+        stripped = _TEMPLATE_ANNEX_SEGMENT_PATTERN.sub("", normalized)
+        if stripped == normalized:
+            return normalized
+        normalized = stripped
+
+
+def _extract_formula_references(
+    formula: str,
+    known_kri_codes: Iterable[str],
+) -> tuple[set[str], set[str]]:
+    """Extrait, pour une formule KRI, les templates référencés directement
+    (``{T(...)...}``) et les autres KRI référencés directement (``{CODE}``
+    ou ``{CODE[T-1Y]}``) - sans résoudre les KRI de manière récursive, voir
+    ``get_kri_template_dependencies`` pour cela.
+    """
+
+    templates = {
+        _normalize_template_id(match.group(1))
+        for match in _CELLREF_TEMPLATE_PATTERN.finditer(formula)
+    }
+
+    known_kri_codes = known_kri_codes if isinstance(known_kri_codes, (set, frozenset)) else set(known_kri_codes)
+    kri_refs: set[str] = set()
+    for match in _BRACE_PATTERN.finditer(formula):
+        inner = match.group(1)
+        # {T(...)...} is a cellref (already captured above) and
+        # {SPE.DPI(...)} is an internal data point - neither is a reference
+        # to another KRI.
+        if inner.startswith("T(") or inner.startswith("SPE.DPI("):
+            continue
+        code = _KRI_OFFSET_SUFFIX_PATTERN.sub("", inner).strip()
+        if code in known_kri_codes:
+            kri_refs.add(code)
+
+    return templates, kri_refs
+
+
+def build_kri_template_index(
+    kri_formulas: dict[str, str],
+) -> dict[str, set[str]]:
+    """Calcule, pour chaque KRI du dictionnaire, l'ensemble des templates
+    dont il dépend, en remontant récursivement à travers les KRI qu'il
+    référence jusqu'au niveau le plus fin - un ensemble vide si ni ce KRI ni
+    aucun de ses sous-KRI ne référence directement de template.
+
+    Résolu par propagation à point fixe plutôt que par une récursion
+    naïvement mémoïsée : une définition circulaire (A référence B qui
+    référence A) casserait une mémoïsation classique - le nœud rencontré en
+    second dans le cycle se verrait mis en cache avant que le premier n'ait
+    fini d'accumuler ses propres templates, et resterait incomplet pour de
+    bon. Ici, chaque KRI d'un même cycle reçoit correctement l'union
+    complète de tout ce qui est atteignable depuis le cycle : on part des
+    templates référencés directement par chacun, puis on propage le long
+    des références entre KRI jusqu'à ce que plus rien ne change - l'ordre
+    de visite n'a alors plus d'importance.
+    """
+
+    known_codes = set(kri_formulas)
+    direct_refs: dict[str, set[str]] = {}
+    resolved: dict[str, set[str]] = {}
+
+    for code, formula in kri_formulas.items():
+        templates, kri_refs = _extract_formula_references(formula, known_codes)
+        direct_refs[code] = kri_refs
+        resolved[code] = templates
+
+    changed = True
+    while changed:
+        changed = False
+        for code, kri_refs in direct_refs.items():
+            for ref_code in kri_refs:
+                missing = resolved[ref_code] - resolved[code]
+                if missing:
+                    resolved[code] |= missing
+                    changed = True
+
+    return resolved
+
+
+def get_kri_template_dependencies(
+    kri_code: str,
+    kri_formulas: dict[str, str],
+) -> set[str]:
+    """Résout les templates utilisés pour nourrir un seul KRI - voir
+    ``build_kri_template_index`` pour la logique de résolution (identique
+    ici ; ce raccourci recalcule tout l'index, ce qui reste négligeable vu
+    la taille du dictionnaire).
+    """
+
+    return build_kri_template_index(kri_formulas).get(kri_code, set())
+
+
+def select_kris_by_templates(
+    templates: Iterable[str],
+    kri_template_index: dict[str, set[str]],
+) -> list[str]:
+    """Sélectionne tous les KRI dépendant d'au moins un template de la liste.
+
+    ``templates`` accepte exactement la même syntaxe que ``build_hive_query``
+    (voir ``_expand_template_expressions``) : un identifiant exact, un joker
+    final (``F_01%``), une plage (``F_xx% xx<48``) ou une exclusion précédée
+    de ``!`` (``!F_20.04%``). Une exclusion ne disqualifie pas un KRI dans
+    son ensemble : elle retire seulement le(s) template(s) exclus de son
+    ensemble de dépendances avant de vérifier s'il en reste un qui
+    correspond à une inclusion - un KRI qui dépend à la fois d'un template
+    inclus et d'un template exclu reste donc sélectionné grâce au premier.
+    """
+
+    templates = _clean_values(templates, "templates")
+    included, excluded = _expand_template_expressions(templates)
+
+    def matches(template_id: str, pattern: str) -> bool:
+        if pattern.endswith("%"):
+            return template_id.startswith(pattern[:-1])
+        return template_id == pattern
+
+    def matches_any(template_id: str, patterns: list[str]) -> bool:
+        return any(matches(template_id, pattern) for pattern in patterns)
+
+    selected = []
+    for code, dependency_templates in kri_template_index.items():
+        effective = {t for t in dependency_templates if not matches_any(t, excluded)}
+        if any(matches_any(t, included) for t in effective):
+            selected.append(code)
+
+    return sorted(selected)
+
+
+def find_kris_using_templates(
+    templates: Iterable[str],
+    dictionary_path: str | Path | None = None,
+) -> list[str]:
+    """Raccourci bout-en-bout : charge le dictionnaire, résout les
+    dépendances de chaque KRI puis sélectionne ceux qui utilisent au moins
+    un des templates demandés (voir ``select_kris_by_templates``).
+    """
+
+    kri_formulas = load_kri_dictionary(dictionary_path)
+    kri_template_index = build_kri_template_index(kri_formulas)
+    return select_kris_by_templates(templates, kri_template_index)
+
+
 def run_hive_query_to_csv(
     templates: Iterable[str],
     reference_dates: Iterable[str],
@@ -281,10 +490,20 @@ def _build_kri_filter(kri_data_point_ids: Iterable[str]) -> str:
     return "(\n          " + "\n          OR ".join(conditions) + "\n      )"
 
 
-def _build_template_filter(templates: Iterable[str]) -> str:
-    """Construit le filtre SQL pour inclusions, plages et exclusions."""
+def _expand_template_expressions(
+    templates: Iterable[str],
+) -> tuple[list[str], list[str]]:
+    """Résout chaque expression de template en motifs plats (inclusions,
+    exclusions), sans rien émettre de spécifique à SQL.
 
-    table_id = "regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')"
+    Une plage comme ``F_xx% xx<48`` est développée en préfixes concrets
+    (``F_01%`` à ``F_47%``) ; un identifiant exact ou un joker final
+    (``F_20.04%``) est renvoyé tel quel. C'est le "moteur" partagé par
+    ``_build_template_filter`` (SQL) et ``select_kris_by_templates``
+    (filtrage en mémoire du référentiel KRI) - un seul endroit comprend la
+    syntaxe des expressions de template.
+    """
+
     included: list[str] = []
     excluded: list[str] = []
 
@@ -302,8 +521,7 @@ def _build_template_filter(templates: Iterable[str]) -> str:
                     f"Joker invalide dans l'expression {expression!r}. "
                     "Seul un % final est accepté."
                 )
-            operator = "LIKE" if template.endswith("%") else "="
-            target.append(f"{table_id} {operator} {_sql_literal(template)}")
+            target.append(template)
             continue
 
         prefix = match.group("prefix").upper()
@@ -314,19 +532,33 @@ def _build_template_filter(templates: Iterable[str]) -> str:
                 "La borne doit être comprise entre 2 et 100."
             )
 
-        target.extend(
-            f"{table_id} LIKE {_sql_literal(f'{prefix}_{number:02d}%')}"
-            for number in range(1, upper_bound)
-        )
+        target.extend(f"{prefix}_{number:02d}%" for number in range(1, upper_bound))
 
     if not included:
         raise ValueError("Au moins un template à inclure doit être indiqué.")
 
-    include_filter = "(\n          " + "\n          OR ".join(included) + "\n      )"
+    return included, excluded
+
+
+def _build_template_filter(templates: Iterable[str]) -> str:
+    """Construit le filtre SQL pour inclusions, plages et exclusions."""
+
+    table_id = "regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')"
+    included, excluded = _expand_template_expressions(templates)
+
+    def clause(pattern: str) -> str:
+        operator = "LIKE" if pattern.endswith("%") else "="
+        return f"{table_id} {operator} {_sql_literal(pattern)}"
+
+    include_filter = (
+        "(\n          " + "\n          OR ".join(map(clause, included)) + "\n      )"
+    )
     if not excluded:
         return include_filter
 
-    exclude_filter = "(\n          " + "\n          OR ".join(excluded) + "\n      )"
+    exclude_filter = (
+        "(\n          " + "\n          OR ".join(map(clause, excluded)) + "\n      )"
+    )
     return f"{include_filter}\n      AND NOT {exclude_filter}"
 
 
