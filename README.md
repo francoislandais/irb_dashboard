@@ -123,8 +123,11 @@ df = run_hive_query_to_csv(
     jst_codes=["FRSOG", "FRBNP", "FRCAG"],
     output_name="finrep_extract",
     devo_client=devo,
+    module_id="YOUR_MODULE_ID",  # Optionnel : correspondance exacte
 )
 ```
+
+Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. Il peut ensuite être transforme en application autonome avec :
 

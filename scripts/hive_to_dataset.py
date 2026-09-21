@@ -27,6 +27,7 @@ def build_hive_query(
     templates: Iterable[str],
     reference_dates: Iterable[str],
     jst_codes: Iterable[str],
+    module_id: str | None = None,
 ) -> str:
     """Construit la requête Hive au format pivoté attendu par l'application.
 
@@ -36,6 +37,9 @@ def build_hive_query(
     - un joker final comme ``F_20.04%`` ;
     - une exclusion précédée de ``!``, comme ``!F_20.04%``.
 
+    ``module_id`` ajoute une correspondance exacte sur la colonne Hive du
+    même nom. Le filtre est désactivé lorsque l'argument est omis ou vide.
+
     Cette table Hive n'expose aucune colonne d'horodatage d'extraction :
     ``extraction_timestamp`` est ajoutée après coup par
     ``run_hive_query_to_csv`` avec la date du jour, pas par cette requête.
@@ -44,6 +48,7 @@ def build_hive_query(
     templates = _clean_values(templates, "templates")
     reference_dates = _clean_values(reference_dates, "dates de référence")
     jst_codes = _clean_values(jst_codes, "JST codes")
+    module_id = str(module_id).strip() if module_id is not None else ""
     _validate_reference_dates(reference_dates)
 
     date_columns = ",\n".join(
@@ -61,6 +66,11 @@ def build_hive_query(
         f"          {_sql_literal(jst_code)}" for jst_code in jst_codes
     )
     template_filter = _build_template_filter(templates)
+    module_filter = (
+        f"\n      AND module_id = {_sql_literal(module_id)}"
+        if module_id
+        else ""
+    )
 
     return f"""SELECT
     table_id,
@@ -83,7 +93,7 @@ FROM (
 {jst_code_list}
     )
       AND is_group_head = 'Y'
-      AND is_highest_cons = 'Y'
+      AND is_highest_cons = 'Y'{module_filter}
       AND reference_period IN (
 {date_list}
       )
@@ -181,15 +191,24 @@ def run_hive_query_to_csv(
     output_name: str,
     output_dir: str | Path | None = None,
     devo_client: HiveClient | None = None,
+    module_id: str | None = None,
 ):
     """Exécute la requête et enregistre le CSV directement dans ``datasets/``.
 
     ``devo_client`` peut être omis lorsque le package ``devo`` est importable.
     Dans un notebook où ``devo`` est déjà initialisé, le passer simplement avec
     ``devo_client=devo``.
+
+    ``module_id`` est transmis à ``build_hive_query``. Sa valeur par défaut
+    ``None`` conserve l'extraction ITS sans filtre de module.
     """
 
-    sql = build_hive_query(templates, reference_dates, jst_codes)
+    sql = build_hive_query(
+        templates,
+        reference_dates,
+        jst_codes,
+        module_id=module_id,
+    )
     client = devo_client or _load_default_devo_client()
     dataframe = client.read_sql(sql)
     dataframe["extraction_timestamp"] = date.today().isoformat()
