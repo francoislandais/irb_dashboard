@@ -1500,14 +1500,11 @@ button:focus-visible {
 }
 
 .explorer-context-detail-toggle {
-  position: absolute;
-  z-index: 20;
-  top: 8px;
-  right: 8px;
   display: grid;
+  flex: 0 0 auto;
   place-items: center;
-  width: 25px;
-  height: 25px;
+  width: 28px;
+  height: 28px;
   border: 1px solid #9fc4dd;
   border-radius: 999px;
   background: #f6fbff;
@@ -1531,7 +1528,7 @@ button:focus-visible {
   outline: none;
 }
 
-.explorer-context-panel:not(.is-detail-collapsed) .explorer-context-detail-toggle > span:first-child {
+.explorer-workspace:not(.is-context-detail-collapsed) .explorer-context-detail-toggle > span:first-child {
   transform: rotate(180deg);
 }
 
