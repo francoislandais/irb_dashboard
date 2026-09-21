@@ -83,6 +83,7 @@ const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
 const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
 const EXPLORER_REFERENCE_URL_PARAM = "explorer_reference_date";
 const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
+const EXPLORER_CONTEXT_URL_PARAM = "explorer_context";
 // 8 prior periods at quarterly cadence is roughly the old default (current
 // year + 2 prior years); other frequencies now get the same period count,
 // just in their own unit (see getExplorerHistoryUnitLabel).
@@ -157,6 +158,7 @@ let explorerGlobalEvolutionFrequency = "quarterly";
 let explorerHasDetectedEvolutionFrequency = false;
 let explorerGlobalHistoryPeriods = pendingUrlHistoryPeriods;
 let explorerStickyFrame = 0;
+let explorerContextDetailCollapsed = readUrlStateParams().get(EXPLORER_CONTEXT_URL_PARAM) !== "expanded";
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
 let explorerBenchmarkLastSmoothingWindow = 4;
@@ -240,6 +242,7 @@ const elements = {
   explorerBenchmarkPreview: document.querySelector(".explorer-benchmark-preview"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
+  explorerContextDetailToggle: document.querySelector("#explorer-context-detail-toggle"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
   globalReferenceSelect: document.querySelector("#global-reference-select"),
   explorerContextSelection: document.querySelector("#explorer-context-selection"),
@@ -269,6 +272,7 @@ export function wireExplorerUi(actions, rerender) {
     button.addEventListener("click", () => {
       if (button.disabled) return;
 
+      if (typeof revealExplorerContextDetail === "function") revealExplorerContextDetail();
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       const requestedAxis = button.getAttribute("data-explorer-axis") || "y";
@@ -279,10 +283,22 @@ export function wireExplorerUi(actions, rerender) {
     });
   });
   elements.explorerTemplateControl?.addEventListener("click", () => {
+    revealExplorerContextDetail();
     explorerContextTopic = "";
     renderExplorerAxisTabs();
     renderExplorerActiveFilters(actions.getState());
     renderExplorerContextPanel(actions.getState());
+  });
+  elements.explorerContextDetailToggle?.addEventListener("click", () => {
+    if (explorerContextDetailCollapsed) {
+      revealExplorerContextDetail();
+    } else {
+      explorerContextTopic = "";
+      setExplorerContextDetailCollapsed(true);
+    }
+    renderExplorerAxisTabs();
+    renderExplorerActiveFilters(getLatestState());
+    renderExplorerContextPanel(getLatestState());
   });
   elements.explorerTableWrap?.addEventListener("scroll", scheduleExplorerStickyParentsUpdate, { passive: true });
   elements.explorerTable.addEventListener("pointerdown", startExplorerCellRangeSelection);
@@ -1053,7 +1069,7 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
 }
 
 function syncExplorerBenchmarkPlacement() {
-  const benchmarkVisible = explorerContextTopic === "benchmark-mode";
+  const benchmarkVisible = explorerContextTopic === "benchmark-mode" && !explorerContextDetailCollapsed;
   // Expanded mode swaps the table for the chart within the exact same
   // spot (see #explorer-benchmark-expanded-slot's grid-row in styles.css) -
   // the context panel, axis tabs and filter bar all stay exactly where
@@ -1069,6 +1085,37 @@ function syncExplorerBenchmarkPlacement() {
     elements.explorerBenchmarkExpand.setAttribute("title", explorerBenchmarkExpanded ? "Return to table" : "Expand benchmark");
     elements.explorerBenchmarkExpand.classList.toggle("is-expanded", explorerBenchmarkExpanded);
   }
+}
+
+function revealExplorerContextDetail() {
+  setExplorerContextDetailCollapsed(false);
+}
+
+function setExplorerContextDetailCollapsed(collapsed) {
+  if (explorerContextDetailCollapsed === collapsed) {
+    syncExplorerContextDetailVisibility();
+    return;
+  }
+
+  explorerContextDetailCollapsed = collapsed;
+  const url = createUrlState();
+  if (collapsed) url.searchParams.delete(EXPLORER_CONTEXT_URL_PARAM);
+  else url.searchParams.set(EXPLORER_CONTEXT_URL_PARAM, "expanded");
+  replaceUrlState(url);
+  syncExplorerContextDetailVisibility();
+}
+
+function syncExplorerContextDetailVisibility() {
+  const collapsed = explorerContextDetailCollapsed;
+  elements.explorerWorkspace?.classList.toggle("is-context-detail-collapsed", collapsed);
+  elements.explorerContextPanel?.classList.toggle("is-detail-collapsed", collapsed);
+  if (elements.explorerContextDetail) elements.explorerContextDetail.hidden = collapsed;
+  if (elements.explorerContextDetailToggle) {
+    elements.explorerContextDetailToggle.setAttribute("aria-expanded", String(!collapsed));
+    elements.explorerContextDetailToggle.setAttribute("aria-label", collapsed ? "Show Explorer options" : "Hide Explorer options");
+    elements.explorerContextDetailToggle.setAttribute("title", collapsed ? "Show Explorer options" : "Hide Explorer options");
+  }
+  window.setTimeout(scheduleExplorerStickyParentsUpdate, 0);
 }
 
 // Everything around the big table that a pure selection change (clicking a
@@ -2991,6 +3038,9 @@ function createExplorerTemplateCaption(activeTemplate) {
 
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
+
+  if (explorerContextTopic) revealExplorerContextDetail();
+  else syncExplorerContextDetailVisibility();
 
   if (explorerContextTopic === "geography" && !getActiveExplorerGeographyAxis()) {
     explorerContextTopic = "";
