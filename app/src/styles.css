@@ -1502,7 +1502,7 @@ button:focus-visible {
   position: absolute;
   z-index: 2;
   top: 68px;
-  right: -9px;
+  right: 0;
   display: grid;
   place-items: center;
   width: 18px;
