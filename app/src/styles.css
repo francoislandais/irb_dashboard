@@ -1472,6 +1472,7 @@ button:focus-visible {
 }
 
 .explorer-context-panel {
+  position: relative;
   grid-column: 1;
   grid-row: 1;
   align-self: stretch;
@@ -1500,21 +1501,21 @@ button:focus-visible {
 
 .explorer-context-detail-toggle {
   position: absolute;
-  z-index: 2;
-  top: 68px;
-  right: 0;
+  z-index: 20;
+  top: 8px;
+  right: 8px;
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 34px;
-  border: 1px solid #d8dfdb;
-  border-radius: 0 6px 6px 0;
-  background: #ffffff;
-  color: #52605a;
-  font-size: 0.9rem;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #9fc4dd;
+  border-radius: 999px;
+  background: #f6fbff;
+  color: var(--primary-dark);
+  font-size: 1.05rem;
   line-height: 1;
   padding: 0;
-  box-shadow: 1px 1px 3px rgb(31 51 42 / 8%);
+  box-shadow: 0 1px 3px rgb(31 51 42 / 12%);
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 220ms ease;
 }
 
