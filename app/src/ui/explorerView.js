@@ -1881,7 +1881,9 @@ function renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader) {
       cell.colSpan = header.colSpan;
       cell.rowSpan = header.rowSpan;
       cell.className = header.leaf ? "explorer-xy-leaf" : "explorer-xy-group";
+      cell.classList.toggle("is-horizontally-merged", header.colSpan > 1);
       const label = document.createElement("span");
+      label.className = "explorer-xy-header-label";
       label.textContent = header.label;
       cell.append(label);
       if (header.leaf) {

@@ -4113,6 +4113,19 @@ table {
   background: #edf2ef;
 }
 
+.metric-table.is-xy-view .explorer-xy-group.is-horizontally-merged {
+  text-align: left;
+}
+
+/* The label stays within its own merged header cell, but remains visible just
+   after the two frozen table columns while that group is being scrolled. */
+.metric-table.is-xy-view .explorer-xy-group.is-horizontally-merged > .explorer-xy-header-label {
+  position: sticky;
+  left: 426px;
+  display: inline-block;
+  z-index: 2;
+}
+
 .metric-table.is-xy-view .explorer-xy-leaf {
   background: #ffffff;
 }
