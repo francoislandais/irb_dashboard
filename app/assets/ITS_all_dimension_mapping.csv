@@ -3652,8 +3652,8 @@ C_67.00;y_axis_rc_code;100;Top ten counterparties each greater than 1% of total 
 C_67.00;y_axis_rc_code;110;Top ten counterparties each greater than 1% of total liabilities/10;;;
 C_67.00;y_axis_rc_code;120;All other funding;;;
 C_68.00;x_axis_rc_code;10;Carrying amount received;;;
-C_68.00;x_axis_rc_code;20;Amount covered by a deposit guarantee scheme in accordance with directive 2014/49/Eu or an equivalent deposit guarantee scheme in a third country;;;
-C_68.00;x_axis_rc_code;30;Amount not covered by a deposit guarantee scheme  in accordance with directive 2014/49/Eu or an equivalent deposit guarantee scheme in a third country;;;
+C_68.00;x_axis_rc_code;20;Amount covered by a deposit guarantee scheme in accordance with directive 2014.49.Eu or an equivalent deposit guarantee scheme in a third country;;;
+C_68.00;x_axis_rc_code;30;Amount not covered by a deposit guarantee scheme  in accordance with directive 2014.49.Eu or an equivalent deposit guarantee scheme in a third country;;;
 C_68.00;x_axis_rc_code;40;Weighted average original maturity;;;
 C_68.00;x_axis_rc_code;50;Weighted average residual maturity;;;
 C_68.00;z_axis_rc_code;0010;All currencies;0;;

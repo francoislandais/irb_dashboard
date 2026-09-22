@@ -93,9 +93,9 @@ const EXPLORER_TEMPLATE_LABELS = {
   "C_47.00": "Leverage ratio - Off-balance sheet",
   "C_48.00": "Leverage ratio - Additional disclosures",
 
-  "C_66.00": "Liquidity coverage ratio",
-  "C_67.00": "LCR - Outflows",
-  "C_68.00": "LCR - Inflows",
+  "C_66.00": "Maturity ladder",
+  "C_67.00": "Concentration of funding by counterparty",
+  "C_68.00": "Concentration of funding by product type",
   "C_69.00": "LCR - Summary",
   "C_70.00": "LCR - Additional items",
   "C_71.00": "LCR - Currency breakdown",
