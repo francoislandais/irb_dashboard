@@ -3237,13 +3237,13 @@ function createExplorerSelectionHistoryControls() {
   controls.className = "explorer-selection-history";
   controls.setAttribute("aria-label", "Selection history");
   const history = getExplorerSelectionHistory()?.history;
-  for (const [direction, label, icon, enabled] of [
-    [-1, "Previous selection", "←", history?.canBack],
-    [1, "Next selection", "→", history?.canForward]
+  for (const [direction, label, text, enabled] of [
+    [-1, "Previous selection", "Previous", history?.canBack],
+    [1, "Next selection", "Next", history?.canForward]
   ]) {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = icon;
+    button.textContent = text;
     button.title = label;
     button.setAttribute("aria-label", label);
     button.disabled = !enabled;
