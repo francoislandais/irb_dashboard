@@ -1362,7 +1362,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
     focusSelectedExplorerRow();
   } else if (shouldRevealExplorerAxisSelection) {
     shouldRevealExplorerAxisSelection = false;
-    scrollSelectedExplorerRowIntoView();
+    focusSelectedExplorerRow();
   } else {
     restoreExplorerScrollPosition();
   }
@@ -5652,19 +5652,6 @@ function focusSelectedExplorerRow() {
   // instead, so both directions are handled together.
   const selectedCell = row.querySelector("td.is-selected-cell");
   (selectedCell ?? row).scrollIntoView({ block: "nearest", inline: "nearest" });
-}
-
-function scrollSelectedExplorerRowIntoView() {
-  const selectedCode = getSelectedExplorerCodeForActiveAxis();
-  const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
-  if (!row || row.hidden) return;
-  scrollExplorerRowIntoViewQuickly(row);
-  // scrollExplorerRowIntoViewQuickly only animates vertical scroll (see its
-  // own comment) - the selected cell can still be off-screen horizontally
-  // (e.g. a Column axis switch, or a template picked from the list, can
-  // land on a date far to the right), so bring it into view too, same as
-  // focusSelectedExplorerRow does for the cellref-navigation case.
-  row.querySelector("td.is-selected-cell")?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
 
 export function saveExplorerScrollPosition() {
