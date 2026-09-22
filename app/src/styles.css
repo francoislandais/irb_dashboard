@@ -1480,7 +1480,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 8px;
-  grid-template-rows: 154px minmax(0, 1fr);
+  grid-template-rows: 180px minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1496,7 +1496,7 @@ button:focus-visible {
 
 .explorer-context-panel.has-benchmark-preview {
   align-content: start;
-  grid-template-rows: 154px auto clamp(190px, 29vh, 250px);
+  grid-template-rows: 180px auto clamp(190px, 29vh, 250px);
 }
 
 .explorer-context-detail-toggle {
@@ -1768,7 +1768,7 @@ button:focus-visible {
   overflow-x: hidden;
   overflow-y: auto;
   background: #f6f8f7;
-  border: 1px solid #9fc4dd;
+  border: 0px solid #9fc4dd;
   border-radius: 9px;
   padding: 8px;
   color: #000000;
@@ -1794,13 +1794,13 @@ button:focus-visible {
 .explorer-selection-summary-headline {
   margin: 0 0 6px;
   overflow-wrap: anywhere;
-  font-size: 1.05rem;
+  font-size: 0.8rem;
   line-height: 1.3;
 }
 
 .explorer-selection-summary-headline-label {
   color: var(--primary-dark);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .explorer-selection-summary-headline-value {
