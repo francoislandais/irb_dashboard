@@ -4287,25 +4287,29 @@ function renderExplorerKriFormulaPanel(state) {
   const node = parseKriFormula(entry.formula);
   const tree = document.createElement("div");
   tree.className = "explorer-kri-formula-tree";
-  tree.append(renderExplorerKriFormulaNode(node, state));
+  // The root KRI itself seeds the ancestor chain, so a kriref that loops
+  // straight back to it (A references A, or A -> B -> A) is caught by the
+  // circular-reference guard in createExplorerKriFormulaReferenceNode
+  // instead of letting the user expand it into an identical copy forever.
+  tree.append(renderExplorerKriFormulaNode(node, state, [selectedCode]));
   article.append(tree);
 
   replaceExplorerContextDetail(article);
 }
 
-function renderExplorerKriFormulaNode(node, state) {
+function renderExplorerKriFormulaNode(node, state, ancestors = []) {
   switch (node.type) {
     case "call":
-      return renderExplorerKriFormulaCall(node, state);
+      return renderExplorerKriFormulaCall(node, state, ancestors);
     case "binary":
-      return renderExplorerKriFormulaBinary(node, state);
+      return renderExplorerKriFormulaBinary(node, state, ancestors);
     case "unary": {
       const wrapper = document.createElement("span");
       wrapper.className = "explorer-kri-formula-inline";
       const minus = document.createElement("span");
       minus.className = "explorer-kri-formula-op";
       minus.textContent = "−";
-      wrapper.append(minus, renderExplorerKriFormulaNode(node.operand, state));
+      wrapper.append(minus, renderExplorerKriFormulaNode(node.operand, state, ancestors));
       return wrapper;
     }
     case "cellref":
@@ -4313,7 +4317,7 @@ function renderExplorerKriFormulaNode(node, state) {
     case "spedpi":
       return createExplorerKriFormulaChip(`Internal data point ${node.code}${formatExplorerKriOffsetSuffix(node.offset)}`);
     case "kriref":
-      return createExplorerKriFormulaReferenceNode(node, state);
+      return createExplorerKriFormulaReferenceNode(node, state, ancestors);
     case "list":
       return createExplorerKriFormulaChip(`[${node.values.map((value) => describeExplorerKriLiteral(value)).join(", ")}]`);
     case "number":
@@ -4535,14 +4539,70 @@ function createExplorerKriFormulaCodeButton(code) {
   return codeButton;
 }
 
-function createExplorerKriFormulaReferenceNode(node, state) {
-  const wrapper = document.createElement("span");
+// A kriref is the one leaf in the tree that can itself be a whole formula
+// (every other leaf - a cellref, an internal data point, a literal - is a
+// true terminal). The "+" lets the user unfold that sub-formula in place,
+// at one indent level deeper, without leaving the current KRI's tree - the
+// referenced code is still also a plain clickable jump (createExplorerKriFormulaCodeButton),
+// exactly as before.
+function createExplorerKriFormulaReferenceNode(node, state, ancestors = []) {
+  const wrapper = document.createElement("div");
   wrapper.className = "explorer-kri-formula-kriref";
-  wrapper.append(createExplorerKriFormulaCodeButton(node.code));
 
-  const name = state?.explorerKriFormulas?.get(node.code)?.name;
-  const rest = (name ? ` — ${name}` : "") + formatExplorerKriOffsetSuffix(node.offset);
-  if (rest) wrapper.append(document.createTextNode(rest));
+  const header = document.createElement("div");
+  header.className = "explorer-kri-formula-kriref-header";
+
+  const subEntry = state?.explorerKriFormulas?.get(node.code);
+  const isCircular = ancestors.includes(node.code);
+  const canExpand = Boolean(subEntry?.formula) && !isCircular;
+
+  let toggle = null;
+  if (canExpand) {
+    toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "explorer-kri-formula-kriref-toggle";
+    toggle.textContent = "+";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", `Show how ${node.code} is computed`);
+    header.append(toggle);
+  }
+
+  header.append(createExplorerKriFormulaCodeButton(node.code));
+
+  const rest = (subEntry?.name ? ` — ${subEntry.name}` : "") + formatExplorerKriOffsetSuffix(node.offset);
+  if (rest) header.append(document.createTextNode(rest));
+
+  if (isCircular) {
+    const note = document.createElement("span");
+    note.className = "explorer-kri-formula-kriref-note";
+    note.textContent = "(circular reference)";
+    header.append(note);
+  }
+
+  wrapper.append(header);
+
+  if (toggle) {
+    let expansion = null;
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (expansion) {
+        expansion.remove();
+        expansion = null;
+        toggle.textContent = "+";
+        toggle.setAttribute("aria-expanded", "false");
+        return;
+      }
+
+      expansion = document.createElement("div");
+      expansion.className = "explorer-kri-formula-kriref-expansion";
+      expansion.append(
+        renderExplorerKriFormulaNode(parseKriFormula(subEntry.formula), state, [...ancestors, node.code])
+      );
+      wrapper.append(expansion);
+      toggle.textContent = "−";
+      toggle.setAttribute("aria-expanded", "true");
+    });
+  }
 
   return wrapper;
 }
@@ -4581,16 +4641,16 @@ const EXPLORER_KRI_FORMULA_BINARY_SYMBOLS = {
   IN: "is one of"
 };
 
-function renderExplorerKriFormulaBinary(node, state) {
+function renderExplorerKriFormulaBinary(node, state, ancestors) {
   const wrapper = document.createElement("span");
   wrapper.className = "explorer-kri-formula-inline";
   const op = document.createElement("span");
   op.className = "explorer-kri-formula-op";
   op.textContent = EXPLORER_KRI_FORMULA_BINARY_SYMBOLS[node.op] ?? node.op;
   wrapper.append(
-    renderExplorerKriFormulaNode(node.left, state),
+    renderExplorerKriFormulaNode(node.left, state, ancestors),
     op,
-    renderExplorerKriFormulaNode(node.right, state)
+    renderExplorerKriFormulaNode(node.right, state, ancestors)
   );
   return wrapper;
 }
@@ -4599,14 +4659,14 @@ function renderExplorerKriFormulaBinary(node, state) {
 // labelled (numerator/denominator, condition/then/else) than as a plain
 // numbered list - every other known function just gets a label and a list
 // of its arguments, and anything unrecognised falls back to its own name.
-function renderExplorerKriFormulaCall(node, state) {
+function renderExplorerKriFormulaCall(node, state, ancestors) {
   const name = node.name.toUpperCase();
 
   if (name === "DIVIDE" && node.args.length === 2) {
     return createExplorerKriFormulaBlock("Ratio", [
       ["Numerator", node.args[0]],
       ["Denominator", node.args[1]]
-    ], state);
+    ], state, ancestors);
   }
 
   if (name === "IFN" && node.args.length === 3) {
@@ -4614,20 +4674,20 @@ function renderExplorerKriFormulaCall(node, state) {
       ["If", node.args[0]],
       ["Then", node.args[1]],
       ["Else", node.args[2]]
-    ], state);
+    ], state, ancestors);
   }
 
   if (name === "COALESCE") {
     return createExplorerKriFormulaBlock("First available value among", node.args.map((arg, index) => (
       [`Option ${index + 1}`, arg]
-    )), state);
+    )), state, ancestors);
   }
 
   const label = EXPLORER_KRI_FORMULA_FUNCTION_LABELS[name] ?? `${node.name}(...)`;
-  return createExplorerKriFormulaBlock(label, node.args.map((arg) => [null, arg]), state);
+  return createExplorerKriFormulaBlock(label, node.args.map((arg) => [null, arg]), state, ancestors);
 }
 
-function createExplorerKriFormulaBlock(label, items, state) {
+function createExplorerKriFormulaBlock(label, items, state, ancestors) {
   const block = document.createElement("div");
   block.className = "explorer-kri-formula-block";
   const heading = document.createElement("p");
@@ -4646,7 +4706,7 @@ function createExplorerKriFormulaBlock(label, items, state) {
       itemHeading.textContent = `${itemLabel}:`;
       item.append(itemHeading);
     }
-    item.append(renderExplorerKriFormulaNode(node, state));
+    item.append(renderExplorerKriFormulaNode(node, state, ancestors));
     list.append(item);
   });
   block.append(list);

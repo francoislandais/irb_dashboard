@@ -1916,6 +1916,48 @@ button:focus-visible {
   line-height: 1.4;
 }
 
+.explorer-kri-formula-kriref-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+
+.explorer-kri-formula-kriref-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d7ded8;
+  border-radius: 4px;
+  background: #f6f8f7;
+  padding: 0;
+  color: var(--primary-dark);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  flex: none;
+}
+
+.explorer-kri-formula-kriref-toggle:hover {
+  border-color: var(--primary-dark);
+  background: #eaf2fa;
+}
+
+.explorer-kri-formula-kriref-note {
+  color: #66736d;
+  font-style: italic;
+}
+
+.explorer-kri-formula-kriref-expansion {
+  margin-top: 7px;
+  border-left: 2px solid #d7ded8;
+  padding-left: 10px;
+}
+
 .explorer-kri-formula-kriref-code {
   cursor: pointer;
   border: none;
