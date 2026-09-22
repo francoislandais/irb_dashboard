@@ -89,6 +89,26 @@ export function buildExplorerXYHeaders(columns) {
         colSpan: span, rowSpan: leaf ? depth - level : 1, leaf });
       index += span;
     }
-    return cells;
+    return markDuplicateExplorerXYGroupLabels(cells);
   });
+}
+
+// Some EBA taxonomies reuse a row concept's own name one level deeper as a
+// sibling branch's ancestor (e.g. C_08.06's "Volatility adjustment to the
+// exposure" is both 0120's own leaf label and the immediate parent of
+// 0130/0140) - two adjacent header cells on the same row then show the
+// exact same text side by side. When that happens for a group (non-leaf)
+// cell, blank its label - the full text still lands on the cell via
+// fullLabel/title for anyone hovering or using a screen reader - and flag
+// the cell before it so the render step can drop the border between them:
+// same concept, so the two cells should read as one open region rather
+// than two separately boxed ones.
+function markDuplicateExplorerXYGroupLabels(cells) {
+  const labels = cells.map((cell) => cell.label);
+  for (let index = 1; index < cells.length; index++) {
+    if (cells[index].leaf || labels[index] !== labels[index - 1]) continue;
+    cells[index - 1].opensIntoNextDuplicate = true;
+    cells[index] = { ...cells[index], label: "", fullLabel: labels[index], isDuplicateLabel: true };
+  }
+  return cells;
 }

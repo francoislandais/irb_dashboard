@@ -4312,6 +4312,25 @@ table {
   background: #eaf2fa;
 }
 
+/* A group header whose text only restates the cell right before it (see
+   markDuplicateExplorerXYGroupLabels) is blanked and matches that cell's
+   background - opens-into-next-duplicate then drops the border on the
+   facing side of each cell in the pair, so the shared border disappears
+   entirely instead of doubling up, and the two read as one open region.
+   These selectors are qualified with thead/th (like the base 0.5px border
+   rule above) purely to match its specificity - without it, the more
+   heavily-qualified base rule would keep winning and the border would
+   never actually go away. */
+.metric-table.is-xy-view thead th.explorer-xy-group.is-duplicate-label {
+  background: #ffffff;
+  border-left: 0;
+}
+
+.metric-table.is-xy-view thead th.explorer-xy-leaf.opens-into-next-duplicate,
+.metric-table.is-xy-view thead th.explorer-xy-group.opens-into-next-duplicate {
+  border-right: 0;
+}
+
 .explorer-xy-header-code {
   display: block;
   margin-top: 4px;

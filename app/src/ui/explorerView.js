@@ -1,5 +1,5 @@
 import { getExplorerTemplateReferenceDates } from "../data/explorerReferenceDates.js";
-import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260921-hierarchy-gt-escape";
+import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260922-xy-header-dedupe";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260921-hierarchy-gt-escape";
 import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-padding";
@@ -1948,6 +1948,12 @@ function renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader) {
       cell.rowSpan = header.rowSpan;
       cell.className = header.leaf ? "explorer-xy-leaf" : "explorer-xy-group";
       cell.classList.toggle("is-horizontally-merged", header.colSpan > 1);
+      cell.classList.toggle("is-duplicate-label", Boolean(header.isDuplicateLabel));
+      cell.classList.toggle("opens-into-next-duplicate", Boolean(header.opensIntoNextDuplicate));
+      if (header.isDuplicateLabel) {
+        cell.title = header.fullLabel;
+        cell.setAttribute("aria-label", header.fullLabel);
+      }
       const label = document.createElement("span");
       label.className = "explorer-xy-header-label";
       label.textContent = header.label;
