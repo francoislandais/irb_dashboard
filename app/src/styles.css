@@ -1552,6 +1552,14 @@ button:focus-visible {
   padding-right: 0;
 }
 
+/* Lines up the selection card's own border with the Explorer options
+   toggle's border (see .explorer-context-detail-toggle) - the toggle sits
+   4px lower than this pane's un-padded top, so cancelling the inherited
+   8px top padding down to 4px brings both borders to the same y. */
+.explorer-context-panel > .cost-of-risk-context-selected-pane {
+  padding-top: 4px;
+}
+
 .explorer-context-panel > .cost-of-risk-context-detail-pane {
   box-sizing: border-box;
   height: 100%;
@@ -1760,7 +1768,8 @@ button:focus-visible {
   overflow-x: hidden;
   overflow-y: auto;
   background: #f6f8f7;
-  border-radius: 7px;
+  border: 1px solid #9fc4dd;
+  border-radius: 9px;
   padding: 8px;
   color: #000000;
   font-size: 0.72rem;
