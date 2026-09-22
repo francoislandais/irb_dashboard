@@ -158,7 +158,11 @@ let explorerGlobalEvolutionFrequency = "quarterly";
 let explorerHasDetectedEvolutionFrequency = false;
 let explorerGlobalHistoryPeriods = pendingUrlHistoryPeriods;
 let explorerStickyFrame = 0;
-let explorerContextDetailCollapsed = readUrlStateParams().get(EXPLORER_CONTEXT_URL_PARAM) !== "expanded";
+// Defaults to expanded - a first-time visitor needs the context panel
+// visible to understand what they're looking at, so only an explicit
+// "collapsed" in the URL (see setExplorerContextDetailCollapsed) starts it
+// closed.
+let explorerContextDetailCollapsed = readUrlStateParams().get(EXPLORER_CONTEXT_URL_PARAM) === "collapsed";
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
 let explorerBenchmarkLastSmoothingWindow = 4;
@@ -1123,8 +1127,11 @@ function setExplorerContextDetailCollapsed(collapsed) {
 
   explorerContextDetailCollapsed = collapsed;
   const url = createUrlState();
-  if (collapsed) url.searchParams.delete(EXPLORER_CONTEXT_URL_PARAM);
-  else url.searchParams.set(EXPLORER_CONTEXT_URL_PARAM, "expanded");
+  // Expanded is the default now (see the module-level initializer above),
+  // so it's collapsed that needs to be the one written to the URL - an
+  // explicit user choice to hide the panel should survive a reload.
+  if (collapsed) url.searchParams.set(EXPLORER_CONTEXT_URL_PARAM, "collapsed");
+  else url.searchParams.delete(EXPLORER_CONTEXT_URL_PARAM);
   replaceUrlState(url);
   syncExplorerContextDetailVisibility();
 }

@@ -1522,18 +1522,6 @@ button:focus-visible {
   height: 17px;
 }
 
-.explorer-context-detail-toggle-icon-close {
-  display: none;
-}
-
-.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-open {
-  display: none;
-}
-
-.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-close {
-  display: block;
-}
-
 .explorer-context-detail-toggle:hover,
 .explorer-context-detail-toggle:focus-visible {
   border-color: var(--primary-dark);
