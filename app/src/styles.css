@@ -1616,6 +1616,23 @@ button:focus-visible {
   grid-column: 2;
 }
 
+/* The toggle's -14px margin-left and the axis-tabs row's 2px padding only
+   make sense when there's a context panel right next to them to hug (see
+   .explorer-context-detail-toggle) - with the panel gone in collapsed mode
+   they left the toggle overflowing further left than the filter row and
+   the table, instead of the three sharing one left edge. */
+.explorer-workspace.is-context-detail-collapsed .explorer-context-detail-toggle {
+  margin-left: 0;
+}
+
+.explorer-workspace.is-context-detail-collapsed .axis-tabs {
+  padding-left: 18px;
+}
+
+.explorer-workspace.is-context-detail-collapsed .metric-table .description-column {
+  padding-left: calc(18px + (var(--indent-level, 0) * 18px));
+}
+
 .explorer-workspace.is-context-detail-collapsed .explorer-context-panel {
   position: absolute;
   z-index: 60;
