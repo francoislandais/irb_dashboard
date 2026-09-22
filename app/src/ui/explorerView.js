@@ -1335,7 +1335,10 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   elements.explorerEmpty.textContent = searchedTableSeries.status;
 
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) {
-    shouldRevealExplorerAxisSelection = false;
+    // Deliberately NOT clearing shouldRevealExplorerAxisSelection here - an
+    // empty render (data still loading, a filter not yet applied) isn't a
+    // real chance to reveal anything, so the flag must survive to the next,
+    // hopefully non-empty render instead of being silently discarded.
     explorerSearchSelectionCache = null;
     recordExplorerSelectionHistory(state);
     if (deferChromeUntilTable) {
@@ -1358,11 +1361,9 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   if (!refreshedChromeAfterTable) refreshExplorerSelectionDependentContextPanel(state);
   applyExplorerSelection();
   if (shouldFocusOpenedExplorerPoint) {
-    shouldFocusOpenedExplorerPoint = false;
-    focusSelectedExplorerRow();
+    if (focusSelectedExplorerRow()) shouldFocusOpenedExplorerPoint = false;
   } else if (shouldRevealExplorerAxisSelection) {
-    shouldRevealExplorerAxisSelection = false;
-    focusSelectedExplorerRow();
+    if (focusSelectedExplorerRow()) shouldRevealExplorerAxisSelection = false;
   } else {
     restoreExplorerScrollPosition();
   }
@@ -5640,7 +5641,12 @@ function focusSelectedExplorerRow() {
   // nothing left to do here but find the row it already rendered.
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
   const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
-  if (!row || row.hidden) return;
+  // Reported false lets the caller keep its "still need to reveal this"
+  // flag set instead of clearing it - the row can genuinely not exist yet
+  // on an early render pass (data still loading, a filter not yet applied,
+  // KRI paginated to the wrong page), and silently giving up here meant the
+  // scroll never happened even once real data arrived on a later render.
+  if (!row || row.hidden) return false;
 
   row.focus({ preventScroll: true });
   // Scrolling the row itself only ever proves vertical visibility - its own
@@ -5659,6 +5665,7 @@ function focusSelectedExplorerRow() {
   // "center" forces a real scroll past the header every time, regardless
   // of where the row happens to sit.
   (selectedCell ?? row).scrollIntoView({ block: "center", inline: "nearest" });
+  return true;
 }
 
 export function saveExplorerScrollPosition() {
