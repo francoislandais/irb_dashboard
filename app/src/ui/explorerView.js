@@ -475,6 +475,11 @@ function ensureActiveExplorerTemplate(state) {
     hasAppliedUrlTemplate = true;
     const urlTemplateId = findMatchingExplorerTemplateId(templates, getUrlTemplateParam());
     if (urlTemplateId) activeExplorerTemplateId = urlTemplateId;
+    // The app can load positioned directly on a template (a shared URL, or
+    // just the default one) - make sure the very first render still reveals
+    // whatever cell ends up selected, instead of sitting at the table's
+    // top-left corner until the user scrolls or interacts.
+    shouldRevealExplorerAxisSelection = true;
   }
 
   if (!templates.some((template) => template.id === activeExplorerTemplateId)) {
@@ -934,6 +939,10 @@ function setActiveExplorerTemplate(tableId) {
   hasInteractedWithExplorerSelection = true;
   activeExplorerTemplateId = tableId;
   updateUrlTemplateParam(activeExplorerTemplateId);
+  // A freshly-selected template's saved scroll position (if any) is from a
+  // previous, unrelated visit to it - always bring the actually-selected
+  // cell into view instead, the same way switching axis tabs already does.
+  shouldRevealExplorerAxisSelection = true;
   if (getLatestState()) {
     saveExplorerScrollPosition();
     rerenderApp(getLatestState());
@@ -5650,6 +5659,12 @@ function scrollSelectedExplorerRowIntoView() {
   const row = elements.explorerTable.querySelector(`tbody tr[data-point-code="${CSS.escape(selectedCode)}"]`);
   if (!row || row.hidden) return;
   scrollExplorerRowIntoViewQuickly(row);
+  // scrollExplorerRowIntoViewQuickly only animates vertical scroll (see its
+  // own comment) - the selected cell can still be off-screen horizontally
+  // (e.g. a Column axis switch, or a template picked from the list, can
+  // land on a date far to the right), so bring it into view too, same as
+  // focusSelectedExplorerRow does for the cellref-navigation case.
+  row.querySelector("td.is-selected-cell")?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
 
 export function saveExplorerScrollPosition() {

@@ -146,7 +146,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260812-costofrisk-domain-split";
-import { openExplorerPoint } from "./explorerView.js?v=20260922-xy-header-selection-chain";
+import { openExplorerPoint } from "./explorerView.js?v=20260922-template-scroll-reveal";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260828-summary-display-mode";
 import {
   clearCostOfRiskEmptyPanelsView,
