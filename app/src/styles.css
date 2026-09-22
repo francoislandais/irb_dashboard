@@ -1508,23 +1508,33 @@ button:focus-visible {
   min-height: 34px;
   margin-left: -14px;
   margin-right: 10px;
-  border: 1px solid #9fc4dd;
+  border: 0;
   border-radius: 9px;
-  background: #f6fbff;
+  background: #f6f8f7;
   color: var(--primary-dark);
   padding: 0;
-  box-shadow: 0 1px 3px rgb(31 51 42 / 12%);
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
 }
 
 .explorer-context-detail-toggle svg {
-  width: 17px;
-  height: 17px;
+  width: 19px;
+  height: 19px;
+}
+
+.explorer-context-detail-toggle-icon-close {
+  display: none;
+}
+
+.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-open {
+  display: none;
+}
+
+.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-close {
+  display: block;
 }
 
 .explorer-context-detail-toggle:hover,
 .explorer-context-detail-toggle:focus-visible {
-  border-color: var(--primary-dark);
   background: #eaf2fa;
   color: var(--primary-dark);
   outline: none;
