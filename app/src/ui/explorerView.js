@@ -5364,6 +5364,23 @@ function selectExplorerRow(pointCode, options = {}) {
   if (shouldFocus && selectedCode) focusSelectedExplorerRow();
 }
 
+// A cell flagged opens-into-next-duplicate has had its shared border with
+// the next cell removed (see markDuplicateExplorerXYGroupLabels) because
+// that next cell is blank and restates the same concept - the two read as
+// one continuous region. When the first one is the selected column's own
+// header, the highlight needs to visibly continue across that open border
+// instead of stopping dead against it, so walk the chain (it can be more
+// than one hop long) and highlight every cell still open to the next.
+function highlightExplorerXYOpenDuplicateChain(header) {
+  let current = header;
+  while (current?.classList.contains("opens-into-next-duplicate")) {
+    const next = current.nextElementSibling;
+    if (!next?.classList.contains("is-duplicate-label")) break;
+    next.classList.add("is-selected-date-header");
+    current = next;
+  }
+}
+
 function applyExplorerSelection() {
   const rows = [...elements.explorerTable.querySelectorAll("tbody tr")];
 
@@ -5394,6 +5411,7 @@ function applyExplorerSelection() {
     const selectedColumnIndex = getActiveExplorerContext().selectedCellColumnIndex ?? 0;
     const selectedHeader = elements.explorerTable.querySelector(`thead th[data-explorer-date-column="${selectedColumnIndex}"]`);
     selectedHeader?.classList.add("is-selected-date-header");
+    highlightExplorerXYOpenDuplicateChain(selectedHeader);
     const selectedYearHeader = [...elements.explorerTable.querySelectorAll("thead th.explorer-year-header")].find((header) => (
       selectedColumnIndex >= Number(header.dataset.explorerYearColumnStart)
       && selectedColumnIndex <= Number(header.dataset.explorerYearColumnEnd)

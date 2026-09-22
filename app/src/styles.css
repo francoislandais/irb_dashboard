@@ -4338,6 +4338,14 @@ table {
   font-size: 0.68rem;
 }
 
+/* A selected leaf's highlight is propagated onto a duplicate cell it opens
+   into (see highlightExplorerXYOpenDuplicateChain) - this has to outrank
+   the plain white .is-duplicate-label background above (4 classes) or the
+   propagated highlight would never actually show. */
+.metric-table.is-xy-view thead th.explorer-xy-group.is-duplicate-label.is-selected-date-header {
+  background: #eaf2fa;
+}
+
 .metric-table.is-xy-view thead th.is-selected-date-header {
   background: #eaf2fa;
   color: var(--primary-dark);
