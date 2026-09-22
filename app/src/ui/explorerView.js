@@ -5651,7 +5651,14 @@ function focusSelectedExplorerRow() {
   // see openExplorerKriFormulaCellRef). Scroll that cell specifically
   // instead, so both directions are handled together.
   const selectedCell = row.querySelector("td.is-selected-cell");
-  (selectedCell ?? row).scrollIntoView({ block: "nearest", inline: "nearest" });
+  // block: "nearest" trusts the browser's plain scroll-container geometry,
+  // which doesn't know the sticky thead visually covers whatever's still
+  // within that geometry - a row sitting just below the top of the
+  // scrollable area reads as "already visible" and gets zero vertical
+  // scroll even though the sticky header is actually drawn right over it.
+  // "center" forces a real scroll past the header every time, regardless
+  // of where the row happens to sit.
+  (selectedCell ?? row).scrollIntoView({ block: "center", inline: "nearest" });
 }
 
 export function saveExplorerScrollPosition() {
