@@ -10,7 +10,7 @@ import {
   explorerTableOffersAllCurrencies,
   getAvailableExplorerAxisCodes,
   isExplorerDataOnlyRowTemplate
-} from "./explorer.js?v=20260917-funding-plan-currencies";
+} from "./explorer.js?v=20260922-native-all-currency";
 
 export const EXPLORER_TARGET = {
   tableId: "C_02.00",

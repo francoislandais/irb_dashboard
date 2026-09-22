@@ -349,11 +349,27 @@ export function explorerTableHasCurrencyZAxis(state, tableId) {
   return getConfiguredExplorerAxisCodes(state, tableId, "z").includes("EUR");
 }
 
+// Some tables (e.g. C_66.01) already have their own native z-axis point
+// for "all currencies" (an actual code/description pair in the dimension
+// mapping) - synthesizing the __ALL__ sentinel on top of that would offer
+// the user two different ways to ask for the same thing. Matched loosely
+// against both code and description since which of the two actually holds
+// the "All Currency" text isn't consistent across the reference data.
+function explorerTableHasNativeAllCurrencyPoint(state, tableId) {
+  return (state.explorerPoints ?? []).some((point) => (
+    point.tableId === tableId
+    && point.coordinate === "z_axis_rc_code"
+    && /all\s*currenc/i.test(`${point.code} ${point.description}`)
+  ));
+}
+
 // Funding Plan currency tables are reported and reviewed currency by
-// currency. Other regulatory families keep their synthetic aggregate.
+// currency. Other regulatory families keep their synthetic aggregate,
+// unless the table already has a native "all currencies" point of its own.
 export function explorerTableOffersAllCurrencies(state, tableId) {
   return !String(tableId ?? "").startsWith("P_")
-    && explorerTableHasCurrencyZAxis(state, tableId);
+    && explorerTableHasCurrencyZAxis(state, tableId)
+    && !explorerTableHasNativeAllCurrencyPoint(state, tableId);
 }
 
 export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId) {

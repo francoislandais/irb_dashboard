@@ -1,7 +1,7 @@
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
-import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260921-hierarchy-gt-escape";
+import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260922-native-all-currency";
 
 // Factor an exact set of tuples, never the Cartesian product of unrelated
 // selections. Siblings merge only when their remaining subtrees are identical.
