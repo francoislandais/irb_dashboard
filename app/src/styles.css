@@ -1510,19 +1510,24 @@ button:focus-visible {
   margin-right: 10px;
   border: 0;
   border-radius: 9px;
-  background: #f6f8f7;
+  background: transparent;
   color: var(--primary-dark);
   padding: 0;
-  transition: background 120ms ease, color 120ms ease;
+  transition: opacity 120ms ease;
 }
 
 .explorer-context-detail-toggle svg {
-  width: 19px;
-  height: 19px;
+  width: 30px;
+  height: 30px;
 }
 
 .explorer-context-detail-toggle-icon-close {
   display: none;
+  /* Expanded already shows the panel, so the icon that collapses it back
+     stays a quiet gray from the selection card's own palette instead of
+     the attention-grabbing blue - only the collapsed state (nothing to
+     see yet) needs to stand out and invite a click. */
+  color: #8b9691;
 }
 
 .explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-open {
@@ -1535,8 +1540,7 @@ button:focus-visible {
 
 .explorer-context-detail-toggle:hover,
 .explorer-context-detail-toggle:focus-visible {
-  background: #eaf2fa;
-  color: var(--primary-dark);
+  opacity: 0.7;
   outline: none;
 }
 
