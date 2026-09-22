@@ -4096,39 +4096,53 @@ function createExplorerSelectionSummaryCard() {
 
   if (lines.length === 0) {
     description.textContent = "Select a cell in the table to see its details here.";
-  } else {
-    lines.forEach(([label, value]) => {
-      const line = document.createElement("p");
-      line.className = "explorer-selection-summary-line";
-      const strong = document.createElement("span");
-      strong.className = "explorer-selection-summary-label";
-      strong.textContent = `${label}: `;
-      const content = document.createElement("span");
-      content.className = "explorer-selection-summary-content";
-      content.textContent = truncateExplorerSummaryText(value);
-      content.title = value;
-      line.append(strong, content);
-      description.append(line);
-    });
+    pane.append(description);
+    return pane;
   }
 
-  const metrics = getExplorerSelectedPointMetrics();
-  if (metrics) description.append(createExplorerSelectionMetrics(metrics));
-  if (selectedReference) {
-    const referenceLine = document.createElement("p");
-    referenceLine.className = "explorer-selection-summary-line";
-    const referenceLabel = document.createElement("span");
-    referenceLabel.className = "explorer-selection-summary-label";
-    referenceLabel.textContent = "Reference date: ";
-    const referenceValue = document.createElement("span");
-    referenceValue.className = "explorer-selection-summary-content";
-    referenceValue.textContent = getExplorerFullDateColumnLabel(selectedReference);
-    referenceLine.append(referenceLabel, referenceValue);
-    description.append(referenceLine);
-  }
+  // The headline leads with the figure itself - what the card exists to
+  // show - before the Row/Column/Tab detail underneath it, instead of
+  // burying "Value"/"Reference date" as two more same-weight lines at the
+  // very bottom.
+  description.append(createExplorerSelectionHeadline(getExplorerSelectedPointMetrics(), selectedReference));
+
+  lines.forEach(([label, value]) => {
+    const line = document.createElement("p");
+    line.className = "explorer-selection-summary-line";
+    const strong = document.createElement("span");
+    strong.className = "explorer-selection-summary-label";
+    strong.textContent = `${label}: `;
+    const content = document.createElement("span");
+    content.className = "explorer-selection-summary-content";
+    content.textContent = truncateExplorerSummaryText(value);
+    content.title = value;
+    line.append(strong, content);
+    description.append(line);
+  });
 
   pane.append(description);
   return pane;
+}
+
+function createExplorerSelectionHeadline(metrics, selectedReference) {
+  const headline = document.createElement("p");
+  headline.className = "explorer-selection-summary-headline";
+
+  const label = document.createElement("span");
+  label.className = "explorer-selection-summary-headline-label";
+  label.textContent = "Selected value : ";
+  headline.append(label);
+
+  const valueText = document.createElement("span");
+  valueText.className = "explorer-selection-summary-headline-value";
+  const value = metrics && Number.isFinite(metrics.currentValue)
+    ? formatMetricValue(metrics.currentValue, metrics.selectedUnit, metrics.format)
+    : "-";
+  const referenceLabel = selectedReference ? getExplorerFullDateColumnLabel(selectedReference) : "";
+  valueText.textContent = referenceLabel ? `${value} as of ${referenceLabel}` : value;
+  headline.append(valueText);
+
+  return headline;
 }
 
 // Reuses the series already computed for the currently rendered table
@@ -4186,21 +4200,6 @@ function getExplorerSelectedPointMetrics() {
     parentValue,
     selectedUnit: state.selectedUnit
   };
-}
-
-function createExplorerSelectionMetrics(metrics) {
-  const value = document.createElement("p");
-  value.className = "explorer-selection-summary-line explorer-selection-summary-value-line";
-  const valueLabel = document.createElement("span");
-  valueLabel.className = "explorer-selection-summary-value-label";
-  valueLabel.textContent = "Value: ";
-  const valueText = document.createElement("span");
-  valueText.className = "explorer-selection-summary-value";
-  valueText.textContent = Number.isFinite(metrics.currentValue)
-    ? formatMetricValue(metrics.currentValue, metrics.selectedUnit, metrics.format)
-    : "-";
-  value.append(valueLabel, valueText);
-  return value;
 }
 
 function renderExplorerDescriptionPanel() {

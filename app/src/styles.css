@@ -1791,14 +1791,20 @@ button:focus-visible {
   font-weight: 400;
 }
 
-.explorer-selection-summary-value-label {
-  color: var(--primary-dark);
-  font-weight: 500;
+.explorer-selection-summary-headline {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+  font-size: 1.05rem;
+  line-height: 1.3;
 }
 
-.explorer-selection-summary-value {
+.explorer-selection-summary-headline-label {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.explorer-selection-summary-headline-value {
   color: #000000;
-  font-size: inherit;
   font-weight: 400;
 }
 
