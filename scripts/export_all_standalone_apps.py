@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import csv
 import gzip
+import html
 import io
 import json
 import posixpath
@@ -19,13 +20,20 @@ PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 APP_DIRECTORY = PROJECT_DIRECTORY / "app"
 DEFAULT_DATASETS_DIRECTORY = PROJECT_DIRECTORY / "datasets"
 DEFAULT_OUTPUTS_DIRECTORY = PROJECT_DIRECTORY / "outputs"
+DEFAULT_STANDALONE_APP_NAME = "Agora Explorer portable"
 
 
 def export_all_standalone_apps(
     datasets_directory: str | Path | None = None,
     outputs_directory: str | Path | None = None,
+    app_name: str | None = None,
 ) -> list[Path]:
-    """Génère un HTML portable pour chaque CSV du dossier de données."""
+    """Génère un HTML portable pour chaque CSV du dossier de données.
+
+    ``app_name`` devient le titre de l'onglet (``<title>``) de chaque fichier
+    généré - le même nom pour tous les CSV de ce lot. Omis, le titre par
+    défaut (``DEFAULT_STANDALONE_APP_NAME``) est conservé.
+    """
 
     datasets_path = _resolve_directory(datasets_directory, DEFAULT_DATASETS_DIRECTORY)
     outputs_path = _resolve_directory(outputs_directory, DEFAULT_OUTPUTS_DIRECTORY)
@@ -43,7 +51,7 @@ def export_all_standalone_apps(
     generated_files = []
     for csv_path in csv_files:
         output_path = outputs_path / f"Agora Explorer_{csv_path.stem}.html"
-        export_standalone_app(csv_path, output_path, bundle=bundle)
+        export_standalone_app(csv_path, output_path, bundle=bundle, app_name=app_name)
         generated_files.append(output_path)
     return generated_files
 
@@ -54,8 +62,14 @@ def export_standalone_app(
     *,
     app_directory: str | Path = APP_DIRECTORY,
     bundle: dict | None = None,
+    app_name: str | None = None,
 ) -> Path:
-    """Génère une version portable à partir d'un CSV unique."""
+    """Génère une version portable à partir d'un CSV unique.
+
+    ``app_name`` devient le titre de l'onglet (``<title>``) de la page
+    générée. Omis, le titre par défaut (``DEFAULT_STANDALONE_APP_NAME``) est
+    conservé.
+    """
 
     data_path = Path(data_file_path).expanduser().resolve()
     csv_text = data_path.read_bytes().decode("utf-8", errors="replace")
@@ -65,7 +79,7 @@ def export_standalone_app(
         Path(app_directory).expanduser().resolve()
     )
     html = _build_standalone_html(
-        standalone_bundle, csv_text=csv_text, file_name=data_path.name
+        standalone_bundle, csv_text=csv_text, file_name=data_path.name, app_name=app_name
     )
     destination = (
         Path(output_path).expanduser().resolve()
@@ -82,6 +96,7 @@ def export_consolidated_standalone_app(
     output_name: str,
     datasets_directory: str | Path | None = None,
     outputs_directory: str | Path | None = None,
+    app_name: str | None = None,
 ) -> Path:
     """Fusionne plusieurs CSV déjà générés dans ``datasets/`` et exporte une
     unique application portable consolidée.
@@ -94,6 +109,10 @@ def export_consolidated_standalone_app(
     une ligne provenant d'un fichier qui n'a pas une colonne donnée (par ex.
     une date de référence absente de son extraction) reçoit une valeur vide
     pour cette colonne plutôt que de faire échouer la fusion.
+
+    ``app_name`` devient le titre de l'onglet (``<title>``) de la page
+    générée. Omis, le titre par défaut (``DEFAULT_STANDALONE_APP_NAME``) est
+    conservé.
     """
 
     # A bare string is iterable character by character in Python - guard
@@ -115,7 +134,7 @@ def export_consolidated_standalone_app(
     bundle = _build_standalone_bundle(APP_DIRECTORY)
     output_csv_name = _normalize_csv_name(output_name)
     html = _build_standalone_html(
-        bundle, csv_text=merged_csv_text, file_name=output_csv_name
+        bundle, csv_text=merged_csv_text, file_name=output_csv_name, app_name=app_name
     )
     destination = outputs_path / f"Agora Explorer_{Path(output_csv_name).stem}.html"
     destination.write_text(html, encoding="utf-8")
@@ -246,7 +265,10 @@ def _resolve_module_path(from_path: str, specifier: str) -> str:
     )
 
 
-def _build_standalone_html(bundle: dict, *, csv_text: str, file_name: str) -> str:
+def _build_standalone_html(
+    bundle: dict, *, csv_text: str, file_name: str, app_name: str | None = None
+) -> str:
+    page_title = html.escape((app_name or "").strip() or DEFAULT_STANDALONE_APP_NAME)
     csv_bytes = csv_text.encode("utf-8")
     compressed_csv = gzip.compress(csv_bytes, compresslevel=9, mtime=0)
     bundle_json = json.dumps(bundle, ensure_ascii=False, separators=(",", ":"))
@@ -268,7 +290,7 @@ def _build_standalone_html(bundle: dict, *, csv_text: str, file_name: str) -> st
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Agora Explorer portable</title>
+    <title>{page_title}</title>
     <style>
 {bundle["stylesCss"]}
     </style>
