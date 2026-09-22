@@ -1521,13 +1521,21 @@ button:focus-visible {
   height: 30px;
 }
 
-.explorer-context-detail-toggle-icon-close {
+/* Expanded already shows the panel, so the icon that collapses it back
+   stays a quiet gray from the selection card's own palette instead of
+   the attention-grabbing blue - only the collapsed state (nothing to see
+   yet) needs to stand out and invite a click. Smaller and lighter than the
+   collapsed icon, on the same light gray fill as the selection card, so
+   it reads as a subtle, thin-lined affordance rather than a bold control. */
+.explorer-context-detail-toggle[aria-expanded="true"] {
+  background: #f6f8f7;
+}
+
+.explorer-context-detail-toggle svg.explorer-context-detail-toggle-icon-close {
   display: none;
-  /* Expanded already shows the panel, so the icon that collapses it back
-     stays a quiet gray from the selection card's own palette instead of
-     the attention-grabbing blue - only the collapsed state (nothing to
-     see yet) needs to stand out and invite a click. */
-  color: #8b9691;
+  width: 18px;
+  height: 18px;
+  color: #b3bcb6;
 }
 
 .explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-open {
