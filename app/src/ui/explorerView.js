@@ -189,6 +189,15 @@ let explorerContextTopic = "";
 // own template (see openExplorerKriFormulaCellRef) can change the active
 // template/selection without the formula panel itself changing.
 let pinnedKriFormulaCode = null;
+// Which kriref codes the user has expanded with the "+" toggle (see
+// createExplorerKriFormulaReferenceNode) - a cellref click re-renders the
+// whole panel (openExplorerKriFormulaCellRef), which used to rebuild every
+// toggle from scratch as collapsed. Keyed by code and reset only when the
+// panel's own root KRI changes (see renderExplorerKriFormulaPanel), so
+// expansions survive a cellref-triggered rerender but don't leak into an
+// unrelated KRI's tree.
+let explorerKriFormulaExpandedCodes = new Set();
+let explorerKriFormulaExpandedRootCode = null;
 // A cellref range (e.g. Row 0030-0070) resolves to more than one real row -
 // only the first becomes the real selection (see
 // openExplorerKriFormulaCellRef), the rest are queued here to get the
@@ -4292,6 +4301,11 @@ function renderExplorerKriFormulaPanel(state) {
   const selectedCode = pinnedKriFormulaCode ?? getSelectedExplorerCodeForActiveAxis();
   const entry = selectedCode ? state?.explorerKriFormulas?.get(selectedCode) : null;
 
+  if (selectedCode !== explorerKriFormulaExpandedRootCode) {
+    explorerKriFormulaExpandedRootCode = selectedCode;
+    explorerKriFormulaExpandedCodes = new Set();
+  }
+
   if (!selectedCode || !entry?.formula) {
     const empty = document.createElement("p");
     empty.className = "explorer-description-empty";
@@ -4605,16 +4619,7 @@ function createExplorerKriFormulaReferenceNode(node, state, ancestors = []) {
 
   if (toggle) {
     let expansion = null;
-    toggle.addEventListener("click", (event) => {
-      event.stopPropagation();
-      if (expansion) {
-        expansion.remove();
-        expansion = null;
-        toggle.textContent = "+";
-        toggle.setAttribute("aria-expanded", "false");
-        return;
-      }
-
+    const buildExpansion = () => {
       expansion = document.createElement("div");
       expansion.className = "explorer-kri-formula-kriref-expansion";
       expansion.append(
@@ -4623,7 +4628,27 @@ function createExplorerKriFormulaReferenceNode(node, state, ancestors = []) {
       wrapper.append(expansion);
       toggle.textContent = "−";
       toggle.setAttribute("aria-expanded", "true");
+    };
+
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (expansion) {
+        expansion.remove();
+        expansion = null;
+        toggle.textContent = "+";
+        toggle.setAttribute("aria-expanded", "false");
+        explorerKriFormulaExpandedCodes.delete(node.code);
+        return;
+      }
+
+      buildExpansion();
+      explorerKriFormulaExpandedCodes.add(node.code);
     });
+
+    // Restores this toggle's open state across a rerender triggered from
+    // inside the panel itself (a cellref click - see
+    // openExplorerKriFormulaCellRef) instead of always starting collapsed.
+    if (explorerKriFormulaExpandedCodes.has(node.code)) buildExpansion();
   }
 
   return wrapper;
