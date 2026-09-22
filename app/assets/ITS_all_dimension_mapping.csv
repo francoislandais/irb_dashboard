@@ -9919,7 +9919,7 @@ KRI;y_axis_rc_code;LIQ55;Liquidity buffer quality ratio;;;%
 KRI;y_axis_rc_code;LIQV0039;Other items providing CBC;;;Thousands
 KRI;y_axis_rc_code;CRFA0709;Impaired loans and advances. Households;;;Thousands
 KRI;y_axis_rc_code;BSFA4200;Total Assets, excluding non-Financial;;;Thousands
-KRI;y_axis_rc_code;LEV001;Total leverage ratio exposure (TLRE) measure, fully phased-in T1 capital;;;Unit
+KRI;y_axis_rc_code;LEV001;Total leverage ratio exposure (TLRE) measure, fully phased-in T1 capital;;;Thousands
 KRI;y_axis_rc_code;BSFL2000;Financial liabilities measured at amortised cost: Subordinated liabilities;;;Thousands
 KRI;y_axis_rc_code;CRED172;Credit risk capital requirements: IRB exposure classes excluding securitisation positions: Institutions;;;%
 KRI;y_axis_rc_code;LIQ261;Backtesting Planned vs Actual Long-term Debt Securities;;;%
@@ -11764,7 +11764,7 @@ KRI;y_axis_rc_code;LEV501;Total value of exposures excluded from P1R-LR in compa
 KRI;y_axis_rc_code;GBDL0100;Total liabilities. Counterparties in SSM countries excluding Domestic country;;;Millions
 KRI;y_axis_rc_code;LIQST007;Funding deficit∕surplus (as % of total assets) Adverse case 1 Month.;;;%
 KRI;y_axis_rc_code;BSFL3800;Deposits: Non-financial corporations-Amortised cost;;;Thousands
-KRI;y_axis_rc_code;OPER111;Total net loss amount for business disruption and system failures excluding loss adjustments relating to previous reporting periods;;;Unit
+KRI;y_axis_rc_code;OPER111;Total net loss amount for business disruption and system failures excluding loss adjustments relating to previous reporting periods;;;Thousands
 KRI;y_axis_rc_code;CAP40;Dynamics of capital requirements: Credit risk capital requirements under IRB approach;;;%
 KRI;y_axis_rc_code;LIQ272;1Y Forecasted Growth of Other Assets;;;%
 KRI;y_axis_rc_code;STCE0102;Total exposure value: off balance sheet items and derivatives as originator – traditional sec - SA;;;Thousands

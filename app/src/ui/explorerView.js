@@ -5550,7 +5550,15 @@ function focusSelectedExplorerRow() {
   if (!row || row.hidden) return;
 
   row.focus({ preventScroll: true });
-  row.scrollIntoView({ block: "nearest", inline: "nearest" });
+  // Scrolling the row itself only ever proves vertical visibility - its own
+  // bounding box spans every column, including the sticky ones that are
+  // always in view, so the browser never bothers scrolling horizontally to
+  // reveal whichever date column actually holds the selected cell (e.g.
+  // reached this way from a template reference in the KRI formula panel -
+  // see openExplorerKriFormulaCellRef). Scroll that cell specifically
+  // instead, so both directions are handled together.
+  const selectedCell = row.querySelector("td.is-selected-cell");
+  (selectedCell ?? row).scrollIntoView({ block: "nearest", inline: "nearest" });
 }
 
 function scrollSelectedExplorerRowIntoView() {
