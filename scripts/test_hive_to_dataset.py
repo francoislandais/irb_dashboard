@@ -66,6 +66,38 @@ class HiveModuleFilterTest(unittest.TestCase):
 
         self.assertNotIn("AND module_id =", sql)
 
+    def test_a_list_of_values_generates_an_in_clause(self):
+        sql = build_hive_query(
+            TEMPLATES,
+            REFERENCE_DATES,
+            JST_CODES,
+            module_id=["COREP", "FINREP"],
+        )
+
+        self.assertIn("AND module_id IN ('COREP', 'FINREP')", sql)
+        self.assertNotIn("AND module_id =", sql)
+
+    def test_a_single_element_list_still_uses_an_exact_match(self):
+        sql = build_hive_query(
+            TEMPLATES,
+            REFERENCE_DATES,
+            JST_CODES,
+            module_id=["COREP"],
+        )
+
+        self.assertIn("AND module_id = 'COREP'", sql)
+        self.assertNotIn("module_id IN", sql)
+
+    def test_an_empty_list_is_disabled(self):
+        sql = build_hive_query(
+            TEMPLATES,
+            REFERENCE_DATES,
+            JST_CODES,
+            module_id=[],
+        )
+
+        self.assertNotIn("AND module_id", sql)
+
     def test_csv_runner_forwards_the_filter(self):
         client = FakeHiveClient()
         with TemporaryDirectory() as output_dir:

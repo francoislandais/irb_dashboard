@@ -39,7 +39,7 @@ def build_hive_query(
     templates: Iterable[str],
     reference_dates: Iterable[str],
     jst_codes: Iterable[str],
-    module_id: str | None = None,
+    module_id: str | Iterable[str] | None = None,
 ) -> str:
     """Construit la requête Hive au format pivoté attendu par l'application.
 
@@ -49,8 +49,10 @@ def build_hive_query(
     - un joker final comme ``F_20.04%`` ;
     - une exclusion précédée de ``!``, comme ``!F_20.04%``.
 
-    ``module_id`` ajoute une correspondance exacte sur la colonne Hive du
-    même nom. Le filtre est désactivé lorsque l'argument est omis ou vide.
+    ``module_id`` ajoute une correspondance sur la colonne Hive du même nom :
+    une valeur unique (``str``) génère ``module_id = ...``, une liste de
+    valeurs (ex. ``["COREP", "FINREP"]``) génère ``module_id IN (...)``. Le
+    filtre est désactivé lorsque l'argument est omis ou vide.
 
     Cette table Hive n'expose aucune colonne d'horodatage d'extraction :
     ``extraction_timestamp`` est ajoutée après coup par
@@ -60,7 +62,7 @@ def build_hive_query(
     templates = _clean_values(templates, "templates")
     reference_dates = _clean_values(reference_dates, "dates de référence")
     jst_codes = _clean_values(jst_codes, "JST codes")
-    module_id = str(module_id).strip() if module_id is not None else ""
+    module_ids = _clean_module_id(module_id)
     _validate_reference_dates(reference_dates)
 
     date_columns = ",\n".join(
@@ -78,11 +80,13 @@ def build_hive_query(
         f"          {_sql_literal(jst_code)}" for jst_code in jst_codes
     )
     template_filter = _build_template_filter(templates)
-    module_filter = (
-        f"\n      AND module_id = {_sql_literal(module_id)}"
-        if module_id
-        else ""
-    )
+    if not module_ids:
+        module_filter = ""
+    elif len(module_ids) == 1:
+        module_filter = f"\n      AND module_id = {_sql_literal(module_ids[0])}"
+    else:
+        module_id_list = ", ".join(_sql_literal(value) for value in module_ids)
+        module_filter = f"\n      AND module_id IN ({module_id_list})"
 
     return f"""SELECT
     table_id,
@@ -400,7 +404,7 @@ def run_hive_query_to_csv(
     output_name: str,
     output_dir: str | Path | None = None,
     devo_client: HiveClient | None = None,
-    module_id: str | None = None,
+    module_id: str | Iterable[str] | None = None,
 ):
     """Exécute la requête et enregistre le CSV directement dans ``datasets/``.
 
@@ -408,8 +412,9 @@ def run_hive_query_to_csv(
     Dans un notebook où ``devo`` est déjà initialisé, le passer simplement avec
     ``devo_client=devo``.
 
-    ``module_id`` est transmis à ``build_hive_query``. Sa valeur par défaut
-    ``None`` conserve l'extraction ITS sans filtre de module.
+    ``module_id`` est transmis à ``build_hive_query`` (valeur unique ou liste,
+    voir sa docstring). Sa valeur par défaut ``None`` conserve l'extraction
+    ITS sans filtre de module.
     """
 
     sql = build_hive_query(
@@ -577,6 +582,21 @@ def _clean_values(values: Iterable[str], label: str) -> list[str]:
     if not cleaned:
         raise ValueError(f"La liste des {label} ne peut pas être vide.")
     return cleaned
+
+
+def _clean_module_id(module_id: str | Iterable[str] | None) -> list[str]:
+    """Normalise ``module_id`` en liste, sans exiger de valeur (contrairement
+    à ``_clean_values``) puisque ce filtre est optionnel et désactivé quand
+    il est vide. Une chaîne seule est traitée comme une valeur unique, pas
+    itérée caractère par caractère - même précaution que ``_clean_values``."""
+
+    if module_id is None:
+        return []
+    if isinstance(module_id, (str, bytes)):
+        module_id = [module_id]
+    return list(
+        dict.fromkeys(str(value).strip() for value in module_id if str(value).strip())
+    )
 
 
 def _validate_reference_dates(reference_dates: Iterable[str]) -> None:
