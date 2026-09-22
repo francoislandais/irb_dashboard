@@ -1503,11 +1503,13 @@ button:focus-visible {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
   margin-left: -14px;
+  margin-right: 10px;
   border: 1px solid #9fc4dd;
-  border-radius: 6px;
+  border-radius: 9px;
   background: #f6fbff;
   color: var(--primary-dark);
   padding: 0;
@@ -1516,8 +1518,20 @@ button:focus-visible {
 }
 
 .explorer-context-detail-toggle svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
+}
+
+.explorer-context-detail-toggle-icon-close {
+  display: none;
+}
+
+.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-open {
+  display: none;
+}
+
+.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-close {
+  display: block;
 }
 
 .explorer-context-detail-toggle:hover,

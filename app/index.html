@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260922-sidebar-toggle-icon">
+    <link rel="stylesheet" href="./src/styles.css?v=20260922-sidebar-toggle-states">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -86,9 +86,15 @@
               <div class="explorer-main-pane">
                 <div class="axis-tabs" role="tablist" aria-label="Axe du tableau">
                   <button id="explorer-context-detail-toggle" class="explorer-context-detail-toggle" type="button" aria-controls="explorer-context-detail" aria-expanded="false" aria-label="Show Explorer options" title="Show Explorer options">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg class="explorer-context-detail-toggle-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <rect x="3" y="4" width="18" height="16" rx="2"/>
                       <line x1="9.5" y1="4" x2="9.5" y2="20"/>
+                      <path d="M6.5 9.5 8.5 12 6.5 14.5"/>
+                    </svg>
+                    <svg class="explorer-context-detail-toggle-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="16" rx="2"/>
+                      <line x1="9.5" y1="4" x2="9.5" y2="20"/>
+                      <path d="M8.5 9.5 6.5 12 8.5 14.5"/>
                     </svg>
                   </button>
                   <button class="axis-tab explorer-template-static" type="button" aria-label="Show templates" aria-controls="explorer-context-detail" aria-expanded="true" data-explorer-template-control>
