@@ -458,9 +458,9 @@ C_07.00;x_axis_rc_code;80;Credit risk mitigation (CRM) techniques with substitut
 C_07.00;x_axis_rc_code;90;Credit risk mitigation (CRM) techniques with substitution effects on the exposure/Substitution of the exposure due to CRM/(-) total outflows;;;
 C_07.00;x_axis_rc_code;100;Credit risk mitigation (CRM) techniques with substitution effects on the exposure/Substitution of the exposure due to CRM/Total inflows (+);;;
 C_07.00;x_axis_rc_code;110;Net exposure after CRM substitution effects pre conversion factors;;;
-C_07.00;x_axis_rc_code;120;CRM - funded credit protection. financial collateral comprehensive method/ Volatility adjustment to the exposure;;;
-C_07.00;x_axis_rc_code;130;Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection. financial collateral comprehensive method/ (-) financial collateral: adjusted value (cvam);;;
-C_07.00;x_axis_rc_code;140;Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection. financial collateral comprehensive method/ (-) financial collateral: adjusted value (cvam)/(-) of which: volatility and maturity adjustments;;;
+C_07.00;x_axis_rc_code;120;Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection. financial collateral comprehensive method// Volatility adjustment to the exposure;;;
+C_07.00;x_axis_rc_code;130;Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection. financial collateral comprehensive method// Volatility adjustment to the exposure/ (-) financial collateral: adjusted value (cvam);;;
+C_07.00;x_axis_rc_code;140;Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection. financial collateral comprehensive method// Volatility adjustment to the exposure/ (-) financial collateral: adjusted value (cvam)/(-) of which: volatility and maturity adjustments;;;
 C_07.00;x_axis_rc_code;150;Fully adjusted exposure value (e*);;;
 C_07.00;x_axis_rc_code;160;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/0%;;;
 C_07.00;x_axis_rc_code;170;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors/20%;;;
@@ -12499,7 +12499,7 @@ KRI;y_axis_rc_code;IDCARD547;Volume effect;;;%
 KRI;y_axis_rc_code;LIQV0162;1Y Forecast for Derivatives Assets;;;Thousands
 KRI;y_axis_rc_code;MRFA3000;Financial assets held for trading: Equity instruments - Other financial corporations;;;Thousands
 KRI;y_axis_rc_code;MR_NRMR_EQR_BWL_1;3-year weighted volatility of quarterly P&L and OCI changes (Equity instruments at FVOCI) to Total CET1;;;%
-KRI;y_axis_rc_code;OPER120;Total net loss including adjustments and loss recoveries;;;Unit
+KRI;y_axis_rc_code;OPER120;Total net loss including adjustments and loss recoveries;;;Thousands
 KRI;y_axis_rc_code;CRED368;Migration Rate: from stage 1 to 3;;;%
 KRI;y_axis_rc_code;MR_PRR_CVA_BWL_WSTD_NUM;Support formula to calculate other KRIs.;;;Millions
 KRI;y_axis_rc_code;ORCE1656;Negative loss adjustment amounts for damage to physical assets;;;Millions
@@ -12921,3 +12921,57 @@ C_25.00;y_axis_rc_code;210;Memorandum items / Counterparty types of transactions
 C_25.00;y_axis_rc_code;220;Memorandum items / Counterparty types of transactions subject to the SA-CVA approach / Non-financial corporations;;;
 C_25.00;y_axis_rc_code;230;Memorandum items / Aggregation of systematic components of CVA risk;;;
 C_25.00;y_axis_rc_code;240;Memorandum items / Aggregation of idosyncratic components of CVA risk;;;
+C_10.00;x_axis_rc_code;10;Original exposure pre conversion factors;;;
+C_10.00;x_axis_rc_code;20;(-) Value adjustments and provisions associated with the original exposure;;;
+C_10.00;x_axis_rc_code;30;Exposure net of value adjustments and provisions;;;
+C_10.00;x_axis_rc_code;40;Exposure value;;;
+C_10.00;x_axis_rc_code;50;Exposure value / Of which: arising from counterparty credit risk;;;
+C_10.00;x_axis_rc_code;60;Output floor / S-TREA;;;
+C_10.00;x_axis_rc_code;70;Output floor / S-TREA / Of which: arising from counterparty credit risk;;;
+C_10.00;x_axis_rc_code;80;Output floor / S-TREA / Of which: with a credit assessment by a nominated ECAI;;;
+C_10.00;x_axis_rc_code;90;Memorandum items: RWEA related to the impact of application of certain transitional provisions / Exposures secured by mortgages on residential property up to 55% of the property value;;;
+C_10.00;x_axis_rc_code;100;Memorandum items: RWEA related to the impact of application of certain transitional provisions / Exposures secured by mortgages on residential property between 55% and 80% of the property value;;;
+C_10.00;x_axis_rc_code;110;Memorandum items: RWEA related to the impact of application of certain transitional provisions / Exposures to unrated corporates with a PD estimate;;;
+C_10.00;x_axis_rc_code;120;Memorandum items: RWEA related to the impact of application of certain transitional provisions / IRB exposures subject to counterparty credit risk under the IMM;;;
+C_10.00;y_axis_rc_code;10;Total exposures;;;
+C_10.00;y_axis_rc_code;20;Total exposures / Of which: Additional stricter prudential requirements based on Article 124 of Regulation (EU) No 575.2013;;;
+C_10.00;y_axis_rc_code;30;SA exposure classes excluding securitisation positions;;;
+C_10.00;y_axis_rc_code;40;SA exposure classes excluding securitisation positions / Central governments or central banks;;;
+C_10.00;y_axis_rc_code;50;SA exposure classes excluding securitisation positions / Regional governments or local authorities;;;
+C_10.00;y_axis_rc_code;60;SA exposure classes excluding securitisation positions / Public sector entities;;;
+C_10.00;y_axis_rc_code;70;SA exposure classes excluding securitisation positions / Multilateral Development Banks;;;
+C_10.00;y_axis_rc_code;80;SA exposure classes excluding securitisation positions / International Organisations;;;
+C_10.00;y_axis_rc_code;90;SA exposure classes excluding securitisation positions / Institutions;;;
+C_10.00;y_axis_rc_code;100;SA exposure classes excluding securitisation positions / Corporates - Other;;;
+C_10.00;y_axis_rc_code;101;SA exposure classes excluding securitisation positions / Corporates - Other / Of which: Exposures to unrated corporates with a PD estimate;;;
+C_10.00;y_axis_rc_code;110;SA exposure classes excluding securitisation positions / Corporates - Other / Of which: Purchased receivables;;;
+C_10.00;y_axis_rc_code;120;SA exposure classes excluding securitisation positions / Corporates - Specialised Lending;;;
+C_10.00;y_axis_rc_code;130;SA exposure classes excluding securitisation positions / Retail;;;
+C_10.00;y_axis_rc_code;131;SA exposure classes excluding securitisation positions / Retail / Of which: Qualifying revolving;;;
+C_10.00;y_axis_rc_code;132;SA exposure classes excluding securitisation positions / Retail / Of which: Purchased receivables;;;
+C_10.00;y_axis_rc_code;150;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures;;;
+C_10.00;y_axis_rc_code;151;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Exposures secured by mortgages on residential property up to 55% of the property value;;;
+C_10.00;y_axis_rc_code;152;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Exposures secured by mortgages on residential property between 55% and 80% of the property value;;;
+C_10.00;y_axis_rc_code;153;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on residential immovable property - non-IPRE (secured);;;
+C_10.00;y_axis_rc_code;154;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on residential immovable property - non-IPRE (unsecured);;;
+C_10.00;y_axis_rc_code;155;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on residential immovable property - Other - non-IPRE;;;
+C_10.00;y_axis_rc_code;156;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on residential immovable property - IPRE;;;
+C_10.00;y_axis_rc_code;157;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on residential immovable property - Other - IPRE;;;
+C_10.00;y_axis_rc_code;158;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on commercial immovable property - non-IPRE (secured);;;
+C_10.00;y_axis_rc_code;159;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on commercial immovable property - non-IPRE (unsecured);;;
+C_10.00;y_axis_rc_code;160;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on commercial immovable property - Other - non-IPRE;;;
+C_10.00;y_axis_rc_code;161;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on commercial immovable property - IPRE;;;
+C_10.00;y_axis_rc_code;162;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Secured by mortgages on commercial immovable property - Other - IPRE;;;
+C_10.00;y_axis_rc_code;163;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Acquisition, development and construction (ADC);;;
+C_10.00;y_axis_rc_code;170;SA exposure classes excluding securitisation positions / Secured by mortgages on immovable property and ADC exposures / Of which: Categorised as Retail - secured by residential real estate in IRB;;;
+C_10.00;y_axis_rc_code;180;SA exposure classes excluding securitisation positions / Exposures in default;;;
+C_10.00;y_axis_rc_code;190;SA exposure classes excluding securitisation positions / Subordinated debt exposures;;;
+C_10.00;y_axis_rc_code;200;SA exposure classes excluding securitisation positions / Covered bonds;;;
+C_10.00;y_axis_rc_code;210;SA exposure classes excluding securitisation positions / Claims on institutions and corporates with a short-term credit assessment;;;
+C_10.00;y_axis_rc_code;220;SA exposure classes excluding securitisation positions / Collective investments undertakings (CIU);;;
+C_10.00;y_axis_rc_code;230;SA exposure classes excluding securitisation positions / Equity;;;
+C_10.00;y_axis_rc_code;240;SA exposure classes excluding securitisation positions / Other items;;;
+C_10.00;y_axis_rc_code;249;Memorandum items;;;
+C_10.00;y_axis_rc_code;250;Memorandum items / Corporates - F-IRB;;;
+C_10.00;y_axis_rc_code;260;Memorandum items / Corporates - A-IRB;;;
+C_10.00;y_axis_rc_code;270;Memorandum items / SA exposures subject to counterparty credit risk under the IMM;;;
