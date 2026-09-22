@@ -1503,33 +1503,29 @@ button:focus-visible {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
+  margin-left: -14px;
   border: 1px solid #9fc4dd;
-  border-radius: 999px;
+  border-radius: 6px;
   background: #f6fbff;
   color: var(--primary-dark);
-  font-size: 1.05rem;
-  line-height: 1;
   padding: 0;
   box-shadow: 0 1px 3px rgb(31 51 42 / 12%);
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 220ms ease;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
-.explorer-context-detail-toggle > span:first-child {
-  line-height: 1;
+.explorer-context-detail-toggle svg {
+  width: 15px;
+  height: 15px;
 }
 
 .explorer-context-detail-toggle:hover,
 .explorer-context-detail-toggle:focus-visible {
-  border-color: #a9c8de;
+  border-color: var(--primary-dark);
   background: #eaf2fa;
   color: var(--primary-dark);
   outline: none;
-}
-
-.explorer-workspace:not(.is-context-detail-collapsed) .explorer-context-detail-toggle > span:first-child {
-  transform: rotate(180deg);
 }
 
 .explorer-context-panel > .cost-of-risk-context-selected-pane,
