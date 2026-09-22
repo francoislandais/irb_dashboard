@@ -5362,15 +5362,19 @@ function selectExplorerRow(pointCode, options = {}) {
     pinnedKriFormulaCode = selectedCode;
   }
 
+  // Both callers of shouldFocus (a click, or Enter/Space on an already
+  // keyboard-focused row) act on a row that's necessarily on-screen already
+  // - scrollIntoView: false keeps this to the a11y focus() move only, with
+  // no forced scroll (see focusSelectedExplorerRow).
   if (getLatestState()) {
     saveExplorerScrollPosition();
     refreshExplorerSelectionOnly(getLatestState());
-    if (shouldFocus && selectedCode) focusSelectedExplorerRow();
+    if (shouldFocus && selectedCode) focusSelectedExplorerRow(false);
     return;
   }
 
   applyExplorerSelection();
-  if (shouldFocus && selectedCode) focusSelectedExplorerRow();
+  if (shouldFocus && selectedCode) focusSelectedExplorerRow(false);
 }
 
 // A cell flagged opens-into-next-duplicate has had its shared border with
@@ -5634,7 +5638,14 @@ function scrollExplorerRowIntoViewQuickly(target, duration = 160) {
   requestAnimationFrame(step);
 }
 
-function focusSelectedExplorerRow() {
+// scrollIntoView: false is for a plain click on an already-visible row/cell
+// (see selectExplorerRow's shouldFocus) - the user just clicked it, so it
+// cannot possibly be off-screen, and forcibly recentering the table on
+// every click was an unwanted side effect the user explicitly rejected.
+// Only the "reveal a selection that might genuinely be off-screen" callers
+// (initial template load, template switch, axis-tab switch, cross-template
+// cellref navigation) want the actual scroll.
+function focusSelectedExplorerRow(scrollIntoView = true) {
   // For KRI, renderExplorer already made sure the selected code's own page
   // was what got fetched (see its shouldFocusOpenedExplorerPoint check) -
   // nothing left to do here but find the row it already rendered.
@@ -5648,6 +5659,7 @@ function focusSelectedExplorerRow() {
   if (!row || row.hidden) return false;
 
   row.focus({ preventScroll: true });
+  if (!scrollIntoView) return true;
   // Scrolling the row itself only ever proves vertical visibility - its own
   // bounding box spans every column, including the sticky ones that are
   // always in view, so the browser never bothers scrolling horizontally to
