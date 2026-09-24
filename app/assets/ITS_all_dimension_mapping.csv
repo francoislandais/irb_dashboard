@@ -370,7 +370,7 @@ C_04.00;y_axis_rc_code;906;Accounting classification of at1 instruments/Capital 
 C_04.00;y_axis_rc_code;870;Output floor/Floor adjustment before application of transitional cap;;;
 C_04.00;y_axis_rc_code;880;Output floor/Floor adjustment after application of transitional cap;;;
 C_04.00;y_axis_rc_code;890;Output floor/Fully loaded floor adjustment;;;
-C_04.00;y_axis_rc_code;900;Output floor/Output floor applied (%);;;
+C_04.00;y_axis_rc_code;900;Output floor/Output floor applied (%);;;%
 C_05.01;x_axis_rc_code;10;Adjustments to CET1;;;
 C_05.01;x_axis_rc_code;20;Adjustments to AT1;;;
 C_05.01;x_axis_rc_code;30;Adjustments to T2;;;
@@ -589,7 +589,7 @@ C_08.01;x_axis_rc_code;210;CRM taken into account in lgd estimates excluding dou
 C_08.01;x_axis_rc_code;220;Subject to double default treatment/Unfunded credit protection;;;
 C_08.01;x_axis_rc_code;230;Exposure weighted average lgd (%);X;;%
 C_08.01;x_axis_rc_code;240;Exposure weighted average lgd (%) for large financial sector entities and unregulated financial entities;;;%
-C_08.01;x_axis_rc_code;250;Exposure-weighted average maturity value (days);;;
+C_08.01;x_axis_rc_code;250;Exposure-weighted average maturity value (days);;;Unit
 C_08.01;x_axis_rc_code;255;Risk weighted exposure amount pre supporting factors;;;
 C_08.01;x_axis_rc_code;256;(-)  adjustment to risk-weighted exposure amount due to sme supporting factor;;;
 C_08.01;x_axis_rc_code;257;(-)  adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;;
@@ -602,6 +602,46 @@ C_08.01;x_axis_rc_code;310;Memorandum items:/Pre-credit derivatives risk weighte
 C_08.01;x_axis_rc_code;100;Exposure after crm substitution effects pre conversion factors/Of which: off balance sheet items;;;
 C_08.01;x_axis_rc_code;120;Exposure value/Of which: off balance sheet items;;;
 C_08.01;x_axis_rc_code;130;Exposure value/Of which: arising from counterparty credit risk;;;
+C_08.03;x_axis_rc_code;10;On-balance sheet exposures;;;
+C_08.03;x_axis_rc_code;20;Off-balance-sheet exposures pre-conversion factors;;;
+C_08.03;x_axis_rc_code;30;Exposure weighted average conversion factors;;;
+C_08.03;x_axis_rc_code;40;Exposure value post conversion factors and post crm;;;
+C_08.03;x_axis_rc_code;50;Exposure weighted average pd (%);;;
+C_08.03;x_axis_rc_code;60;Number of obligors;;;
+C_08.03;x_axis_rc_code;70;Exposure weighted average lgd (%);;;
+C_08.03;x_axis_rc_code;80;Exposure weighted average maturity (years);;;
+C_08.03;x_axis_rc_code;90;Risk weighted exposure amount after supporting factors;;;
+C_08.03;x_axis_rc_code;100;Expected loss amount;;;
+C_08.03;x_axis_rc_code;110;(-) value adjustments and provisions;;;
+C_08.03;z_axis_rc_code;qx01;All exposure classes and approaches;;;
+C_08.03;z_axis_rc_code;qx2023;All exposure classes and approaches/IRB-A;;;
+C_08.03;z_axis_rc_code;qx2021;All exposure classes and approaches/IRB-A / Central governments and central banks;;;
+C_08.03;z_axis_rc_code;qx2071;All exposure classes and approaches/IRB-A / Regional governments or local authorities;;;
+C_08.03;z_axis_rc_code;qx2073;All exposure classes and approaches/IRB-A / Public sector entities;;;
+C_08.03;z_axis_rc_code;qx2013;All exposure classes and approaches/IRB-A / Corporates / Other;;;
+C_08.03;z_axis_rc_code;qx2015;All exposure classes and approaches/IRB-A / Corporates / Specialised lending;;;
+C_08.03;z_axis_rc_code;qx2075;All exposure classes and approaches/IRB-A / Corporates / Purchased receivables;;;
+C_08.03;z_axis_rc_code;qx2077;All exposure classes and approaches/IRB-A / Corporates / Memo item / Large corporates;;;
+C_08.03;z_axis_rc_code;qx2079;All exposure classes and approaches/IRB-A / Corporates / Memo item / SME;;;
+C_08.03;z_axis_rc_code;qx2068;All exposure classes and approaches/IRB-A / Retail / Secured by residential real estate;;;
+C_08.03;z_axis_rc_code;qx2009;All exposure classes and approaches/IRB-A / Retail / Qualifying revolving;;;
+C_08.03;z_axis_rc_code;qx2081;All exposure classes and approaches/IRB-A / Retail / Other;;;
+C_08.03;z_axis_rc_code;qx2055;All exposure classes and approaches/IRB-A / Retail / Purchased receivables;;;
+C_08.03;z_axis_rc_code;qx2010;All exposure classes and approaches/IRB-A / Retail / Memo item / Secured by immovable property / Non-SME;;;
+C_08.03;z_axis_rc_code;qx2011;All exposure classes and approaches/IRB-A / Retail / Memo item / Secured by immovable property / SME;;;
+C_08.03;z_axis_rc_code;qx2007;All exposure classes and approaches/IRB-A / Retail / Memo item / Other / Non-SME;;;
+C_08.03;z_axis_rc_code;qx2008;All exposure classes and approaches/IRB-A / Retail / Memo item / Other / SME;;;
+C_08.03;z_axis_rc_code;qx2022;All exposure classes and approaches/IRB-F ;;;
+C_08.03;z_axis_rc_code;qx2020;All exposure classes and approaches/IRB-F / Central governments and central banks;;;
+C_08.03;z_axis_rc_code;qx2072;All exposure classes and approaches/IRB-F / Regional governments or local authorities;;;
+C_08.03;z_axis_rc_code;qx2074;All exposure classes and approaches/IRB-F / Public sector entities;;;
+C_08.03;z_axis_rc_code;qx2018;All exposure classes and approaches/IRB-F / Institutions;;;
+C_08.03;z_axis_rc_code;qx2012;All exposure classes and approaches/IRB-F / Corporates / Other;;;
+C_08.03;z_axis_rc_code;qx2014;All exposure classes and approaches/IRB-F / Corporates / Specialised lending;;;
+C_08.03;z_axis_rc_code;qx2076;All exposure classes and approaches/IRB-F / Corporates / Purchased receivables;;;
+C_08.03;z_axis_rc_code;qx2078;All exposure classes and approaches/IRB-F / Corporates / Memo item / Large corporates;;;
+C_08.03;z_axis_rc_code;qx2080;All exposure classes and approaches/IRB-F / Corporates / Memo item / SME;;;
+C_08.03;z_axis_rc_code;qx2082;All exposure classes and approaches/Collective Investment Undertakings (CIU);;;
 C_08.01;z_axis_rc_code;qx01;All exposure classes and approaches;;;
 C_08.01;z_axis_rc_code;qx2023;All exposure classes and approaches/IRB-A;;;
 C_08.01;z_axis_rc_code;qx2021;All exposure classes and approaches/IRB-A / Central governments and central banks;;;
@@ -669,9 +709,9 @@ C_08.02;x_axis_rc_code;190;Credit risk mitigation techniques taken into account 
 C_08.02;x_axis_rc_code;200;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Other physical collateral;;;
 C_08.02;x_axis_rc_code;210;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment/Funded credit protection/Other eligible collateral/Receivables;;;
 C_08.02;x_axis_rc_code;220;Subject to double default treatment/Unfunded credit protection;;;
-C_08.02;x_axis_rc_code;230;Exposure weighted average lgd (%);;;
-C_08.02;x_axis_rc_code;240;Exposure weighted average lgd (%) for large financial sector entities and unregulated financial entities;;;
-C_08.02;x_axis_rc_code;250;Exposure-weighted average maturity value (days);;;
+C_08.02;x_axis_rc_code;230;Exposure weighted average lgd (%);;;%
+C_08.02;x_axis_rc_code;240;Exposure weighted average lgd (%) for large financial sector entities and unregulated financial entities;;;%
+C_08.02;x_axis_rc_code;250;Exposure-weighted average maturity value (days);;;Unit
 C_08.02;x_axis_rc_code;255;Risk weighted exposure amount pre supporting factor;;;
 C_08.02;x_axis_rc_code;256;(-)  adjustment to risk-weighted exposure amount due to sme supporting factor;;;
 C_08.02;x_axis_rc_code;257;(-)  adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;;
@@ -697,34 +737,6 @@ C_08.02;z_axis_rc_code;6;Total IRBF (without own estimates of LGD or conversion 
 C_08.02;z_axis_rc_code;8;Total IRBF (without own estimates of LGD or conversion factors)/Corporates - SME;;;
 C_08.02;z_axis_rc_code;10;Total IRBF (without own estimates of LGD or conversion factors)/Corporates - Specialised Lending;;;
 C_08.02;z_axis_rc_code;12;Total IRBF (without own estimates of LGD or conversion factors)/Corporates - Other;;;
-C_08.03;x_axis_rc_code;10;On-balance sheet exposures;;;
-C_08.03;x_axis_rc_code;20;Off-balance-sheet exposures pre-conversion factors;;;
-C_08.03;x_axis_rc_code;30;Exposure weighted average conversion factors;;;
-C_08.03;x_axis_rc_code;40;Exposure value post conversion factors and post crm;;;
-C_08.03;x_axis_rc_code;50;Exposure weighted average pd (%);;;
-C_08.03;x_axis_rc_code;60;Number of obligors;;;
-C_08.03;x_axis_rc_code;70;Exposure weighted average lgd (%);;;
-C_08.03;x_axis_rc_code;80;Exposure weighted average maturity (years);;;
-C_08.03;x_axis_rc_code;90;Risk weighted exposure amount after supporting factors;;;
-C_08.03;x_axis_rc_code;100;Expected loss amount;;;
-C_08.03;x_axis_rc_code;110;(-) value adjustments and provisions;;;
-C_08.03;z_axis_rc_code;1;Total IRBA (with own estimates of LGD or conversion factors);;;
-C_08.03;z_axis_rc_code;3;Total IRBA (with own estimates of LGD or conversion factors)/Central governments and central banks;;;
-C_08.03;z_axis_rc_code;5;Total IRBA (with own estimates of LGD or conversion factors)/Institutions;;;
-C_08.03;z_axis_rc_code;7;Total IRBA (with own estimates of LGD or conversion factors)/Corporates - SME;;;
-C_08.03;z_axis_rc_code;9;Total IRBA (with own estimates of LGD or conversion factors)/Corporates - Specialised Lending;;;
-C_08.03;z_axis_rc_code;11;Total IRBA (with own estimates of LGD or conversion factors)/Corporates - Other;;;
-C_08.03;z_axis_rc_code;13;Total IRBA (with own estimates of LGD or conversion factors)/Retail - Secured by immovable property SME;;;
-C_08.03;z_axis_rc_code;14;Total IRBA (with own estimates of LGD or conversion factors)/Retail - Secured by immovable property non-SME;;;
-C_08.03;z_axis_rc_code;15;Total IRBA (with own estimates of LGD or conversion factors)/Retail - Qualifying revolving;;;
-C_08.03;z_axis_rc_code;16;Total IRBA (with own estimates of LGD or conversion factors)/Retail - Other SME;;;
-C_08.03;z_axis_rc_code;17;Total IRBA (with own estimates of LGD or conversion factors)/Retail - Other non-SME;;;
-C_08.03;z_axis_rc_code;2;Total IRBF (without own estimates of LGD or conversion factors);;;
-C_08.03;z_axis_rc_code;4;Total IRBF (without own estimates of LGD or conversion factors)/Central governments and central banks;;;
-C_08.03;z_axis_rc_code;6;Total IRBF (without own estimates of LGD or conversion factors)/Institutions;;;
-C_08.03;z_axis_rc_code;8;Total IRBF (without own estimates of LGD or conversion factors)/Corporates - SME;;;
-C_08.03;z_axis_rc_code;10;Total IRBF (without own estimates of LGD or conversion factors)/Corporates - Specialised Lending;;;
-C_08.03;z_axis_rc_code;12;Total IRBF (without own estimates of LGD or conversion factors)/Corporates - Other;;;
 C_08.03;y_axis_rc_code;10;PD range/0.00 to <0.15;;;
 C_08.03;y_axis_rc_code;20;PD range/0.00 to <0.15/0.00 to <0.10;;;
 C_08.03;y_axis_rc_code;30;PD range/0.00 to <0.15/0.10  to <0.15;;;
@@ -752,11 +764,11 @@ C_08.04;y_axis_rc_code;60;Acquisitions and disposals (+ or -);;;
 C_08.04;y_axis_rc_code;70;Foreign exchange movements (+ or -);;;
 C_08.04;y_axis_rc_code;80;Other (+ or -);;;
 C_08.04;y_axis_rc_code;90;Risk weighted exposure amount at the end of the reporting period;;;
-C_08.05;x_axis_rc_code;10;Arithmetic average pd (%);;;
-C_08.05;x_axis_rc_code;20;Number of obligors at the end of the previous year;;;
-C_08.05;x_axis_rc_code;30;Number of obligors at the end of the previous year/Of which: defaulted during the year;;;
-C_08.05;x_axis_rc_code;40;Observed average default rate (%);;;
-C_08.05;x_axis_rc_code;50;Average historical annual default rate (%);;;
+C_08.05;x_axis_rc_code;10;Arithmetic average pd (%);;;%
+C_08.05;x_axis_rc_code;20;Number of obligors at the end of the previous year;;;Unit
+C_08.05;x_axis_rc_code;30;Number of obligors at the end of the previous year/Of which: defaulted during the year;;;Unit
+C_08.05;x_axis_rc_code;40;Observed average default rate (%);;;%
+C_08.05;x_axis_rc_code;50;Average historical annual default rate (%);;;%
 C_08.05;z_axis_rc_code;x762;Corporates - SME without own estimates of LGD or conversion factors;;;
 C_08.05;z_axis_rc_code;x769;Retail - Qualifying revolving - with own estimates of LGD or conversion factors;;;
 C_08.05;z_axis_rc_code;x758;Central governments and central banks without own estimates of LGD or conversion factors;;;
