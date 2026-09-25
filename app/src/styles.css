@@ -516,6 +516,20 @@ p {
   width: 170px;
 }
 
+.institution-field {
+  width: 400px;
+}
+
+.unit-field {
+  width: 310px;
+}
+
+.global-bar .compact-field select {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
 .field > span {
   white-space: nowrap;
 }
