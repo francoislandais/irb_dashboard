@@ -1,4 +1,5 @@
 import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
+import { parseInstitutionDictionaryCsv } from "./data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260917-kri-formula";
@@ -19,8 +20,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260925-institution-id";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260925-institution-id";
+import { createDataStore } from "./data/dataStore.js?v=20260925-institution-dictionary";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260925-institution-dictionary";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -150,6 +151,18 @@ const actions = {
 
   updateSelectedJst(jstCode) {
     actions.updateSelectedInstitution(jstCode);
+  },
+
+  loadInstitutionDictionary(csvText, fileName) {
+    try {
+      store.setInstitutionDictionary(parseInstitutionDictionaryCsv(csvText), fileName);
+    } catch (error) {
+      store.setInstitutionDictionaryError(error);
+    }
+  },
+
+  clearInstitutionDictionary() {
+    store.clearInstitutionDictionary();
   },
 
   updateSelectedUnit(unit) {

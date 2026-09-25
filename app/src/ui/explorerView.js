@@ -46,6 +46,7 @@ import {
   parseKriFormula
 } from "../data/explorerKriFormula.js?v=20260917-kri-formula";
 import { getLatestState } from "./appState.js";
+import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260925-institution-id";
@@ -3302,6 +3303,9 @@ function replaceExplorerContextDetail(...nodes) {
 }
 
 function renderExplorerJstSelectionPanel(state) {
+  const institutionOptions = state?.institutionOptions ?? state?.jstOptions ?? [];
+  const dictionary = state?.institutionDictionary ?? {};
+  const selectedInstitutionId = state?.selectedInstitutionId ?? state?.selectedJst;
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-jst-selection-panel";
 
@@ -3309,7 +3313,7 @@ function renderExplorerJstSelectionPanel(state) {
   title.className = "explorer-context-title";
   title.textContent = "Institution";
 
-  const benchmark = buildExplorerBenchmark(state?.jstOptions ?? []);
+  const benchmark = buildExplorerBenchmark(institutionOptions);
   const selectedReference = getSelectedExplorerReference(state);
   const valuesByJst = new Map(benchmark.series.map((item) => {
     const point = item.values.find((candidate) => candidate.label === selectedReference?.label) ?? null;
@@ -3320,25 +3324,48 @@ function renderExplorerJstSelectionPanel(state) {
   list.setAttribute("role", "listbox");
   list.setAttribute("aria-label", "Institution");
 
-  (state?.jstOptions ?? []).forEach((jstCode) => {
-    const isActive = jstCode === state?.selectedJst;
+  institutionOptions.forEach((institutionId) => {
+    const entry = getInstitutionDisplayInfo(dictionary, institutionId);
+    const isActive = institutionId === selectedInstitutionId;
     const row = document.createElement("button");
     row.type = "button";
     row.className = "explorer-jst-selection-row";
+    row.classList.toggle("has-institution-dictionary", Boolean(entry));
     row.classList.toggle("is-active", isActive);
     row.setAttribute("role", "option");
     row.setAttribute("aria-selected", String(isActive));
-    row.dataset.explorerJstCode = jstCode;
+    row.dataset.explorerJstCode = institutionId;
 
     const label = document.createElement("span");
-    label.textContent = jstCode;
+    label.className = "explorer-institution-label";
+    const level = document.createElement("span");
+    level.className = "explorer-institution-level";
+    level.textContent = entry?.consolidationLevel ?? "";
+    level.hidden = !entry?.consolidationLevel;
+    const identity = document.createElement("span");
+    identity.className = "explorer-institution-identity";
+    const name = document.createElement("span");
+    name.className = "explorer-institution-name";
+    name.textContent = entry?.institutionName || institutionId;
+    identity.append(name);
+    if (entry) {
+      const details = document.createElement("span");
+      details.className = "explorer-institution-details";
+      details.textContent = `JST ${entry.jstCode}`;
+      identity.append(details);
+    }
+    label.append(level, identity);
     const metric = document.createElement("span");
-    const rawValue = valuesByJst.get(jstCode);
-    metric.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
+    metric.className = "explorer-institution-metric";
+    const value = document.createElement("span");
+    const rawValue = valuesByJst.get(institutionId);
+    value.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
+    metric.append(value);
     row.append(label, metric);
     row.addEventListener("click", () => {
-      if (jstCode === getLatestState()?.selectedJst) return;
-      updateSelectedJst(jstCode);
+      const latestState = getLatestState();
+      if (institutionId === (latestState?.selectedInstitutionId ?? latestState?.selectedJst)) return;
+      updateSelectedJst(institutionId);
     });
     list.append(row);
   });

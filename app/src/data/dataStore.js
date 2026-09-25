@@ -18,6 +18,9 @@ const initialState = {
   fileName: "",
   isRestoring: false,
   institutionOptions: [],
+  institutionDictionary: {},
+  institutionDictionaryError: "",
+  institutionDictionaryFileName: "",
   selectedInstitutionId: "",
   jstOptions: [],
   loadedAt: null,
@@ -348,6 +351,34 @@ export function createDataStore() {
       emit();
     },
 
+    setInstitutionDictionary(institutionDictionary, institutionDictionaryFileName = "") {
+      state = {
+        ...state,
+        institutionDictionary: institutionDictionary ?? {},
+        institutionDictionaryError: "",
+        institutionDictionaryFileName
+      };
+      emit();
+    },
+
+    setInstitutionDictionaryError(error) {
+      state = {
+        ...state,
+        institutionDictionaryError: error?.message ?? "Could not read the institution dictionary."
+      };
+      emit();
+    },
+
+    clearInstitutionDictionary() {
+      state = {
+        ...state,
+        institutionDictionary: {},
+        institutionDictionaryError: "",
+        institutionDictionaryFileName: ""
+      };
+      emit();
+    },
+
     setSelectedUnit(selectedUnit) {
       state = { ...state, selectedUnit };
       emit();
@@ -404,6 +435,9 @@ export function createDataStore() {
         explorerTemplateGroupsError: state.explorerTemplateGroupsError,
         explorerKriFormulas: state.explorerKriFormulas,
         explorerKriFormulasError: state.explorerKriFormulasError,
+        institutionDictionary: state.institutionDictionary,
+        institutionDictionaryError: state.institutionDictionaryError,
+        institutionDictionaryFileName: state.institutionDictionaryFileName,
         institutionOptions: [],
         peerDisplayMode: state.peerDisplayMode,
         rememberedFileReady: false,
