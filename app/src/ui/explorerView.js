@@ -3338,10 +3338,6 @@ function renderExplorerJstSelectionPanel(state) {
 
     const label = document.createElement("span");
     label.className = "explorer-institution-label";
-    const level = document.createElement("span");
-    level.className = "explorer-institution-level";
-    level.textContent = entry?.consolidationLevel ?? "";
-    level.hidden = !entry?.consolidationLevel;
     const identity = document.createElement("span");
     identity.className = "explorer-institution-identity";
     const name = document.createElement("span");
@@ -3351,10 +3347,10 @@ function renderExplorerJstSelectionPanel(state) {
     if (entry) {
       const details = document.createElement("span");
       details.className = "explorer-institution-details";
-      details.textContent = `JST ${entry.jstCode}`;
+      details.textContent = [entry.consolidationLevel, entry.jstCode].filter(Boolean).join(" — ");
       identity.append(details);
     }
-    label.append(level, identity);
+    label.append(identity);
     const metric = document.createElement("span");
     metric.className = "explorer-institution-metric";
     const value = document.createElement("span");

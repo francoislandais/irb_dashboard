@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260925-institution-id";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260925-institution-dictionary";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260925-institution-display";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
@@ -26,7 +26,6 @@ const elements = {
   institutionPickerToggle: document.querySelector("#institution-picker-toggle"),
   institutionPickerMenu: document.querySelector("#institution-picker-menu"),
   institutionPickerName: document.querySelector("#institution-picker-name"),
-  institutionPickerDetails: document.querySelector("#institution-picker-details"),
   institutionPickerLevel: document.querySelector("#institution-picker-level"),
   institutionDictionaryButton: document.querySelector("#institution-dictionary-button"),
   institutionDictionaryClear: document.querySelector("#institution-dictionary-clear"),
@@ -274,7 +273,6 @@ function renderInstitutionSelect(state) {
     elements.institutionSelect.append(new Option("Chargez un CSV", ""));
     elements.institutionPickerToggle.disabled = true;
     elements.institutionPickerName.textContent = "Chargez un CSV";
-    elements.institutionPickerDetails.textContent = "";
     elements.institutionPickerLevel.hidden = true;
     elements.institutionPickerMenu.hidden = true;
     elements.institutionPickerToggle.setAttribute("aria-expanded", "false");
@@ -300,7 +298,6 @@ function renderInstitutionSelect(state) {
     row.setAttribute("role", "option");
     row.setAttribute("aria-selected", String(institutionId === selectedInstitutionId));
     row.setAttribute("aria-label", [entry?.consolidationLevel, institutionName, entry?.jstCode || institutionId].filter(Boolean).join(", "));
-    const level = createInstitutionLevelBadge(entry?.consolidationLevel);
     const text = document.createElement("span");
     text.className = "institution-picker-option-text";
     const name = document.createElement("span");
@@ -310,15 +307,14 @@ function renderInstitutionSelect(state) {
     if (entry) {
       const subline = document.createElement("span");
       subline.className = "institution-picker-option-details";
-      subline.textContent = `JST ${entry.jstCode}`;
+      subline.textContent = [entry.consolidationLevel, entry.jstCode].filter(Boolean).join(" — ");
       text.append(subline);
     }
-    row.append(level, text);
+    row.append(text);
     elements.institutionPickerMenu.append(row);
   });
   const selectedEntry = getInstitutionDisplayInfo(dictionary, selectedInstitutionId);
   elements.institutionPickerName.textContent = selectedEntry?.institutionName || selectedInstitutionId;
-  elements.institutionPickerDetails.textContent = selectedEntry ? `JST ${selectedEntry.jstCode}` : "";
   elements.institutionPickerLevel.textContent = selectedEntry?.consolidationLevel ?? "";
   elements.institutionPickerLevel.hidden = !selectedEntry?.consolidationLevel;
   elements.institutionPickerToggle.disabled = false;
@@ -334,14 +330,6 @@ function renderInstitutionSelect(state) {
     || "Load an optional institution dictionary";
   elements.institutionDictionaryButton.classList.toggle("has-error", Boolean(state.institutionDictionaryError));
   elements.institutionDictionaryClear.hidden = !state.institutionDictionaryFileName;
-}
-
-function createInstitutionLevelBadge(level) {
-  const badge = document.createElement("span");
-  badge.className = "institution-picker-option-level institution-level-badge";
-  badge.textContent = level || "";
-  if (!level) badge.setAttribute("aria-hidden", "true");
-  return badge;
 }
 
 function setInstitutionPickerOpen(isOpen) {

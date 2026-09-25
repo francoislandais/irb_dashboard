@@ -553,12 +553,11 @@ p {
 }
 
 .institution-picker-current {
-  display: grid;
+  display: block;
   min-width: 0;
 }
 
-.institution-picker-name,
-.institution-picker-details {
+.institution-picker-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -567,11 +566,6 @@ p {
 .institution-picker-name {
   font-size: 0.76rem;
   font-weight: 600;
-}
-
-.institution-picker-details {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.61rem;
 }
 
 .institution-level-badge {
@@ -613,7 +607,7 @@ p {
 }
 
 .institution-picker-option {
-  align-items: center;
+  align-items: start;
   background: transparent;
   border: 0;
   border-radius: 5px;
@@ -621,8 +615,8 @@ p {
   cursor: pointer;
   display: grid;
   font: inherit;
-  gap: 10px;
-  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0;
+  grid-template-columns: minmax(0, 1fr);
   padding: 7px 8px;
   text-align: left;
   width: 100%;
@@ -644,13 +638,8 @@ p {
 }
 
 .institution-picker-option-details {
-  color: #65736b;
+  color: #858f89;
   font-size: 0.67rem;
-}
-
-.institution-picker-option-level {
-  border-color: #d4ddd8;
-  color: #59675f;
 }
 
 .institution-dictionary-button {
@@ -2968,20 +2957,8 @@ table {
 }
 
 .explorer-institution-label {
-  align-items: center;
-  display: flex;
-  gap: 10px;
+  display: block;
   min-width: 0;
-}
-
-.explorer-institution-level {
-  background: #edf1ef;
-  border-radius: 4px;
-  color: #64736b;
-  flex: 0 0 auto;
-  font-size: 0.62rem;
-  font-weight: 600;
-  padding: 3px 5px;
 }
 
 .explorer-institution-identity {
@@ -2993,6 +2970,7 @@ table {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .explorer-institution-details {
