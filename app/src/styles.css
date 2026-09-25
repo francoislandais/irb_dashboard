@@ -517,7 +517,7 @@ p {
 }
 
 .institution-field {
-  width: 270px;
+  width: 230px;
 }
 
 .unit-field {
@@ -539,10 +539,10 @@ p {
   cursor: pointer;
   display: flex;
   font: inherit;
-  gap: 8px;
+  gap: 6px;
   justify-content: space-between;
-  min-height: 34px;
-  padding: 3px 8px;
+  min-height: 24px;
+  padding: 0 8px;
   text-align: left;
   width: 100%;
 }
@@ -569,13 +569,12 @@ p {
 }
 
 .institution-level-badge {
-  border: 1px solid rgba(255, 255, 255, 0.36);
-  border-radius: 4px;
   color: rgba(255, 255, 255, 0.9);
   flex: 0 0 auto;
   font-size: 0.57rem;
   font-weight: 600;
-  padding: 2px 4px;
+  line-height: 1;
+  padding: 0;
 }
 
 .institution-picker-chevron {
