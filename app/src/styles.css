@@ -2981,6 +2981,10 @@ table {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 400;
+}
+
+.explorer-jst-selection-row.is-active .explorer-institution-name {
   font-weight: 600;
 }
 
