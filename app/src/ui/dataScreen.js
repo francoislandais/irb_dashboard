@@ -320,7 +320,9 @@ function renderInstitutionSelect(state) {
   });
   const selectedEntry = getInstitutionDisplayInfo(dictionary, selectedInstitutionId);
   elements.institutionPickerName.textContent = selectedEntry?.institutionName || selectedInstitutionId;
-  elements.institutionPickerLevel.textContent = selectedEntry?.consolidationLevel ?? "";
+  elements.institutionPickerLevel.textContent = selectedEntry?.consolidationLevel
+    ? `(${selectedEntry.consolidationLevel})`
+    : "";
   elements.institutionPickerLevel.hidden = !selectedEntry?.consolidationLevel;
   elements.institutionPickerToggle.disabled = false;
   elements.institutionPickerToggle.setAttribute("aria-label", selectedEntry

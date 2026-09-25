@@ -571,16 +571,16 @@ p {
 
 .institution-picker-name {
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .institution-level-badge {
   align-items: center;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(220, 229, 225, 0.82);
   display: inline-flex;
   flex: 0 0 auto;
-  font-size: 0.57rem;
-  font-weight: 600;
+  font-size: 0.65rem;
+  font-weight: 400;
   line-height: 1.2;
   padding: 0;
 }
@@ -624,7 +624,7 @@ p {
   font: inherit;
   gap: 0;
   grid-template-columns: minmax(0, 1fr);
-  padding: 7px 8px;
+  padding: 10px 12px;
   text-align: left;
   width: 100%;
 }
@@ -636,17 +636,20 @@ p {
 
 .institution-picker-option-text {
   display: grid;
+  row-gap: 3px;
   min-width: 0;
 }
 
 .institution-picker-option-name {
   font-size: 0.78rem;
   font-weight: 600;
+  line-height: 1.25;
 }
 
 .institution-picker-option-details {
   color: #858f89;
   font-size: 0.67rem;
+  line-height: 1.2;
 }
 
 .institution-dictionary-button {
@@ -2971,6 +2974,7 @@ table {
 .explorer-institution-identity {
   display: grid;
   min-width: 0;
+  row-gap: 3px;
 }
 
 .explorer-institution-name {
@@ -2984,6 +2988,11 @@ table {
   color: #69766f;
   font-size: 0.66rem;
   font-weight: 400;
+}
+
+.explorer-context-panel .explorer-jst-selection-panel .explorer-jst-selection-row {
+  padding-bottom: 10px;
+  padding-top: 10px;
 }
 
 .explorer-institution-metric {
