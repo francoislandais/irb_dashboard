@@ -1,5 +1,5 @@
 import { COST_OF_RISK_FILTER_ALL } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
-import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
+import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260925-percent-scale";
 
 let costOfRiskSummaryMosaicClickTimer = null;
 

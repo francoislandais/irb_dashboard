@@ -1,6 +1,6 @@
 export function formatMetricValue(value, selectedUnit, valueFormat = "") {
   if (isUnitFormat(valueFormat)) return String(value);
-  if (isPercentFormat(valueFormat)) return formatPercentValue(value);
+  if (isPercentFormat(valueFormat)) return formatFractionAsPercentValue(value);
 
   const unit = getUnitDefinition(selectedUnit);
   return new Intl.NumberFormat("fr-FR", {
@@ -34,6 +34,14 @@ export function isPercentFormat(valueFormat) {
 export function formatPercentValue(value) {
   const percentValue = Math.abs(value) <= 1 ? value * 100 : value;
 
+  return formatPercentNumber(percentValue);
+}
+
+export function formatFractionAsPercentValue(value) {
+  return formatPercentNumber(value * 100);
+}
+
+function formatPercentNumber(percentValue) {
   return `${new Intl.NumberFormat("fr-FR", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2

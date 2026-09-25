@@ -1,4 +1,4 @@
-import { formatPercentValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
+import { formatPercentValue } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { formatBasisPointChange, formatCet1Amount, getCet1RatioSnapshot } from "../data/cet1.js";
 
 const elements = {

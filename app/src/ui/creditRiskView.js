@@ -178,7 +178,7 @@ import {
   updateCostOfRiskCoreSelection
 } from "./costOfRiskCoreSelection.js?v=20260802-readable-selection-phrases";
 import { showContextMenu } from "./contextMenu.js?v=20260710-audit-trail";
-import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
+import { formatBasisPointsValue, formatContributionPercentValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { getLatestState } from "./appState.js";
 import { costOfRiskElements as elements } from "./costOfRiskElements.js?v=20260806-cell-selection";
 import {

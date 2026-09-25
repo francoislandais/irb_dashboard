@@ -1,7 +1,7 @@
 import { getIrbOutputFloorModel } from "../data/irb.js?v=20260817-output-floor-bridge";
 import { getIrbDensityModel, getIrbDensityPoint, IRB_DENSITY_TOTAL_Y_CODE } from "../data/irbDensity.js?v=20260814-irb-density-cube";
 import { getIrbCet1RatioModel, getIrbCet1TimeSeriesModel } from "../data/irbCet1.js?v=20260818-cet1-timeseries";
-import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260917-kri-unit-fix";
+import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { createCostOfRiskQuarterAxisLabelsOptions } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { clearBenchmarkEndpointLabels, renderBenchmarkEndpointLabels, scheduleBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";

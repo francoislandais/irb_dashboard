@@ -1,6 +1,6 @@
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
-import { formatBasisPointsValue, formatMetricValue } from "./core/formatting.js?v=20260917-kri-unit-fix";
+import { formatBasisPointsValue, formatMetricValue } from "./core/formatting.js?v=20260925-percent-scale";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 
 export function getCet1RatioSnapshot(state) {
