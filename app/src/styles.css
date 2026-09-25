@@ -2974,7 +2974,7 @@ table {
 .explorer-institution-identity {
   display: grid;
   min-width: 0;
-  row-gap: 3px;
+  row-gap: 5px;
 }
 
 .explorer-institution-name {
@@ -2991,15 +2991,17 @@ table {
 }
 
 .explorer-context-panel .explorer-jst-selection-panel .explorer-jst-selection-row {
-  padding-bottom: 10px;
-  padding-top: 10px;
+  padding-bottom: 13px;
+  padding-top: 13px;
 }
 
 .explorer-institution-metric {
-  align-items: flex-end;
+  align-self: start;
+  align-items: start;
   display: grid;
   font-variant-numeric: tabular-nums;
   justify-items: end;
+  line-height: 1.25;
 }
 
 .explorer-display-mode-row,
