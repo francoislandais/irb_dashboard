@@ -17,6 +17,8 @@ const initialState = {
   fileHandle: null,
   fileName: "",
   isRestoring: false,
+  institutionOptions: [],
+  selectedInstitutionId: "",
   jstOptions: [],
   loadedAt: null,
   explorerPoints: [],
@@ -62,7 +64,8 @@ export function createDataStore() {
       return () => listeners.delete(listener);
     },
 
-    setData({ file, fileHandle, columns, dataIndexes, datasetId, datasetLabel, extractionTimestamp, source, jstOptions, rows, loadedAt }) {
+    setData({ file, fileHandle, columns, dataIndexes, datasetId, datasetLabel, extractionTimestamp, source, institutionOptions, jstOptions = institutionOptions, rows, loadedAt }) {
+      const availableInstitutions = institutionOptions ?? jstOptions ?? [];
       const nextDatasetId = datasetId || createDatasetId(source || "local");
       const nextDataset = {
         id: nextDatasetId,
@@ -72,7 +75,8 @@ export function createDataStore() {
         fileHandle,
         fileName: file.name,
         isLoaded: true,
-        jstOptions,
+        institutionOptions: availableInstitutions,
+        jstOptions: availableInstitutions,
         label: datasetLabel || file.name || "Dataset",
         loadedAt,
         rows,
@@ -82,12 +86,12 @@ export function createDataStore() {
         ...state.datasets.filter((dataset) => dataset.id !== nextDatasetId),
         nextDataset
       ];
-      const selectedJst = jstOptions.includes(state.selectedJst)
-        ? state.selectedJst
-        : jstOptions[0] ?? "";
+      const selectedInstitutionId = availableInstitutions.includes(state.selectedInstitutionId ?? state.selectedJst)
+        ? (state.selectedInstitutionId ?? state.selectedJst)
+        : availableInstitutions[0] ?? "";
       const peerJstCodes = state.activeDatasetId === nextDatasetId
-        ? normalizePeerJstCodes(state.peerJstCodes, jstOptions)
-        : [...jstOptions];
+        ? normalizePeerJstCodes(state.peerJstCodes, availableInstitutions)
+        : [...availableInstitutions];
       const availableModules = getAvailableModules(dataIndexes);
       nextDataset.availableModules = availableModules;
 
@@ -104,12 +108,14 @@ export function createDataStore() {
         fileHandle,
         fileName: file.name,
         impossibleXYCombinations: scopeImpossibleXYCombinations(state.impossibleXYCombinationsSource, dataIndexes),
-        jstOptions,
+        institutionOptions: availableInstitutions,
+        jstOptions: availableInstitutions,
         loadedAt,
         peerJstCodes,
         rememberedFileReady: false,
         rows,
-        selectedJst
+        selectedInstitutionId,
+        selectedJst: selectedInstitutionId
       };
       emit();
     },
@@ -127,6 +133,7 @@ export function createDataStore() {
           fileName: entry.fileName,
           extractionTimestamp: "",
           isLoaded: false,
+          institutionOptions: [],
           jstOptions: [],
           label: entry.fileName || "Dataset",
           loadedAt: null,
@@ -146,10 +153,11 @@ export function createDataStore() {
       const dataset = state.datasets.find((candidate) => candidate.id === activeDatasetId);
       if (!dataset || dataset.isLoaded === false) return;
 
-      const selectedJst = dataset.jstOptions.includes(state.selectedJst)
-        ? state.selectedJst
-        : dataset.jstOptions[0] ?? "";
-      const peerJstCodes = normalizePeerJstCodes(state.peerJstCodes, dataset.jstOptions);
+      const institutionOptions = dataset.institutionOptions ?? dataset.jstOptions ?? [];
+      const selectedInstitutionId = institutionOptions.includes(state.selectedInstitutionId ?? state.selectedJst)
+        ? (state.selectedInstitutionId ?? state.selectedJst)
+        : institutionOptions[0] ?? "";
+      const peerJstCodes = normalizePeerJstCodes(state.peerJstCodes, institutionOptions);
       const availableModules = dataset.availableModules ?? getAvailableModules(dataset.dataIndexes);
 
       state = {
@@ -164,12 +172,14 @@ export function createDataStore() {
         fileHandle: dataset.fileHandle,
         fileName: dataset.fileName,
         impossibleXYCombinations: scopeImpossibleXYCombinations(state.impossibleXYCombinationsSource, dataset.dataIndexes),
-        jstOptions: dataset.jstOptions,
+        institutionOptions,
+        jstOptions: institutionOptions,
         loadedAt: dataset.loadedAt,
         peerJstCodes,
         rememberedFileReady: false,
         rows: dataset.rows,
-        selectedJst
+        selectedInstitutionId,
+        selectedJst: selectedInstitutionId
       };
       emit();
     },
@@ -192,12 +202,14 @@ export function createDataStore() {
         fileHandle: nextDataset?.fileHandle ?? null,
         fileName: nextDataset?.fileName ?? "",
         impossibleXYCombinations: scopeImpossibleXYCombinations(state.impossibleXYCombinationsSource, nextDataset?.dataIndexes),
-        jstOptions: nextDataset?.jstOptions ?? [],
+        institutionOptions: nextDataset?.institutionOptions ?? nextDataset?.jstOptions ?? [],
+        jstOptions: nextDataset?.institutionOptions ?? nextDataset?.jstOptions ?? [],
         loadedAt: nextDataset?.loadedAt ?? null,
         peerJstCodes: nextDataset ? normalizePeerJstCodes(state.peerJstCodes, nextDataset.jstOptions) : [],
         rememberedFileReady: false,
         rows: nextDataset?.rows ?? [],
-        selectedJst: nextDataset?.jstOptions[0] ?? ""
+        selectedInstitutionId: (nextDataset?.institutionOptions ?? nextDataset?.jstOptions ?? [])[0] ?? "",
+        selectedJst: (nextDataset?.institutionOptions ?? nextDataset?.jstOptions ?? [])[0] ?? ""
       };
       emit();
     },
@@ -327,7 +339,12 @@ export function createDataStore() {
     },
 
     setSelectedJst(selectedJst) {
-      state = { ...state, selectedJst };
+      state = { ...state, selectedInstitutionId: selectedJst, selectedJst };
+      emit();
+    },
+
+    setSelectedInstitutionId(selectedInstitutionId) {
+      state = { ...state, selectedInstitutionId, selectedJst: selectedInstitutionId };
       emit();
     },
 
@@ -387,8 +404,10 @@ export function createDataStore() {
         explorerTemplateGroupsError: state.explorerTemplateGroupsError,
         explorerKriFormulas: state.explorerKriFormulas,
         explorerKriFormulasError: state.explorerKriFormulasError,
+        institutionOptions: [],
         peerDisplayMode: state.peerDisplayMode,
         rememberedFileReady: false,
+        selectedInstitutionId: "",
         selectedJst: "",
         selectedUnit: state.selectedUnit
       };

@@ -1,7 +1,7 @@
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
-import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js";
+import { getRequiredAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
-import { getIndexedJstCodes, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260915-stable-lists";
+import { getIndexedJstCodes, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
 
 const C01_TABLE_ID = "C_01.00";
 const C02_TABLE_ID = "C_02.00";

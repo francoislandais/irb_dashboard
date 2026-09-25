@@ -1,4 +1,4 @@
-import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
+import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { parseNumericValue } from "./core/referenceColumns.js";
 import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260922-native-all-currency";

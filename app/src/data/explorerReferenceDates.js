@@ -1,4 +1,4 @@
-import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { getReferenceColumns } from "./core/referenceColumns.js";
 import { getIndexedRowsByTableJst } from "./dataIndex.js";
 

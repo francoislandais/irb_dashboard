@@ -1,8 +1,7 @@
-import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { getReferenceColumns } from "./core/referenceColumns.js";
 
 const REQUIRED_AXIS_COLUMN_LABELS = {
-  jstCode: "jst_code",
   tableId: "table_id",
   xAxisRcCode: "x_axis_rc_code",
   yAxisRcCode: "y_axis_rc_code",
@@ -45,7 +44,12 @@ function getMissingAxisColumns(columns) {
   const indexes = getCompleteAxisColumnIndexes(columns);
   if (indexes) return [];
 
-  return Object.entries(REQUIRED_AXIS_COLUMN_LABELS)
-    .filter(([, label]) => !columns.includes(label))
+  const normalizedColumns = new Set(columns.map((column) => String(column ?? "").trim().toLowerCase()));
+  const missing = Object.entries(REQUIRED_AXIS_COLUMN_LABELS)
+    .filter(([, label]) => !normalizedColumns.has(label))
     .map(([, label]) => label);
+  if (!normalizedColumns.has("reporting_unit_id") && !normalizedColumns.has("jst_code")) {
+    missing.unshift("reporting_unit_id (or legacy jst_code)");
+  }
+  return missing;
 }

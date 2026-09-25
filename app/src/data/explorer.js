@@ -1,6 +1,6 @@
-import { getAllIndexedTableIds, getIndexedAxisCodesAnyJst, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260915-stable-lists";
+import { getAllIndexedTableIds, getIndexedAxisCodesAnyJst, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
-import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { unescapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";
 
 const EXPLORER_TEMPLATE_LABELS = {

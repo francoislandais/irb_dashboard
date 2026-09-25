@@ -33,7 +33,7 @@ export function buildDatasetUpdateQuery(state) {
 
   return `SELECT
     table_id,
-    jst_code,
+    jst_code AS reporting_unit_id,
     x_axis_rc_code,
     y_axis_rc_code,
     z_axis_rc_code,

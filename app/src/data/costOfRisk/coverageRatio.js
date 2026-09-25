@@ -1,4 +1,4 @@
-import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "../core/axisColumns.js";
+import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "../core/axisColumns.js?v=20260925-institution-id";
 import { getReferenceColumns } from "../core/referenceColumns.js";
 import {
   DEFAULT_COST_OF_RISK_COVERAGE_RATIO_CELL

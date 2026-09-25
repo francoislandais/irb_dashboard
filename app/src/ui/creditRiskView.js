@@ -135,7 +135,7 @@ import {
 import {
   renderCostOfRiskCoreDefinitionTables
 } from "./costOfRiskCoreDefinitionView.js?v=20260802-readable-selection-phrases";
-import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260910-context-title-only";
+import { renderCostOfRiskActiveFiltersView } from "./costOfRiskActiveFiltersView.js?v=20260925-institution-id";
 import { createUnitSelectionPanel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260910-context-title-only";
 import {
   renderCostOfRiskFilterSelect as renderFilterSelect,
@@ -146,7 +146,7 @@ import {
   clearCostOfRiskAuditTableView,
   renderCostOfRiskAuditTableView
 } from "./costOfRiskAuditTableView.js?v=20260812-costofrisk-domain-split";
-import { openExplorerPoint } from "./explorerView.js?v=20260922-kriref-expand-persist";
+import { openExplorerPoint } from "./explorerView.js?v=20260925-institution-id";
 import { renderCostOfRiskRatioDenominatorControls as renderRatioDenominatorControls } from "./costOfRiskRatioDenominatorView.js?v=20260828-summary-display-mode";
 import {
   clearCostOfRiskEmptyPanelsView,
@@ -193,7 +193,7 @@ import {
   createCostOfRiskFilterPreviewCacheKey,
   createCostOfRiskFilterPreviewRenderer
 } from "./costOfRiskFilterPreviewRenderer.js?v=20260803-bar-fade";
-import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260806-cell-selection";
+import { createCostOfRiskPeerSelectionPanel } from "./costOfRiskPeerSelectionPanel.js?v=20260925-institution-id";
 import {
   CREDIT_RISK_DISABLED_TABS,
   readCreditRiskUrlState,
@@ -2740,7 +2740,7 @@ function renderCostOfRiskStageRatioAuditPanel(stageRatio, state, options = {}) {
   });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(stageRatio.referenceDate)}`,
-    `JST: ${state.selectedJst}`,
+    `Institution: ${state.selectedInstitutionId || state.selectedJst}`,
     `Perimeter: ${stageRatio.filterLabel || "selected instruments and counterparties"}`,
     `${isCostOfRiskPerformanceStatusFilterValue(activeCostOfRiskFilters.stage) ? "Selected status" : "Selected stage"}: ${row.label}`
   ]));
@@ -2790,7 +2790,7 @@ function renderCostOfRiskCoverageRatioAuditPanel(coverageRatio, state, options =
   });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(coverageRatio.referenceDate)}`,
-    `JST: ${state.selectedJst}`,
+    `Institution: ${state.selectedInstitutionId || state.selectedJst}`,
     `Perimeter: ${coverageRatio.filterLabel || "selected instruments and counterparties"}`,
     `${isCostOfRiskPerformanceStatusFilterValue(activeCostOfRiskFilters.stage) ? "Selected status" : "Selected stage"}: ${row.label}`
   ]));
@@ -2840,7 +2840,7 @@ function renderCostOfRiskCollateralRatioAuditPanel(collateralRatio, state, optio
   });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(collateralRatio.referenceDate)}`,
-    `JST: ${state.selectedJst}`,
+    `Institution: ${state.selectedInstitutionId || state.selectedJst}`,
     `Perimeter: ${collateralRatio.filterLabel || "selected instruments and counterparties"}`,
     `Selected status: ${row.label}`
   ]));
@@ -2904,7 +2904,7 @@ function renderCostOfRiskSummaryAuditPanel(summary, state, options = {}) {
   });
   article.append(createCostOfRiskAuditInfoSection("Selected scope", [
     `Reference date: ${formatReferenceQuarterLabel(summary.referenceDate)}`,
-    `JST: ${state.selectedJst}`,
+    `Institution: ${state.selectedInstitutionId || state.selectedJst}`,
     `Breakdown: ${isCounterpartyCell ? "counterparty" : "staging status"}`,
     `Selected row: ${row.label}`,
     `Perimeter: ${summary.filterLabel || "selected instruments, counterparties and status"}`
@@ -3639,8 +3639,8 @@ function renderCostOfRiskJstSelectionPanel() {
   const intro = createCostOfRiskAuditIntroHeader({
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-reference-date-panel",
     eyebrow: "Breakdown of selection by :",
-    lead: jstCodes.length > 0 ? "" : "No JST code is available in the loaded dataset.",
-    title: "JST code"
+    lead: jstCodes.length > 0 ? "" : "No institution is available in the loaded dataset.",
+    title: "Institution"
   });
   intro.dataset.costOfRiskJstPanelKey = panelKey;
 

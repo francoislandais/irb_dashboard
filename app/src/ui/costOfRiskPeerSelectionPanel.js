@@ -18,8 +18,8 @@ export function createCostOfRiskPeerSelectionPanel(
     articleClassName: "cost-of-risk-audit-intro cost-of-risk-peer-selection-panel",
     eyebrow: "Benchmark peers",
     lead: jstOptions.length > 0
-      ? `${selectedCount} of ${jstOptions.length} JST selected for benchmark views. Changes are applied immediately.`
-      : "Load a dataset to choose the JST included in benchmark views.",
+      ? `${selectedCount} of ${jstOptions.length} institutions selected for benchmark views. Changes are applied immediately.`
+      : "Load a dataset to choose the institutions included in benchmark views.",
     title: "Peers"
   });
 
@@ -63,7 +63,7 @@ export function createCostOfRiskPeerSelectionPanel(
   }
 
   intro.append(createCostOfRiskAuditInfoSection("How it is used", [
-    "The selected JST always remains visible in benchmark charts.",
+    "The selected institution always remains visible in benchmark charts.",
     "The peers selected here define the comparison population for explicit peer curves and anonymized percentile distributions.",
     "Leaving no peer selected means the benchmark population is empty until peers are selected again."
   ]));

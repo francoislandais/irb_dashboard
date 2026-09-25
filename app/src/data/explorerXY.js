@@ -1,6 +1,6 @@
 import { getExplorerAxisPointsConfig } from "./timeSeries.js?v=20260921-hierarchy-gt-escape";
 import { getAvailableExplorerAxisCodes, getExplorerRowsForTemplate, EXPLORER_ALL_CURRENCIES_CODE, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260922-native-all-currency";
-import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 import { unescapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";

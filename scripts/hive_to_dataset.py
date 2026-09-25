@@ -90,7 +90,7 @@ def build_hive_query(
 
     return f"""SELECT
     table_id,
-    jst_code,
+    jst_code AS reporting_unit_id,
     x_axis_rc_code,
     y_axis_rc_code,
     z_axis_rc_code,
@@ -175,7 +175,7 @@ def build_kri_hive_query(
 
     return f"""SELECT
     'KRI' AS table_id,
-    jst_code,
+    jst_code AS reporting_unit_id,
     '' AS x_axis_rc_code,
     kri_data_point_id AS y_axis_rc_code,
     '' AS z_axis_rc_code,

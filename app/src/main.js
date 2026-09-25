@@ -1,6 +1,6 @@
 import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
-import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js";
-import { buildDataIndexes, getIndexedJstCodes } from "./data/dataIndex.js?v=20260915-stable-lists";
+import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
+import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
 import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260917-kri-formula";
 import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260921-hierarchy-gt-escape";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
@@ -19,8 +19,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260917-kri-formula";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260921-full-context-collapse";
+import { createDataStore } from "./data/dataStore.js?v=20260925-institution-id";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260925-institution-id";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -29,7 +29,8 @@ import {
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./ui/urlState.js";
 
 const store = createDataStore();
-const JST_URL_PARAM = "jst";
+const INSTITUTION_URL_PARAM = "institution";
+const LEGACY_JST_URL_PARAM = "jst";
 const MODULE_URL_PARAM = "module";
 const DATASET_URL_PARAM = "dataset";
 const HEADER_URL_PARAM = "header";
@@ -133,7 +134,7 @@ const actions = {
     }
     updateUrlDatasetParam(store.getState().activeDatasetId);
     updateUrlModuleParam(store.getState().activeModule);
-    updateUrlJstParam(store.getState().selectedJst);
+    updateUrlInstitutionParam(store.getState().selectedInstitutionId);
     applyUrlPeerExclusions(store.getState().jstOptions);
     updateUrlPeerExclusionsParam(store.getState());
   },
@@ -142,9 +143,13 @@ const actions = {
     store.setDatasetLabel(label);
   },
 
+  updateSelectedInstitution(institutionId) {
+    store.setSelectedInstitutionId(institutionId);
+    updateUrlInstitutionParam(institutionId);
+  },
+
   updateSelectedJst(jstCode) {
-    store.setSelectedJst(jstCode);
-    updateUrlJstParam(jstCode);
+    actions.updateSelectedInstitution(jstCode);
   },
 
   updateSelectedUnit(unit) {
@@ -196,7 +201,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const parsed = removeEmptyReferenceColumns(rawParsed.columns, rawParsed.rows);
   validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
-  const jstOptions = getIndexedJstCodes({ dataIndexes });
+  const institutionOptions = getIndexedInstitutionIds({ dataIndexes });
   const extractionTimestamp = getExtractionTimestamp(parsed.columns, parsed.rows);
   const datasetId = options.datasetId || createDatasetId(options.source || "local");
   csvTextByDatasetId.set(datasetId, text);
@@ -209,17 +214,18 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
     datasetLabel: options.datasetLabel || fileName,
     extractionTimestamp,
     source: options.source || "local",
-    jstOptions,
+    institutionOptions,
+    jstOptions: institutionOptions,
     rows: parsed.rows,
     loadedAt
   });
   updateUrlDatasetParam(store.getState().activeDatasetId);
   updateUrlModuleParam(store.getState().activeModule);
 
-  const urlJst = getUrlJstParam();
-  const matchedJst = findMatchingJstCode(jstOptions, urlJst);
-  if (matchedJst) store.setSelectedJst(matchedJst);
-  applyUrlPeerExclusions(jstOptions);
+  const urlInstitution = getUrlInstitutionParam();
+  const matchedInstitution = findMatchingInstitutionId(institutionOptions, urlInstitution);
+  if (matchedInstitution) store.setSelectedInstitutionId(matchedInstitution);
+  applyUrlPeerExclusions(institutionOptions);
 }
 
 function getExtractionTimestamp(columns, rows) {
@@ -274,17 +280,19 @@ function base64ToUint8Array(base64) {
   return bytes;
 }
 
-function getUrlJstParam() {
-  return readUrlStateParams().get(JST_URL_PARAM) ?? "";
+function getUrlInstitutionParam() {
+  const params = readUrlStateParams();
+  return params.get(INSTITUTION_URL_PARAM) ?? params.get(LEGACY_JST_URL_PARAM) ?? "";
 }
 
-function updateUrlJstParam(jstCode) {
+function updateUrlInstitutionParam(institutionId) {
   const url = createUrlState();
-  if (jstCode) {
-    url.searchParams.set(JST_URL_PARAM, jstCode);
+  if (institutionId) {
+    url.searchParams.set(INSTITUTION_URL_PARAM, institutionId);
   } else {
-    url.searchParams.delete(JST_URL_PARAM);
+    url.searchParams.delete(INSTITUTION_URL_PARAM);
   }
+  url.searchParams.delete(LEGACY_JST_URL_PARAM);
   replaceAppUrlState(url);
 }
 
@@ -382,15 +390,15 @@ function replaceAppUrlState(url) {
   replaceUrlState(url);
 }
 
-function findMatchingJstCode(jstOptions, requestedJst) {
-  if (!requestedJst) return "";
+function findMatchingInstitutionId(institutionOptions, requestedInstitutionId) {
+  if (!requestedInstitutionId) return "";
 
-  const exactMatch = jstOptions.find((jstCode) => jstCode === requestedJst);
+  const exactMatch = institutionOptions.find((institutionId) => institutionId === requestedInstitutionId);
   if (exactMatch) return exactMatch;
 
-  const normalizedRequestedJst = normalizeJstForUrlMatch(requestedJst);
-  return jstOptions.find((jstCode) => (
-    normalizeJstForUrlMatch(jstCode) === normalizedRequestedJst
+  const normalizedRequestedId = normalizeJstForUrlMatch(requestedInstitutionId);
+  return institutionOptions.find((institutionId) => (
+    normalizeJstForUrlMatch(institutionId) === normalizedRequestedId
   )) ?? "";
 }
 

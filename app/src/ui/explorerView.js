@@ -4,7 +4,7 @@ import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/e
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260921-hierarchy-gt-escape";
 import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-padding";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
-import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js?v=20260925-institution-id";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
@@ -48,7 +48,7 @@ import {
 import { getLatestState } from "./appState.js";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
-import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260917-query-ranges";
+import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260925-institution-id";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js?v=20260917-query-light-en";
 import { showContextMenu } from "./contextMenu.js?v=20260911-explorer-denominator";
 
@@ -1462,7 +1462,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
     { label: "Row selection", value: captions.y || "Not used" },
     { label: "Column selection", value: captions.x || "Not used" },
     { label: "Tab selection", value: captions.z || "Not used" },
-    { label: "JST code", value: state.selectedJst || "-" },
+    { label: "Institution", value: state.selectedInstitutionId || state.selectedJst || "-" },
     { label: "Display unit", value: unitLabel },
     { label: "Table display", value: getActiveExplorerDisplayOption().label },
     { label: "Evolution frequency", value: getActiveExplorerEvolutionOption().label }
@@ -1477,7 +1477,7 @@ function buildVisibleExplorerExcelPayload(state, table) {
     fileName: sanitizeExcelFileName(`Agora Explorer_${templateId}_${displayedDimension}.xlsx`),
     metadata,
     rows,
-    subtitle: `Visible table · ${state.selectedJst || "JST not selected"} · ${unitLabel}`,
+    subtitle: `Visible table · ${state.selectedInstitutionId || state.selectedJst || "Institution not selected"} · ${unitLabel}`,
     title: `${templateId} — ${templateTitle} — ${displayedDimension} dimension`
   };
 }
@@ -2635,7 +2635,7 @@ function renderExplorerActiveFilters(state) {
 
   const jstValue = document.createElement("span");
   jstValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  jstValue.textContent = state?.selectedJst || "JST";
+  jstValue.textContent = state?.selectedInstitutionId || state?.selectedJst || "Institution";
   jstToggle.append(jstValue);
   jstToggle.addEventListener("click", () => {
     explorerContextTopic = "jst-code";
@@ -3307,7 +3307,7 @@ function renderExplorerJstSelectionPanel(state) {
 
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
-  title.textContent = "JST code";
+  title.textContent = "Institution";
 
   const benchmark = buildExplorerBenchmark(state?.jstOptions ?? []);
   const selectedReference = getSelectedExplorerReference(state);
@@ -3318,7 +3318,7 @@ function renderExplorerJstSelectionPanel(state) {
   const list = document.createElement("div");
   list.className = "explorer-jst-selection-list";
   list.setAttribute("role", "listbox");
-  list.setAttribute("aria-label", "JST code");
+  list.setAttribute("aria-label", "Institution");
 
   (state?.jstOptions ?? []).forEach((jstCode) => {
     const isActive = jstCode === state?.selectedJst;
@@ -3902,8 +3902,8 @@ function renderExplorerPeerSelectionPanel(state) {
   const lead = document.createElement("p");
   lead.className = "explorer-context-lead";
   lead.textContent = jstOptions.length > 0
-    ? `${selectedCount} of ${jstOptions.length} JST selected for benchmark views. Changes are applied immediately.`
-    : "Load a dataset to choose the JST included in benchmark views.";
+    ? `${selectedCount} of ${jstOptions.length} institutions selected for benchmark views. Changes are applied immediately.`
+    : "Load a dataset to choose the institutions included in benchmark views.";
 
   article.append(eyebrow, title, lead);
 
@@ -3947,7 +3947,7 @@ function renderExplorerPeerSelectionPanel(state) {
   }
 
   article.append(createExplorerContextItem("How it is used", [
-    "The selected JST always remains visible in benchmark charts.",
+    "The selected institution always remains visible in benchmark charts.",
     "The peers selected here define the comparison population for explicit peer curves and anonymized percentile distributions.",
     "Leaving no peer selected means the benchmark population is empty until peers are selected again."
   ].join("\n")));

@@ -129,7 +129,7 @@ df = run_hive_query_to_csv(
 
 Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
-Le résultat est enregistré sous `datasets/finrep_extract.csv`. Il peut ensuite être transforme en application autonome avec :
+Le résultat est enregistré sous `datasets/finrep_extract.csv`. La colonne d’identification est publiée sous le nom `reporting_unit_id` ; les anciens CSV qui utilisent encore `jst_code` restent acceptés par l’application. Il peut ensuite être transforme en application autonome avec :
 
 ```sh
 python3 scripts/export_all_standalone_apps.py

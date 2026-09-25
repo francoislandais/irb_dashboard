@@ -1,6 +1,6 @@
-import { getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates } from "../dataIndex.js?v=20260915-stable-lists";
+import { getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates } from "../dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "../core/axisCode.js?v=20260921-z-axis-padding";
-import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "../core/axisColumns.js";
+import { getRequiredAxisColumnIndexes as getRequiredIndexes } from "../core/axisColumns.js?v=20260925-institution-id";
 import { getReferenceColumns, parseNumericValue } from "../core/referenceColumns.js";
 import {
   ASSET_KEY_BY_LABEL,

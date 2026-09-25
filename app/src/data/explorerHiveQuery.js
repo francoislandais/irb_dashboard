@@ -1,6 +1,6 @@
-import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
-import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260915-stable-lists";
+import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260925-institution-id";
 import { EXPLORER_ALL_CURRENCIES_CODE } from "./explorer.js?v=20260922-native-all-currency";
 
 // Factor an exact set of tuples, never the Cartesian product of unrelated
@@ -66,7 +66,7 @@ export function buildExplorerQueryFromPoints(state, points, { includeDateFilter 
     if (!tuples.length) continue;
     const columns = kri ? ["jst_code", "kri_data_point_id"] : ["regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')", "jst_code", "z_axis_rc_code", "x_axis_rc_code", "y_axis_rc_code"];
     if (dated) columns.push("reference_period");
-    const projection = kri ? ["'KRI' AS table_id", "jst_code", "'' AS x_axis_rc_code", "kri_data_point_id AS y_axis_rc_code", "'' AS z_axis_rc_code"] : ["table_id", "jst_code", "x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code"];
+    const projection = kri ? ["'KRI' AS table_id", "jst_code AS reporting_unit_id", "'' AS x_axis_rc_code", "kri_data_point_id AS y_axis_rc_code", "'' AS z_axis_rc_code"] : ["table_id", "jst_code AS reporting_unit_id", "x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code"];
     queries.push(`SELECT\n${projection.concat(["reference_period", "value_decimal"]).map(item => `    ${item}`).join(",\n")}\nFROM crp_agora.${kri ? "agora_dm_imas_kris_raw" : "agora_its_bft_current"}\nWHERE is_group_head = 'Y'\n    AND is_highest_cons = 'Y'\n    AND (\n${indent(indent(factorTuples(tuples, columns)))}\n    )`);
   }
   return queries.length ? `${queries.join("\n\nUNION\n\n")}\nORDER BY\n    reference_period,\n    table_id,\n    y_axis_rc_code,\n    x_axis_rc_code;` : null;

@@ -1,8 +1,8 @@
 import { setLatestState } from "./appState.js";
-import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260917-reference-date-fast";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260922-kriref-expand-persist";
+import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260925-institution-id";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260925-institution-id";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
-import { showDatasetDialog } from "./datasetDialog.js?v=20260915-extraction-timestamp-fix";
+import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 
@@ -21,7 +21,7 @@ const elements = {
   fileName: document.querySelector("#file-name"),
   fileStatus: document.querySelector("#file-status"),
   forgetFileButton: document.querySelector("#forget-file-button"),
-  jstSelect: document.querySelector("#jst-select"),
+  institutionSelect: document.querySelector("#institution-select"),
   moduleButtons: [...document.querySelectorAll("[data-module-target]")],
   moduleViews: [...document.querySelectorAll(".module-view")],
   peersButton: document.querySelector("#peers-button"),
@@ -68,8 +68,8 @@ export function wireUi(actions) {
     }
     await actions.setActiveDataset(event.target.value);
   });
-  elements.jstSelect.addEventListener("change", (event) => {
-    actions.updateSelectedJst(event.target.value);
+  elements.institutionSelect.addEventListener("change", (event) => {
+    actions.updateSelectedInstitution(event.target.value);
   });
   elements.unitSelect.addEventListener("change", (event) => {
     saveExplorerScrollPosition();
@@ -131,9 +131,9 @@ export function renderAppState(state) {
     elements.forgetFileButton.disabled = !hasData || activeDataset?.source === "embedded";
   }
   if (elements.exportStandaloneButton) elements.exportStandaloneButton.disabled = !hasData;
-  if (elements.peersButton) elements.peersButton.disabled = state.jstOptions.length === 0;
+  if (elements.peersButton) elements.peersButton.disabled = (state.institutionOptions ?? state.jstOptions).length === 0;
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
-  renderJstSelect(state.jstOptions, state.selectedJst);
+  renderInstitutionSelect(state.institutionOptions ?? state.jstOptions, state.selectedInstitutionId ?? state.selectedJst);
   renderExplorerHeaderReferenceControl(state);
   renderActiveModule(state.activeModule, state.availableModules);
 
@@ -201,19 +201,19 @@ function renderDatasetSelect(datasets, activeDatasetId, rememberedFileReady = fa
   elements.datasetSelect.disabled = false;
 }
 
-function renderJstSelect(jstOptions, selectedJst) {
-  elements.jstSelect.replaceChildren();
+function renderInstitutionSelect(institutionOptions, selectedInstitutionId) {
+  elements.institutionSelect.replaceChildren();
 
-  if (jstOptions.length === 0) {
-    elements.jstSelect.append(new Option("Chargez un CSV", ""));
-    elements.jstSelect.disabled = true;
+  if (institutionOptions.length === 0) {
+    elements.institutionSelect.append(new Option("Chargez un CSV", ""));
+    elements.institutionSelect.disabled = true;
     return;
   }
 
-  jstOptions.forEach((jstCode) => {
-    elements.jstSelect.append(new Option(jstCode, jstCode, false, jstCode === selectedJst));
+  institutionOptions.forEach((institutionId) => {
+    elements.institutionSelect.append(new Option(institutionId, institutionId, false, institutionId === selectedInstitutionId));
   });
-  elements.jstSelect.disabled = false;
+  elements.institutionSelect.disabled = false;
 }
 
 function renderActiveModule(activeModule, availableModules = []) {

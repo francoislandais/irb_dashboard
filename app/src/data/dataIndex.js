@@ -1,20 +1,25 @@
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
-import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js";
+import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 
 const KEY_SEPARATOR = "\u001f";
 
 export function buildDataIndexes(columns, rows) {
   const indexes = getCompleteAxisColumnIndexes(columns);
   if (!indexes) {
+    const emptyInstitutionIds = new Set();
+    const emptyTableMap = new Map();
     return {
       axisCodes: new Map(),
       byAxisPoint: new Map(),
       byCoordinates: new Map(),
-      byTableJst: new Map(),
+      byTableInstitution: emptyTableMap,
+      byTableJst: emptyTableMap,
       detailKeys: new Set(),
+      institutionIds: emptyInstitutionIds,
       indexes: null,
-      jstCodes: new Set(),
-      tableIdsByJst: new Map()
+      jstCodes: emptyInstitutionIds,
+      tableIdsByInstitution: emptyTableMap,
+      tableIdsByJst: emptyTableMap
     };
   }
 
@@ -22,29 +27,33 @@ export function buildDataIndexes(columns, rows) {
   const byAxisPoint = new Map();
   const byCoordinates = new Map();
   const byTableJst = new Map();
+  const institutionIds = new Set();
   const detailKeys = new Set();
-  const jstCodes = new Set();
+  const jstCodes = institutionIds;
   const tableIdsByJst = new Map();
 
   rows.forEach((row, rowIndex) => {
     const tableId = row[indexes.tableId];
-    const jstCode = row[indexes.jstCode];
+    const institutionId = row[indexes.institutionId];
 
-    if (!tableId || !jstCode) return;
+    if (!tableId || !institutionId) return;
 
-    jstCodes.add(jstCode);
-    pushIndexValue(byTableJst, makeDataKey(tableId, jstCode), rowIndex);
-    addTableId(tableIdsByJst, jstCode, tableId);
+    institutionIds.add(institutionId);
+    pushIndexValue(byTableJst, makeDataKey(tableId, institutionId), rowIndex);
+    addTableId(tableIdsByJst, institutionId, tableId);
   });
 
   return {
     axisCodes,
     byAxisPoint,
     byCoordinates,
+    byTableInstitution: byTableJst,
     byTableJst,
     detailKeys,
+    institutionIds,
     indexes,
     jstCodes,
+    tableIdsByInstitution: tableIdsByJst,
     tableIdsByJst
   };
 }
@@ -113,6 +122,12 @@ export function getIndexedJstCodes(state) {
   if (!jstCodes) return [];
 
   return [...jstCodes].sort((left, right) => left.localeCompare(right, "fr"));
+}
+
+export function getIndexedInstitutionIds(state) {
+  const institutionIds = state.dataIndexes?.institutionIds ?? state.dataIndexes?.jstCodes;
+  if (!institutionIds) return [];
+  return [...institutionIds].sort((left, right) => left.localeCompare(right, "fr"));
 }
 
 function getIndexedRows(state, rowIndexes) {

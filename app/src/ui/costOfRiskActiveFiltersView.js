@@ -194,10 +194,10 @@ function createCostOfRiskJstChip(selectedJst) {
   toggle.type = "button";
   toggle.dataset.costOfRiskJstHelp = "true";
   toggle.dataset.costOfRiskQuickFilter = "jst";
-  toggle.setAttribute("aria-label", "Change JST code");
+  toggle.setAttribute("aria-label", "Change institution");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  label.textContent = selectedJst || "JST";
+  label.textContent = selectedJst || "Institution";
   toggle.append(label);
   chip.append(toggle);
   return chip;
