@@ -517,6 +517,7 @@ p {
 }
 
 .institution-field {
+  max-width: min(600px, 50vw);
   width: 230px;
 }
 
@@ -553,11 +554,16 @@ p {
 }
 
 .institution-picker-current {
-  display: block;
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 8px;
   min-width: 0;
 }
 
 .institution-picker-name {
+  flex: 1 1 auto;
+  line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -569,11 +575,13 @@ p {
 }
 
 .institution-level-badge {
+  align-items: center;
   color: rgba(255, 255, 255, 0.9);
+  display: inline-flex;
   flex: 0 0 auto;
   font-size: 0.57rem;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.2;
   padding: 0;
 }
 
@@ -4376,6 +4384,10 @@ table {
   .field input,
   .field select {
     width: 100%;
+  }
+
+  .institution-field {
+    max-width: 100%;
   }
 
   .content-grid {

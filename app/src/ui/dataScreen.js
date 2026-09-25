@@ -132,6 +132,10 @@ export function wireUi(actions) {
     }
   });
   elements.institutionDictionaryClear.addEventListener("click", actions.clearInstitutionDictionary);
+  window.addEventListener("resize", () => {
+    const state = actions.getState();
+    fitInstitutionField(state.institutionOptions ?? state.jstOptions ?? [], state.institutionDictionary ?? {});
+  });
   elements.unitSelect.addEventListener("change", (event) => {
     saveExplorerScrollPosition();
     actions.updateSelectedUnit(event.target.value);
@@ -268,6 +272,7 @@ function renderInstitutionSelect(state) {
   const dictionary = state.institutionDictionary ?? {};
   elements.institutionSelect.replaceChildren();
   elements.institutionPickerMenu.replaceChildren();
+  fitInstitutionField(institutionOptions, dictionary);
 
   if (institutionOptions.length === 0) {
     elements.institutionSelect.append(new Option("Chargez un CSV", ""));
@@ -330,6 +335,33 @@ function renderInstitutionSelect(state) {
     || "Load an optional institution dictionary";
   elements.institutionDictionaryButton.classList.toggle("has-error", Boolean(state.institutionDictionaryError));
   elements.institutionDictionaryClear.hidden = !state.institutionDictionaryFileName;
+}
+
+function fitInstitutionField(institutionOptions, dictionary) {
+  const field = elements.institutionPickerToggle.closest(".institution-field");
+  if (!field) return;
+  if (Object.keys(dictionary).length === 0 || window.innerWidth <= 760) {
+    field.style.width = "";
+    return;
+  }
+
+  const canvas = fitInstitutionField.canvas ??= document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  context.font = getComputedStyle(elements.institutionPickerName).font;
+  const longestName = institutionOptions.reduce((longest, institutionId) => {
+    const name = getInstitutionDisplayInfo(dictionary, institutionId)?.institutionName || institutionId;
+    return Math.max(longest, context.measureText(name).width);
+  }, 0);
+  context.font = getComputedStyle(elements.institutionPickerLevel).font;
+  const longestLevel = institutionOptions.reduce((longest, institutionId) => {
+    const level = getInstitutionDisplayInfo(dictionary, institutionId)?.consolidationLevel || "";
+    return Math.max(longest, context.measureText(level).width);
+  }, 0);
+
+  const labelWidth = field.querySelector(":scope > span")?.getBoundingClientRect().width ?? 80;
+  const requiredWidth = Math.ceil(labelWidth + longestName + longestLevel + 8 + 16 + 14 + 8 + 10);
+  field.style.width = `${Math.max(230, requiredWidth)}px`;
 }
 
 function setInstitutionPickerOpen(isOpen) {

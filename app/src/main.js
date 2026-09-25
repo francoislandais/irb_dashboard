@@ -21,7 +21,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260925-institution-dictionary";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260925-institution-display";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260925-institution-label-fit";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
