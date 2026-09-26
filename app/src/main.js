@@ -26,7 +26,7 @@ import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
   resolveStandaloneModulePath
-} from "./standaloneExport.mjs";
+} from "./standaloneExport.mjs?v=20260926-global-update-dictionary";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./ui/urlState.js";
 
 const store = createDataStore();
@@ -266,6 +266,17 @@ async function loadStandaloneData() {
       source: "embedded"
     }
   );
+  if (standaloneData.institutionDictionaryBase64) {
+    const dictionaryCsvText = await readStandaloneCsvText({
+      csvCompression: standaloneData.institutionDictionaryCompression,
+      csvBase64: standaloneData.institutionDictionaryBase64,
+      csvByteLength: standaloneData.institutionDictionaryByteLength
+    });
+    actions.loadInstitutionDictionary(
+      dictionaryCsvText,
+      standaloneData.institutionDictionaryFileName || "institution_dictionary.csv"
+    );
+  }
   store.setCapabilityNotice("Version portable : les données sont intégrées dans ce fichier HTML.");
   return true;
 }

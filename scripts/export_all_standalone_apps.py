@@ -27,6 +27,7 @@ def export_all_standalone_apps(
     datasets_directory: str | Path | None = None,
     outputs_directory: str | Path | None = None,
     app_name: str | None = None,
+    institution_dictionary_file_path: str | Path | None = None,
 ) -> list[Path]:
     """Génère un HTML portable pour chaque CSV du dossier de données.
 
@@ -51,7 +52,13 @@ def export_all_standalone_apps(
     generated_files = []
     for csv_path in csv_files:
         output_path = outputs_path / f"Agora Explorer_{csv_path.stem}.html"
-        export_standalone_app(csv_path, output_path, bundle=bundle, app_name=app_name)
+        export_standalone_app(
+            csv_path,
+            output_path,
+            bundle=bundle,
+            app_name=app_name,
+            institution_dictionary_file_path=institution_dictionary_file_path,
+        )
         generated_files.append(output_path)
     return generated_files
 
@@ -63,6 +70,7 @@ def export_standalone_app(
     app_directory: str | Path = APP_DIRECTORY,
     bundle: dict | None = None,
     app_name: str | None = None,
+    institution_dictionary_file_path: str | Path | None = None,
 ) -> Path:
     """Génère une version portable à partir d'un CSV unique.
 
@@ -75,11 +83,21 @@ def export_standalone_app(
     csv_text = data_path.read_bytes().decode("utf-8", errors="replace")
     if not csv_text.strip():
         raise ValueError(f"Le fichier de données est vide : {data_path}")
+    institution_dictionary_csv_text = ""
+    if institution_dictionary_file_path is not None:
+        dictionary_path = Path(institution_dictionary_file_path).expanduser().resolve()
+        institution_dictionary_csv_text = dictionary_path.read_bytes().decode("utf-8-sig", errors="replace")
+        if not institution_dictionary_csv_text.strip():
+            raise ValueError(f"Le dictionnaire des institutions est vide : {dictionary_path}")
     standalone_bundle = bundle or _build_standalone_bundle(
         Path(app_directory).expanduser().resolve()
     )
     html = _build_standalone_html(
-        standalone_bundle, csv_text=csv_text, file_name=data_path.name, app_name=app_name
+        standalone_bundle,
+        csv_text=csv_text,
+        file_name=data_path.name,
+        app_name=app_name,
+        institution_dictionary_csv_text=institution_dictionary_csv_text,
     )
     destination = (
         Path(output_path).expanduser().resolve()
@@ -266,7 +284,12 @@ def _resolve_module_path(from_path: str, specifier: str) -> str:
 
 
 def _build_standalone_html(
-    bundle: dict, *, csv_text: str, file_name: str, app_name: str | None = None
+    bundle: dict,
+    *,
+    csv_text: str,
+    file_name: str,
+    app_name: str | None = None,
+    institution_dictionary_csv_text: str = "",
 ) -> str:
     page_title = html.escape((app_name or "").strip() or DEFAULT_STANDALONE_APP_NAME)
     csv_bytes = csv_text.encode("utf-8")
@@ -284,6 +307,15 @@ def _build_standalone_html(
         .isoformat(timespec="milliseconds")
         .replace("+00:00", "Z"),
     }
+    if institution_dictionary_csv_text:
+        dictionary_bytes = institution_dictionary_csv_text.encode("utf-8")
+        compressed_dictionary = gzip.compress(dictionary_bytes, compresslevel=9, mtime=0)
+        payload.update({
+            "institutionDictionaryCompression": "gzip-base64",
+            "institutionDictionaryBase64": base64.b64encode(compressed_dictionary).decode("ascii"),
+            "institutionDictionaryByteLength": len(dictionary_bytes),
+            "institutionDictionaryFileName": "institution_dictionary.csv",
+        })
     app_markup = _extract_app_markup(bundle["indexHtml"])
     return f'''<!doctype html>
 <html lang="fr" data-standalone="true">

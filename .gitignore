@@ -14,5 +14,16 @@ datasets/
 outputs/
 work/
 
+# Classeur versionné servant d'exemple au prototype global_update.
+!outputs/
+outputs/*
+!outputs/global-update-prototype/
+outputs/global-update-prototype/*
+!outputs/global-update-prototype/global_update_examples.xlsx
+
+# Fixture CSV contrôlée du mode de simulation global_update.
+!scripts/fixtures/
+!scripts/fixtures/global_update_test_data.csv
+
 # Exceptions : mappings internes de l'application.
 !app/assets/*.csv

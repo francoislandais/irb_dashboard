@@ -1,0 +1,51 @@
+{
+  "period_start": "2018-01-31",
+  "period_end": "2035-12-31",
+  "entities": [
+    {
+      "lei": "5493001KJTIIGC8Y1R12",
+      "institution_name": "Northstar Bank",
+      "highest_level": "CONSO",
+      "jst_by_level": {
+        "CONSO": "DUM001",
+        "SOLO": "DUM002",
+        "LIQUIDITY_SUBGROUP": "DUM003"
+      }
+    },
+    {
+      "lei": "969500Q2MA9Y1GQG8B61",
+      "institution_name": "Riverside Credit",
+      "highest_level": "SOLO",
+      "jst_by_level": {
+        "CONSO": "DUM004",
+        "SOLO": "DUM005",
+        "LIQUIDITY_SUBGROUP": "DUM006"
+      }
+    },
+    {
+      "lei": "213800WAVVOPS85N2205",
+      "institution_name": "Summit Financial",
+      "highest_level": "CONSO",
+      "jst_by_level": {
+        "CONSO": "DUM007",
+        "SOLO": "DUM008",
+        "LIQUIDITY_SUBGROUP": "DUM009"
+      }
+    },
+    {
+      "lei": "5493006MHB84DD0ZWV18",
+      "institution_name": "Harbor Group",
+      "highest_level": "SOLO",
+      "jst_by_level": {
+        "CONSO": "DUM010",
+        "SOLO": "DUM011",
+        "LIQUIDITY_SUBGROUP": "DUM012"
+      }
+    }
+  ],
+  "templates": {
+    "FINREP": ["F_01.01", "F_12.01", "F_47.00"],
+    "COREP": ["C_01.00", "C_03.00", "C_08.01", "C_18.00"],
+    "KRI": ["LIQ101", "LIQ205", "CRFA0900"]
+  }
+}

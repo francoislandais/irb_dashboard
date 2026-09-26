@@ -18,11 +18,21 @@ export async function exportStandaloneApp(dataFilePath, options = {}) {
   const absoluteDataPath = resolve(dataFilePath);
   const csvText = await readFile(absoluteDataPath, "utf8");
   if (!csvText.trim()) throw new Error(`Le fichier de données est vide : ${absoluteDataPath}`);
+  const institutionDictionaryCsvText = options.institutionDictionaryFilePath
+    ? await readFile(resolve(options.institutionDictionaryFilePath), "utf8")
+    : "";
+  if (options.institutionDictionaryFilePath && !institutionDictionaryCsvText.trim()) {
+    throw new Error(`Le dictionnaire des institutions est vide : ${options.institutionDictionaryFilePath}`);
+  }
 
   const bundle = await buildStandaloneBundle(appDirectory);
   const html = await buildStandaloneHtml(bundle, {
     csvText,
-    fileName: basename(absoluteDataPath)
+    fileName: basename(absoluteDataPath),
+    institutionDictionaryCsvText,
+    institutionDictionaryFileName: options.institutionDictionaryFilePath
+      ? basename(options.institutionDictionaryFilePath)
+      : ""
   });
   const outputPath = resolveOutputPath(options.outputPath, absoluteDataPath);
   await writeFile(outputPath, html, "utf8");

@@ -23,11 +23,20 @@ export function resolveStandaloneModulePath(fromPath, specifier) {
 export async function buildStandaloneHtml(bundle, activeDataset) {
   const appMarkup = extractAppMarkup(bundle.indexHtml);
   const compressedCsv = await compressStandaloneCsv(activeDataset.csvText);
+  const compressedInstitutionDictionary = activeDataset.institutionDictionaryCsvText
+    ? await compressStandaloneCsv(activeDataset.institutionDictionaryCsvText)
+    : null;
   const compressedBundle = await compressStandaloneText(JSON.stringify(bundle));
   const standalonePayload = {
     csvCompression: "gzip-base64",
     csvBase64: compressedCsv.base64,
     csvByteLength: compressedCsv.originalByteLength,
+    ...(compressedInstitutionDictionary ? {
+      institutionDictionaryCompression: "gzip-base64",
+      institutionDictionaryBase64: compressedInstitutionDictionary.base64,
+      institutionDictionaryByteLength: compressedInstitutionDictionary.originalByteLength,
+      institutionDictionaryFileName: activeDataset.institutionDictionaryFileName || "institution_dictionary.csv"
+    } : {}),
     fileName: activeDataset.fileName || "embedded-data.csv",
     loadedAt: new Date().toISOString()
   };

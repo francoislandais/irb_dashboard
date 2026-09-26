@@ -129,6 +129,28 @@ df = run_hive_query_to_csv(
 
 Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
+### Prototype de mise à jour globale
+
+Le classeur `outputs/global-update-prototype/global_update_examples.xlsx` montre le format proposé : un onglet par application, les LEI en `B1`, le niveau de consolidation en `B2`, puis une ligne par extraction à partir de la ligne 5. La fréquence et la profondeur d'historique s'appliquent séparément à chaque ligne.
+
+Après installation de la dépendance du lecteur Excel (`python3 -m pip install -r scripts/requirements-global-update.txt`), le point d'entrée unique peut être importé :
+
+```python
+from scripts.global_update import global_update
+
+result = global_update(mode="preview")
+```
+
+Le mode `preview` valide tout le classeur et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans `outputs/global-update-prototype/generated/preview/`. Il ne se connecte pas à Hive.
+
+Le mode `test` redirige le SQL vers les noms de tables suffixés `_test`, puis construit localement les datasets factices, un dictionnaire d'institutions et les applications HTML autonomes :
+
+```sh
+python3 scripts/global_update.py --mode test
+```
+
+Ce mode ne se connecte pas à Hive : les valeurs viennent de `scripts/fixtures/global_update_test_entities.json`. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les noms de tables `_test` et les noms de colonnes `lei`, `consolidation_level` et `institution_name` restent à confirmer sur le schéma Hive réel avant d'activer une exécution distante. Le format d'`Institution ID` utilisé dans ce prototype est `LEI_niveau`.
+
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. La colonne d’identification est publiée sous le nom `reporting_unit_id` ; les anciens CSV qui utilisent encore `jst_code` restent acceptés par l’application. Il peut ensuite être transforme en application autonome avec :
 
 ```sh
