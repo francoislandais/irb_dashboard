@@ -258,9 +258,10 @@ def _write_query_index(output: Path, manifest: dict) -> None:
         lines.extend([f"## {application['name']}", "", f"Niveau : `{application['consolidation']}`", f"LEI : {', '.join(application['leis'])}", ""])
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
         for extraction in application["extractions"]:
+            year_label = "an" if extraction["history_years"] == 1 else "ans"
             lines.append(
                 f"- [Extraction {extraction['index']:02d} — {extraction['module']} / {extraction['selector']}]"
-                f"({extraction['query']}) — {extraction['frequency']}, {extraction['history_years']} ans"
+                f"({extraction['query']}) — {extraction['frequency']}, {extraction['history_years']} {year_label}"
                 f" ({extraction['history_periods']} périodes)"
                 f" ({extraction['reference_dates'][0]} → {extraction['reference_dates'][-1]})"
             )

@@ -149,7 +149,7 @@ Le mode `test` redirige le SQL vers les noms de tables suffixés `_test`, puis c
 python3 scripts/global_update.py --mode test
 ```
 
-Ce mode ne se connecte pas à Hive : les valeurs viennent de `scripts/fixtures/global_update_test_entities.json`. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les noms de tables `_test` et les noms de colonnes `lei`, `consolidation_level` et `institution_name` restent à confirmer sur le schéma Hive réel avant d'activer une exécution distante. Le format d'`Institution ID` utilisé dans ce prototype est `LEI_niveau`.
+Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les noms de tables `_test` et les noms de colonnes `lei`, `consolidation_level` et `institution_name` restent à confirmer sur le schéma Hive réel avant d'activer une exécution distante. Le format d'`Institution ID` utilisé dans ce prototype est `LEI_niveau`.
 
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. La colonne d’identification est publiée sous le nom `reporting_unit_id` ; les anciens CSV qui utilisent encore `jst_code` restent acceptés par l’application. Il peut ensuite être transforme en application autonome avec :
 
