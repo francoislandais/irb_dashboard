@@ -602,17 +602,6 @@ C_08.01;x_axis_rc_code;310;Memorandum items:/Pre-credit derivatives risk weighte
 C_08.01;x_axis_rc_code;100;Exposure after crm substitution effects pre conversion factors/Of which: off balance sheet items;;;
 C_08.01;x_axis_rc_code;120;Exposure value/Of which: off balance sheet items;;;
 C_08.01;x_axis_rc_code;130;Exposure value/Of which: arising from counterparty credit risk;;;
-C_08.03;x_axis_rc_code;10;On-balance sheet exposures;;;
-C_08.03;x_axis_rc_code;20;Off-balance-sheet exposures pre-conversion factors;;;
-C_08.03;x_axis_rc_code;30;Exposure weighted average conversion factors;;;
-C_08.03;x_axis_rc_code;40;Exposure value post conversion factors and post crm;;;
-C_08.03;x_axis_rc_code;50;Exposure weighted average pd (%);;;
-C_08.03;x_axis_rc_code;60;Number of obligors;;;
-C_08.03;x_axis_rc_code;70;Exposure weighted average lgd (%);;;
-C_08.03;x_axis_rc_code;80;Exposure weighted average maturity (years);;;
-C_08.03;x_axis_rc_code;90;Risk weighted exposure amount after supporting factors;;;
-C_08.03;x_axis_rc_code;100;Expected loss amount;;;
-C_08.03;x_axis_rc_code;110;(-) value adjustments and provisions;;;
 C_08.03;z_axis_rc_code;qx01;All exposure classes and approaches;;;
 C_08.03;z_axis_rc_code;qx2023;All exposure classes and approaches/IRB-A;;;
 C_08.03;z_axis_rc_code;qx2021;All exposure classes and approaches/IRB-A / Central governments and central banks;;;
@@ -1962,7 +1951,7 @@ C_14.00;x_axis_rc_code;120;Non-abcp programmes/Origination date;;;
 C_14.00;x_axis_rc_code;121;Non-abcp programmes/Date of latest issuance;;;
 C_14.00;x_axis_rc_code;130;Non-abcp programmes/Total amount of securitised exposures at origination date;;;
 C_14.00;x_axis_rc_code;140;Securitised exposures/Total amount;;;
-C_14.00;x_axis_rc_code;150;Securitised exposures/Institution's share (%);;;
+C_14.00;x_axis_rc_code;150;Securitised exposures/Institution's share (%);;;%
 C_14.00;x_axis_rc_code;160;Securitised exposures/Type;;;
 C_14.00;x_axis_rc_code;171;Securitised exposures/% of irb in approach applied;;;
 C_14.00;x_axis_rc_code;180;Securitised exposures/Number of exposures;;;
