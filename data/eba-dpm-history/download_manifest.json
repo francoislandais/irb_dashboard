@@ -1,0 +1,246 @@
+{
+  "generated_at_utc": "2026-09-27T20:03:05.884071+00:00",
+  "sources_catalog": "sources.json",
+  "assets": [
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%202.9%20%28incl.%20new%20files%29/DPM%20v2.9.1//DPM%20Dictionary.xlsx",
+      "http_status": "cached",
+      "bytes": 978386,
+      "sha256": "0faf158d99c9b3750119e89717a79017c2a9d0a19855d4b0e8f949d1f2d728a6",
+      "filename": "2.9.1.1_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "2.9.1.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2023-11/33603ffd-5707-4159-a33c-04251abb62b1/DPM%20Table%20Layouts.zip",
+      "http_status": "cached",
+      "bytes": 7416043,
+      "sha256": "735604a397dcdb26ad8a09ea0ea889250742fdf0c8d21046f827e7b63456e91c",
+      "filename": "2.9.1.1_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "2.9.1.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%203.0/3.0.%20phase%202%20Errata%20/1013739/DPM%20Dictionary%203.0.1%20%28Errata%203%29.xlsx",
+      "http_status": "cached",
+      "bytes": 1203296,
+      "sha256": "45ab606dc8b0052064571751764a2dd68956a70ba36ef09ab836f383ab17d200",
+      "filename": "3.0.1_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "3.0.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2023-11/92fc36fb-5945-42f2-8757-31bb79037e4c/Table%20Layouts%203.0.1.Errata3.zip",
+      "http_status": "cached",
+      "bytes": 7401220,
+      "sha256": "b98fcae94983d5b47d83caa7b370a9ebe60bf46afa09fda7bdc6066517dc3557",
+      "filename": "3.0.1_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "3.0.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%203.1/Phase%201/1016854/DPM%20Dictionary%203.1.phase2_.xlsx",
+      "http_status": "cached",
+      "bytes": 1256100,
+      "sha256": "1cd4fb3aaaa0eaeaf4edef01a8d448880d6f9bb2cf5f5b5c918030d4af0a0f2c",
+      "filename": "3.1_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "3.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2023-11/8671f9bf-13f0-47ed-852f-8e68e65f44f0/DPM%20tabe%20layout%20and%20data%20point%20categorizaiton.zip",
+      "http_status": "cached",
+      "bytes": 2197142,
+      "sha256": "70ff1ef921b316871fb779edb5fc12f2637240dc79b89d146c0d897063eb2b0e",
+      "filename": "3.1_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "3.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%203.2/Phase%203/1039940/DPM%20Dictionary%203.2.phase3_.xlsx",
+      "http_status": "cached",
+      "bytes": 1294532,
+      "sha256": "f1fd23a1e7316b57f2c4011155bbbbeb1f83316d2bcef57de7db1e377425fff0",
+      "filename": "3.2_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "3.2"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2023-11/7e727bbe-83e4-4faa-938e-7580a29d5482/3.2%20table%20layouts.zip",
+      "http_status": "cached",
+      "bytes": 12373784,
+      "sha256": "c02e887eda29f4da81f1b075e0fe3ac0e3432daf9b940bca7ebd838c39615bd1",
+      "filename": "3.2_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "3.2"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20Framework%203.3/Phase%203/1063285/DPM%20Dictionary%203.3.phase3_.xlsx",
+      "http_status": "cached",
+      "bytes": 1478233,
+      "sha256": "ff092cdefe504e19f285af56c4b099d49074ddf254da35b77ca8906d0589e894",
+      "filename": "3.3_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "3.3"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2023-11/5246bb4b-24a6-4dcb-8f20-abc2b37f1ef1/DPM%20tabe%20layout%20and%20data%20point%20categorizaiton.zip",
+      "http_status": "cached",
+      "bytes": 1326803,
+      "sha256": "be4896c0bced995a5ed4441c050a9f17a3b42964d38743ecf3e59d9746aad7a1",
+      "filename": "3.3_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "3.3"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2024-02/fa9fd8ec-35bf-4898-a360-9626ff366423/dpm_dictionary_3.4.xlsx",
+      "http_status": "cached",
+      "bytes": 1478894,
+      "sha256": "bfd2a67701d8708855f2dee4310107e83ffd23e8a200e8b806b65af538e00c63",
+      "filename": "3.4_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "3.4"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2024-02/794db949-2184-4be4-ac06-635e32055e84/dpm_table_layouts_and_data_point_categorisation.zip",
+      "http_status": "cached",
+      "bytes": 346279,
+      "sha256": "9ce0332af8177e19b9f94eb15432a977456f66dfd206ae5ea7c4badcc0fc9c13",
+      "filename": "3.4_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "3.4"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2024-07/0090adc8-063d-4b45-82f5-30759543f9fe/dpm_dictionary_3.5.xlsx",
+      "http_status": "cached",
+      "bytes": 1670926,
+      "sha256": "265aea2c3b183dfc3a7c826f11730c2ee6619f9063797b3dd02523f01c9b3e6a",
+      "filename": "3.5_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "3.5"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2024-07/a4f3ad81-ea7b-49eb-b277-e41c55c731cb/table_layout.zip",
+      "http_status": "cached",
+      "bytes": 717355,
+      "sha256": "c2a915f994122d7aa6df962e178bbfa322f79e504792d398288c60519339ad5b",
+      "filename": "3.5_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "3.5"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-03/84dc8ed3-8982-45cf-8b91-6d019f88ec92/dpm2_4_0_glossary_20250129.xlsx",
+      "http_status": "cached",
+      "bytes": 2059301,
+      "sha256": "25ba9eba1e38426731332b16a646f5c69bb3a92009ed039ac5540c5ab980e4dd",
+      "filename": "4.0_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "4.0"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2024-12/7ae0363a-ad3d-42d9-a192-34711416c039/annotated_templates.zip",
+      "http_status": "cached",
+      "bytes": 3963004,
+      "sha256": "3b973e7e9dd06f9d855b9afe77a930b3881a3a84e64292c90f0ef8d397a5e57d",
+      "filename": "4.0_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "4.0"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-07/1258693a-4a78-4d5e-b37f-b151652513e1/Glossary%20-%20full%20export_new.xlsx",
+      "http_status": "cached",
+      "bytes": 2179050,
+      "sha256": "1affd8876728254cd9bb349393adee749df3f4df8a6b87be8ebd9c964ae02400",
+      "filename": "4.1_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "4.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-07/44989a9c-e7e8-4126-8032-1156dc1c4b51/3.d%20DPM%20table%20layout%20and%20data%20point%20categorization__new.zip",
+      "http_status": "cached",
+      "bytes": 2343429,
+      "sha256": "e80b9e8551afa96fb326d019e555e9e45403ef309e1e8140d6852dcd37da8285",
+      "filename": "4.1_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "4.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2026-01/a62c718b-bbab-4def-b700-9268a818567e/Glossary%20-%20full%20export.xlsx",
+      "http_status": "cached",
+      "bytes": 2659664,
+      "sha256": "7ca476c37e8b599ce4df616b1d92fab5beac5691c3671798a9824ad1054cd766",
+      "filename": "4.2_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "4.2",
+        "4.2.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2026-02/c92d5e2b-bcd7-4767-ab5b-cdf0b1737368/260106%20Annotated%20templates_with_finpre9dp_4.2.1.zip",
+      "http_status": "cached",
+      "bytes": 18399442,
+      "sha256": "e022598f9f98408d6920555a90c899bea5a1a2519b696703c232526a45b7cc07",
+      "filename": "4.2_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "4.2",
+        "4.2.1"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-11/f49ea2f2-a21b-4283-981c-61fa5ed84c0c/eba_conversion_file_phase_3_22.05.2025.xlsx",
+      "http_status": "cached",
+      "bytes": 1843683,
+      "sha256": "66b0f921d6f146282072e3ae69d5a94a438bc12b1312d20ea5efcfd830ff85ee",
+      "filename": "dpm1_to_dpm2_glossary_conversion.xlsx",
+      "kind": "conversion_reference",
+      "frameworks": []
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2026-02/29587443-7e93-4500-9196-4fd3dc8c427e/DPM%202.0%20and%20DPM_XL%20Technical%20Documentation.zip",
+      "http_status": "cached",
+      "bytes": 11795454,
+      "sha256": "6a4b4795bd4e152edc8a416fbff247bd3aeacf94c5f69953dc243d3fa52ceb1c",
+      "filename": "dpm2_technical_documentation.zip",
+      "kind": "technical_documentation",
+      "frameworks": []
+    }
+  ]
+}

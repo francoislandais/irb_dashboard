@@ -1,0 +1,15 @@
+{
+  "layout_rows": 258114,
+  "template_release_rows": 2838,
+  "workbooks": 109,
+  "workbooks_with_errors": 0,
+  "modules_without_effective_date_rule": [
+    "COVID19",
+    "FINREP",
+    "FP",
+    "NOTIF_IMPRACTICABILITY",
+    "PAY"
+  ],
+  "schedule_rows": 64,
+  "generated_from": "official EBA source packages listed in sources.json"
+}

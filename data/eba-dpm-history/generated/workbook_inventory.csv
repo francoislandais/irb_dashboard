@@ -1,0 +1,110 @@
+﻿framework,module,workbook,sheets,status
+2.9.1.1,SBP,Annotated Table Layout 290-P2-SBP 2.9.xlsx,22,parsed
+2.9.1.1,RES,Annotated Table Layout 290-RES 2.9.xlsx,48,parsed
+2.9.1.1,COREP,Annotated Table Layout 291-COREP 2.9.1.xlsx,259,parsed
+2.9.1.1,FINREP,Annotated Table Layout 291-FINREP 2.9.1.xlsx,122,parsed
+3.0,COREP,Annotated Table Layout 300-P1-COREP 3.0.errata.xlsx,307,parsed
+3.0,FINREP,Annotated Table Layout 300-P1-FINREP 3.0.xlsx,122,parsed
+3.0.1,AE,Annotated Table Layout 301-P2-AE 3.0.1.xlsx,23,parsed
+3.0.1,GSII,Annotated Table Layout 301-P2-GSII 3.0.1.xlsx,1,parsed
+3.0.1,MREL_DECISIONS,Annotated Table Layout 301-P2-MREL_DECISIONS 3.0.1.xlsx,1,parsed
+3.0.1,MREL_TLAC,Annotated Table Layout 301-P2-MREL_TLAC 3.0.1.xlsx,9,parsed
+3.0.1,NOTIF_IMPRACTICABILITY,Annotated Table Layout 301-P2-NOTIF_IMPRACTICABILITY 3.0.1.xlsx,5,parsed
+3.0.1,REM,Annotated Table Layout 301-P2-REM 3.0.1.xlsx,7,parsed
+3.1,IF,Annotated Table Layout 310-P1-IF 3.1.xlsx,92,parsed
+3.1,RES,Annotated Table Layout 311-P2-RES 3.1.1.xlsx,58,parsed
+3.1,SBP,Annotated Table Layout 311-P2-SBP 3.1.1.xlsx,30,parsed
+3.2,AE,Annotated Table Layout 320-P1-AE 3.2.xlsx,23,parsed
+3.2,COREP,Annotated Table Layout 320-P1-COREP 3.2.xlsx,325,parsed
+3.2,GSII,Annotated Table Layout 320-P1-GSII 3.2.xlsx,1,parsed
+3.2,IF,Annotated Table Layout 320-P1-IF 3.2.xlsx,94,parsed
+3.2,COVID19,Annotated Table Layout 321-P2-COVID19 3.2.1.xlsx,16,parsed
+3.2,FINREP,Annotated Table Layout 321-P2-FINREP 3.2.1.xlsx,122,parsed
+3.2,FP,Annotated Table Layout 321-P2-FP 3.2.1.xlsx,15,parsed
+3.2,MREL_DECISIONS,Annotated Table Layout 321-P2-MREL_DECISIONS 3.2.1.xlsx,1,parsed
+3.2,MREL_TLAC,Annotated Table Layout 321-P2-MREL_TLAC 3.2.1.xlsx,9,parsed
+3.2,NOTIF_IMPRACTICABILITY,Annotated Table Layout 321-P2-NOTIF_IMPRACTICABILITY 3.2.1.xlsx,5,parsed
+3.2,PAY,Annotated Table Layout 321-P2-PAY 3.2.1.xlsx,54,parsed
+3.2,RES,Annotated Table Layout 321-P2-RES 3.2.1.xlsx,58,parsed
+3.2,SBP,Annotated Table Layout 321-P2-SBP 3.2.1.xlsx,30,parsed
+3.2,REM,Annotated Table Layout 322-P3-REM 3.2.2.xlsx,25,parsed
+3.3,ESG,Annotated Table Layout 330-P1-ESG 3.3.xlsx,25,parsed
+3.3,IPU,Annotated Table Layout 330-P1-IPU 3.3.xlsx,2,parsed
+3.3,PILLAR3,Annotated Table Layout 330-P1-PILLAR3 3.3.xlsx,93,parsed
+3.3,SBP,Annotated Table Layout 331-P1-IWD1-SBP 3.3.1.xlsx,36,parsed
+3.3,IRRBB,Annotated Table Layout 332-P3-IRRBB 3.3.2.xlsx,18,parsed
+3.4,IRRBB,Annotated Table Layout 340-IRRBB 3.4.xlsx,18,parsed
+3.4,MREL_TLAC,Annotated Table Layout 340-MREL_TLAC 3.4.xlsx,9,parsed
+3.5,COREP,Annotated Table Layout 3.5-COREP 3.5.xlsx,33,parsed
+3.5,DORA,Annotated Table Layout 3.5-DORA 3.5.xlsx,15,parsed
+3.5,FC,Annotated Table Layout 3.5-FC 3.5.xlsx,15,parsed
+3.5,MREL_TLAC,Annotated Table Layout 3.5-MREL_TLAC 3.5.xlsx,9,parsed
+3.5,REM,Annotated Table Layout 3.5-REM 3.5.xlsx,14,parsed
+4.0,COREP_LR,20241217 Annotated Table Layout  COREP_LRCOREP 4.0.xlsx,10,parsed
+4.0,COREP_OF,20241217 Annotated Table Layout  COREP_OFCOREP 4.0.xlsx,131,parsed
+4.0,DORA,20241217 Annotated Table Layout  DORADORA 4.0.xlsx,15,parsed
+4.0,IF_CLASS2,20241217 Annotated Table Layout  IF_CLASS2IF 4.0.xlsx,85,parsed
+4.0,MICA_ITS,20241217 Annotated Table Layout  MICA_ITSMICA 4.0.xlsx,12,parsed
+4.1,CODIS,20250519 Annotated Table Layout  CODISPILLAR3 4.1.xlsx,118,parsed
+4.1,ESGDIS,20250519 Annotated Table Layout  ESGDISPILLAR3 4.1.xlsx,26,parsed
+4.1,ESG,20250519 Annotated Table Layout  ESGESG 4.1.xlsx,25,parsed
+4.1,FINDIS,20250519 Annotated Table Layout  FINDISPILLAR3 4.1.xlsx,33,parsed
+4.1,GSIIDIS,20250519 Annotated Table Layout  GSIIDISPILLAR3 4.1.xlsx,15,parsed
+4.1,IRRBBDIS,20250519 Annotated Table Layout  IRRBBDISPILLAR3 4.1.xlsx,2,parsed
+4.1,MICA,20250519 Annotated Table Layout  MICAMICA 4.1.xlsx,19,parsed
+4.1,MICA_OF,20250519 Annotated Table Layout  MICA_OFMICA 4.1.xlsx,2,parsed
+4.1,MRELTLACDIS,20250519 Annotated Table Layout  MRELTLACDISPILLAR3 4.1.xlsx,13,parsed
+4.1,P3DH,20250519 Annotated Table Layout  P3DHPILLAR3 4.1.xlsx,1,parsed
+4.1,REMDIS,20250519 Annotated Table Layout  REMDISPILLAR3 4.1.xlsx,6,parsed
+4.1,SEPA_IPR,20250519 Annotated Table Layout  SEPA_IPRPAY 4.1.xlsx,6,parsed
+4.2,AE,260106 Annotated templates/AE/20260106 Annotated Table Layout  AE 4.2 AEAE 4.2.xlsx,23,parsed
+4.2,COREP_ALM,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_ALMCOREP 4.2.xlsx,17,parsed
+4.2,COREP_FRTB,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_FRTBCOREP 4.2.xlsx,3,parsed
+4.2,COREP_LCR_DA,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_LCR_DACOREP 4.2.xlsx,14,parsed
+4.2,COREP_LE,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_LECOREP 4.2.xlsx,5,parsed
+4.2,COREP_LR,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_LRCOREP 4.2.xlsx,10,parsed
+4.2,COREP_NSFR,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_NSFRCOREP 4.2.xlsx,35,parsed
+4.2,COREP_OF,260106 Annotated templates/COREP/20260106 Annotated Table Layout  COREP 4.2 COREP_OFCOREP 4.2.xlsx,135,parsed
+4.2,DORA,260106 Annotated templates/DORA/20260106 Annotated Table Layout  DORA 4.2 DORADORA 4.2.xlsx,15,parsed
+4.2,ESG,260106 Annotated templates/ESG/20260106 Annotated Table Layout  ESG 4.2 ESGESG 4.2.xlsx,25,parsed
+4.2,FC,260106 Annotated templates/FC/20260106 Annotated Table Layout  FC 4.2 FCFC 4.2.xlsx,15,parsed
+4.2,FINREP9,260106 Annotated templates/FINREP/20260106 Annotated Table Layout  FINREP 4.2 FINREP9FINREP 4.2.xlsx,124,parsed
+4.2.1,FINREP9DP,260106 Annotated templates/FINREP/20260210 Annotated Table Layout  FINREP 4.2.1 FINREP9DPFINREP 4.2.1.xlsx,139,parsed
+4.2,FP,260106 Annotated templates/FP/20260106 Annotated Table Layout  FP 4.2 FPFP 4.2.xlsx,15,parsed
+4.2,GSII,260106 Annotated templates/GSII/20260106 Annotated Table Layout  GSII 4.2 GSIIGSII 4.2.xlsx,1,parsed
+4.2,IF_CLASS2,260106 Annotated templates/IF/20260106 Annotated Table Layout  IF 4.2 IF_CLASS2IF 4.2.xlsx,86,parsed
+4.2,IF_CLASS3,260106 Annotated templates/IF/20260106 Annotated Table Layout  IF 4.2 IF_CLASS3IF 4.2.xlsx,6,parsed
+4.2,IF_GROUPTEST,260106 Annotated templates/IF/20260106 Annotated Table Layout  IF 4.2 IF_GROUPTESTIF 4.2.xlsx,3,parsed
+4.2,IF_TM,260106 Annotated templates/IF/20260106 Annotated Table Layout  IF 4.2 IF_TMIF 4.2.xlsx,2,parsed
+4.2,NOTIF_IMPRACTICABILITY,260106 Annotated templates/IMPRAC/20260109 Annotated Table Layout  IMPRAC 4.2 NOTIF_IMPRACTICABILITYIMPRAC 4.2.xlsx,5,parsed
+4.2,IPU,260106 Annotated templates/IPU/20260106 Annotated Table Layout  IPU 4.2 IPUIPU 4.2.xlsx,1,parsed
+4.2,IRRBB,260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx,18,parsed
+4.2,MICA,260106 Annotated templates/MICA/20260106 Annotated Table Layout  MICA 4.2 MICAMICA 4.2.xlsx,19,parsed
+4.2,MICA_OF,260106 Annotated templates/MICA/20260106 Annotated Table Layout  MICA 4.2 MICA_OFMICA 4.2.xlsx,2,parsed
+4.2,MREL_DECISIONS,260106 Annotated templates/MREL/20260106 Annotated Table Layout  MREL 4.2 MREL_DECISIONSMREL 4.2.xlsx,1,parsed
+4.2,MREL_TLAC,260106 Annotated templates/MREL/20260106 Annotated Table Layout  MREL 4.2 MREL_TLACMREL 4.2.xlsx,9,parsed
+4.2,PSD_FRP,260106 Annotated templates/PAY/20260106 Annotated Table Layout  PAY 4.2 PSD_FRPPAY 4.2.xlsx,54,parsed
+4.2,SEPA_IPR,260106 Annotated templates/PAY/20260106 Annotated Table Layout  PAY 4.2 SEPA_IPRPAY 4.2.xlsx,6,parsed
+4.2,CODIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 CODISPILLAR3 4.2.xlsx,115,parsed
+4.2,ESGDIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 ESGDISPILLAR3 4.2.xlsx,26,parsed
+4.2,FINDIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 FINDISPILLAR3 4.2.xlsx,34,parsed
+4.2,GSIIDIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 GSIIDISPILLAR3 4.2.xlsx,15,parsed
+4.2,IRRBBDIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 IRRBBDISPILLAR3 4.2.xlsx,2,parsed
+4.2,MRELTLACDIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 MRELTLACDISPILLAR3 4.2.xlsx,13,parsed
+4.2,P3DH,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 P3DHPILLAR3 4.2.xlsx,1,parsed
+4.2,REMDIS,260106 Annotated templates/PILLAR3/20260106 Annotated Table Layout  PILLAR3 4.2 REMDISPILLAR3 4.2.xlsx,6,parsed
+4.2,REM_BM_CI,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_BM_CIREM 4.2.xlsx,9,parsed
+4.2,REM_BM_IF,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_BM_IFREM 4.2.xlsx,4,parsed
+4.2,REM_DBM,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_DBMREM 4.2.xlsx,14,parsed
+4.2,REM_GAP_CI,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_GAP_CIREM 4.2.xlsx,2,parsed
+4.2,REM_GAP_IF,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_GAP_IFREM 4.2.xlsx,2,parsed
+4.2,REM_HE_CI,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_HE_CIREM 4.2.xlsx,3,parsed
+4.2,REM_HE_IF,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_HE_IFREM 4.2.xlsx,3,parsed
+4.2,REM,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_HR_CountryREM 4.2.xlsx,1,parsed
+4.2,REM,260106 Annotated templates/REM/20260106 Annotated Table Layout  REM 4.2 REM_HR_InstitutionREM 4.2.xlsx,1,parsed
+4.2,RESOL1,260106 Annotated templates/RES/20260106 Annotated Table Layout  RES 4.2 RESOL1RES 4.2.xlsx,17,parsed
+4.2,RESOL2,260106 Annotated templates/RES/20260106 Annotated Table Layout  RES 4.2 RESOL2RES 4.2.xlsx,21,parsed
+4.2,SBPIMV,260106 Annotated templates/SBP/20260106 Annotated Table Layout  SBP 4.2 SBPIMVSBP 4.2.xlsx,4,parsed
+4.2,SBP_CR,260106 Annotated templates/SBP/20260106 Annotated Table Layout  SBP 4.2 SBP_CRSBP 4.2.xlsx,7,parsed
+4.2,SBP_IFRS9,260106 Annotated templates/SBP/20260106 Annotated Table Layout  SBP 4.2 SBP_IFRS9SBP 4.2.xlsx,9,parsed
+4.2,SBP_RM,260106 Annotated templates/SBP/20260106 Annotated Table Layout  SBP 4.2 SBP_RMSBP 4.2.xlsx,20,parsed

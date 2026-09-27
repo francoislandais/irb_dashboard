@@ -1,0 +1,104 @@
+{
+  "about": "Official EBA DPM dictionaries and annotated table-layout packages used to reconstruct reporting-template dimensions across reporting-framework releases.",
+  "license_note": "Sources remain EBA publications; this project stores unmodified technical packages for reproducibility. See EBA source pages for legal terms and release context.",
+  "frameworks": [
+    {
+      "framework": "2.9.1.1",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%202.9%20%28incl.%20new%20files%29/DPM%20v2.9.1//DPM%20Dictionary.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/33603ffd-5707-4159-a33c-04251abb62b1/DPM%20Table%20Layouts.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29",
+      "role": "pre_period_base_for_delta_reconstruction"
+    },
+    {
+      "framework": "3.0.1",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%203.0/3.0.%20phase%202%20Errata%20/1013739/DPM%20Dictionary%203.0.1%20%28Errata%203%29.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/92fc36fb-5945-42f2-8757-31bb79037e4c/Table%20Layouts%203.0.1.Errata3.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30",
+      "role": "complete_base_for_delta_reconstruction"
+    },
+    {
+      "framework": "3.1",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%203.1/Phase%201/1016854/DPM%20Dictionary%203.1.phase2_.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/8671f9bf-13f0-47ed-852f-8e68e65f44f0/DPM%20tabe%20layout%20and%20data%20point%20categorizaiton.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31"
+    },
+    {
+      "framework": "3.2",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%203.2/Phase%203/1039940/DPM%20Dictionary%203.2.phase3_.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/7e727bbe-83e4-4faa-938e-7580a29d5482/3.2%20table%20layouts.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32"
+    },
+    {
+      "framework": "3.3",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20Framework%203.3/Phase%203/1063285/DPM%20Dictionary%203.3.phase3_.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/5246bb4b-24a6-4dcb-8f20-abc2b37f1ef1/DPM%20tabe%20layout%20and%20data%20point%20categorizaiton.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33"
+    },
+    {
+      "framework": "3.4",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/2024-02/fa9fd8ec-35bf-4898-a360-9626ff366423/dpm_dictionary_3.4.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2024-02/794db949-2184-4be4-ac06-635e32055e84/dpm_table_layouts_and_data_point_categorisation.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-34"
+    },
+    {
+      "framework": "3.5",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/2024-07/0090adc8-063d-4b45-82f5-30759543f9fe/dpm_dictionary_3.5.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2024-07/a4f3ad81-ea7b-49eb-b277-e41c55c731cb/table_layout.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35"
+    },
+    {
+      "framework": "4.0",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/2025-03/84dc8ed3-8982-45cf-8b91-6d019f88ec92/dpm2_4_0_glossary_20250129.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2024-12/7ae0363a-ad3d-42d9-a192-34711416c039/annotated_templates.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40"
+    },
+    {
+      "framework": "4.1",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/2025-07/1258693a-4a78-4d5e-b37f-b151652513e1/Glossary%20-%20full%20export_new.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2025-07/44989a9c-e7e8-4126-8032-1156dc1c4b51/3.d%20DPM%20table%20layout%20and%20data%20point%20categorization__new.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41"
+    },
+    {
+      "framework": "4.2",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/2026-01/a62c718b-bbab-4def-b700-9268a818567e/Glossary%20-%20full%20export.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2026-02/c92d5e2b-bcd7-4767-ab5b-cdf0b1737368/260106%20Annotated%20templates_with_finpre9dp_4.2.1.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42"
+    },
+    {
+      "framework": "4.2.1",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/2026-01/a62c718b-bbab-4def-b700-9268a818567e/Glossary%20-%20full%20export.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2026-02/c92d5e2b-bcd7-4767-ab5b-cdf0b1737368/260106%20Annotated%20templates_with_finpre9dp_4.2.1.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42"
+    }
+  ],
+  "additional_references": [
+    {
+      "name": "Reporting frameworks: releases, module-specific reference dates",
+      "url": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks"
+    },
+    {
+      "name": "Reporting modules by framework release / time traveller",
+      "url": "https://www.eba.europa.eu/reporting-time-traveller/reporting-by-release"
+    },
+    {
+      "name": "DPM 2.0 and DPM_XL technical documentation",
+      "url": "https://www.eba.europa.eu/sites/default/files/2026-02/29587443-7e93-4500-9196-4fd3dc8c427e/DPM%202.0%20and%20DPM_XL%20Technical%20Documentation.zip"
+    },
+    {
+      "name": "Conversion between DPM 1.0 and DPM 2.0 glossaries",
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-11/f49ea2f2-a21b-4283-981c-61fa5ed84c0c/eba_conversion_file_phase_3_22.05.2025.xlsx"
+    }
+  ],
+  "supporting_assets": [
+    {
+      "filename": "dpm1_to_dpm2_glossary_conversion.xlsx",
+      "kind": "conversion_reference",
+      "url": "https://www.eba.europa.eu/sites/default/files/2025-11/f49ea2f2-a21b-4283-981c-61fa5ed84c0c/eba_conversion_file_phase_3_22.05.2025.xlsx"
+    },
+    {
+      "filename": "dpm2_technical_documentation.zip",
+      "kind": "technical_documentation",
+      "url": "https://www.eba.europa.eu/sites/default/files/2026-02/29587443-7e93-4500-9196-4fd3dc8c427e/DPM%202.0%20and%20DPM_XL%20Technical%20Documentation.zip"
+    }
+  ]
+}
