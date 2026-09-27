@@ -61,6 +61,12 @@ assert.equal(header[0][1].rowSpan,2);
 checkHeaders(["A > Shared > One","A > Shared > Two","B > Shared > Three","A > Shared > Four","Solo"].map((hierarchyPath,i)=>({hierarchyPath,code:String(i)})));
 assert.equal(checkHeaders([{hierarchyPath:Array.from({length:12},(_,i)=>`Level ${i}`).join(" > "),code:"deep"},{hierarchyPath:"Short",code:"short"}]).length,12);
 
+const singleSelectionDenominator={path:"10",scope:"selection",numeratorCode:"70"};
+assert.equal(isExplorerContributionChild("unrelated branch",singleSelectionDenominator,"70"),true);
+assert.equal(isExplorerContributionChild("another unrelated branch",singleSelectionDenominator,"80"),false);
+assert.equal(isExplorerContributionChild("10 > child",{path:"10",scope:"subcomponents"},"70"),true);
+assert.equal(isExplorerContributionChild("11 > child",{path:"10",scope:"subcomponents"},"70"),false);
+
 // Small DOM fixture: execute the actual table renderer without a browser.
 class Element {
   constructor(tag) { this.tagName=tag.toUpperCase();this.children=[];this.dataset={};this.style={setProperty(k,v){this[k]=v;}};this.classList={add(){},toggle(){}}; }
@@ -78,6 +84,12 @@ class RatioBadgeElement {
   remove() { this.removed=true; }
 }
 const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()},getExplorerAxisDisplayName:axis=>({x:"Column",y:"Row",z:"Tab"}[axis]||"Row")});
+ratioIndicatorContext.isExplorerContributionChild=isExplorerContributionChild;
+vm.runInContext(source.slice(source.indexOf("function getExplorerContributionBaseValues("),source.indexOf("function getExplorerDenominatorValues(")),ratioIndicatorContext);
+const selectedDenominatorSeries=[{value:10},{value:20}];
+const selectionContributionBase={...singleSelectionDenominator,row:{values:selectedDenominatorSeries}};
+assert.equal(ratioIndicatorContext.getExplorerContributionBaseValues({code:"70"},"unrelated branch","y",selectionContributionBase,null),selectedDenominatorSeries);
+assert.equal(ratioIndicatorContext.getExplorerContributionBaseValues({code:"80"},"another branch","y",selectionContributionBase,null),null);
 vm.runInContext(source.slice(source.indexOf("function syncExplorerAxisRatioIndicator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
 let ratioBadge=null;
 const ratioButton={attributes:{},querySelector:()=>ratioBadge,append(node){ratioBadge=node;},setAttribute(key,value){this.attributes[key]=value;},removeAttribute(key){delete this.attributes[key];}};

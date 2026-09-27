@@ -479,8 +479,12 @@ export function getAvailableExplorerAxisCodes(state, tableId, axis) {
     .sort((left, right) => left.localeCompare(right, "fr"));
 }
 
-export function isExplorerContributionChild(path, contributionBase) {
+export function isExplorerContributionChild(path, contributionBase, pointCode = "") {
   if (!contributionBase?.path) return false;
+  if (contributionBase.scope === "selection") {
+    return Boolean(contributionBase.numeratorCode)
+      && String(pointCode ?? "") === String(contributionBase.numeratorCode);
+  }
   if (contributionBase.type === "common") return true;
   return path.startsWith(`${contributionBase.path} > `);
 }

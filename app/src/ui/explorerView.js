@@ -37,7 +37,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260922-native-all-currency";
+} from "../data/explorer.js?v=20260927-ratio-scope";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import {
@@ -353,8 +353,12 @@ export function wireExplorerUi(actions, rerender) {
     const cell = event.target.closest("td[data-explorer-cell-column]");
     showContextMenu([
       {
-        label: "Use as denominator",
-        action: () => setExplorerContributionBase(row)
+        label: "Use as denominator for all subcomponents",
+        action: () => setExplorerContributionBase(row, { scope: "subcomponents" })
+      },
+      {
+        label: "Use as denominator for current selection",
+        action: () => setExplorerContributionBase(row, { scope: "selection" })
       },
       {
         label: "Generate query",
@@ -2194,7 +2198,7 @@ function getExplorerContributionBase(rows, activeAxis) {
 }
 
 function getExplorerContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution) {
-  if (contributionBase && isExplorerContributionChild(normalizedPath, contributionBase)) {
+  if (contributionBase && isExplorerContributionChild(normalizedPath, contributionBase, seriesRow.code)) {
     return contributionBase.row?.values ?? getExplorerDenominatorValues(contributionBase, activeAxis, seriesRow.code);
   }
 
@@ -2467,13 +2471,17 @@ function getExplorerPropagatedContribution(activeAxis) {
     const selectedPath = getExplorerAxisCodePath(axis, selectedCode);
     const basePath = normalizeHierarchyPath(base.path);
 
-    if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) continue;
+    if (base.scope === "selection") {
+      if (axis !== activeAxis || !base.numeratorCode || String(selectedCode ?? "") !== String(base.numeratorCode)) continue;
+    } else if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) continue;
 
     return {
       axis,
       baseCode: base.pointCode,
       basePath,
       label: String(base.label ?? "").replaceAll(">", "/"),
+      numeratorCode: base.numeratorCode,
+      scope: base.scope,
       selections: base.selections,
       tableId: base.tableId,
       type: base.type
@@ -2508,12 +2516,14 @@ function getActiveExplorerContributionSetting() {
   return context.contributionBaseByAxis[context.activeAxis];
 }
 
-function setExplorerContributionBase(row) {
+function setExplorerContributionBase(row, { scope = "subcomponents" } = {}) {
   const context = getActiveExplorerContext();
   context.contributionBaseByAxis[context.activeAxis] = {
     label: row.dataset.hierarchyPath,
+    numeratorCode: scope === "selection" ? getSelectedExplorerCodeForActiveAxis() : "",
     path: row.dataset.normalizedPath,
     pointCode: row.dataset.pointCode,
+    scope,
     tableId: getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId,
     type: "axis"
   };
@@ -5005,13 +5015,17 @@ function getExplorerOwnAxisContribution(axis) {
   const selectedPath = getExplorerAxisCodePath(axis, selectedCode);
   const basePath = normalizeHierarchyPath(base.path);
 
-  if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) return null;
+  if (base.scope === "selection") {
+    if (axis !== context.activeAxis || !base.numeratorCode || String(selectedCode ?? "") !== String(base.numeratorCode)) return null;
+  } else if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) return null;
 
   return {
     axis,
     baseCode: base.pointCode,
     basePath,
     label: String(base.label ?? "").replaceAll(">", "/"),
+    numeratorCode: base.numeratorCode,
+    scope: base.scope,
     selections: base.selections,
     tableId: base.tableId,
     type: base.type
