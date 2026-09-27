@@ -3045,12 +3045,15 @@ function renderExplorerAxisTabs() {
     const isActive = axis === activeAxis;
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     const isUnusedTabAxis = axis === "z" && (axisOptions.z?.codes?.length ?? 0) === 0;
+    const ratioDenominator = isActive ? getExplorerPropagatedContribution(axis)?.label : "";
     button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled", !isAvailable);
+    button.classList.toggle("has-ratio-indicator", Boolean(ratioDenominator));
     button.disabled = !isAvailable;
     button.hidden = isUnusedTabAxis;
     button.setAttribute("aria-disabled", String(!isAvailable));
     button.setAttribute("aria-selected", String(isActive && isAvailable));
+    syncExplorerAxisRatioIndicator(button, ratioDenominator);
   });
 
   Object.entries(elements.explorerAxisCaptions).forEach(([axis, element]) => {
@@ -3070,6 +3073,26 @@ function renderExplorerAxisTabs() {
     const displayCode = axisCodes[axis] === EXPLORER_ALL_CURRENCIES_CODE ? EXPLORER_ALL_CURRENCIES_LABEL : axisCodes[axis];
     element.replaceChildren(createAxisCaptionLine(displayCode, axis));
   });
+}
+
+function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
+  const existingBadge = button.querySelector(".axis-ratio-indicator");
+  if (!denominatorLabel) {
+    existingBadge?.remove();
+    button.removeAttribute("title");
+    button.removeAttribute("aria-description");
+    return;
+  }
+
+  const tooltip = `Displayed as a ratio. Denominator: ${denominatorLabel}`;
+  const badge = existingBadge || document.createElement("span");
+  badge.className = "axis-ratio-indicator";
+  badge.textContent = "÷";
+  badge.title = tooltip;
+  badge.setAttribute("aria-hidden", "true");
+  if (!existingBadge) button.append(badge);
+  button.title = tooltip;
+  button.setAttribute("aria-description", tooltip);
 }
 
 // The template uses the same compact pill shape as the switchable axes, but

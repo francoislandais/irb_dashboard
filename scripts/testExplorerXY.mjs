@@ -72,6 +72,23 @@ class Element {
   getBoundingClientRect(){return {height:32};}
 }
 const source=readFileSync(new URL("../app/src/ui/explorerView.js",import.meta.url),"utf8");
+class RatioBadgeElement {
+  constructor() { this.attributes={};this.removed=false; }
+  setAttribute(key,value) { this.attributes[key]=value; }
+  remove() { this.removed=true; }
+}
+const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()}});
+vm.runInContext(source.slice(source.indexOf("function syncExplorerAxisRatioIndicator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
+let ratioBadge=null;
+const ratioButton={attributes:{},querySelector:()=>ratioBadge,append(node){ratioBadge=node;},setAttribute(key,value){this.attributes[key]=value;},removeAttribute(key){delete this.attributes[key];}};
+ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"Capital / Total assets");
+assert.equal(ratioBadge.textContent,"÷");
+assert.equal(ratioBadge.title,"Displayed as a ratio. Denominator: Capital / Total assets");
+assert.equal(ratioButton.attributes["aria-description"],ratioBadge.title);
+ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"");
+assert.equal(ratioBadge.removed,true);
+assert.equal(ratioButton.attributes.title,undefined);
+
 let context={activeAxis:"y",selectedXCode:"0010",selectedYCode:"0010",selectedZCode:"EUR",selectedReferenceLabel:dates[0].label};
 const table=new Element("table");
 let selectedCalls=0;

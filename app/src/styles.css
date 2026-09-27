@@ -2597,6 +2597,7 @@ table {
 /* Same content-sized pill as the Credit Risk tabs: white/grey when off,
    light blue fill + darker blue border + dark blue text when on. */
 .axis-tab {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2612,6 +2613,33 @@ table {
   overflow: hidden;
   padding: 8px 16px;
   text-align: center;
+}
+
+.axis-tab.has-ratio-indicator {
+  padding-right: 23px;
+}
+
+.axis-ratio-indicator {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  display: grid;
+  width: 13px;
+  height: 13px;
+  place-items: center;
+  border: 1px solid rgba(0, 105, 168, 0.3);
+  border-radius: 50%;
+  background: #fff;
+  color: #0069a8;
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: auto;
+}
+
+.axis-tab.is-active .axis-ratio-indicator {
+  border-color: rgba(0, 105, 168, 0.36);
+  background: #d6e8f7;
 }
 
 .axis-tab[hidden] {
