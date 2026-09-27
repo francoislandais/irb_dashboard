@@ -2639,39 +2639,68 @@ table {
   pointer-events: auto;
 }
 
-.axis-ratio-indicator::after {
-  position: absolute;
-  top: 0;
-  right: auto;
-  left: calc(100% + 8px);
-  z-index: 5000;
+.axis-tab.is-ratio-inactive .axis-ratio-indicator {
+  border-color: #c8d0d5;
+  background: #f2f4f5;
+  color: #87939a;
+}
+
+.axis-ratio-popover {
+  position: fixed;
+  z-index: 1500;
+  display: grid;
   width: max-content;
   max-width: min(280px, calc(100vw - 24px));
+  gap: 5px;
   border: 1px solid #d7e0e7;
   border-radius: 6px;
   background: #fff;
   box-shadow: 0 4px 14px rgba(25, 42, 54, 0.18);
   color: #26343c;
-  content: attr(data-tooltip);
   font-size: 0.72rem;
   font-weight: 400;
   line-height: 1.35;
-  opacity: 0;
-  padding: 7px 9px;
-  pointer-events: none;
+  padding: 9px 10px;
   text-align: left;
-  visibility: hidden;
-  white-space: pre-line;
 }
 
-.axis-ratio-indicator:hover::after {
-  opacity: 1;
-  visibility: visible;
+.axis-ratio-popover-status {
+  color: #52616a;
+}
+
+.axis-ratio-popover-denominator {
+  font-weight: 600;
+}
+
+.axis-ratio-popover-toggle {
+  justify-self: start;
+  margin-top: 3px;
+  border: 1px solid #c8d9e6;
+  border-radius: 5px;
+  background: #f1f6fa;
+  color: #0069a8;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  padding: 4px 7px;
+}
+
+.axis-ratio-popover-toggle:hover,
+.axis-ratio-popover-toggle:focus-visible {
+  border-color: #8fb6d1;
+  background: #e3eff7;
+  outline: none;
 }
 
 .axis-tab.is-active .axis-ratio-indicator {
   border-color: rgba(0, 105, 168, 0.36);
   background: #d6e8f7;
+}
+
+.axis-tab.is-active.is-ratio-inactive .axis-ratio-indicator {
+  border-color: #c8d0d5;
+  background: #f2f4f5;
+  color: #87939a;
 }
 
 .axis-tab[hidden] {

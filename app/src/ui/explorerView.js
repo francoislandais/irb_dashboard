@@ -37,7 +37,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260927-ratio-scope";
+} from "../data/explorer.js?v=20260927-ratio-toggle";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import {
@@ -185,6 +185,8 @@ let explorerCellRangePreview = null;
 let explorerQueryPoints = [];
 let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
+let explorerRatioPopover = null;
+let explorerRatioPopoverHideTimer = 0;
 // Which KRI's formula the "KRI formula" panel shows - tracked separately
 // from the current axis selection so that jumping to a referenced cell's
 // own template (see openExplorerKriFormulaCellRef) can change the active
@@ -2198,11 +2200,11 @@ function getExplorerContributionBase(rows, activeAxis) {
 }
 
 function getExplorerContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution) {
-  if (contributionBase && isExplorerContributionChild(normalizedPath, contributionBase, seriesRow.code)) {
+  if (contributionBase?.enabled !== false && contributionBase && isExplorerContributionChild(normalizedPath, contributionBase, seriesRow.code)) {
     return contributionBase.row?.values ?? getExplorerDenominatorValues(contributionBase, activeAxis, seriesRow.code);
   }
 
-  if (!propagatedContribution || seriesRow.isVirtual) return null;
+  if (!propagatedContribution || propagatedContribution.enabled === false || seriesRow.isVirtual) return null;
   if (propagatedContribution.axis === activeAxis) return null;
 
   const state = getLatestState();
@@ -2479,6 +2481,7 @@ function getExplorerPropagatedContribution(activeAxis) {
       axis,
       baseCode: base.pointCode,
       basePath,
+      enabled: base.enabled !== false,
       label: String(base.label ?? "").replaceAll(">", "/"),
       numeratorCode: base.numeratorCode,
       scope: base.scope,
@@ -2520,6 +2523,7 @@ function setExplorerContributionBase(row, { scope = "subcomponents" } = {}) {
   const context = getActiveExplorerContext();
   context.contributionBaseByAxis[context.activeAxis] = {
     label: row.dataset.hierarchyPath,
+    enabled: true,
     numeratorCode: scope === "selection" ? getSelectedExplorerCodeForActiveAxis() : "",
     path: row.dataset.normalizedPath,
     pointCode: row.dataset.pointCode,
@@ -2991,7 +2995,7 @@ function getCompleteExplorerSelectionsForBenchmark(context, activeAxis) {
 
 function getExplorerBenchmarkContributionContext(context, activeAxis) {
   const contribution = getExplorerPropagatedContribution(activeAxis);
-  if (!contribution?.baseCode && !contribution?.selections) return null;
+  if (contribution?.enabled === false || (!contribution?.baseCode && !contribution?.selections)) return null;
 
   const selections = contribution.selections
     ? { ...contribution.selections }
@@ -3056,15 +3060,13 @@ function renderExplorerAxisTabs() {
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     const isUnusedTabAxis = axis === "z" && (axisOptions.z?.codes?.length ?? 0) === 0;
     const ratioContribution = isActive ? getExplorerPropagatedContribution(axis) : null;
-    const ratioDenominator = ratioContribution ? formatExplorerRatioDenominator(ratioContribution) : "";
     button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled", !isAvailable);
-    button.classList.toggle("has-ratio-indicator", Boolean(ratioDenominator));
     button.disabled = !isAvailable;
     button.hidden = isUnusedTabAxis;
     button.setAttribute("aria-disabled", String(!isAvailable));
     button.setAttribute("aria-selected", String(isActive && isAvailable));
-    syncExplorerAxisRatioIndicator(button, ratioDenominator);
+    syncExplorerAxisRatioIndicator(button, ratioContribution);
   });
 
   Object.entries(elements.explorerAxisCaptions).forEach(([axis, element]) => {
@@ -3092,18 +3094,92 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
   const existingBadge = button.querySelector(".axis-ratio-indicator");
   if (!denominatorLabel) {
     existingBadge?.remove();
+    button.classList.remove("has-ratio-indicator", "is-ratio-inactive");
     button.removeAttribute("aria-description");
     return;
   }
 
-  const tooltip = `Displayed as a ratio\nDenominator: ${denominatorLabel}`;
   const badge = existingBadge || document.createElement("span");
   badge.className = "axis-ratio-indicator";
   badge.textContent = "%";
-  badge.dataset.tooltip = tooltip;
   badge.setAttribute("aria-hidden", "true");
-  if (!existingBadge) button.append(badge);
-  button.setAttribute("aria-description", tooltip);
+  badge.ratioContribution = denominatorLabel;
+  if (!existingBadge) {
+    badge.addEventListener("pointerenter", () => showExplorerRatioPopover(badge));
+    badge.addEventListener("pointerleave", scheduleExplorerRatioPopoverHide);
+    button.append(badge);
+  }
+
+  const isEnabled = denominatorLabel.enabled !== false;
+  button.classList.toggle("has-ratio-indicator", true);
+  button.classList.toggle("is-ratio-inactive", !isEnabled);
+  button.setAttribute("aria-description", `${isEnabled ? "Displayed as a ratio" : "Displayed as raw data"}. Denominator: ${formatExplorerRatioDenominator(denominatorLabel)}`);
+}
+
+function showExplorerRatioPopover(badge) {
+  window.clearTimeout(explorerRatioPopoverHideTimer);
+  const contribution = badge.ratioContribution;
+  if (!contribution) return;
+
+  if (!explorerRatioPopover) {
+    explorerRatioPopover = document.createElement("div");
+    explorerRatioPopover.className = "axis-ratio-popover";
+    explorerRatioPopover.setAttribute("role", "group");
+    explorerRatioPopover.addEventListener("pointerenter", () => window.clearTimeout(explorerRatioPopoverHideTimer));
+    explorerRatioPopover.addEventListener("pointerleave", scheduleExplorerRatioPopoverHide);
+    document.body.append(explorerRatioPopover);
+  }
+
+  const isEnabled = contribution.enabled !== false;
+  const status = document.createElement("span");
+  status.className = "axis-ratio-popover-status";
+  status.textContent = isEnabled ? "Displayed as a ratio" : "Displayed as raw data";
+
+  const denominator = document.createElement("span");
+  denominator.className = "axis-ratio-popover-denominator";
+  denominator.textContent = `Denominator: ${formatExplorerRatioDenominator(contribution)}`;
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "axis-ratio-popover-toggle";
+  toggle.textContent = isEnabled ? "Show raw data" : "Apply denominator";
+  toggle.addEventListener("click", () => {
+    if (!toggleExplorerContributionBase(contribution.axis, contribution.baseCode)) return;
+    window.clearTimeout(explorerRatioPopoverHideTimer);
+    explorerRatioPopover?.remove();
+    explorerRatioPopover = null;
+  });
+
+  explorerRatioPopover.replaceChildren(status, denominator, toggle);
+  const badgeRect = badge.getBoundingClientRect();
+  explorerRatioPopover.hidden = false;
+  const popoverRect = explorerRatioPopover.getBoundingClientRect();
+  const preferredLeft = badgeRect.right + 8;
+  const left = preferredLeft + popoverRect.width <= window.innerWidth - 8
+    ? preferredLeft
+    : Math.max(8, badgeRect.left - popoverRect.width - 8);
+  const top = Math.min(badgeRect.top, window.innerHeight - popoverRect.height - 8);
+  explorerRatioPopover.style.left = `${left}px`;
+  explorerRatioPopover.style.top = `${Math.max(8, top)}px`;
+}
+
+function scheduleExplorerRatioPopoverHide() {
+  window.clearTimeout(explorerRatioPopoverHideTimer);
+  explorerRatioPopoverHideTimer = window.setTimeout(() => {
+    explorerRatioPopover?.remove();
+    explorerRatioPopover = null;
+  }, 180);
+}
+
+function toggleExplorerContributionBase(axis, pointCode) {
+  const base = getActiveExplorerContext().contributionBaseByAxis[axis];
+  if (!base || String(base.pointCode ?? "") !== String(pointCode ?? "")) return false;
+
+  base.enabled = base.enabled === false;
+  saveExplorerScrollPosition();
+  const state = getLatestState();
+  if (state) rerenderApp(state);
+  return true;
 }
 
 function formatExplorerRatioDenominator(contribution) {
@@ -5023,6 +5099,7 @@ function getExplorerOwnAxisContribution(axis) {
     axis,
     baseCode: base.pointCode,
     basePath,
+    enabled: base.enabled !== false,
     label: String(base.label ?? "").replaceAll(">", "/"),
     numeratorCode: base.numeratorCode,
     scope: base.scope,

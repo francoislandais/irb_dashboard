@@ -79,8 +79,9 @@ class Element {
 }
 const source=readFileSync(new URL("../app/src/ui/explorerView.js",import.meta.url),"utf8");
 class RatioBadgeElement {
-  constructor() { this.attributes={};this.dataset={};this.removed=false; }
+  constructor() { this.attributes={};this.dataset={};this.removed=false;this.listeners={}; }
   setAttribute(key,value) { this.attributes[key]=value; }
+  addEventListener(name,listener) { this.listeners[name]=listener; }
   remove() { this.removed=true; }
 }
 const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()},getExplorerAxisDisplayName:axis=>({x:"Column",y:"Row",z:"Tab"}[axis]||"Row")});
@@ -92,15 +93,28 @@ assert.equal(ratioIndicatorContext.getExplorerContributionBaseValues({code:"70"}
 assert.equal(ratioIndicatorContext.getExplorerContributionBaseValues({code:"80"},"another branch","y",selectionContributionBase,null),null);
 vm.runInContext(source.slice(source.indexOf("function syncExplorerAxisRatioIndicator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
 let ratioBadge=null;
-const ratioButton={attributes:{},querySelector:()=>ratioBadge,append(node){ratioBadge=node;},setAttribute(key,value){this.attributes[key]=value;},removeAttribute(key){delete this.attributes[key];}};
-ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"Row 100 (Total INFLOWS)");
+const ratioButton={attributes:{},classList:{classes:new Set(),toggle(name,enabled){enabled?this.classes.add(name):this.classes.delete(name);},remove(...names){names.forEach(name=>this.classes.delete(name));},contains(name){return this.classes.has(name);}},querySelector:()=>ratioBadge,append(node){ratioBadge=node;},setAttribute(key,value){this.attributes[key]=value;},removeAttribute(key){delete this.attributes[key];}};
+const ratioContribution={axis:"y",baseCode:"100",label:"Total INFLOWS",enabled:true};
+ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,ratioContribution);
 assert.equal(ratioBadge.textContent,"%");
-assert.equal(ratioBadge.dataset.tooltip,"Displayed as a ratio\nDenominator: Row 100 (Total INFLOWS)");
+assert.equal(ratioBadge.ratioContribution,ratioContribution);
 assert.equal(ratioBadge.title,undefined);
-assert.equal(ratioButton.attributes["aria-description"],ratioBadge.dataset.tooltip);
-ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"");
+assert.equal(ratioButton.attributes["aria-description"],"Displayed as a ratio. Denominator: Row 100 (Total INFLOWS)");
+ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,{...ratioContribution,enabled:false});
+assert.equal(ratioButton.attributes["aria-description"],"Displayed as raw data. Denominator: Row 100 (Total INFLOWS)");
+ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,null);
 assert.equal(ratioBadge.removed,true);
 assert.equal(ratioButton.attributes.title,undefined);
+const ratioToggleBase={pointCode:"100",enabled:true};
+ratioIndicatorContext.getActiveExplorerContext=()=>({contributionBaseByAxis:{y:ratioToggleBase}});
+ratioIndicatorContext.saveExplorerScrollPosition=()=>{};
+ratioIndicatorContext.getLatestState=()=>({});
+ratioIndicatorContext.rerenderApp=()=>{};
+assert.equal(ratioIndicatorContext.toggleExplorerContributionBase("y","100"),true);
+assert.equal(ratioToggleBase.enabled,false);
+assert.equal(ratioIndicatorContext.toggleExplorerContributionBase("y","100"),true);
+assert.equal(ratioToggleBase.enabled,true);
+assert.equal(ratioIndicatorContext.toggleExplorerContributionBase("y","200"),false);
 vm.runInContext(source.slice(source.indexOf("function formatExplorerRatioDenominator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
 assert.equal(ratioIndicatorContext.formatExplorerRatioDenominator({axis:"y",baseCode:"100",label:"INFLOWS"}),"Row 100 (INFLOWS)");
 
