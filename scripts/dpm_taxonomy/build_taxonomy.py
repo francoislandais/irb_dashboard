@@ -259,7 +259,7 @@ def schedule_match(module: str, framework: str, template_id: str, rows: list[dic
     eligible_versions = {framework, family}
     if family == "3.0":
         eligible_versions.add("3.0.1")
-    candidates = []
+    candidates: list[tuple[tuple[int, int], dict[str, str]]] = []
     for row in rows:
         pattern = row["module_pattern"].upper()
         if pattern == "*" or (pattern.endswith("*") and normalized.startswith(pattern[:-1])) or pattern == normalized:
@@ -269,7 +269,7 @@ def schedule_match(module: str, framework: str, template_id: str, rows: list[dic
             # Old packages use broad taxonomy IDs; only rows for the exact
             # framework, plus explicit earlier base rows, are applicable.
             if row["framework"] in eligible_versions:
-                specificity = len(pattern.rstrip("*"))
+                specificity = (len(pattern.rstrip("*")), len(template_pattern))
                 candidates.append((specificity, row))
     return max(candidates, key=lambda item: item[0])[1] if candidates else None
 

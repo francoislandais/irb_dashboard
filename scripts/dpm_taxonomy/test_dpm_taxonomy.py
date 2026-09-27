@@ -115,6 +115,12 @@ class DpmTaxonomyTests(unittest.TestCase):
         other = builder.schedule_match("SBP", "3.2.1", "C_107.01.a", rows)
         self.assertEqual(imv["effective_from"], "2022-09-30")
         self.assertEqual(other["effective_from"], "2022-12-31")
+        pay_gap_ci = builder.schedule_match("REM", "3.2.2", "R_06.00.a", rows)
+        pay_gap_if = builder.schedule_match("REM", "3.2.2", "R_06.01.a", rows)
+        regular_rem = builder.schedule_match("REM", "3.2.2", "R_05.00", rows)
+        self.assertEqual(pay_gap_ci["effective_from"], "2023-12-31")
+        self.assertEqual(pay_gap_if["effective_from"], "2022-12-31")
+        self.assertEqual(regular_rem["effective_from"], "2022-12-31")
         dora = builder.schedule_match("DORA", "4.2", "D_01.00", rows)
         self.assertEqual(dora["status"], "not_applicable_replaced")
 
