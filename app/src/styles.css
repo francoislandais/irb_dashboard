@@ -2641,7 +2641,7 @@ table {
 
 .axis-ratio-indicator::after {
   position: absolute;
-  top: calc(100% + 64px);
+  top: calc(100% + 50px);
   right: auto;
   left: calc(100% + 8px);
   z-index: 5000;
