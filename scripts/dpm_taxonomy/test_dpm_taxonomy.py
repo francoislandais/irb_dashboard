@@ -18,6 +18,28 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_real_dpm_210_delta_and_2020_applicability_rules(self):
+        archive = zipfile.ZipFile(SOURCES / "2.10_layouts.zip")
+        covid_file = next(n for n in archive.namelist() if "COVID19" in n and n.endswith(".xlsx"))
+        fp_file = next(n for n in archive.namelist() if "-FP " in n and n.endswith(".xlsx"))
+        self.assertEqual(builder.release_from_name(fp_file, "2.10"), "2.10.1")
+        workbook = load_workbook(io.BytesIO(archive.read(covid_file)), data_only=True)
+        self.assertIn("F 90.01", workbook.sheetnames)
+        sheet = workbook["F 90.01"]
+        columns_row, rows_row = builder.find_marker_rows(sheet)
+        self.assertTrue(builder.x_axis_rows(sheet, columns_row, rows_row))
+        self.assertTrue(builder.y_axis_rows(sheet, rows_row))
+        schedule = builder.read_schedule()
+        self.assertEqual(builder.schedule_match("COVID19", "2.10", "F_90.01", schedule)["effective_from"], "2020-06-30")
+        self.assertEqual(builder.schedule_match("FP", "2.10.1", "Y_01.01", schedule)["effective_from"], "2020-12-31")
+        self.assertEqual(builder.schedule_match("SBP", "2.10", "C_106.00", schedule)["effective_from"], "2020-09-30")
+        self.assertEqual(builder.schedule_match("FINREP", "3.2", "F_00.01", schedule)["effective_from"], "2022-12-31")
+        self.assertEqual(builder.schedule_match("SBP_CR", "4.2", "C_107.00", schedule)["effective_from"], "2025-12-31")
+        self.assertEqual(builder.schedule_match("SBPIMV", "4.2", "C_106.00", schedule)["effective_from"], "2026-02-28")
+        self.assertEqual(builder.schedule_match("COREP_OF", "4.2", "C_01.00", schedule)["effective_from"], "2026-06-30")
+        workbook.close()
+        archive.close()
+
     def test_real_dpm_42_layout_recovers_axes_and_sheet_dimension(self):
         archive = zipfile.ZipFile(SOURCES / "4.2_layouts.zip")
         corep_file = next(n for n in archive.namelist() if "COREP_OFCOREP" in n)
@@ -52,12 +74,40 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(resolve("COREP", "C_01.00", builder.date(2022, 12, 31), rows)[0]["framework"], "3.0.1")
         self.assertEqual(resolve("COREP", "C_01.00", builder.date(2023, 6, 30), rows)[0]["framework"], "3.2")
 
+    def test_interval_closure_does_not_cross_module_boundaries(self):
+        rows = [
+            {"module_code": "COREP", "template_id": "C_01.00", "framework": "3.2", "effective_from": "2023-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "COREP_OF", "template_id": "C_01.00", "framework": "4.0", "effective_from": "2025-03-31", "effective_to": "", "status": "official"},
+            {"module_code": "COREP_OF", "template_id": "C_01.00", "framework": "4.2", "effective_from": "2026-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "CODIS", "template_id": "K_04.00.a", "framework": "4.1", "effective_from": "2025-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "PILLAR3", "template_id": "K_04.00.a", "framework": "3.3", "effective_from": "2023-12-31", "effective_to": "", "status": "official"},
+        ]
+        history = builder.close_template_intervals(rows)
+        corep = [r for r in history if r["module_code"] == "COREP"]
+        corep_of = [r for r in history if r["module_code"] == "COREP_OF"]
+        codis = next(r for r in history if r["module_code"] == "CODIS")
+        pillar = next(r for r in history if r["module_code"] == "PILLAR3")
+        self.assertEqual(corep[0]["effective_to"], "")
+        self.assertEqual(corep_of[0]["effective_to"], "2026-06-30")
+        self.assertEqual(codis["effective_to"], "")
+        self.assertEqual(pillar["effective_to"], "")
+        self.assertEqual(resolve("COREP", "C_01.00", builder.date(2026, 7, 1), history)[0]["framework"], "4.2")
+
     def test_resolver_follows_dpm2_module_split_for_same_template(self):
         rows = [
             {"module_code": "COREP", "template_id": "C_01.00", "framework": "3.2", "effective_from": "2023-06-30", "effective_to": "2026-03-31", "effective_source": "eba", "status": "official"},
             {"module_code": "COREP_OF", "template_id": "C_01.00", "framework": "4.2", "effective_from": "2026-03-31", "effective_to": "", "effective_source": "eba", "status": "official"},
         ]
         self.assertEqual(resolve("COREP", "C_01.00", builder.date(2026, 4, 30), rows)[0]["framework"], "4.2")
+
+    def test_resolver_keeps_parallel_split_modules_ambiguous(self):
+        rows = [
+            {"module_code": "COREP", "template_id": "C_00.01", "framework": "3.2", "effective_from": "2023-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "COREP_OF", "template_id": "C_00.01", "framework": "4.2", "effective_from": "2026-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "COREP_LR", "template_id": "C_00.01", "framework": "4.2", "effective_from": "2026-03-31", "effective_to": "", "status": "official"},
+        ]
+        found = resolve("COREP", "C_00.01", builder.date(2026, 7, 1), rows)
+        self.assertEqual({r["module_code"] for r in found}, {"COREP_OF", "COREP_LR"})
 
     def test_sheet_level_exception_rules_are_explicit(self):
         rows = builder.read_schedule()

@@ -1,65 +1,75 @@
 module_pattern,framework,effective_from,status,source_url,evidence,template_pattern
-COREP,2.9.1.1,2019-12-31,baseline,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29","Pre-period DPM layout baseline"
-FINREP,2.9.1.1,2019-12-31,baseline,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29","Pre-period DPM layout baseline"
-COREP,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","Reporting framework 3.0 applicable from June 2021; COREP technical package 3.0.1"
-FINREP,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","Reporting framework 3.0 applicable from June 2021; FINREP technical package 3.0"
-AE,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","Baseline module release in 3.0.x"
-GSII,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","Baseline module release in 3.0.x"
-MREL_DECISIONS,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","MREL decisions technical package"
-MREL_TLAC,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","MREL/TLAC technical package"
-NOTIF_IMPRACTICABILITY,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","Notification technical package"
-REM,3.0.1,2021-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30","Remuneration reporting technical package"
-RES,2.9.1.1,2019-12-31,baseline,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29","Last complete pre-3.0 module layout available in the source archive"
-SBP,2.9.1.1,2019-12-31,baseline,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29","Last complete pre-3.0 module layout available in the source archive"
-COREP,3.1,2021-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31","Module-specific application from September 2021"
-FINREP,3.1,2021-09-30,carry_forward,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31","No FINREP layout delta in 3.1; keep the previous module taxonomy"
-IF,3.1,2021-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31","Investment Firms reporting first reference date 09/2021"
-RES,3.1,2021-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31","Resolution reporting module-specific application 09/2021"
-SBP,3.1,2021-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31","Supervisory benchmarking module-specific application 09/2021"
-SBP,3.2,2022-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","Initial Market Valuation (IMV) template family first reference date 09/2022",C_106
-SBP,3.2,2022-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","Other supervisory benchmarking template families first reference date 12/2022",
-RES,3.2,2022-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","3.2.1 resolution-planning package"
-MREL_DECISIONS,3.2,2022-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","3.2.1 module package"
-MREL_TLAC,3.2,2022-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","3.2.1 module package"
-REM,3.2,2022-12-31,official_with_module_split,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","12/2022 for most remuneration guidance; pay-gap changes start 12/2023"
-REM,3.2,2023-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","Pay-gap reporting first reference date 12/2023"
-COREP,3.2,2023-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","COREP first reference date 06/2023"
-AE,3.2,2023-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","Asset Encumbrance first reference date 06/2023"
-GSII,3.2,2023-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","G-SII reporting first reference date 06/2023"
-IF,3.2,2023-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32","Investment Firms ITS first reference date 06/2023; separate threshold-monitoring date needs confirmation"
-SBP,3.3,2023-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33","Supervisory Benchmarking first reference date 09/2023"
-IPU,3.3,2023-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33","IPU first reference date 12/2023"
-ESG,3.3,2023-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33","ESG first reference date 12/2023"
-PILLAR3,3.3,2023-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33","Pillar 3 hub pilot templates first reference date 12/2023"
-IRRBB,3.3,2023-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33","Ad-hoc IRRBB package first reference date 12/2023"
-IRRBB,3.4,2024-09-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-34","IRRBB amended ITS first reference date 09/2024"
-REM,3.5,2024-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35","Diversity benchmarking guidance first reference date 12/2024"
-FC,3.5,2024-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35","FICOD technical package first reference date 12/2024"
-MREL_TLAC,3.5,2024-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35","MREL/TLAC first reference date 12/2024; supersedes 3.4 changes"
-COREP*,4.0,2025-03-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40","CRR3/CRD6 COREP changes, first reference date 03/2025"
-IF*,4.0,2025-03-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40","Class 2 investment firms first reference date 03/2025"
-DORA,4.0,2025-03-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40","Final DORA ITS first reference date 03/2025"
-MICA*,4.0,2025-03-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40","MiCAR ITS first reference date 03/2025"
-MICA*,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","MiCAR reporting guidelines first reference date 06/2025"
-PILLAR3*,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Comprehensive Pillar 3 templates first reference date 06/2025"
-ESG,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","ESG minor amendments first reference date 06/2025"
-SEPA_IPR,4.2,2022-12-31,official_retroactive_reporting,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","4.2 package covers historical data from 2022; first PSP-to-NCA remittance is 2026-04-09"
-RES*,4.2,2025-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","Resolution planning first reference date 12/2025"
-MREL_DECISIONS,4.2,2025-12-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","MREL decisions first reference date 12/2025"
-SBP_CR*,4.2,2026-02-28,official_with_tbd,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","New SBP market-risk layout references 02/2026 and 05/2026 (latter TBD); template-level subperiod needs refinement"
-COREP_OF,4.2,2026-03-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","EBA footnote clarifies technical package 4.2 from reference date 03/2026"
-FINREP9DP,4.2.1,2026-03-31,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","FINREP datapoints module and 4.2.1 package first reference date 03/2026"
-*,4.2,2026-03-31,official_except_explicit_overrides,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","All other modules use the completed DPM 2.0 glossary from 03/2026; DORA excluded"
-COREP,3.5,,not_applicable_provisional,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35","The 3.5 COREP/FRTB material is provisional and not applicable until the framework starts applying; use the applicable predecessor until the final release"
-DORA,3.5,,not_applicable_provisional,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35","EBA marks 3.5 DORA provisional pending adoption; final DORA ITS appears in 4.0"
-DORA,4.2,,not_applicable_replaced,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","EBA says this DORA version will not apply and will be replaced by 4.3"
-MREL_TLAC,3.4,,superseded,"https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-34","3.4 MREL/TLAC change is superseded by 3.5 before application"
-CODIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 disclosure templates first reference date 06/2025"
-ESGDIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 ESG disclosure templates in the 4.1 package"
-FINDIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 financial disclosure templates in the 4.1 package"
-GSIIDIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 G-SII disclosure templates in the 4.1 package"
-IRRBBDIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 IRRBB disclosure templates in the 4.1 package"
-MRELTLACDIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 MREL/TLAC disclosure templates in the 4.1 package"
-P3DH,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 data hub templates first reference date 06/2025"
-REMDIS,4.1,2025-06-30,official,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41","Pillar 3 remuneration disclosure templates in the 4.1 package"
-SEPA_IPR,4.1,,not_applicable_deferred,"https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42","IPR reporting was deferred from 4.1 to 4.2; EBA states the first remittance date is in April 2026"
+COREP,2.9.1.1,2019-12-31,baseline,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29,Pre-period DPM layout baseline,
+FINREP,2.9.1.1,2019-12-31,baseline,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29,Pre-period DPM layout baseline,
+COREP,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Reporting framework 3.0 applicable from June 2021; COREP technical package 3.0.1,
+FINREP,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Reporting framework 3.0 applicable from June 2021; FINREP technical package 3.0,
+AE,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Baseline module release in 3.0.x,
+GSII,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Baseline module release in 3.0.x,
+MREL_DECISIONS,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,MREL decisions technical package,
+MREL_TLAC,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,MREL/TLAC technical package,
+NOTIF_IMPRACTICABILITY,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Notification technical package,
+REM,3.0.1,2021-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Remuneration reporting technical package,
+RES,2.9.1.1,2019-12-31,baseline,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29,Last complete pre-3.0 module layout available in the source archive,
+SBP,2.9.1.1,2019-12-31,baseline,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-29,Last complete pre-3.0 module layout available in the source archive,
+COREP,3.1,2021-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31,Module-specific application from September 2021,
+FINREP,3.1,2021-09-30,carry_forward,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31,No FINREP layout delta in 3.1; keep the previous module taxonomy,
+IF,3.1,2021-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31,Investment Firms reporting first reference date 09/2021,
+RES,3.1,2021-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31,Resolution reporting module-specific application 09/2021,
+SBP,3.1,2021-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-31,Supervisory benchmarking module-specific application 09/2021,
+SBP,3.2,2022-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,Initial Market Valuation (IMV) template family first reference date 09/2022,C_106
+SBP,3.2,2022-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,Other supervisory benchmarking template families first reference date 12/2022,
+RES,3.2,2022-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,3.2.1 resolution-planning package,
+MREL_DECISIONS,3.2,2022-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,3.2.1 module package,
+MREL_TLAC,3.2,2022-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,3.2.1 module package,
+REM,3.2,2022-12-31,official_with_module_split,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,12/2022 for most remuneration guidance; pay-gap changes start 12/2023,
+REM,3.2,2023-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,Pay-gap reporting first reference date 12/2023,
+COREP,3.2,2023-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,COREP first reference date 06/2023,
+AE,3.2,2023-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,Asset Encumbrance first reference date 06/2023,
+GSII,3.2,2023-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,G-SII reporting first reference date 06/2023,
+IF,3.2,2023-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,Investment Firms ITS first reference date 06/2023; separate threshold-monitoring date needs confirmation,
+SBP,3.3,2023-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33,Supervisory Benchmarking first reference date 09/2023,
+IPU,3.3,2023-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33,IPU first reference date 12/2023,
+ESG,3.3,2023-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33,ESG first reference date 12/2023,
+PILLAR3,3.3,2023-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33,Pillar 3 hub pilot templates first reference date 12/2023,
+IRRBB,3.3,2023-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-33,Ad-hoc IRRBB package first reference date 12/2023,
+IRRBB,3.4,2024-09-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-34,IRRBB amended ITS first reference date 09/2024,
+REM,3.5,2024-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35,Diversity benchmarking guidance first reference date 12/2024,
+FC,3.5,2024-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35,FICOD technical package first reference date 12/2024,
+MREL_TLAC,3.5,2024-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35,MREL/TLAC first reference date 12/2024; supersedes 3.4 changes,
+COREP*,4.0,2025-03-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40,"CRR3/CRD6 COREP changes, first reference date 03/2025",
+IF*,4.0,2025-03-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40,Class 2 investment firms first reference date 03/2025,
+DORA,4.0,2025-03-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40,Final DORA ITS first reference date 03/2025,
+MICA*,4.0,2025-03-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-40,MiCAR ITS first reference date 03/2025,
+MICA*,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,MiCAR reporting guidelines first reference date 06/2025,
+PILLAR3*,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Comprehensive Pillar 3 templates first reference date 06/2025,
+ESG,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,ESG minor amendments first reference date 06/2025,
+SEPA_IPR,4.2,2022-12-31,official_retroactive_reporting,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,4.2 package covers historical data from 2022; first PSP-to-NCA remittance is 2026-04-09,
+RES*,4.2,2025-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,Resolution planning first reference date 12/2025,
+MREL_DECISIONS,4.2,2025-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,MREL decisions first reference date 12/2025,
+SBP_CR*,4.2,2025-12-31,official,https://www.eba.europa.eu/reporting-time-traveller/reporting-by-release?framework_release=5551,EBA reporting time traveller marks SBP_CR current under 4.2 from 31/12/2025,
+COREP_OF,4.2,2026-06-30,official_postponed,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,"First reference date was postponed to 06/2026; current EBA framework page says 06/2026, despite the earlier technical-package 03/2026 footnote",
+FINREP9DP,4.2.1,2026-03-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,FINREP datapoints module and 4.2.1 package first reference date 03/2026,
+*,4.2,2026-03-31,official_except_explicit_overrides,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,All other modules use the completed DPM 2.0 glossary from 03/2026; DORA excluded,
+COREP,3.5,,not_applicable_provisional,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35,The 3.5 COREP/FRTB material is provisional and not applicable until the framework starts applying; use the applicable predecessor until the final release,
+DORA,3.5,,not_applicable_provisional,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-35,EBA marks 3.5 DORA provisional pending adoption; final DORA ITS appears in 4.0,
+DORA,4.2,,not_applicable_replaced,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,EBA says this DORA version will not apply and will be replaced by 4.3,
+MREL_TLAC,3.4,,superseded,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-34,3.4 MREL/TLAC change is superseded by 3.5 before application,
+CODIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 disclosure templates first reference date 06/2025,
+ESGDIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 ESG disclosure templates in the 4.1 package,
+FINDIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 financial disclosure templates in the 4.1 package,
+GSIIDIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 G-SII disclosure templates in the 4.1 package,
+IRRBBDIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 IRRBB disclosure templates in the 4.1 package,
+MRELTLACDIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 MREL/TLAC disclosure templates in the 4.1 package,
+P3DH,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 data hub templates first reference date 06/2025,
+REMDIS,4.1,2025-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-41,Pillar 3 remuneration disclosure templates in the 4.1 package,
+SEPA_IPR,4.1,,not_applicable_deferred,https://www.eba.europa.eu/risk-and-data-analysis/reporting-frameworks/reporting-framework-42,IPR reporting was deferred from 4.1 to 4.2; EBA states the first remittance date is in April 2026,
+COVID19,2.10,2020-06-30,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,COVID-19 Guidelines first quarterly reference date 30/06/2020; supervisors may request monthly data,
+SBP,2.10,2020-09-30,official_with_module_split,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,Supervisory Benchmarking IMV first reference date 09/2020,C_106
+SBP,2.10,2020-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,Other Supervisory Benchmarking templates first apply from 12/2020,
+RES,2.10,2020-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,Resolution planning technical amendments applicable from 12/2020,
+FP,2.10,2020-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,Updated Funding Plans Guidelines first reference date 12/2020,
+REM,2.10,2020-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,Remuneration benchmarking technical package in 2.10 applies from 12/2020,
+PAY,2.10,2020-12-31,official,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210,Fraudulent payment reporting integrated into 2.10; release page groups this change with 12/2020 applicability,
+*,3.0.1,2021-06-30,official_default,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-30,Framework 3.0 is expected to apply from 30/06/2021; module-specific rules override this default,
+*,3.2,2022-12-31,official_other_modules,https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-32,EBA states all other framework modules without CON/IND/IFRS/GAAP are used from reference date 12/2022; module-specific rules override this default,
+SBPIMV,4.2,2026-02-28,official,https://www.eba.europa.eu/reporting-time-traveller/reporting-by-release?framework_release=5551,EBA reporting time traveller marks 4.2 SBPIMV effective from February 2026; normalized to the month-end reference date,

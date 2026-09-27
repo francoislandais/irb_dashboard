@@ -26,7 +26,7 @@ Le résolveur accepte un code de template, une date de référence et, si le cod
 
 ## Sources et versions
 
-`sources.json` liste les dictionnaires, layouts annotés, pages EBA et documents de conversion. Les archives DPM 2.9.1.1 et 3.0.1 sont conservées comme socle antérieur; les versions suivantes contiennent souvent seulement les modules modifiés. Le générateur conserve donc les snapshots par module et laisse la structure précédente en vigueur lorsqu’aucun changement de layout n’est publié.
+`sources.json` liste les dictionnaires, layouts annotés, pages EBA et documents de conversion. Les archives DPM 2.9.1.1, 2.10 phase 2 et 3.0.1 forment les premières bases historiques; 2.10 apporte notamment les modules temporaires COVID-19 et les versions initiales de plusieurs modules de reporting. Les versions ultérieures contiennent souvent seulement les modules modifiés. Le générateur conserve donc les snapshots par module et laisse la structure précédente en vigueur lorsqu’aucun changement de layout n’est publié.
 
 Les classeurs DPM 1.0 (onglets `Tables`, `Domains`, `Dimensions`, `Members`, `Hierarchies`) et DPM 2.0 (glossaire `Category`, `Item`, `Property`, `SubCategory`, `SubCategoryItem`) ne décrivent pas les mêmes entités. Le parseur garde leurs codes officiels et normalise uniquement les axes et chemins destinés au format du mapping de l’application. La documentation technique DPM 2.0 et le fichier de conversion DPM 1.0 → DPM 2.0 sont inclus comme références d’audit.
 
@@ -36,7 +36,7 @@ Les bases DPM complètes (`.accdb` ou équivalent) ne sont pas copiées ici : pl
 
 `module_release_schedule.csv` est le registre explicite des premières dates de référence attendues, avec l’URL EBA et la note qui justifie chaque règle. Le résolveur choisit, pour un module/template et une date donnée, la dernière version dont `effective_from` est antérieure ou égale à la date. Un module absent d’une release garde la dernière version connue. Les versions provisoires ou remplacées ont un statut distinct et ne remplacent pas une version applicable.
 
-Les dates données par l’EBA sont parfois au niveau du module, parfois au niveau du type de template, parfois rétroactives ou provisoires. Les cas non résolus sont laissés vides et signalés dans `build_report.json`; ils ne doivent jamais être déduits mécaniquement du numéro de release. À l’état actuel, les règles d’entrée en vigueur restent à établir pour `COVID19`, `FINREP`, `FP`, `NOTIF_IMPRACTICABILITY` et `PAY`; le rapport les énumère. Les dates de SBP 3.2, REM 3.2, seuils IF et certains modules de reporting séparés demandent aussi une vérification plus fine au niveau des templates avant d’utiliser le résultat comme autorité juridique.
+Les dates données par l’EBA sont parfois au niveau du module, parfois au niveau du type de template, parfois rétroactives ou provisoires. Les règles connues sont inscrites avec leur source et leur portée; les exceptions provisoires ou non applicables restent sans date. Le générateur ne déduit pas les dates à partir du seul numéro de release. Les changements de codes de module à travers DPM 1.0 et DPM 2.0 restent séparés dans l’historique; le résolveur suit une famille de modules lorsqu’elle est demandée, et signale les codes de template qui demeurent ambigus entre plusieurs modules. Les modules de SBP 4.2 ont des dates distinctes : SBP_CR en décembre 2025, SBPIMV en février 2026, puis le reste selon les règles du paquet 4.2.
 
 ## Points de contrôle
 

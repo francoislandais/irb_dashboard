@@ -35,7 +35,7 @@ AXIS_COORDINATES = {
     "y": "y_axis_rc_code",
     "z": "z_axis_rc_code",
 }
-VERSION_RE = re.compile(r"(?<!\d)(4\.2\.1|4\.2|4\.1|4\.0|3\.5|3\.4|3\.3|3\.2|3\.1|3\.0(?:\.1)?|2\.9\.1\.1)(?!\d)")
+VERSION_RE = re.compile(r"(?<!\d)(4\.2\.1|4\.2|4\.1|4\.0|3\.5|3\.4|3\.3|3\.2|3\.1|3\.0(?:\.1)?|2\.10(?:\.1)?|2\.9\.1\.1)(?!\d)")
 DOMAIN_REF_RE = re.compile(r"\(([A-Za-z0-9_]+):([A-Za-z0-9_]+)(?:\(([A-Za-z0-9_]+)\))?\)")
 NUMERIC_CODE_RE = re.compile(r"^\d{1,4}$")
 
@@ -274,6 +274,26 @@ def schedule_match(module: str, framework: str, template_id: str, rows: list[dic
     return max(candidates, key=lambda item: item[0])[1] if candidates else None
 
 
+def close_template_intervals(template_rows: Iterable[dict[str, str]]) -> list[dict[str, str]]:
+    """Close snapshots only within the same module/template identity.
+
+    A template code can be reused by unrelated modules, and some releases
+    split one module into several parallel DPM 2.0 modules. Cross-module
+    interval closure would incorrectly make one branch truncate another.
+    Module-family aliases are resolved separately by resolve_taxonomy.py.
+    """
+    ordered = sorted(template_rows, key=lambda r: (r["module_code"], r["template_id"], r["effective_from"] or "9999", r["framework"]))
+    by_module_template: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in ordered:
+        if row["effective_from"]:
+            by_module_template[(row["module_code"], row["template_id"])].append(row)
+    for versions in by_module_template.values():
+        versions.sort(key=lambda r: (r["effective_from"], r["framework"]))
+        for current, following in zip(versions, versions[1:]):
+            current["effective_to"] = following["effective_from"]
+    return ordered
+
+
 def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     schedules = read_schedule()
     layout_rows: list[dict[str, str]] = []
@@ -378,32 +398,10 @@ def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict
         key = (row["module_code"], row["framework"], row["table_id"], row["coordinate"], row["code"])
         unique_layouts.setdefault(key, row)
 
-    # Materialise effective intervals for each module/template, with later
-    # release snapshots closing the preceding interval.
-    sorted_templates = sorted(template_rows.values(), key=lambda r: (r["module_code"], r["template_id"], r["effective_from"] or "9999", r["framework"]))
-    by_template: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
-    for row in sorted_templates:
-        if row["effective_from"]:
-            by_template[(row["module_code"], row["template_id"])].append(row)
-    for versions in by_template.values():
-        versions.sort(key=lambda r: (r["effective_from"], r["framework"]))
-        for current, following in zip(versions, versions[1:]):
-            current["effective_to"] = following["effective_from"]
-    # DPM 2.0 splits some formerly broad DPM 1.0 modules (for example COREP
-    # into COREP_OF/COREP_LR and PILLAR3 into disclosure modules). A template
-    # code's effective taxonomy therefore advances across those module-code
-    # transitions too. Keep the module in the row for audit/disambiguation,
-    # but close old snapshots at the next release of that template code.
-    by_template_code: dict[str, list[dict[str, str]]] = defaultdict(list)
-    for row in sorted_templates:
-        if row["effective_from"]:
-            by_template_code[row["template_id"]].append(row)
-    for versions in by_template_code.values():
-        start_dates = sorted({row["effective_from"] for row in versions})
-        next_date = {current: following for current, following in zip(start_dates, start_dates[1:])}
-        for row in versions:
-            if row["effective_from"] in next_date:
-                row["effective_to"] = next_date[row["effective_from"]]
+    # Materialise intervals within each module/template. DPM 2.0 module splits
+    # remain visible as separate module histories and are followed by the
+    # resolver when the caller requests the former module family.
+    sorted_templates = close_template_intervals(template_rows.values())
 
     return list(unique_layouts.values()), sorted_templates, inventory
 

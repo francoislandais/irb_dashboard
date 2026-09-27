@@ -1,7 +1,29 @@
 {
-  "generated_at_utc": "2026-09-27T20:03:05.884071+00:00",
+  "generated_at_utc": "2026-09-27T20:09:47.749720+00:00",
   "sources_catalog": "sources.json",
   "assets": [
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20Framework%202.10/Phase%202/896406/DPM%20Dictionary%202.10%20phase%202.xlsx",
+      "http_status": 200,
+      "bytes": 1035970,
+      "sha256": "27d101dc265c537a29183a814486ca2e510668a294e3f7f09b84759fb4015771",
+      "filename": "2.10_dictionary.xlsx",
+      "kind": "dictionary",
+      "frameworks": [
+        "2.10"
+      ]
+    },
+    {
+      "url": "https://www.eba.europa.eu/sites/default/files/2023-11/890e1975-97c4-42e5-b07a-013fec42f39a/Annotated%20table%20layouts2.zip",
+      "http_status": 200,
+      "bytes": 3536709,
+      "sha256": "a94ce49fddfaedcc10e5b2227650a0aee07cb63e8363f0accf576903ae7a9d95",
+      "filename": "2.10_layouts.zip",
+      "kind": "layouts",
+      "frameworks": [
+        "2.10"
+      ]
+    },
     {
       "url": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%202.9%20%28incl.%20new%20files%29/DPM%20v2.9.1//DPM%20Dictionary.xlsx",
       "http_status": "cached",

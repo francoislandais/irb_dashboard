@@ -19,7 +19,8 @@ MODULE_FAMILIES = {
     "SBP": ("SBP",),
     "REM": ("REM",),
     "MICA": ("MICA",),
-    "MREL_TLAC": ("MREL_TLAC", "MRELTLACDIS"),
+    "MREL_TLAC": ("MREL_TLAC",),
+    "PAY": ("PAY", "PSD_FRP", "SEPA_IPR"),
     "PILLAR3": ("PILLAR3", "CODIS", "ESGDIS", "FINDIS", "GSIIDIS", "IRRBBDIS", "MRELTLACDIS", "P3DH", "REMDIS"),
 }
 
@@ -31,6 +32,26 @@ def module_matches(requested: str | None, actual: str) -> bool:
         return True
     family = MODULE_FAMILIES.get(requested.upper())
     return bool(family and any(actual.upper().startswith(prefix) for prefix in family))
+
+
+def is_split_child_module(parent: str, actual: str) -> bool:
+    """Whether an actual DPM 2.0 module replaces/splits the named legacy module."""
+    parent, actual = parent.upper(), actual.upper()
+    if actual == parent:
+        return False
+    if parent == "COREP":
+        return actual.startswith("COREP_")
+    if parent == "FINREP":
+        return actual.startswith("FINREP")
+    if parent == "IF":
+        return actual.startswith("IF_")
+    if parent == "RES":
+        return actual.startswith("RESOL")
+    if parent in {"SBP", "REM", "PAY"}:
+        return actual.startswith(parent + "_") or (parent == "PAY" and actual in {"PSD_FRP", "SEPA_IPR"})
+    if parent == "PILLAR3":
+        return actual in MODULE_FAMILIES[parent] and actual != parent
+    return False
 
 
 def resolve(module: str | None, template: str, reference_date: date, rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -49,8 +70,17 @@ def resolve(module: str | None, template: str, reference_date: date, rows: list[
             matches.append(row)
     if not matches:
         return []
-    latest_date = max(row["effective_from"] for row in matches)
-    return [row for row in matches if row["effective_from"] == latest_date]
+    if module:
+        children = [row for row in matches if is_split_child_module(module, row["module_code"])]
+        if children:
+            matches = children
+    # Keep the latest snapshot for each actual module. A broad legacy module
+    # can split into several simultaneously active DPM 2.0 modules, so choosing
+    # one global latest date would silently select only one branch.
+    latest_by_module: dict[str, str] = {}
+    for row in matches:
+        latest_by_module[row["module_code"]] = max(latest_by_module.get(row["module_code"], ""), row["effective_from"])
+    return [row for row in matches if row["effective_from"] == latest_by_module[row["module_code"]]]
 
 
 def main() -> int:
@@ -79,11 +109,13 @@ def main() -> int:
             return 2
         print(json.dumps({"status": "template_not_found", "template": normalize_template(args.template), "reference_date": ref_date.isoformat()}, indent=2))
         return 3
-    if len(found) > 1 and not args.module:
+    matched_modules = sorted({r["module_code"] for r in found})
+    if len(matched_modules) > 1:
         print(json.dumps({
             "status": "ambiguous_module",
             "template": normalize_template(args.template),
             "reference_date": ref_date.isoformat(),
+            "requested_module": args.module,
             "matches": [{"module": r["module_code"], "framework": r["framework"], "effective_from": r["effective_from"], "effective_to": r["effective_to"]} for r in found],
         }, ensure_ascii=False, indent=2))
         return 4

@@ -3,6 +3,13 @@
   "license_note": "Sources remain EBA publications; this project stores unmodified technical packages for reproducibility. See EBA source pages for legal terms and release context.",
   "frameworks": [
     {
+      "framework": "2.10",
+      "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20Framework%202.10/Phase%202/896406/DPM%20Dictionary%202.10%20phase%202.xlsx",
+      "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/890e1975-97c4-42e5-b07a-013fec42f39a/Annotated%20table%20layouts2.zip",
+      "page": "https://www.eba.europa.eu/risk-and-data-analysis/reporting/reporting-frameworks/reporting-framework-210",
+      "role": "phase_2_errata_for_2020_module_deltas"
+    },
+    {
       "framework": "2.9.1.1",
       "dictionary": "https://www.eba.europa.eu/sites/default/files/document_library/Risk%20Analysis%20and%20Data/Reporting%20Frameworks/Reporting%20framework%202.9%20%28incl.%20new%20files%29/DPM%20v2.9.1//DPM%20Dictionary.xlsx",
       "layouts": "https://www.eba.europa.eu/sites/default/files/2023-11/33603ffd-5707-4159-a33c-04251abb62b1/DPM%20Table%20Layouts.zip",
