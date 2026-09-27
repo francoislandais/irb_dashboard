@@ -82,7 +82,7 @@ vm.runInContext(source.slice(source.indexOf("function syncExplorerAxisRatioIndic
 let ratioBadge=null;
 const ratioButton={attributes:{},querySelector:()=>ratioBadge,append(node){ratioBadge=node;},setAttribute(key,value){this.attributes[key]=value;},removeAttribute(key){delete this.attributes[key];}};
 ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"Capital / Total assets");
-assert.equal(ratioBadge.textContent,"÷");
+assert.equal(ratioBadge.textContent,"%");
 assert.equal(ratioBadge.title,"Displayed as a ratio. Denominator: Capital / Total assets");
 assert.equal(ratioButton.attributes["aria-description"],ratioBadge.title);
 ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"");

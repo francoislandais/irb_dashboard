@@ -3087,7 +3087,7 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
   const tooltip = `Displayed as a ratio. Denominator: ${denominatorLabel}`;
   const badge = existingBadge || document.createElement("span");
   badge.className = "axis-ratio-indicator";
-  badge.textContent = "÷";
+  badge.textContent = "%";
   badge.title = tooltip;
   badge.setAttribute("aria-hidden", "true");
   if (!existingBadge) button.append(badge);
