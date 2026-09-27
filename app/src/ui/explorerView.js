@@ -187,6 +187,8 @@ let suppressNextExplorerRowClick = false;
 let explorerContextTopic = "";
 let explorerRatioPopover = null;
 let explorerRatioPopoverHideTimer = 0;
+let explorerRatioPopoverBadge = null;
+let explorerRatioPopoverOutsideClickHandler = null;
 // Which KRI's formula the "KRI formula" panel shows - tracked separately
 // from the current axis selection so that jumping to a referenced cell's
 // own template (see openExplorerKriFormulaCellRef) can change the active
@@ -3128,7 +3130,13 @@ function showExplorerRatioPopover(badge) {
     explorerRatioPopover.addEventListener("pointerenter", () => window.clearTimeout(explorerRatioPopoverHideTimer));
     explorerRatioPopover.addEventListener("pointerleave", scheduleExplorerRatioPopoverHide);
     document.body.append(explorerRatioPopover);
+    explorerRatioPopoverOutsideClickHandler = (event) => {
+      if (explorerRatioPopover?.contains(event.target) || explorerRatioPopoverBadge?.contains(event.target)) return;
+      closeExplorerRatioPopover();
+    };
+    document.addEventListener("pointerdown", explorerRatioPopoverOutsideClickHandler);
   }
+  explorerRatioPopoverBadge = badge;
 
   const isEnabled = contribution.enabled !== false;
   const status = document.createElement("span");
@@ -3145,9 +3153,9 @@ function showExplorerRatioPopover(badge) {
   toggle.textContent = isEnabled ? "Show raw data" : "Apply denominator";
   toggle.addEventListener("click", () => {
     if (!toggleExplorerContributionBase(contribution.axis, contribution.baseCode)) return;
-    window.clearTimeout(explorerRatioPopoverHideTimer);
-    explorerRatioPopover?.remove();
-    explorerRatioPopover = null;
+    contribution.enabled = contribution.enabled === false;
+    status.textContent = contribution.enabled ? "Displayed as a ratio" : "Displayed as raw data";
+    toggle.textContent = contribution.enabled ? "Show raw data" : "Apply denominator";
   });
 
   explorerRatioPopover.replaceChildren(status, denominator, toggle);
@@ -3166,9 +3174,29 @@ function showExplorerRatioPopover(badge) {
 function scheduleExplorerRatioPopoverHide() {
   window.clearTimeout(explorerRatioPopoverHideTimer);
   explorerRatioPopoverHideTimer = window.setTimeout(() => {
-    explorerRatioPopover?.remove();
-    explorerRatioPopover = null;
+    closeExplorerRatioPopover();
   }, 180);
+}
+
+function closeExplorerRatioPopover() {
+  window.clearTimeout(explorerRatioPopoverHideTimer);
+  const contribution = explorerRatioPopoverBadge?.ratioContribution;
+  if (contribution?.enabled === false) {
+    const context = getActiveExplorerContext();
+    const base = context.contributionBaseByAxis[contribution.axis];
+    if (base && String(base.pointCode ?? "") === String(contribution.baseCode ?? "")) {
+      context.contributionBaseByAxis[contribution.axis] = null;
+      const state = getLatestState();
+      if (state) rerenderApp(state);
+    }
+  }
+  explorerRatioPopover?.remove();
+  explorerRatioPopover = null;
+  explorerRatioPopoverBadge = null;
+  if (explorerRatioPopoverOutsideClickHandler) {
+    document.removeEventListener("pointerdown", explorerRatioPopoverOutsideClickHandler);
+    explorerRatioPopoverOutsideClickHandler = null;
+  }
 }
 
 function toggleExplorerContributionBase(axis, pointCode) {
