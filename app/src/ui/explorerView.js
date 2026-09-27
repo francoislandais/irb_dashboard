@@ -3067,7 +3067,9 @@ function renderExplorerAxisTabs() {
       return;
     }
 
-    element.title = captions[axis];
+    const axisButton = elements.explorerAxisButtons.find((button) => button.getAttribute("data-explorer-axis") === axis);
+    if (axisButton?.classList.contains("has-ratio-indicator")) element.removeAttribute("title");
+    else element.title = captions[axis];
     // The raw code is normally what a "<Row|Column|Tab> : <code>" pill
     // shows, but "All Currency" (see explorer.js) is a display sentinel,
     // not a real code meant to be shown as-is.
@@ -3080,7 +3082,6 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
   const existingBadge = button.querySelector(".axis-ratio-indicator");
   if (!denominatorLabel) {
     existingBadge?.remove();
-    button.removeAttribute("title");
     button.removeAttribute("aria-description");
     return;
   }
@@ -3089,11 +3090,9 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
   const badge = existingBadge || document.createElement("span");
   badge.className = "axis-ratio-indicator";
   badge.textContent = "%";
-  badge.title = tooltip;
   badge.dataset.tooltip = tooltip;
   badge.setAttribute("aria-hidden", "true");
   if (!existingBadge) button.append(badge);
-  button.title = tooltip;
   button.setAttribute("aria-description", tooltip);
 }
 
