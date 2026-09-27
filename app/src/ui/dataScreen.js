@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260925-institution-id";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260927-ratio-tooltip";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260927-ratio-tooltip-label";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";

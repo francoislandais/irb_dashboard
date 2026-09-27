@@ -3045,7 +3045,8 @@ function renderExplorerAxisTabs() {
     const isActive = axis === activeAxis;
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     const isUnusedTabAxis = axis === "z" && (axisOptions.z?.codes?.length ?? 0) === 0;
-    const ratioDenominator = isActive ? getExplorerPropagatedContribution(axis)?.label : "";
+    const ratioContribution = isActive ? getExplorerPropagatedContribution(axis) : null;
+    const ratioDenominator = ratioContribution ? formatExplorerRatioDenominator(ratioContribution) : "";
     button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled", !isAvailable);
     button.classList.toggle("has-ratio-indicator", Boolean(ratioDenominator));
@@ -3084,7 +3085,7 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
     return;
   }
 
-  const tooltip = `Displayed as a ratio. Denominator: ${denominatorLabel}`;
+  const tooltip = `Displayed as a ratio\nDenominator: ${denominatorLabel}`;
   const badge = existingBadge || document.createElement("span");
   badge.className = "axis-ratio-indicator";
   badge.textContent = "%";
@@ -3094,6 +3095,14 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
   if (!existingBadge) button.append(badge);
   button.title = tooltip;
   button.setAttribute("aria-description", tooltip);
+}
+
+function formatExplorerRatioDenominator(contribution) {
+  const axisLabel = getExplorerAxisDisplayName(contribution.axis);
+  const code = String(contribution.baseCode ?? "").trim();
+  const description = String(contribution.label ?? "").split("/").at(-1).trim();
+  const identity = [axisLabel, code].filter(Boolean).join(" ");
+  return description ? `${identity} (${description})` : identity;
 }
 
 // The template uses the same compact pill shape as the switchable axes, but

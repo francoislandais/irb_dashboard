@@ -2660,7 +2660,7 @@ table {
   pointer-events: none;
   text-align: left;
   visibility: hidden;
-  white-space: normal;
+  white-space: pre-line;
 }
 
 .axis-ratio-indicator:hover::after {

@@ -77,18 +77,20 @@ class RatioBadgeElement {
   setAttribute(key,value) { this.attributes[key]=value; }
   remove() { this.removed=true; }
 }
-const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()}});
+const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()},getExplorerAxisDisplayName:axis=>({x:"Column",y:"Row",z:"Tab"}[axis]||"Row")});
 vm.runInContext(source.slice(source.indexOf("function syncExplorerAxisRatioIndicator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
 let ratioBadge=null;
 const ratioButton={attributes:{},querySelector:()=>ratioBadge,append(node){ratioBadge=node;},setAttribute(key,value){this.attributes[key]=value;},removeAttribute(key){delete this.attributes[key];}};
-ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"Capital / Total assets");
+ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"Row 100 (Total INFLOWS)");
 assert.equal(ratioBadge.textContent,"%");
-assert.equal(ratioBadge.title,"Displayed as a ratio. Denominator: Capital / Total assets");
+assert.equal(ratioBadge.title,"Displayed as a ratio\nDenominator: Row 100 (Total INFLOWS)");
 assert.equal(ratioBadge.dataset.tooltip,ratioBadge.title);
 assert.equal(ratioButton.attributes["aria-description"],ratioBadge.title);
 ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"");
 assert.equal(ratioBadge.removed,true);
 assert.equal(ratioButton.attributes.title,undefined);
+vm.runInContext(source.slice(source.indexOf("function formatExplorerRatioDenominator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
+assert.equal(ratioIndicatorContext.formatExplorerRatioDenominator({axis:"y",baseCode:"100",label:"INFLOWS"}),"Row 100 (INFLOWS)");
 
 let context={activeAxis:"y",selectedXCode:"0010",selectedYCode:"0010",selectedZCode:"EUR",selectedReferenceLabel:dates[0].label};
 const table=new Element("table");
