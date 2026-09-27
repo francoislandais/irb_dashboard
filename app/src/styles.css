@@ -2616,6 +2616,8 @@ table {
 }
 
 .axis-tab.has-ratio-indicator {
+  z-index: 20;
+  overflow: visible;
   padding-right: 23px;
 }
 
@@ -2635,6 +2637,35 @@ table {
   font-weight: 700;
   line-height: 1;
   pointer-events: auto;
+}
+
+.axis-ratio-indicator::after {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: -4px;
+  z-index: 5000;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  border: 1px solid #d7e0e7;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(25, 42, 54, 0.18);
+  color: #26343c;
+  content: attr(data-tooltip);
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.35;
+  opacity: 0;
+  padding: 7px 9px;
+  pointer-events: none;
+  text-align: left;
+  visibility: hidden;
+  white-space: normal;
+}
+
+.axis-ratio-indicator:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 .axis-tab.is-active .axis-ratio-indicator {

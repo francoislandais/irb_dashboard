@@ -3089,6 +3089,7 @@ function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
   badge.className = "axis-ratio-indicator";
   badge.textContent = "%";
   badge.title = tooltip;
+  badge.dataset.tooltip = tooltip;
   badge.setAttribute("aria-hidden", "true");
   if (!existingBadge) button.append(badge);
   button.title = tooltip;

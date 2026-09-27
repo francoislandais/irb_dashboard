@@ -73,7 +73,7 @@ class Element {
 }
 const source=readFileSync(new URL("../app/src/ui/explorerView.js",import.meta.url),"utf8");
 class RatioBadgeElement {
-  constructor() { this.attributes={};this.removed=false; }
+  constructor() { this.attributes={};this.dataset={};this.removed=false; }
   setAttribute(key,value) { this.attributes[key]=value; }
   remove() { this.removed=true; }
 }
@@ -84,6 +84,7 @@ const ratioButton={attributes:{},querySelector:()=>ratioBadge,append(node){ratio
 ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"Capital / Total assets");
 assert.equal(ratioBadge.textContent,"%");
 assert.equal(ratioBadge.title,"Displayed as a ratio. Denominator: Capital / Total assets");
+assert.equal(ratioBadge.dataset.tooltip,ratioBadge.title);
 assert.equal(ratioButton.attributes["aria-description"],ratioBadge.title);
 ratioIndicatorContext.syncExplorerAxisRatioIndicator(ratioButton,"");
 assert.equal(ratioBadge.removed,true);
