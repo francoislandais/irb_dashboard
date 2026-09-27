@@ -2616,7 +2616,7 @@ table {
 }
 
 .axis-tab.has-ratio-indicator {
-  z-index: 20;
+  z-index: 55;
   overflow: visible;
   padding-right: 23px;
 }
@@ -2641,8 +2641,9 @@ table {
 
 .axis-ratio-indicator::after {
   position: absolute;
-  top: calc(100% + 7px);
-  right: -4px;
+  top: calc(100% + 64px);
+  right: auto;
+  left: calc(100% + 8px);
   z-index: 5000;
   width: max-content;
   max-width: min(280px, calc(100vw - 24px));
