@@ -608,6 +608,30 @@ def dictionary_items(dictionary_name: str) -> dict[str, list[tuple[str, str]]]:
                     label = clean(row[idx["Name"]])
                     if category and code and label:
                         result[category].append((code, label))
+
+        # Sheet-per dimensions can point to a subcategory rather than the
+        # entire category. Keep these member sets separately so annotations
+        # such as ``(qEC:qEC2) <Key value>`` do not expand to every qEC value.
+        for sheet_name in ("SubCategoryItems", "SubCategoryItem"):
+            if sheet_name not in workbook.sheetnames:
+                continue
+            sheet = workbook[sheet_name]
+            header = [clean(c.value) for c in next(sheet.iter_rows(min_row=1, max_row=1))]
+            idx = {name: i for i, name in enumerate(header) if name}
+            category_column = "CategoryCode" if "CategoryCode" in idx else "Category_SubCategory"
+            required = {category_column, "SubCategoryCode", "ItemCode", "ItemName"}
+            if not required.issubset(idx):
+                continue
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                category = clean(row[idx[category_column]])
+                subcategory = clean(row[idx["SubCategoryCode"]])
+                code = clean(row[idx["ItemCode"]])
+                label = clean(row[idx["ItemName"]])
+                if category and subcategory and code and label:
+                    code = "q" + code if code.startswith("x") else code
+                    members = result[f"{category}:{subcategory}"]
+                    if not any(existing_code == code for existing_code, _ in members):
+                        members.append((code, label))
     finally:
         workbook.close()
     return dict(result)
@@ -638,14 +662,24 @@ def dictionary_z_rows(dictionary_path: Path, sheet: Any) -> list[tuple[str, str]
                     key_value_refs.append((nested or first, second))
                 elif re.fullmatch(r"[A-Z]{2,5}", second):
                     refs.append((second, second))
+    is_key_value = bool(key_value_refs)
     refs = list(dict.fromkeys(key_value_refs or refs))
     if not refs:
         return []
 
     all_items = dictionary_items(str(dictionary_path.resolve()))
     items: list[tuple[str, str]] = []
-    for category_or_domain, _subcode in refs:
-        items.extend(all_items.get(category_or_domain, []))
+    for category_or_domain, subcode in refs:
+        if is_key_value:
+            # Use the exact referenced subcategory when available. Some DPM
+            # releases only provide a category reference, so keep the full
+            # category as a compatibility fallback for those annotations.
+            items.extend(
+                all_items.get(f"{category_or_domain}:{subcode}")
+                or all_items.get(category_or_domain, [])
+            )
+        else:
+            items.extend(all_items.get(category_or_domain, []))
     unique: dict[str, str] = {}
     for code, label in items:
         unique.setdefault(code, label)

@@ -134,7 +134,10 @@ class DpmTaxonomyTests(unittest.TestCase):
         top = " ".join(str(c.value or "") for row in tab_sheet.iter_rows(min_row=1, max_row=5, max_col=12) for c in row).casefold()
         self.assertIn("sheet per exposure class", top)
         z = builder.dictionary_z_rows(SOURCES / "4.2_dictionary.xlsx", tab_sheet)
-        self.assertEqual(len(z), 89)
+        self.assertEqual(len(z), 29)
+        z_42_memorandum = builder.dictionary_z_rows(SOURCES / "4.2_dictionary.xlsx", workbook["C_07.00.c"])
+        self.assertEqual(len(z_42_memorandum), 8)
+        self.assertEqual(len({code for code, _label in z} | {code for code, _label in z_42_memorandum}), 30)
         workbook.close()
         archive.close()
 
@@ -143,7 +146,10 @@ class DpmTaxonomyTests(unittest.TestCase):
         workbook_40 = load_workbook(io.BytesIO(archive_40.read(corep_file_40)), data_only=True)
         tab_sheet_40 = workbook_40["C_07.00.a"]
         z_40 = builder.dictionary_z_rows(SOURCES / "4.0_dictionary.xlsx", tab_sheet_40)
-        self.assertEqual(len(z_40), 80)
+        self.assertEqual(len(z_40), 29)
+        z_40_memorandum = builder.dictionary_z_rows(SOURCES / "4.0_dictionary.xlsx", workbook_40["C_07.00.c"])
+        self.assertEqual(len(z_40_memorandum), 8)
+        self.assertEqual(len({code for code, _label in z_40} | {code for code, _label in z_40_memorandum}), 30)
         workbook_40.close()
         archive_40.close()
 

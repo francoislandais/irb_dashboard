@@ -1,26 +1,21 @@
 {
-  "layout_rows": 91710,
+  "layout_rows": 77519,
   "inferred_display_formats": {
-    "%": 3501,
-    "Unit": 1862
+    "%": 3467,
+    "Unit": 1821
   },
-  "template_release_rows": 2267,
+  "template_release_rows": 2263,
   "workbooks": 115,
   "workbooks_with_errors": 0,
   "modules_without_effective_date_rule": [],
   "schedule_rows": 74,
-  "templates_with_discriminating_suffixes": 15,
-  "unique_discriminating_template_ids": 15,
+  "templates_with_discriminating_suffixes": 13,
+  "unique_discriminating_template_ids": 13,
   "discriminating_suffix_templates": [
     {
       "module_code": "CODIS",
       "template_id": "K_27.02",
       "conflicting_axis_code_cases": 14
-    },
-    {
-      "module_code": "CODIS",
-      "template_id": "K_29.01",
-      "conflicting_axis_code_cases": 11
     },
     {
       "module_code": "CODIS",
@@ -51,11 +46,6 @@
       "module_code": "COREP",
       "template_id": "C_66.01",
       "conflicting_axis_code_cases": 1
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_08.05.1",
-      "conflicting_axis_code_cases": 11
     },
     {
       "module_code": "FINDIS",
