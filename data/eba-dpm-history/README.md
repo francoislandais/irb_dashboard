@@ -22,6 +22,8 @@ Les archives téléchargées sont contrôlées par taille et SHA-256 puis décri
 
 Les lignes indentées des layouts annotés deviennent des chemins hiérarchiques séparés par `/`. Les colonnes reprennent le code de colonne et le libellé terminal. Pour les layouts DPM 1.0, les feuilles numérotées d’un template fournissent les codes et libellés de l’axe Z : le générateur ne développe pas tous les membres des domaines de dictionnaire référencés, car cela ajouterait des possibilités qui ne s’appliquent pas au template. En DPM 2.0, les dimensions de feuille explicitement déclarées par `Key value` sont résolues dans le glossaire. Les autres références de propriétés ne sont pas des valeurs d’axe Z.
 
+Les suffixes de template `.a`, `.b`, etc. sont retirés et les mappings identiques fusionnés, sauf si un même code d’axe possède des libellés distincts entre suffixes ou si leurs dates d’application divergent. Ces exceptions sont listées dans `build_report.json` avec leur nombre de codes conflictuels.
+
 Le résolveur accepte un code de template, une date de référence et, si le code existe dans plusieurs modules, le module. Les intervalles sont semi-ouverts : `effective_from` est inclus et `effective_to` ne l’est pas. Il suit les équivalences de familles lors du passage aux modules DPM 2.0 (par exemple une demande `COREP` peut retrouver un layout publié sous `COREP_OF`). Il faut tout de même fournir le module lorsqu’un même code de template est réutilisé dans plusieurs familles.
 
 ## Sources et versions

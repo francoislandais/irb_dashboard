@@ -89,6 +89,23 @@ class DpmTaxonomyTests(unittest.TestCase):
         workbook.close()
         archive.close()
 
+    def test_suffix_is_kept_only_when_it_disambiguates_an_axis_code(self):
+        mappings = [
+            {"module_code": "COREP", "framework": "3.2", "table_id": "C_01.00.a", "coordinate": "y_axis_rc_code", "code": "10", "description": "Own funds"},
+            {"module_code": "COREP", "framework": "3.2", "table_id": "C_01.00.b", "coordinate": "y_axis_rc_code", "code": "10", "description": " own   funds "},
+            {"module_code": "RES", "framework": "3.2", "table_id": "T_01.00.a", "coordinate": "y_axis_rc_code", "code": "511", "description": "Own funds/CET1/Share capital"},
+            {"module_code": "RES", "framework": "3.2", "table_id": "T_01.00.b", "coordinate": "y_axis_rc_code", "code": "511", "description": "Liabilities/Residual liabilities/Share capital"},
+        ]
+        templates = [
+            {"module_code": "COREP", "framework": "3.2", "template_id": "C_01.00.a", "effective_from": "2023-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "COREP", "framework": "3.2", "template_id": "C_01.00.b", "effective_from": "2023-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "RES", "framework": "3.2", "template_id": "T_01.00.a", "effective_from": "2023-06-30", "effective_to": "", "status": "official"},
+            {"module_code": "RES", "framework": "3.2", "template_id": "T_01.00.b", "effective_from": "2023-06-30", "effective_to": "", "status": "official"},
+        ]
+        exceptions, conflicts = builder.find_discriminating_suffix_templates(mappings, templates)
+        self.assertEqual(exceptions, {("RES", "T_01.00")})
+        self.assertEqual(conflicts[("RES", "T_01.00")], 1)
+
     def test_module_schedule_selects_reference_date_intervals(self):
         rows = [
             {"module_code": "COREP", "template_id": "C_01.00", "framework": "3.0.1", "effective_from": "2021-06-30", "effective_to": "2023-06-30", "effective_source": "eba", "status": "official"},

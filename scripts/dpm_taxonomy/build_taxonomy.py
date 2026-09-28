@@ -68,6 +68,62 @@ def normalize_template(value: Any) -> str:
     return text
 
 
+def split_template_suffix(template_id: str) -> tuple[str, str] | None:
+    """Split a final one-letter sub-template suffix from a template code."""
+    match = re.fullmatch(r"(.+)\.([A-Za-z])", template_id.strip())
+    return (match.group(1), match.group(2).casefold()) if match else None
+
+
+def description_signature(value: str) -> str:
+    return " ".join(value.casefold().split())
+
+
+def find_discriminating_suffix_templates(
+    mapping_rows: Iterable[dict[str, str]],
+    template_rows: Iterable[dict[str, str]],
+) -> tuple[set[tuple[str, str]], dict[tuple[str, str], int]]:
+    """Find template families where suffix removal would create ambiguity.
+
+    A suffix is retained for a module/template family when siblings reuse the
+    same axis/code with different descriptions or have different applicability
+    intervals. Case-only description differences are treated as equivalent.
+    """
+    descriptions: dict[tuple[str, str, str, str, str], dict[str, set[tuple[str, str, str]]]] = defaultdict(lambda: defaultdict(set))
+    for row in mapping_rows:
+        split = split_template_suffix(row["table_id"])
+        if not split:
+            continue
+        base, suffix = split
+        key = (row["module_code"], row["framework"], base, row["coordinate"], row["code"])
+        descriptions[key][suffix].add((
+            description_signature(row["description"]),
+            row.get("format", ""),
+            row.get("ignore", ""),
+        ))
+
+    conflicts: dict[tuple[str, str], int] = defaultdict(int)
+    for key, by_suffix in descriptions.items():
+        if len(by_suffix) < 2:
+            continue
+        signatures = set().union(*by_suffix.values())
+        if len(signatures) > 1:
+            conflicts[(key[0], key[2])] += 1
+
+    intervals: dict[tuple[str, str, str], dict[str, set[tuple[str, str, str]]]] = defaultdict(lambda: defaultdict(set))
+    for row in template_rows:
+        split = split_template_suffix(row["template_id"])
+        if not split:
+            continue
+        base, suffix = split
+        key = (row["module_code"], row["framework"], base)
+        intervals[key][suffix].add((row["effective_from"], row["effective_to"], row["status"]))
+    for (module, _framework, base), by_suffix in intervals.items():
+        if len(by_suffix) > 1 and len(set().union(*by_suffix.values())) > 1:
+            conflicts[(module, base)] += 1
+
+    return set(conflicts), dict(conflicts)
+
+
 def release_from_name(filename: str, default: str) -> str:
     match = VERSION_RE.search(filename)
     return match.group(1) if match else default
@@ -318,7 +374,12 @@ def close_template_intervals(template_rows: Iterable[dict[str, str]]) -> list[di
     return ordered
 
 
-def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
+def extract_all() -> tuple[
+    list[dict[str, str]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    dict[tuple[str, str], int],
+]:
     schedules = read_schedule()
     layout_rows: list[dict[str, str]] = []
     template_rows: dict[tuple[str, str, str], dict[str, str]] = {}
@@ -369,11 +430,10 @@ def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict
                         # DPM 1.0 uses one numbered worksheet per tab/Z member;
                         # DPM 2.0 declares enumerated tab dimensions in the
                         # glossary via a Key value reference.
-                        zs = (
-                            dictionary_z_rows(dictionary, sheet)
-                            if version.startswith("4.")
-                            else legacy_sheet_z_rows(sheet)
-                        )
+                        if version.startswith("4."):
+                            zs = [(code, desc, 0) for code, desc in dictionary_z_rows(dictionary, sheet)]
+                        else:
+                            zs = [(code, desc, int(code)) for code, desc in legacy_sheet_z_rows(sheet)]
                     else:
                         zs = []
                     effective = schedule_match(module, version, table_id, schedules)
@@ -397,14 +457,14 @@ def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict
                         "source_workbook": member,
                         "source_sheet": sheet.title,
                     }
-                    for axis, entries in (("x", xs), ("y", ys), ("z", [(code, desc, 0) for code, desc in zs])):
+                    for axis, entries in (("x", xs), ("y", ys), ("z", zs)):
                         for order, (code, description, _row_number) in enumerate(entries, 1):
                             layout_rows.append({
                                 "table_id": table_id,
                                 "coordinate": AXIS_COORDINATES[axis],
                                 "code": code,
                                 "description": description,
-                                "order_first": "" if axis == "y" else str(order),
+                                "order_first": "" if axis == "y" else str(_row_number if axis == "z" and _row_number else order),
                                 "ignore": "",
                                 "format": "",
                                 "module_code": module,
@@ -425,6 +485,25 @@ def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict
                     "status": "parsed",
                 })
 
+    discriminating, suffix_conflicts = find_discriminating_suffix_templates(layout_rows, template_rows.values())
+
+    # Suffixes are usually display/segmentation variants of one template. Keep
+    # them only for module/template families where stripping them would make a
+    # reused axis code ambiguous.
+    for row in layout_rows:
+        split = split_template_suffix(row["table_id"])
+        if split and (row["module_code"], split[0]) not in discriminating:
+            row["table_id"] = split[0]
+
+    normalized_templates: dict[tuple[str, str, str], dict[str, str]] = {}
+    for row in template_rows.values():
+        split = split_template_suffix(row["template_id"])
+        normalized_id = row["template_id"]
+        if split and (row["module_code"], split[0]) not in discriminating:
+            normalized_id = split[0]
+        normalized = {**row, "template_id": normalized_id}
+        normalized_templates.setdefault((row["module_code"], normalized_id, row["framework"]), normalized)
+
     # Collapse duplicate sheet tabs, retaining the first occurrence for an
     # identical table/axis/code/release and preserving full source inventory.
     unique_layouts: dict[tuple[str, str, str, str, str], dict[str, str]] = {}
@@ -435,9 +514,9 @@ def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict
     # Materialise intervals within each module/template. DPM 2.0 module splits
     # remain visible as separate module histories and are followed by the
     # resolver when the caller requests the former module family.
-    sorted_templates = close_template_intervals(template_rows.values())
+    sorted_templates = close_template_intervals(normalized_templates.values())
 
-    return list(unique_layouts.values()), sorted_templates, inventory
+    return list(unique_layouts.values()), sorted_templates, inventory, suffix_conflicts
 
 
 def write_csv(path: Path, rows: Iterable[dict[str, str]], columns: list[str]) -> None:
@@ -452,7 +531,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     args = parser.parse_args()
-    dimensions, templates, inventory = extract_all()
+    dimensions, templates, inventory, suffix_conflicts = extract_all()
     write_csv(args.output_dir / "versioned_dimension_mapping.csv", dimensions, [
         "table_id", "coordinate", "code", "description", "order_first", "ignore", "format",
         "module_code", "framework", "effective_from", "effective_to", "status", "source_workbook", "source_sheet", "effective_source",
@@ -473,6 +552,12 @@ def main() -> int:
         "workbooks_with_errors": sum(1 for r in inventory if r["status"].startswith("workbook_error")),
         "modules_without_effective_date_rule": unresolved,
         "schedule_rows": len(read_schedule()),
+        "templates_with_discriminating_suffixes": len(suffix_conflicts),
+        "unique_discriminating_template_ids": len({template for _module, template in suffix_conflicts}),
+        "discriminating_suffix_templates": [
+            {"module_code": module, "template_id": template, "conflicting_axis_code_cases": count}
+            for (module, template), count in sorted(suffix_conflicts.items())
+        ],
         "generated_from": "official EBA source packages listed in sources.json",
     }
     (args.output_dir / "build_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
