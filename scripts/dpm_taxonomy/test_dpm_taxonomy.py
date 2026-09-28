@@ -126,9 +126,15 @@ class DpmTaxonomyTests(unittest.TestCase):
         workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
 
         f18 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.a"], 9)}
-        self.assertEqual(f18["5"], "Cash balances at central banks and other demand deposits")
-        self.assertEqual(f18["10"], "Debt securities")
-        self.assertEqual(f18["20"], "Debt securities/Central banks")
+        cost_parent = "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST"
+        self.assertEqual(f18["5"], f"{cost_parent}/Cash balances at central banks and other demand deposits")
+        self.assertEqual(f18["10"], f"{cost_parent}/Debt securities")
+        self.assertEqual(f18["20"], f"{cost_parent}/Debt securities/Central banks")
+        self.assertEqual(f18["70"], f"{cost_parent}/Loans and advances")
+        self.assertEqual(f18["180"], cost_parent)
+        fair_value_parent = "DEBT INSTRUMENTS AT FAIR VALUE THROUGH OTHER COMPREHENSIVE INCOME OR THROUGH EQUITY SUBJECT TO IMPAIRMENT"
+        self.assertEqual(f18["201"], fair_value_parent)
+        self.assertEqual(f18["211"], f"{fair_value_parent}/Debt securities")
 
         f18_off_balance = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.b"], 9)}
         self.assertEqual(f18_off_balance["340"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given")

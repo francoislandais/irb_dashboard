@@ -358,26 +358,39 @@ def y_axis_rows(sheet: Any, rows_row: int | None) -> list[tuple[str, str, int]]:
         paths.append("/".join([ancestor for _level, ancestor in ancestors] + [label]))
         ancestors.append((depth, label))
 
-    # A final, less-indented summary can be the logical parent of the
-    # immediately preceding deeper block (for example, Total assets or
-    # Off-balance sheet exposures). Attach that block retroactively, stopping
-    # at the preceding line on the same or a shallower indentation level.
-    if len(items) > 1 and items[-1][2] < items[-2][2]:
-        _parent_code, parent_label, parent_depth, _parent_row = items[-1]
-        start = len(items) - 2
-        while start >= 0 and items[start][2] > parent_depth:
-            start -= 1
-        start += 1
-
+    def attach_preceding_block(start: int, end: int, parent_index: int) -> None:
+        """Prefix a preceding deeper block with its later parent row."""
+        parent_label = items[parent_index][1]
         block_ancestors: list[tuple[int, str]] = []
-        for index in range(start, len(items) - 1):
+        for index in range(start, end):
             _code, label, depth, _row_no = items[index]
             while block_ancestors and block_ancestors[-1][0] >= depth:
                 block_ancestors.pop()
             relative_path = [ancestor for _level, ancestor in block_ancestors] + [label]
             paths[index] = "/".join([parent_label] + relative_path)
             block_ancestors.append((depth, label))
-        paths[-1] = parent_label
+        paths[parent_index] = parent_label
+
+    # Some templates put their first, lowest-indentation node after an initial
+    # block of more-indented rows. That first node is the retroactive root for
+    # the leading block (e.g. F_18.00's code 180). Later rows at that same
+    # indentation remain peers, so they do not steal the prior block.
+    minimum_depth = min(item[2] for item in items)
+    first_minimum = next(index for index, item in enumerate(items) if item[2] == minimum_depth)
+    if first_minimum > 0 and all(item[2] > minimum_depth for item in items[:first_minimum]):
+        attach_preceding_block(0, first_minimum, first_minimum)
+
+    # A final, less-indented total can parent the trailing deeper block too.
+    # Stop at the previous same-level or shallower row so earlier sections
+    # remain siblings rather than being swept under this total.
+    if len(items) > 1 and items[-1][2] < items[-2][2] and len(items) - 1 != first_minimum:
+        parent_depth = items[-1][2]
+        start = len(items) - 2
+        while start >= 0 and items[start][2] > parent_depth:
+            start -= 1
+        start += 1
+        if start < len(items) - 1:
+            attach_preceding_block(start, len(items) - 1, len(items) - 1)
 
     return [(code, paths[index], row_no) for index, (code, _label, _depth, row_no) in enumerate(items)]
 
