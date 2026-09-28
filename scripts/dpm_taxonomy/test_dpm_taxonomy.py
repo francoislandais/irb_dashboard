@@ -66,6 +66,29 @@ class DpmTaxonomyTests(unittest.TestCase):
         workbook.close()
         archive.close()
 
+    def test_legacy_corep_0801_z_axis_uses_numbered_template_sheets(self):
+        archive = zipfile.ZipFile(SOURCES / "3.2_layouts.zip")
+        corep_file = next(n for n in archive.namelist() if "COREP" in n and n.endswith(".xlsx"))
+        workbook = load_workbook(io.BytesIO(archive.read(corep_file)), data_only=True)
+        sheets = [sheet for sheet in workbook.worksheets if sheet.title.startswith("C 08.01.a(")]
+
+        z_rows = [entry for sheet in sheets for entry in builder.legacy_sheet_z_rows(sheet)]
+        self.assertEqual(len(sheets), 17)
+        self.assertEqual(len(z_rows), 17)
+        self.assertEqual(len({code for code, _description in z_rows}), 17)
+        self.assertTrue(all(code.isdigit() for code, _description in z_rows))
+        self.assertEqual(z_rows[0][0], "0001")
+        self.assertIn("Total with own estimates", z_rows[0][1])
+        self.assertFalse(any(code.casefold().startswith("qx") for code, _description in z_rows))
+
+        # The old domain-wide resolver leaked more than 300 unrelated members
+        # into this 17-tab template; DPM 1.0 must use its sheets instead.
+        leaked = builder.dictionary_z_rows(SOURCES / "3.2_dictionary.xlsx", sheets[0])
+        self.assertGreater(len(leaked), 300)
+
+        workbook.close()
+        archive.close()
+
     def test_module_schedule_selects_reference_date_intervals(self):
         rows = [
             {"module_code": "COREP", "template_id": "C_01.00", "framework": "3.0.1", "effective_from": "2021-06-30", "effective_to": "2023-06-30", "effective_source": "eba", "status": "official"},

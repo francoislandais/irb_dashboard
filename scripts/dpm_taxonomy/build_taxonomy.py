@@ -248,6 +248,30 @@ def dictionary_z_rows(dictionary_path: Path, sheet: Any) -> list[tuple[str, str]
     return list(unique.items())
 
 
+def legacy_sheet_z_rows(sheet: Any) -> list[tuple[str, str]]:
+    """Read a DPM 1.0 sheet-per Z member from its numbered layout sheet.
+
+    Legacy annotated packages materialise each tab value as its own worksheet:
+    the sheet title ends in ``(001)``, and the matching label is repeated in
+    the first rows. Expanding every referenced glossary domain here would
+    incorrectly add hundreds of unrelated members to the template's Z axis.
+    """
+    match = re.search(r"\((\d{3,4})\)\s*$", clean(sheet.title))
+    if not match:
+        return []
+    code = match.group(1)
+    numeric_code = int(code)
+
+    for row in sheet.iter_rows(min_row=1, max_row=min(sheet.max_row, 5)):
+        for cell in row:
+            text = clean(cell.value)
+            label_match = re.match(r"0*(\d{1,4})\s+(.+)$", text)
+            if label_match and int(label_match.group(1)) == numeric_code:
+                return [(code, label_match.group(2))]
+
+    return []
+
+
 def read_schedule() -> list[dict[str, str]]:
     with SCHEDULE.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
@@ -341,7 +365,17 @@ def extract_all() -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict
                             "sheet per" in header_text
                             or (table_sheet_counts[table_id] > 1 and bool(re.search(r"\([^)]*\d{3,4}\)\s*$", clean(sheet.title))))
                         )
-                    zs = dictionary_z_rows(dictionary, sheet) if has_variable_tab_axis else []
+                    if has_variable_tab_axis:
+                        # DPM 1.0 uses one numbered worksheet per tab/Z member;
+                        # DPM 2.0 declares enumerated tab dimensions in the
+                        # glossary via a Key value reference.
+                        zs = (
+                            dictionary_z_rows(dictionary, sheet)
+                            if version.startswith("4.")
+                            else legacy_sheet_z_rows(sheet)
+                        )
+                    else:
+                        zs = []
                     effective = schedule_match(module, version, table_id, schedules)
                     status = effective["status"] if effective else "needs_effective_date"
                     from_date = effective["effective_from"] if effective else ""
