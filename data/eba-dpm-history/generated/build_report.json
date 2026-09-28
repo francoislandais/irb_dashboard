@@ -76,7 +76,7 @@
     {
       "module_code": "CODIS",
       "template_id": "K_74.00",
-      "conflicting_axis_code_cases": 3
+      "conflicting_axis_code_cases": 2
     },
     {
       "module_code": "COREP",
@@ -181,7 +181,7 @@
     {
       "module_code": "COREP_OF",
       "template_id": "C_07.00",
-      "conflicting_axis_code_cases": 20
+      "conflicting_axis_code_cases": 26
     },
     {
       "module_code": "COREP_OF",
@@ -241,7 +241,7 @@
     {
       "module_code": "FINDIS",
       "template_id": "K_21.01",
-      "conflicting_axis_code_cases": 27
+      "conflicting_axis_code_cases": 30
     },
     {
       "module_code": "FINDIS",

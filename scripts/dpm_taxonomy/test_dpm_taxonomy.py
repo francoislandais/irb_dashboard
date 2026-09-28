@@ -73,6 +73,10 @@ class DpmTaxonomyTests(unittest.TestCase):
             credit_by_code["103"],
             "BREAKDOWN OF THE FULLY ADJUSTED EXPOSURE VALUE OF OFF-BALANCE SHEET ITEMS BY CONVERSION FACTORS/STANDARD CONVERSION FACTORS/0.1",
         )
+        self.assertEqual(
+            credit_by_code["90"],
+            "Exposure after CRM substitution effects pre conversion factors/Substitution of the exposure due to CRM",
+        )
 
         operational_risk = workbook["C_17.01.a"]
         operational_x = builder.x_axis_rows(operational_risk, *builder.find_marker_rows(operational_risk))
@@ -83,6 +87,35 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertIn("sheet per exposure class", top)
         z = builder.dictionary_z_rows(SOURCES / "4.2_dictionary.xlsx", tab_sheet)
         self.assertTrue(z)
+        workbook.close()
+        archive.close()
+
+    def test_corep_40_unmerged_headers_infer_parent_scopes(self):
+        archive = zipfile.ZipFile(SOURCES / "4.0_layouts.zip")
+        corep_file = next(n for n in archive.namelist() if "COREP_OFCOREP" in n and n.endswith(".xlsx"))
+        workbook = load_workbook(io.BytesIO(archive.read(corep_file)), data_only=True)
+        sheet = workbook["C_08.01.a"]
+
+        x_rows = builder.x_axis_rows(sheet, *builder.find_marker_rows(sheet))
+        x_by_code = {code: description for code, description, _row in x_rows}
+        self.assertEqual(
+            x_by_code["30"],
+            "Original exposure pre conversion factors/Of which: large financial sector entities and unregulated financial entities",
+        )
+        self.assertEqual(
+            x_by_code["50"],
+            "Credit risk mitigation (CRM) techniques with substitution effects on the exposure/Unfunded credit protection/(-) Credit derivatives",
+        )
+        self.assertEqual(
+            x_by_code["102"],
+            "BREAKDOWN OF THE FULLY ADJUSTED EXPOSURE VALUE OF OFF-BALANCE SHEET ITEMS BY CONVERSION FACTORS/STANDARD CONVERSION FACTORS/0",
+        )
+        self.assertEqual(
+            x_by_code["103"],
+            "BREAKDOWN OF THE FULLY ADJUSTED EXPOSURE VALUE OF OFF-BALANCE SHEET ITEMS BY CONVERSION FACTORS/STANDARD CONVERSION FACTORS/0.1",
+        )
+        self.assertEqual(x_by_code["90"], "Exposure after CRM substitution effects pre conversion factors")
+
         workbook.close()
         archive.close()
 
