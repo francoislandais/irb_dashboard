@@ -151,6 +151,58 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertLess([code for code, _description, _row in rows].index("120"), [code for code, _description, _row in rows].index("5"))
         workbook.close()
 
+    def test_y_axis_code_less_labels_become_structural_parents(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.cell(1, 2, "Rows")
+        for row_no, label, code, indent in [
+            (2, "Deferred tax assets and liabilities", "", 0),
+            (3, "Total deferred tax assets", "10", 2),
+            (4, "Assets not relying on future profitability", "20", 4),
+            (5, "Provisions and expected losses", "", 0),
+            (6, "IRB excess or shortfall", "30", 2),
+        ]:
+            sheet.cell(row_no, 2, label).alignment = Alignment(indent=indent)
+            sheet.cell(row_no, 3, code)
+
+        entries = builder.y_axis_rows(sheet, 1, include_parent=True)
+        by_code = {entry[0]: entry for entry in entries}
+        structural_parents = {entry[0]: entry[1] for entry in entries if entry[4]}
+
+        first_parent = by_code["10"][3]
+        second_parent = by_code["30"][3]
+        self.assertEqual(structural_parents[first_parent], "Deferred tax assets and liabilities")
+        self.assertEqual(structural_parents[second_parent], "Provisions and expected losses")
+        self.assertEqual(by_code["10"][5], "Deferred tax assets and liabilities/Total deferred tax assets")
+        self.assertEqual(by_code["20"][3], "10")
+        self.assertEqual(by_code["30"][5], "Provisions and expected losses/IRB excess or shortfall")
+        workbook.close()
+
+    def test_real_corep_c03_c04_code_less_section_rows_are_in_hierarchy(self):
+        archive = zipfile.ZipFile(SOURCES / "3.2_layouts.zip")
+        member = next(name for name in archive.namelist() if "320-P1-COREP 3.2.xlsx" in name)
+        workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
+
+        c04_sheet = workbook["C 04.00"]
+        c04 = builder.y_axis_rows(c04_sheet, builder.find_marker_rows(c04_sheet)[1], "C_04.00", include_parent=True)
+        c04_by_code = {entry[0]: entry for entry in c04}
+        self.assertEqual(
+            c04_by_code["10"][5],
+            "0009 Deferred tax assets and liabilities/Total deferred tax assets",
+        )
+        self.assertEqual(c04_by_code["20"][3], "10")
+
+        c03_sheet = workbook["C 03.00"]
+        c03 = builder.y_axis_rows(c03_sheet, builder.find_marker_rows(c03_sheet)[1], "C_03.00", include_parent=True)
+        c03_by_code = {entry[0]: entry for entry in c03}
+        self.assertEqual(
+            c03_by_code["300"][5],
+            "0299 Memorandum Items: Capital ratios without application of the transitional provisions on IFRS 9/CET1 Capital ratio without application of the transitional provisions on IFRS 9",
+        )
+        self.assertTrue(c03_by_code["300"][3].startswith("__PARENT__"))
+        workbook.close()
+        archive.close()
+
     def test_finrep_32_f18_and_f01_hierarchy_from_source_workbook(self):
         archive = zipfile.ZipFile(SOURCES / "3.2_layouts.zip")
         member = next(name for name in archive.namelist() if name.endswith("Annotated Table Layout 321-P2-FINREP 3.2.1.xlsx"))

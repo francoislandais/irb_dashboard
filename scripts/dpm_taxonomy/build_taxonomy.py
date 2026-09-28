@@ -477,7 +477,11 @@ def y_axis_rows(
     for row_no in range(rows_row, sheet.max_row + 1):
         code = code_text(sheet.cell(row_no, 3).value)
         label = clean(sheet.cell(row_no, 2).value)
-        if not code or not label or code.casefold() in {"code", "row"}:
+        # A label without a selectable coordinate code can still be a real
+        # hierarchy node. Keep it in the indentation stream so later coded
+        # rows can inherit it as a parent; with_parent_codes() will assign an
+        # internal synthetic code only when a descendant actually needs it.
+        if not label or label.casefold() in {"code", "row", "rows"}:
             continue
         indent = sheet.cell(row_no, 2).alignment.indent or 0
         depth = max(0, round(float(indent) / 2))
@@ -490,7 +494,7 @@ def y_axis_rows(
             and re.fullmatch(r"F_18\.00(?:\.[a-z0-9]+)?", table_id, flags=re.IGNORECASE)
         ):
             depth = max(depth, 1)
-        items.append((code, label, depth, row_no))
+        items.append((code or "", label, depth, row_no))
 
     if not items:
         return []
@@ -522,26 +526,52 @@ def y_axis_rows(
         if start < end:
             retroactive_moves.append((items[parent_index][3], items[start][3]))
 
-    # Some templates put their first, lowest-indentation node after an initial
-    # block of more-indented rows. That first node is the retroactive root for
-    # the leading block (e.g. F_18.00's code 180). Later rows at that same
-    # indentation remain peers, so they do not steal the prior block.
-    minimum_depth = min(item[2] for item in items)
-    first_minimum = next(index for index, item in enumerate(items) if item[2] == minimum_depth)
-    if first_minimum > 0 and all(item[2] > minimum_depth for item in items[:first_minimum]):
-        attach_preceding_block(0, first_minimum, first_minimum)
+    # Retroactive parent detection applies to coded rows only. Some layouts
+    # append uncoded notes after the final coded row, and those notes must not
+    # displace a genuine trailing total (e.g. F_18.00's code 550). Likewise, a
+    # leading uncoded section title is already the root of its descendants and
+    # prevents a later top-level coded sibling from stealing that block.
+    coded_indices = [index for index, item in enumerate(items) if item[0]]
+    first_minimum = -1
+    if coded_indices:
+        minimum_depth = min(items[index][2] for index in coded_indices)
+        first_minimum = next(index for index in coded_indices if items[index][2] == minimum_depth)
+        preceding_coded = [index for index in coded_indices if index < first_minimum]
+        preceding_uncoded_root = any(
+            not items[index][0] and items[index][2] <= minimum_depth
+            for index in range(first_minimum)
+        )
+        if (
+            preceding_coded
+            and not preceding_uncoded_root
+            and all(items[index][2] > minimum_depth for index in preceding_coded)
+        ):
+            attach_preceding_block(0, first_minimum, first_minimum)
 
-    # A final, less-indented total can parent the trailing deeper block too.
-    # Stop at the previous same-level or shallower row so earlier sections
-    # remain siblings rather than being swept under this total.
-    if len(items) > 1 and items[-1][2] < items[-2][2] and len(items) - 1 != first_minimum:
-        parent_depth = items[-1][2]
-        start = len(items) - 2
-        while start >= 0 and items[start][2] > parent_depth:
+    # A final coded, less-indented total can parent the trailing deeper block.
+    # Ignore later uncoded notes when choosing that terminal row, and stop at
+    # the previous coded row at the same or a shallower indentation.
+    if len(coded_indices) > 1:
+        parent_index = coded_indices[-1]
+        previous_coded_index = coded_indices[-2]
+        parent_depth = items[parent_index][2]
+        start = previous_coded_index
+        while start >= 0:
+            if items[start][0] and items[start][2] <= parent_depth:
+                break
             start -= 1
         start += 1
-        if start < len(items) - 1:
-            attach_preceding_block(start, len(items) - 1, len(items) - 1)
+        preceding_uncoded_root = any(
+            not items[index][0] and items[index][2] <= parent_depth
+            for index in range(start, parent_index)
+        )
+        if (
+            items[previous_coded_index][2] > parent_depth
+            and parent_index != first_minimum
+            and not preceding_uncoded_root
+        ):
+            if start < parent_index:
+                attach_preceding_block(start, parent_index, parent_index)
 
     # Keep the source order except where a parent was identified after its
     # children: move it immediately before the first child it now parents.
@@ -553,9 +583,9 @@ def y_axis_rows(
         ordered.insert(child_index, parent)
 
     if not include_parent:
-        return [(item[0], "/".join(path), item[3]) for item, path in ordered]
+        return [(item[0], "/".join(path), item[3]) for item, path in ordered if item[0]]
 
-    return with_parent_codes([(item[0], tuple(path), item[3]) for item, path in ordered])
+    return with_parent_codes([(item[0], tuple(path), item[3]) for item, path in ordered if item[0]])
 
 
 @functools.lru_cache(maxsize=32)
