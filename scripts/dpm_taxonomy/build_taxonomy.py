@@ -332,7 +332,7 @@ def x_axis_rows(sheet: Any, columns_row: int | None, rows_row: int | None) -> li
     return output
 
 
-def y_axis_rows(sheet: Any, rows_row: int | None) -> list[tuple[str, str, int]]:
+def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tuple[str, str, int]]:
     if rows_row is None:
         return []
     items: list[tuple[str, str, int, int]] = []
@@ -343,6 +343,15 @@ def y_axis_rows(sheet: Any, rows_row: int | None) -> list[tuple[str, str, int]]:
             continue
         indent = sheet.cell(row_no, 2).alignment.indent or 0
         depth = max(0, round(float(indent) / 2))
+        # In some FINREP F_18.00 releases, the source workbook accidentally
+        # omits the single indentation level on code 5 (Cash balances). Keep
+        # this correction scoped to that row/template, across all releases.
+        if (
+            code == "5"
+            and label.casefold().startswith("cash balance")
+            and re.fullmatch(r"F_18\.00(?:\.[a-z0-9]+)?", table_id, flags=re.IGNORECASE)
+        ):
+            depth = max(depth, 1)
         items.append((code, label, depth, row_no))
 
     if not items:
@@ -570,7 +579,7 @@ def extract_all() -> tuple[
                         continue
                     columns_row, rows_row = find_marker_rows(sheet)
                     xs = x_axis_rows(sheet, columns_row, rows_row)
-                    ys = y_axis_rows(sheet, rows_row)
+                    ys = y_axis_rows(sheet, rows_row, table_id)
                     header_text = " ".join(
                         clean(sheet.cell(r, c).value)
                         for r in range(1, min(sheet.max_row, 5) + 1)

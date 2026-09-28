@@ -125,7 +125,7 @@ class DpmTaxonomyTests(unittest.TestCase):
         member = next(name for name in archive.namelist() if name.endswith("Annotated Table Layout 321-P2-FINREP 3.2.1.xlsx"))
         workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
 
-        f18 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.a"], 9)}
+        f18 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.a"], 9, "F_18.00.a")}
         cost_parent = "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST"
         self.assertEqual(f18["5"], f"{cost_parent}/Cash balances at central banks and other demand deposits")
         self.assertEqual(f18["10"], f"{cost_parent}/Debt securities")
@@ -136,7 +136,7 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(f18["201"], fair_value_parent)
         self.assertEqual(f18["211"], f"{fair_value_parent}/Debt securities")
 
-        f18_off_balance = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.b"], 9)}
+        f18_off_balance = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.b"], 9, "F_18.00.b")}
         self.assertEqual(f18_off_balance["340"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given")
         self.assertEqual(f18_off_balance["350"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given/Central banks")
         self.assertEqual(f18_off_balance["550"], "OFF-BALANCE SHEET EXPOSURES")
@@ -149,6 +149,43 @@ class DpmTaxonomyTests(unittest.TestCase):
 
         workbook.close()
         archive.close()
+
+    def test_finrep_f18_cash_balance_missing_indent_is_corrected_in_42_releases(self):
+        archive = zipfile.ZipFile(SOURCES / "4.2_layouts.zip")
+        members = (
+            next(n for n in archive.namelist() if "FINREP9FINREP 4.2.xlsx" in n),
+            next(n for n in archive.namelist() if "FINREP9DPFINREP 4.2.1.xlsx" in n),
+        )
+
+        for member in members:
+            with self.subTest(workbook=Path(member).name):
+                workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
+                sheet = workbook["F_18.00.a"]
+                rows_row = builder.find_marker_rows(sheet)[1]
+                result = {code: description for code, description, _row in builder.y_axis_rows(sheet, rows_row, "F_18.00.a")}
+                parent = "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST"
+                self.assertEqual(result["5"], f"{parent}/Cash balances at central banks and other demand deposits")
+                self.assertEqual(result["10"], f"{parent}/Debt securities")
+                self.assertEqual(result["70"], f"{parent}/Loans and advances")
+                self.assertEqual(result["180"], parent)
+                workbook.close()
+
+        archive.close()
+
+    def test_f18_indent_exception_does_not_apply_to_other_templates(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.cell(1, 2, "Rows")
+        sheet.cell(2, 2, "Cash balances").alignment = Alignment(indent=0)
+        sheet.cell(2, 3, "5")
+        sheet.cell(3, 2, "Debt securities").alignment = Alignment(indent=2)
+        sheet.cell(3, 3, "10")
+
+        result = {code: description for code, description, _row in builder.y_axis_rows(sheet, 1, "X_18.00")}
+
+        self.assertEqual(result["5"], "Cash balances")
+        self.assertEqual(result["10"], "Cash balances/Debt securities")
+        workbook.close()
 
     def test_corep_40_unmerged_headers_infer_parent_scopes(self):
         archive = zipfile.ZipFile(SOURCES / "4.0_layouts.zip")
