@@ -1,12 +1,12 @@
 {
-  "layout_rows": 90062,
-  "template_release_rows": 2502,
+  "layout_rows": 89981,
+  "template_release_rows": 2499,
   "workbooks": 115,
   "workbooks_with_errors": 0,
   "modules_without_effective_date_rule": [],
   "schedule_rows": 74,
-  "templates_with_discriminating_suffixes": 67,
-  "unique_discriminating_template_ids": 51,
+  "templates_with_discriminating_suffixes": 66,
+  "unique_discriminating_template_ids": 50,
   "discriminating_suffix_templates": [
     {
       "module_code": "AE",
@@ -82,11 +82,6 @@
       "module_code": "COREP",
       "template_id": "C_07.00",
       "conflicting_axis_code_cases": 6
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_08.01",
-      "conflicting_axis_code_cases": 8
     },
     {
       "module_code": "COREP",

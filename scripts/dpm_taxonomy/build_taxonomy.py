@@ -78,6 +78,24 @@ def description_signature(value: str) -> str:
     return " ".join(value.casefold().split())
 
 
+def suffix_collision_signature(module: str, base: str, value: str) -> str:
+    """Normalize known equivalent labels before treating suffixes as distinct.
+
+    In legacy COREP C_08.01, sheets .a and .b share the specialized-lending
+    Y-axis rows. The only textual difference is the parent label
+    "Specialized lending slotting criteria (b)" vs "...: total"; the actual
+    row codes and meanings are the same. Sheet .b adds X-axis rows such as
+    code 100 that do not exist in .a, so the suffix does not disambiguate data.
+    """
+    signature = description_signature(value)
+    if module == "COREP" and base == "C_08.01":
+        signature = signature.replace(
+            "specialized lending slotting criteria (b)",
+            "specialized lending slotting criteria: total",
+        )
+    return signature
+
+
 def find_discriminating_suffix_templates(
     mapping_rows: Iterable[dict[str, str]],
     template_rows: Iterable[dict[str, str]],
@@ -96,7 +114,7 @@ def find_discriminating_suffix_templates(
         base, suffix = split
         key = (row["module_code"], row["framework"], base, row["coordinate"], row["code"])
         descriptions[key][suffix].add((
-            description_signature(row["description"]),
+            suffix_collision_signature(row["module_code"], base, row["description"]),
             row.get("format", ""),
             row.get("ignore", ""),
         ))

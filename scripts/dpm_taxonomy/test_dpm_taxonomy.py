@@ -106,6 +106,24 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(exceptions, {("RES", "T_01.00")})
         self.assertEqual(conflicts[("RES", "T_01.00")], 1)
 
+    def test_corep_0801_suffixes_merge_when_codes_do_not_collide(self):
+        mappings = [
+            {"module_code": "COREP", "framework": "2.9.1.1", "table_id": "C_08.01.a", "coordinate": "y_axis_rc_code", "code": "80", "description": "Total exposures/Specialized lending slotting criteria (b)"},
+            {"module_code": "COREP", "framework": "2.9.1.1", "table_id": "C_08.01.b", "coordinate": "y_axis_rc_code", "code": "80", "description": "Total exposures/Specialized lending slotting criteria: total"},
+            {"module_code": "COREP", "framework": "2.9.1.1", "table_id": "C_08.01.a", "coordinate": "y_axis_rc_code", "code": "100", "description": "Total exposures/Specialized lending slotting criteria (b)/0.5"},
+            {"module_code": "COREP", "framework": "2.9.1.1", "table_id": "C_08.01.b", "coordinate": "y_axis_rc_code", "code": "100", "description": "Total exposures/Specialized lending slotting criteria: total/0.5"},
+            {"module_code": "COREP", "framework": "2.9.1.1", "table_id": "C_08.01.b", "coordinate": "x_axis_rc_code", "code": "100", "description": "Of which: off balance sheet items"},
+        ]
+        templates = [
+            {"module_code": "COREP", "framework": "2.9.1.1", "template_id": f"C_08.01.{suffix}", "effective_from": "2019-12-31", "effective_to": "2021-06-30", "status": "baseline"}
+            for suffix in ("a", "b")
+        ]
+
+        exceptions, conflicts = builder.find_discriminating_suffix_templates(mappings, templates)
+
+        self.assertNotIn(("COREP", "C_08.01"), exceptions)
+        self.assertNotIn(("COREP", "C_08.01"), conflicts)
+
     def test_module_schedule_selects_reference_date_intervals(self):
         rows = [
             {"module_code": "COREP", "template_id": "C_01.00", "framework": "3.0.1", "effective_from": "2021-06-30", "effective_to": "2023-06-30", "effective_source": "eba", "status": "official"},
