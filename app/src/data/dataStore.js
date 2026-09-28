@@ -22,8 +22,8 @@ const initialState = {
   institutionDictionaryError: "",
   institutionDictionaryFileName: "",
   selectedInstitutionId: "",
-  availableTaxonomies: [],
-  selectedTaxonomy: "",
+  availableTaxonomiesByTemplate: {},
+  selectedTaxonomiesByTemplate: {},
   jstOptions: [],
   loadedAt: null,
   explorerPoints: [],
@@ -228,11 +228,11 @@ export function createDataStore() {
       emit();
     },
 
-    setTaxonomyDimensionData({ availableTaxonomies, selectedTaxonomy, dimensionMapping, explorerPoints }) {
+    setTaxonomyDimensionData({ availableTaxonomiesByTemplate, selectedTaxonomiesByTemplate, dimensionMapping, explorerPoints }) {
       state = {
         ...state,
-        availableTaxonomies: [...(availableTaxonomies ?? [])],
-        selectedTaxonomy: selectedTaxonomy ?? "",
+        availableTaxonomiesByTemplate: availableTaxonomiesByTemplate ?? {},
+        selectedTaxonomiesByTemplate: selectedTaxonomiesByTemplate ?? {},
         dimensionMapping,
         dimensionMappingError: "",
         explorerPoints: explorerPoints ?? [],

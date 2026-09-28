@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260925-institution-id";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260927-ratio-toggle";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20260928-template-taxonomy";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
@@ -37,7 +37,6 @@ const elements = {
   rowCount: document.querySelector("#row-count"),
   sidebarToggle: document.querySelector("#sidebar-toggle"),
   supportNotice: document.querySelector("#support-notice"),
-  taxonomySelect: document.querySelector("#taxonomy-select"),
   unitSelect: document.querySelector("#unit-select")
 };
 
@@ -141,9 +140,6 @@ export function wireUi(actions) {
     saveExplorerScrollPosition();
     actions.updateSelectedUnit(event.target.value);
   });
-  elements.taxonomySelect?.addEventListener("change", (event) => {
-    actions.updateSelectedTaxonomy(event.target.value);
-  });
   elements.moduleButtons.forEach((button) => {
     button.addEventListener("click", () => actions.setActiveModule(button.dataset.moduleTarget));
   });
@@ -202,7 +198,6 @@ export function renderAppState(state) {
   if (elements.exportStandaloneButton) elements.exportStandaloneButton.disabled = !hasData;
   if (elements.peersButton) elements.peersButton.disabled = (state.institutionOptions ?? state.jstOptions).length === 0;
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
-  renderTaxonomySelect(state.availableTaxonomies, state.selectedTaxonomy);
   renderInstitutionSelect(state);
   renderExplorerHeaderReferenceControl(state);
   renderActiveModule(state.activeModule, state.availableModules);
@@ -233,21 +228,6 @@ export function renderAppState(state) {
     renderCreditRisk(state);
     syncCreditRiskUrlParams();
   }
-}
-
-function renderTaxonomySelect(availableTaxonomies = [], selectedTaxonomy = "") {
-  const select = elements.taxonomySelect;
-  if (!select) return;
-  select.replaceChildren();
-  if (availableTaxonomies.length === 0) {
-    select.append(new Option("Loading…", "", true, true));
-    select.disabled = true;
-    return;
-  }
-  availableTaxonomies.forEach((taxonomy) => {
-    select.append(new Option(taxonomy, taxonomy, false, taxonomy === selectedTaxonomy));
-  });
-  select.disabled = false;
 }
 
 function renderDatasetSelect(datasets, activeDatasetId, rememberedFileReady = false, rememberedFileName = "") {

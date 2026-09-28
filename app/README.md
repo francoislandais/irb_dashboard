@@ -33,8 +33,9 @@ Le contenu des fichiers CSV utilisateur n'est pas envoyé à un serveur. La bran
 ## Prévisualiser les taxonomies DPM
 
 La branche de test `codex/taxonomy-preview` remplace le dictionnaire interne par
-une version dérivée de l'historique DPM. Le sélecteur **Taxonomy** du header est
-global : changer de framework recharge les dimensions de tous les templates.
+une version dérivée de l'historique DPM. Les pilules **Taxonomy** au-dessus du
+tableau choisissent le framework du template affiché, indépendamment des autres
+templates. Chaque template démarre sur son framework le plus récent disponible.
 Au démarrage, l'application lit directement
 `app/assets/taxonomy-preview-empty-data.csv` comme jeu de données de référence.
 Ce fichier contient une ligne technique par template, sans coordonnées ni

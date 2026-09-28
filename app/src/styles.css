@@ -2594,6 +2594,51 @@ table {
   width: 100%;
 }
 
+.explorer-taxonomy-pills {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 2px 2px;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.explorer-taxonomy-pills[hidden] {
+  display: none;
+}
+
+.explorer-taxonomy-label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-right: 3px;
+}
+
+.explorer-taxonomy-pill {
+  background: #ffffff;
+  border: 1px solid #d8dfdb;
+  border-radius: 999px;
+  color: #5f6b65;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.74rem;
+  line-height: 1.2;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.explorer-taxonomy-pill:hover {
+  border-color: #9bc4df;
+  color: var(--primary-dark);
+}
+
+.explorer-taxonomy-pill.is-active {
+  background: #eaf2fa;
+  border-color: #b7d1e8;
+  color: var(--primary-dark);
+  font-weight: 650;
+}
+
 /* Same content-sized pill as the Credit Risk tabs: white/grey when off,
    light blue fill + darker blue border + dark blue text when on. */
 .axis-tab {

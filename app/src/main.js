@@ -2,7 +2,7 @@ import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
 import { parseInstitutionDictionaryCsv } from "./data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
-import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260928-taxonomy-preview";
+import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260928-template-taxonomy";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
@@ -19,8 +19,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260928-taxonomy-preview";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260928-taxonomy-preview";
+import { createDataStore } from "./data/dataStore.js?v=20260928-template-taxonomy";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260928-template-taxonomy";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -169,9 +169,13 @@ const actions = {
     updateUrlUnitParam(store.getState().selectedUnit);
   },
 
-  async updateSelectedTaxonomy(taxonomy) {
+  async updateSelectedTaxonomy(templateId, taxonomy) {
     try {
-      store.setTaxonomyDimensionData(await loadTaxonomyDimensionData(taxonomy));
+      const selectedTaxonomiesByTemplate = {
+        ...store.getState().selectedTaxonomiesByTemplate,
+        [templateId]: taxonomy
+      };
+      store.setTaxonomyDimensionData(await loadTaxonomyDimensionData(selectedTaxonomiesByTemplate));
     } catch (error) {
       store.setDimensionMappingError(error);
     }

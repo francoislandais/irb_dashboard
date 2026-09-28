@@ -5,30 +5,43 @@ import { parseExplorerPoints } from "./explorerConfig.js?v=20260921-hierarchy-gt
 const TAXONOMY_DATA_URL = "./assets/ITS_all_dimension_mapping.csv";
 let sourcePromise = null;
 
-export async function loadTaxonomyDimensionData(requestedTaxonomy = "") {
+export async function loadTaxonomyDimensionData(requestedTaxonomies = {}) {
   const { columns, rows } = await loadSource();
   const frameworkIndex = columns.indexOf("framework");
-  if (frameworkIndex === -1) {
+  const tableIdIndex = columns.indexOf("table_id");
+  if (frameworkIndex === -1 || tableIdIndex === -1) {
     throw new Error("Le dictionnaire de test doit contenir une colonne framework.");
   }
 
-  const availableTaxonomies = [...new Set(rows
-    .map((row) => String(row[frameworkIndex] ?? "").trim())
-    .filter(Boolean))]
-    .sort((left, right) => left.localeCompare(right, "en", { numeric: true }));
-  const selectedTaxonomy = availableTaxonomies.includes(requestedTaxonomy)
-    ? requestedTaxonomy
-    : availableTaxonomies.at(-1) ?? "";
-  if (!selectedTaxonomy) throw new Error("Aucune taxonomie n'a été trouvée dans le dictionnaire.");
+  const taxonomiesByTemplate = new Map();
+  rows.forEach((row) => {
+    const tableId = String(row[tableIdIndex] ?? "").trim();
+    const framework = String(row[frameworkIndex] ?? "").trim();
+    if (!tableId || !framework) return;
+    if (!taxonomiesByTemplate.has(tableId)) taxonomiesByTemplate.set(tableId, new Set());
+    taxonomiesByTemplate.get(tableId).add(framework);
+  });
+
+  const availableTaxonomiesByTemplate = {};
+  const selectedTaxonomiesByTemplate = {};
+  taxonomiesByTemplate.forEach((taxonomies, tableId) => {
+    const availableTaxonomies = [...taxonomies]
+      .sort((left, right) => left.localeCompare(right, "en", { numeric: true }));
+    const requested = requestedTaxonomies?.[tableId];
+    availableTaxonomiesByTemplate[tableId] = availableTaxonomies;
+    selectedTaxonomiesByTemplate[tableId] = availableTaxonomies.includes(requested)
+      ? requested
+      : availableTaxonomies.at(-1) ?? "";
+  });
 
   const selectedRows = deduplicateFrameworkRows(
-    rows.filter((row) => String(row[frameworkIndex] ?? "").trim() === selectedTaxonomy),
+    rows.filter((row) => selectedTaxonomiesByTemplate[row[tableIdIndex]] === String(row[frameworkIndex] ?? "").trim()),
     columns
   );
 
   return {
-    availableTaxonomies,
-    selectedTaxonomy,
+    availableTaxonomiesByTemplate,
+    selectedTaxonomiesByTemplate,
     dimensionMapping: createDimensionMapping(columns, selectedRows),
     explorerPoints: parseExplorerPoints(columns, selectedRows)
   };

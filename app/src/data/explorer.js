@@ -301,11 +301,7 @@ export function isExplorerDataOnlyRowTemplate(tableId) {
 }
 
 export function getExplorerTemplates(state) {
-  const configuredTableIds = state?.selectedTaxonomy
-    ? new Set((state.explorerPoints ?? []).map((point) => point.tableId))
-    : null;
-  const tableIds = getExplorerTableIds(state)
-    .filter((tableId) => !configuredTableIds || configuredTableIds.has(tableId));
+  const tableIds = getExplorerTableIds(state);
 
   return tableIds.flatMap((tableId) => {
     const description = getExplorerTemplateDescription(tableId);
