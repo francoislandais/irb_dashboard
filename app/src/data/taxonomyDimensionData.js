@@ -1,6 +1,6 @@
 import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
-import { createDimensionMapping } from "./dimensionMapping.js?v=20260928-local-description";
-import { parseExplorerPoints } from "./explorerConfig.js?v=20260928-local-description";
+import { createDimensionMapping } from "./dimensionMapping.js?v=20260928-dictionary-casing";
+import { parseExplorerPoints } from "./explorerConfig.js?v=20260928-dictionary-casing";
 
 const TAXONOMY_DATA_URL = "./assets/ITS_all_dimension_mapping.csv";
 let sourcePromise = null;

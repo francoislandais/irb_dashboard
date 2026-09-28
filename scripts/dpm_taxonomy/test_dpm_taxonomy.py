@@ -19,6 +19,21 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_taxonomy_label_sentence_casing_preserves_regulatory_acronyms(self):
+        cases = {
+            "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST": "Debt instruments at cost or at amortised cost",
+            "TOTAL SREP CAPITAL REQUIREMENT RATIO (TSCR)": "Total SREP capital requirement ratio (TSCR)",
+            "MEMORANDUM ITEMS: CAPITAL RATIOS WITHOUT APPLICATION OF IFRS 9": "Memorandum items: capital ratios without application of IFRS 9",
+            "OFF-BALANCE SHEET EXPOSURES": "Off-balance sheet exposures",
+            "CET1 CAPITAL RATIO": "CET1 capital ratio",
+            "SMES AND SMES": "SMEs and SMEs",
+            "IS": "IS",
+            "Already mixed case": "Already mixed case",
+        }
+        for source, expected in cases.items():
+            with self.subTest(source=source):
+                self.assertEqual(builder.format_taxonomy_label(source), expected)
+
     def test_display_format_inference_marks_percentages_and_raw_units(self):
         cases = {
             "CET1 capital ratio": "%",

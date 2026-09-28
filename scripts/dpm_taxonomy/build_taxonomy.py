@@ -44,12 +44,63 @@ DISPLAY_RATE_RE = re.compile(r"(?i)\b(?:default|loss|cure|recovery|capital\s+buf
 DISPLAY_COUNT_RE = re.compile(r"(?i)\b(?:number\s+of|count\s+of|number|count)\b")
 DISPLAY_DURATION_RE = re.compile(r"(?i)\b(?:maturity|duration|repricing\s+time|survival\s+period)\b")
 DISPLAY_DURATION_UNIT_RE = re.compile(r"(?i)\b(?:days?|months?|years?)\b")
+REGULATORY_ACRONYMS = set("""
+ABCP ACPR ACTP AVA BAFIN BIC BNRO BRRD BSI BTAR CCF CET1 CDS CNMV COREP CRD CRR
+CSR CQS CSSF CVA CYSEC DGS DORA EAD EBA ECB EEPE ERBA ESG FINFSA FINREP FKTK FMI
+FRTB FSMA FTNET FX GIRR GMRA GSIB HANFA HQLA ICMA IFRS IRBA IRB IRC ISDA ISIN
+JST KDPW LCR LEI LGD LOCOM MFSA MREL NPE NPL NSFR OENB OCI OCR P2G PD PV QCCP
+QRT RWA RWEA SEPA SFT SME SREP SWIFT TLAC TREA TPD TSCR UCITS XBRL
+""".split())
+COMMON_SHORT_WORDS = set("""
+A AN AND ARE AS AT BE BEEN BUT BY CAN FOR FROM HAD HAS HAVE HE HER HIS HOW I IF IN
+ALL ANY DAY DUE INTO IS IT ITS LOW MAY NET NEW NO NON NOT OF OFF OLD ON OR OUR
+OWN OUT OVER PER PRE RAW ROW SHE SO TAB TOP THAN THAT THE THEIR THEM THEN THERE
+THESE THEY THIS THOSE THROUGH TO UNDER UP VIA WAS WE WERE WHAT WHEN WHERE WHICH
+WHO WHY WILL WITH WITHIN WITHOUT YOU YOUR AU AUX CE CES DANS DE DES DU ELLE EN ET
+LA LE LES MAIS NE NI OU PAR PAS POUR QUE QUI SA SANS SE SES SON SUR UN UNE VERS
+""".split())
+ALL_CAPS_WORD_RE = re.compile(r"[\w]+", re.UNICODE)
 
 
 def clean(value: Any) -> str:
     if value is None:
         return ""
     return " ".join(str(value).replace("\r", " ").replace("\n", " ").split())
+
+
+def format_taxonomy_label(value: Any) -> str:
+    """Sentence-case shouting-style labels while preserving regulatory acronyms.
+
+    This is applied to the extracted dictionary once, so the application only
+    needs to display the dictionary's description values.
+    """
+    source = str(value or "")
+    letters = [character for character in source if character.isalpha()]
+    if not letters or any(character != character.upper() for character in letters):
+        return source
+
+    def format_word(match: re.Match[str]) -> str:
+        word = match.group(0)
+        upper = word.upper()
+        plural_stem = upper[:-1] if upper.endswith("S") else ""
+        if upper in REGULATORY_ACRONYMS or any(character.isdigit() for character in upper):
+            return upper
+        if plural_stem in REGULATORY_ACRONYMS:
+            return f"{plural_stem}s"
+        if len(upper) <= 3 and upper not in COMMON_SHORT_WORDS:
+            return upper
+        return word.lower()
+
+    result = ALL_CAPS_WORD_RE.sub(format_word, source.lower())
+    # Short country/reporting codes such as "IS" can also be ordinary English
+    # words. Preserve them when the whole description consists of that code.
+    if re.fullmatch(r"\s*[\w]+\s*", source, re.UNICODE) and len(source.strip()) == 2:
+        result = source.strip()
+    for index, character in enumerate(result):
+        if character.isalpha():
+            result = result[:index] + character.upper() + result[index + 1:]
+            break
+    return result
 
 
 def code_text(value: Any) -> str:
@@ -821,7 +872,7 @@ def extract_all() -> tuple[
                                 "coordinate": AXIS_COORDINATES[axis],
                                 "code": code,
                                 "parent_coordinate_code": parent_code,
-                                "description": description,
+                                "description": format_taxonomy_label(description),
                                 "order_first": "" if axis == "y" else str(_row_number if axis == "z" and _row_number else order),
                                 "ignore": "Y" if is_virtual_parent else "",
                                 "format": "" if is_virtual_parent else (
