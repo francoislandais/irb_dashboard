@@ -56,7 +56,7 @@
     {
       "module_code": "COREP",
       "template_id": "C_51.00",
-      "conflicting_axis_code_cases": 20
+      "conflicting_axis_code_cases": 22
     },
     {
       "module_code": "COREP",
@@ -86,7 +86,7 @@
     {
       "module_code": "FINDIS",
       "template_id": "K_21.01",
-      "conflicting_axis_code_cases": 162
+      "conflicting_axis_code_cases": 192
     },
     {
       "module_code": "FINDIS",
@@ -96,7 +96,7 @@
     {
       "module_code": "FINDIS",
       "template_id": "K_80.00",
-      "conflicting_axis_code_cases": 42
+      "conflicting_axis_code_cases": 66
     },
     {
       "module_code": "FINDIS",

@@ -335,8 +335,7 @@ def x_axis_rows(sheet: Any, columns_row: int | None, rows_row: int | None) -> li
 def y_axis_rows(sheet: Any, rows_row: int | None) -> list[tuple[str, str, int]]:
     if rows_row is None:
         return []
-    output: list[tuple[str, str, int]] = []
-    ancestors: list[str] = []
+    items: list[tuple[str, str, int, int]] = []
     for row_no in range(rows_row, sheet.max_row + 1):
         code = code_text(sheet.cell(row_no, 3).value)
         label = clean(sheet.cell(row_no, 2).value)
@@ -344,11 +343,43 @@ def y_axis_rows(sheet: Any, rows_row: int | None) -> list[tuple[str, str, int]]:
             continue
         indent = sheet.cell(row_no, 2).alignment.indent or 0
         depth = max(0, round(float(indent) / 2))
-        depth = min(depth, len(ancestors))
-        ancestors = ancestors[:depth]
-        ancestors.append(label)
-        output.append((code, "/".join(ancestors), row_no))
-    return output
+        items.append((code, label, depth, row_no))
+
+    if not items:
+        return []
+
+    # Most layouts list parents before their children. Use the absolute indent
+    # as the level: equal indentation always closes the previous sibling.
+    paths: list[str] = []
+    ancestors: list[tuple[int, str]] = []
+    for _code, label, depth, _row_no in items:
+        while ancestors and ancestors[-1][0] >= depth:
+            ancestors.pop()
+        paths.append("/".join([ancestor for _level, ancestor in ancestors] + [label]))
+        ancestors.append((depth, label))
+
+    # A final, less-indented summary can be the logical parent of the
+    # immediately preceding deeper block (for example, Total assets or
+    # Off-balance sheet exposures). Attach that block retroactively, stopping
+    # at the preceding line on the same or a shallower indentation level.
+    if len(items) > 1 and items[-1][2] < items[-2][2]:
+        _parent_code, parent_label, parent_depth, _parent_row = items[-1]
+        start = len(items) - 2
+        while start >= 0 and items[start][2] > parent_depth:
+            start -= 1
+        start += 1
+
+        block_ancestors: list[tuple[int, str]] = []
+        for index in range(start, len(items) - 1):
+            _code, label, depth, _row_no = items[index]
+            while block_ancestors and block_ancestors[-1][0] >= depth:
+                block_ancestors.pop()
+            relative_path = [ancestor for _level, ancestor in block_ancestors] + [label]
+            paths[index] = "/".join([parent_label] + relative_path)
+            block_ancestors.append((depth, label))
+        paths[-1] = parent_label
+
+    return [(code, paths[index], row_no) for index, (code, _label, _depth, row_no) in enumerate(items)]
 
 
 @functools.lru_cache(maxsize=32)

@@ -5,7 +5,8 @@ import zipfile
 import csv
 from pathlib import Path
 
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Alignment
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -87,6 +88,59 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertIn("sheet per exposure class", top)
         z = builder.dictionary_z_rows(SOURCES / "4.2_dictionary.xlsx", tab_sheet)
         self.assertTrue(z)
+        workbook.close()
+        archive.close()
+
+    def test_y_axis_uses_absolute_indent_and_terminal_parent_retroactively(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.cell(1, 2, "Rows")
+        rows = [
+            ("Cash balances", "5", 2),
+            ("Debt securities", "10", 2),
+            ("Central banks", "20", 4),
+            ("Loans and advances", "70", 2),
+            ("Central banks", "80", 4),
+            ("Loan commitments", "100", 2),
+            ("Households", "110", 4),
+            ("Total assets", "120", 0),
+        ]
+        for row_no, (label, code, indent) in enumerate(rows, start=2):
+            sheet.cell(row_no, 2, label).alignment = Alignment(indent=indent)
+            sheet.cell(row_no, 3, code)
+
+        result = {code: description for code, description, _row in builder.y_axis_rows(sheet, 1)}
+
+        self.assertEqual(result["5"], "Total assets/Cash balances")
+        self.assertEqual(result["10"], "Total assets/Debt securities")
+        self.assertEqual(result["20"], "Total assets/Debt securities/Central banks")
+        self.assertEqual(result["70"], "Total assets/Loans and advances")
+        self.assertEqual(result["100"], "Total assets/Loan commitments")
+        self.assertEqual(result["110"], "Total assets/Loan commitments/Households")
+        self.assertEqual(result["120"], "Total assets")
+        workbook.close()
+
+    def test_finrep_32_f18_and_f01_hierarchy_from_source_workbook(self):
+        archive = zipfile.ZipFile(SOURCES / "3.2_layouts.zip")
+        member = next(name for name in archive.namelist() if name.endswith("Annotated Table Layout 321-P2-FINREP 3.2.1.xlsx"))
+        workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
+
+        f18 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.a"], 9)}
+        self.assertEqual(f18["5"], "Cash balances at central banks and other demand deposits")
+        self.assertEqual(f18["10"], "Debt securities")
+        self.assertEqual(f18["20"], "Debt securities/Central banks")
+
+        f18_off_balance = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.b"], 9)}
+        self.assertEqual(f18_off_balance["340"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given")
+        self.assertEqual(f18_off_balance["350"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given/Central banks")
+        self.assertEqual(f18_off_balance["550"], "OFF-BALANCE SHEET EXPOSURES")
+
+        f01 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 01.01"], 7)}
+        self.assertEqual(f01["10"], "Total assets/Cash, cash balances at central banks and other demand deposits")
+        self.assertEqual(f01["50"], "Total assets/Financial assets held for trading")
+        self.assertEqual(f01["60"], "Total assets/Financial assets held for trading/Derivatives")
+        self.assertEqual(f01["380"], "Total assets")
+
         workbook.close()
         archive.close()
 
