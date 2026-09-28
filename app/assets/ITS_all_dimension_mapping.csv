@@ -49722,10 +49722,8 @@ F_35.00;x_axis_rc_code;230;__PARENT__0b310af7dfd0;Credit rating agency 1;;;;4.2
 F_35.00;x_axis_rc_code;240;__PARENT__0b310af7dfd0;Credit rating agency 2;;;;4.2
 F_35.00;x_axis_rc_code;250;__PARENT__0b310af7dfd0;Credit rating agency 3;;;;4.2
 F_36.01;x_axis_rc_code;__PARENT__7f2ec7750821;;Collateral Type - Classification by Asset type;;Y;;4.2
-F_36.01;x_axis_rc_code;__PARENT__b25928c69902;;Total;;Y;;4.2
 F_36.01;x_axis_rc_code;__PARENT__9a96c7e4951f;__PARENT__7f2ec7750821;Debt securities;;Y;;4.2
 F_36.01;x_axis_rc_code;__PARENT__709618641c19;__PARENT__7f2ec7750821;Loans and advances other than loans on demand;;Y;;4.2
-F_36.01;x_axis_rc_code;__PARENT__b36b47049840;__PARENT__7f2ec7750821;Other assets;;Y;;4.2
 F_36.01;x_axis_rc_code;10;__PARENT__7f2ec7750821;Loans on demand;;;;4.2
 F_36.01;x_axis_rc_code;20;__PARENT__7f2ec7750821;Equity instruments;;;;4.2
 F_36.01;x_axis_rc_code;30;__PARENT__9a96c7e4951f;Total;;;;4.2
@@ -49742,8 +49740,8 @@ F_36.01;x_axis_rc_code;130;__PARENT__709618641c19;Non financial Corporations;;;;
 F_36.01;x_axis_rc_code;140;130;Of which: loans collateralised with Immovable Property;;;;4.2
 F_36.01;x_axis_rc_code;150;__PARENT__709618641c19;Households;;;;4.2
 F_36.01;x_axis_rc_code;160;150;Of which: loans collateralised with Immovable Property;;;;4.2
-F_36.01;x_axis_rc_code;170;__PARENT__b36b47049840;Households;;;;4.2
-F_36.01;x_axis_rc_code;180;__PARENT__b25928c69902;Households;;;;4.2
+F_36.01;x_axis_rc_code;170;__PARENT__7f2ec7750821;Other assets;;;;4.2
+F_36.01;x_axis_rc_code;180;;Total;;;;4.2
 F_36.01;y_axis_rc_code;10;;Central bank funding (of all types, including e.g. repos). Encumbered assets;;;;4.2
 F_36.01;y_axis_rc_code;30;;Exchange traded derivatives. Encumbered assets;;;;4.2
 F_36.01;y_axis_rc_code;50;;Over-the-counter derivatives. Encumbered assets;;;;4.2
@@ -49768,11 +49766,8 @@ F_36.01;y_axis_rc_code;210;;Total unencumbered assets;;;;4.2
 F_36.01;y_axis_rc_code;230;;Encumbered + Unencumbered Assets;;;;4.2
 F_36.01;y_axis_rc_code;220;230;Of which central bank eligible;;;;4.2
 F_36.02;x_axis_rc_code;__PARENT__7f2ec7750821;;Collateral Type - Classification by Asset type;;Y;;4.2
-F_36.02;x_axis_rc_code;__PARENT__b25928c69902;;Total;;Y;;4.2
 F_36.02;x_axis_rc_code;__PARENT__9a96c7e4951f;__PARENT__7f2ec7750821;Debt securities;;Y;;4.2
 F_36.02;x_axis_rc_code;__PARENT__709618641c19;__PARENT__7f2ec7750821;Loans and advances other than loans on demand;;Y;;4.2
-F_36.02;x_axis_rc_code;__PARENT__2b7ef7462e93;__PARENT__7f2ec7750821;Other collateral received;;Y;;4.2
-F_36.02;x_axis_rc_code;__PARENT__2d067cff882e;__PARENT__7f2ec7750821;Own debt securities issued other than own covered bonds or securitisations;;Y;;4.2
 F_36.02;x_axis_rc_code;10;__PARENT__7f2ec7750821;Loans on demand;;;;4.2
 F_36.02;x_axis_rc_code;20;__PARENT__7f2ec7750821;Equity instruments;;;;4.2
 F_36.02;x_axis_rc_code;30;__PARENT__9a96c7e4951f;Debt Securities;;;;4.2
@@ -49789,9 +49784,9 @@ F_36.02;x_axis_rc_code;130;__PARENT__709618641c19;Non financial Corporations;;;;
 F_36.02;x_axis_rc_code;140;130;Of which: loans collateralised with Immovable Property;;;;4.2
 F_36.02;x_axis_rc_code;150;__PARENT__709618641c19;Households;;;;4.2
 F_36.02;x_axis_rc_code;160;150;Of which: loans collateralised with Immovable Property;;;;4.2
-F_36.02;x_axis_rc_code;170;__PARENT__2b7ef7462e93;Households;;;;4.2
-F_36.02;x_axis_rc_code;180;__PARENT__2d067cff882e;Households;;;;4.2
-F_36.02;x_axis_rc_code;190;__PARENT__b25928c69902;Households;;;;4.2
+F_36.02;x_axis_rc_code;170;__PARENT__7f2ec7750821;Other collateral received;;;;4.2
+F_36.02;x_axis_rc_code;180;__PARENT__7f2ec7750821;Own debt securities issued other than own covered bonds or securitisations;;;;4.2
+F_36.02;x_axis_rc_code;190;;Total;;;;4.2
 F_36.02;y_axis_rc_code;10;;Central bank funding (of all types, including e.g. repos). Encumbered collateral received;;;;4.2
 F_36.02;y_axis_rc_code;30;;Exchange traded Derivatives. Encumbered collateral received;;;;4.2
 F_36.02;y_axis_rc_code;50;;Over-the-counter derivatives. Encumbered collateral received;;;;4.2
@@ -51554,9 +51549,7 @@ C_71.00;z_axis_rc_code;x63;;Currencies other than the most liquid currencies, ER
 C_71.00;z_axis_rc_code;x64;;Currency pairs made up of two most liquid currencies, currency pairs made up of the Euro and an ERM II currency;;;;4.2
 C_71.00;z_axis_rc_code;x65;;Curency pairs other than currency pairs made up of two most liquid currencies and currency pairs made up of the Euro and an ERM II currency;;;;4.2
 C_71.00;z_axis_rc_code;qx2001;;Reporting currency;;;;4.2
-C_90.00;x_axis_rc_code;__PARENT__b82abdb33990;;Total assets;;Y;;4.2
 C_90.00;x_axis_rc_code;__PARENT__3f77084ad852;10;Breakdown by regulatory book;;Y;;4.2
-C_90.00;x_axis_rc_code;__PARENT__d8d2cb87d6d3;10;In % of total assets;;Y;;4.2
 C_90.00;x_axis_rc_code;__PARENT__be833851843d;__PARENT__3f77084ad852;Non-trading book;;Y;;4.2
 C_90.00;x_axis_rc_code;__PARENT__650561ac8c47;20;Of which: Trading book business for the purposes of Article 94;;Y;;4.2
 C_90.00;x_axis_rc_code;10;;On - and off - balance sheet business subject to market risk;;;;4.2
@@ -51565,8 +51558,8 @@ C_90.00;x_axis_rc_code;30;__PARENT__650561ac8c47;Total;;;;4.2
 C_90.00;x_axis_rc_code;40;__PARENT__650561ac8c47;In % of total assets;;;%;4.2
 C_90.00;x_axis_rc_code;50;__PARENT__be833851843d;Positions subject to foreign exchange risk;;;;4.2
 C_90.00;x_axis_rc_code;60;__PARENT__be833851843d;Positions subject to Commodities risk;;;;4.2
-C_90.00;x_axis_rc_code;70;__PARENT__d8d2cb87d6d3;Non-trading book;;;%;4.2
-C_90.00;x_axis_rc_code;80;__PARENT__b82abdb33990;Non-trading book;;;;4.2
+C_90.00;x_axis_rc_code;70;10;In % of total assets;;;%;4.2
+C_90.00;x_axis_rc_code;80;;Total assets;;;;4.2
 C_90.00;y_axis_rc_code;10;;Month 3;;;;4.2
 C_90.00;y_axis_rc_code;20;;Month 2;;;;4.2
 C_90.00;y_axis_rc_code;30;;Month 1;;;;4.2
@@ -53349,22 +53342,12 @@ C_27.00;x_axis_rc_code;40;__PARENT__3c35e2796341;Residence of the counterparty;;
 C_27.00;x_axis_rc_code;50;__PARENT__3c35e2796341;Sector of the counterparty;;;;4.2
 C_27.00;x_axis_rc_code;60;__PARENT__3c35e2796341;NACE code;;;;4.2
 C_27.00;x_axis_rc_code;70;__PARENT__3c35e2796341;Type of counterparty;;;;4.2
-C_28.00;x_axis_rc_code;__PARENT__7b75a52540a5;;(-) Amounts exempted;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__e5f9aff75216;;(-) Exposures deducted from CET 1 or Additional Tier 1 items;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__a36a28b35d59;;(-) Value adjustments and provisions;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__b5a37450eec8;;Counterparty;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__4ceeb5b4a390;;Eligible credit risk mitigation (CRM) techniques;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__a68ebb3eb636;;Exposure value after application of exemptions and CRM;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__88b688b89167;;Exposure value before application of exemptions and CRM;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__673b1379240a;;Original exposures;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__373332b3724f;__PARENT__4ceeb5b4a390;(-) Funded credit protection other than substitution effect;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__41959c831fc0;__PARENT__4ceeb5b4a390;(-) Real estate;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__07393f6ca98e;__PARENT__4ceeb5b4a390;(-) Substitution effect of eligible credit risk mitigation techniques;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__fb1a27b23c30;__PARENT__a68ebb3eb636;% of Tier 1 capital;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__240f3cb5e306;__PARENT__a68ebb3eb636;Of which: Non-trading book;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__a504718e9188;__PARENT__a68ebb3eb636;Total;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__052ccb442315;__PARENT__88b688b89167;Total;;Y;;4.2
-C_28.00;x_axis_rc_code;__PARENT__ede4fd41e642;__PARENT__673b1379240a;Additional exposures arising from transactions where there is an exposure to underlying assets;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__a30a543f990e;__PARENT__673b1379240a;Direct exposures;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__b1239a7139e1;__PARENT__673b1379240a;Indirect exposures;;Y;;4.2
 C_28.00;x_axis_rc_code;__PARENT__633dfcf3dec8;__PARENT__07393f6ca98e;(-) Off balance sheet items;;Y;;4.2
@@ -53387,11 +53370,11 @@ C_28.00;x_axis_rc_code;140;__PARENT__b1239a7139e1;Derivatives;;;;4.2
 C_28.00;x_axis_rc_code;150;__PARENT__a3fb8c01eef9;Loan commitments;;;;4.2
 C_28.00;x_axis_rc_code;160;__PARENT__a3fb8c01eef9;Financial guarantees;;;;4.2
 C_28.00;x_axis_rc_code;170;__PARENT__a3fb8c01eef9;Other commitments;;;;4.2
-C_28.00;x_axis_rc_code;180;__PARENT__ede4fd41e642;Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;190;__PARENT__a36a28b35d59;Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;200;__PARENT__e5f9aff75216;Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;210;__PARENT__052ccb442315;Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;220;__PARENT__052ccb442315;Of which: Non-trading book;;;;4.2
+C_28.00;x_axis_rc_code;180;__PARENT__673b1379240a;Additional exposures arising from transactions where there is an exposure to underlying assets;;;;4.2
+C_28.00;x_axis_rc_code;190;;(-) Value adjustments and provisions;;;;4.2
+C_28.00;x_axis_rc_code;200;;(-) Exposures deducted from CET 1 or Additional Tier 1 items;;;;4.2
+C_28.00;x_axis_rc_code;210;__PARENT__88b688b89167;Total;;;;4.2
+C_28.00;x_axis_rc_code;220;210;Of which: Non-trading book;;;;4.2
 C_28.00;x_axis_rc_code;230;__PARENT__88b688b89167;% of Tier 1 capital;;;%;4.2
 C_28.00;x_axis_rc_code;240;__PARENT__07393f6ca98e;(-) Debt instruments;;;;4.2
 C_28.00;x_axis_rc_code;250;__PARENT__07393f6ca98e;(-) Equity instruments;;;;4.2
@@ -53399,30 +53382,18 @@ C_28.00;x_axis_rc_code;260;__PARENT__07393f6ca98e;(-) Derivatives;;;;4.2
 C_28.00;x_axis_rc_code;270;__PARENT__633dfcf3dec8;(-) Loan commitments;;;;4.2
 C_28.00;x_axis_rc_code;280;__PARENT__633dfcf3dec8;(-) Financial Guarantees;;;;4.2
 C_28.00;x_axis_rc_code;290;__PARENT__633dfcf3dec8;(-) Other commitments;;;;4.2
-C_28.00;x_axis_rc_code;300;__PARENT__373332b3724f;(-) Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;310;__PARENT__41959c831fc0;(-) Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;320;__PARENT__7b75a52540a5;(-) Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;330;__PARENT__a504718e9188;(-) Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;340;__PARENT__240f3cb5e306;(-) Off balance sheet items;;;;4.2
-C_28.00;x_axis_rc_code;350;__PARENT__fb1a27b23c30;(-) Off balance sheet items;;;%;4.2
-C_29.00;x_axis_rc_code;__PARENT__7b75a52540a5;;(-) Amounts exempted;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__e5f9aff75216;;(-) Exposures deducted from CET 1 or Additional Tier 1 items;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__a36a28b35d59;;(-) Value adjustments and provisions;;Y;;4.2
+C_28.00;x_axis_rc_code;300;__PARENT__4ceeb5b4a390;(-) Funded credit protection other than substitution effect;;;;4.2
+C_28.00;x_axis_rc_code;310;__PARENT__4ceeb5b4a390;(-) Real estate;;;;4.2
+C_28.00;x_axis_rc_code;320;;(-) Amounts exempted;;;;4.2
+C_28.00;x_axis_rc_code;330;__PARENT__a68ebb3eb636;Total;;;;4.2
+C_28.00;x_axis_rc_code;340;__PARENT__a68ebb3eb636;Of which: Non-trading book;;;;4.2
+C_28.00;x_axis_rc_code;350;__PARENT__a68ebb3eb636;% of Tier 1 capital;;;%;4.2
 C_29.00;x_axis_rc_code;__PARENT__b5a37450eec8;;Counterparty;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__4ceeb5b4a390;;Eligible credit risk mitigation (CRM) techniques;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__a68ebb3eb636;;Exposure value after application of exemptions and CRM;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__88b688b89167;;Exposure value before application of exemptions and CRM;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__673b1379240a;;Original exposures;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__373332b3724f;__PARENT__4ceeb5b4a390;(-) Funded credit protection other than substitution effect;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__41959c831fc0;__PARENT__4ceeb5b4a390;(-) Real estate;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__07393f6ca98e;__PARENT__4ceeb5b4a390;(-) Substitution effect of eligible credit risk mitigation techniques;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__fb1a27b23c30;__PARENT__a68ebb3eb636;% of Tier 1 capital;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__240f3cb5e306;__PARENT__a68ebb3eb636;Of which: Non-trading book;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__a504718e9188;__PARENT__a68ebb3eb636;Total;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__4e997df87caa;__PARENT__88b688b89167;% of Tier 1 capital;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__d62afedcb3a5;__PARENT__88b688b89167;Of which: Non-trading book;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__052ccb442315;__PARENT__88b688b89167;Total;;Y;;4.2
-C_29.00;x_axis_rc_code;__PARENT__ede4fd41e642;__PARENT__673b1379240a;Additional exposures arising from transactions where there is an exposure to underlying assets;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__a30a543f990e;__PARENT__673b1379240a;Direct exposures;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__b1239a7139e1;__PARENT__673b1379240a;Indirect exposures;;Y;;4.2
 C_29.00;x_axis_rc_code;__PARENT__633dfcf3dec8;__PARENT__07393f6ca98e;(-) Off balance sheet items;;Y;;4.2
@@ -53445,24 +53416,24 @@ C_29.00;x_axis_rc_code;150;__PARENT__b1239a7139e1;Derivatives;;;;4.2
 C_29.00;x_axis_rc_code;160;__PARENT__a3fb8c01eef9;Loan commitments;;;;4.2
 C_29.00;x_axis_rc_code;170;__PARENT__a3fb8c01eef9;Financial guarantees;;;;4.2
 C_29.00;x_axis_rc_code;180;__PARENT__a3fb8c01eef9;Other commitments;;;;4.2
-C_29.00;x_axis_rc_code;190;__PARENT__ede4fd41e642;Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;200;__PARENT__a36a28b35d59;Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;210;__PARENT__e5f9aff75216;Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;220;__PARENT__052ccb442315;Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;230;__PARENT__d62afedcb3a5;Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;240;__PARENT__4e997df87caa;Off balance sheet items;;;%;4.2
+C_29.00;x_axis_rc_code;190;__PARENT__673b1379240a;Additional exposures arising from transactions where there is an exposure to underlying assets;;;;4.2
+C_29.00;x_axis_rc_code;200;;(-) Value adjustments and provisions;;;;4.2
+C_29.00;x_axis_rc_code;210;;(-) Exposures deducted from CET 1 or Additional Tier 1 items;;;;4.2
+C_29.00;x_axis_rc_code;220;__PARENT__88b688b89167;Total;;;;4.2
+C_29.00;x_axis_rc_code;230;__PARENT__88b688b89167;Of which: Non-trading book;;;;4.2
+C_29.00;x_axis_rc_code;240;__PARENT__88b688b89167;% of Tier 1 capital;;;%;4.2
 C_29.00;x_axis_rc_code;250;__PARENT__07393f6ca98e;(-) Debt instruments;;;;4.2
 C_29.00;x_axis_rc_code;260;__PARENT__07393f6ca98e;(-) Equity instruments;;;;4.2
 C_29.00;x_axis_rc_code;270;__PARENT__07393f6ca98e;(-) Derivatives;;;;4.2
 C_29.00;x_axis_rc_code;280;__PARENT__633dfcf3dec8;(-) Loan commitments;;;;4.2
 C_29.00;x_axis_rc_code;290;__PARENT__633dfcf3dec8;(-) Financial Guarantees;;;;4.2
 C_29.00;x_axis_rc_code;300;__PARENT__633dfcf3dec8;(-) Other commitments;;;;4.2
-C_29.00;x_axis_rc_code;310;__PARENT__373332b3724f;(-) Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;320;__PARENT__41959c831fc0;(-) Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;330;__PARENT__7b75a52540a5;(-) Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;340;__PARENT__a504718e9188;(-) Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;350;__PARENT__240f3cb5e306;(-) Off balance sheet items;;;;4.2
-C_29.00;x_axis_rc_code;360;__PARENT__fb1a27b23c30;(-) Off balance sheet items;;;%;4.2
+C_29.00;x_axis_rc_code;310;__PARENT__4ceeb5b4a390;(-) Funded credit protection other than substitution effect;;;;4.2
+C_29.00;x_axis_rc_code;320;__PARENT__4ceeb5b4a390;(-) Real estate;;;;4.2
+C_29.00;x_axis_rc_code;330;;(-) Amounts exempted;;;;4.2
+C_29.00;x_axis_rc_code;340;__PARENT__a68ebb3eb636;Total;;;;4.2
+C_29.00;x_axis_rc_code;350;__PARENT__a68ebb3eb636;Of which: Non-trading book;;;;4.2
+C_29.00;x_axis_rc_code;360;__PARENT__a68ebb3eb636;% of Tier 1 capital;;;%;4.2
 C_40.00;x_axis_rc_code;10;;Accounting balance sheet value;;;;4.2
 C_40.00;x_axis_rc_code;20;;Accounting value assuming no netting or other CRM;;;;4.2
 C_40.00;x_axis_rc_code;40;;Add-on for SFT;;;;4.2
@@ -54250,7 +54221,6 @@ C_81.00;z_axis_rc_code;x65;;Curency pairs other than currency pairs made up of t
 C_81.00;z_axis_rc_code;qx2001;;Reporting currency;;;;4.2
 C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;4.2
-C_82.00;x_axis_rc_code;__PARENT__5c86f5525366;;Required stable funding;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;4.2
 C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;Unit;4.2
@@ -54259,7 +54229,7 @@ C_82.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;HQLA;;;;4.2
 C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;Unit;4.2
 C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;Unit;4.2
 C_82.00;x_axis_rc_code;90;__PARENT__cffac3962595;HQLA;;;;4.2
-C_82.00;x_axis_rc_code;100;__PARENT__5c86f5525366;Non-HQLA by maturity;;;;4.2
+C_82.00;x_axis_rc_code;100;;Required stable funding;;;;4.2
 C_82.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;4.2
 C_82.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;4.2
 C_82.00;y_axis_rc_code;30;20;cash, reserves and HQLA exposures to central banks;;;;4.2
@@ -55459,8 +55429,6 @@ C_06.02;x_axis_rc_code;__PARENT__9770247d3385;;Capital buffers;;Y;;4.2
 C_06.02;x_axis_rc_code;__PARENT__e83dd4c132ec;;Entities within scope of consolidation;;Y;;4.2
 C_06.02;x_axis_rc_code;__PARENT__d0e93dcb6143;;Information on entities subject to own funds requirements;;Y;;4.2
 C_06.02;x_axis_rc_code;__PARENT__3fe9be079d8b;;Information on the contribution of entities to solvency of the group;;Y;;4.2
-C_06.02;x_axis_rc_code;__PARENT__5d14225925f3;__PARENT__3fe9be079d8b;Total risk exposure amount;;Y;;4.2
-C_06.02;x_axis_rc_code;__PARENT__e76bc37ab9af;120;Tier 2 capital;;Y;;4.2
 C_06.02;x_axis_rc_code;11;__PARENT__e83dd4c132ec;Name of Entity in Group Solvency;;;;4.2
 C_06.02;x_axis_rc_code;21;__PARENT__e83dd4c132ec;Code of Entity in Group Solvency;;;;4.2
 C_06.02;x_axis_rc_code;26;__PARENT__e83dd4c132ec;Type of code;;;;4.2
@@ -55488,13 +55456,13 @@ C_06.02;x_axis_rc_code;190;180;Of which: minority interests;;;;4.2
 C_06.02;x_axis_rc_code;200;180;Related own funds instruments, related retained earnings, share premium accounts and other reserves;;;;4.2
 C_06.02;x_axis_rc_code;210;150;Additional tier 1 capital;;;;4.2
 C_06.02;x_axis_rc_code;220;210;Of which: qualifying additional tier 1 capital;;;;4.2
-C_06.02;x_axis_rc_code;230;__PARENT__e76bc37ab9af;Additional tier 1 capital;;;;4.2
-C_06.02;x_axis_rc_code;240;__PARENT__e76bc37ab9af;Of which: qualifying tier 2 capital;;;;4.2
-C_06.02;x_axis_rc_code;250;__PARENT__5d14225925f3;Tier 2 capital;;;;4.2
-C_06.02;x_axis_rc_code;260;__PARENT__5d14225925f3;"Credit; counterparty credit; dilution risks, free deliveries and settlement/delivery risk";;;;4.2
-C_06.02;x_axis_rc_code;270;__PARENT__5d14225925f3;Market risks;;;;4.2
-C_06.02;x_axis_rc_code;280;__PARENT__5d14225925f3;Operational risk;;;;4.2
-C_06.02;x_axis_rc_code;290;__PARENT__5d14225925f3;Other risk exposure amounts;;;;4.2
+C_06.02;x_axis_rc_code;230;120;Tier 2 capital;;;;4.2
+C_06.02;x_axis_rc_code;240;230;Of which: qualifying tier 2 capital;;;;4.2
+C_06.02;x_axis_rc_code;250;__PARENT__3fe9be079d8b;Total risk exposure amount;;;;4.2
+C_06.02;x_axis_rc_code;260;250;"Credit; counterparty credit; dilution risks, free deliveries and settlement/delivery risk";;;;4.2
+C_06.02;x_axis_rc_code;270;250;Market risks;;;;4.2
+C_06.02;x_axis_rc_code;280;250;Operational risk;;;;4.2
+C_06.02;x_axis_rc_code;290;250;Other risk exposure amounts;;;;4.2
 C_06.02;x_axis_rc_code;300;__PARENT__3fe9be079d8b;Qualifying own funds included in consolidated own funds;;;;4.2
 C_06.02;x_axis_rc_code;310;300;Qualifying tier 1 instruments included in consolidated tier 1 capital;;;;4.2
 C_06.02;x_axis_rc_code;320;310;Minority interests included in consolidated common equity tier 1 capital;;;;4.2
@@ -55513,29 +55481,12 @@ C_06.02;x_axis_rc_code;440;410;Conservation buffer due to macro-prudential or sy
 C_06.02;x_axis_rc_code;450;410;Systemic risk buffer;;;;4.2
 C_06.02;x_axis_rc_code;470;410;Global systemically important institution buffer;;;;4.2
 C_06.02;x_axis_rc_code;480;410;Other systemically important institution buffer;;;;4.2
-C_07.00;x_axis_rc_code;__PARENT__64f7ab0f6b66;;(-) Adjustment to risk-weighted exposure amount due to SME supporting factor;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__eb7093982416;;(-) Adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;Y;;4.2
 C_07.00;x_axis_rc_code;__PARENT__de2778a412f0;;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors;;Y;;4.2
 C_07.00;x_axis_rc_code;__PARENT__13171bc256ce;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;4.2
 C_07.00;x_axis_rc_code;__PARENT__62120eaa8ec7;;Credit risk mitigation techniques affecting the amount of the exposure: funded credit protection. Financial collateral comprehensive method;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__21cea6b2a8b0;;Fully adjusted exposure value (E*);;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__1de545491afa;;Memorandum item: RWEA related to the impact of application of transitional provisions on CCF for unconditionally cancellable commitiments;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__097751abb856;;Net exposure after CRM substitution effects pre conversion factors;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__ea08219be6a7;;Risk weighted exposure amount after supporting factors and after FX-mismatch;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__168a08bfa11f;;Risk weighted exposure amount pre supporting factors and pre FX-mismatch;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__4049902ce13e;__PARENT__de2778a412f0;0;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__0a27c795e018;__PARENT__de2778a412f0;0.1;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__4665892ff4f2;__PARENT__de2778a412f0;0.2;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__d5e2a07ef1e3;__PARENT__de2778a412f0;0.4;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__6cf4c1569190;__PARENT__de2778a412f0;0.5;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__eda961146a2d;__PARENT__de2778a412f0;1;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__fc46ffdb0bdc;__PARENT__de2778a412f0;Transitional arrangements for UCCs;;Y;;4.2
 C_07.00;x_axis_rc_code;__PARENT__5cb46e3d0f05;__PARENT__13171bc256ce;Funded credit protection;;Y;;4.2
 C_07.00;x_axis_rc_code;__PARENT__166f46694965;__PARENT__13171bc256ce;Substitution of the exposure due to CRM;;Y;;4.2
 C_07.00;x_axis_rc_code;__PARENT__8ead9bd598a0;__PARENT__13171bc256ce;Unfunded credit protection: adjusted values (Ga);;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__1c8d1bd87268;__PARENT__21cea6b2a8b0;Volatility adjustment to the exposure;;Y;;4.2
-C_07.00;x_axis_rc_code;__PARENT__86992a4396b0;__PARENT__ea08219be6a7;Of which: with a credit assessment by a nominated ECAI;;Y;;4.2
 C_07.00;x_axis_rc_code;10;;Original exposure pre conversion factors;;;;4.2
 C_07.00;x_axis_rc_code;30;;(-) Value adjustments and provision associated with the original exposure;;;;4.2
 C_07.00;x_axis_rc_code;40;;Exposure net of value adjustments and provisions;;;;4.2
@@ -55545,25 +55496,25 @@ C_07.00;x_axis_rc_code;70;__PARENT__5cb46e3d0f05;(-) Financial collateral: simpl
 C_07.00;x_axis_rc_code;80;__PARENT__5cb46e3d0f05;(-) Other funded credit protection;;;;4.2
 C_07.00;x_axis_rc_code;90;__PARENT__166f46694965;(-) Total Outflows;;;;4.2
 C_07.00;x_axis_rc_code;100;__PARENT__166f46694965;Total Inflows (+);;;;4.2
-C_07.00;x_axis_rc_code;110;__PARENT__097751abb856;Substitution of the exposure due to CRM;;;;4.2
+C_07.00;x_axis_rc_code;110;;Net exposure after CRM substitution effects pre conversion factors;;;;4.2
 C_07.00;x_axis_rc_code;120;__PARENT__62120eaa8ec7;Volatility adjustment to the exposure;;;;4.2
 C_07.00;x_axis_rc_code;130;120;(-) Financial collateral: adjusted value (Cvam);;;;4.2
 C_07.00;x_axis_rc_code;140;130;(-) of which: Volatility and maturity adjustments;;;;4.2
-C_07.00;x_axis_rc_code;150;__PARENT__1c8d1bd87268;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;160;__PARENT__4049902ce13e;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;165;__PARENT__0a27c795e018;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;170;__PARENT__4665892ff4f2;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;175;__PARENT__d5e2a07ef1e3;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;180;__PARENT__6cf4c1569190;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;190;__PARENT__eda961146a2d;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;195;__PARENT__fc46ffdb0bdc;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;200;__PARENT__9e22a2883603;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;215;__PARENT__168a08bfa11f;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;216;__PARENT__64f7ab0f6b66;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;217;__PARENT__eb7093982416;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;220;__PARENT__ea08219be6a7;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;230;__PARENT__86992a4396b0;(-) Financial collateral: adjusted value (Cvam);;;;4.2
-C_07.00;x_axis_rc_code;241;__PARENT__1de545491afa;(-) Financial collateral: adjusted value (Cvam);;;;4.2
+C_07.00;x_axis_rc_code;150;;Fully adjusted exposure value (E*);;;;4.2
+C_07.00;x_axis_rc_code;160;__PARENT__de2778a412f0;0;;;;4.2
+C_07.00;x_axis_rc_code;165;__PARENT__de2778a412f0;0.1;;;;4.2
+C_07.00;x_axis_rc_code;170;__PARENT__de2778a412f0;0.2;;;;4.2
+C_07.00;x_axis_rc_code;175;__PARENT__de2778a412f0;0.4;;;;4.2
+C_07.00;x_axis_rc_code;180;__PARENT__de2778a412f0;0.5;;;;4.2
+C_07.00;x_axis_rc_code;190;__PARENT__de2778a412f0;1;;;;4.2
+C_07.00;x_axis_rc_code;195;__PARENT__de2778a412f0;Transitional arrangements for UCCs;;;;4.2
+C_07.00;x_axis_rc_code;200;;Exposure value;;;;4.2
+C_07.00;x_axis_rc_code;215;;Risk weighted exposure amount pre supporting factors and pre FX-mismatch;;;;4.2
+C_07.00;x_axis_rc_code;216;;(-) Adjustment to risk-weighted exposure amount due to SME supporting factor;;;;4.2
+C_07.00;x_axis_rc_code;217;;(-) Adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;;;4.2
+C_07.00;x_axis_rc_code;220;;Risk weighted exposure amount after supporting factors and after FX-mismatch;;;;4.2
+C_07.00;x_axis_rc_code;230;220;Of which: with a credit assessment by a nominated ECAI;;;;4.2
+C_07.00;x_axis_rc_code;241;;Memorandum item: RWEA related to the impact of application of transitional provisions on CCF for unconditionally cancellable commitiments;;;;4.2
 C_07.00;y_axis_rc_code;__PARENT__d5123097b722;;0065 Breakdown of total exposures by exposure types:;;Y;;4.2
 C_07.00;y_axis_rc_code;__PARENT__2a96eef6a010;;0135 Breakdown of total exposures by risk weights:;;Y;;4.2
 C_07.00;y_axis_rc_code;__PARENT__a1f7a14e0ff7;;0285 Breakdown of total exposures by approach (CIU):;;Y;;4.2
@@ -55704,6 +55655,7 @@ C_07.00;z_axis_rc_code;qx2089;;Exposures secured by mortgages on commercial immo
 C_07.00;z_axis_rc_code;qx2090;;Exposures secured by mortgages on commercial immovable property-IPRE, including also other exposures;;;;4.2
 C_07.00;z_axis_rc_code;qx2095;;Exposures to corporates originally calculated under Foundation IRB approach;;;;4.2
 C_07.00;z_axis_rc_code;qx2096;;Exposures to corporates originally calculated under Advanced IRB approach;;;;4.2
+C_07.00;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
 C_07.00;x_axis_rc_code;210;__PARENT__9e22a2883603;Of which: Arising from Counterparty Credit Risk;;;;4.2
 C_07.00;x_axis_rc_code;211;;Of which: Arising from Counterparty Credit Risk excluding exposures cleared through a CCP;;;;4.2
 C_07.00;x_axis_rc_code;__PARENT__87a7e660f8f5;;Breakdown of the fully adjusted exposure of off-balance sheet items by conversion factors;;Y;;4.2
@@ -55713,36 +55665,15 @@ C_07.00;y_axis_rc_code;310;__PARENT__1bdbce8fe17d;Exposures secured by mortgages
 C_07.00;y_axis_rc_code;330;__PARENT__1bdbce8fe17d;Acquisition, development and construction (ADC);;;;4.2
 C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;%;4.2
 C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;%;4.2
-C_08.01;x_axis_rc_code;__PARENT__64f7ab0f6b66;;(-) Adjustment to risk-weighted exposure amount due to SME supporting factor;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__eb7093982416;;(-) Adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__6339922511be;;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__6ceea113d305;;Exposure after CRM substitution effects pre conversion factors;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__f993aa86651e;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__31b56006ffa0;;Exposure weighted average lgd (%);;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__fd8740220050;;Exposure-weighted average maturity value (days);;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__fc0a9f2feef6;;Memorandum items:;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__7e4a30617d86;;Risk weighted exposure amount after supporting factor;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__88d11328b692;;Risk weighted exposure amount pre supporting factors;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__6f5105f28b6b;__PARENT__64f7ab0f6b66;Funded credit protection;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__8fa69dc92152;__PARENT__eb7093982416;Funded credit protection;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__bbd82cb22495;__PARENT__6339922511be;Standard conversion factors;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__253c07d4ee3e;__PARENT__022ac6703d0d;Substitution of the exposure due to CRM;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__aa3cf677d78b;__PARENT__022ac6703d0d;Unfunded credit protection;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__f36700753b73;__PARENT__3d50c795dd97;Funded credit protection;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__22e070676a5d;__PARENT__3d50c795dd97;Own estimates of lgd's are used: unfunded credit protection;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__180ac35d9b3c;__PARENT__f993aa86651e;Funded credit protection;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__5547ff9b8f5c;__PARENT__31b56006ffa0;Funded credit protection;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__39517a01bd4d;__PARENT__fd8740220050;Funded credit protection;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__ce38a3ac41d3;__PARENT__fc0a9f2feef6;(-) value adjustments and provisions;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__4a4a5bab90c1;__PARENT__fc0a9f2feef6;Expected loss amount;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__f4203f36ca4b;__PARENT__fc0a9f2feef6;Number of obligors;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__28274ba3bc56;__PARENT__fc0a9f2feef6;Pre-credit derivatives risk weighted exposure amount;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__04feb6206ac4;__PARENT__7e4a30617d86;Funded credit protection;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__e0c8631b0daf;__PARENT__7e4a30617d86;Of which: large financial sector entities and unregulated financial entities;;Y;;4.2
-C_08.01;x_axis_rc_code;__PARENT__8c445022bc2f;__PARENT__88d11328b692;Funded credit protection;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__e4bde03f4686;__PARENT__f36700753b73;Other eligible collateral;;Y;;4.2
 C_08.01;x_axis_rc_code;10;;Internal rating scale - PD assigned to the obligor grade or pool;;;%;4.2
 C_08.01;x_axis_rc_code;20;;Original exposure pre conversion factors;;;;4.2
@@ -55752,7 +55683,7 @@ C_08.01;x_axis_rc_code;50;__PARENT__aa3cf677d78b;(-) Credit derivatives;;;;4.2
 C_08.01;x_axis_rc_code;60;__PARENT__022ac6703d0d;(-) Other funded credit protection;;;;4.2
 C_08.01;x_axis_rc_code;70;__PARENT__253c07d4ee3e;(-) Total outflows;;;;4.2
 C_08.01;x_axis_rc_code;80;__PARENT__253c07d4ee3e;Total inflows (+);;;;4.2
-C_08.01;x_axis_rc_code;90;__PARENT__6ceea113d305;Substitution of the exposure due to CRM;;;;4.2
+C_08.01;x_axis_rc_code;90;;Exposure after CRM substitution effects pre conversion factors;;;;4.2
 C_08.01;x_axis_rc_code;101;__PARENT__6339922511be;Modelled conversion factors;;;;4.2
 C_08.01;x_axis_rc_code;102;__PARENT__bbd82cb22495;0;;;;4.2
 C_08.01;x_axis_rc_code;103;__PARENT__bbd82cb22495;0.1;;;;4.2
@@ -55760,8 +55691,8 @@ C_08.01;x_axis_rc_code;104;__PARENT__bbd82cb22495;0.2;;;;4.2
 C_08.01;x_axis_rc_code;105;__PARENT__bbd82cb22495;0.4;;;;4.2
 C_08.01;x_axis_rc_code;106;__PARENT__bbd82cb22495;0.5;;;;4.2
 C_08.01;x_axis_rc_code;107;__PARENT__bbd82cb22495;1;;;;4.2
-C_08.01;x_axis_rc_code;110;__PARENT__9e22a2883603;Standard conversion factors;;;;4.2
-C_08.01;x_axis_rc_code;140;__PARENT__9e22a2883603;Of which: large financial sector entities and unregulated financial entities;;;;4.2
+C_08.01;x_axis_rc_code;110;;Exposure value;;;;4.2
+C_08.01;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;4.2
 C_08.01;x_axis_rc_code;150;__PARENT__22e070676a5d;Guarantees;;;%;4.2
 C_08.01;x_axis_rc_code;160;__PARENT__22e070676a5d;Credit derivatives;;;%;4.2
 C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;%;4.2
@@ -55772,18 +55703,18 @@ C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;
 C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;4.2
 C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;4.2
 C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;4.2
-C_08.01;x_axis_rc_code;230;__PARENT__5547ff9b8f5c;Other eligible collateral;;;%;4.2
-C_08.01;x_axis_rc_code;240;__PARENT__180ac35d9b3c;Other eligible collateral;;;%;4.2
-C_08.01;x_axis_rc_code;250;__PARENT__39517a01bd4d;Other eligible collateral;;;Unit;4.2
-C_08.01;x_axis_rc_code;255;__PARENT__8c445022bc2f;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;256;__PARENT__6f5105f28b6b;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;257;__PARENT__8fa69dc92152;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;260;__PARENT__04feb6206ac4;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;270;__PARENT__e0c8631b0daf;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;280;__PARENT__4a4a5bab90c1;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;290;__PARENT__ce38a3ac41d3;Other eligible collateral;;;;4.2
-C_08.01;x_axis_rc_code;300;__PARENT__f4203f36ca4b;Other eligible collateral;;;Unit;4.2
-C_08.01;x_axis_rc_code;310;__PARENT__28274ba3bc56;Other eligible collateral;;;;4.2
+C_08.01;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;4.2
+C_08.01;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;4.2
+C_08.01;x_axis_rc_code;250;;Exposure-weighted average maturity value (days);;;Unit;4.2
+C_08.01;x_axis_rc_code;255;;Risk weighted exposure amount pre supporting factors;;;;4.2
+C_08.01;x_axis_rc_code;256;;(-) Adjustment to risk-weighted exposure amount due to SME supporting factor;;;;4.2
+C_08.01;x_axis_rc_code;257;;(-) Adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;;;4.2
+C_08.01;x_axis_rc_code;260;;Risk weighted exposure amount after supporting factor;;;;4.2
+C_08.01;x_axis_rc_code;270;260;Of which: large financial sector entities and unregulated financial entities;;;;4.2
+C_08.01;x_axis_rc_code;280;__PARENT__fc0a9f2feef6;Expected loss amount;;;;4.2
+C_08.01;x_axis_rc_code;290;__PARENT__fc0a9f2feef6;(-) value adjustments and provisions;;;;4.2
+C_08.01;x_axis_rc_code;300;__PARENT__fc0a9f2feef6;Number of obligors;;;Unit;4.2
+C_08.01;x_axis_rc_code;310;__PARENT__fc0a9f2feef6;Pre-credit derivatives risk weighted exposure amount;;;;4.2
 C_08.01;y_axis_rc_code;__PARENT__5d248913a9d7;;0029 Breakdown of total exposures by exposure types:;;Y;;4.2
 C_08.01;y_axis_rc_code;__PARENT__9675679da93e;;0189 Breakdown of total exposures by approach (CIU):;;Y;;4.2
 C_08.01;y_axis_rc_code;__PARENT__904874aafb3c;__PARENT__5d248913a9d7;0039 Exposures / Transactions subject to counterparty credit risk;;Y;;4.2
@@ -55842,39 +55773,20 @@ C_08.01;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
 C_08.01;z_axis_rc_code;qx2084;;Retail exposures - Other than Purchased receivables and Qualifying revolving with own estimates of LGD or conversion factors;;;;4.2
 C_08.01;z_axis_rc_code;qx2086;;Corporates without own estimates of LGD or conversion factors;;;;4.2
 C_08.01;z_axis_rc_code;qx2085;;Corporates with own estimates of LGD or conversion factors;;;;4.2
+C_08.01;x_axis_rc_code;__PARENT__6ceea113d305;;Exposure after CRM substitution effects pre conversion factors;;Y;;4.2
+C_08.01;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
 C_08.01;x_axis_rc_code;100;__PARENT__6ceea113d305;Of which: off balance sheet items;;;;4.2
 C_08.01;x_axis_rc_code;120;__PARENT__9e22a2883603;Of which: off balance sheet items;;;;4.2
 C_08.01;x_axis_rc_code;130;__PARENT__9e22a2883603;Of which: arising from counterparty credit risk;;;;4.2
-C_08.02;x_axis_rc_code;__PARENT__64f7ab0f6b66;;(-) Adjustment to risk-weighted exposure amount due to SME supporting factor;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__eb7093982416;;(-) Adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__6339922511be;;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__6ceea113d305;;Exposure after CRM substitution effects pre conversion factors;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__f993aa86651e;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__31b56006ffa0;;Exposure weighted average lgd (%);;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__fd8740220050;;Exposure-weighted average maturity value (days);;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__fc0a9f2feef6;;Memorandum items:;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__7e4a30617d86;;Risk weighted exposure amount after supporting factor;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__76f1b5b4721a;;Risk weighted exposure amount pre supporting factor;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__6f5105f28b6b;__PARENT__64f7ab0f6b66;Funded credit protection;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__8fa69dc92152;__PARENT__eb7093982416;Funded credit protection;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__bbd82cb22495;__PARENT__6339922511be;Standard conversion factors;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__253c07d4ee3e;__PARENT__022ac6703d0d;Substitution of the exposure due to CRM;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__aa3cf677d78b;__PARENT__022ac6703d0d;Unfunded credit protection;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__f36700753b73;__PARENT__3d50c795dd97;Funded credit protection;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__b6dae134762b;__PARENT__3d50c795dd97;Own estimates of lgd's are used:;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__180ac35d9b3c;__PARENT__f993aa86651e;Funded credit protection;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__5547ff9b8f5c;__PARENT__31b56006ffa0;Funded credit protection;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__39517a01bd4d;__PARENT__fd8740220050;Funded credit protection;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__ce38a3ac41d3;__PARENT__fc0a9f2feef6;(-) value adjustments and provisions;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__4a4a5bab90c1;__PARENT__fc0a9f2feef6;Expected loss amount;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__f4203f36ca4b;__PARENT__fc0a9f2feef6;Number of obligors;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__28274ba3bc56;__PARENT__fc0a9f2feef6;Pre-credit derivatives risk weighted exposure amount;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__04feb6206ac4;__PARENT__7e4a30617d86;Funded credit protection;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__e0c8631b0daf;__PARENT__7e4a30617d86;Of which: large financial sector entities and unregulated financial entities;;Y;;4.2
-C_08.02;x_axis_rc_code;__PARENT__e6391f1f954e;__PARENT__76f1b5b4721a;Funded credit protection;;Y;;4.2
 C_08.02;x_axis_rc_code;__PARENT__e4bde03f4686;__PARENT__f36700753b73;Other eligible collateral;;Y;;4.2
 C_08.02;x_axis_rc_code;5;;Obligor grade;;;;4.2
 C_08.02;x_axis_rc_code;10;;Internal rating scale - PD assigned to the obligor grade or pool;;;%;4.2
@@ -55885,8 +55797,8 @@ C_08.02;x_axis_rc_code;50;__PARENT__aa3cf677d78b;(-) Credit derivatives;;;;4.2
 C_08.02;x_axis_rc_code;60;__PARENT__022ac6703d0d;(-) Other funded credit protection;;;;4.2
 C_08.02;x_axis_rc_code;70;__PARENT__253c07d4ee3e;(-) Total outflows;;;;4.2
 C_08.02;x_axis_rc_code;80;__PARENT__253c07d4ee3e;Total inflows (+);;;;4.2
-C_08.02;x_axis_rc_code;90;__PARENT__6ceea113d305;Substitution of the exposure due to CRM;;;;4.2
-C_08.02;x_axis_rc_code;100;__PARENT__6ceea113d305;Of which: off balance sheet items;;;;4.2
+C_08.02;x_axis_rc_code;90;;Exposure after CRM substitution effects pre conversion factors;;;;4.2
+C_08.02;x_axis_rc_code;100;90;Of which: off balance sheet items;;;;4.2
 C_08.02;x_axis_rc_code;101;__PARENT__6339922511be;Modelled conversion factors;;;;4.2
 C_08.02;x_axis_rc_code;102;__PARENT__bbd82cb22495;0;;;;4.2
 C_08.02;x_axis_rc_code;103;__PARENT__bbd82cb22495;0.1;;;;4.2
@@ -55894,10 +55806,10 @@ C_08.02;x_axis_rc_code;104;__PARENT__bbd82cb22495;0.2;;;;4.2
 C_08.02;x_axis_rc_code;105;__PARENT__bbd82cb22495;0.4;;;;4.2
 C_08.02;x_axis_rc_code;106;__PARENT__bbd82cb22495;0.5;;;;4.2
 C_08.02;x_axis_rc_code;107;__PARENT__bbd82cb22495;1;;;;4.2
-C_08.02;x_axis_rc_code;110;__PARENT__9e22a2883603;Standard conversion factors;;;;4.2
-C_08.02;x_axis_rc_code;120;__PARENT__9e22a2883603;Of which: off balance sheet items;;;;4.2
-C_08.02;x_axis_rc_code;130;__PARENT__9e22a2883603;Of which: arising from counterparty credit risk;;;;4.2
-C_08.02;x_axis_rc_code;140;__PARENT__9e22a2883603;Of which: large financial sector entities and unregulated financial entities;;;;4.2
+C_08.02;x_axis_rc_code;110;;Exposure value;;;;4.2
+C_08.02;x_axis_rc_code;120;110;Of which: off balance sheet items;;;;4.2
+C_08.02;x_axis_rc_code;130;110;Of which: arising from counterparty credit risk;;;;4.2
+C_08.02;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;4.2
 C_08.02;x_axis_rc_code;150;__PARENT__b6dae134762b;Guarantees;;;%;4.2
 C_08.02;x_axis_rc_code;160;__PARENT__b6dae134762b;Credit derivatives;;;%;4.2
 C_08.02;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of lgd's are used:;;;%;4.2
@@ -55908,18 +55820,18 @@ C_08.02;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;
 C_08.02;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;4.2
 C_08.02;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;4.2
 C_08.02;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;4.2
-C_08.02;x_axis_rc_code;230;__PARENT__5547ff9b8f5c;Other eligible collateral;;;%;4.2
-C_08.02;x_axis_rc_code;240;__PARENT__180ac35d9b3c;Other eligible collateral;;;%;4.2
-C_08.02;x_axis_rc_code;250;__PARENT__39517a01bd4d;Other eligible collateral;;;Unit;4.2
-C_08.02;x_axis_rc_code;255;__PARENT__e6391f1f954e;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;256;__PARENT__6f5105f28b6b;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;257;__PARENT__8fa69dc92152;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;260;__PARENT__04feb6206ac4;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;270;__PARENT__e0c8631b0daf;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;280;__PARENT__4a4a5bab90c1;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;290;__PARENT__ce38a3ac41d3;Other eligible collateral;;;;4.2
-C_08.02;x_axis_rc_code;300;__PARENT__f4203f36ca4b;Other eligible collateral;;;Unit;4.2
-C_08.02;x_axis_rc_code;310;__PARENT__28274ba3bc56;Other eligible collateral;;;;4.2
+C_08.02;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;4.2
+C_08.02;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;4.2
+C_08.02;x_axis_rc_code;250;;Exposure-weighted average maturity value (days);;;Unit;4.2
+C_08.02;x_axis_rc_code;255;;Risk weighted exposure amount pre supporting factor;;;;4.2
+C_08.02;x_axis_rc_code;256;;(-) Adjustment to risk-weighted exposure amount due to SME supporting factor;;;;4.2
+C_08.02;x_axis_rc_code;257;;(-) Adjustment to risk-weighted exposure amount due to infrastructure projects supporting factor;;;;4.2
+C_08.02;x_axis_rc_code;260;;Risk weighted exposure amount after supporting factor;;;;4.2
+C_08.02;x_axis_rc_code;270;260;Of which: large financial sector entities and unregulated financial entities;;;;4.2
+C_08.02;x_axis_rc_code;280;__PARENT__fc0a9f2feef6;Expected loss amount;;;;4.2
+C_08.02;x_axis_rc_code;290;__PARENT__fc0a9f2feef6;(-) value adjustments and provisions;;;;4.2
+C_08.02;x_axis_rc_code;300;__PARENT__fc0a9f2feef6;Number of obligors;;;Unit;4.2
+C_08.02;x_axis_rc_code;310;__PARENT__fc0a9f2feef6;Pre-credit derivatives risk weighted exposure amount;;;;4.2
 C_08.02;z_axis_rc_code;qx2007;;Memo item: Retail - Other non-SME - with own estimates of LGD or conversion factors;;;;4.2
 C_08.02;z_axis_rc_code;qx2008;;Memo item: Retail - Other SME - with own estimates of LGD or conversion factors;;;;4.2
 C_08.02;z_axis_rc_code;qx2009;;Retail - Qualifying revolving - with own estimates of LGD or conversion factors;;;;4.2
@@ -58218,28 +58130,19 @@ C_11.00;y_axis_rc_code;90;70;Transactions unsettled between 5 and 15 days (Facto
 C_11.00;y_axis_rc_code;100;70;Transactions unsettled between 16 and 30 days (Factor 50%);;;%;4.2
 C_11.00;y_axis_rc_code;110;70;Transactions unsettled between 31 and 45 days (Factor 75%);;;%;4.2
 C_11.00;y_axis_rc_code;120;70;Transactions unsettled for 46 days or more (Factor 100%);;;%;4.2
-C_13.01;x_axis_rc_code;__PARENT__75c7ea472004;;(-) CREDIT RISK MITIGATION TECHNIQUES AFFECTING THE AMOUNT OF THE EXPOSURE: FUNDED CREDIT PROTECTION FINANCIAL COLLATERAL COMPREHENSIVE METHOD ADJUSTED VALUE (Cvam);;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__46818d4e5298;;Breakdown of the exposure value subject to risk weights;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__13171bc256ce;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__672aacf0d713;;Fully adjusted exposure value (E*);;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__479364538b4d;;Memorandum items;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__fa7010182f73;;Net exposure after CRM substitution effects pre conversion factors;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__c4ae6e8db540;;Output floor S-TREA;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__defa1b196091;;Risk-weighted exposure amount;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__dd2d497d6220;;Securitisation positions;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__16d9bcfbb1a4;;Synthetic securitisations: credit protection to the securitised exposures;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__b1b0bca196bc;;Total risk-weighted exposure amount;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__b10c1c66d677;__PARENT__46818d4e5298;Internal assessment approach;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__3cd4b36adb46;__PARENT__46818d4e5298;Other (RW=1250%);;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__9ef7a36e3e89;__PARENT__46818d4e5298;SEC-ERBA;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__f44611b73b64;__PARENT__46818d4e5298;Specific treatment for senior tranches of qualifying NPE securitisations;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__8e44e2419991;__PARENT__13171bc256ce;Substitution of the exposure due to CRM;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__1519ad91fd27;__PARENT__479364538b4d;"Output floor; RWEA related to the impact of application of article 465(7) of regulation (EU) no 575/2013";;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__9429d5469f18;__PARENT__defa1b196091;SEC-IRBA;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__6e82962a9ae6;__PARENT__16d9bcfbb1a4;(-) Total outflows;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__715e19ccc8a0;__PARENT__b10c1c66d677;Breakdown by RW bands;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__f0f5b7ff0700;__PARENT__9ef7a36e3e89;Breakdown by credit quality steps;;Y;;4.2
-C_13.01;x_axis_rc_code;__PARENT__eef6e9c26791;__PARENT__9ef7a36e3e89;Breakdown by reasons for application of SEC-ERBA;;Y;;4.2
+C_13.01;x_axis_rc_code;__PARENT__715e19ccc8a0;640;Breakdown by RW bands;;Y;;4.2
+C_13.01;x_axis_rc_code;__PARENT__f0f5b7ff0700;350;Breakdown by credit quality steps;;Y;;4.2
+C_13.01;x_axis_rc_code;__PARENT__eef6e9c26791;350;Breakdown by reasons for application of SEC-ERBA;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__6a878b0ac9d9;210;Breakdown by RW bands;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__86d45fd310cb;280;Breakdown by RW bands;;Y;;4.2
 C_13.01;x_axis_rc_code;__PARENT__1ed37a6bfa5e;__PARENT__f0f5b7ff0700;Long term credit quality steps;;Y;;4.2
@@ -58255,10 +58158,10 @@ C_13.01;x_axis_rc_code;80;__PARENT__13171bc256ce;(-) UNFUNDED CREDIT PROTECTION:
 C_13.01;x_axis_rc_code;90;__PARENT__13171bc256ce;(-) Funded credit protection;;;;4.2
 C_13.01;x_axis_rc_code;100;__PARENT__8e44e2419991;(-) Total outflows;;;;4.2
 C_13.01;x_axis_rc_code;110;__PARENT__8e44e2419991;Total inflows;;;;4.2
-C_13.01;x_axis_rc_code;120;__PARENT__fa7010182f73;Substitution of the exposure due to CRM;;;;4.2
-C_13.01;x_axis_rc_code;130;__PARENT__75c7ea472004;Substitution of the exposure due to CRM;;;;4.2
-C_13.01;x_axis_rc_code;140;__PARENT__672aacf0d713;Substitution of the exposure due to CRM;;;;4.2
-C_13.01;x_axis_rc_code;150;__PARENT__672aacf0d713;Of which: subject to a CCF of 0%;;;%;4.2
+C_13.01;x_axis_rc_code;120;;Net exposure after CRM substitution effects pre conversion factors;;;;4.2
+C_13.01;x_axis_rc_code;130;;(-) CREDIT RISK MITIGATION TECHNIQUES AFFECTING THE AMOUNT OF THE EXPOSURE: FUNDED CREDIT PROTECTION FINANCIAL COLLATERAL COMPREHENSIVE METHOD ADJUSTED VALUE (Cvam);;;;4.2
+C_13.01;x_axis_rc_code;140;;Fully adjusted exposure value (E*);;;;4.2
+C_13.01;x_axis_rc_code;150;140;Of which: subject to a CCF of 0%;;;%;4.2
 C_13.01;x_axis_rc_code;160;;(-) Non refundable price purchase discount;;;;4.2
 C_13.01;x_axis_rc_code;170;;(-) Specific credit risk adjustments on underlying exposures;;;;4.2
 C_13.01;x_axis_rc_code;180;;Exposure value;;;;4.2
@@ -58278,7 +58181,7 @@ C_13.01;x_axis_rc_code;310;__PARENT__86d45fd310cb;>50% To 100% RW;;;%;4.2
 C_13.01;x_axis_rc_code;320;__PARENT__86d45fd310cb;>100% To 1250% RW;;;%;4.2
 C_13.01;x_axis_rc_code;330;__PARENT__86d45fd310cb;1250% RW (W unknown);;;%;4.2
 C_13.01;x_axis_rc_code;340;__PARENT__86d45fd310cb;1250% RW (other);;;%;4.2
-C_13.01;x_axis_rc_code;350;__PARENT__9ef7a36e3e89;Breakdown by RW bands;;;;4.2
+C_13.01;x_axis_rc_code;350;__PARENT__46818d4e5298;SEC-ERBA;;;;4.2
 C_13.01;x_axis_rc_code;360;__PARENT__513fe450d6aa;CQS 1;;;;4.2
 C_13.01;x_axis_rc_code;370;__PARENT__513fe450d6aa;CQS 2;;;;4.2
 C_13.01;x_axis_rc_code;380;__PARENT__513fe450d6aa;CQS 3;;;;4.2
@@ -58307,31 +58210,31 @@ C_13.01;x_axis_rc_code;600;__PARENT__eef6e9c26791;POSITIONS SUBJECT TO ARTICLE 2
 C_13.01;x_axis_rc_code;610;__PARENT__eef6e9c26791;POSITIONS SUBJECT TO ARTICLE 254(2), POINT (b) OF REGULATION (EU) NO 575/2013;;;;4.2
 C_13.01;x_axis_rc_code;620;__PARENT__eef6e9c26791;Positions subject to articles 254 (4) or 258 (2) of regulation (EU) no 575/2013;;;;4.2
 C_13.01;x_axis_rc_code;630;__PARENT__eef6e9c26791;Following the hierarchy of approaches;;;;4.2
-C_13.01;x_axis_rc_code;640;__PARENT__b10c1c66d677;Breakdown by reasons for application of SEC-ERBA;;;;4.2
+C_13.01;x_axis_rc_code;640;__PARENT__46818d4e5298;Internal assessment approach;;;;4.2
 C_13.01;x_axis_rc_code;650;__PARENT__715e19ccc8a0;<=20% RW;;;%;4.2
 C_13.01;x_axis_rc_code;660;__PARENT__715e19ccc8a0;>20% To 50% RW;;;%;4.2
 C_13.01;x_axis_rc_code;670;__PARENT__715e19ccc8a0;>50% To 100% RW;;;%;4.2
 C_13.01;x_axis_rc_code;680;__PARENT__715e19ccc8a0;>100% To 1250% RW;;;%;4.2
 C_13.01;x_axis_rc_code;690;__PARENT__715e19ccc8a0;1250% RW;;;%;4.2
-C_13.01;x_axis_rc_code;695;__PARENT__f44611b73b64;Breakdown by RW bands;;;;4.2
-C_13.01;x_axis_rc_code;700;__PARENT__3cd4b36adb46;Breakdown by RW bands;;;%;4.2
-C_13.01;x_axis_rc_code;710;__PARENT__defa1b196091;Breakdown by RW bands;;;;4.2
-C_13.01;x_axis_rc_code;720;__PARENT__9429d5469f18;Breakdown by RW bands;;;;4.2
-C_13.01;x_axis_rc_code;730;__PARENT__9429d5469f18;Of which: calculated under article 255 (4) (purchased receivables);;;;4.2
-C_13.01;x_axis_rc_code;740;__PARENT__defa1b196091;SEC-sa;;;;4.2
+C_13.01;x_axis_rc_code;695;__PARENT__46818d4e5298;Specific treatment for senior tranches of qualifying NPE securitisations;;;;4.2
+C_13.01;x_axis_rc_code;700;__PARENT__46818d4e5298;Other (RW=1250%);;;%;4.2
+C_13.01;x_axis_rc_code;710;;Risk-weighted exposure amount;;;;4.2
+C_13.01;x_axis_rc_code;720;710;SEC-IRBA;;;;4.2
+C_13.01;x_axis_rc_code;730;720;Of which: calculated under article 255 (4) (purchased receivables);;;;4.2
+C_13.01;x_axis_rc_code;740;710;SEC-sa;;;;4.2
 C_13.01;x_axis_rc_code;750;740;Of which: RW=1250% (W unknown);;;%;4.2
-C_13.01;x_axis_rc_code;760;__PARENT__defa1b196091;SEC-ERBA;;;;4.2
+C_13.01;x_axis_rc_code;760;710;SEC-ERBA;;;;4.2
 C_13.01;x_axis_rc_code;770;760;Auto loans, auto leases and equipment leases;;;;4.2
 C_13.01;x_axis_rc_code;780;760;SEC-ERBA option;;;;4.2
 C_13.01;x_axis_rc_code;790;760;POSITIONS SUBJECT TO ARTICLE 254(2), POINT (a) OF REGULATION (EU) NO 575/2013;;;;4.2
 C_13.01;x_axis_rc_code;800;760;POSITIONS SUBJECT TO ARTICLE 254(2), POINT (b) OF REGULATION (EU) NO 575/2013;;;;4.2
 C_13.01;x_axis_rc_code;810;760;Positions subject to articles 254 (4) or 258 (2) of regulation (EU) no 575/2013;;;;4.2
 C_13.01;x_axis_rc_code;820;760;Following the hierarchy of approaches;;;;4.2
-C_13.01;x_axis_rc_code;830;__PARENT__defa1b196091;Internal assessment approach;;;;4.2
+C_13.01;x_axis_rc_code;830;710;Internal assessment approach;;;;4.2
 C_13.01;x_axis_rc_code;840;830;Average risk weight (%);;;%;4.2
-C_13.01;x_axis_rc_code;845;__PARENT__defa1b196091;Specific treatment for senior tranches of qualifying NPE securitisations;;;;4.2
-C_13.01;x_axis_rc_code;850;__PARENT__defa1b196091;Other (RW=1250%);;;%;4.2
-C_13.01;x_axis_rc_code;860;__PARENT__defa1b196091;Of which: synthetic securitisations;;;;4.2
+C_13.01;x_axis_rc_code;845;710;Specific treatment for senior tranches of qualifying NPE securitisations;;;;4.2
+C_13.01;x_axis_rc_code;850;710;Other (RW=1250%);;;%;4.2
+C_13.01;x_axis_rc_code;860;710;Of which: synthetic securitisations;;;;4.2
 C_13.01;x_axis_rc_code;870;;Adjustment to the risk-weighted exposure amount due to maturity mismatches;;;;4.2
 C_13.01;x_axis_rc_code;880;;Overall effect (adjustment) due to infringement of chapter 2 of regulation (EU) 2017/2402;;;;4.2
 C_13.01;x_axis_rc_code;890;__PARENT__b1b0bca196bc;Before CAP;;;;4.2
@@ -58507,8 +58410,6 @@ C_14.00;x_axis_rc_code;300;__PARENT__a1483e0cd167;Legal final maturity date;;;;4
 C_14.00;x_axis_rc_code;302;__PARENT__570cc8fad487;Attachment point of risk sold (%);;;%;4.2
 C_14.00;x_axis_rc_code;303;__PARENT__570cc8fad487;Detachment point of risk sold (%);;;%;4.2
 C_14.00;x_axis_rc_code;304;__PARENT__570cc8fad487;Risk transfer claimed by originator institution (%);;;%;4.2
-C_14.01;x_axis_rc_code;__PARENT__10d8d56381d9;;(-) Exposure value deducted from own funds;;Y;;4.2
-C_14.01;x_axis_rc_code;__PARENT__3f6a9caee00a;;Exposure value;;Y;;4.2
 C_14.01;x_axis_rc_code;__PARENT__479364538b4d;;Memorandum items;;Y;;4.2
 C_14.01;x_axis_rc_code;__PARENT__c4ae6e8db540;;Output floor S-TREA;;Y;;4.2
 C_14.01;x_axis_rc_code;__PARENT__dd2d497d6220;;Securitisation positions;;Y;;4.2
@@ -58535,8 +58436,8 @@ C_14.01;x_axis_rc_code;370;__PARENT__f02208aebce9;Direct credit substitutes;;;;4
 C_14.01;x_axis_rc_code;380;__PARENT__f02208aebce9;IRS / CRS;;;;4.2
 C_14.01;x_axis_rc_code;390;__PARENT__f02208aebce9;Liquidity facilities;;;;4.2
 C_14.01;x_axis_rc_code;400;__PARENT__f02208aebce9;Other;;;;4.2
-C_14.01;x_axis_rc_code;411;__PARENT__3f6a9caee00a;Memorandum items: off-balance sheet items and derivatives pre conversion factors;;;;4.2
-C_14.01;x_axis_rc_code;420;__PARENT__10d8d56381d9;Memorandum items: off-balance sheet items and derivatives pre conversion factors;;;;4.2
+C_14.01;x_axis_rc_code;411;;Exposure value;;;;4.2
+C_14.01;x_axis_rc_code;420;;(-) Exposure value deducted from own funds;;;;4.2
 C_14.01;x_axis_rc_code;430;__PARENT__9164886689bf;Before CAP;;;;4.2
 C_14.01;x_axis_rc_code;431;__PARENT__9164886689bf;(-) Reduction due to risk weight CAP;;;;4.2
 C_14.01;x_axis_rc_code;432;__PARENT__9164886689bf;(-) Reduction due to overall CAP;;;;4.2
@@ -59655,14 +59556,13 @@ C_32.01;y_axis_rc_code;210;150;Haircuts for trading liabilities at fair value;;;
 C_32.01;y_axis_rc_code;220;150;Other liabilities;;;;4.2
 C_32.01;y_axis_rc_code;230;150;Liabilities included in disposal groups classified as held for sale;;;;4.2
 C_32.02;x_axis_rc_code;__PARENT__1cab46865098;;Category level AVA;;Y;;4.2
-C_32.02;x_axis_rc_code;__PARENT__57982720951b;;Total AVA;;Y;;4.2
 C_32.02;x_axis_rc_code;10;__PARENT__1cab46865098;Market price uncertainty;;;;4.2
 C_32.02;x_axis_rc_code;20;10;Of which: calculated using the expert based approach;;;;4.2
 C_32.02;x_axis_rc_code;30;__PARENT__1cab46865098;Close-out costs;;;;4.2
 C_32.02;x_axis_rc_code;40;30;Of which: calculated using the expert based approach;;;;4.2
 C_32.02;x_axis_rc_code;50;__PARENT__1cab46865098;Model risk;;;;4.2
 C_32.02;x_axis_rc_code;60;50;Of which: calculated using the expert based approach;;;;4.2
-C_32.02;x_axis_rc_code;110;__PARENT__57982720951b;Model risk;;;;4.2
+C_32.02;x_axis_rc_code;110;;Total AVA;;;;4.2
 C_32.02;y_axis_rc_code;10;;Total core approach;;;;4.2
 C_32.02;y_axis_rc_code;20;10;Of which: trading book;;;;4.2
 C_32.02;y_axis_rc_code;30;10;Portfolios under articles 9 to 17 - total category level post-diversification;;;;4.2
@@ -59740,9 +59640,6 @@ C_32.04;x_axis_rc_code;80;;Concentrated position AVA;;;;4.2
 C_32.04;x_axis_rc_code;90;;Concentrated position fair value adjustment;;;;4.2
 C_32.04;x_axis_rc_code;100;;IPV difference;;;;4.2
 C_33.00;x_axis_rc_code;__PARENT__302a0cda3377;;Direct exposures;;Y;;4.2
-C_33.00;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
-C_33.00;x_axis_rc_code;__PARENT__9ed8118a7c23;;Risk weighted exposure amount;;Y;;4.2
-C_33.00;x_axis_rc_code;__PARENT__f8ac6e4f5da8;__PARENT__302a0cda3377;Accumulated impairment;;Y;;4.2
 C_33.00;x_axis_rc_code;__PARENT__8ae0a24b869c;__PARENT__302a0cda3377;Derivatives;;Y;;4.2
 C_33.00;x_axis_rc_code;__PARENT__245ce0aaa306;__PARENT__302a0cda3377;Off-balance sheet exposures;;Y;;4.2
 C_33.00;x_axis_rc_code;__PARENT__3a4df935578b;__PARENT__302a0cda3377;On-balance sheet exposures;;Y;;4.2
@@ -59763,8 +59660,8 @@ C_33.00;x_axis_rc_code;110;__PARENT__f88bf0083249;Non-trading non-derivative fin
 C_33.00;x_axis_rc_code;120;__PARENT__f88bf0083249;Other non-trading non-derivative financial assets;;;;4.2
 C_33.00;x_axis_rc_code;130;__PARENT__3a4df935578b;Short positions;;;;4.2
 C_33.00;x_axis_rc_code;140;130;Of which: Short positions from reverse repurchased loans classified as held for trading or trading financial assets;;;;4.2
-C_33.00;x_axis_rc_code;150;__PARENT__f8ac6e4f5da8;Short positions;;;;4.2
-C_33.00;x_axis_rc_code;160;__PARENT__f8ac6e4f5da8;of which: from financial assets at fair value through other comprehensive income or from non-trading non-derivative financial assets measured at fair value to equity;;;;4.2
+C_33.00;x_axis_rc_code;150;__PARENT__302a0cda3377;Accumulated impairment;;;;4.2
+C_33.00;x_axis_rc_code;160;150;of which: from financial assets at fair value through other comprehensive income or from non-trading non-derivative financial assets measured at fair value to equity;;;;4.2
 C_33.00;x_axis_rc_code;170;__PARENT__302a0cda3377;Accumulated negative changes in fair value due to credit risk;;;;4.2
 C_33.00;x_axis_rc_code;180;170;of which: from non-trading financial assets mandatorily at fair value through profit or loss, financial assets designated at fair value through profit or loss or from non-trading financial assets measured at fair value through profit or loss;;;;4.2
 C_33.00;x_axis_rc_code;190;170;of which: from financial assets at fair value through other comprehensive income or from non-trading non-derivative financial assets measured at fair value to equity;;;;4.2
@@ -59775,8 +59672,8 @@ C_33.00;x_axis_rc_code;230;__PARENT__8ab0c6e3da18;Notional amount;;;;4.2
 C_33.00;x_axis_rc_code;240;__PARENT__245ce0aaa306;Nominal amount;;;;4.2
 C_33.00;x_axis_rc_code;250;__PARENT__245ce0aaa306;Provisions;;;;4.2
 C_33.00;x_axis_rc_code;260;__PARENT__245ce0aaa306;Accumulated negative changes in fair value due to credit risk;;;;4.2
-C_33.00;x_axis_rc_code;290;__PARENT__9e22a2883603;Off-balance sheet exposures;;;;4.2
-C_33.00;x_axis_rc_code;300;__PARENT__9ed8118a7c23;Off-balance sheet exposures;;;;4.2
+C_33.00;x_axis_rc_code;290;;Exposure value;;;;4.2
+C_33.00;x_axis_rc_code;300;;Risk weighted exposure amount;;;;4.2
 C_33.00;y_axis_rc_code;__PARENT__561fc424c070;10;0015 Breakdown of total exposures by risk, regulatory approach and exposure classes;;Y;;4.2
 C_33.00;y_axis_rc_code;__PARENT__be0e768a55f1;10;0165 Breakdown of total exposures by residual maturity;;Y;;4.2
 C_33.00;y_axis_rc_code;10;;Total exposures;;;;4.2
@@ -60934,24 +60831,22 @@ D_07.00;x_axis_rc_code;__PARENT__30aeef82914f;;Disclosure reference date T;;Y;;4
 D_07.00;x_axis_rc_code;__PARENT__3145fa488bf3;__PARENT__30aeef82914f;Climate Change Adaptation (CCA);;Y;;4.2
 D_07.00;x_axis_rc_code;__PARENT__a2a2e885ee0c;__PARENT__30aeef82914f;Climate Change Mitigation (CCM);;Y;;4.2
 D_07.00;x_axis_rc_code;__PARENT__b7ed0112ae3e;__PARENT__30aeef82914f;Total (CCM + CCA);;Y;;4.2
-D_07.00;x_axis_rc_code;__PARENT__5e06ee5648b4;__PARENT__3145fa488bf3;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
-D_07.00;x_axis_rc_code;__PARENT__7b77591b2a10;__PARENT__b7ed0112ae3e;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
 D_07.00;x_axis_rc_code;10;__PARENT__30aeef82914f;Total gross carrying amount;;;;4.2
 D_07.00;x_axis_rc_code;20;__PARENT__a2a2e885ee0c;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
 D_07.00;x_axis_rc_code;30;20;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 D_07.00;x_axis_rc_code;40;30;Of which specialised lending;;;;4.2
 D_07.00;x_axis_rc_code;50;30;Of which transitional;;;;4.2
 D_07.00;x_axis_rc_code;60;30;Of which enabling;;;;4.2
-D_07.00;x_axis_rc_code;70;__PARENT__5e06ee5648b4;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_07.00;x_axis_rc_code;80;__PARENT__5e06ee5648b4;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_07.00;x_axis_rc_code;90;70;Of which specialised lending;;;;4.2
-D_07.00;x_axis_rc_code;100;70;Of which adaptation;;;;4.2
-D_07.00;x_axis_rc_code;110;70;Of which enabling;;;;4.2
-D_07.00;x_axis_rc_code;120;__PARENT__7b77591b2a10;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_07.00;x_axis_rc_code;130;__PARENT__7b77591b2a10;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_07.00;x_axis_rc_code;140;120;Of which specialised lending;;;;4.2
-D_07.00;x_axis_rc_code;150;120;Of which transitional/adaptation;;;;4.2
-D_07.00;x_axis_rc_code;160;120;Of which enabling;;;;4.2
+D_07.00;x_axis_rc_code;70;__PARENT__3145fa488bf3;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+D_07.00;x_axis_rc_code;80;70;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+D_07.00;x_axis_rc_code;90;80;Of which specialised lending;;;;4.2
+D_07.00;x_axis_rc_code;100;80;Of which adaptation;;;;4.2
+D_07.00;x_axis_rc_code;110;80;Of which enabling;;;;4.2
+D_07.00;x_axis_rc_code;120;__PARENT__b7ed0112ae3e;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+D_07.00;x_axis_rc_code;130;120;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+D_07.00;x_axis_rc_code;140;130;Of which specialised lending;;;;4.2
+D_07.00;x_axis_rc_code;150;130;Of which transitional/adaptation;;;;4.2
+D_07.00;x_axis_rc_code;160;130;Of which enabling;;;;4.2
 D_07.00;y_axis_rc_code;__PARENT__a6c612fad8dd;;0005 GAR - Covered assets in both numerator and denominator;;Y;;4.2
 D_07.00;y_axis_rc_code;__PARENT__a19d03fc01ff;;0325 Assets excluded from the numerator for GAR calculation (covered in the denominator);;Y;;4.2
 D_07.00;y_axis_rc_code;__PARENT__c838179061e2;;0455 Other assets excluded from both the numerator and denominator for GAR calculation;;Y;;4.2
@@ -61011,23 +60906,21 @@ D_08.00;x_axis_rc_code;__PARENT__6abcf0622803;;Disclosure reference date T: KPIs
 D_08.00;x_axis_rc_code;__PARENT__b32b98b81c98;__PARENT__6abcf0622803;Climate Change Adaptation (CCA);;Y;;4.2
 D_08.00;x_axis_rc_code;__PARENT__dd56b407bc7a;__PARENT__6abcf0622803;Climate Change Mitigation (CCM);;Y;;4.2
 D_08.00;x_axis_rc_code;__PARENT__182d4d9b2d1a;__PARENT__6abcf0622803;Total (CCM + CCA);;Y;;4.2
-D_08.00;x_axis_rc_code;__PARENT__f28625b4d9eb;__PARENT__b32b98b81c98;Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
-D_08.00;x_axis_rc_code;__PARENT__540c801a0d6a;__PARENT__182d4d9b2d1a;Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
 D_08.00;x_axis_rc_code;10;__PARENT__dd56b407bc7a;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
 D_08.00;x_axis_rc_code;20;10;Of which environmentally sustainable;;;;4.2
 D_08.00;x_axis_rc_code;30;20;Of which specialised lending;;;;4.2
 D_08.00;x_axis_rc_code;40;20;Of which transitional;;;;4.2
 D_08.00;x_axis_rc_code;50;20;Of which enabling;;;;4.2
-D_08.00;x_axis_rc_code;60;__PARENT__f28625b4d9eb;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;70;__PARENT__f28625b4d9eb;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;80;60;Of which specialised lending;;;;4.2
-D_08.00;x_axis_rc_code;90;60;Of which adaptation;;;;4.2
-D_08.00;x_axis_rc_code;100;60;Of which enabling;;;;4.2
-D_08.00;x_axis_rc_code;110;__PARENT__540c801a0d6a;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;120;__PARENT__540c801a0d6a;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;130;110;Of which specialised lending;;;;4.2
-D_08.00;x_axis_rc_code;140;110;Of which transitional/adaptation;;;;4.2
-D_08.00;x_axis_rc_code;150;110;Of which enabling;;;;4.2
+D_08.00;x_axis_rc_code;60;__PARENT__b32b98b81c98;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+D_08.00;x_axis_rc_code;70;60;Of which environmentally sustainable;;;;4.2
+D_08.00;x_axis_rc_code;80;70;Of which specialised lending;;;;4.2
+D_08.00;x_axis_rc_code;90;70;Of which adaptation;;;;4.2
+D_08.00;x_axis_rc_code;100;70;Of which enabling;;;;4.2
+D_08.00;x_axis_rc_code;110;__PARENT__182d4d9b2d1a;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+D_08.00;x_axis_rc_code;120;110;Of which environmentally sustainable;;;;4.2
+D_08.00;x_axis_rc_code;130;120;Of which specialised lending;;;;4.2
+D_08.00;x_axis_rc_code;140;120;Of which transitional/adaptation;;;;4.2
+D_08.00;x_axis_rc_code;150;120;Of which enabling;;;;4.2
 D_08.00;y_axis_rc_code;10;;GAR;;;;4.2
 D_08.00;y_axis_rc_code;20;10;Loans and advances, debt securities and equity instruments not HfT eligible for GAR calculation;;;;4.2
 D_08.00;y_axis_rc_code;170;;Collateral obtained by taking possession: residential and commercial immovable properties;;;;4.2
@@ -61052,47 +60945,43 @@ D_08.00;x_axis_rc_code;__PARENT__7cc9311f822d;;Disclosure reference date T: KPIs
 D_08.00;x_axis_rc_code;__PARENT__7427c32c991e;__PARENT__7cc9311f822d;Climate Change Adaptation (CCA);;Y;;4.2
 D_08.00;x_axis_rc_code;__PARENT__754d7a6f7ecd;__PARENT__7cc9311f822d;Climate Change Mitigation (CCM);;Y;;4.2
 D_08.00;x_axis_rc_code;__PARENT__c5c87ea1c5fa;__PARENT__7cc9311f822d;Total (CCM + CCA);;Y;;4.2
-D_08.00;x_axis_rc_code;__PARENT__161011686aca;__PARENT__7427c32c991e;Proportion of new eligible assets funding taxonomy relevant sectors;;Y;;4.2
-D_08.00;x_axis_rc_code;__PARENT__f14c92a5b3f2;__PARENT__c5c87ea1c5fa;Proportion of new eligible assets funding taxonomy relevant sectors;;Y;;4.2
 D_08.00;x_axis_rc_code;170;__PARENT__754d7a6f7ecd;Proportion of new eligible assets funding taxonomy relevant sectors;;;;4.2
 D_08.00;x_axis_rc_code;180;170;Of which environmentally sustainable;;;;4.2
 D_08.00;x_axis_rc_code;190;180;Of which specialised lending;;;;4.2
 D_08.00;x_axis_rc_code;200;180;Of which transitional;;;;4.2
 D_08.00;x_axis_rc_code;210;180;Of which enabling;;;;4.2
-D_08.00;x_axis_rc_code;220;__PARENT__161011686aca;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;230;__PARENT__161011686aca;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;240;220;Of which specialised lending;;;;4.2
-D_08.00;x_axis_rc_code;250;220;Of which adaptation;;;;4.2
-D_08.00;x_axis_rc_code;260;220;Of which enabling;;;;4.2
-D_08.00;x_axis_rc_code;270;__PARENT__f14c92a5b3f2;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;280;__PARENT__f14c92a5b3f2;Of which environmentally sustainable;;;;4.2
-D_08.00;x_axis_rc_code;290;270;Of which specialised lending;;;;4.2
-D_08.00;x_axis_rc_code;300;270;Of which transitional/adaptation;;;;4.2
-D_08.00;x_axis_rc_code;310;270;Of which enabling;;;;4.2
+D_08.00;x_axis_rc_code;220;__PARENT__7427c32c991e;Proportion of new eligible assets funding taxonomy relevant sectors;;;;4.2
+D_08.00;x_axis_rc_code;230;220;Of which environmentally sustainable;;;;4.2
+D_08.00;x_axis_rc_code;240;230;Of which specialised lending;;;;4.2
+D_08.00;x_axis_rc_code;250;230;Of which adaptation;;;;4.2
+D_08.00;x_axis_rc_code;260;230;Of which enabling;;;;4.2
+D_08.00;x_axis_rc_code;270;__PARENT__c5c87ea1c5fa;Proportion of new eligible assets funding taxonomy relevant sectors;;;;4.2
+D_08.00;x_axis_rc_code;280;270;Of which environmentally sustainable;;;;4.2
+D_08.00;x_axis_rc_code;290;280;Of which specialised lending;;;;4.2
+D_08.00;x_axis_rc_code;300;280;Of which transitional/adaptation;;;;4.2
+D_08.00;x_axis_rc_code;310;280;Of which enabling;;;;4.2
 D_08.00;x_axis_rc_code;160;__PARENT__6abcf0622803;Proportion of total assets covered;;;;4.2
 D_08.00;x_axis_rc_code;320;__PARENT__7cc9311f822d;Proportion of total new assets covered;;;;4.2
 D_09.01;x_axis_rc_code;__PARENT__30aeef82914f;;Disclosure reference date T;;Y;;4.2
 D_09.01;x_axis_rc_code;__PARENT__3145fa488bf3;__PARENT__30aeef82914f;Climate Change Adaptation (CCA);;Y;;4.2
 D_09.01;x_axis_rc_code;__PARENT__a2a2e885ee0c;__PARENT__30aeef82914f;Climate Change Mitigation (CCM);;Y;;4.2
 D_09.01;x_axis_rc_code;__PARENT__b7ed0112ae3e;__PARENT__30aeef82914f;Total (CCM + CCA);;Y;;4.2
-D_09.01;x_axis_rc_code;__PARENT__5e06ee5648b4;__PARENT__3145fa488bf3;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
-D_09.01;x_axis_rc_code;__PARENT__7b77591b2a10;__PARENT__b7ed0112ae3e;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
 D_09.01;x_axis_rc_code;10;__PARENT__30aeef82914f;Total gross carrying amount;;;;4.2
 D_09.01;x_axis_rc_code;20;__PARENT__a2a2e885ee0c;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
 D_09.01;x_axis_rc_code;30;20;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 D_09.01;x_axis_rc_code;40;30;Of which specialised lending;;;;4.2
 D_09.01;x_axis_rc_code;50;30;Of which transitional;;;;4.2
 D_09.01;x_axis_rc_code;60;30;Of which enabling;;;;4.2
-D_09.01;x_axis_rc_code;70;__PARENT__5e06ee5648b4;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_09.01;x_axis_rc_code;80;__PARENT__5e06ee5648b4;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_09.01;x_axis_rc_code;90;70;Of which specialised lending;;;;4.2
-D_09.01;x_axis_rc_code;100;70;Of which adaptation;;;;4.2
-D_09.01;x_axis_rc_code;110;70;Of which enabling;;;;4.2
-D_09.01;x_axis_rc_code;120;__PARENT__7b77591b2a10;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_09.01;x_axis_rc_code;130;__PARENT__7b77591b2a10;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-D_09.01;x_axis_rc_code;140;120;Of which specialised lending;;;;4.2
-D_09.01;x_axis_rc_code;150;120;Of which transitional/adaptation;;;;4.2
-D_09.01;x_axis_rc_code;160;120;Of which enabling;;;;4.2
+D_09.01;x_axis_rc_code;70;__PARENT__3145fa488bf3;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+D_09.01;x_axis_rc_code;80;70;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+D_09.01;x_axis_rc_code;90;80;Of which specialised lending;;;;4.2
+D_09.01;x_axis_rc_code;100;80;Of which adaptation;;;;4.2
+D_09.01;x_axis_rc_code;110;80;Of which enabling;;;;4.2
+D_09.01;x_axis_rc_code;120;__PARENT__b7ed0112ae3e;Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+D_09.01;x_axis_rc_code;130;120;Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+D_09.01;x_axis_rc_code;140;130;Of which specialised lending;;;;4.2
+D_09.01;x_axis_rc_code;150;130;Of which transitional/adaptation;;;;4.2
+D_09.01;x_axis_rc_code;160;130;Of which enabling;;;;4.2
 D_09.01;y_axis_rc_code;__PARENT__62301ff038f0;;0015 Assets excluded from the numerator for GAR calculation (covered in the denominator) but included in the numerator and denominator of the BTAR;;Y;;4.2
 D_09.01;y_axis_rc_code;__PARENT__c9532b625452;;0125 Assets excluded from the numerator of BTAR (covered in the denominator);;Y;;4.2
 D_09.01;y_axis_rc_code;__PARENT__6764a8d0ef06;;0175 Other assets excluded from both the numerator and denominator for BTAR calculation;;Y;;4.2
@@ -61119,23 +61008,21 @@ D_09.02;x_axis_rc_code;__PARENT__6abcf0622803;;Disclosure reference date T: KPIs
 D_09.02;x_axis_rc_code;__PARENT__b32b98b81c98;__PARENT__6abcf0622803;Climate Change Adaptation (CCA);;Y;;4.2
 D_09.02;x_axis_rc_code;__PARENT__dd56b407bc7a;__PARENT__6abcf0622803;Climate Change Mitigation (CCM);;Y;;4.2
 D_09.02;x_axis_rc_code;__PARENT__182d4d9b2d1a;__PARENT__6abcf0622803;Total (CCM + CCA);;Y;;4.2
-D_09.02;x_axis_rc_code;__PARENT__f28625b4d9eb;__PARENT__b32b98b81c98;Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
-D_09.02;x_axis_rc_code;__PARENT__540c801a0d6a;__PARENT__182d4d9b2d1a;Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
 D_09.02;x_axis_rc_code;10;__PARENT__dd56b407bc7a;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
 D_09.02;x_axis_rc_code;20;10;Of which environmentally sustainable;;;;4.2
 D_09.02;x_axis_rc_code;30;20;Of which specialised lending;;;;4.2
 D_09.02;x_axis_rc_code;40;20;Of which transitional;;;;4.2
 D_09.02;x_axis_rc_code;50;20;Of which enabling;;;;4.2
-D_09.02;x_axis_rc_code;60;__PARENT__f28625b4d9eb;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;70;__PARENT__f28625b4d9eb;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;80;60;Of which specialised lending;;;;4.2
-D_09.02;x_axis_rc_code;90;60;Of which adaptation;;;;4.2
-D_09.02;x_axis_rc_code;100;60;Of which enabling;;;;4.2
-D_09.02;x_axis_rc_code;110;__PARENT__540c801a0d6a;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;120;__PARENT__540c801a0d6a;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;130;110;Of which specialised lending;;;;4.2
-D_09.02;x_axis_rc_code;140;110;Of which transitional/adaptation;;;;4.2
-D_09.02;x_axis_rc_code;150;110;Of which enabling;;;;4.2
+D_09.02;x_axis_rc_code;60;__PARENT__b32b98b81c98;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+D_09.02;x_axis_rc_code;70;60;Of which environmentally sustainable;;;;4.2
+D_09.02;x_axis_rc_code;80;70;Of which specialised lending;;;;4.2
+D_09.02;x_axis_rc_code;90;70;Of which adaptation;;;;4.2
+D_09.02;x_axis_rc_code;100;70;Of which enabling;;;;4.2
+D_09.02;x_axis_rc_code;110;__PARENT__182d4d9b2d1a;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+D_09.02;x_axis_rc_code;120;110;Of which environmentally sustainable;;;;4.2
+D_09.02;x_axis_rc_code;130;120;Of which specialised lending;;;;4.2
+D_09.02;x_axis_rc_code;140;120;Of which transitional/adaptation;;;;4.2
+D_09.02;x_axis_rc_code;150;120;Of which enabling;;;;4.2
 D_09.02;y_axis_rc_code;10;;BTAR;;;;4.2
 D_09.02;y_axis_rc_code;20;10;GAR;;;;4.2
 D_09.02;y_axis_rc_code;30;10;EU Non-financial corporations not subject to NFRD disclosure obligations;;;;4.2
@@ -61146,23 +61033,21 @@ D_09.02;x_axis_rc_code;__PARENT__0be7ae978874;;Disclosure reference date T: KPIs
 D_09.02;x_axis_rc_code;__PARENT__ee71b1745fac;__PARENT__0be7ae978874;Climate Change Adaptation (CCA);;Y;;4.2
 D_09.02;x_axis_rc_code;__PARENT__f01aed47dcf9;__PARENT__0be7ae978874;Climate Change Mitigation (CCM);;Y;;4.2
 D_09.02;x_axis_rc_code;__PARENT__c6797b80f55b;__PARENT__0be7ae978874;Total (CCM + CCA);;Y;;4.2
-D_09.02;x_axis_rc_code;__PARENT__f77a603aa7b8;__PARENT__ee71b1745fac;Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
-D_09.02;x_axis_rc_code;__PARENT__f58d5d9bf3ac;__PARENT__c6797b80f55b;Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
 D_09.02;x_axis_rc_code;170;__PARENT__f01aed47dcf9;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
 D_09.02;x_axis_rc_code;180;170;Of which environmentally sustainable;;;;4.2
 D_09.02;x_axis_rc_code;190;180;Of which specialised lending;;;;4.2
 D_09.02;x_axis_rc_code;200;180;Of which transitional;;;;4.2
 D_09.02;x_axis_rc_code;210;180;Of which enabling;;;;4.2
-D_09.02;x_axis_rc_code;220;__PARENT__f77a603aa7b8;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;230;__PARENT__f77a603aa7b8;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;240;220;Of which specialised lending;;;;4.2
-D_09.02;x_axis_rc_code;250;220;Of which adaptation;;;;4.2
-D_09.02;x_axis_rc_code;260;220;Of which enabling;;;;4.2
-D_09.02;x_axis_rc_code;270;__PARENT__f58d5d9bf3ac;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;280;__PARENT__f58d5d9bf3ac;Of which environmentally sustainable;;;;4.2
-D_09.02;x_axis_rc_code;290;270;Of which specialised lending;;;;4.2
-D_09.02;x_axis_rc_code;300;270;Of which transitional/adaptation;;;;4.2
-D_09.02;x_axis_rc_code;310;270;Of which enabling;;;;4.2
+D_09.02;x_axis_rc_code;220;__PARENT__ee71b1745fac;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+D_09.02;x_axis_rc_code;230;220;Of which environmentally sustainable;;;;4.2
+D_09.02;x_axis_rc_code;240;230;Of which specialised lending;;;;4.2
+D_09.02;x_axis_rc_code;250;230;Of which adaptation;;;;4.2
+D_09.02;x_axis_rc_code;260;230;Of which enabling;;;;4.2
+D_09.02;x_axis_rc_code;270;__PARENT__c6797b80f55b;Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+D_09.02;x_axis_rc_code;280;270;Of which environmentally sustainable;;;;4.2
+D_09.02;x_axis_rc_code;290;280;Of which specialised lending;;;;4.2
+D_09.02;x_axis_rc_code;300;280;Of which transitional/adaptation;;;;4.2
+D_09.02;x_axis_rc_code;310;280;Of which enabling;;;;4.2
 D_09.02;x_axis_rc_code;__PARENT__7cc9311f822d;;Disclosure reference date T: KPIs on flows;;Y;;4.2
 D_09.02;x_axis_rc_code;160;__PARENT__6abcf0622803;Proportion of total assets covered;;;;4.2
 D_09.02;x_axis_rc_code;320;__PARENT__7cc9311f822d;Proportion of total new assets covered;;;;4.2
@@ -61212,7 +61097,6 @@ L_00.03;y_axis_rc_code;80;69;Fees and other charges;;;;4.2
 L_00.03;y_axis_rc_code;90;69;Interests;;;;4.2
 L_00.03;y_axis_rc_code;100;69;Dividends;;;;4.2
 L_01.00;x_axis_rc_code;__PARENT__bde073a45ca7;;Characteristics of the transaction;;Y;;4.2
-L_01.00;x_axis_rc_code;__PARENT__fce06e20e5f7;;Comments;;Y;;4.2
 L_01.00;x_axis_rc_code;__PARENT__bdcbf1248841;;Identification of the instrument;;Y;;4.2
 L_01.00;x_axis_rc_code;__PARENT__e93518fe4b00;;Identification of the transaction;;Y;;4.2
 L_01.00;x_axis_rc_code;__PARENT__30b6aae74b8f;__PARENT__bde073a45ca7;Amount of the transaction;;Y;;4.2
@@ -61243,7 +61127,7 @@ L_01.00;x_axis_rc_code;170;__PARENT__30b6aae74b8f;Amount at reporting date;;;;4.
 L_01.00;x_axis_rc_code;180;__PARENT__30b6aae74b8f;Value of collateral;;;;4.2
 L_01.00;x_axis_rc_code;190;__PARENT__d0ac1bb1c474;Amount of dividends/ interest/coupon and other payments;;;;4.2
 L_01.00;x_axis_rc_code;200;__PARENT__d0ac1bb1c474;Coupon/ interest rate;;;;4.2
-L_01.00;x_axis_rc_code;210;__PARENT__fce06e20e5f7;Associated P&L;;;;4.2
+L_01.00;x_axis_rc_code;210;;Comments;;;;4.2
 L_02.00;x_axis_rc_code;__PARENT__bde073a45ca7;;Characteristics of the transaction;;Y;;4.2
 L_02.00;x_axis_rc_code;__PARENT__bdcbf1248841;;Identification of the instrument;;Y;;4.2
 L_02.00;x_axis_rc_code;__PARENT__e93518fe4b00;;Identification of the transaction;;Y;;4.2
@@ -61905,20 +61789,16 @@ F_04.08;y_axis_rc_code;160;120;Other financial corporations;;;;4.2
 F_04.08;y_axis_rc_code;170;120;Non-financial corporations;;;;4.2
 F_04.08;y_axis_rc_code;180;;Households;;;;4.2
 F_04.08;y_axis_rc_code;175;180;Of which: Small and Medium-sized Enterprises;;;;4.2
-F_04.09;x_axis_rc_code;__PARENT__f3b03f570ec7;;Carrying amount;;Y;;4.2
-F_04.09;x_axis_rc_code;__PARENT__54234e1d496e;;General allowances for banking risk affecting carrying amount;;Y;;4.2
-F_04.09;x_axis_rc_code;__PARENT__ed3be2666eb4;;General allowances for credit risk affecting carrying amount;;Y;;4.2
 F_04.09;x_axis_rc_code;__PARENT__d040c013f44e;;Gross carrying amount;;Y;;4.2
-F_04.09;x_axis_rc_code;__PARENT__e0a88c91f89c;;Specific allowances for credit risk;;Y;;4.2
 F_04.09;x_axis_rc_code;10;__PARENT__d040c013f44e;Unimpaired assets;;;;4.2
 F_04.09;x_axis_rc_code;15;10;of which: assets under LOCOM;;;;4.2
 F_04.09;x_axis_rc_code;20;__PARENT__d040c013f44e;Impaired assets;;;;4.2
 F_04.09;x_axis_rc_code;25;20;of which: assets under LOCOM;;;;4.2
-F_04.09;x_axis_rc_code;30;__PARENT__e0a88c91f89c;Impaired assets;;;;4.2
-F_04.09;x_axis_rc_code;41;__PARENT__ed3be2666eb4;Impaired assets;;;;4.2
-F_04.09;x_axis_rc_code;45;__PARENT__54234e1d496e;Impaired assets;;;;4.2
-F_04.09;x_axis_rc_code;50;__PARENT__f3b03f570ec7;Impaired assets;;;;4.2
-F_04.09;x_axis_rc_code;60;__PARENT__f3b03f570ec7;of which: assets under LOCOM;;;;4.2
+F_04.09;x_axis_rc_code;30;;Specific allowances for credit risk;;;;4.2
+F_04.09;x_axis_rc_code;41;;General allowances for credit risk affecting carrying amount;;;;4.2
+F_04.09;x_axis_rc_code;45;;General allowances for banking risk affecting carrying amount;;;;4.2
+F_04.09;x_axis_rc_code;50;;Carrying amount;;;;4.2
+F_04.09;x_axis_rc_code;60;50;of which: assets under LOCOM;;;;4.2
 F_04.09;x_axis_rc_code;70;;Accumulated negative value adjustments on LOCOM assets - market risk induced;;;;4.2
 F_04.09;x_axis_rc_code;80;;Accumulated negative value adjustments on LOCOM assets - credit risk induced;;;;4.2
 F_04.09;x_axis_rc_code;90;;Accumulated partial write-offs;;;;4.2
@@ -61943,20 +61823,16 @@ F_04.09;y_axis_rc_code;110;140;Other financial corporations;;;;4.2
 F_04.09;y_axis_rc_code;120;140;Non-financial corporations;;;;4.2
 F_04.09;y_axis_rc_code;125;120;Of which: Small and Medium-sized Enterprises;;;;4.2
 F_04.09;y_axis_rc_code;130;140;Households;;;;4.2
-F_04.10;x_axis_rc_code;__PARENT__f3b03f570ec7;;Carrying amount;;Y;;4.2
-F_04.10;x_axis_rc_code;__PARENT__54234e1d496e;;General allowances for banking risk affecting carrying amount;;Y;;4.2
-F_04.10;x_axis_rc_code;__PARENT__ed3be2666eb4;;General allowances for credit risk affecting carrying amount;;Y;;4.2
 F_04.10;x_axis_rc_code;__PARENT__d040c013f44e;;Gross carrying amount;;Y;;4.2
-F_04.10;x_axis_rc_code;__PARENT__e0a88c91f89c;;Specific allowances for credit risk;;Y;;4.2
 F_04.10;x_axis_rc_code;15;__PARENT__d040c013f44e;Unimpaired assets;;;;4.2
 F_04.10;x_axis_rc_code;16;15;of which: assets under LOCOM;;;;4.2
 F_04.10;x_axis_rc_code;20;__PARENT__d040c013f44e;Impaired assets;;;;4.2
 F_04.10;x_axis_rc_code;25;20;of which: assets under LOCOM;;;;4.2
-F_04.10;x_axis_rc_code;30;__PARENT__e0a88c91f89c;Impaired assets;;;;4.2
-F_04.10;x_axis_rc_code;40;__PARENT__ed3be2666eb4;Impaired assets;;;;4.2
-F_04.10;x_axis_rc_code;50;__PARENT__54234e1d496e;Impaired assets;;;;4.2
-F_04.10;x_axis_rc_code;10;__PARENT__f3b03f570ec7;Impaired assets;;;;4.2
-F_04.10;x_axis_rc_code;70;__PARENT__f3b03f570ec7;of which: assets under LOCOM;;;;4.2
+F_04.10;x_axis_rc_code;30;;Specific allowances for credit risk;;;;4.2
+F_04.10;x_axis_rc_code;40;;General allowances for credit risk affecting carrying amount;;;;4.2
+F_04.10;x_axis_rc_code;50;;General allowances for banking risk affecting carrying amount;;;;4.2
+F_04.10;x_axis_rc_code;10;;Carrying amount;;;;4.2
+F_04.10;x_axis_rc_code;70;10;of which: assets under LOCOM;;;;4.2
 F_04.10;x_axis_rc_code;80;;Accumulated negative value adjustments on LOCOM assets - market risk induced;;;;4.2
 F_04.10;x_axis_rc_code;90;;Accumulated negative value adjustments on LOCOM assets - credit risk induced;;;;4.2
 F_04.10;x_axis_rc_code;100;;Accumulated partial write-offs;;;;4.2
@@ -62007,14 +61883,12 @@ F_05.01;y_axis_rc_code;110;__PARENT__e7358a7be487;of which: credit for consumpti
 F_05.01;y_axis_rc_code;120;__PARENT__e7358a7be487;of which: lending for house purchase;;;;4.2
 F_05.01;y_axis_rc_code;130;__PARENT__d35b3adc52a4;of which: project finance loans;;;;4.2
 F_06.01;x_axis_rc_code;__PARENT__ae38ef7b3bf8;;Non-financial corporations;;Y;;4.2
-F_06.01;x_axis_rc_code;__PARENT__e6d6b2253a20;__PARENT__ae38ef7b3bf8;Accumulated impairment;;Y;;4.2
-F_06.01;x_axis_rc_code;__PARENT__f9ab58e6ec04;__PARENT__ae38ef7b3bf8;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;Y;;4.2
 F_06.01;x_axis_rc_code;10;__PARENT__ae38ef7b3bf8;Gross carrying amount;;;;4.2
 F_06.01;x_axis_rc_code;11;10;of which: loans and advances subject to impairment;;;;4.2
 F_06.01;x_axis_rc_code;12;10;Of which: non-performing;;;;4.2
 F_06.01;x_axis_rc_code;13;12;of which: defaulted;;;;4.2
-F_06.01;x_axis_rc_code;21;__PARENT__e6d6b2253a20;Of which: non-performing;;;;4.2
-F_06.01;x_axis_rc_code;22;__PARENT__f9ab58e6ec04;Of which: non-performing;;;;4.2
+F_06.01;x_axis_rc_code;21;__PARENT__ae38ef7b3bf8;Accumulated impairment;;;;4.2
+F_06.01;x_axis_rc_code;22;__PARENT__ae38ef7b3bf8;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;;;4.2
 F_06.01;y_axis_rc_code;190;;Loans and advances;;;;4.2
 F_06.01;y_axis_rc_code;10;190;A Agriculture, forestry and fishing;;;;4.2
 F_06.01;y_axis_rc_code;20;190;B Mining and quarrying;;;;4.2
@@ -63175,7 +63049,6 @@ F_18.01;y_axis_rc_code;110;100;Of which: Loans collateralised by residential imm
 F_18.01;y_axis_rc_code;120;100;Of which: Credit for consumption;;;;4.2
 F_18.01;y_axis_rc_code;130;150;Loans and advances other than held for trading or trading;;;;4.2
 F_18.01;y_axis_rc_code;140;150;Loans and advances held for sale;;;;4.2
-F_18.02;x_axis_rc_code;__PARENT__6cc8c4c23c4b;;Accumulated impairment, accumulated negative changes in fair value due to credit risk;;Y;;4.2
 F_18.02;x_axis_rc_code;10;;Gross carrying amount;;;;4.2
 F_18.02;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;;4.2
 F_18.02;x_axis_rc_code;30;10;Performing;;;;4.2
@@ -63193,11 +63066,11 @@ F_18.02;x_axis_rc_code;140;80;Past due > 5 years <= 7 years;;;;4.2
 F_18.02;x_axis_rc_code;150;80;Past due > 7 years;;;;4.2
 F_18.02;x_axis_rc_code;160;80;Of which: defaulted;;;;4.2
 F_18.02;x_axis_rc_code;170;80;Of which: Non-performing exposures with forbearance measures;;;;4.2
-F_18.02;x_axis_rc_code;180;__PARENT__6cc8c4c23c4b;Non Performing;;;;4.2
-F_18.02;x_axis_rc_code;190;__PARENT__6cc8c4c23c4b;of which: Exposures with forbearance measures;;;;4.2
-F_18.02;x_axis_rc_code;200;__PARENT__6cc8c4c23c4b;Performing exposures - Accumulated impairment;;;;4.2
+F_18.02;x_axis_rc_code;180;;Accumulated impairment, accumulated negative changes in fair value due to credit risk;;;;4.2
+F_18.02;x_axis_rc_code;190;180;of which: Exposures with forbearance measures;;;;4.2
+F_18.02;x_axis_rc_code;200;180;Performing exposures - Accumulated impairment;;;;4.2
 F_18.02;x_axis_rc_code;210;200;Of which: Performing exposures with forbearance measures;;;;4.2
-F_18.02;x_axis_rc_code;220;__PARENT__6cc8c4c23c4b;Non-performing exposures - Accumulated impairment, accumulated negative changes in fair value due to credit risk;;;;4.2
+F_18.02;x_axis_rc_code;220;180;Non-performing exposures - Accumulated impairment, accumulated negative changes in fair value due to credit risk;;;;4.2
 F_18.02;x_axis_rc_code;230;220;Unlikely to pay that are not past due or past due <= 90 days;;;;4.2
 F_18.02;x_axis_rc_code;240;220;Past due > 90 days <= 180 days;;;;4.2
 F_18.02;x_axis_rc_code;250;220;Past due > 180 days <= 1 year;;;;4.2
@@ -63438,16 +63311,14 @@ F_20.03;y_axis_rc_code;270;;Profit or (-) loss after tax from continuing operati
 F_20.03;y_axis_rc_code;275;;Extraordinary profit or (-) loss after tax;;;;4.2
 F_20.03;y_axis_rc_code;280;;Profit or (-) loss after tax from discontinued operations;;;;4.2
 F_20.03;y_axis_rc_code;290;;Profit or (-) loss for the year;;;;4.2
-F_20.04;x_axis_rc_code;__PARENT__ee57255c2e63;;Accumulated impairment;;Y;;4.2
-F_20.04;x_axis_rc_code;__PARENT__f09f63efe467;;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;Y;;4.2
 F_20.04;x_axis_rc_code;10;;Gross carrying amount;;;;4.2
 F_20.04;x_axis_rc_code;11;10;Of which: held for trading or trading;;;;4.2
 F_20.04;x_axis_rc_code;12;10;Of which: financial assets subject to impairment, including cash balances at central banks and other demand deposits;;;;4.2
 F_20.04;x_axis_rc_code;22;10;Of which: forborne;;;;4.2
 F_20.04;x_axis_rc_code;25;10;Of which: non-performing;;;;4.2
 F_20.04;x_axis_rc_code;26;25;Of which: defaulted;;;;4.2
-F_20.04;x_axis_rc_code;31;__PARENT__ee57255c2e63;Of which: non-performing;;;;4.2
-F_20.04;x_axis_rc_code;40;__PARENT__f09f63efe467;Of which: non-performing;;;;4.2
+F_20.04;x_axis_rc_code;31;;Accumulated impairment;;;;4.2
+F_20.04;x_axis_rc_code;40;;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;;;4.2
 F_20.04;y_axis_rc_code;10;;Derivatives;;;;4.2
 F_20.04;y_axis_rc_code;20;10;Of which: credit institutions;;;;4.2
 F_20.04;y_axis_rc_code;30;10;Of which: other financial corporations;;;;4.2
@@ -65619,7 +65490,6 @@ F_24.03;y_axis_rc_code;20;10;Of which: Debt forgiveness;;;;4.2
 F_25.01;x_axis_rc_code;__PARENT__46362940e95f;;Collateral obtained by taking possession other than collateral classified as Property Plant and Equipment (PP&E);;Y;;4.2
 F_25.01;x_axis_rc_code;__PARENT__2f5b90040640;__PARENT__46362940e95f;Of which: Non-current assets held-for-sale;;Y;;4.2
 F_25.01;x_axis_rc_code;__PARENT__077d6d9cf35e;__PARENT__46362940e95f;Time passed since recognition in balance sheet;;Y;;4.2
-F_25.01;x_axis_rc_code;__PARENT__bdaa608b87cc;__PARENT__2f5b90040640;Carrying amount;;Y;;4.2
 F_25.01;x_axis_rc_code;__PARENT__f3ab1b6e7430;__PARENT__077d6d9cf35e;<= 2 years;;Y;;4.2
 F_25.01;x_axis_rc_code;__PARENT__1e895f30ab5d;__PARENT__077d6d9cf35e;> 2 years <= 5 years;;Y;;4.2
 F_25.01;x_axis_rc_code;__PARENT__ffd6a0120716;__PARENT__077d6d9cf35e;> 5 years;;Y;;4.2
@@ -65632,7 +65502,7 @@ F_25.01;x_axis_rc_code;80;__PARENT__1e895f30ab5d;Carrying amount;;;;4.2
 F_25.01;x_axis_rc_code;90;__PARENT__ffd6a0120716;Value at initial recognition;;;;4.2
 F_25.01;x_axis_rc_code;100;90;Carrying amount;;;;4.2
 F_25.01;x_axis_rc_code;110;__PARENT__2f5b90040640;Value at initial recognition;;;;4.2
-F_25.01;x_axis_rc_code;120;__PARENT__bdaa608b87cc;Value at initial recognition;;;;4.2
+F_25.01;x_axis_rc_code;120;__PARENT__2f5b90040640;Carrying amount;;;;4.2
 F_25.01;y_axis_rc_code;10;;Opening balance;;;;4.2
 F_25.01;y_axis_rc_code;20;;Inflows of collateral during the period;;;;4.2
 F_25.01;y_axis_rc_code;30;20;Inflow due to new collateral obtained by taking possession;;;;4.2
@@ -66650,20 +66520,16 @@ F_04.08;y_axis_rc_code;160;120;Other financial corporations;;;;4.2.1
 F_04.08;y_axis_rc_code;170;120;Non-financial corporations;;;;4.2.1
 F_04.08;y_axis_rc_code;180;;Households;;;;4.2.1
 F_04.08;y_axis_rc_code;175;180;Of which: Small and Medium-sized Enterprises;;;;4.2.1
-F_04.09;x_axis_rc_code;__PARENT__f3b03f570ec7;;Carrying amount;;Y;;4.2.1
-F_04.09;x_axis_rc_code;__PARENT__54234e1d496e;;General allowances for banking risk affecting carrying amount;;Y;;4.2.1
-F_04.09;x_axis_rc_code;__PARENT__ed3be2666eb4;;General allowances for credit risk affecting carrying amount;;Y;;4.2.1
 F_04.09;x_axis_rc_code;__PARENT__d040c013f44e;;Gross carrying amount;;Y;;4.2.1
-F_04.09;x_axis_rc_code;__PARENT__e0a88c91f89c;;Specific allowances for credit risk;;Y;;4.2.1
 F_04.09;x_axis_rc_code;10;__PARENT__d040c013f44e;Unimpaired assets;;;;4.2.1
 F_04.09;x_axis_rc_code;15;10;of which: assets under LOCOM;;;;4.2.1
 F_04.09;x_axis_rc_code;20;__PARENT__d040c013f44e;Impaired assets;;;;4.2.1
 F_04.09;x_axis_rc_code;25;20;of which: assets under LOCOM;;;;4.2.1
-F_04.09;x_axis_rc_code;30;__PARENT__e0a88c91f89c;Impaired assets;;;;4.2.1
-F_04.09;x_axis_rc_code;41;__PARENT__ed3be2666eb4;Impaired assets;;;;4.2.1
-F_04.09;x_axis_rc_code;45;__PARENT__54234e1d496e;Impaired assets;;;;4.2.1
-F_04.09;x_axis_rc_code;50;__PARENT__f3b03f570ec7;Impaired assets;;;;4.2.1
-F_04.09;x_axis_rc_code;60;__PARENT__f3b03f570ec7;of which: assets under LOCOM;;;;4.2.1
+F_04.09;x_axis_rc_code;30;;Specific allowances for credit risk;;;;4.2.1
+F_04.09;x_axis_rc_code;41;;General allowances for credit risk affecting carrying amount;;;;4.2.1
+F_04.09;x_axis_rc_code;45;;General allowances for banking risk affecting carrying amount;;;;4.2.1
+F_04.09;x_axis_rc_code;50;;Carrying amount;;;;4.2.1
+F_04.09;x_axis_rc_code;60;50;of which: assets under LOCOM;;;;4.2.1
 F_04.09;x_axis_rc_code;70;;Accumulated negative value adjustments on LOCOM assets - market risk induced;;;;4.2.1
 F_04.09;x_axis_rc_code;80;;Accumulated negative value adjustments on LOCOM assets - credit risk induced;;;;4.2.1
 F_04.09;x_axis_rc_code;90;;Accumulated partial write-offs;;;;4.2.1
@@ -66688,20 +66554,16 @@ F_04.09;y_axis_rc_code;110;140;Other financial corporations;;;;4.2.1
 F_04.09;y_axis_rc_code;120;140;Non-financial corporations;;;;4.2.1
 F_04.09;y_axis_rc_code;125;120;Of which: Small and Medium-sized Enterprises;;;;4.2.1
 F_04.09;y_axis_rc_code;130;140;Households;;;;4.2.1
-F_04.10;x_axis_rc_code;__PARENT__f3b03f570ec7;;Carrying amount;;Y;;4.2.1
-F_04.10;x_axis_rc_code;__PARENT__54234e1d496e;;General allowances for banking risk affecting carrying amount;;Y;;4.2.1
-F_04.10;x_axis_rc_code;__PARENT__ed3be2666eb4;;General allowances for credit risk affecting carrying amount;;Y;;4.2.1
 F_04.10;x_axis_rc_code;__PARENT__d040c013f44e;;Gross carrying amount;;Y;;4.2.1
-F_04.10;x_axis_rc_code;__PARENT__e0a88c91f89c;;Specific allowances for credit risk;;Y;;4.2.1
 F_04.10;x_axis_rc_code;15;__PARENT__d040c013f44e;Unimpaired assets;;;;4.2.1
 F_04.10;x_axis_rc_code;16;15;of which: assets under LOCOM;;;;4.2.1
 F_04.10;x_axis_rc_code;20;__PARENT__d040c013f44e;Impaired assets;;;;4.2.1
 F_04.10;x_axis_rc_code;25;20;of which: assets under LOCOM;;;;4.2.1
-F_04.10;x_axis_rc_code;30;__PARENT__e0a88c91f89c;Impaired assets;;;;4.2.1
-F_04.10;x_axis_rc_code;40;__PARENT__ed3be2666eb4;Impaired assets;;;;4.2.1
-F_04.10;x_axis_rc_code;50;__PARENT__54234e1d496e;Impaired assets;;;;4.2.1
-F_04.10;x_axis_rc_code;10;__PARENT__f3b03f570ec7;Impaired assets;;;;4.2.1
-F_04.10;x_axis_rc_code;70;__PARENT__f3b03f570ec7;of which: assets under LOCOM;;;;4.2.1
+F_04.10;x_axis_rc_code;30;;Specific allowances for credit risk;;;;4.2.1
+F_04.10;x_axis_rc_code;40;;General allowances for credit risk affecting carrying amount;;;;4.2.1
+F_04.10;x_axis_rc_code;50;;General allowances for banking risk affecting carrying amount;;;;4.2.1
+F_04.10;x_axis_rc_code;10;;Carrying amount;;;;4.2.1
+F_04.10;x_axis_rc_code;70;10;of which: assets under LOCOM;;;;4.2.1
 F_04.10;x_axis_rc_code;80;;Accumulated negative value adjustments on LOCOM assets - market risk induced;;;;4.2.1
 F_04.10;x_axis_rc_code;90;;Accumulated negative value adjustments on LOCOM assets - credit risk induced;;;;4.2.1
 F_04.10;x_axis_rc_code;100;;Accumulated partial write-offs;;;;4.2.1
@@ -66761,14 +66623,12 @@ F_05.01.dp;x_axis_rc_code;50;__PARENT__f3b03f570ec7;Non-financial corporations;;
 F_05.01.dp;x_axis_rc_code;60;__PARENT__f3b03f570ec7;Households;;;;4.2.1
 F_05.01.dp;y_axis_rc_code;50;;Reverse repurchase loans;;;;4.2.1
 F_06.01;x_axis_rc_code;__PARENT__ae38ef7b3bf8;;Non-financial corporations;;Y;;4.2.1
-F_06.01;x_axis_rc_code;__PARENT__e6d6b2253a20;__PARENT__ae38ef7b3bf8;Accumulated impairment;;Y;;4.2.1
-F_06.01;x_axis_rc_code;__PARENT__f9ab58e6ec04;__PARENT__ae38ef7b3bf8;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;Y;;4.2.1
 F_06.01;x_axis_rc_code;10;__PARENT__ae38ef7b3bf8;Gross carrying amount;;;;4.2.1
 F_06.01;x_axis_rc_code;11;10;of which: loans and advances subject to impairment;;;;4.2.1
 F_06.01;x_axis_rc_code;12;10;Of which: non-performing;;;;4.2.1
 F_06.01;x_axis_rc_code;13;12;of which: defaulted;;;;4.2.1
-F_06.01;x_axis_rc_code;21;__PARENT__e6d6b2253a20;Of which: non-performing;;;;4.2.1
-F_06.01;x_axis_rc_code;22;__PARENT__f9ab58e6ec04;Of which: non-performing;;;;4.2.1
+F_06.01;x_axis_rc_code;21;__PARENT__ae38ef7b3bf8;Accumulated impairment;;;;4.2.1
+F_06.01;x_axis_rc_code;22;__PARENT__ae38ef7b3bf8;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;;;4.2.1
 F_06.01;y_axis_rc_code;190;;Loans and advances;;;;4.2.1
 F_06.01;y_axis_rc_code;10;190;A Agriculture, forestry and fishing;;;;4.2.1
 F_06.01;y_axis_rc_code;20;190;B Mining and quarrying;;;;4.2.1
@@ -68130,7 +67990,6 @@ F_18.01;y_axis_rc_code;110;100;Of which: Loans collateralised by residential imm
 F_18.01;y_axis_rc_code;120;100;Of which: Credit for consumption;;;;4.2.1
 F_18.01;y_axis_rc_code;130;150;Loans and advances other than held for trading or trading;;;;4.2.1
 F_18.01;y_axis_rc_code;140;150;Loans and advances held for sale;;;;4.2.1
-F_18.02;x_axis_rc_code;__PARENT__6cc8c4c23c4b;;Accumulated impairment, accumulated negative changes in fair value due to credit risk;;Y;;4.2.1
 F_18.02;x_axis_rc_code;10;;Gross carrying amount;;;;4.2.1
 F_18.02;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;;4.2.1
 F_18.02;x_axis_rc_code;30;10;Performing;;;;4.2.1
@@ -68148,11 +68007,11 @@ F_18.02;x_axis_rc_code;140;80;Past due > 5 years <= 7 years;;;;4.2.1
 F_18.02;x_axis_rc_code;150;80;Past due > 7 years;;;;4.2.1
 F_18.02;x_axis_rc_code;160;80;Of which: defaulted;;;;4.2.1
 F_18.02;x_axis_rc_code;170;80;Of which: Non-performing exposures with forbearance measures;;;;4.2.1
-F_18.02;x_axis_rc_code;180;__PARENT__6cc8c4c23c4b;Non Performing;;;;4.2.1
-F_18.02;x_axis_rc_code;190;__PARENT__6cc8c4c23c4b;of which: Exposures with forbearance measures;;;;4.2.1
-F_18.02;x_axis_rc_code;200;__PARENT__6cc8c4c23c4b;Performing exposures - Accumulated impairment;;;;4.2.1
+F_18.02;x_axis_rc_code;180;;Accumulated impairment, accumulated negative changes in fair value due to credit risk;;;;4.2.1
+F_18.02;x_axis_rc_code;190;180;of which: Exposures with forbearance measures;;;;4.2.1
+F_18.02;x_axis_rc_code;200;180;Performing exposures - Accumulated impairment;;;;4.2.1
 F_18.02;x_axis_rc_code;210;200;Of which: Performing exposures with forbearance measures;;;;4.2.1
-F_18.02;x_axis_rc_code;220;__PARENT__6cc8c4c23c4b;Non-performing exposures - Accumulated impairment, accumulated negative changes in fair value due to credit risk;;;;4.2.1
+F_18.02;x_axis_rc_code;220;180;Non-performing exposures - Accumulated impairment, accumulated negative changes in fair value due to credit risk;;;;4.2.1
 F_18.02;x_axis_rc_code;230;220;Unlikely to pay that are not past due or past due <= 90 days;;;;4.2.1
 F_18.02;x_axis_rc_code;240;220;Past due > 90 days <= 180 days;;;;4.2.1
 F_18.02;x_axis_rc_code;250;220;Past due > 180 days <= 1 year;;;;4.2.1
@@ -68445,16 +68304,14 @@ F_20.03;y_axis_rc_code;270;;Profit or (-) loss after tax from continuing operati
 F_20.03;y_axis_rc_code;275;;Extraordinary profit or (-) loss after tax;;;;4.2.1
 F_20.03;y_axis_rc_code;280;;Profit or (-) loss after tax from discontinued operations;;;;4.2.1
 F_20.03;y_axis_rc_code;290;;Profit or (-) loss for the year;;;;4.2.1
-F_20.04;x_axis_rc_code;__PARENT__ee57255c2e63;;Accumulated impairment;;Y;;4.2.1
-F_20.04;x_axis_rc_code;__PARENT__f09f63efe467;;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;Y;;4.2.1
 F_20.04;x_axis_rc_code;10;;Gross carrying amount;;;;4.2.1
 F_20.04;x_axis_rc_code;11;10;Of which: held for trading or trading;;;;4.2.1
 F_20.04;x_axis_rc_code;12;10;Of which: financial assets subject to impairment, including cash balances at central banks and other demand deposits;;;;4.2.1
 F_20.04;x_axis_rc_code;22;10;Of which: forborne;;;;4.2.1
 F_20.04;x_axis_rc_code;25;10;Of which: non-performing;;;;4.2.1
 F_20.04;x_axis_rc_code;26;25;Of which: defaulted;;;;4.2.1
-F_20.04;x_axis_rc_code;31;__PARENT__ee57255c2e63;Of which: non-performing;;;;4.2.1
-F_20.04;x_axis_rc_code;40;__PARENT__f09f63efe467;Of which: non-performing;;;;4.2.1
+F_20.04;x_axis_rc_code;31;;Accumulated impairment;;;;4.2.1
+F_20.04;x_axis_rc_code;40;;Accumulated negative changes in fair value due to credit risk on non-performing exposures;;;;4.2.1
 F_20.04;y_axis_rc_code;10;;Derivatives;;;;4.2.1
 F_20.04;y_axis_rc_code;20;10;Of which: credit institutions;;;;4.2.1
 F_20.04;y_axis_rc_code;30;10;Of which: other financial corporations;;;;4.2.1
@@ -70626,7 +70483,6 @@ F_24.03;y_axis_rc_code;20;10;Of which: Debt forgiveness;;;;4.2.1
 F_25.01;x_axis_rc_code;__PARENT__46362940e95f;;Collateral obtained by taking possession other than collateral classified as Property Plant and Equipment (PP&E);;Y;;4.2.1
 F_25.01;x_axis_rc_code;__PARENT__2f5b90040640;__PARENT__46362940e95f;Of which: Non-current assets held-for-sale;;Y;;4.2.1
 F_25.01;x_axis_rc_code;__PARENT__077d6d9cf35e;__PARENT__46362940e95f;Time passed since recognition in balance sheet;;Y;;4.2.1
-F_25.01;x_axis_rc_code;__PARENT__bdaa608b87cc;__PARENT__2f5b90040640;Carrying amount;;Y;;4.2.1
 F_25.01;x_axis_rc_code;__PARENT__f3ab1b6e7430;__PARENT__077d6d9cf35e;<= 2 years;;Y;;4.2.1
 F_25.01;x_axis_rc_code;__PARENT__1e895f30ab5d;__PARENT__077d6d9cf35e;> 2 years <= 5 years;;Y;;4.2.1
 F_25.01;x_axis_rc_code;__PARENT__ffd6a0120716;__PARENT__077d6d9cf35e;> 5 years;;Y;;4.2.1
@@ -70639,7 +70495,7 @@ F_25.01;x_axis_rc_code;80;__PARENT__1e895f30ab5d;Carrying amount;;;;4.2.1
 F_25.01;x_axis_rc_code;90;__PARENT__ffd6a0120716;Value at initial recognition;;;;4.2.1
 F_25.01;x_axis_rc_code;100;90;Carrying amount;;;;4.2.1
 F_25.01;x_axis_rc_code;110;__PARENT__2f5b90040640;Value at initial recognition;;;;4.2.1
-F_25.01;x_axis_rc_code;120;__PARENT__bdaa608b87cc;Value at initial recognition;;;;4.2.1
+F_25.01;x_axis_rc_code;120;__PARENT__2f5b90040640;Carrying amount;;;;4.2.1
 F_25.01;y_axis_rc_code;10;;Opening balance;;;;4.2.1
 F_25.01;y_axis_rc_code;20;;Inflows of collateral during the period;;;;4.2.1
 F_25.01;y_axis_rc_code;30;20;Inflow due to new collateral obtained by taking possession;;;;4.2.1
@@ -77954,14 +77810,13 @@ K_09.01;x_axis_rc_code;__PARENT__bcdcc9bd4847;;Institution acts as originator;;Y
 K_09.01;x_axis_rc_code;__PARENT__6ce6e17f6142;;Institution acts as sponsor;;Y;;4.2
 K_09.01;x_axis_rc_code;__PARENT__14d2ab827576;__PARENT__6ce964657bba;Traditional;;Y;;4.2
 K_09.01;x_axis_rc_code;__PARENT__898cd5e8241c;__PARENT__bcdcc9bd4847;Traditional;;Y;;4.2
-K_09.01;x_axis_rc_code;__PARENT__2fbec9a89673;__PARENT__bcdcc9bd4847;e. Synthetic;;Y;;4.2
 K_09.01;x_axis_rc_code;__PARENT__37f4549885d4;__PARENT__6ce6e17f6142;Traditional;;Y;;4.2
 K_09.01;x_axis_rc_code;10;__PARENT__898cd5e8241c;a. STS;;;;4.2
 K_09.01;x_axis_rc_code;20;10;b. of which SRT;;;;4.2
 K_09.01;x_axis_rc_code;30;__PARENT__898cd5e8241c;c. Non-STS;;;;4.2
 K_09.01;x_axis_rc_code;40;30;d. of which SRT;;;;4.2
-K_09.01;x_axis_rc_code;50;__PARENT__2fbec9a89673;c. Non-STS;;;;4.2
-K_09.01;x_axis_rc_code;60;__PARENT__2fbec9a89673;f. of which SRT;;;;4.2
+K_09.01;x_axis_rc_code;50;__PARENT__bcdcc9bd4847;e. Synthetic;;;;4.2
+K_09.01;x_axis_rc_code;60;50;f. of which SRT;;;;4.2
 K_09.01;x_axis_rc_code;70;__PARENT__bcdcc9bd4847;g. Sub-total;;;;4.2
 K_09.01;x_axis_rc_code;80;__PARENT__37f4549885d4;h. STS;;;;4.2
 K_09.01;x_axis_rc_code;90;__PARENT__37f4549885d4;i. Non-STS;;;;4.2
@@ -80111,21 +79966,19 @@ K_47.00;x_axis_rc_code;__PARENT__30aeef82914f;;Disclosure reference date T;;Y;;4
 K_47.00;x_axis_rc_code;__PARENT__3145fa488bf3;__PARENT__30aeef82914f;Climate Change Adaptation (CCA);;Y;;4.2
 K_47.00;x_axis_rc_code;__PARENT__a2a2e885ee0c;__PARENT__30aeef82914f;Climate Change Mitigation (CCM);;Y;;4.2
 K_47.00;x_axis_rc_code;__PARENT__b7ed0112ae3e;__PARENT__30aeef82914f;Total (CCM + CCA);;Y;;4.2
-K_47.00;x_axis_rc_code;__PARENT__a48aea9146cf;__PARENT__3145fa488bf3;g. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
-K_47.00;x_axis_rc_code;__PARENT__b5383bf53948;__PARENT__b7ed0112ae3e;l. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
 K_47.00;x_axis_rc_code;10;__PARENT__30aeef82914f;a. Total gross carrying amount;;;;4.2
 K_47.00;x_axis_rc_code;20;__PARENT__a2a2e885ee0c;b. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
 K_47.00;x_axis_rc_code;30;20;c. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 K_47.00;x_axis_rc_code;40;30;d. Of which specialised lending;;;;4.2
 K_47.00;x_axis_rc_code;50;30;e. Of which transitional;;;;4.2
 K_47.00;x_axis_rc_code;60;30;f. Of which enabling;;;;4.2
-K_47.00;x_axis_rc_code;70;__PARENT__a48aea9146cf;c. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-K_47.00;x_axis_rc_code;80;__PARENT__a48aea9146cf;h. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+K_47.00;x_axis_rc_code;70;__PARENT__3145fa488bf3;g. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+K_47.00;x_axis_rc_code;80;70;h. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 K_47.00;x_axis_rc_code;90;80;i. Of which specialised lending;;;;4.2
 K_47.00;x_axis_rc_code;100;80;j. Of which adaptation;;;;4.2
 K_47.00;x_axis_rc_code;110;80;k. Of which enabling;;;;4.2
-K_47.00;x_axis_rc_code;120;__PARENT__b5383bf53948;h. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-K_47.00;x_axis_rc_code;130;__PARENT__b5383bf53948;m. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+K_47.00;x_axis_rc_code;120;__PARENT__b7ed0112ae3e;l. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+K_47.00;x_axis_rc_code;130;120;m. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 K_47.00;x_axis_rc_code;140;130;n. Of which specialised lending;;;;4.2
 K_47.00;x_axis_rc_code;150;130;o. Of which transitional/adaptation;;;;4.2
 K_47.00;x_axis_rc_code;160;130;p. Of which enabling;;;;4.2
@@ -80188,20 +80041,18 @@ K_48.00;x_axis_rc_code;__PARENT__6abcf0622803;;Disclosure reference date T: KPIs
 K_48.00;x_axis_rc_code;__PARENT__b32b98b81c98;__PARENT__6abcf0622803;Climate Change Adaptation (CCA);;Y;;4.2
 K_48.00;x_axis_rc_code;__PARENT__dd56b407bc7a;__PARENT__6abcf0622803;Climate Change Mitigation (CCM);;Y;;4.2
 K_48.00;x_axis_rc_code;__PARENT__182d4d9b2d1a;__PARENT__6abcf0622803;Total (CCM + CCA);;Y;;4.2
-K_48.00;x_axis_rc_code;__PARENT__df07c7bad785;__PARENT__b32b98b81c98;f. Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
-K_48.00;x_axis_rc_code;__PARENT__b263ed9ed5c7;__PARENT__182d4d9b2d1a;k. Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
 K_48.00;x_axis_rc_code;10;__PARENT__dd56b407bc7a;a. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
 K_48.00;x_axis_rc_code;20;10;b. Of which environmentally sustainable;;;;4.2
 K_48.00;x_axis_rc_code;30;20;c. Of which specialised lending;;;;4.2
 K_48.00;x_axis_rc_code;40;20;d. Of which transitional;;;;4.2
 K_48.00;x_axis_rc_code;50;20;e. Of which enabling;;;;4.2
-K_48.00;x_axis_rc_code;60;__PARENT__df07c7bad785;b. Of which environmentally sustainable;;;;4.2
-K_48.00;x_axis_rc_code;70;__PARENT__df07c7bad785;g. Of which environmentally sustainable;;;;4.2
+K_48.00;x_axis_rc_code;60;__PARENT__b32b98b81c98;f. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+K_48.00;x_axis_rc_code;70;60;g. Of which environmentally sustainable;;;;4.2
 K_48.00;x_axis_rc_code;80;70;h. Of which specialised lending;;;;4.2
 K_48.00;x_axis_rc_code;90;70;i. Of which adaptation;;;;4.2
 K_48.00;x_axis_rc_code;100;70;j. Of which enabling;;;;4.2
-K_48.00;x_axis_rc_code;110;__PARENT__b263ed9ed5c7;g. Of which environmentally sustainable;;;;4.2
-K_48.00;x_axis_rc_code;120;__PARENT__b263ed9ed5c7;l. Of which environmentally sustainable;;;;4.2
+K_48.00;x_axis_rc_code;110;__PARENT__182d4d9b2d1a;k. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+K_48.00;x_axis_rc_code;120;110;l. Of which environmentally sustainable;;;;4.2
 K_48.00;x_axis_rc_code;130;120;m. Of which specialised lending;;;;4.2
 K_48.00;x_axis_rc_code;140;120;n. Of which transitional/adaptation;;;;4.2
 K_48.00;x_axis_rc_code;150;120;o. Of which enabling;;;;4.2
@@ -80229,20 +80080,18 @@ K_48.00;x_axis_rc_code;__PARENT__7cc9311f822d;;Disclosure reference date T: KPIs
 K_48.00;x_axis_rc_code;__PARENT__7427c32c991e;__PARENT__7cc9311f822d;Climate Change Adaptation (CCA);;Y;;4.2
 K_48.00;x_axis_rc_code;__PARENT__754d7a6f7ecd;__PARENT__7cc9311f822d;Climate Change Mitigation (CCM);;Y;;4.2
 K_48.00;x_axis_rc_code;__PARENT__c5c87ea1c5fa;__PARENT__7cc9311f822d;Total (CCM + CCA);;Y;;4.2
-K_48.00;x_axis_rc_code;__PARENT__5fa2ae778713;__PARENT__7427c32c991e;v. Proportion of new eligible assets funding taxonomy relevant sectors;;Y;;4.2
-K_48.00;x_axis_rc_code;__PARENT__67718c5c2351;__PARENT__c5c87ea1c5fa;aa. Proportion of new eligible assets funding taxonomy relevant sectors;;Y;;4.2
 K_48.00;x_axis_rc_code;170;__PARENT__754d7a6f7ecd;q. Proportion of new eligible assets funding taxonomy relevant sectors;;;;4.2
 K_48.00;x_axis_rc_code;180;170;r. Of which environmentally sustainable;;;;4.2
 K_48.00;x_axis_rc_code;190;180;s. Of which specialised lending;;;;4.2
 K_48.00;x_axis_rc_code;200;180;t. Of which transitional;;;;4.2
 K_48.00;x_axis_rc_code;210;180;u. Of which enabling;;;;4.2
-K_48.00;x_axis_rc_code;220;__PARENT__5fa2ae778713;r. Of which environmentally sustainable;;;;4.2
-K_48.00;x_axis_rc_code;230;__PARENT__5fa2ae778713;w. Of which environmentally sustainable;;;;4.2
+K_48.00;x_axis_rc_code;220;__PARENT__7427c32c991e;v. Proportion of new eligible assets funding taxonomy relevant sectors;;;;4.2
+K_48.00;x_axis_rc_code;230;220;w. Of which environmentally sustainable;;;;4.2
 K_48.00;x_axis_rc_code;240;230;x. Of which specialised lending;;;;4.2
 K_48.00;x_axis_rc_code;250;230;y. Of which adaptation;;;;4.2
 K_48.00;x_axis_rc_code;260;230;z. Of which enabling;;;;4.2
-K_48.00;x_axis_rc_code;270;__PARENT__67718c5c2351;w. Of which environmentally sustainable;;;;4.2
-K_48.00;x_axis_rc_code;280;__PARENT__67718c5c2351;ab. Of which environmentally sustainable;;;;4.2
+K_48.00;x_axis_rc_code;270;__PARENT__c5c87ea1c5fa;aa. Proportion of new eligible assets funding taxonomy relevant sectors;;;;4.2
+K_48.00;x_axis_rc_code;280;270;ab. Of which environmentally sustainable;;;;4.2
 K_48.00;x_axis_rc_code;290;280;ac. Of which specialised lending;;;;4.2
 K_48.00;x_axis_rc_code;300;280;ad. Of which transitional/adaptation;;;;4.2
 K_48.00;x_axis_rc_code;310;280;ae. Of which enabling;;;;4.2
@@ -80252,21 +80101,19 @@ K_49.01;x_axis_rc_code;__PARENT__30aeef82914f;;Disclosure reference date T;;Y;;4
 K_49.01;x_axis_rc_code;__PARENT__3145fa488bf3;__PARENT__30aeef82914f;Climate Change Adaptation (CCA);;Y;;4.2
 K_49.01;x_axis_rc_code;__PARENT__a2a2e885ee0c;__PARENT__30aeef82914f;Climate Change Mitigation (CCM);;Y;;4.2
 K_49.01;x_axis_rc_code;__PARENT__b7ed0112ae3e;__PARENT__30aeef82914f;Total (CCM + CCA);;Y;;4.2
-K_49.01;x_axis_rc_code;__PARENT__a48aea9146cf;__PARENT__3145fa488bf3;g. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
-K_49.01;x_axis_rc_code;__PARENT__b5383bf53948;__PARENT__b7ed0112ae3e;l. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;Y;;4.2
 K_49.01;x_axis_rc_code;10;__PARENT__30aeef82914f;a. Total gross carrying amount;;;;4.2
 K_49.01;x_axis_rc_code;20;__PARENT__a2a2e885ee0c;b. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
 K_49.01;x_axis_rc_code;30;20;c. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 K_49.01;x_axis_rc_code;40;30;d. Of which specialised lending;;;;4.2
 K_49.01;x_axis_rc_code;50;30;e. Of which transitional;;;;4.2
 K_49.01;x_axis_rc_code;60;30;f. Of which enabling;;;;4.2
-K_49.01;x_axis_rc_code;70;__PARENT__a48aea9146cf;c. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-K_49.01;x_axis_rc_code;80;__PARENT__a48aea9146cf;h. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+K_49.01;x_axis_rc_code;70;__PARENT__3145fa488bf3;g. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+K_49.01;x_axis_rc_code;80;70;h. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 K_49.01;x_axis_rc_code;90;80;i. Of which specialised lending;;;;4.2
 K_49.01;x_axis_rc_code;100;80;j. Of which adaptation;;;;4.2
 K_49.01;x_axis_rc_code;110;80;k. Of which enabling;;;;4.2
-K_49.01;x_axis_rc_code;120;__PARENT__b5383bf53948;h. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
-K_49.01;x_axis_rc_code;130;__PARENT__b5383bf53948;m. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
+K_49.01;x_axis_rc_code;120;__PARENT__b7ed0112ae3e;l. Of which towards taxonomy relevant sectors (Taxonomy-eligible);;;;4.2
+K_49.01;x_axis_rc_code;130;120;m. Of which environmentally sustainable (Taxonomy-aligned);;;;4.2
 K_49.01;x_axis_rc_code;140;130;n. Of which specialised lending;;;;4.2
 K_49.01;x_axis_rc_code;150;130;o. Of which transitional/adaptation;;;;4.2
 K_49.01;x_axis_rc_code;160;130;p. Of which enabling;;;;4.2
@@ -80296,20 +80143,18 @@ K_49.02;x_axis_rc_code;__PARENT__6abcf0622803;;Disclosure reference date T: KPIs
 K_49.02;x_axis_rc_code;__PARENT__b32b98b81c98;__PARENT__6abcf0622803;Climate Change Adaptation (CCA);;Y;;4.2
 K_49.02;x_axis_rc_code;__PARENT__dd56b407bc7a;__PARENT__6abcf0622803;Climate Change Mitigation (CCM);;Y;;4.2
 K_49.02;x_axis_rc_code;__PARENT__182d4d9b2d1a;__PARENT__6abcf0622803;Total (CCM + CCA);;Y;;4.2
-K_49.02;x_axis_rc_code;__PARENT__df07c7bad785;__PARENT__b32b98b81c98;f. Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
-K_49.02;x_axis_rc_code;__PARENT__b263ed9ed5c7;__PARENT__182d4d9b2d1a;k. Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
 K_49.02;x_axis_rc_code;10;__PARENT__dd56b407bc7a;a. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
 K_49.02;x_axis_rc_code;20;10;b. Of which environmentally sustainable;;;;4.2
 K_49.02;x_axis_rc_code;30;20;c. Of which specialised lending;;;;4.2
 K_49.02;x_axis_rc_code;40;20;d. Of which transitional;;;;4.2
 K_49.02;x_axis_rc_code;50;20;e. Of which enabling;;;;4.2
-K_49.02;x_axis_rc_code;60;__PARENT__df07c7bad785;b. Of which environmentally sustainable;;;;4.2
-K_49.02;x_axis_rc_code;70;__PARENT__df07c7bad785;g. Of which environmentally sustainable;;;;4.2
+K_49.02;x_axis_rc_code;60;__PARENT__b32b98b81c98;f. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+K_49.02;x_axis_rc_code;70;60;g. Of which environmentally sustainable;;;;4.2
 K_49.02;x_axis_rc_code;80;70;h. Of which specialised lending;;;;4.2
 K_49.02;x_axis_rc_code;90;70;i. Of which adaptation;;;;4.2
 K_49.02;x_axis_rc_code;100;70;j. Of which enabling;;;;4.2
-K_49.02;x_axis_rc_code;110;__PARENT__b263ed9ed5c7;g. Of which environmentally sustainable;;;;4.2
-K_49.02;x_axis_rc_code;120;__PARENT__b263ed9ed5c7;l. Of which environmentally sustainable;;;;4.2
+K_49.02;x_axis_rc_code;110;__PARENT__182d4d9b2d1a;k. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+K_49.02;x_axis_rc_code;120;110;l. Of which environmentally sustainable;;;;4.2
 K_49.02;x_axis_rc_code;130;120;m. Of which specialised lending;;;;4.2
 K_49.02;x_axis_rc_code;140;120;n. Of which transitional/adaptation;;;;4.2
 K_49.02;x_axis_rc_code;150;120;o. Of which enabling;;;;4.2
@@ -80323,20 +80168,18 @@ K_49.02;x_axis_rc_code;__PARENT__0be7ae978874;;Disclosure reference date T: KPIs
 K_49.02;x_axis_rc_code;__PARENT__ee71b1745fac;__PARENT__0be7ae978874;Climate Change Adaptation (CCA);;Y;;4.2
 K_49.02;x_axis_rc_code;__PARENT__f01aed47dcf9;__PARENT__0be7ae978874;Climate Change Mitigation (CCM);;Y;;4.2
 K_49.02;x_axis_rc_code;__PARENT__c6797b80f55b;__PARENT__0be7ae978874;Total (CCM + CCA);;Y;;4.2
-K_49.02;x_axis_rc_code;__PARENT__6e352b37dcf2;__PARENT__ee71b1745fac;v. Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
-K_49.02;x_axis_rc_code;__PARENT__6114726cf5bd;__PARENT__c6797b80f55b;aa. Proportion of eligible assets funding taxonomy relevant sectors;;Y;;4.2
 K_49.02;x_axis_rc_code;170;__PARENT__f01aed47dcf9;q. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
 K_49.02;x_axis_rc_code;180;170;r. Of which environmentally sustainable;;;;4.2
 K_49.02;x_axis_rc_code;190;180;s. Of which specialised lending;;;;4.2
 K_49.02;x_axis_rc_code;200;180;t. Of which transitional;;;;4.2
 K_49.02;x_axis_rc_code;210;180;u. Of which enabling;;;;4.2
-K_49.02;x_axis_rc_code;220;__PARENT__6e352b37dcf2;r. Of which environmentally sustainable;;;;4.2
-K_49.02;x_axis_rc_code;230;__PARENT__6e352b37dcf2;w. Of which environmentally sustainable;;;;4.2
+K_49.02;x_axis_rc_code;220;__PARENT__ee71b1745fac;v. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+K_49.02;x_axis_rc_code;230;220;w. Of which environmentally sustainable;;;;4.2
 K_49.02;x_axis_rc_code;240;230;x. Of which specialised lending;;;;4.2
 K_49.02;x_axis_rc_code;250;230;y. Of which adaptation;;;;4.2
 K_49.02;x_axis_rc_code;260;230;z. Of which enabling;;;;4.2
-K_49.02;x_axis_rc_code;270;__PARENT__6114726cf5bd;w. Of which environmentally sustainable;;;;4.2
-K_49.02;x_axis_rc_code;280;__PARENT__6114726cf5bd;ab. Of which environmentally sustainable;;;;4.2
+K_49.02;x_axis_rc_code;270;__PARENT__c6797b80f55b;aa. Proportion of eligible assets funding taxonomy relevant sectors;;;;4.2
+K_49.02;x_axis_rc_code;280;270;ab. Of which environmentally sustainable;;;;4.2
 K_49.02;x_axis_rc_code;290;280;ac. Of which specialised lending;;;;4.2
 K_49.02;x_axis_rc_code;300;280;ad. Of which transitional/adaptation;;;;4.2
 K_49.02;x_axis_rc_code;310;280;ae. Of which enabling;;;;4.2
@@ -80709,23 +80552,18 @@ K_83.01.c;x_axis_rc_code;30;20;c Of which defaulted;;;;4.2
 K_83.01.c;x_axis_rc_code;40;10;d Of which subject to impairment;;;;4.2
 K_83.01.c;x_axis_rc_code;50;;f Accumulated impairment;;;;4.2
 K_83.01.c;x_axis_rc_code;60;;g Accumulated negative changes in fair value due to credit risk on non-performing exposures;;;;4.2
-K_83.01.d;x_axis_rc_code;__PARENT__5ad91c502b3d;;f Provisions on off-balance-sheet commitments and financial guarantees given;;Y;;4.2
 K_83.01.d;x_axis_rc_code;9;;Residence of counterparty;;;;4.2
 K_83.01.d;x_axis_rc_code;10;;a Gross carrying/nominal amount;;;;4.2
 K_83.01.d;x_axis_rc_code;20;10;b Of which non-performing;;;;4.2
 K_83.01.d;x_axis_rc_code;30;20;Of which defaulted;;;;4.2
-K_83.01.d;x_axis_rc_code;40;__PARENT__5ad91c502b3d;b Of which non-performing;;;;4.2
-K_83.01.e;x_axis_rc_code;__PARENT__3f48255a16fd;;d of which: subject to impairment;;Y;;4.2
-K_83.01.e;x_axis_rc_code;__PARENT__22c8da394065;;e Accumulated impairment;;Y;;4.2
-K_83.01.e;x_axis_rc_code;__PARENT__bf8396310170;;f Provisions on off-balance sheet commitments and financial guarantees given;;Y;;4.2
-K_83.01.e;x_axis_rc_code;__PARENT__61c08764eab4;;g Accumulated negative changes in fair value due to credit risk on non-performing exposures;;Y;;4.2
+K_83.01.d;x_axis_rc_code;40;;f Provisions on off-balance-sheet commitments and financial guarantees given;;;;4.2
 K_83.01.e;x_axis_rc_code;10;;a Gross carrying/Nominal amount;;;;4.2
 K_83.01.e;x_axis_rc_code;20;10;b of which: non-performing;;;;4.2
 K_83.01.e;x_axis_rc_code;30;20;c of which: defaulted;;;;4.2
-K_83.01.e;x_axis_rc_code;40;__PARENT__3f48255a16fd;b of which: non-performing;;;;4.2
-K_83.01.e;x_axis_rc_code;50;__PARENT__22c8da394065;b of which: non-performing;;;;4.2
-K_83.01.e;x_axis_rc_code;60;__PARENT__bf8396310170;b of which: non-performing;;;;4.2
-K_83.01.e;x_axis_rc_code;70;__PARENT__61c08764eab4;b of which: non-performing;;;;4.2
+K_83.01.e;x_axis_rc_code;40;;d of which: subject to impairment;;;;4.2
+K_83.01.e;x_axis_rc_code;50;;e Accumulated impairment;;;;4.2
+K_83.01.e;x_axis_rc_code;60;;f Provisions on off-balance sheet commitments and financial guarantees given;;;;4.2
+K_83.01.e;x_axis_rc_code;70;;g Accumulated negative changes in fair value due to credit risk on non-performing exposures;;;;4.2
 K_83.01.e;y_axis_rc_code;10;;150 Total;;;;4.2
 K_84.01;x_axis_rc_code;10;;Gross carrying amount;;;;4.2
 K_84.01;x_axis_rc_code;20;10;Of which non-performing;;;;4.2
@@ -85072,7 +84910,6 @@ Z_07.01.3;x_axis_rc_code;30;__PARENT__deb99fefa68c;Value of transactions;;;;4.2
 Z_07.01.3;x_axis_rc_code;40;__PARENT__deb99fefa68c;Value of transaction of which recurrent;;;;4.2
 Z_07.01.3;x_axis_rc_code;70;__PARENT__05e504aab250;Value of transactions;;;;4.2
 Z_07.01.3;x_axis_rc_code;100;__PARENT__05e504aab250;Number of transactions;;;Unit;4.2
-Z_07.01.4;x_axis_rc_code;__PARENT__237aa3f48c06;;Comments from the group;;Y;;4.2
 Z_07.01.4;x_axis_rc_code;__PARENT__43fafd50cfe3;;Cross border value;;Y;;4.2
 Z_07.01.4;x_axis_rc_code;__PARENT__86a0a623b62b;;Economic functions;;Y;;4.2
 Z_07.01.4;x_axis_rc_code;__PARENT__ad02da054435;;Impact and substitutability analyses;;Y;;4.2
@@ -85104,7 +84941,7 @@ Z_07.01.4;x_axis_rc_code;180;__PARENT__1927d07da71e;Operational requirements;;;;
 Z_07.01.4;x_axis_rc_code;190;__PARENT__3518eaeeb620;Impact on market;;;;4.2
 Z_07.01.4;x_axis_rc_code;200;__PARENT__3518eaeeb620;Substitutability;;;;4.2
 Z_07.01.4;x_axis_rc_code;210;__PARENT__3518eaeeb620;Critical Function;;;;4.2
-Z_07.01.4;x_axis_rc_code;220;__PARENT__237aa3f48c06;Criticality assessment;;;;4.2
+Z_07.01.4;x_axis_rc_code;220;;Comments from the group;;;;4.2
 Z_07.01.4;y_axis_rc_code;__PARENT__2db336f25346;;0249 Capital Markets;;Y;;4.2
 Z_07.01.4;y_axis_rc_code;250;__PARENT__2db336f25346;Derivatives held for trading - OTC;;;;4.2
 Z_07.01.4;y_axis_rc_code;260;__PARENT__2db336f25346;Derivatives held for trading - non-OTC;;;;4.2
@@ -85543,7 +85380,6 @@ Z_07.01.4;z_axis_rc_code;qx2007;;Not applicable;;;;4.2
 Z_07.01.4;z_axis_rc_code;qx2013;;Non-domestic;;;;4.2
 Z_07.01.4;z_axis_rc_code;qx2018;;Other or unknown;;;;4.2
 Z_07.01.4;z_axis_rc_code;qx2019;;Asian Infrastructure Investment Bank (AIIB);;;;4.2
-Z_07.01.5;x_axis_rc_code;__PARENT__237aa3f48c06;;Comments from the group;;Y;;4.2
 Z_07.01.5;x_axis_rc_code;__PARENT__86a0a623b62b;;Economic functions;;Y;;4.2
 Z_07.01.5;x_axis_rc_code;__PARENT__ad02da054435;;Impact and substitutability analyses;;Y;;4.2
 Z_07.01.5;x_axis_rc_code;__PARENT__deb99fefa68c;;Quantitative Data;;Y;;4.2
@@ -85567,7 +85403,7 @@ Z_07.01.5;x_axis_rc_code;150;__PARENT__1927d07da71e;Operational requirements;;;;
 Z_07.01.5;x_axis_rc_code;160;__PARENT__3518eaeeb620;Impact on market;;;;4.2
 Z_07.01.5;x_axis_rc_code;170;__PARENT__3518eaeeb620;Substitutability;;;;4.2
 Z_07.01.5;x_axis_rc_code;180;__PARENT__3518eaeeb620;Critical Function;;;;4.2
-Z_07.01.5;x_axis_rc_code;190;__PARENT__237aa3f48c06;Criticality assessment;;;;4.2
+Z_07.01.5;x_axis_rc_code;190;;Comments from the group;;;;4.2
 Z_07.01.5;y_axis_rc_code;__PARENT__cc8c049bc0c7;;0319 Wholesale Funding;;Y;;4.2
 Z_07.01.5;y_axis_rc_code;320;__PARENT__cc8c049bc0c7;Borrowing;;;;4.2
 Z_07.01.5;y_axis_rc_code;330;__PARENT__cc8c049bc0c7;Derivatives (assets);;;;4.2
@@ -86092,7 +85928,6 @@ Z_08.05;x_axis_rc_code;40;__PARENT__3bccece99fe7;ID;;;;4.2
 Z_09.01;x_axis_rc_code;__PARENT__ade0d50c9254;;Communication;;Y;;4.2
 Z_09.01;x_axis_rc_code;__PARENT__7ceee3f3615a;;Provider;;Y;;4.2
 Z_09.01;x_axis_rc_code;__PARENT__9f8a2389a20c;;User;;Y;;4.2
-Z_09.01;x_axis_rc_code;__PARENT__c06f75f5d687;__PARENT__ade0d50c9254;Point of contact at FMI/ intermediary;;Y;;4.2
 Z_09.01;x_axis_rc_code;__PARENT__4b761858dd4d;__PARENT__7ceee3f3615a;Contracts and Services;;Y;;4.2
 Z_09.01;x_axis_rc_code;__PARENT__4fbb8fe6d065;__PARENT__7ceee3f3615a;FMI;;Y;;4.2
 Z_09.01;x_axis_rc_code;__PARENT__327e2b4ab772;__PARENT__7ceee3f3615a;Intermediary;;Y;;4.2
@@ -86126,7 +85961,7 @@ Z_09.01;x_axis_rc_code;240;__PARENT__887f39054dcb;SWIFT;;;;4.2
 Z_09.01;x_axis_rc_code;250;__PARENT__887f39054dcb;Other communication service providers - Name;;;;4.2
 Z_09.01;x_axis_rc_code;260;__PARENT__bf9967c6adb5;Name of additional service providers;;;;4.2
 Z_09.01;x_axis_rc_code;270;__PARENT__bf9967c6adb5;Additional services;;;;4.2
-Z_09.01;x_axis_rc_code;280;__PARENT__c06f75f5d687;Other service providers enabling access to FMI;;;;4.2
+Z_09.01;x_axis_rc_code;280;__PARENT__ade0d50c9254;Point of contact at FMI/ intermediary;;;;4.2
 Z_09.02;x_axis_rc_code;10;;ID representing combination of user, FMI, system type and intermediary;;;;4.2
 Z_09.02;x_axis_rc_code;20;;Critical FMI;;;;4.2
 Z_09.02;x_axis_rc_code;30;20;Country;;;;4.2

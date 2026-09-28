@@ -120,8 +120,11 @@ class DpmTaxonomyTests(unittest.TestCase):
         )
         self.assertEqual(
             credit_by_code["90"],
-            "Exposure after CRM substitution effects pre conversion factors/Substitution of the exposure due to CRM",
+            "Exposure after CRM substitution effects pre conversion factors",
         )
+        self.assertEqual(credit_by_code["250"], "Exposure-weighted average maturity value (days)")
+        self.assertEqual(credit_by_code["255"], "Risk weighted exposure amount pre supporting factors")
+        self.assertEqual(credit_by_code["280"], "Memorandum items:/Expected loss amount")
 
         operational_risk = workbook["C_17.01.a"]
         operational_x = builder.x_axis_rows(operational_risk, *builder.find_marker_rows(operational_risk))
@@ -341,6 +344,26 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(virtual_parent[1], "Exposure")
         self.assertTrue(virtual_parent[4])
         workbook.close()
+
+        # Merge dimensions are presentation only. The same level anchors must
+        # reconstruct the same paths when the cells are left unmerged.
+        unmerged = Workbook()
+        sheet = unmerged.active
+        sheet.cell(1, 1, "Columns")
+        sheet.cell(2, 2, "Exposure")
+        sheet.cell(3, 2, "Gross amount")
+        sheet.cell(3, 3, "Of which")
+        sheet.cell(4, 4, "Retail / SME")
+        sheet.cell(5, 2, "10")
+        sheet.cell(5, 3, "20")
+        sheet.cell(5, 4, "30")
+        sheet.cell(6, 2, "Rows")
+        unmerged_rows = builder.x_axis_rows(sheet, 1, 6, include_parent=True)
+        self.assertEqual(
+            {entry[0]: (entry[1], entry[3], entry[4], entry[5]) for entry in rows},
+            {entry[0]: (entry[1], entry[3], entry[4], entry[5]) for entry in unmerged_rows},
+        )
+        unmerged.close()
 
     def test_corep_40_unmerged_headers_infer_parent_scopes(self):
         archive = zipfile.ZipFile(SOURCES / "4.0_layouts.zip")

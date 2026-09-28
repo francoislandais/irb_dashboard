@@ -414,94 +414,33 @@ def x_axis_rows(
     code_columns = [col for col in range(1, sheet.max_column + 1) if code_text(sheet.cell(code_row, col).value)]
     last_code_col = max(code_columns)
 
-    # A column heading is a stack of labels, not just the nearest cell above
-    # its RC code. Merged cells define the horizontal scope of parent headings;
-    # expand those scopes only within the header band. Numeric members such as
-    # 0, 0.1 and 0.2 are deliberately retained as labels here. Their role is
-    # determined by their position above the selected RC-code row, not by
-    # whether they happen to look numeric.
-    merged_header_values: dict[tuple[int, int], str] = {}
-    for merged in sheet.merged_cells.ranges:
-        if merged.max_row <= columns_row or merged.min_row >= code_row:
-            continue
-        if merged.min_col > sheet.max_column:
-            continue
-        anchor = clean(sheet.cell(merged.min_row, merged.min_col).value)
-        if not anchor:
-            continue
-        for row_no in range(max(columns_row + 1, merged.min_row), min(code_row - 1, merged.max_row) + 1):
-            for col_no in range(merged.min_col, min(sheet.max_column, merged.max_col) + 1):
-                if row_no != merged.min_row or col_no != merged.min_col:
-                    merged_header_values[(row_no, col_no)] = anchor
-
-    # Some releases (notably COREP 4.0) express the same grouped headers with
-    # blank cells instead of Excel merges. Treat each unmerged label as a
-    # heading that runs to the next heading on that row. This reconstructs
-    # spans such as E:F and G:K while stopping at explicit or inferred siblings.
-    merged_ranges_by_row: dict[int, list[Any]] = defaultdict(list)
-    for merged in sheet.merged_cells.ranges:
-        if merged.min_row <= code_row - 1 and merged.max_row > columns_row:
-            for row_no in range(max(columns_row + 1, merged.min_row), min(code_row - 1, merged.max_row) + 1):
-                merged_ranges_by_row[row_no].append(merged)
-    for row_no in range(columns_row + 1, code_row):
-        horizontal_merges = [m for m in merged_ranges_by_row[row_no] if m.max_col > m.min_col]
-        unmerged_anchors: list[tuple[int, str]] = []
-        sibling_starts = {m.min_col for m in horizontal_merges}
-        for col_no in range(1, last_code_col + 1):
-            component = clean(sheet.cell(row_no, col_no).value)
+    # Treat each header row as a hierarchy level. A label remains active to
+    # its right until another label appears at that level. When a new node
+    # starts, deeper nodes from the previous branch are closed. This
+    # deliberately ignores Excel merge ranges; anchors and blanks are handled
+    # the same way as ordinary cells. Numeric members such as 0, 0.1 and 0.2
+    # are retained as normal level labels.
+    header_rows = range(columns_row + 1, code_row)
+    active_by_level: dict[int, str] = {}
+    output: list[tuple[str, tuple[str, ...], int]] = []
+    for col in range(1, last_code_col + 1):
+        for level, row_no in enumerate(header_rows):
+            component = clean(sheet.cell(row_no, col).value)
             if not component:
                 continue
-            containing_merge = next((m for m in merged_ranges_by_row[row_no] if m.min_col <= col_no <= m.max_col), None)
-            if containing_merge:
-                continue
-            unmerged_anchors.append((col_no, component))
-            sibling_starts.add(col_no)
-        for col_no, component in unmerged_anchors:
-            next_start = min((start for start in sibling_starts if start > col_no), default=last_code_col + 1)
-            end_col = min(next_start - 1, last_code_col)
+            # Even identical text at a new cell begins a new node at this
+            # level, so deeper labels cannot leak across sibling branches.
+            active_by_level[level] = component
+            for deeper_level in tuple(active_by_level):
+                if deeper_level > level:
+                    del active_by_level[deeper_level]
 
-            # A sibling header at a higher level also closes this scope. This
-            # matters when a lower heading would otherwise spill across the
-            # next top-level group (a layout found in COREP 4.0).
-            for parent_row in range(columns_row + 1, row_no):
-                parent_starts = {
-                    m.min_col for m in merged_ranges_by_row[parent_row]
-                    if m.max_col > m.min_col
-                }
-                for parent_col in range(1, last_code_col + 1):
-                    if not clean(sheet.cell(parent_row, parent_col).value):
-                        continue
-                    if any(m.min_col <= parent_col <= m.max_col for m in merged_ranges_by_row[parent_row]):
-                        continue
-                    parent_starts.add(parent_col)
-                later_parent = min((start for start in parent_starts if start > col_no), default=last_code_col + 1)
-                end_col = min(end_col, later_parent - 1)
-
-            # Only extend an unmerged heading when a lower header row provides
-            # evidence that it is a parent. Leaf labels must stay in their own
-            # columns; otherwise, e.g. "Total inflows" leaks into its neighbor.
-            has_children = any(
-                clean(sheet.cell(child_row, target_col).value)
-                or merged_header_values.get((child_row, target_col), "")
-                for child_row in range(row_no + 1, code_row)
-                for target_col in range(col_no, end_col + 1)
-            )
-            if not has_children:
-                continue
-            for target_col in range(col_no + 1, end_col + 1):
-                if not clean(sheet.cell(row_no, target_col).value):
-                    merged_header_values.setdefault((row_no, target_col), component)
-
-    output: list[tuple[str, tuple[str, ...], int]] = []
-    for col in range(1, sheet.max_column + 1):
         code = code_text(sheet.cell(code_row, col).value)
         if not code:
             continue
-        components: list[str] = []
-        for row_no in range(columns_row + 1, code_row):
-            component = clean(sheet.cell(row_no, col).value)
-            if not component:
-                component = merged_header_values.get((row_no, col), "")
+        components = []
+        for level in range(len(header_rows)):
+            component = active_by_level.get(level, "")
             if component and (not components or components[-1] != component):
                 components.append(component)
         if components:
