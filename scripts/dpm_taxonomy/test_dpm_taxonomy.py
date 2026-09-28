@@ -58,6 +58,26 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(current_y["description"].casefold(), "own funds")
         self.assertNotIn("sheet per", " ".join(str(c.value or "") for row in sheet.iter_rows(min_row=1, max_row=5, max_col=12) for c in row).casefold())
 
+        credit_risk = workbook["C_08.01.a"]
+        credit_x = builder.x_axis_rows(credit_risk, *builder.find_marker_rows(credit_risk))
+        credit_by_code = {code: description for code, description, _row in credit_x}
+        self.assertEqual(
+            credit_by_code["50"],
+            "Credit risk mitigation (CRM) techniques with substitution effects on the exposure/Unfunded credit protection/(-) Credit derivatives",
+        )
+        self.assertEqual(
+            credit_by_code["102"],
+            "BREAKDOWN OF THE FULLY ADJUSTED EXPOSURE VALUE OF OFF-BALANCE SHEET ITEMS BY CONVERSION FACTORS/STANDARD CONVERSION FACTORS/0",
+        )
+        self.assertEqual(
+            credit_by_code["103"],
+            "BREAKDOWN OF THE FULLY ADJUSTED EXPOSURE VALUE OF OFF-BALANCE SHEET ITEMS BY CONVERSION FACTORS/STANDARD CONVERSION FACTORS/0.1",
+        )
+
+        operational_risk = workbook["C_17.01.a"]
+        operational_x = builder.x_axis_rows(operational_risk, *builder.find_marker_rows(operational_risk))
+        self.assertIn(("10", "Event types/INTERNAL FRAUD", 7), operational_x)
+
         tab_sheet = workbook["C_07.00.a"]
         top = " ".join(str(c.value or "") for row in tab_sheet.iter_rows(min_row=1, max_row=5, max_col=12) for c in row).casefold()
         self.assertIn("sheet per exposure class", top)
@@ -80,6 +100,13 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(z_rows[0][0], "0001")
         self.assertIn("Total with own estimates", z_rows[0][1])
         self.assertFalse(any(code.casefold().startswith("qx") for code, _description in z_rows))
+
+        x_rows = builder.x_axis_rows(sheets[0], *builder.find_marker_rows(sheets[0]))
+        x_by_code = {code: description for code, description, _row in x_rows}
+        self.assertEqual(
+            x_by_code["50"],
+            "Credit risk mitigation (CRM) techniques with substitution effects on the exposure/Unfunded credit protection/(-) Credit derivatives",
+        )
 
         # The old domain-wide resolver leaked more than 300 unrelated members
         # into this 17-tab template; DPM 1.0 must use its sheets instead.

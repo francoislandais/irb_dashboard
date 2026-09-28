@@ -218,19 +218,41 @@ def x_axis_rows(sheet: Any, columns_row: int | None, rows_row: int | None) -> li
     # Choose the last dense row of column codes; a few older layouts carry
     # auxiliary numeric identifiers above or below the actual code row.
     code_row = max(row for count, row in candidates if count == max_count)
+
+    # A column heading is a stack of labels, not just the nearest cell above
+    # its RC code. Merged cells define the horizontal scope of parent headings;
+    # expand those scopes only within the header band. Numeric members such as
+    # 0, 0.1 and 0.2 are deliberately retained as labels here. Their role is
+    # determined by their position above the selected RC-code row, not by
+    # whether they happen to look numeric.
+    merged_header_values: dict[tuple[int, int], str] = {}
+    for merged in sheet.merged_cells.ranges:
+        if merged.max_row <= columns_row or merged.min_row >= code_row:
+            continue
+        if merged.min_col > sheet.max_column:
+            continue
+        anchor = clean(sheet.cell(merged.min_row, merged.min_col).value)
+        if not anchor:
+            continue
+        for row_no in range(max(columns_row + 1, merged.min_row), min(code_row - 1, merged.max_row) + 1):
+            for col_no in range(merged.min_col, min(sheet.max_column, merged.max_col) + 1):
+                if row_no != merged.min_row or col_no != merged.min_col:
+                    merged_header_values[(row_no, col_no)] = anchor
+
     output = []
     for col in range(1, sheet.max_column + 1):
         code = code_text(sheet.cell(code_row, col).value)
         if not code:
             continue
-        label = ""
-        for previous in range(code_row - 1, columns_row, -1):
-            candidate = clean(sheet.cell(previous, col).value)
-            if candidate and not code_text(candidate):
-                label = candidate
-                break
-        if label:
-            output.append((code, label, code_row))
+        components: list[str] = []
+        for row_no in range(columns_row + 1, code_row):
+            component = clean(sheet.cell(row_no, col).value)
+            if not component:
+                component = merged_header_values.get((row_no, col), "")
+            if component and (not components or components[-1] != component):
+                components.append(component)
+        if components:
+            output.append((code, "/".join(components), code_row))
     return output
 
 
