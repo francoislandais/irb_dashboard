@@ -109,7 +109,8 @@ class DpmTaxonomyTests(unittest.TestCase):
             sheet.cell(row_no, 2, label).alignment = Alignment(indent=indent)
             sheet.cell(row_no, 3, code)
 
-        result = {code: description for code, description, _row in builder.y_axis_rows(sheet, 1)}
+        rows = builder.y_axis_rows(sheet, 1)
+        result = {code: description for code, description, _row in rows}
 
         self.assertEqual(result["5"], "Total assets/Cash balances")
         self.assertEqual(result["10"], "Total assets/Debt securities")
@@ -118,6 +119,7 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(result["100"], "Total assets/Loan commitments")
         self.assertEqual(result["110"], "Total assets/Loan commitments/Households")
         self.assertEqual(result["120"], "Total assets")
+        self.assertLess([code for code, _description, _row in rows].index("120"), [code for code, _description, _row in rows].index("5"))
         workbook.close()
 
     def test_finrep_32_f18_and_f01_hierarchy_from_source_workbook(self):
@@ -125,27 +127,34 @@ class DpmTaxonomyTests(unittest.TestCase):
         member = next(name for name in archive.namelist() if name.endswith("Annotated Table Layout 321-P2-FINREP 3.2.1.xlsx"))
         workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
 
-        f18 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.a"], 9, "F_18.00.a")}
+        f18_rows = builder.y_axis_rows(workbook["F 18.00.a"], 9, "F_18.00.a")
+        f18 = {code: description for code, description, _row in f18_rows}
+        f18_order = [code for code, _description, _row in f18_rows]
         cost_parent = "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST"
         self.assertEqual(f18["5"], f"{cost_parent}/Cash balances at central banks and other demand deposits")
         self.assertEqual(f18["10"], f"{cost_parent}/Debt securities")
         self.assertEqual(f18["20"], f"{cost_parent}/Debt securities/Central banks")
         self.assertEqual(f18["70"], f"{cost_parent}/Loans and advances")
         self.assertEqual(f18["180"], cost_parent)
+        self.assertLess(f18_order.index("180"), f18_order.index("5"))
         fair_value_parent = "DEBT INSTRUMENTS AT FAIR VALUE THROUGH OTHER COMPREHENSIVE INCOME OR THROUGH EQUITY SUBJECT TO IMPAIRMENT"
         self.assertEqual(f18["201"], fair_value_parent)
         self.assertEqual(f18["211"], f"{fair_value_parent}/Debt securities")
+        self.assertLess(f18_order.index("201"), f18_order.index("211"))
 
         f18_off_balance = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.b"], 9, "F_18.00.b")}
         self.assertEqual(f18_off_balance["340"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given")
         self.assertEqual(f18_off_balance["350"], "OFF-BALANCE SHEET EXPOSURES/Loan commitments given/Central banks")
         self.assertEqual(f18_off_balance["550"], "OFF-BALANCE SHEET EXPOSURES")
 
-        f01 = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 01.01"], 7)}
+        f01_rows = builder.y_axis_rows(workbook["F 01.01"], 7)
+        f01 = {code: description for code, description, _row in f01_rows}
+        f01_order = [code for code, _description, _row in f01_rows]
         self.assertEqual(f01["10"], "Total assets/Cash, cash balances at central banks and other demand deposits")
         self.assertEqual(f01["50"], "Total assets/Financial assets held for trading")
         self.assertEqual(f01["60"], "Total assets/Financial assets held for trading/Derivatives")
         self.assertEqual(f01["380"], "Total assets")
+        self.assertLess(f01_order.index("380"), f01_order.index("10"))
 
         workbook.close()
         archive.close()
@@ -162,12 +171,15 @@ class DpmTaxonomyTests(unittest.TestCase):
                 workbook = load_workbook(io.BytesIO(archive.read(member)), data_only=True)
                 sheet = workbook["F_18.00.a"]
                 rows_row = builder.find_marker_rows(sheet)[1]
-                result = {code: description for code, description, _row in builder.y_axis_rows(sheet, rows_row, "F_18.00.a")}
+                result_rows = builder.y_axis_rows(sheet, rows_row, "F_18.00.a")
+                result = {code: description for code, description, _row in result_rows}
+                order = [code for code, _description, _row in result_rows]
                 parent = "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST"
                 self.assertEqual(result["5"], f"{parent}/Cash balances at central banks and other demand deposits")
                 self.assertEqual(result["10"], f"{parent}/Debt securities")
                 self.assertEqual(result["70"], f"{parent}/Loans and advances")
                 self.assertEqual(result["180"], parent)
+                self.assertLess(order.index("180"), order.index("5"))
                 workbook.close()
 
         archive.close()

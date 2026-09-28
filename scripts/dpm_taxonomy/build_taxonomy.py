@@ -367,6 +367,8 @@ def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tu
         paths.append("/".join([ancestor for _level, ancestor in ancestors] + [label]))
         ancestors.append((depth, label))
 
+    retroactive_moves: list[tuple[int, int]] = []
+
     def attach_preceding_block(start: int, end: int, parent_index: int) -> None:
         """Prefix a preceding deeper block with its later parent row."""
         parent_label = items[parent_index][1]
@@ -379,6 +381,8 @@ def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tu
             paths[index] = "/".join([parent_label] + relative_path)
             block_ancestors.append((depth, label))
         paths[parent_index] = parent_label
+        if start < end:
+            retroactive_moves.append((items[parent_index][3], items[start][3]))
 
     # Some templates put their first, lowest-indentation node after an initial
     # block of more-indented rows. That first node is the retroactive root for
@@ -401,7 +405,16 @@ def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tu
         if start < len(items) - 1:
             attach_preceding_block(start, len(items) - 1, len(items) - 1)
 
-    return [(code, paths[index], row_no) for index, (code, _label, _depth, row_no) in enumerate(items)]
+    # Keep the source order except where a parent was identified after its
+    # children: move it immediately before the first child it now parents.
+    ordered = list(zip(items, paths))
+    for parent_row_no, first_child_row_no in retroactive_moves:
+        parent_index = next(index for index, (item, _path) in enumerate(ordered) if item[3] == parent_row_no)
+        parent = ordered.pop(parent_index)
+        child_index = next(index for index, (item, _path) in enumerate(ordered) if item[3] == first_child_row_no)
+        ordered.insert(child_index, parent)
+
+    return [(item[0], path, item[3]) for item, path in ordered]
 
 
 @functools.lru_cache(maxsize=32)
