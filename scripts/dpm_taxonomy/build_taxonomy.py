@@ -102,42 +102,58 @@ def find_discriminating_suffix_templates(
 ) -> tuple[set[tuple[str, str]], dict[tuple[str, str], int]]:
     """Find template families where suffix removal would create ambiguity.
 
-    A suffix is retained for a module/template family when siblings reuse the
-    same axis/code with different descriptions or have different applicability
-    intervals. Case-only description differences are treated as equivalent.
+    A suffix is retained only when two siblings can contain the same complete
+    dimensional key (same code on every axis) and at least one shared code has
+    a different meaning. A difference on one axis alone is not a collision if
+    another axis has disjoint codes. Case-only description differences are
+    treated as equivalent.
     """
-    descriptions: dict[tuple[str, str, str, str, str], dict[str, set[tuple[str, str, str]]]] = defaultdict(lambda: defaultdict(set))
+    dimensions: dict[tuple[str, str, str, str], dict[str, dict[str, set[tuple[str, str, str]]]]] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(set))
+    )
     for row in mapping_rows:
         split = split_template_suffix(row["table_id"])
         if not split:
             continue
         base, suffix = split
-        key = (row["module_code"], row["framework"], base, row["coordinate"], row["code"])
-        descriptions[key][suffix].add((
+        key = (row["module_code"], row["framework"], base, row["coordinate"])
+        dimensions[key][suffix][row["code"]].add((
             suffix_collision_signature(row["module_code"], base, row["description"]),
             row.get("format", ""),
             row.get("ignore", ""),
         ))
 
     conflicts: dict[tuple[str, str], int] = defaultdict(int)
-    for key, by_suffix in descriptions.items():
-        if len(by_suffix) < 2:
-            continue
-        signatures = set().union(*by_suffix.values())
-        if len(signatures) > 1:
-            conflicts[(key[0], key[2])] += 1
+    by_family: dict[tuple[str, str, str], dict[str, dict[str, dict[str, set[tuple[str, str, str]]]]]] = defaultdict(
+        lambda: defaultdict(dict)
+    )
+    for (module, framework, base, coordinate), by_suffix in dimensions.items():
+        for suffix, codes in by_suffix.items():
+            by_family[(module, framework, base)][suffix][coordinate] = codes
 
-    intervals: dict[tuple[str, str, str], dict[str, set[tuple[str, str, str]]]] = defaultdict(lambda: defaultdict(set))
-    for row in template_rows:
-        split = split_template_suffix(row["template_id"])
-        if not split:
-            continue
-        base, suffix = split
-        key = (row["module_code"], row["framework"], base)
-        intervals[key][suffix].add((row["effective_from"], row["effective_to"], row["status"]))
-    for (module, _framework, base), by_suffix in intervals.items():
-        if len(by_suffix) > 1 and len(set().union(*by_suffix.values())) > 1:
-            conflicts[(module, base)] += 1
+    for (module, _framework, base), by_suffix in by_family.items():
+        suffixes = sorted(by_suffix)
+        for index, left_suffix in enumerate(suffixes):
+            left_axes = by_suffix[left_suffix]
+            for right_suffix in suffixes[index + 1:]:
+                right_axes = by_suffix[right_suffix]
+                # Different dimensional shapes cannot share a complete key.
+                if left_axes.keys() != right_axes.keys():
+                    continue
+                shared_codes: dict[str, set[str]] = {}
+                for coordinate in left_axes:
+                    shared_codes[coordinate] = left_axes[coordinate].keys() & right_axes[coordinate].keys()
+                # If any axis has no common code, the two subtemplates' cells
+                # cannot collide after the suffix is removed.
+                if any(not codes for codes in shared_codes.values()):
+                    continue
+                different_meanings = 0
+                for coordinate, codes in shared_codes.items():
+                    for code in codes:
+                        if left_axes[coordinate][code] != right_axes[coordinate][code]:
+                            different_meanings += 1
+                if different_meanings:
+                    conflicts[(module, base)] += different_meanings
 
     return set(conflicts), dict(conflicts)
 

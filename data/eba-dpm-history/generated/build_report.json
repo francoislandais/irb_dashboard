@@ -1,37 +1,17 @@
 {
-  "layout_rows": 90305,
-  "template_release_rows": 2518,
+  "layout_rows": 83363,
+  "template_release_rows": 2302,
   "workbooks": 115,
   "workbooks_with_errors": 0,
   "modules_without_effective_date_rule": [],
   "schedule_rows": 74,
-  "templates_with_discriminating_suffixes": 71,
-  "unique_discriminating_template_ids": 53,
+  "templates_with_discriminating_suffixes": 21,
+  "unique_discriminating_template_ids": 21,
   "discriminating_suffix_templates": [
-    {
-      "module_code": "AE",
-      "template_id": "F_32.03",
-      "conflicting_axis_code_cases": 6
-    },
-    {
-      "module_code": "AE",
-      "template_id": "F_34.00",
-      "conflicting_axis_code_cases": 3
-    },
-    {
-      "module_code": "CODIS",
-      "template_id": "K_04.00",
-      "conflicting_axis_code_cases": 2
-    },
     {
       "module_code": "CODIS",
       "template_id": "K_19.02",
       "conflicting_axis_code_cases": 8
-    },
-    {
-      "module_code": "CODIS",
-      "template_id": "K_26.00",
-      "conflicting_axis_code_cases": 2
     },
     {
       "module_code": "CODIS",
@@ -46,7 +26,7 @@
     {
       "module_code": "CODIS",
       "template_id": "K_29.02",
-      "conflicting_axis_code_cases": 4
+      "conflicting_axis_code_cases": 2
     },
     {
       "module_code": "CODIS",
@@ -66,12 +46,7 @@
     {
       "module_code": "CODIS",
       "template_id": "K_66.02",
-      "conflicting_axis_code_cases": 6
-    },
-    {
-      "module_code": "CODIS",
-      "template_id": "K_73.00",
-      "conflicting_axis_code_cases": 8
+      "conflicting_axis_code_cases": 14
     },
     {
       "module_code": "CODIS",
@@ -80,58 +55,13 @@
     },
     {
       "module_code": "COREP",
-      "template_id": "C_07.00",
-      "conflicting_axis_code_cases": 17
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_09.01",
-      "conflicting_axis_code_cases": 6
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_17.01",
-      "conflicting_axis_code_cases": 27
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_32.02",
-      "conflicting_axis_code_cases": 21
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_33.00",
-      "conflicting_axis_code_cases": 21
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_43.00",
-      "conflicting_axis_code_cases": 6
-    },
-    {
-      "module_code": "COREP",
       "template_id": "C_51.00",
-      "conflicting_axis_code_cases": 24
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_52.00",
-      "conflicting_axis_code_cases": 5
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_53.00",
-      "conflicting_axis_code_cases": 3
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_60.00",
-      "conflicting_axis_code_cases": 5
+      "conflicting_axis_code_cases": 20
     },
     {
       "module_code": "COREP",
       "template_id": "C_66.01",
-      "conflicting_axis_code_cases": 129
+      "conflicting_axis_code_cases": 21
     },
     {
       "module_code": "COREP",
@@ -149,99 +79,14 @@
       "conflicting_axis_code_cases": 1
     },
     {
-      "module_code": "COREP",
-      "template_id": "C_93.00",
-      "conflicting_axis_code_cases": 1
-    },
-    {
-      "module_code": "COREP_ALM",
-      "template_id": "C_66.01",
-      "conflicting_axis_code_cases": 57
-    },
-    {
-      "module_code": "COREP_LCR_DA",
-      "template_id": "C_73.00",
-      "conflicting_axis_code_cases": 1
-    },
-    {
-      "module_code": "COREP_LR",
-      "template_id": "C_43.00",
-      "conflicting_axis_code_cases": 4
-    },
-    {
-      "module_code": "COREP_NSFR",
-      "template_id": "C_80.00",
-      "conflicting_axis_code_cases": 8
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_02.00",
-      "conflicting_axis_code_cases": 104
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_07.00",
-      "conflicting_axis_code_cases": 26
-    },
-    {
       "module_code": "COREP_OF",
       "template_id": "C_08.05.1",
       "conflicting_axis_code_cases": 11
     },
     {
-      "module_code": "COREP_OF",
-      "template_id": "C_09.01",
-      "conflicting_axis_code_cases": 8
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_17.01",
-      "conflicting_axis_code_cases": 18
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_25.01",
-      "conflicting_axis_code_cases": 9
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_32.02",
-      "conflicting_axis_code_cases": 14
-    },
-    {
-      "module_code": "COREP_OF",
-      "template_id": "C_33.00",
-      "conflicting_axis_code_cases": 14
-    },
-    {
-      "module_code": "COVID19",
-      "template_id": "F_91.05",
-      "conflicting_axis_code_cases": 2
-    },
-    {
-      "module_code": "ESG",
-      "template_id": "D_08.00",
-      "conflicting_axis_code_cases": 33
-    },
-    {
-      "module_code": "ESG",
-      "template_id": "D_09.02",
-      "conflicting_axis_code_cases": 3
-    },
-    {
-      "module_code": "ESGDIS",
-      "template_id": "K_48.00",
-      "conflicting_axis_code_cases": 36
-    },
-    {
-      "module_code": "ESGDIS",
-      "template_id": "K_49.02",
-      "conflicting_axis_code_cases": 12
-    },
-    {
       "module_code": "FINDIS",
       "template_id": "K_21.01",
-      "conflicting_axis_code_cases": 30
+      "conflicting_axis_code_cases": 162
     },
     {
       "module_code": "FINDIS",
@@ -251,117 +96,22 @@
     {
       "module_code": "FINDIS",
       "template_id": "K_80.00",
-      "conflicting_axis_code_cases": 6
+      "conflicting_axis_code_cases": 42
     },
     {
       "module_code": "FINDIS",
       "template_id": "K_82.00",
-      "conflicting_axis_code_cases": 26
+      "conflicting_axis_code_cases": 34
     },
     {
       "module_code": "FINDIS",
       "template_id": "K_83.01",
-      "conflicting_axis_code_cases": 14
+      "conflicting_axis_code_cases": 28
     },
     {
       "module_code": "FINDIS",
       "template_id": "K_87.00",
       "conflicting_axis_code_cases": 18
-    },
-    {
-      "module_code": "FINREP",
-      "template_id": "F_18.00",
-      "conflicting_axis_code_cases": 63
-    },
-    {
-      "module_code": "FINREP",
-      "template_id": "F_25.01",
-      "conflicting_axis_code_cases": 9
-    },
-    {
-      "module_code": "FINREP",
-      "template_id": "F_25.02",
-      "conflicting_axis_code_cases": 9
-    },
-    {
-      "module_code": "FINREP9",
-      "template_id": "F_18.00",
-      "conflicting_axis_code_cases": 21
-    },
-    {
-      "module_code": "FINREP9",
-      "template_id": "F_25.01",
-      "conflicting_axis_code_cases": 3
-    },
-    {
-      "module_code": "FINREP9",
-      "template_id": "F_25.02",
-      "conflicting_axis_code_cases": 4
-    },
-    {
-      "module_code": "FINREP9DP",
-      "template_id": "F_18.00",
-      "conflicting_axis_code_cases": 21
-    },
-    {
-      "module_code": "FINREP9DP",
-      "template_id": "F_25.01",
-      "conflicting_axis_code_cases": 3
-    },
-    {
-      "module_code": "FINREP9DP",
-      "template_id": "F_25.02",
-      "conflicting_axis_code_cases": 4
-    },
-    {
-      "module_code": "IF_CLASS2",
-      "template_id": "C_25.01",
-      "conflicting_axis_code_cases": 9
-    },
-    {
-      "module_code": "MRELTLACDIS",
-      "template_id": "K_91.00",
-      "conflicting_axis_code_cases": 1
-    },
-    {
-      "module_code": "MRELTLACDIS",
-      "template_id": "K_95.00",
-      "conflicting_axis_code_cases": 18
-    },
-    {
-      "module_code": "MRELTLACDIS",
-      "template_id": "K_96.00",
-      "conflicting_axis_code_cases": 10
-    },
-    {
-      "module_code": "MRELTLACDIS",
-      "template_id": "K_98.00",
-      "conflicting_axis_code_cases": 10
-    },
-    {
-      "module_code": "MREL_TLAC",
-      "template_id": "M_02.00",
-      "conflicting_axis_code_cases": 10
-    },
-    {
-      "module_code": "PILLAR3",
-      "template_id": "K_48.00",
-      "conflicting_axis_code_cases": 2
-    },
-    {
-      "module_code": "PILLAR3",
-      "template_id": "K_49.02",
-      "conflicting_axis_code_cases": 1
-    },
-    {
-      "module_code": "REM",
-      "template_id": "R_06.00",
-      "conflicting_axis_code_cases": 2
-    },
-    {
-      "module_code": "RES",
-      "template_id": "T_01.00",
-      "conflicting_axis_code_cases": 16
     }
   ],
   "generated_from": "official EBA source packages listed in sources.json"

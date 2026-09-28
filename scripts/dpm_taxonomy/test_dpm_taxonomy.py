@@ -166,6 +166,40 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(exceptions, {("RES", "T_01.00")})
         self.assertEqual(conflicts[("RES", "T_01.00")], 1)
 
+    def test_suffix_is_removed_when_other_axes_make_cells_disjoint(self):
+        mappings = [
+            {"module_code": "FINREP", "framework": "3.2", "table_id": "F_18.00.a", "coordinate": "x_axis_rc_code", "code": "10", "description": "Gross carrying amount"},
+            {"module_code": "FINREP", "framework": "3.2", "table_id": "F_18.00.a", "coordinate": "y_axis_rc_code", "code": "340", "description": "Debt instruments held for sale/Loan commitments given"},
+            {"module_code": "FINREP", "framework": "3.2", "table_id": "F_18.00.e", "coordinate": "x_axis_rc_code", "code": "20", "description": "Nominal amount"},
+            {"module_code": "FINREP", "framework": "3.2", "table_id": "F_18.00.e", "coordinate": "y_axis_rc_code", "code": "340", "description": "Loan commitments given"},
+        ]
+        templates = [
+            {"module_code": "FINREP", "framework": "3.2", "template_id": f"F_18.00.{suffix}", "effective_from": "2022-12-31", "effective_to": "", "status": "official"}
+            for suffix in ("a", "e")
+        ]
+
+        exceptions, conflicts = builder.find_discriminating_suffix_templates(mappings, templates)
+
+        self.assertNotIn(("FINREP", "F_18.00"), exceptions)
+        self.assertNotIn(("FINREP", "F_18.00"), conflicts)
+
+    def test_suffix_is_kept_when_a_complete_cell_key_collides(self):
+        mappings = [
+            {"module_code": "RES", "framework": "3.2", "table_id": "T_01.00.a", "coordinate": "x_axis_rc_code", "code": "10", "description": "Amount"},
+            {"module_code": "RES", "framework": "3.2", "table_id": "T_01.00.a", "coordinate": "y_axis_rc_code", "code": "511", "description": "Assets/Share capital"},
+            {"module_code": "RES", "framework": "3.2", "table_id": "T_01.00.b", "coordinate": "x_axis_rc_code", "code": "10", "description": "Amount"},
+            {"module_code": "RES", "framework": "3.2", "table_id": "T_01.00.b", "coordinate": "y_axis_rc_code", "code": "511", "description": "Liabilities/Share capital"},
+        ]
+        templates = [
+            {"module_code": "RES", "framework": "3.2", "template_id": f"T_01.00.{suffix}", "effective_from": "2022-12-31", "effective_to": "", "status": "official"}
+            for suffix in ("a", "b")
+        ]
+
+        exceptions, conflicts = builder.find_discriminating_suffix_templates(mappings, templates)
+
+        self.assertEqual(exceptions, {("RES", "T_01.00")})
+        self.assertEqual(conflicts[("RES", "T_01.00")], 1)
+
     def test_corep_0801_suffixes_merge_when_codes_do_not_collide(self):
         mappings = [
             {"module_code": "COREP", "framework": "2.9.1.1", "table_id": "C_08.01.a", "coordinate": "y_axis_rc_code", "code": "80", "description": "Total exposures/Specialized lending slotting criteria (b)"},
