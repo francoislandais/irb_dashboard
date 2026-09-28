@@ -134,9 +134,18 @@ class DpmTaxonomyTests(unittest.TestCase):
         top = " ".join(str(c.value or "") for row in tab_sheet.iter_rows(min_row=1, max_row=5, max_col=12) for c in row).casefold()
         self.assertIn("sheet per exposure class", top)
         z = builder.dictionary_z_rows(SOURCES / "4.2_dictionary.xlsx", tab_sheet)
-        self.assertTrue(z)
+        self.assertEqual(len(z), 89)
         workbook.close()
         archive.close()
+
+        archive_40 = zipfile.ZipFile(SOURCES / "4.0_layouts.zip")
+        corep_file_40 = next(n for n in archive_40.namelist() if "COREP_OFCOREP" in n)
+        workbook_40 = load_workbook(io.BytesIO(archive_40.read(corep_file_40)), data_only=True)
+        tab_sheet_40 = workbook_40["C_07.00.a"]
+        z_40 = builder.dictionary_z_rows(SOURCES / "4.0_dictionary.xlsx", tab_sheet_40)
+        self.assertEqual(len(z_40), 80)
+        workbook_40.close()
+        archive_40.close()
 
     def test_y_axis_uses_absolute_indent_and_terminal_parent_retroactively(self):
         workbook = Workbook()

@@ -630,7 +630,12 @@ def dictionary_z_rows(dictionary_path: Path, sheet: Any) -> list[tuple[str, str]
                 # annotates a varying dimension as (dimension:domain), while
                 # fixed selections use member codes such as (AP:x42).
                 if "key value" in text.casefold():
-                    key_value_refs.append((nested or second, second))
+                    # In the older annotation ``(qEC:qEC2) <Key value>``,
+                    # the first token is the dimension domain and the second
+                    # is its subdomain. Newer annotations add the domain again
+                    # as a nested token: ``(qEC:qEC2(qEC))``. Prefer that
+                    # explicit nested domain, otherwise use the first token.
+                    key_value_refs.append((nested or first, second))
                 elif re.fullmatch(r"[A-Z]{2,5}", second):
                     refs.append((second, second))
     refs = list(dict.fromkeys(key_value_refs or refs))
