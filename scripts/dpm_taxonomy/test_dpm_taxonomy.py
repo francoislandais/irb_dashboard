@@ -82,7 +82,7 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertIn(("10", "Amount", 6), xs)
         self.assertIn("10", [code for code, _description, _row in ys])
         self.assertTrue(any(path.startswith("OWN FUNDS") for code, path, _row in ys if code == "10"))
-        with (ROOT / "app" / "assets" / "ITS_all_dimension_mapping.csv").open(encoding="cp1252", newline="") as handle:
+        with (ROOT / "app" / "assets" / "ITS_all_dimension_mapping.csv").open(encoding="utf-8-sig", newline="") as handle:
             current = list(csv.DictReader(handle, delimiter=";"))
         current_y = next(r for r in current if r["table_id"] == "C_01.00" and r["coordinate"] == "y_axis_rc_code" and r["code"] == "10")
         self.assertEqual(current_y["description"].casefold(), "own funds")

@@ -130,7 +130,7 @@ def production_display_format_lookup() -> dict[tuple[str, str, str, str], str]:
     if not source.exists():
         return {}
     values: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
-    with source.open(encoding="cp1252", newline="") as handle:
+    with source.open(encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle, delimiter=";"):
             value_format = clean(row.get("format", ""))
             if value_format not in {"%", "Unit"}:

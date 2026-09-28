@@ -46,6 +46,12 @@
           <button id="institution-dictionary-button" class="topbar-button institution-dictionary-button" type="button" title="Load an optional institution dictionary">Add names</button>
           <button id="institution-dictionary-clear" class="topbar-button institution-dictionary-clear" type="button" aria-label="Remove institution dictionary" title="Use raw institution IDs" hidden>×</button>
           <input id="institution-dictionary-input" type="file" accept=".csv,text/csv" hidden>
+          <label class="field compact-field taxonomy-field">
+            <span>Taxonomy</span>
+            <select id="taxonomy-select" disabled aria-label="Select a taxonomy">
+              <option value="">Loading…</option>
+            </select>
+          </label>
           <label class="field compact-field unit-field">
             <span>Unité</span>
             <select id="unit-select">
@@ -407,6 +413,6 @@
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20260926-global-update-dictionary"></script>
+    <script type="module" src="./src/main.js?v=20260928-taxonomy-preview"></script>
   </body>
 </html>

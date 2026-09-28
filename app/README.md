@@ -28,4 +28,22 @@ Les navigateurs ne donnent pas accès à un chemin local brut pour des raisons d
 
 Si le navigateur ne supporte pas cette API, le chargement CSV fonctionne quand même, mais l'utilisateur devra sélectionner le fichier à chaque session.
 
-Le contenu du fichier CSV n'est pas inclus dans l'application et n'est pas envoyé à un serveur.
+Le contenu des fichiers CSV utilisateur n'est pas envoyé à un serveur. La branche de prévisualisation charge en plus son CSV d'exemple depuis `app/assets/`.
+
+## Prévisualiser les taxonomies DPM
+
+La branche de test `codex/taxonomy-preview` remplace le dictionnaire interne par
+une version dérivée de l'historique DPM. Le sélecteur **Taxonomy** du header est
+global : changer de framework recharge les dimensions de tous les templates.
+Au démarrage, l'application lit directement
+`app/assets/taxonomy-preview-empty-data.csv` comme jeu de données de référence.
+Ce fichier contient une ligne technique par template, sans coordonnées ni
+valeurs numériques, afin d'afficher la structure vide des templates.
+
+Après modification du CSV, rechargez l'application pour relire le fichier. Pour
+reconstruire le dictionnaire compact et le jeu de prévisualisation à partir de
+`data/eba-dpm-history/generated/versioned_dimension_mapping.csv`, lancez :
+
+```sh
+python3 scripts/dpm_taxonomy/build_taxonomy_preview.py
+```

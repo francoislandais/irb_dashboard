@@ -37,7 +37,7 @@ import {
   normalizeExplorerSeriesRow,
   normalizeHierarchyPath,
   splitHierarchyPath
-} from "../data/explorer.js?v=20260927-ratio-toggle";
+} from "../data/explorer.js?v=20260928-taxonomy-preview";
 import { getExplorerDefaultExpandDepth } from "../data/explorerDefaultExpandDepth.js";
 import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import {

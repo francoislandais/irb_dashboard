@@ -2,8 +2,7 @@ import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
 import { parseInstitutionDictionaryCsv } from "./data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
-import { loadDimensionMapping } from "./data/dimensionMapping.js?v=20260917-kri-formula";
-import { loadExplorerPoints } from "./data/explorerConfig.js?v=20260921-hierarchy-gt-escape";
+import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260928-taxonomy-preview";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
@@ -20,8 +19,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260925-institution-dictionary";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260925-institution-label-spacing";
+import { createDataStore } from "./data/dataStore.js?v=20260928-taxonomy-preview";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260928-taxonomy-preview";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -168,6 +167,14 @@ const actions = {
   updateSelectedUnit(unit) {
     store.setSelectedUnit(unit);
     updateUrlUnitParam(store.getState().selectedUnit);
+  },
+
+  async updateSelectedTaxonomy(taxonomy) {
+    try {
+      store.setTaxonomyDimensionData(await loadTaxonomyDimensionData(taxonomy));
+    } catch (error) {
+      store.setDimensionMappingError(error);
+    }
   },
 
   updatePeerJstCodes(peerJstCodes) {
@@ -624,13 +631,12 @@ async function startApplication() {
 
   try {
     await Promise.all([
-      loadInternalMapping(),
+      loadTaxonomyConfiguration(),
       loadImpossibleCombinations(),
-      loadExplorerConfiguration(),
       loadExplorerDefaultExpandDepthConfig(),
       loadExplorerTemplateGroupsConfig(),
       loadExplorerKriFormulasConfig(),
-      hasStandaloneCsvData() ? loadStandaloneData() : restoreLastFile()
+      hasStandaloneCsvData() ? loadStandaloneData() : loadTaxonomyPreviewDataset()
     ]);
   } catch (error) {
     store.setError(error);
@@ -665,12 +671,25 @@ function revealApplication() {
   window.setTimeout(() => startupScreen?.remove(), 220);
 }
 
-async function loadInternalMapping() {
+async function loadTaxonomyConfiguration() {
   try {
-    store.setDimensionMapping(await loadDimensionMapping());
+    store.setTaxonomyDimensionData(await loadTaxonomyDimensionData());
   } catch (error) {
     store.setDimensionMappingError(error);
   }
+}
+
+async function loadTaxonomyPreviewDataset() {
+  const response = await fetch("./assets/taxonomy-preview-empty-data.csv", { cache: "no-store" });
+  if (!response.ok) throw new Error("Le CSV de prévisualisation des templates n'a pas pu être chargé.");
+  const text = await response.text();
+  currentCsvText = text;
+  currentCsvFileName = "taxonomy-preview-empty-data.csv";
+  await loadCsvText(text, currentCsvFileName, null, new Date(), {
+    datasetId: "taxonomy-preview-empty-data",
+    datasetLabel: "Taxonomy preview — empty templates",
+    source: "embedded"
+  });
 }
 
 async function loadImpossibleCombinations() {
@@ -678,14 +697,6 @@ async function loadImpossibleCombinations() {
     store.setImpossibleXYCombinations(await loadImpossibleXYCombinations());
   } catch (error) {
     store.setImpossibleXYCombinationsError(error);
-  }
-}
-
-async function loadExplorerConfiguration() {
-  try {
-    store.setExplorerPoints(await loadExplorerPoints());
-  } catch (error) {
-    store.setExplorerPointsError(error);
   }
 }
 
