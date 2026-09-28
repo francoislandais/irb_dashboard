@@ -17,6 +17,7 @@ APP_MAPPING_COLUMNS = [
     "table_id",
     "coordinate",
     "code",
+    "parent_coordinate_code",
     "description",
     "order_first",
     "ignore",

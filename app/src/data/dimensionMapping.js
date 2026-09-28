@@ -18,7 +18,9 @@ export function createDimensionMapping(columns, rows) {
     tableId: columns.indexOf("table_id"),
     coordinate: columns.indexOf("coordinate"),
     code: columns.indexOf("code"),
+    parentCoordinateCode: columns.indexOf("parent_coordinate_code"),
     description: columns.indexOf("description"),
+    ignore: columns.indexOf("ignore"),
     format: columns.indexOf("format")
   };
 
@@ -32,7 +34,11 @@ export function createDimensionMapping(columns, rows) {
     const tableId = row[indexes.tableId];
     const coordinate = row[indexes.coordinate];
     const sourceCode = row[indexes.code];
+    const parentCoordinateCode = indexes.parentCoordinateCode === -1
+      ? ""
+      : normalizeMappingCode(row[indexes.parentCoordinateCode], coordinate);
     const description = row[indexes.description];
+    const ignore = indexes.ignore === -1 ? "" : String(row[indexes.ignore] ?? "").trim();
     const format = indexes.format === -1 ? "" : String(row[indexes.format] ?? "").trim();
 
     if (!tableId || !coordinate || !sourceCode || !description) return;
@@ -41,6 +47,9 @@ export function createDimensionMapping(columns, rows) {
       code: normalizeMappingCode(sourceCode, coordinate),
       coordinate,
       description,
+      parentCoordinateCode,
+      ignore,
+      internalParent: String(sourceCode).startsWith("__PARENT__"),
       format,
       tableId
     };
@@ -50,14 +59,17 @@ export function createDimensionMapping(columns, rows) {
   });
 
   return {
+    hasParentCoordinateCode: indexes.parentCoordinateCode !== -1,
+
     find(tableId, coordinate, code) {
       return byCoordinate.get(makeMappingKey(tableId, coordinate, code)) ?? null;
     },
 
-    list(tableId, coordinate) {
+    list(tableId, coordinate, { includeInternalParents = false } = {}) {
       return entries.filter((entry) => (
         entry.tableId === tableId
         && entry.coordinate === coordinate
+        && (includeInternalParents || !entry.internalParent)
       ));
     },
 

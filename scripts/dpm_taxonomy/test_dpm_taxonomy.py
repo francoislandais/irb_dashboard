@@ -228,6 +228,52 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(result["10"], "Cash balances/Debt securities")
         workbook.close()
 
+    def test_parent_codes_follow_structure_even_when_labels_contain_slashes(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.cell(1, 2, "Rows")
+        sheet.cell(2, 2, "Assets").alignment = Alignment(indent=0)
+        sheet.cell(2, 3, "10")
+        sheet.cell(3, 2, "Loans / advances").alignment = Alignment(indent=2)
+        sheet.cell(3, 3, "20")
+        sheet.cell(4, 2, "Retail / SME").alignment = Alignment(indent=4)
+        sheet.cell(4, 3, "30")
+
+        rows = builder.y_axis_rows(sheet, 1, include_parent=True)
+        by_code = {entry[0]: entry for entry in rows}
+
+        self.assertEqual(by_code["10"][3], "")
+        self.assertEqual(by_code["20"][3], "10")
+        self.assertEqual(by_code["30"][3], "20")
+        self.assertEqual(by_code["30"][1], "Assets/Loans / advances/Retail / SME")
+        workbook.close()
+
+    def test_x_parent_code_uses_header_levels(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.cell(1, 1, "Columns")
+        sheet.cell(2, 2, "Exposure")
+        sheet.cell(3, 2, "Gross amount")
+        sheet.cell(3, 3, "Of which")
+        sheet.cell(4, 4, "Retail / SME")
+        sheet.cell(5, 2, "10")
+        sheet.cell(5, 3, "20")
+        sheet.cell(5, 4, "30")
+        sheet.cell(6, 2, "Rows")
+        sheet.merge_cells("B2:D2")
+        sheet.merge_cells("C3:D3")
+
+        rows = builder.x_axis_rows(sheet, 1, 6, include_parent=True)
+        by_code = {entry[0]: entry for entry in rows}
+
+        self.assertTrue(by_code["20"][3].startswith("__PARENT__"))
+        self.assertEqual(by_code["30"][3], "20")
+        self.assertTrue(by_code["30"][1].endswith("Retail / SME"))
+        virtual_parent = by_code[by_code["20"][3]]
+        self.assertEqual(virtual_parent[1], "Exposure")
+        self.assertTrue(virtual_parent[4])
+        workbook.close()
+
     def test_corep_40_unmerged_headers_infer_parent_scopes(self):
         archive = zipfile.ZipFile(SOURCES / "4.0_layouts.zip")
         corep_file = next(n for n in archive.namelist() if "COREP_OFCOREP" in n and n.endswith(".xlsx"))

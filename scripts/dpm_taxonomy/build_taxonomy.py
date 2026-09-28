@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import functools
 import io
 import json
@@ -296,7 +297,55 @@ def find_marker_rows(sheet: Any) -> tuple[int | None, int | None]:
     return columns_row, rows_row
 
 
-def x_axis_rows(sheet: Any, columns_row: int | None, rows_row: int | None) -> list[tuple[str, str, int]]:
+def with_parent_codes(
+    entries: list[tuple[str, tuple[str, ...], int]],
+) -> list[tuple[str, str, int, str, bool]]:
+    """Add immediate code links and hidden nodes for uncoded header groups."""
+    code_by_path: dict[tuple[str, ...], str] = {}
+    for code, path, _row_no in entries:
+        code_by_path.setdefault(path, code)
+
+    virtual_by_path: dict[tuple[str, ...], str] = {}
+    used_codes = {code for code, _path, _row_no in entries}
+
+    def code_for_path(path: tuple[str, ...]) -> str:
+        existing = code_by_path.get(path)
+        if existing:
+            return existing
+        if path not in virtual_by_path:
+            digest = hashlib.sha1("\u001f".join(path).encode("utf-8")).hexdigest()[:12]
+            candidate = f"__PARENT__{digest}"
+            salt = 1
+            while candidate in used_codes:
+                candidate = f"__PARENT__{digest}_{salt}"
+                salt += 1
+            used_codes.add(candidate)
+            virtual_by_path[path] = candidate
+        return virtual_by_path[path]
+
+    for _code, path, _row_no in entries:
+        for depth in range(1, len(path)):
+            code_for_path(path[:depth])
+
+    virtual_entries: list[tuple[str, str, int, str, bool]] = []
+    for path, code in sorted(virtual_by_path.items(), key=lambda item: (len(item[0]), item[0])):
+        parent_code = code_for_path(path[:-1]) if len(path) > 1 else ""
+        virtual_entries.append((code, "/".join(path), 0, parent_code, True))
+
+    real_entries = [
+        (code, "/".join(path), row_no, code_for_path(path[:-1]) if len(path) > 1 else "", False)
+        for code, path, row_no in entries
+    ]
+    return virtual_entries + real_entries
+
+
+def x_axis_rows(
+    sheet: Any,
+    columns_row: int | None,
+    rows_row: int | None,
+    *,
+    include_parent: bool = False,
+) -> list[tuple[str, str, int] | tuple[str, str, int, str, bool]]:
     if columns_row is None:
         return []
     end = rows_row or min(sheet.max_row, columns_row + 20)
@@ -392,7 +441,7 @@ def x_axis_rows(sheet: Any, columns_row: int | None, rows_row: int | None) -> li
                 if not clean(sheet.cell(row_no, target_col).value):
                     merged_header_values.setdefault((row_no, target_col), component)
 
-    output = []
+    output: list[tuple[str, tuple[str, ...], int]] = []
     for col in range(1, sheet.max_column + 1):
         code = code_text(sheet.cell(code_row, col).value)
         if not code:
@@ -405,11 +454,23 @@ def x_axis_rows(sheet: Any, columns_row: int | None, rows_row: int | None) -> li
             if component and (not components or components[-1] != component):
                 components.append(component)
         if components:
-            output.append((code, "/".join(components), code_row))
-    return output
+            output.append((code, tuple(components), code_row))
+
+    if not include_parent:
+        return [(code, "/".join(components), row_no) for code, components, row_no in output]
+
+    # Parentage comes from the reconstructed header levels, never from
+    # splitting the display string: a component may itself contain "/".
+    return with_parent_codes(output)
 
 
-def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tuple[str, str, int]]:
+def y_axis_rows(
+    sheet: Any,
+    rows_row: int | None,
+    table_id: str = "",
+    *,
+    include_parent: bool = False,
+) -> list[tuple[str, str, int] | tuple[str, str, int, str, bool]]:
     if rows_row is None:
         return []
     items: list[tuple[str, str, int, int]] = []
@@ -436,12 +497,12 @@ def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tu
 
     # Most layouts list parents before their children. Use the absolute indent
     # as the level: equal indentation always closes the previous sibling.
-    paths: list[str] = []
+    paths: list[list[str]] = []
     ancestors: list[tuple[int, str]] = []
     for _code, label, depth, _row_no in items:
         while ancestors and ancestors[-1][0] >= depth:
             ancestors.pop()
-        paths.append("/".join([ancestor for _level, ancestor in ancestors] + [label]))
+        paths.append([ancestor for _level, ancestor in ancestors] + [label])
         ancestors.append((depth, label))
 
     retroactive_moves: list[tuple[int, int]] = []
@@ -455,9 +516,9 @@ def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tu
             while block_ancestors and block_ancestors[-1][0] >= depth:
                 block_ancestors.pop()
             relative_path = [ancestor for _level, ancestor in block_ancestors] + [label]
-            paths[index] = "/".join([parent_label] + relative_path)
+            paths[index] = [parent_label] + relative_path
             block_ancestors.append((depth, label))
-        paths[parent_index] = parent_label
+        paths[parent_index] = [parent_label]
         if start < end:
             retroactive_moves.append((items[parent_index][3], items[start][3]))
 
@@ -491,7 +552,10 @@ def y_axis_rows(sheet: Any, rows_row: int | None, table_id: str = "") -> list[tu
         child_index = next(index for index, (item, _path) in enumerate(ordered) if item[3] == first_child_row_no)
         ordered.insert(child_index, parent)
 
-    return [(item[0], path, item[3]) for item, path in ordered]
+    if not include_parent:
+        return [(item[0], "/".join(path), item[3]) for item, path in ordered]
+
+    return with_parent_codes([(item[0], tuple(path), item[3]) for item, path in ordered])
 
 
 @functools.lru_cache(maxsize=32)
@@ -668,8 +732,8 @@ def extract_all() -> tuple[
                     if not table_id or table_id.casefold() in {"table of contents", "toc"}:
                         continue
                     columns_row, rows_row = find_marker_rows(sheet)
-                    xs = x_axis_rows(sheet, columns_row, rows_row)
-                    ys = y_axis_rows(sheet, rows_row, table_id)
+                    xs = x_axis_rows(sheet, columns_row, rows_row, include_parent=True)
+                    ys = y_axis_rows(sheet, rows_row, table_id, include_parent=True)
                     header_text = " ".join(
                         clean(sheet.cell(r, c).value)
                         for r in range(1, min(sheet.max_row, 5) + 1)
@@ -717,17 +781,23 @@ def extract_all() -> tuple[
                         "source_sheet": sheet.title,
                     }
                     for axis, entries in (("x", xs), ("y", ys), ("z", zs)):
-                        for order, (code, description, _row_number) in enumerate(entries, 1):
+                        for order, entry in enumerate(entries, 1):
+                            code, description, _row_number = entry[:3]
+                            parent_code = entry[3] if len(entry) > 3 else ""
+                            is_virtual_parent = bool(entry[4]) if len(entry) > 4 else False
                             layout_rows.append({
                                 "table_id": table_id,
                                 "coordinate": AXIS_COORDINATES[axis],
                                 "code": code,
+                                "parent_coordinate_code": parent_code,
                                 "description": description,
                                 "order_first": "" if axis == "y" else str(_row_number if axis == "z" and _row_number else order),
-                                "ignore": "",
-                                "format": production_display_format(
-                                    table_id, AXIS_COORDINATES[axis], code, description
-                                ) or infer_display_format(description),
+                                "ignore": "Y" if is_virtual_parent else "",
+                                "format": "" if is_virtual_parent else (
+                                    production_display_format(
+                                        table_id, AXIS_COORDINATES[axis], code, description
+                                    ) or infer_display_format(description)
+                                ),
                                 "module_code": module,
                                 "framework": version,
                                 "effective_from": from_date,
@@ -746,7 +816,10 @@ def extract_all() -> tuple[
                     "status": "parsed",
                 })
 
-    discriminating, suffix_conflicts = find_discriminating_suffix_templates(layout_rows, template_rows.values())
+    discriminating, suffix_conflicts = find_discriminating_suffix_templates(
+        [row for row in layout_rows if row.get("ignore") != "Y"],
+        template_rows.values(),
+    )
 
     # Suffixes are usually display/segmentation variants of one template. Keep
     # them only for module/template families where stripping them would make a
@@ -794,7 +867,7 @@ def main() -> int:
     args = parser.parse_args()
     dimensions, templates, inventory, suffix_conflicts = extract_all()
     write_csv(args.output_dir / "versioned_dimension_mapping.csv", dimensions, [
-        "table_id", "coordinate", "code", "description", "order_first", "ignore", "format",
+        "table_id", "coordinate", "code", "parent_coordinate_code", "description", "order_first", "ignore", "format",
         "module_code", "framework", "effective_from", "effective_to", "status", "source_workbook", "source_sheet", "effective_source",
     ])
     write_csv(args.output_dir / "template_taxonomy_history.csv", templates, [

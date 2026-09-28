@@ -2,6 +2,7 @@ import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByC
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { escapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";
+import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-parent-coordinate";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 import {
   EXPLORER_ALL_CURRENCIES_CODE,
@@ -220,12 +221,19 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
     matchedRowsByCode.get(code).push(row);
   });
 
+  const configuredMappings = state.dimensionMapping?.list?.(tableId, coordinate, { includeInternalParents: true }) ?? [];
+  const hierarchyResolver = createCoordinateHierarchyResolver(configuredMappings, {
+    legacySlashPaths: !state.dimensionMapping?.hasParentCoordinateCode
+  });
+
   return codes
     .map((code) => {
       const matchedRows = matchedRowsByCode.get(code) ?? [];
       const mapping = state.dimensionMapping?.find(tableId, coordinate, code);
       const description = mapping?.description || `${axis.toUpperCase()} ${code}`;
-      const hierarchy = parseDescriptionHierarchy(description);
+      const hierarchy = mapping
+        ? hierarchyResolver.resolve(mapping)
+        : { label: description, level: 0, parentPath: "", path: escapeHierarchySegment(description) };
 
       return {
         code,
@@ -355,24 +363,6 @@ function canUseCompleteCoordinateIndex(selections) {
     && selections.selectedYCode
     && selections.selectedZCode
   );
-}
-
-function parseDescriptionHierarchy(description) {
-  const parts = String(description ?? "")
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
-  // label keeps the original text (this row's own display never goes
-  // through splitHierarchyPath) - only the joined paths need escaping (see
-  // core/hierarchyPath.js).
-  const escapedParts = parts.map(escapeHierarchySegment);
-
-  return {
-    label: parts.at(-1) ?? "",
-    level: Math.max(0, parts.length - 1),
-    parentPath: escapedParts.slice(0, -1).join(" > "),
-    path: escapedParts.join(" > ")
-  };
 }
 
 function getSelectedFilterFormat(state, tableId, activeAxis, selections) {
