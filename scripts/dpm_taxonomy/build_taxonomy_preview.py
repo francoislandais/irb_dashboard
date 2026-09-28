@@ -51,7 +51,7 @@ def main() -> None:
         if key not in seen:
             seen.add(key)
             unique_rows.append({
-                column: clean_field(row.get(column, "") or "")
+                column: "" if column == "order_first" else clean_field(row.get(column, "") or "")
                 for column in APP_MAPPING_COLUMNS
             })
         table_ids.add(row["table_id"])
