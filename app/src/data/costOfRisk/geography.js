@@ -137,7 +137,8 @@ function getOrCreateCostOfRiskGeographyCountry(countryMap, state, countryCode) {
 }
 
 function getCostOfRiskCountryLabel(state, countryCode) {
-  return state.dimensionMapping?.find?.(COST_OF_RISK_GEOGRAPHY_TABLE_ID, "z_axis_rc_code", countryCode)?.description
+  const mapping = state.dimensionMapping?.find?.(COST_OF_RISK_GEOGRAPHY_TABLE_ID, "z_axis_rc_code", countryCode);
+  return mapping?.fullDescription || mapping?.description
     || countryCode;
 }
 

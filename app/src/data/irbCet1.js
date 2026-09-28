@@ -150,7 +150,7 @@ function calculateShapleyAttribution(numerator, denominator) {
 function buildComponentBreakdown(state, indexes, tableId, totalCode, currentReference, previousReference, totalBasisPoints, totalChange, componentCodes = null) {
   const mappings = state.dimensionMapping?.list?.(tableId, "y_axis_rc_code") ?? [];
   const totalMapping = mappings.find((mapping) => normalizeAxisCode(mapping.code, "y") === totalCode);
-  const totalPath = splitPath(totalMapping?.description);
+  const totalPath = totalMapping?.pathComponents ?? splitPath(totalMapping?.description);
   const rows = getIndexedRowsByTableJst(state, tableId);
   const rowByCode = new Map();
   rows.forEach((row) => {
@@ -159,7 +159,7 @@ function buildComponentBreakdown(state, indexes, tableId, totalCode, currentRefe
   });
 
   const components = mappings
-    .map((mapping) => ({ ...mapping, code: normalizeAxisCode(mapping.code, "y"), path: splitPath(mapping.description) }))
+    .map((mapping) => ({ ...mapping, code: normalizeAxisCode(mapping.code, "y"), path: mapping.pathComponents ?? splitPath(mapping.description) }))
     .filter((mapping) => mapping.code !== totalCode && (
       Array.isArray(componentCodes)
         ? componentCodes.includes(mapping.code)

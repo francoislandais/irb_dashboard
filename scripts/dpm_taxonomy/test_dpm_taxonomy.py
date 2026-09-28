@@ -245,7 +245,8 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(by_code["10"][3], "")
         self.assertEqual(by_code["20"][3], "10")
         self.assertEqual(by_code["30"][3], "20")
-        self.assertEqual(by_code["30"][1], "Assets/Loans / advances/Retail / SME")
+        self.assertEqual(by_code["30"][1], "Retail / SME")
+        self.assertEqual(by_code["30"][5], "Assets/Loans / advances/Retail / SME")
         workbook.close()
 
     def test_x_parent_code_uses_header_levels(self):

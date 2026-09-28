@@ -1,6 +1,6 @@
 import { getIrbOutputFloorModel } from "../data/irb.js?v=20260817-output-floor-bridge";
-import { getIrbDensityModel, getIrbDensityPoint, IRB_DENSITY_TOTAL_Y_CODE } from "../data/irbDensity.js?v=20260814-irb-density-cube";
-import { getIrbCet1RatioModel, getIrbCet1TimeSeriesModel } from "../data/irbCet1.js?v=20260818-cet1-timeseries";
+import { getIrbDensityModel, getIrbDensityPoint, IRB_DENSITY_TOTAL_Y_CODE } from "../data/irbDensity.js?v=20260928-local-description";
+import { getIrbCet1RatioModel, getIrbCet1TimeSeriesModel } from "../data/irbCet1.js?v=20260928-local-description";
 import { formatBasisPointsValue, formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { createCostOfRiskQuarterAxisLabelsOptions } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import { clearBenchmarkEndpointLabels, renderBenchmarkEndpointLabels, scheduleBenchmarkEndpointLabels } from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
@@ -824,7 +824,9 @@ function buildDensityYAxisTree(options) {
   const roots = [];
   const nodesByPath = new Map();
   options.forEach((option) => {
-    const parts = String(option.label ?? option.code).split("/").map((part) => part.trim()).filter(Boolean);
+    const parts = option.pathComponents?.length
+      ? option.pathComponents
+      : String(option.label ?? option.code).split("/").map((part) => part.trim()).filter(Boolean);
     let siblings = roots;
     parts.forEach((label, index) => {
       const path = parts.slice(0, index + 1).join(" > ");

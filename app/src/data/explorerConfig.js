@@ -1,6 +1,6 @@
 import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
-import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-parent-coordinate";
+import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-local-description";
 
 const EXPLORER_CONFIG_URL = "./assets/ITS_all_dimension_mapping.csv";
 
@@ -61,8 +61,10 @@ export function parseExplorerPoints(columns, rows) {
     const hierarchy = hierarchyResolver.resolve(point);
     return {
       ...point,
+      fullDescription: hierarchy.components.join(" / "),
       displayDescription: hierarchy.label,
       hierarchyPath: hierarchy.path,
+      pathComponents: hierarchy.components,
       parentPath: hierarchy.parentPath,
       indentLevel: hierarchy.level
     };

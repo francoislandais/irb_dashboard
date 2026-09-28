@@ -1,4 +1,4 @@
-import { getExplorerAxisPointsConfig } from "./timeSeries.js?v=20260921-hierarchy-gt-escape";
+import { getExplorerAxisPointsConfig } from "./timeSeries.js?v=20260928-local-description";
 import { getAvailableExplorerAxisCodes, getExplorerRowsForTemplate, EXPLORER_ALL_CURRENCIES_CODE, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260922-native-all-currency";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
@@ -70,8 +70,9 @@ export function buildExplorerXYHeaders(columns) {
   // as a safety net for the column.description/column.code fallback below,
   // which is raw, unescaped text (used only when a column has no
   // hierarchyPath at all).
-  const paths = columns.map((column) => String(column.hierarchyPath || column.description || column.code)
-    .split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean).map(unescapeHierarchySegment));
+  const paths = columns.map((column) => (column.hierarchyPath
+    ? String(column.hierarchyPath).split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean).map(unescapeHierarchySegment)
+    : String(column.description || column.code).split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean)));
   const depth = Math.max(1, ...paths.map((path) => path.length));
   return Array.from({ length: depth }, (_, level) => {
     const cells = [];

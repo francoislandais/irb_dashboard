@@ -23,9 +23,11 @@ export function createCoordinateHierarchyResolver(points, { legacySlashPaths = f
     let result;
     if (parent) {
       const parentHierarchy = resolve(parent, nextVisiting);
-      const label = childLabel(point.description, parent.description);
+      const label = String(point.description ?? "");
+      const components = [...parentHierarchy.components, label];
       const escapedLabel = escapeHierarchySegment(label);
       result = {
+        components,
         label,
         level: parentHierarchy.level + 1,
         parentPath: parentHierarchy.path,
@@ -46,23 +48,17 @@ function keyFor(point) {
   return `${point.tableId}\u001f${point.coordinate}\u001f${point.code}`;
 }
 
-function childLabel(description, parentDescription) {
-  const value = String(description ?? "");
-  const parent = String(parentDescription ?? "");
-  if (parent && value.startsWith(`${parent}/`)) return value.slice(parent.length + 1).trim();
-  return value;
-}
-
 function rootHierarchy(point, legacySlashPaths) {
   const description = String(point.description ?? "");
   if (!legacySlashPaths) {
     const path = escapeHierarchySegment(description);
-    return { label: description, level: 0, parentPath: "", path };
+    return { components: [description], label: description, level: 0, parentPath: "", path };
   }
 
   const parts = description.split("/").map((part) => part.trim()).filter(Boolean);
   const escapedParts = parts.map(escapeHierarchySegment);
   return {
+    components: parts,
     label: parts.at(-1) ?? description,
     level: Math.max(0, parts.length - 1),
     parentPath: escapedParts.slice(0, -1).join(" > "),

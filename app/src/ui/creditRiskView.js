@@ -49,7 +49,7 @@ import {
   getCostOfRiskWaterfallXAxisOptions,
   getCostOfRiskXAxisOptions,
   getSelectedSmoothedCostOfRiskPoint
-} from "../data/costOfRisk.js?v=20260827-common-denominator";
+} from "../data/costOfRisk.js?v=20260928-local-description";
 import {
   createStageTransferWaterfallData,
   getStageTransferAxisLabel,

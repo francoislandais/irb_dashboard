@@ -1,7 +1,7 @@
 import {
   COST_OF_RISK_BALANCE_SCOPE_IN_BALANCE,
   COST_OF_RISK_FILTER_ALL
-} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+} from "../data/costOfRisk.js?v=20260928-local-description";
 import {
   formatCostOfRiskCounterpartySelectionLabel,
   getCostOfRiskFilterParentValue,

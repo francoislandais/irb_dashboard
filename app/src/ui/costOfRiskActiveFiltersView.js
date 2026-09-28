@@ -5,7 +5,7 @@ import {
   COST_OF_RISK_PERIOD_MODE_ANNUALIZED,
   COST_OF_RISK_PERIOD_MODE_YTD,
   formatReferenceQuarterLabel
-} from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+} from "../data/costOfRisk.js?v=20260928-local-description";
 import { COST_OF_RISK_STAGE_FILTER_UNSUPPORTED_TABS } from "./costOfRiskFilterSelectionConfig.js?v=20260806-cell-selection";
 import { createUnitFilterChip } from "./unitFilterView.js?v=20260910-context-title-only";
 

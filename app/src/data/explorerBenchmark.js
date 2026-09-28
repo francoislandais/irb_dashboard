@@ -71,22 +71,25 @@ function matchesBenchmarkSelection(row, indexes, axis, selectedCode, requireBlan
 export function getBenchmarkLabel(state, tableId, context, activeAxis, activeTemplateLabel) {
   if (activeAxis === "template") return activeTemplateLabel || tableId;
   if (activeAxis === "x") {
-    return state?.dimensionMapping?.find(tableId, "x_axis_rc_code", context.selectedXCode)?.description
+    const mapping = state?.dimensionMapping?.find(tableId, "x_axis_rc_code", context.selectedXCode);
+    return mapping?.fullDescription || mapping?.description
       || `Column ${context.selectedXCode}`;
   }
   if (activeAxis === "z") {
     if (context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE) return EXPLORER_ALL_CURRENCIES_LABEL;
-    return state?.explorerPoints?.find((point) => (
+    const point = state?.explorerPoints?.find((point) => (
       point.tableId === tableId
       && point.coordinate === "z_axis_rc_code"
       && point.code === context.selectedZCode
-    ))?.description || `Tab ${context.selectedZCode}`;
+    ));
+    return point?.fullDescription || point?.description || `Tab ${context.selectedZCode}`;
   }
-  return state?.explorerPoints?.find((point) => (
+  const point = state?.explorerPoints?.find((point) => (
     point.tableId === tableId
     && point.coordinate === "y_axis_rc_code"
     && point.code === context.selectedYCode
-  ))?.description || `Row ${context.selectedYCode}`;
+  ));
+  return point?.fullDescription || point?.description || `Row ${context.selectedYCode}`;
 }
 
 export function getBenchmarkValueFormat(state, tableId, context) {

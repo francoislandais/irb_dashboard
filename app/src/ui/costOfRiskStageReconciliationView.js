@@ -1,4 +1,4 @@
-import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260928-local-description";
 import { formatMetricValue, formatSignedMetricValue } from "../data/core/formatting.js?v=20260925-percent-scale";
 import {
   createCostOfRiskHighchartsTitle,

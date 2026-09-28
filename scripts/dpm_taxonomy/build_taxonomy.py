@@ -299,7 +299,7 @@ def find_marker_rows(sheet: Any) -> tuple[int | None, int | None]:
 
 def with_parent_codes(
     entries: list[tuple[str, tuple[str, ...], int]],
-) -> list[tuple[str, str, int, str, bool]]:
+) -> list[tuple[str, str, int, str, bool, str]]:
     """Add immediate code links and hidden nodes for uncoded header groups."""
     code_by_path: dict[tuple[str, ...], str] = {}
     for code, path, _row_no in entries:
@@ -327,13 +327,13 @@ def with_parent_codes(
         for depth in range(1, len(path)):
             code_for_path(path[:depth])
 
-    virtual_entries: list[tuple[str, str, int, str, bool]] = []
+    virtual_entries: list[tuple[str, str, int, str, bool, str]] = []
     for path, code in sorted(virtual_by_path.items(), key=lambda item: (len(item[0]), item[0])):
         parent_code = code_for_path(path[:-1]) if len(path) > 1 else ""
-        virtual_entries.append((code, "/".join(path), 0, parent_code, True))
+        virtual_entries.append((code, path[-1], 0, parent_code, True, "/".join(path)))
 
     real_entries = [
-        (code, "/".join(path), row_no, code_for_path(path[:-1]) if len(path) > 1 else "", False)
+        (code, path[-1], row_no, code_for_path(path[:-1]) if len(path) > 1 else "", False, "/".join(path))
         for code, path, row_no in entries
     ]
     return virtual_entries + real_entries
@@ -345,7 +345,7 @@ def x_axis_rows(
     rows_row: int | None,
     *,
     include_parent: bool = False,
-) -> list[tuple[str, str, int] | tuple[str, str, int, str, bool]]:
+) -> list[tuple[str, str, int] | tuple[str, str, int, str, bool, str]]:
     if columns_row is None:
         return []
     end = rows_row or min(sheet.max_row, columns_row + 20)
@@ -470,7 +470,7 @@ def y_axis_rows(
     table_id: str = "",
     *,
     include_parent: bool = False,
-) -> list[tuple[str, str, int] | tuple[str, str, int, str, bool]]:
+) -> list[tuple[str, str, int] | tuple[str, str, int, str, bool, str]]:
     if rows_row is None:
         return []
     items: list[tuple[str, str, int, int]] = []
@@ -785,6 +785,7 @@ def extract_all() -> tuple[
                             code, description, _row_number = entry[:3]
                             parent_code = entry[3] if len(entry) > 3 else ""
                             is_virtual_parent = bool(entry[4]) if len(entry) > 4 else False
+                            format_description = entry[5] if len(entry) > 5 else description
                             layout_rows.append({
                                 "table_id": table_id,
                                 "coordinate": AXIS_COORDINATES[axis],
@@ -795,8 +796,8 @@ def extract_all() -> tuple[
                                 "ignore": "Y" if is_virtual_parent else "",
                                 "format": "" if is_virtual_parent else (
                                     production_display_format(
-                                        table_id, AXIS_COORDINATES[axis], code, description
-                                    ) or infer_display_format(description)
+                                        table_id, AXIS_COORDINATES[axis], code, format_description
+                                    ) or infer_display_format(format_description)
                                 ),
                                 "module_code": module,
                                 "framework": version,

@@ -3,7 +3,7 @@
 // ratio/summary/flow domain). This file re-exports the full public API so
 // every existing importer can keep using "../data/costOfRisk.js" unchanged.
 export * from "./costOfRisk/definitions.js";
-export * from "./costOfRisk/core.js?v=20260917-kri-unit-fix";
+export * from "./costOfRisk/core.js?v=20260928-local-description";
 export * from "./costOfRisk/definitionModel.js";
 export * from "./costOfRisk/stageRatio.js";
 export * from "./costOfRisk/coverageRatio.js";
@@ -11,7 +11,7 @@ export * from "./costOfRisk/collateralRatio.js";
 export * from "./costOfRisk/stageSummary.js?v=20260827-common-denominator";
 export * from "./costOfRisk/counterpartySummary.js?v=20260827-common-denominator";
 export * from "./costOfRisk/counterpartyTreemap.js";
-export * from "./costOfRisk/geography.js";
+export * from "./costOfRisk/geography.js?v=20260928-local-description";
 export * from "./costOfRisk/nplFlows.js";
 export * from "./costOfRisk/stageTransfer.js";
 export * from "./costOfRisk/stageReconciliation.js";

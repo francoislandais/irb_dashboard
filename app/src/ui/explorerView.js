@@ -1,13 +1,13 @@
 import { getExplorerTemplateReferenceDates } from "../data/explorerReferenceDates.js";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260922-xy-header-dedupe";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
-import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260921-hierarchy-gt-escape";
+import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260928-local-description";
 import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-padding";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js?v=20260925-institution-id";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
-import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260812-costofrisk-domain-split";
+import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260928-local-description";
 import {
   getBenchmarkLabel,
   getBenchmarkPointValue,
@@ -703,7 +703,9 @@ function getExplorerConceptIndex(state = getLatestState()) {
     const description = String(point.description ?? "").trim();
     // Raw description, not the escaped hierarchyPath (see
     // core/hierarchyPath.js) - guard the same ">=" case directly here too.
-    const segments = description.split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean);
+    const segments = Array.isArray(point.pathComponents) && point.pathComponents.length
+      ? point.pathComponents
+      : description.split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean);
     (segments.length > 0 ? segments : [description]).forEach((segment) => addSegmentConcepts(segment, point.tableId, kind));
   });
 
@@ -2505,8 +2507,8 @@ function getExplorerAxisCodePath(axis, code) {
   if (!code) return "";
 
   if (axis === "x") {
-    const description = getLatestState()?.dimensionMapping?.find(tableId, "x_axis_rc_code", code)?.description;
-    return normalizeHierarchyPath(splitHierarchyPath(String(description ?? "").replaceAll("/", ">")).join(" > "));
+    const mapping = getLatestState()?.dimensionMapping?.find(tableId, "x_axis_rc_code", code);
+    return normalizeHierarchyPath(mapping?.hierarchyPath || mapping?.description || "");
   }
 
   const pointTableId = axis === "y" ? (activeTemplate?.id ?? tableId) : tableId;
@@ -3250,7 +3252,11 @@ function toggleExplorerContributionBase(axis, pointCode) {
 function formatExplorerRatioDenominator(contribution) {
   const axisLabel = getExplorerAxisDisplayName(contribution.axis);
   const code = String(contribution.baseCode ?? "").trim();
-  const description = String(contribution.label ?? "").split("/").at(-1).trim();
+  const coordinate = ({ x: "x_axis_rc_code", y: "y_axis_rc_code", z: "z_axis_rc_code", tab: "z_axis_rc_code" })[contribution.axis];
+  const mapping = coordinate
+    ? getLatestState()?.dimensionMapping?.find(contribution.tableId, coordinate, contribution.baseCode)
+    : null;
+  const description = String(mapping?.description ?? splitHierarchyPath(contribution.label ?? "").at(-1) ?? "").trim();
   const identity = [axisLabel, code].filter(Boolean).join(" ");
   return description ? `${identity} (${description})` : identity;
 }
@@ -5124,7 +5130,7 @@ function getExplorerAxisCaptions() {
   ));
   const xDescription = getLatestState()?.dimensionMapping
     ?.find(tableId, "x_axis_rc_code", context.selectedXCode)
-    ?.description;
+    ?.fullDescription;
 
   return {
     // activeTemplate.label is already "<tableId> - <description>" (see
@@ -5133,10 +5139,10 @@ function getExplorerAxisCaptions() {
     // double the table ID (e.g. "F_01.01 - F_01.01 - Own funds").
     template: activeTemplateForCaptions?.label || activeExplorerTemplateId,
     x: formatExplorerAxisCaption(context.selectedXCode, xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : "")),
-    y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
+    y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.fullDescription || yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
     z: context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE
       ? EXPLORER_ALL_CURRENCIES_LABEL
-      : formatExplorerAxisCaption(context.selectedZCode, zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
+      : formatExplorerAxisCaption(context.selectedZCode, zPoint?.fullDescription || zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
   };
 }
 

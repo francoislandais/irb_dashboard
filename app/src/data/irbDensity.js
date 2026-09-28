@@ -83,7 +83,10 @@ export function getIrbDensityPoint(state, referenceName, jstCode, portfolioCode,
 
 function buildYAxisOptions(state, cube, jstCode) {
   return [...(cube.yCodesByJst.get(jstCode) ?? [])]
-    .map((code) => ({ code, label: getAxisLabel(state, "y_axis_rc_code", code) }))
+    .map((code) => {
+      const mapping = state.dimensionMapping?.find(IRB_DENSITY_TABLE_ID, "y_axis_rc_code", code);
+      return { code, label: mapping?.description || code, pathComponents: mapping?.pathComponents };
+    })
     .sort((left, right) => {
       if (left.code === IRB_DENSITY_TOTAL_Y_CODE) return -1;
       if (right.code === IRB_DENSITY_TOTAL_Y_CODE) return 1;
@@ -184,7 +187,8 @@ function getPortfolioLabel(state, code) {
     ?.find(IRB_DENSITY_TABLE_ID, "z_axis_rc_code", code)
     ?.description;
   if (!description) return code;
-  const path = description.split("/").map((part) => part.trim()).filter(Boolean);
+  const path = state?.dimensionMapping?.find(IRB_DENSITY_TABLE_ID, "z_axis_rc_code", code)?.pathComponents
+    ?? description.split("/").map((part) => part.trim()).filter(Boolean);
   if (path[0]?.toLowerCase() === "all exposure classes and approaches" && path.length > 1) {
     path.shift();
   }

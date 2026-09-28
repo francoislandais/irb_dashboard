@@ -1,22 +1,17 @@
 {
-  "layout_rows": 87092,
+  "layout_rows": 86103,
   "inferred_display_formats": {
-    "%": 4298,
-    "Unit": 1855
+    "%": 4186,
+    "Unit": 1773
   },
-  "template_release_rows": 2302,
+  "template_release_rows": 2267,
   "workbooks": 115,
   "workbooks_with_errors": 0,
   "modules_without_effective_date_rule": [],
   "schedule_rows": 74,
-  "templates_with_discriminating_suffixes": 21,
-  "unique_discriminating_template_ids": 21,
+  "templates_with_discriminating_suffixes": 15,
+  "unique_discriminating_template_ids": 15,
   "discriminating_suffix_templates": [
-    {
-      "module_code": "CODIS",
-      "template_id": "K_19.02",
-      "conflicting_axis_code_cases": 8
-    },
     {
       "module_code": "CODIS",
       "template_id": "K_27.02",
@@ -45,7 +40,7 @@
     {
       "module_code": "CODIS",
       "template_id": "K_66.01",
-      "conflicting_axis_code_cases": 8
+      "conflicting_axis_code_cases": 4
     },
     {
       "module_code": "CODIS",
@@ -53,33 +48,8 @@
       "conflicting_axis_code_cases": 14
     },
     {
-      "module_code": "CODIS",
-      "template_id": "K_74.00",
-      "conflicting_axis_code_cases": 2
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_51.00",
-      "conflicting_axis_code_cases": 22
-    },
-    {
       "module_code": "COREP",
       "template_id": "C_66.01",
-      "conflicting_axis_code_cases": 21
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_73.00",
-      "conflicting_axis_code_cases": 3
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_80.00",
-      "conflicting_axis_code_cases": 8
-    },
-    {
-      "module_code": "COREP",
-      "template_id": "C_83.00",
       "conflicting_axis_code_cases": 1
     },
     {
@@ -90,7 +60,7 @@
     {
       "module_code": "FINDIS",
       "template_id": "K_21.01",
-      "conflicting_axis_code_cases": 192
+      "conflicting_axis_code_cases": 108
     },
     {
       "module_code": "FINDIS",
@@ -100,12 +70,12 @@
     {
       "module_code": "FINDIS",
       "template_id": "K_80.00",
-      "conflicting_axis_code_cases": 66
+      "conflicting_axis_code_cases": 42
     },
     {
       "module_code": "FINDIS",
       "template_id": "K_82.00",
-      "conflicting_axis_code_cases": 34
+      "conflicting_axis_code_cases": 26
     },
     {
       "module_code": "FINDIS",

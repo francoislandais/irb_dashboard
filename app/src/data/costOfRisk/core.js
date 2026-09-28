@@ -177,7 +177,7 @@ export function getCostOfRiskXAxisOptions(state) {
   return mappings
     .map((mapping) => ({
       code: mapping.code,
-      label: mapping.description ? `${mapping.code} - ${mapping.description}` : mapping.code
+      label: mapping.fullDescription ? `${mapping.code} - ${mapping.fullDescription}` : mapping.code
     }))
     .filter(dedupeCostOfRiskAxisOptions)
     .sort((left, right) => left.code.localeCompare(right.code));
@@ -286,7 +286,8 @@ function getCostOfRiskFirstReferenceIndexOfYear(referenceColumns, index) {
 
 export function getMappingDescription(state, tableId, coordinate, code) {
   const mappings = state.dimensionMapping?.list?.(tableId, coordinate) ?? [];
-  return mappings.find((mapping) => mapping.code === code)?.description ?? code;
+  const mapping = mappings.find((candidate) => candidate.code === code);
+  return mapping?.fullDescription ?? mapping?.description ?? code;
 }
 
 export function buildCostOfRiskRatioComponentDrivers(state, indexes, referenceColumns, filters, jstCode, referenceIndex, metric, effectContext = {}) {
@@ -861,7 +862,7 @@ export function getCostOfRiskStageBoxYSelection(state, filters = {}) {
 
 function getCostOfRiskStageAxisYSelection(state, filters = {}, config) {
   const descriptors = getCostOfRiskStageAxisYMappings(state, config.tableId)
-    .filter((mapping) => !config.descriptionPrefix || String(mapping.description ?? "").startsWith(config.descriptionPrefix))
+    .filter((mapping) => !config.descriptionPrefix || String(mapping.fullDescription ?? mapping.description ?? "").startsWith(config.descriptionPrefix))
     .map(describeCostOfRiskStageAxisYAxisPoint);
   const normalizedFilters = normalizeCostOfRiskFilters(filters);
   const asset = normalizedFilters.asset;
@@ -913,16 +914,13 @@ function getCostOfRiskStageAxisYMappings(state, tableId) {
 }
 
 function describeCostOfRiskStageAxisYAxisPoint(mapping) {
-  const parts = String(mapping.description ?? "")
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
+  const parts = mapping.pathComponents ?? splitMappingPath(mapping.description);
 
   return {
     asset: parts.find((part) => ASSET_LABELS.includes(part)) ?? "",
     code: mapping.code,
     counterparty: findCostOfRiskCounterparty(parts),
-    description: mapping.description,
+    description: mapping.fullDescription ?? mapping.description,
     terminal: parts.at(-1) ?? ""
   };
 }
@@ -942,16 +940,13 @@ function createCostOfRiskStageAxisSelectionLabel(filters) {
 }
 
 function describeCostOfRiskYAxisPoint(mapping) {
-  const parts = String(mapping.description ?? "")
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
+  const parts = mapping.pathComponents ?? splitMappingPath(mapping.description);
 
   return {
     asset: parts.find((part) => ASSET_LABELS.includes(part)) ?? "",
     code: mapping.code,
     counterparty: findCostOfRiskCounterparty(parts),
-    description: mapping.description,
+    description: mapping.fullDescription ?? mapping.description,
     stage: findCostOfRiskStage(parts),
     terminal: parts.at(-1) ?? ""
   };
@@ -1174,7 +1169,7 @@ export function getCostOfRiskXAxisFullLabelMap(state) {
   const mappings = state.dimensionMapping?.list?.(COST_OF_RISK_TABLE_ID, "x_axis_rc_code") ?? [];
   return new Map(mappings.map((mapping) => [
     mapping.code,
-    formatCostOfRiskFullAxisLabel(mapping.description || mapping.code)
+    formatCostOfRiskFullAxisLabel(mapping.fullDescription || mapping.description || mapping.code)
   ]));
 }
 
@@ -1194,12 +1189,11 @@ export function getCostOfRiskStageTransferXAxisLabelMap(state) {
 }
 
 function getCostOfRiskShortAxisLabel(description, fallback) {
-  const parts = String(description ?? "")
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
+  return String(description ?? "").trim() || fallback;
+}
 
-  return parts.at(-1) || fallback;
+function splitMappingPath(description = "") {
+  return String(description).split("/").map((part) => part.trim()).filter(Boolean);
 }
 
 function buildCostOfRiskBenchmarkSeries(state, indexes, referenceColumns, selectedOption, xAxisCode, filters = {}, periodMode = COST_OF_RISK_PERIOD_MODE_QUARTERLY) {

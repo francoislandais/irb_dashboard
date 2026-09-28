@@ -1,5 +1,6 @@
 import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
+import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-local-description";
 
 const MAPPING_URL = "./assets/ITS_all_dimension_mapping.csv";
 
@@ -56,6 +57,18 @@ export function createDimensionMapping(columns, rows) {
 
     entries.push(entry);
     byCoordinate.set(makeMappingKey(tableId, coordinate, sourceCode), entry);
+  });
+
+  const hierarchyResolver = createCoordinateHierarchyResolver(entries, {
+    legacySlashPaths: indexes.parentCoordinateCode === -1
+  });
+  entries.forEach((entry) => {
+    const hierarchy = hierarchyResolver.resolve(entry);
+    entry.pathComponents = hierarchy.components;
+    entry.hierarchyPath = hierarchy.path;
+    entry.parentPath = hierarchy.parentPath;
+    entry.indentLevel = hierarchy.level;
+    entry.fullDescription = hierarchy.components.join(" / ");
   });
 
   return {
