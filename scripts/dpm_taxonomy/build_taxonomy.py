@@ -38,6 +38,11 @@ AXIS_COORDINATES = {
 VERSION_RE = re.compile(r"(?<!\d)(4\.2\.1|4\.2|4\.1|4\.0|3\.5|3\.4|3\.3|3\.2|3\.1|3\.0(?:\.1)?|2\.10(?:\.1)?|2\.9\.1\.1)(?!\d)")
 DOMAIN_REF_RE = re.compile(r"\(([A-Za-z0-9_]+):([A-Za-z0-9_]+)(?:\(([A-Za-z0-9_]+)\))?\)")
 NUMERIC_CODE_RE = re.compile(r"^\d{1,4}$")
+DISPLAY_PERCENT_RE = re.compile(r"(?i)(?:%|\bpercent(?:age)?\b|\bratio\b|\bpd\b|\blgd\b|\bocr\b|\bp2g\b)")
+DISPLAY_RATE_RE = re.compile(r"(?i)\b(?:default|loss|cure|recovery|capital\s+buffer)\s+rate\b")
+DISPLAY_COUNT_RE = re.compile(r"(?i)\b(?:number\s+of|count\s+of|number|count)\b")
+DISPLAY_DURATION_RE = re.compile(r"(?i)\b(?:maturity|duration|repricing\s+time|survival\s+period)\b")
+DISPLAY_DURATION_UNIT_RE = re.compile(r"(?i)\b(?:days?|months?|years?)\b")
 
 
 def clean(value: Any) -> str:
@@ -61,6 +66,46 @@ def code_text(value: Any) -> str:
     return str(int(result)) if len(result) > 1 and result.startswith("0") else result
 
 
+def infer_display_format(description: str) -> str:
+    """Infer display-only exceptions to the default monetary scale.
+
+    The default is intentionally blank: ordinary monetary values continue to
+    follow the application's selected currency scale. This V1 only tags
+    percentage metrics and values that should remain in raw units.
+    """
+    segments = [clean(part) for part in str(description or "").split("/") if clean(part)]
+    if not segments:
+        return ""
+
+    folded = [part.casefold() for part in segments]
+    full_text = " / ".join(segments)
+    leaf = segments[-1].strip()
+
+    # Ratio descendants such as surplus/deficit, and explicit ratio
+    # numerators or denominators, are amounts rather than percentage values.
+    amount_component = re.compile(r"(?i)\b(?:numerator|denominator|surplus|deficit)\b")
+    if amount_component.search(leaf):
+        return ""
+
+    # A percentage printed as an axis category (e.g. conversion factor 10%)
+    # describes the category, not the scale of the cell value.
+    if any("conversion factor" in part for part in folded):
+        return ""
+    if re.fullmatch(r"[+\-]?\d+(?:[.,]\d+)?\s*%", leaf):
+        return ""
+
+    if DISPLAY_PERCENT_RE.search(full_text) or DISPLAY_RATE_RE.search(full_text):
+        return "%"
+
+    if DISPLAY_COUNT_RE.search(full_text):
+        return "Unit"
+
+    if DISPLAY_DURATION_RE.search(full_text) and DISPLAY_DURATION_UNIT_RE.search(full_text):
+        return "Unit"
+
+    return ""
+
+
 def normalize_template(value: Any) -> str:
     text = clean(value)
     text = re.sub(r"\s*\([^)]*\)\s*$", "", text)
@@ -76,6 +121,38 @@ def split_template_suffix(template_id: str) -> tuple[str, str] | None:
 
 def description_signature(value: str) -> str:
     return " ".join(value.casefold().split())
+
+
+@functools.lru_cache(maxsize=1)
+def production_display_format_lookup() -> dict[tuple[str, str, str, str], str]:
+    """Load already-curated percent/raw-unit formats from the live dictionary."""
+    source = ROOT / "app" / "assets" / "ITS_all_dimension_mapping.csv"
+    if not source.exists():
+        return {}
+    values: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
+    with source.open(encoding="cp1252", newline="") as handle:
+        for row in csv.DictReader(handle, delimiter=";"):
+            value_format = clean(row.get("format", ""))
+            if value_format not in {"%", "Unit"}:
+                continue
+            key = (
+                clean(row.get("table_id", "")),
+                clean(row.get("coordinate", "")),
+                clean(row.get("code", "")),
+                description_signature(clean(row.get("description", ""))),
+            )
+            values[key].add(value_format)
+    return {key: next(iter(formats)) for key, formats in values.items() if len(formats) == 1}
+
+
+def production_display_format(table_id: str, coordinate: str, code: str, description: str) -> str:
+    key = (
+        clean(table_id),
+        clean(coordinate),
+        clean(code),
+        description_signature(clean(description)),
+    )
+    return production_display_format_lookup().get(key, "")
 
 
 def suffix_collision_signature(module: str, base: str, value: str) -> str:
@@ -648,7 +725,9 @@ def extract_all() -> tuple[
                                 "description": description,
                                 "order_first": "" if axis == "y" else str(_row_number if axis == "z" and _row_number else order),
                                 "ignore": "",
-                                "format": "",
+                                "format": production_display_format(
+                                    table_id, AXIS_COORDINATES[axis], code, description
+                                ) or infer_display_format(description),
                                 "module_code": module,
                                 "framework": version,
                                 "effective_from": from_date,
@@ -729,6 +808,10 @@ def main() -> int:
     })
     report = {
         "layout_rows": len(dimensions),
+        "inferred_display_formats": {
+            value: sum(1 for row in dimensions if row.get("format") == value)
+            for value in ("%", "Unit")
+        },
         "template_release_rows": len(templates),
         "workbooks": len(inventory),
         "workbooks_with_errors": sum(1 for r in inventory if r["status"].startswith("workbook_error")),

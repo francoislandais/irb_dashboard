@@ -1,5 +1,9 @@
 {
   "layout_rows": 83363,
+  "inferred_display_formats": {
+    "%": 4298,
+    "Unit": 1855
+  },
   "template_release_rows": 2302,
   "workbooks": 115,
   "workbooks_with_errors": 0,

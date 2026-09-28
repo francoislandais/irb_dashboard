@@ -19,6 +19,35 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_display_format_inference_marks_percentages_and_raw_units(self):
+        cases = {
+            "CET1 capital ratio": "%",
+            "Average historical annual default rate (%)": "%",
+            "Default rate latest year": "%",
+            "Total srep capital requirement ratio/To be made up of CET1 capital": "%",
+            "Surplus of CET1 capital/CET1 capital ratio without transitional provisions": "%",
+            "OCR and Pillar 2 Guidance (P2G)/To be made up of Tier 1 capital": "%",
+            "Internal rating scale - PD assigned to the obligor grade or pool": "%",
+            "Number of obligors/Of which: defaulted during the year": "Unit",
+            "Number of transactions": "Unit",
+            "Exposure-weighted average maturity value (days)": "Unit",
+            "Cash balances at central banks": "",
+            "Derivatives held for trading/Optional: interest rate derivatives": "",
+            "CET1 capital ratio/Surplus(+) or deficit(-)": "",
+            "Loan to deposit ratio/Denominator": "",
+            "Standard conversion factors/10%": "",
+        }
+        for description, expected in cases.items():
+            with self.subTest(description=description):
+                self.assertEqual(builder.infer_display_format(description), expected)
+
+        self.assertEqual(
+            builder.production_display_format(
+                "C_03.00", "y_axis_rc_code", "190", "OCR and Pillar 2 Guidance (P2G)"
+            ),
+            "%",
+        )
+
     def test_real_dpm_210_delta_and_2020_applicability_rules(self):
         archive = zipfile.ZipFile(SOURCES / "2.10_layouts.zip")
         covid_file = next(n for n in archive.namelist() if "COVID19" in n and n.endswith(".xlsx"))
