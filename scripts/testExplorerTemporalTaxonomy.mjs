@@ -44,6 +44,8 @@ const sandbox = {
 };
 const context = vm.createContext(sandbox);
 vm.runInContext(source.slice(start, end), context);
+// Host-created Date objects do not satisfy `instanceof Date` inside the VM.
+sandbox.getExplorerDateKey = (date) => date.toISOString().slice(0, 10);
 
 const mainSeries = {
   dateColumns: dates.map((date) => ({ date, label: date.toISOString().slice(0, 10) })),
@@ -137,4 +139,50 @@ assert.ok(!continuingLine.values[0].isTaxonomyUnavailable);
 const newerLine = selectedCurrencyResult.rows.find((row) => row.taxonomyFramework === "4.2" && row.code === "200");
 assert.equal(newerLine.values[0].isTaxonomyUnavailable, true, "real Y taxonomy changes remain masked");
 
-console.log("PASS: Temporal taxonomy preserves open currencies and masks genuinely unavailable codes.");
+sandbox.explorerGlobalDisplayMode = "xy";
+const xyTabResult = vm.runInContext(
+  "buildExplorerTemporalTaxonomySeries(currencySeries, state, currencyOptions)", context
+);
+assert.deepEqual([...xyTabResult.taxonomyBlocks], ["4.2"], "XY Tab keeps the temporal taxonomy sections");
+for (const code of ["__ALL_CURRENCIES__", "EUR", "USD"]) {
+  const row = xyTabResult.rows.find((item) => item.code === code);
+  assert.deepEqual([...row.values.map((point) => point.value)], [1, 2, 3]);
+}
+const xyMatrix = { xy: true, dateColumns: mainSeries.dateColumns, rows: mainSeries.rows };
+Object.assign(sandbox, { xyMatrix });
+assert.equal(vm.runInContext(
+  "buildExplorerTemporalTaxonomySeries(xyMatrix, state, selectedCurrencyOptions)", context
+), xyMatrix, "the X/Y matrix remains outside the temporal taxonomy renderer");
+
+const zCodesByFramework = new Map([
+  ["3.2", ["A", "D"]], ["4.0", ["A", "C"]], ["4.2", ["A", "B"]]
+]);
+const zSeriesForFramework = (framework) => ({
+  dateColumns: mainSeries.dateColumns,
+  rows: zCodesByFramework.get(framework).map((code) => ({
+    code, description: code, displayDescription: code, hierarchyPath: code,
+    parentPath: "", indentLevel: 0,
+    values: dates.map((date, index) => ({ date, label: date.toISOString().slice(0, 10), value: index + 1 }))
+  }))
+});
+sandbox.getTaxonomyDataForTemplateFramework = (_state, _tableId, framework) => ({
+  dimensionMapping: { framework },
+  explorerPoints: [
+    { tableId: "T", coordinate: "x_axis_rc_code", code: "10" },
+    { tableId: "T", coordinate: "y_axis_rc_code", code: "100" },
+    ...zCodesByFramework.get(framework).map((code) => ({ tableId: "T", coordinate: "z_axis_rc_code", code }))
+  ]
+});
+sandbox.buildExplorerAxisSeries = (historicalState) => zSeriesForFramework(historicalState.dimensionMapping.framework);
+Object.assign(sandbox, {
+  zMainSeries: zSeriesForFramework("4.2"),
+  zOptions: { ...currencyOptions, selectedZCode: "B" }
+});
+const xyZResult = vm.runInContext("buildExplorerTemporalTaxonomySeries(zMainSeries, state, zOptions)", context);
+assert.deepEqual([...xyZResult.taxonomyBlocks], ["4.2", "4.0", "3.2"]);
+assert.equal(xyZResult.rows.find((row) => row.taxonomyFramework === "4.2" && row.code === "B")
+  .values[0].isTaxonomyUnavailable, true);
+assert.equal(xyZResult.rows.find((row) => row.taxonomyFramework === "4.0" && row.code === "C")
+  .values[1].value, 2);
+
+console.log("PASS: Temporal and XY Tab share taxonomy blocks; XY X/Y remains a matrix.");

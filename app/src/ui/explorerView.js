@@ -1108,7 +1108,9 @@ function ensureExplorerTemplateSelections(state, template) {
 function getExplorerTemporalHistoricalAxisCodes(state, tableId) {
   const emptyCodes = { x: new Set(), y: new Set(), z: new Set() };
   const mainFramework = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
-  if (explorerGlobalDisplayMode !== "temporal" || !state?.rows || !mainFramework
+  const showsTaxonomyTimeline = explorerGlobalDisplayMode === "temporal"
+    || (explorerGlobalDisplayMode === "xy" && getActiveExplorerContext().selectedAxis === "z");
+  if (!showsTaxonomyTimeline || !state?.rows || !mainFramework
       || !state.taxonomyHistory || !state.taxonomySource) return emptyCodes;
 
   let cache = explorerTemporalHistoricalAxisCodesByRows.get(state.rows);
@@ -1817,6 +1819,10 @@ function renderExplorerTable(series, selectedUnit) {
   if (!isDateFocus) descriptionHeader.rowSpan = 2;
   descriptionHeader.setAttribute("aria-label", getExplorerAxisDisplayName(activeAxis));
   descriptionHeader.textContent = isXY ? getExplorerAxisDisplayName(activeAxis) : "";
+  if (isXY) {
+    const taxonomyStatus = createExplorerTaxonomyStatus();
+    if (taxonomyStatus) descriptionHeader.append(taxonomyStatus);
+  }
   headerRow.append(descriptionHeader);
 
   const codeHeader = document.createElement("th");
@@ -2026,6 +2032,7 @@ function renderExplorerTable(series, selectedUnit) {
     elements.explorerTable.append(colgroup);
   }
   elements.explorerTable.append(thead, tbody);
+  elements.explorerTable.style.setProperty("--explorer-taxonomy-sticky-top", `${thead.getBoundingClientRect().height}px`);
   if (isXY) {
     const updateOffsets = () => {
       let top = 0;
@@ -3106,8 +3113,10 @@ function buildExplorerEvolutionSeries(series, state) {
 }
 
 function buildExplorerTemporalTaxonomySeries(series, state, options) {
-  if (explorerGlobalDisplayMode !== "temporal" || series?.xy || !series?.dateColumns?.length) return series;
   const { tableId, templateId, axis } = options;
+  const showsTaxonomyTimeline = explorerGlobalDisplayMode === "temporal"
+    || (explorerGlobalDisplayMode === "xy" && axis === "z");
+  if (!showsTaxonomyTimeline || series?.xy || !series?.dateColumns?.length) return series;
   const mainFramework = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
   if (!tableId || !mainFramework || !state?.taxonomyHistory || !state?.taxonomySource) return series;
 
@@ -4561,7 +4570,6 @@ function createExplorerSelectionSummaryCard() {
 
   const description = document.createElement("div");
   description.className = "explorer-selection-summary-description";
-  const taxonomyStatus = createExplorerTaxonomyStatus();
 
   const lines = [
     ["Row", captions.y],
@@ -4571,7 +4579,6 @@ function createExplorerSelectionSummaryCard() {
 
   if (lines.length === 0) {
     description.textContent = "Select a cell in the table to see its details here.";
-    if (taxonomyStatus) description.append(taxonomyStatus);
     pane.append(description);
     return pane;
   }
@@ -4596,7 +4603,6 @@ function createExplorerSelectionSummaryCard() {
     description.append(line);
   });
 
-  if (taxonomyStatus) description.append(taxonomyStatus);
   pane.append(description);
   return pane;
 }
@@ -4610,7 +4616,7 @@ function createExplorerTaxonomyStatus() {
   if (!selected) return null;
 
   const status = document.createElement("span");
-  status.className = "explorer-taxonomy-status";
+  status.className = "explorer-xy-taxonomy-status";
   status.textContent = `DPM 2.0 · Framework ${selected}`;
   status.setAttribute("aria-label", `DPM 2.0 taxonomy, framework ${selected}`);
   return status;

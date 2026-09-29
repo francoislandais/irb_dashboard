@@ -138,6 +138,8 @@ const sandbox={
 for(const name of ["clearExplorerCellRangeSelection","expandDefaultExplorerPaths","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar"]) sandbox[name]=()=>{};
 const ctx=vm.createContext(sandbox);
 vm.runInContext('let explorerGlobalReferenceLabel="",explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,shouldRevealExplorerAxisSelection=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
+base.selectedTaxonomiesByTemplate={TEST:"4.2"};
+vm.runInContext(source.slice(source.indexOf("function createExplorerTaxonomyStatus()"),source.indexOf("function createExplorerSelectionHeadline(")),ctx);
 // Real template contexts share the display mode and preserve their normal axis.
 vm.runInContext(source.slice(source.indexOf("function createExplorerTemplateContext()"),source.indexOf("function getActiveExplorerTemplate(")),ctx);
 const first=vm.runInContext('createExplorerTemplateContext()',ctx);
@@ -172,6 +174,8 @@ const thead=table.children.find(n=>n.tagName==="THEAD");
 const tbody=table.children.find(n=>n.tagName==="TBODY");
 assert.equal(thead.rows.length,2);
 assert.equal(thead.rows[0].cells[0].rowSpan,2);
+assert.equal(thead.rows[0].cells[0].children[0].textContent,"DPM 2.0 · Framework 4.2");
+assert.equal(table.style["--explorer-taxonomy-sticky-top"],"32px");
 assert.equal(tbody.rows[0].cells[2].textContent,"12");
 assert.equal(tbody.rows[0].cells[3].textContent,"0");
 assert.equal(tbody.rows[0].cells[4].textContent,"-");

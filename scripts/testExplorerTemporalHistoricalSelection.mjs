@@ -29,6 +29,7 @@ const sandbox = {
   explorerTemporalHistoricalAxisCodesByRows: new WeakMap(),
   isExplorerHistorySelectionActive: () => false,
   getExplorerContextForTemplate: () => selection,
+  getActiveExplorerContext: () => selection,
   getExplorerAxisOptions: () => ({
     x: { codes: ["current-x"] },
     y: { codes: ["current-y"] },
@@ -40,9 +41,12 @@ const sandbox = {
   ],
   getTaxonomyFrameworkForDate: (_state, _tableId, date) => date.getFullYear() === 2024 ? "3.2" : "4.2",
   getTaxonomyDataForTemplateFramework: (_state, _tableId, framework) => framework === "3.2"
-    ? { explorerPoints: [{ tableId: "T", coordinate: "y_axis_rc_code", code: "legacy-001" }] }
+    ? { explorerPoints: [
+      { tableId: "T", coordinate: "y_axis_rc_code", code: "legacy-001" },
+      { tableId: "T", coordinate: "z_axis_rc_code", code: "legacy-z" }
+    ] }
     : { explorerPoints: [] },
-  getVisibleExplorerAxes: () => ["y", "x"],
+  getVisibleExplorerAxes: () => ["y", "x", "z"],
   ensureExplorerSelectionUsesExistingRow: () => { fallbackCount += 1; },
   getExplorerRowsForTemplate: () => [],
   detectExplorerTemplateEvolutionFrequency: () => "quarterly"
@@ -61,4 +65,11 @@ vm.runInContext("ensureExplorerTemplateSelections(historicalState, template)", c
 assert.equal(selection.selectedYCode, "current-y", "codes from hidden historical blocks are not retained in XY mode");
 assert.equal(fallbackCount, 1);
 
-console.log("PASS: historical-only codes remain selected in Temporal and current-axis validation resumes in XY.");
+selection.activeAxis = "z";
+selection.selectedAxis = "z";
+selection.selectedZCode = "legacy-z";
+vm.runInContext("ensureExplorerTemplateSelections(historicalState, template)", context);
+assert.equal(selection.selectedZCode, "legacy-z", "XY Tab retains selectable historical Z codes");
+assert.equal(fallbackCount, 1);
+
+console.log("PASS: historical codes remain selectable in Temporal and XY Tab, but not in the XY matrix.");
