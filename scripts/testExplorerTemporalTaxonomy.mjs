@@ -88,4 +88,53 @@ const framework32Row = result.rows.find((row) => row.taxonomyFramework === "3.2"
 assert.deepEqual([...framework32Row.values.map((point) => point.isTaxonomyUnavailable === true)], [false, true, true]);
 assert.equal(result.rows.filter((row) => row.isTaxonomySectionHeader).length, 3);
 
-console.log("PASS: Temporal separates taxonomy-only rows, masks inapplicable dates, and preserves valid zeroes.");
+// Open currency axes were implicit in older workbooks. A missing Z list in
+// those frameworks must not grey out either currencies or their aggregate.
+sandbox.getTaxonomyDataForTemplateFramework = (_state, _tableId, framework) => ({
+  dimensionMapping: { framework },
+  explorerPoints: [
+    { tableId: "T", coordinate: "x_axis_rc_code", code: "10" },
+    ...pointsByFramework.get(framework).map((code) => ({ tableId: "T", coordinate: "y_axis_rc_code", code })),
+    ...(framework === "4.2" ? ["EUR", "USD", "qx46"].map((code) => ({
+      tableId: "T", coordinate: "z_axis_rc_code", code
+    })) : [])
+  ]
+});
+const currencySeries = {
+  dateColumns: mainSeries.dateColumns,
+  rows: ["__ALL_CURRENCIES__", "EUR", "USD"].map((code) => ({
+    code,
+    description: code,
+    displayDescription: code,
+    hierarchyPath: code,
+    parentPath: "",
+    indentLevel: 0,
+    values: dates.map((date, index) => ({ date, label: date.toISOString().slice(0, 10), value: index + 1 }))
+  }))
+};
+const currencyOptions = {
+  axis: "z", tableId: "T", templateId: "T",
+  selectedXCode: "10", selectedYCode: "100", selectedZCode: "__ALL_CURRENCIES__", templates: []
+};
+Object.assign(sandbox, { currencySeries, currencyOptions });
+const currencyResult = vm.runInContext(
+  "buildExplorerTemporalTaxonomySeries(currencySeries, state, currencyOptions)", context
+);
+for (const code of ["__ALL_CURRENCIES__", "EUR", "USD"]) {
+  const row = currencyResult.rows.find((item) => item.code === code);
+  assert.deepEqual([...row.values.map((point) => point.value)], [1, 2, 3]);
+  assert.ok(row.values.every((point) => !point.isTaxonomyUnavailable));
+}
+
+const selectedCurrencyOptions = { ...currencyOptions, axis: "y", selectedZCode: "EUR" };
+Object.assign(sandbox, { selectedCurrencyOptions });
+const selectedCurrencyResult = vm.runInContext(
+  "buildExplorerTemporalTaxonomySeries(mainSeries, state, selectedCurrencyOptions)", context
+);
+const continuingLine = selectedCurrencyResult.rows.find((row) => row.taxonomyFramework === "4.2" && row.code === "100");
+assert.equal(continuingLine.values[0].value, 0, "a selected currency does not mask a valid historical Y code");
+assert.ok(!continuingLine.values[0].isTaxonomyUnavailable);
+const newerLine = selectedCurrencyResult.rows.find((row) => row.taxonomyFramework === "4.2" && row.code === "200");
+assert.equal(newerLine.values[0].isTaxonomyUnavailable, true, "real Y taxonomy changes remain masked");
+
+console.log("PASS: Temporal taxonomy preserves open currencies and masks genuinely unavailable codes.");

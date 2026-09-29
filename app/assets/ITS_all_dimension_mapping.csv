@@ -41153,7 +41153,6 @@ Q_03.01;z_axis_rc_code;CHF;;Swiss Franc;;;;4.0
 Q_03.01;z_axis_rc_code;JPY;;Yen;;;;4.0
 Q_03.01;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.0
 Q_03.01;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.0
-Q_03.01;z_axis_rc_code;AUD;;Australian Dollar;;;;4.0
 Q_03.01;z_axis_rc_code;SEK;;Swedish Krona;;;;4.0
 Q_03.01;z_axis_rc_code;DKK;;Danish Krone;;;;4.0
 Q_03.01;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.0
@@ -41161,9 +41160,13 @@ Q_03.01;z_axis_rc_code;PLN;;Zloty;;;;4.0
 Q_03.01;z_axis_rc_code;CZK;;Czech Koruna;;;;4.0
 Q_03.01;z_axis_rc_code;HUF;;Forint;;;;4.0
 Q_03.01;z_axis_rc_code;RON;;New Romanian Leu;;;;4.0
-Q_03.01;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.0
-Q_03.01;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.0
 Q_03.01;z_axis_rc_code;TRY;;Turkish Lira;;;;4.0
+Q_03.01;z_axis_rc_code;BRL;;Brazilian Real;;;;4.0
+Q_03.01;z_axis_rc_code;MXN;;Mexican Peso;;;;4.0
+Q_03.01;z_axis_rc_code;ARS;;Argentine Peso;;;;4.0
+Q_03.01;z_axis_rc_code;CLP;;Chilean Peso;;;;4.0
+Q_03.01;z_axis_rc_code;COP;;Colombian Peso;;;;4.0
+Q_03.01;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.0
 Q_03.01;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.0
 Q_03.02;x_axis_rc_code;10;;Type of product;;;;4.0
 Q_03.02;x_axis_rc_code;20;;Counterparty/Issuer Name;;;;4.0
@@ -41179,7 +41182,6 @@ Q_03.02;z_axis_rc_code;CHF;;Swiss Franc;;;;4.0
 Q_03.02;z_axis_rc_code;JPY;;Yen;;;;4.0
 Q_03.02;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.0
 Q_03.02;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.0
-Q_03.02;z_axis_rc_code;AUD;;Australian Dollar;;;;4.0
 Q_03.02;z_axis_rc_code;SEK;;Swedish Krona;;;;4.0
 Q_03.02;z_axis_rc_code;DKK;;Danish Krone;;;;4.0
 Q_03.02;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.0
@@ -41187,9 +41189,13 @@ Q_03.02;z_axis_rc_code;PLN;;Zloty;;;;4.0
 Q_03.02;z_axis_rc_code;CZK;;Czech Koruna;;;;4.0
 Q_03.02;z_axis_rc_code;HUF;;Forint;;;;4.0
 Q_03.02;z_axis_rc_code;RON;;New Romanian Leu;;;;4.0
-Q_03.02;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.0
-Q_03.02;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.0
 Q_03.02;z_axis_rc_code;TRY;;Turkish Lira;;;;4.0
+Q_03.02;z_axis_rc_code;BRL;;Brazilian Real;;;;4.0
+Q_03.02;z_axis_rc_code;MXN;;Mexican Peso;;;;4.0
+Q_03.02;z_axis_rc_code;ARS;;Argentine Peso;;;;4.0
+Q_03.02;z_axis_rc_code;CLP;;Chilean Peso;;;;4.0
+Q_03.02;z_axis_rc_code;COP;;Colombian Peso;;;;4.0
+Q_03.02;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.0
 Q_03.02;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.0
 Q_03.02;y_axis_rc_code;10;;All other bank deposits counterparties;;;;4.0
 Q_03.02;y_axis_rc_code;20;;All other securities issuers;;;;4.0
@@ -45079,7 +45085,6 @@ Q_03.01;z_axis_rc_code;CHF;;Swiss Franc;;;;4.1
 Q_03.01;z_axis_rc_code;JPY;;Yen;;;;4.1
 Q_03.01;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.1
 Q_03.01;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.1
-Q_03.01;z_axis_rc_code;AUD;;Australian Dollar;;;;4.1
 Q_03.01;z_axis_rc_code;SEK;;Swedish Krona;;;;4.1
 Q_03.01;z_axis_rc_code;DKK;;Danish Krone;;;;4.1
 Q_03.01;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.1
@@ -45087,9 +45092,13 @@ Q_03.01;z_axis_rc_code;PLN;;Zloty;;;;4.1
 Q_03.01;z_axis_rc_code;CZK;;Czech Koruna;;;;4.1
 Q_03.01;z_axis_rc_code;HUF;;Forint;;;;4.1
 Q_03.01;z_axis_rc_code;RON;;New Romanian Leu;;;;4.1
-Q_03.01;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.1
-Q_03.01;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.1
 Q_03.01;z_axis_rc_code;TRY;;Turkish Lira;;;;4.1
+Q_03.01;z_axis_rc_code;BRL;;Brazilian Real;;;;4.1
+Q_03.01;z_axis_rc_code;MXN;;Mexican Peso;;;;4.1
+Q_03.01;z_axis_rc_code;ARS;;Argentine Peso;;;;4.1
+Q_03.01;z_axis_rc_code;CLP;;Chilean Peso;;;;4.1
+Q_03.01;z_axis_rc_code;COP;;Colombian Peso;;;;4.1
+Q_03.01;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.1
 Q_03.01;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.1
 Q_03.02;x_axis_rc_code;10;;Type of product;;;;4.1
 Q_03.02;x_axis_rc_code;20;;Counterparty/Issuer Name;;;;4.1
@@ -45105,7 +45114,6 @@ Q_03.02;z_axis_rc_code;CHF;;Swiss Franc;;;;4.1
 Q_03.02;z_axis_rc_code;JPY;;Yen;;;;4.1
 Q_03.02;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.1
 Q_03.02;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.1
-Q_03.02;z_axis_rc_code;AUD;;Australian Dollar;;;;4.1
 Q_03.02;z_axis_rc_code;SEK;;Swedish Krona;;;;4.1
 Q_03.02;z_axis_rc_code;DKK;;Danish Krone;;;;4.1
 Q_03.02;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.1
@@ -45113,9 +45121,13 @@ Q_03.02;z_axis_rc_code;PLN;;Zloty;;;;4.1
 Q_03.02;z_axis_rc_code;CZK;;Czech Koruna;;;;4.1
 Q_03.02;z_axis_rc_code;HUF;;Forint;;;;4.1
 Q_03.02;z_axis_rc_code;RON;;New Romanian Leu;;;;4.1
-Q_03.02;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.1
-Q_03.02;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.1
 Q_03.02;z_axis_rc_code;TRY;;Turkish Lira;;;;4.1
+Q_03.02;z_axis_rc_code;BRL;;Brazilian Real;;;;4.1
+Q_03.02;z_axis_rc_code;MXN;;Mexican Peso;;;;4.1
+Q_03.02;z_axis_rc_code;ARS;;Argentine Peso;;;;4.1
+Q_03.02;z_axis_rc_code;CLP;;Chilean Peso;;;;4.1
+Q_03.02;z_axis_rc_code;COP;;Colombian Peso;;;;4.1
+Q_03.02;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.1
 Q_03.02;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.1
 Q_03.02;y_axis_rc_code;10;;All other bank deposits counterparties;;;;4.1
 Q_03.02;y_axis_rc_code;20;;All other securities issuers;;;;4.1
@@ -45195,7 +45207,6 @@ Q_03.03;z_axis_rc_code;CHF;;Swiss Franc;;;;4.1
 Q_03.03;z_axis_rc_code;JPY;;Yen;;;;4.1
 Q_03.03;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.1
 Q_03.03;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.1
-Q_03.03;z_axis_rc_code;AUD;;Australian Dollar;;;;4.1
 Q_03.03;z_axis_rc_code;SEK;;Swedish Krona;;;;4.1
 Q_03.03;z_axis_rc_code;DKK;;Danish Krone;;;;4.1
 Q_03.03;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.1
@@ -45203,9 +45214,13 @@ Q_03.03;z_axis_rc_code;PLN;;Zloty;;;;4.1
 Q_03.03;z_axis_rc_code;CZK;;Czech Koruna;;;;4.1
 Q_03.03;z_axis_rc_code;HUF;;Forint;;;;4.1
 Q_03.03;z_axis_rc_code;RON;;New Romanian Leu;;;;4.1
-Q_03.03;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.1
-Q_03.03;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.1
 Q_03.03;z_axis_rc_code;TRY;;Turkish Lira;;;;4.1
+Q_03.03;z_axis_rc_code;BRL;;Brazilian Real;;;;4.1
+Q_03.03;z_axis_rc_code;MXN;;Mexican Peso;;;;4.1
+Q_03.03;z_axis_rc_code;ARS;;Argentine Peso;;;;4.1
+Q_03.03;z_axis_rc_code;CLP;;Chilean Peso;;;;4.1
+Q_03.03;z_axis_rc_code;COP;;Colombian Peso;;;;4.1
+Q_03.03;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.1
 Q_03.03;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.1
 Q_04.01;x_axis_rc_code;10;;Number;;;Unit;4.1
 Q_04.01;x_axis_rc_code;20;;Amount;;;;4.1
@@ -46256,7 +46271,6 @@ F_34.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 F_34.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 F_34.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 F_34.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-F_34.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 F_34.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 F_34.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 F_34.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46264,9 +46278,13 @@ F_34.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 F_34.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 F_34.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 F_34.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-F_34.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-F_34.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 F_34.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+F_34.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+F_34.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+F_34.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+F_34.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+F_34.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+F_34.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 F_34.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 F_35.00;x_axis_rc_code;__PARENT__2df768cb5e90;;Cover pool;;Y;;4.2
 F_35.00;x_axis_rc_code;__PARENT__db2484c7293a;;Covered bond liabilities;;Y;;4.2
@@ -46566,7 +46584,6 @@ C_66.01;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_66.01;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_66.01;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_66.01;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_66.01;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_66.01;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_66.01;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_66.01;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46574,9 +46591,13 @@ C_66.01;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_66.01;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_66.01;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_66.01;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_66.01;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_66.01;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_66.01;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_66.01;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_66.01;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_66.01;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_66.01;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_66.01;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_66.01;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_66.01;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_67.00;x_axis_rc_code;10;;Counterparty Name;;;;4.2
 C_67.00;x_axis_rc_code;15;;Code;;;;4.2
@@ -46607,7 +46628,6 @@ C_67.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_67.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_67.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_67.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_67.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_67.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_67.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_67.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46615,9 +46635,13 @@ C_67.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_67.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_67.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_67.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_67.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_67.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_67.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_67.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_67.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_67.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_67.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_67.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_67.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_67.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_68.00;x_axis_rc_code;10;;Carrying amount received;;;;4.2
 C_68.00;x_axis_rc_code;20;;Amount covered by a Deposit Guarantee Scheme in accordance with Directive 2014/49/EU or an equivalent deposit guarantee scheme in a third country;;;;4.2
@@ -46648,7 +46672,6 @@ C_68.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_68.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_68.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_68.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_68.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_68.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_68.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_68.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46656,9 +46679,13 @@ C_68.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_68.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_68.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_68.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_68.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_68.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_68.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_68.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_68.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_68.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_68.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_68.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_68.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_68.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_69.00;x_axis_rc_code;__PARENT__42fa50c1524a;;1 month;;Y;;4.2
 C_69.00;x_axis_rc_code;__PARENT__fdb8d5cd424a;;1 week;;Y;;4.2
@@ -46702,7 +46729,6 @@ C_69.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_69.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_69.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_69.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_69.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_69.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_69.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_69.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46710,9 +46736,13 @@ C_69.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_69.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_69.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_69.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_69.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_69.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_69.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_69.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_69.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_69.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_69.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_69.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_69.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_69.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_70.00;x_axis_rc_code;__PARENT__d19384c6fc3a;;> 1 day <= 7 days;;Y;;4.2
 C_70.00;x_axis_rc_code;__PARENT__47a459ae8574;;> 7days <= 14 days;;Y;;4.2
@@ -46916,7 +46946,6 @@ C_70.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_70.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_70.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_70.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_70.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_70.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_70.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_70.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46924,9 +46953,13 @@ C_70.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_70.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_70.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_70.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_70.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_70.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_70.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_70.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_70.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_70.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_70.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_70.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_70.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_70.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_71.00;x_axis_rc_code;__PARENT__9d7401ec9143;;Concentration of counterbalancing capacity by issuer;;Y;;4.2
 C_71.00;x_axis_rc_code;10;__PARENT__9d7401ec9143;Issuer name;;;;4.2
@@ -46957,7 +46990,6 @@ C_71.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_71.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_71.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_71.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_71.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_71.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_71.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_71.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -46965,9 +46997,13 @@ C_71.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_71.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_71.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_71.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_71.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_71.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_71.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_71.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_71.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_71.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_71.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_71.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_71.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_71.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_90.00;x_axis_rc_code;__PARENT__3f77084ad852;10;Breakdown by regulatory book;;Y;;4.2
 C_90.00;x_axis_rc_code;__PARENT__be833851843d;__PARENT__3f77084ad852;Non-trading book;;Y;;4.2
@@ -47089,7 +47125,6 @@ C_72.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_72.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_72.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_72.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_72.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_72.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_72.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_72.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -47097,9 +47132,13 @@ C_72.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_72.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_72.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_72.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_72.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_72.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_72.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_72.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_72.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_72.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_72.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_72.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_72.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_72.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_73.00;x_axis_rc_code;__PARENT__69c0b81540bd;;Weight;;Y;;4.2
 C_73.00;x_axis_rc_code;10;;Amount;;;;4.2
@@ -47266,7 +47305,6 @@ C_73.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_73.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_73.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_73.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_73.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_73.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_73.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_73.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -47274,9 +47312,13 @@ C_73.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_73.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_73.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_73.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_73.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_73.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_73.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_73.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_73.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_73.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_73.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_73.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_73.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_73.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_74.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_74.00;x_axis_rc_code;__PARENT__db3ada31914a;;Applicable weight;;Y;;4.2
@@ -47389,7 +47431,6 @@ C_74.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_74.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_74.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_74.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_74.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_74.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_74.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_74.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -47397,9 +47438,13 @@ C_74.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_74.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_74.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_74.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_74.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_74.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_74.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_74.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_74.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_74.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_74.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_74.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_74.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_74.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_75.01;x_axis_rc_code;10;;Market value of collateral lent;;;;4.2
 C_75.01;x_axis_rc_code;20;;Liquidity value of collateral lent;;;;4.2
@@ -47702,7 +47747,6 @@ C_75.01;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_75.01;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_75.01;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_75.01;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_75.01;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_75.01;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_75.01;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_75.01;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -47710,9 +47754,13 @@ C_75.01;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_75.01;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_75.01;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_75.01;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_75.01;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_75.01;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_75.01;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_75.01;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_75.01;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_75.01;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_75.01;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_75.01;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_75.01;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_75.01;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_76.00;x_axis_rc_code;10;;Value / Percentage;;;;4.2
 C_76.00;y_axis_rc_code;__PARENT__b3b2c45251b7;;0008 Calculations;;Y;;4.2
@@ -47759,7 +47807,6 @@ C_76.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_76.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_76.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_76.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_76.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_76.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_76.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_76.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -47767,9 +47814,13 @@ C_76.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_76.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_76.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_76.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_76.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_76.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_76.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_76.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_76.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_76.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_76.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_76.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_76.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_76.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_77.00;x_axis_rc_code;5;;Parent or subsidiary;;;;4.2
 C_77.00;x_axis_rc_code;10;;Name of entity;;;;4.2
@@ -48197,7 +48248,6 @@ C_80.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_80.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_80.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_80.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_80.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_80.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_80.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_80.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -48205,9 +48255,13 @@ C_80.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_80.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_80.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_80.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_80.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_80.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_80.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_80.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_80.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_80.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_80.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_80.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_80.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_80.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_81.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_81.00;x_axis_rc_code;__PARENT__e672faa71c26;;Applicable ASF factor;;Y;;4.2
@@ -48269,7 +48323,6 @@ C_81.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_81.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_81.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_81.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_81.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_81.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_81.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_81.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -48277,9 +48330,13 @@ C_81.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_81.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_81.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_81.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_81.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_81.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_81.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_81.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_81.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_81.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_81.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_81.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_81.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_81.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;4.2
@@ -48345,7 +48402,6 @@ C_82.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_82.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_82.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_82.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_82.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_82.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_82.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_82.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -48353,9 +48409,13 @@ C_82.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_82.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_82.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_82.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_82.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_82.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_82.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_82.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_82.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_82.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_82.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_82.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_82.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_82.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_83.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_83.00;x_axis_rc_code;__PARENT__e672faa71c26;;Applicable ASF factor;;Y;;4.2
@@ -48384,7 +48444,6 @@ C_83.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_83.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_83.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_83.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_83.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_83.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_83.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_83.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -48392,9 +48451,13 @@ C_83.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_83.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_83.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_83.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_83.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_83.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_83.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_83.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_83.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_83.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_83.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_83.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_83.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_83.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_84.00;x_axis_rc_code;10;;Amount;;;;4.2
 C_84.00;x_axis_rc_code;20;;Required stable funding;;;;4.2
@@ -48431,7 +48494,6 @@ C_84.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 C_84.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 C_84.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 C_84.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-C_84.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 C_84.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 C_84.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 C_84.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -48439,9 +48501,13 @@ C_84.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 C_84.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 C_84.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 C_84.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-C_84.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-C_84.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_84.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+C_84.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+C_84.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+C_84.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+C_84.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+C_84.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+C_84.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 C_84.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_01.00;x_axis_rc_code;10;;Amount;;;;4.2
 C_01.00;y_axis_rc_code;10;;Own funds;;;;4.2
@@ -61446,7 +61512,6 @@ P_02.06;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 P_02.06;z_axis_rc_code;JPY;;Yen;;;;4.2
 P_02.06;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 P_02.06;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-P_02.06;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 P_02.06;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 P_02.06;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 P_02.06;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -61454,9 +61519,13 @@ P_02.06;z_axis_rc_code;PLN;;Zloty;;;;4.2
 P_02.06;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 P_02.06;z_axis_rc_code;HUF;;Forint;;;;4.2
 P_02.06;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-P_02.06;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-P_02.06;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 P_02.06;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+P_02.06;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+P_02.06;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+P_02.06;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+P_02.06;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+P_02.06;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+P_02.06;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 P_02.06;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 P_02.07;x_axis_rc_code;10;;Actual current position;;;;4.2
 P_02.07;x_axis_rc_code;30;;Planned Year 1 Position;;;;4.2
@@ -62301,7 +62370,6 @@ J_01.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_01.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_01.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_01.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_01.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_01.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_01.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_01.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62309,9 +62377,13 @@ J_01.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_01.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_01.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_01.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_01.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_01.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_01.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_01.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_01.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_01.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_01.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_01.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_01.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_02.00;x_axis_rc_code;__PARENT__9102228cabdf;;Bank estimate of IRRBB sensivitities including behavioural, conditional and automatic optionality;;Y;;4.2
 J_02.00;x_axis_rc_code;__PARENT__da6dc0235196;;Market value;;Y;;4.2
 J_02.00;x_axis_rc_code;__PARENT__ec7f0f051f83;;Net interest income;;Y;;4.2
@@ -62403,7 +62475,6 @@ J_02.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_02.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_02.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_02.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_02.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_02.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_02.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_02.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62411,9 +62482,13 @@ J_02.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_02.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_02.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_02.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_02.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_02.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_02.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_02.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_02.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_02.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_02.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_02.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_02.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_02.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_03.00;x_axis_rc_code;__PARENT__9102228cabdf;;Bank estimate of IRRBB sensivitities including behavioural, conditional and automatic optionality;;Y;;4.2
 J_03.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic value of equity;;Y;;4.2
@@ -62478,7 +62553,6 @@ J_03.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_03.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_03.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_03.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_03.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_03.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_03.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_03.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62486,9 +62560,13 @@ J_03.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_03.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_03.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_03.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_03.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_03.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_03.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_03.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_03.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_03.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_03.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_03.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_03.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_03.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_04.00;x_axis_rc_code;__PARENT__9102228cabdf;;Bank estimate of IRRBB sensivitities including behavioural, conditional and automatic optionality;;Y;;4.2
 J_04.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic value of equity;;Y;;4.2
@@ -62529,7 +62607,6 @@ J_04.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_04.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_04.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_04.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_04.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_04.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_04.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_04.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62537,9 +62614,13 @@ J_04.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_04.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_04.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_04.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_04.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_04.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_04.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_04.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_04.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_04.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_04.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_04.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_04.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_04.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_05.00;x_axis_rc_code;__PARENT__4869d00dd9ab;;Fixed rate;;Y;;4.2
 J_05.00;x_axis_rc_code;__PARENT__442975a4d442;;Floating rate;;Y;;4.2
@@ -62643,7 +62724,6 @@ J_05.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_05.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_05.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_05.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_05.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_05.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_05.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_05.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62651,9 +62731,13 @@ J_05.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_05.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_05.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_05.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_05.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_05.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_05.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_05.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_05.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_05.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_05.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_05.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_05.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_05.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_06.00;x_axis_rc_code;__PARENT__4869d00dd9ab;;Fixed rate;;Y;;4.2
 J_06.00;x_axis_rc_code;__PARENT__442975a4d442;;Floating rate;;Y;;4.2
@@ -62752,7 +62836,6 @@ J_06.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_06.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_06.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_06.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_06.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_06.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_06.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_06.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62760,9 +62843,13 @@ J_06.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_06.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_06.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_06.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_06.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_06.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_06.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_06.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_06.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_06.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_06.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_06.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_06.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_06.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_07.00;x_axis_rc_code;__PARENT__4869d00dd9ab;;Fixed rate;;Y;;4.2
 J_07.00;x_axis_rc_code;__PARENT__442975a4d442;;Floating rate;;Y;;4.2
@@ -62856,7 +62943,6 @@ J_07.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_07.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_07.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_07.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_07.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_07.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_07.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_07.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62864,9 +62950,13 @@ J_07.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_07.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_07.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_07.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_07.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_07.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_07.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_07.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_07.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_07.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_07.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_07.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_07.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_07.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_07.00;y_axis_rc_code;__PARENT__b9061015437e;;0535 Memorandum items;;Y;;4.2
 J_08.00;x_axis_rc_code;10;;Notional amount;;;;4.2
@@ -62906,7 +62996,6 @@ J_08.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_08.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_08.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_08.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_08.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_08.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_08.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_08.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62914,9 +63003,13 @@ J_08.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_08.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_08.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_08.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_08.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_08.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_08.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_08.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_08.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_08.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_08.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_08.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_08.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_08.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_08.00;x_axis_rc_code;30;;Baseline scenario (contractual);;;;4.2
 J_08.00;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;4.2
@@ -62973,7 +63066,6 @@ J_09.00;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_09.00;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_09.00;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_09.00;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_09.00;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_09.00;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_09.00;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_09.00;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -62981,9 +63073,13 @@ J_09.00;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_09.00;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_09.00;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_09.00;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_09.00;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_09.00;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_09.00;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_09.00;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_09.00;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_09.00;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_09.00;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_09.00;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_09.00;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_09.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_09.00;x_axis_rc_code;30;;Baseline scenario (contractual);;;;4.2
 J_09.00;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;4.2
@@ -63048,7 +63144,6 @@ J_10.02;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_10.02;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_10.02;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_10.02;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_10.02;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_10.02;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_10.02;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_10.02;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -63056,9 +63151,13 @@ J_10.02;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_10.02;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_10.02;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_10.02;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_10.02;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_10.02;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_10.02;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_10.02;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_10.02;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_10.02;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_10.02;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_10.02;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_10.02;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_10.02;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 J_11.01;x_axis_rc_code;10;;Qualitative information;;;;4.2
 J_11.01;y_axis_rc_code;__PARENT__0b69e8804fcc;;0005 Approach NII and EVE SOT estimates;;Y;;4.2
@@ -63107,7 +63206,6 @@ J_11.02;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 J_11.02;z_axis_rc_code;JPY;;Yen;;;;4.2
 J_11.02;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 J_11.02;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-J_11.02;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 J_11.02;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 J_11.02;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 J_11.02;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -63115,9 +63213,13 @@ J_11.02;z_axis_rc_code;PLN;;Zloty;;;;4.2
 J_11.02;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 J_11.02;z_axis_rc_code;HUF;;Forint;;;;4.2
 J_11.02;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-J_11.02;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-J_11.02;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 J_11.02;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+J_11.02;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+J_11.02;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+J_11.02;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+J_11.02;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+J_11.02;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+J_11.02;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 J_11.02;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 Q_00.01;x_axis_rc_code;10;;Information;;;;4.2
 Q_00.01;y_axis_rc_code;10;;Type of the token based on currencies referenced;;;;4.2
@@ -63437,7 +63539,6 @@ Q_03.01;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 Q_03.01;z_axis_rc_code;JPY;;Yen;;;;4.2
 Q_03.01;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 Q_03.01;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-Q_03.01;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 Q_03.01;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 Q_03.01;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 Q_03.01;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -63445,9 +63546,13 @@ Q_03.01;z_axis_rc_code;PLN;;Zloty;;;;4.2
 Q_03.01;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 Q_03.01;z_axis_rc_code;HUF;;Forint;;;;4.2
 Q_03.01;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-Q_03.01;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-Q_03.01;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 Q_03.01;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+Q_03.01;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+Q_03.01;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+Q_03.01;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+Q_03.01;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+Q_03.01;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+Q_03.01;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 Q_03.01;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 Q_03.02;x_axis_rc_code;10;;Type of product;;;;4.2
 Q_03.02;x_axis_rc_code;20;;Counterparty/Issuer Name;;;;4.2
@@ -63463,7 +63568,6 @@ Q_03.02;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 Q_03.02;z_axis_rc_code;JPY;;Yen;;;;4.2
 Q_03.02;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 Q_03.02;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-Q_03.02;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 Q_03.02;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 Q_03.02;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 Q_03.02;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -63471,9 +63575,13 @@ Q_03.02;z_axis_rc_code;PLN;;Zloty;;;;4.2
 Q_03.02;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 Q_03.02;z_axis_rc_code;HUF;;Forint;;;;4.2
 Q_03.02;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-Q_03.02;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-Q_03.02;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 Q_03.02;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+Q_03.02;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+Q_03.02;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+Q_03.02;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+Q_03.02;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+Q_03.02;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+Q_03.02;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 Q_03.02;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 Q_03.02;y_axis_rc_code;10;;All other bank deposits counterparties;;;;4.2
 Q_03.02;y_axis_rc_code;20;;All other securities issuers;;;;4.2
@@ -63553,7 +63661,6 @@ Q_03.03;z_axis_rc_code;CHF;;Swiss Franc;;;;4.2
 Q_03.03;z_axis_rc_code;JPY;;Yen;;;;4.2
 Q_03.03;z_axis_rc_code;CNY;;Yuan Renminbi;;;;4.2
 Q_03.03;z_axis_rc_code;CAD;;Canadian Dollar;;;;4.2
-Q_03.03;z_axis_rc_code;AUD;;Australian Dollar;;;;4.2
 Q_03.03;z_axis_rc_code;SEK;;Swedish Krona;;;;4.2
 Q_03.03;z_axis_rc_code;DKK;;Danish Krone;;;;4.2
 Q_03.03;z_axis_rc_code;NOK;;Norwegian Krone;;;;4.2
@@ -63561,9 +63668,13 @@ Q_03.03;z_axis_rc_code;PLN;;Zloty;;;;4.2
 Q_03.03;z_axis_rc_code;CZK;;Czech Koruna;;;;4.2
 Q_03.03;z_axis_rc_code;HUF;;Forint;;;;4.2
 Q_03.03;z_axis_rc_code;RON;;New Romanian Leu;;;;4.2
-Q_03.03;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
-Q_03.03;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 Q_03.03;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
+Q_03.03;z_axis_rc_code;BRL;;Brazilian Real;;;;4.2
+Q_03.03;z_axis_rc_code;MXN;;Mexican Peso;;;;4.2
+Q_03.03;z_axis_rc_code;ARS;;Argentine Peso;;;;4.2
+Q_03.03;z_axis_rc_code;CLP;;Chilean Peso;;;;4.2
+Q_03.03;z_axis_rc_code;COP;;Colombian Peso;;;;4.2
+Q_03.03;z_axis_rc_code;UYU;;Peso Uruguayo;;;;4.2
 Q_03.03;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 Q_04.01;x_axis_rc_code;10;;Number;;;Unit;4.2
 Q_04.01;x_axis_rc_code;20;;Amount;;;;4.2

@@ -3135,7 +3135,19 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
     return codes;
   };
   const axisCoordinate = `${axis}_axis_rc_code`;
-  const mainCodes = getCodesByCoordinate(mainFramework)?.get(axisCoordinate) ?? new Set();
+  const mainCodeSets = getCodesByCoordinate(mainFramework);
+  const mainCodes = mainCodeSets?.get(axisCoordinate) ?? new Set();
+  const mainCurrencyCodes = mainCodeSets?.get("z_axis_rc_code") ?? new Set();
+  // Older DPM workbooks leave open currency axes implicit. Their missing Z
+  // members do not mean that reported currencies ceased to exist.
+  const hasOpenCurrencyAxis = mainCurrencyCodes.has("EUR") && mainCurrencyCodes.has("qx46");
+  const hasCodeAtDate = (codeSets, coordinate, code) => {
+    if (coordinate === "z_axis_rc_code") {
+      if (code === EXPLORER_ALL_CURRENCIES_CODE) return true;
+      if (hasOpenCurrencyAxis && mainCurrencyCodes.has(code)) return true;
+    }
+    return codeSets.get(coordinate)?.has(code) ?? false;
+  };
   const dateCodeSets = frameworkByDate.map((framework) => framework ? getCodesByCoordinate(framework) : null);
   const otherAxisSelections = [
     ["x_axis_rc_code", options.selectedXCode],
@@ -3145,7 +3157,7 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
     && code
     && !(coordinate === "z_axis_rc_code" && code === EXPLORER_ALL_CURRENCIES_CODE));
   const isOtherAxisSelectionAvailable = (codeSets) => Boolean(codeSets)
-    && otherAxisSelections.every(([coordinate, code]) => codeSets.get(coordinate)?.has(code));
+    && otherAxisSelections.every(([coordinate, code]) => hasCodeAtDate(codeSets, coordinate, code));
 
   const maskedMainRows = series.rows.map((row) => ({
     ...row,
@@ -3154,7 +3166,7 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
       const dateFramework = frameworkByDate[index];
       const codeSets = dateCodeSets[index];
       if (!dateFramework || !codeSets) return point;
-      const exists = codeSets.get(axisCoordinate)?.has(row.code)
+      const exists = hasCodeAtDate(codeSets, axisCoordinate, row.code)
         && isOtherAxisSelectionAvailable(codeSets);
       return exists ? point : { ...point, value: null, isTaxonomyUnavailable: true };
     })
@@ -3207,7 +3219,7 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
             return sourceValue ?? { date: dateColumn.date, label: dateColumn.label, value: null };
           }
           const exists = dateFramework === framework
-            && codeSets.get(axisCoordinate)?.has(row.code)
+            && hasCodeAtDate(codeSets, axisCoordinate, row.code)
             && isOtherAxisSelectionAvailable(codeSets);
           return exists
             ? sourceValue ?? { date: dateColumn.date, label: dateColumn.label, value: null }

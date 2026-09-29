@@ -62,13 +62,15 @@ LA LE LES MAIS NE NI OU PAR PAS POUR QUE QUI SA SANS SE SES SON SUR UN UNE VERS
 ALL_CAPS_WORD_RE = re.compile(r"[\w]+", re.UNICODE)
 
 # A curated display subset of the EBA's open currency domain. Keep the
-# reporting currency first, then the major international currencies and the
-# European/regional currencies most useful when browsing bank disclosures.
+# reporting currency first, then major international, European and Latin
+# American currencies most useful when browsing bank disclosures. Keep at
+# most 20 foreign currencies in an open axis.
 # The source glossary remains untouched; this order is applied on every build.
 CURRENCY_Z_DISPLAY_ORDER = (
     "EUR", "USD", "GBP", "CHF", "JPY", "CNY",
-    "CAD", "AUD", "SEK", "DKK", "NOK", "PLN",
-    "CZK", "HUF", "RON", "SGD", "HKD", "TRY",
+    "CAD", "SEK", "DKK", "NOK", "PLN", "CZK",
+    "HUF", "RON", "TRY", "BRL", "MXN", "ARS",
+    "CLP", "COP", "UYU",
 )
 
 C08_IRB_Z_LABELS = {

@@ -193,9 +193,13 @@ class DpmTaxonomyTests(unittest.TestCase):
             ("qx1", "All currencies"), ("ALL", "Lek"), ("JPY", "Yen"),
             ("EUR", "Euro"), ("USD", "US Dollar"), ("GBP", "Pound Sterling"),
             ("qx46", "Other Currency (open axis tables)"),
+            ("BRL", "Brazilian Real"), ("MXN", "Mexican Peso"),
+            ("ARS", "Argentine Peso"), ("CLP", "Chilean Peso"),
+            ("COP", "Colombian Peso"), ("UYU", "Peso Uruguayo"),
         ] + [(f"BA{chr(65 + i)}", f"Currency {i}") for i in range(21)]
         limited = builder.limit_currency_z_rows(rows)
         self.assertEqual([code for code, _ in limited[:5]], ["qx1", "EUR", "USD", "GBP", "JPY"])
+        self.assertEqual([code for code, _ in limited[5:11]], ["BRL", "MXN", "ARS", "CLP", "COP", "UYU"])
         self.assertEqual(limited[-1][0], "qx46")
         self.assertNotIn("ALL", [code for code, _ in limited])
         self.assertLessEqual(sum(len(code) == 3 for code, _ in limited), 21)
