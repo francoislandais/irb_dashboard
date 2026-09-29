@@ -28,21 +28,23 @@ Les navigateurs ne donnent pas accès à un chemin local brut pour des raisons d
 
 Si le navigateur ne supporte pas cette API, le chargement CSV fonctionne quand même, mais l'utilisateur devra sélectionner le fichier à chaque session.
 
-Le contenu des fichiers CSV utilisateur n'est pas envoyé à un serveur. La branche de prévisualisation charge en plus son CSV d'exemple depuis `app/assets/`.
+Le contenu des fichiers CSV utilisateur n'est pas envoyé à un serveur. La
+branche avec les taxonomies DPM conserve le même chargement local des données.
 
-## Prévisualiser les taxonomies DPM
+## Taxonomies DPM versionnées
 
-La branche de test `codex/taxonomy-preview` remplace le dictionnaire interne par
-une version dérivée de l'historique DPM. Les pilules **Taxonomy** au-dessus du
-tableau choisissent le framework du template affiché, indépendamment des autres
-templates. Chaque template démarre sur son framework le plus récent disponible.
-Au démarrage, l'application lit directement
-`app/assets/taxonomy-preview-empty-data.csv` comme jeu de données de référence.
-Ce fichier contient une ligne technique par template, sans coordonnées ni
-valeurs numériques, afin d'afficher la structure vide des templates.
+La branche `codex/taxonomy-preview` utilise le dictionnaire versionné dérivé de
+l'historique DPM dans `app/assets/ITS_all_dimension_mapping.csv`, tout en
+conservant le démarrage normal de l'Explorer et son chargement de fichiers CSV.
+L'application restaure le dernier fichier local quand le navigateur y a encore
+accès ; sinon, choisissez le CSV data comme d'habitude. Par défaut, chaque
+template utilise le framework le plus récent disponible pour lui. Les pilules
+**Taxonomy** au-dessus du tableau permettent de choisir une autre version pour
+le template affiché.
 
-Après modification du CSV, rechargez l'application pour relire le fichier. Pour
-reconstruire le dictionnaire compact et le jeu de prévisualisation à partir de
+Le CSV `app/assets/taxonomy-preview-empty-data.csv` reste disponible pour
+prévisualiser les structures vides, mais il n'est plus chargé automatiquement.
+Pour reconstruire le dictionnaire compact à partir de
 `data/eba-dpm-history/generated/versioned_dimension_mapping.csv`, lancez :
 
 ```sh

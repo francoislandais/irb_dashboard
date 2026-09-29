@@ -10,7 +10,7 @@ export async function loadTaxonomyDimensionData(requestedTaxonomies = {}) {
   const frameworkIndex = columns.indexOf("framework");
   const tableIdIndex = columns.indexOf("table_id");
   if (frameworkIndex === -1 || tableIdIndex === -1) {
-    throw new Error("Le dictionnaire de test doit contenir une colonne framework.");
+    throw new Error("Le dictionnaire des taxonomies doit contenir les colonnes framework et table_id.");
   }
 
   const taxonomiesByTemplate = new Map();

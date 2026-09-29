@@ -640,7 +640,7 @@ async function startApplication() {
       loadExplorerDefaultExpandDepthConfig(),
       loadExplorerTemplateGroupsConfig(),
       loadExplorerKriFormulasConfig(),
-      hasStandaloneCsvData() ? loadStandaloneData() : loadTaxonomyPreviewDataset()
+      hasStandaloneCsvData() ? loadStandaloneData() : restoreLastFile()
     ]);
   } catch (error) {
     store.setError(error);
@@ -681,19 +681,6 @@ async function loadTaxonomyConfiguration() {
   } catch (error) {
     store.setDimensionMappingError(error);
   }
-}
-
-async function loadTaxonomyPreviewDataset() {
-  const response = await fetch("./assets/taxonomy-preview-empty-data.csv", { cache: "no-store" });
-  if (!response.ok) throw new Error("Le CSV de prévisualisation des templates n'a pas pu être chargé.");
-  const text = await response.text();
-  currentCsvText = text;
-  currentCsvFileName = "taxonomy-preview-empty-data.csv";
-  await loadCsvText(text, currentCsvFileName, null, new Date(), {
-    datasetId: "taxonomy-preview-empty-data",
-    datasetLabel: "Taxonomy preview — empty templates",
-    source: "embedded"
-  });
 }
 
 async function loadImpossibleCombinations() {
