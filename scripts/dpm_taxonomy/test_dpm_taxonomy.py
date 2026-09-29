@@ -19,10 +19,10 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
-    def test_c08_irb_z_groups_legacy_and_qx_codes_without_changing_identities(self):
-        def dimension(table_id, coordinate, code, description):
+    def test_c08_irb_z_uses_real_totals_and_shortens_portfolio_labels(self):
+        def dimension(table_id, coordinate, code, description, framework="3.2"):
             return {
-                "module_code": "COREP", "framework": "3.2", "table_id": table_id,
+                "module_code": "COREP", "framework": framework, "table_id": table_id,
                 "coordinate": coordinate, "code": code, "description": description,
                 "parent_coordinate_code": "", "ignore": "", "format": "", "order_first": "",
             }
@@ -35,18 +35,31 @@ class DpmTaxonomyTests(unittest.TestCase):
             dimension("C_08.01", "z_axis_rc_code", "0004", "Central banks without own estimates of LGD or conversion factors"),
             dimension("C_08.01", "z_axis_rc_code", "qx01", "All exposure classes and approaches"),
             dimension("C_08.01", "z_axis_rc_code", "qx2082", "Collective Investment Undertakings (CIU)"),
+            dimension("C_08.01", "z_axis_rc_code", "qx2023", "Total with own estimates of LGD and/or conversion factors", "4.2"),
+            dimension("C_08.01", "z_axis_rc_code", "qx2007", "Memo item: Retail - Other non-SME - with own estimates of LGD or conversion factors", "4.2"),
+            dimension("C_08.01", "z_axis_rc_code", "qx2022", "Total without own estimates of LGD or conversion factors", "4.2"),
+            dimension("C_08.01", "z_axis_rc_code", "qx2012", "Corporates - Other without own estimates of LGD or conversion factors", "4.2"),
             dimension("C_08.06", "z_axis_rc_code", "qx129", "Project finance"),
         ]
         result = builder.group_c08_irb_z_rows(original)
-        grouped = [row for row in result if row["table_id"] == "C_08.01" and row["coordinate"] == "z_axis_rc_code"]
+        grouped = [row for row in result if row["table_id"] == "C_08.01" and row["framework"] == "3.2" and row["coordinate"] == "z_axis_rc_code"]
         self.assertEqual([row["code"] for row in grouped], [
-            "qx01", "__PARENT__C08_IRB_A", "0001", "0003",
-            "__PARENT__C08_IRB_F", "0002", "0004", "qx2082",
+            "qx01", "0001", "0003", "0002", "0004", "qx2082",
         ])
-        self.assertEqual([row["parent_coordinate_code"] for row in grouped[2:4]], ["__PARENT__C08_IRB_A"] * 2)
-        self.assertEqual([row["parent_coordinate_code"] for row in grouped[5:7]], ["__PARENT__C08_IRB_F"] * 2)
-        self.assertEqual([row["ignore"] for row in (grouped[1], grouped[4])], ["Y", "Y"])
-        self.assertEqual([row["order_first"] for row in grouped], [str(number) for number in range(1, 9)])
+        self.assertEqual(grouped[1]["description"], "IRB A — With own estimates of LGD or conversion factors")
+        self.assertEqual(grouped[2]["description"], "Central banks")
+        self.assertEqual(grouped[2]["parent_coordinate_code"], "0001")
+        self.assertEqual(grouped[3]["description"], "IRB F — Without own estimates of LGD or conversion factors")
+        self.assertEqual(grouped[4]["description"], "Central banks")
+        self.assertEqual(grouped[4]["parent_coordinate_code"], "0002")
+        self.assertEqual([row["order_first"] for row in grouped], [str(number) for number in range(1, 7)])
+        modern = [row for row in result if row["table_id"] == "C_08.01" and row["framework"] == "4.2"]
+        self.assertEqual([row["code"] for row in modern], ["qx2023", "qx2007", "qx2022", "qx2012"])
+        self.assertEqual(modern[1]["description"], "Memo item: Retail - Other non-SME")
+        self.assertEqual(modern[1]["parent_coordinate_code"], "qx2023")
+        self.assertEqual(modern[3]["description"], "Corporates - Other")
+        self.assertEqual(modern[3]["parent_coordinate_code"], "qx2022")
+        self.assertEqual([modern[0]["ignore"], modern[2]["ignore"]], ["", ""])
         self.assertEqual(next(row for row in result if row["table_id"] == "C_08.06"), original[-1])
         self.assertEqual(original[0]["parent_coordinate_code"], "")
 

@@ -71,10 +71,14 @@ CURRENCY_Z_DISPLAY_ORDER = (
     "CZK", "HUF", "RON", "SGD", "HKD", "TRY",
 )
 
-C08_IRB_Z_PARENTS = {
-    "with": ("__PARENT__C08_IRB_A", "IRB A — With own estimates of LGD or conversion factors"),
-    "without": ("__PARENT__C08_IRB_F", "IRB F — Without own estimates of LGD or conversion factors"),
+C08_IRB_Z_LABELS = {
+    "with": "IRB A — With own estimates of LGD or conversion factors",
+    "without": "IRB F — Without own estimates of LGD or conversion factors",
 }
+C08_IRB_QUALIFIER_RE = re.compile(
+    r"\s*(?:[-–—]\s*)?(?:with|without) own estimates? of LGD (?:and/)?or conversion factors\s*$",
+    re.IGNORECASE,
+)
 
 
 def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
@@ -98,11 +102,12 @@ def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
 
 
 def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
-    """Add display parents to C_08 Z choices after sheet and suffix merging.
+    """Use each real C_08 IRB total as the parent of its Z portfolios.
 
     Legacy releases place one Z choice on each numbered worksheet. Grouping
     the finished table/framework is necessary to assemble both complete IRB
-    branches. Original Z codes and descriptions remain unchanged.
+    branches. The source total codes remain selectable; redundant qualifiers
+    are removed from child labels without changing their codes or formats.
     """
     buckets: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -123,21 +128,22 @@ def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
         if not groups["with"] or not groups["without"]:
             continue
 
-        used_codes = {member["code"] for member in members}
-        if used_codes.intersection(parent_code for parent_code, _ in C08_IRB_Z_PARENTS.values()):
-            raise ValueError(f"C_08 IRB display parent code collides with source Z code: {key}")
-
         organized = [member.copy() for member in groups["other"]
                      if "all exposure classes and approaches" in member["description"].casefold()]
         for group_name in ("with", "without"):
-            parent_code, parent_label = C08_IRB_Z_PARENTS[group_name]
-            organized.append({
-                **members[0], "code": parent_code, "description": parent_label,
-                "parent_coordinate_code": "", "ignore": "Y", "format": "",
-            })
             group_members = groups[group_name]
-            group_members = sorted(group_members, key=lambda member: not member["description"].casefold().startswith("total "))
-            organized.extend({**member, "parent_coordinate_code": parent_code} for member in group_members)
+            totals = [member for member in group_members if member["description"].casefold().startswith("total ")]
+            if len(totals) != 1:
+                raise ValueError(f"Expected one C_08 IRB {group_name} total in {key}, found {len(totals)}")
+            total = totals[0]
+            organized.append({**total, "description": C08_IRB_Z_LABELS[group_name], "parent_coordinate_code": ""})
+            for member in group_members:
+                if member is total:
+                    continue
+                description = C08_IRB_QUALIFIER_RE.sub("", member["description"]).rstrip(" -–—")
+                if not description or description == member["description"]:
+                    raise ValueError(f"Cannot shorten C_08 IRB portfolio label: {key} {member['code']}")
+                organized.append({**member, "description": description, "parent_coordinate_code": total["code"]})
         organized.extend(member.copy() for member in groups["other"]
                          if "all exposure classes and approaches" not in member["description"].casefold())
         for order, member in enumerate(organized, 1):
