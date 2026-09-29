@@ -1822,6 +1822,11 @@ function renderExplorerTable(series, selectedUnit) {
   if (isXY) {
     const taxonomyStatus = createExplorerTaxonomyStatus();
     if (taxonomyStatus) descriptionHeader.append(taxonomyStatus);
+  } else if (series.mainTaxonomyFramework) {
+    const taxonomyStatus = document.createElement("span");
+    taxonomyStatus.className = "explorer-timeline-taxonomy-status";
+    taxonomyStatus.textContent = `Taxonomy framework ${series.mainTaxonomyFramework}`;
+    descriptionHeader.append(taxonomyStatus);
   }
   headerRow.append(descriptionHeader);
 
@@ -2032,7 +2037,6 @@ function renderExplorerTable(series, selectedUnit) {
     elements.explorerTable.append(colgroup);
   }
   elements.explorerTable.append(thead, tbody);
-  elements.explorerTable.style.setProperty("--explorer-taxonomy-sticky-top", `${thead.getBoundingClientRect().height}px`);
   if (isXY) {
     const updateOffsets = () => {
       let top = 0;
@@ -3189,7 +3193,7 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
     .sort((left, right) => right[1] - left[1])
     .map(([framework]) => framework);
   const blocks = maskedMainRows.length
-    ? [addExplorerTaxonomySection(mainFramework, maskedMainRows, series.dateColumns)]
+    ? [{ framework: mainFramework, rows: maskedMainRows }]
     : [];
 
   historicalFrameworks.forEach((framework) => {
@@ -3240,6 +3244,7 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
 
   return {
     ...series,
+    mainTaxonomyFramework: maskedMainRows.length ? mainFramework : "",
     taxonomyBlocks: blocks.map((block) => block.framework),
     rows: blocks.flatMap((block) => block.rows)
   };

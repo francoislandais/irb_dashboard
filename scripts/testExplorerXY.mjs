@@ -175,7 +175,6 @@ const tbody=table.children.find(n=>n.tagName==="TBODY");
 assert.equal(thead.rows.length,2);
 assert.equal(thead.rows[0].cells[0].rowSpan,2);
 assert.equal(thead.rows[0].cells[0].children[0].textContent,"DPM 2.0 · Framework 4.2");
-assert.equal(table.style["--explorer-taxonomy-sticky-top"],"32px");
 assert.equal(tbody.rows[0].cells[2].textContent,"12");
 assert.equal(tbody.rows[0].cells[3].textContent,"0");
 assert.equal(tbody.rows[0].cells[4].textContent,"-");
@@ -204,6 +203,35 @@ const missing=buildExplorerXYSeries({...base,rows:[],explorerPoints:[]},{tableId
 context.activeAxis="z";assert.equal(vm.runInContext('isExplorerXYView()',ctx),false);
 context.activeAxis="y";
 console.log("PASS: XY values, fixed orientation, global display mode, dates, Z/JST filters, missing vs zero, formats, merged header coverage, real table rendering, coordinate selection and retained axis choices with temporal Tab fallback.");
+
+// In a temporal table (including XY Tab), the current framework belongs to
+// the sticky date header; only a historical framework starts a body section.
+sandbox.buildExplorerYearGroups=()=>[{year:"2025",count:2}];
+sandbox.getExplorerQuarterLabel=column=>column.label;
+sandbox.getExplorerFullDateColumnLabel=column=>column.label;
+sandbox.getExplorerAxisImpossiblePaths=()=>new Map();
+sandbox.getExplorerPropagatedContribution=()=>null;
+context.activeAxis="z";
+const timelineDateColumns=dates.map(date=>({date:date.date,label:date.label}));
+const timelineValues=timelineDateColumns.map((column,index)=>({...column,value:index+1}));
+const timelineSeries={
+  dateColumns:timelineDateColumns,
+  rows:[
+    {code:"EUR",description:"Euro",displayDescription:"Euro",hierarchyPath:"Euro",parentPath:"",indentLevel:0,values:timelineValues},
+    {code:"taxonomy-section:3.2",description:"Taxonomy framework 3.2",displayDescription:"Taxonomy framework 3.2",hierarchyPath:"taxonomy-section:3.2",parentPath:"",indentLevel:0,isVirtual:true,isTaxonomySectionHeader:true,values:timelineValues},
+  ],
+  mainTaxonomyFramework:"4.2",
+  taxonomyBlocks:["4.2","3.2"]
+};
+sandbox.timelineSeries=timelineSeries;
+table.children=[];
+vm.runInContext('renderExplorerTable(timelineSeries,"millions")',ctx);
+const timelineHead=table.children.find(n=>n.tagName==="THEAD");
+const timelineBody=table.children.find(n=>n.tagName==="TBODY");
+assert.equal(timelineHead.rows[0].cells[0].children[0].textContent,"Taxonomy framework 4.2");
+assert.equal(timelineBody.rows[0].dataset.pointCode,"EUR");
+assert.equal(timelineBody.rows[1].cells[0].title,"Taxonomy framework 3.2");
+context.activeAxis="y";
 
 // Forbidden coordinates differ from ordinary missing data and cannot be selected.
 base.impossibleXYCombinations = { isImpossible: (tableId,x,y) => tableId === "TEST" && x === "0020" && y === "0010" };
