@@ -87,6 +87,26 @@ C08_IRB_PORTFOLIO_FAMILIES = (
     ("corporates",),
     ("retail",),
 )
+C07_42_SECURED_PARENT_CODE = "__PARENT__C07_EXPOSURES_SECURED"
+C07_42_SECURED_PREFIX_RE = re.compile(r"^exposures? secured by\s+", re.IGNORECASE)
+C07_42_Z_PRIORITY = (
+    "exposures to central governments or central banks",
+    "exposures to regional governments or local authorities",
+    "exposures to public sector entities",
+    "exposures to multilateral development banks",
+    "exposures to international organisations",
+    "exposures to institutions without",
+    "exposures to institutions and corporates",
+    "exposures to corporates",
+    "retail exposures",
+    "exposures in the form of covered bonds",
+    "exposures in the form of units or shares",
+    "equity exposures",
+    "exposures in default",
+    "exposures to subordinated debt",
+    "exposures to acquisition, development and construction",
+    "other items",
+)
 
 
 def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
@@ -118,6 +138,67 @@ def c08_irb_portfolio_sort_key(description: str) -> tuple[bool, int]:
         if portfolio.startswith(prefixes):
             return bool(memo), rank
     return bool(memo), len(C08_IRB_PORTFOLIO_FAMILIES)
+
+
+def group_c07_42_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Order C_07.00's 4.2 Z choices and fold only secured exposures."""
+    target = ("COREP_OF", "4.2", "C_07.00")
+    members = [row for row in rows if
+               (row["module_code"], row["framework"], row["table_id"]) == target
+               and row["coordinate"] == AXIS_COORDINATES["z"]]
+    secured = [row for row in members if C07_42_SECURED_PREFIX_RE.match(row["description"])]
+    if not secured:
+        return rows
+    if any(row["code"] == C07_42_SECURED_PARENT_CODE for row in members):
+        raise ValueError("C_07.00 secured display parent collides with a source Z code")
+
+    def root_priority(row: dict[str, str]) -> tuple[int, int]:
+        if row["code"] == "qx01":
+            return -1, 0
+        label = row["description"].casefold()
+        for rank, prefix in enumerate(C07_42_Z_PRIORITY):
+            if label.startswith(prefix):
+                # The broad corporate class precedes its specialised cases.
+                subtype = 0 if label == "exposures to corporates without a short-term credit assessment" else 1
+                return rank, subtype
+        return len(C07_42_Z_PRIORITY), 0
+
+    def secured_priority(row: dict[str, str]) -> int:
+        label = row["description"].casefold()
+        if label.startswith("exposures secured by mortgages on immovable property"):
+            return 0
+        if label.startswith("exposures secured by mortgages on residential"):
+            return 1
+        if label.startswith("exposures secured by mortgages on commercial"):
+            return 2
+        return 3
+
+    roots = sorted((row.copy() for row in members if row not in secured), key=root_priority)
+    organized = roots + [{
+        **secured[0], "code": C07_42_SECURED_PARENT_CODE,
+        "description": "Exposure Secured", "parent_coordinate_code": "",
+        "ignore": "Y", "format": "",
+    }]
+    for member in sorted(secured, key=secured_priority):
+        description = C07_42_SECURED_PREFIX_RE.sub("", member["description"])
+        organized.append({
+            **member, "description": description[:1].upper() + description[1:],
+            "parent_coordinate_code": C07_42_SECURED_PARENT_CODE,
+        })
+    for order, member in enumerate(organized, 1):
+        member["order_first"] = str(order)
+
+    output: list[dict[str, str]] = []
+    emitted = False
+    for row in rows:
+        if ((row["module_code"], row["framework"], row["table_id"]) == target
+                and row["coordinate"] == AXIS_COORDINATES["z"]):
+            if not emitted:
+                output.extend(organized)
+                emitted = True
+            continue
+        output.append(row)
+    return output
 
 
 def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -1069,7 +1150,7 @@ def extract_all() -> tuple[
     # resolver when the caller requests the former module family.
     sorted_templates = close_template_intervals(normalized_templates.values())
 
-    dimensions = group_c08_irb_z_rows(list(unique_layouts.values()))
+    dimensions = group_c07_42_z_rows(group_c08_irb_z_rows(list(unique_layouts.values())))
     return dimensions, sorted_templates, inventory, suffix_conflicts
 
 

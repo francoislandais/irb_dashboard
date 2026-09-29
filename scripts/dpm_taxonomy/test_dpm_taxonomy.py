@@ -19,6 +19,45 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_c07_42_z_orders_roots_and_folds_only_secured_exposures(self):
+        def member(code, description, framework="4.2"):
+            return {
+                "module_code": "COREP_OF", "framework": framework, "table_id": "C_07.00",
+                "coordinate": "z_axis_rc_code", "code": code, "description": description,
+                "parent_coordinate_code": "", "ignore": "", "format": "", "order_first": "",
+            }
+
+        source = [
+            member("qx2060", "Exposures secured by mortgages on commercial immovable property - non-IPRE (secured)"),
+            member("qx13", "Exposures in the form of covered bonds"),
+            member("qx2036", "Exposures to corporates without a short-term credit assessment - other than specialised lending"),
+            member("qx2042", "Exposures secured by mortgages on residential immovable property - IPRE"),
+            member("qx26", "Retail exposures"),
+            member("qx1", "Equity exposures"),
+            member("qx16", "Exposures to central governments or central banks"),
+            member("qx12", "Exposures in default"),
+            member("qx01", "All exposure classes and approaches"),
+            member("qx19", "Exposures to institutions without a short-term credit assessment"),
+            member("qx17", "Exposures to corporates without a short-term credit assessment"),
+            member("qx2038", "Exposures secured by mortgages on immovable property and ADC"),
+            member("qx14", "Exposures in the form of units or shares in CIUs"),
+            member("qx23", "Exposures to regional governments or local authorities"),
+            member("qxold", "Exposures secured by mortgages on immovable property", "4.0"),
+        ]
+        result = builder.group_c07_42_z_rows(source)
+        grouped = [row for row in result if row["framework"] == "4.2"]
+        self.assertEqual([row["code"] for row in grouped], [
+            "qx01", "qx16", "qx23", "qx19", "qx17", "qx2036", "qx26",
+            "qx13", "qx14", "qx1", "qx12", "__PARENT__C07_EXPOSURES_SECURED",
+            "qx2038", "qx2042", "qx2060",
+        ])
+        self.assertEqual(grouped[11]["description"], "Exposure Secured")
+        self.assertEqual(grouped[11]["ignore"], "Y")
+        self.assertTrue(all(row["parent_coordinate_code"] == grouped[11]["code"] for row in grouped[12:]))
+        self.assertEqual(grouped[13]["description"], "Mortgages on residential immovable property - IPRE")
+        self.assertEqual(result[-1], source[-1])
+        self.assertEqual(source[0]["parent_coordinate_code"], "")
+
     def test_c08_irb_z_uses_real_totals_and_shortens_portfolio_labels(self):
         def dimension(table_id, coordinate, code, description, framework="3.2"):
             return {

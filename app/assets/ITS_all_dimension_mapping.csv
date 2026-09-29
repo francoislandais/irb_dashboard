@@ -49047,34 +49047,36 @@ C_07.00;y_axis_rc_code;281;__PARENT__a1f7a14e0ff7;Look-through approach;;;;4.2
 C_07.00;y_axis_rc_code;282;__PARENT__a1f7a14e0ff7;Mandate-based approach;;;;4.2
 C_07.00;y_axis_rc_code;283;__PARENT__a1f7a14e0ff7;Fall-back approach;;;;4.2
 C_07.00;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
-C_07.00;z_axis_rc_code;qx2038;;Exposures secured by mortgages on immovable property and ADC;;;;4.2
-C_07.00;z_axis_rc_code;qx2042;;Exposures secured by mortgages on residential immovable property - IPRE;;;;4.2
-C_07.00;z_axis_rc_code;qx2039;;Exposures secured by mortgages on residential immovable property - non-IPRE (secured);;;;4.2
-C_07.00;z_axis_rc_code;qx2040;;Exposures secured by mortgages on residential immovable property - non-IPRE (unsecured);;;;4.2
-C_07.00;z_axis_rc_code;qx2043;;Exposures secured by mortgages on residential immovable property - Other - IPRE;;;;4.2
-C_07.00;z_axis_rc_code;qx2041;;Exposures secured by mortgages on residential immovable property - Other - non-IPRE;;;;4.2
-C_07.00;z_axis_rc_code;qx2049;;Exposures to Acquisition, development and construction (ADC);;;;4.2
+C_07.00;z_axis_rc_code;qx16;;Exposures to central governments or central banks;;;;4.2
+C_07.00;z_axis_rc_code;qx23;;Exposures to regional governments or local authorities;;;;4.2
+C_07.00;z_axis_rc_code;qx22;;Exposures to public sector entities;;;;4.2
+C_07.00;z_axis_rc_code;qx21;;Exposures to multilateral development banks;;;;4.2
+C_07.00;z_axis_rc_code;qx20;;Exposures to international organisations;;;;4.2
+C_07.00;z_axis_rc_code;qx19;;Exposures to institutions without a short-term credit assessment;;;;4.2
+C_07.00;z_axis_rc_code;qx18;;Exposures to institutions and corporates with a short-term credit assessment;;;;4.2
+C_07.00;z_axis_rc_code;qx17;;Exposures to corporates without a short-term credit assessment;;;;4.2
 C_07.00;z_axis_rc_code;qx2036;;Exposures to corporates without a short-term credit assessment - other than specialised lending;;;;4.2
 C_07.00;z_axis_rc_code;qx2037;;Exposures to corporates without a short-term credit assessment - specialised lending;;;;4.2
-C_07.00;z_axis_rc_code;qx2050;;Exposures to subordinated debt;;;;4.2
-C_07.00;z_axis_rc_code;qx2058;;Exposures secured by mortgages on commercial immovable property - IPRE;;;;4.2
-C_07.00;z_axis_rc_code;qx2060;;Exposures secured by mortgages on commercial immovable property - non-IPRE (secured);;;;4.2
-C_07.00;z_axis_rc_code;qx2061;;Exposures secured by mortgages on commercial immovable property - non-IPRE (unsecured);;;;4.2
-C_07.00;z_axis_rc_code;qx2062;;Exposures secured by mortgages on commercial immovable property - Other - IPRE;;;;4.2
-C_07.00;z_axis_rc_code;qx2063;;Exposures secured by mortgages on commercial immovable property - Other - non-IPRE;;;;4.2
-C_07.00;z_axis_rc_code;qx1;;Equity exposures;;;;4.2
-C_07.00;z_axis_rc_code;qx12;;Exposures in default;;;;4.2
+C_07.00;z_axis_rc_code;qx26;;Retail exposures;;;;4.2
 C_07.00;z_axis_rc_code;qx13;;Exposures in the form of covered bonds;;;;4.2
 C_07.00;z_axis_rc_code;qx14;;Exposures in the form of units or shares in CIUs;;;;4.2
-C_07.00;z_axis_rc_code;qx16;;Exposures to central governments or central banks;;;;4.2
-C_07.00;z_axis_rc_code;qx18;;Exposures to institutions and corporates with a short-term credit assessment;;;;4.2
-C_07.00;z_axis_rc_code;qx19;;Exposures to institutions without a short-term credit assessment;;;;4.2
-C_07.00;z_axis_rc_code;qx20;;Exposures to international organisations;;;;4.2
-C_07.00;z_axis_rc_code;qx21;;Exposures to multilateral development banks;;;;4.2
-C_07.00;z_axis_rc_code;qx22;;Exposures to public sector entities;;;;4.2
-C_07.00;z_axis_rc_code;qx23;;Exposures to regional governments or local authorities;;;;4.2
+C_07.00;z_axis_rc_code;qx1;;Equity exposures;;;;4.2
+C_07.00;z_axis_rc_code;qx12;;Exposures in default;;;;4.2
+C_07.00;z_axis_rc_code;qx2050;;Exposures to subordinated debt;;;;4.2
+C_07.00;z_axis_rc_code;qx2049;;Exposures to Acquisition, development and construction (ADC);;;;4.2
 C_07.00;z_axis_rc_code;qx25;;Other items;;;;4.2
-C_07.00;z_axis_rc_code;qx26;;Retail exposures;;;;4.2
+C_07.00;z_axis_rc_code;__PARENT__C07_EXPOSURES_SECURED;;Exposure Secured;;Y;;4.2
+C_07.00;z_axis_rc_code;qx2038;__PARENT__C07_EXPOSURES_SECURED;Mortgages on immovable property and ADC;;;;4.2
+C_07.00;z_axis_rc_code;qx2042;__PARENT__C07_EXPOSURES_SECURED;Mortgages on residential immovable property - IPRE;;;;4.2
+C_07.00;z_axis_rc_code;qx2039;__PARENT__C07_EXPOSURES_SECURED;Mortgages on residential immovable property - non-IPRE (secured);;;;4.2
+C_07.00;z_axis_rc_code;qx2040;__PARENT__C07_EXPOSURES_SECURED;Mortgages on residential immovable property - non-IPRE (unsecured);;;;4.2
+C_07.00;z_axis_rc_code;qx2043;__PARENT__C07_EXPOSURES_SECURED;Mortgages on residential immovable property - Other - IPRE;;;;4.2
+C_07.00;z_axis_rc_code;qx2041;__PARENT__C07_EXPOSURES_SECURED;Mortgages on residential immovable property - Other - non-IPRE;;;;4.2
+C_07.00;z_axis_rc_code;qx2058;__PARENT__C07_EXPOSURES_SECURED;Mortgages on commercial immovable property - IPRE;;;;4.2
+C_07.00;z_axis_rc_code;qx2060;__PARENT__C07_EXPOSURES_SECURED;Mortgages on commercial immovable property - non-IPRE (secured);;;;4.2
+C_07.00;z_axis_rc_code;qx2061;__PARENT__C07_EXPOSURES_SECURED;Mortgages on commercial immovable property - non-IPRE (unsecured);;;;4.2
+C_07.00;z_axis_rc_code;qx2062;__PARENT__C07_EXPOSURES_SECURED;Mortgages on commercial immovable property - Other - IPRE;;;;4.2
+C_07.00;z_axis_rc_code;qx2063;__PARENT__C07_EXPOSURES_SECURED;Mortgages on commercial immovable property - Other - non-IPRE;;;;4.2
 C_07.00;x_axis_rc_code;__PARENT__9e22a2883603;;Exposure value;;Y;;4.2
 C_07.00;x_axis_rc_code;210;__PARENT__9e22a2883603;Of which: Arising from Counterparty Credit Risk;;;;4.2
 C_07.00;x_axis_rc_code;211;;Of which: Arising from Counterparty Credit Risk excluding exposures cleared through a CCP;;;;4.2
@@ -49083,7 +49085,6 @@ C_07.00;y_axis_rc_code;__PARENT__1bdbce8fe17d;;0285 Memorandum items;;Y;;4.2
 C_07.00;y_axis_rc_code;290;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on commercial immovable property;;;;4.2
 C_07.00;y_axis_rc_code;310;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on residential immovable property;;;;4.2
 C_07.00;y_axis_rc_code;330;__PARENT__1bdbce8fe17d;Acquisition, development and construction (ADC);;;;4.2
-C_07.00;z_axis_rc_code;qx17;;Exposures to corporates without a short-term credit assessment;;;;4.2
 C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;%;4.2
 C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;%;4.2
 C_08.01;x_axis_rc_code;__PARENT__6339922511be;;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors;;Y;;4.2
