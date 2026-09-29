@@ -7,6 +7,8 @@ import csv
 import unicodedata
 from pathlib import Path
 
+from build_template_names import build_template_names
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "data/eba-dpm-history/generated/versioned_dimension_mapping.csv"
@@ -81,6 +83,7 @@ def main() -> None:
             })
 
     write_taxonomy_history()
+    build_template_names()
 
     print(f"Wrote {len(unique_rows):,} versioned dimension rows to {MAPPING_OUTPUT}")
     print(f"Wrote {len(table_ids):,} empty template rows to {DATA_OUTPUT}")

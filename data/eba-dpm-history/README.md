@@ -10,6 +10,7 @@ Depuis la racine du dépôt :
 python3 -m pip install -r scripts/requirements-dpm-taxonomy.txt
 python3 scripts/dpm_taxonomy/download_sources.py
 python3 scripts/dpm_taxonomy/build_taxonomy.py
+python3 scripts/dpm_taxonomy/build_taxonomy_preview.py
 python3 scripts/dpm_taxonomy/resolve_taxonomy.py C_01.00 2021-09-30 --module COREP
 ```
 
@@ -19,6 +20,12 @@ Les archives téléchargées sont contrôlées par taille et SHA-256 puis décri
 - `template_taxonomy_history.csv` : intervalles d’application par module et template;
 - `workbook_inventory.csv` : inventaire des classeurs et feuilles réellement lus;
 - `build_report.json` : volumes et règles de date à compléter ou à confirmer.
+
+La préparation de l’application s’effectue ensuite avec `build_taxonomy_preview.py`.
+Elle génère aussi `app/assets/ITS_explorer_template_names.csv` et son module JavaScript
+associé depuis les titres des feuilles EBA. Chaque identifiant de l’application est
+associé au nom de son framework le plus récent disponible; la provenance du nom
+(framework, module, classeur et feuille) reste consultable dans le CSV.
 
 Les lignes indentées des layouts annotés deviennent des chemins hiérarchiques séparés par `/`. Les colonnes reprennent le code de colonne et le libellé terminal. Pour les layouts DPM 1.0, les feuilles numérotées d’un template fournissent les codes et libellés de l’axe Z : le générateur ne développe pas tous les membres des domaines de dictionnaire référencés, car cela ajouterait des possibilités qui ne s’appliquent pas au template. En DPM 2.0, les dimensions de feuille explicitement déclarées par `Key value` sont résolues dans le glossaire. Les autres références de propriétés ne sont pas des valeurs d’axe Z.
 
