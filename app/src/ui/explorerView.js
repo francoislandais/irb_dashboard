@@ -3186,26 +3186,20 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
 }
 
 function addExplorerTaxonomySection(framework, rows, dateColumns) {
-  const label = `Taxonomy · Framework ${framework}`;
+  const label = `Taxonomy framework ${framework}`;
   const section = {
     code: `taxonomy-section:${framework}`,
     description: label,
     displayDescription: label,
     format: "",
-    hierarchyPath: label,
+    hierarchyPath: `taxonomy-section:${framework}`,
     indentLevel: 0,
     isVirtual: true,
     isTaxonomySectionHeader: true,
     parentPath: "",
     values: dateColumns.map((dateColumn) => ({ date: dateColumn.date, label: dateColumn.label, value: null }))
   };
-  const prefixedRows = rows.map((row) => ({
-    ...row,
-    hierarchyPath: `${label} > ${row.hierarchyPath || row.description || row.code}`,
-    indentLevel: (row.indentLevel ?? 0) + 1,
-    parentPath: row.parentPath ? `${label} > ${row.parentPath}` : label
-  }));
-  return { framework, rows: [section, ...prefixedRows] };
+  return { framework, rows: [section, ...rows] };
 }
 
 function getExplorerDateKey(date) {
@@ -5448,7 +5442,7 @@ function expandDefaultExplorerPaths(rows, parentPaths) {
 
   rows.forEach((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
-    if (parentPaths.has(path) && (row.isTaxonomySectionHeader || (row.indentLevel ?? 0) < defaultDepth)) {
+    if (parentPaths.has(path) && (row.indentLevel ?? 0) < defaultDepth) {
       expandedPaths.add(path);
     }
   });
@@ -5458,6 +5452,14 @@ function expandDefaultExplorerPaths(rows, parentPaths) {
 
 function createDescriptionContent(seriesRow, normalizedPath, isParent, options = {}) {
   const fragment = document.createDocumentFragment();
+  if (seriesRow.isTaxonomySectionHeader) {
+    const frameworkLabel = document.createElement("span");
+    frameworkLabel.className = "taxonomy-framework-label";
+    frameworkLabel.textContent = seriesRow.displayDescription || seriesRow.description;
+    fragment.append(frameworkLabel);
+    return fragment;
+  }
+
   const content = document.createElement("span");
   content.className = "tree-cell-content";
   const expandedPaths = getActiveExplorerExpandedPaths();

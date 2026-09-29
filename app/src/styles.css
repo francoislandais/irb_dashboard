@@ -4698,17 +4698,27 @@ table {
 
 .metric-table tbody tr.is-taxonomy-section > th,
 .metric-table tbody tr.is-taxonomy-section > td {
-  background: #f4f6f5 !important;
-  border-top: 1px solid #dfe4e1;
-  color: #6f7a74 !important;
+  background: transparent !important;
+  border-top: 0;
+  color: #7a8580 !important;
+}
+
+.metric-table tbody tr.is-taxonomy-section,
+.metric-table tbody tr.is-taxonomy-section > th:hover,
+.metric-table tbody tr.is-taxonomy-section > td:hover {
+  background: transparent !important;
+  cursor: default;
 }
 
 .metric-table tbody tr.is-taxonomy-section > th.description-column {
-  font-size: 0.76em;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding-bottom: 7px;
-  padding-top: 9px;
+  padding-bottom: 3px;
+  padding-top: 7px;
+}
+
+.taxonomy-framework-label {
+  color: #7a8580;
+  font-size: 0.72rem;
+  font-weight: 400;
 }
 
 .metric-table tbody tr.is-taxonomy-section > td.taxonomy-section-filler {

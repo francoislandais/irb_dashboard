@@ -73,6 +73,8 @@ Object.assign(sandbox, {
 const result = vm.runInContext("buildExplorerTemporalTaxonomySeries(mainSeries, state, options)", context);
 
 assert.deepEqual([...result.taxonomyBlocks], ["4.2", "4.0", "3.2"]);
+assert.equal(result.rows[0].displayDescription, "Taxonomy framework 4.2");
+assert.equal(result.rows[1].indentLevel, 0, "taxonomy rows start at their natural hierarchy depth");
 const mainRows = result.rows.filter((row) => row.taxonomyFramework === "4.2");
 assert.equal(mainRows.find((row) => row.code === "100").values[0].value, 0, "a real zero remains visible when the code exists");
 assert.equal(mainRows.find((row) => row.code === "200").values[0].isTaxonomyUnavailable, true);
@@ -80,6 +82,8 @@ assert.equal(mainRows.find((row) => row.code === "200").values[0].value, null);
 
 const framework40Row = result.rows.find((row) => row.taxonomyFramework === "4.0" && row.code === "150");
 assert.deepEqual([...framework40Row.values.map((point) => point.isTaxonomyUnavailable === true)], [true, false, true]);
+assert.equal(framework40Row.indentLevel, 0, "historical taxonomy rows retain their original indentation");
+assert.equal(framework40Row.hierarchyPath, "Line 150", "taxonomy labels do not become hierarchy parents");
 const framework32Row = result.rows.find((row) => row.taxonomyFramework === "3.2" && row.code === "140");
 assert.deepEqual([...framework32Row.values.map((point) => point.isTaxonomyUnavailable === true)], [false, true, true]);
 assert.equal(result.rows.filter((row) => row.isTaxonomySectionHeader).length, 3);
