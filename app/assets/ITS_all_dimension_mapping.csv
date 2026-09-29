@@ -6785,7 +6785,7 @@ C_71.00;y_axis_rc_code;90;120;8;;;;2.9.1.1
 C_71.00;y_axis_rc_code;100;120;9;;;;2.9.1.1
 C_71.00;y_axis_rc_code;110;120;10;;;;2.9.1.1
 C_72.00;x_axis_rc_code;10;;Amount/Market value;;;;2.9.1.1
-C_72.00;x_axis_rc_code;30;;Applicable weight;;;;2.9.1.1
+C_72.00;x_axis_rc_code;30;;Applicable weight;;;%;2.9.1.1
 C_72.00;x_axis_rc_code;40;;Value according to Article 9;;;;2.9.1.1
 C_72.00;y_axis_rc_code;__PARENT__d2577be41ad1;10;479 Memorandum;;Y;;2.9.1.1
 C_72.00;y_axis_rc_code;10;;Total unadjusted liquid assets;;;;2.9.1.1
@@ -6811,8 +6811,8 @@ C_72.00;y_axis_rc_code;200;180;Qualifying CIU shares/units: underlying is extrem
 C_72.00;y_axis_rc_code;210;180;Central institutions: Level 1 EHQ covered bonds which are considered liquid assets for the depositing credit institution;;;;2.9.1.1
 C_72.00;y_axis_rc_code;220;10;Total unadjusted level 2 ASSETS;;;;2.9.1.1
 C_72.00;y_axis_rc_code;230;220;Total unadjusted level 2A assets;;;;2.9.1.1
-C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;%;2.9.1.1
-C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;%;2.9.1.1
+C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;;2.9.1.1
+C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;;2.9.1.1
 C_72.00;y_axis_rc_code;260;230;High quality covered bonds (CQS2);;;;2.9.1.1
 C_72.00;y_axis_rc_code;270;230;High quality covered bonds (Third Country, CQS1);;;;2.9.1.1
 C_72.00;y_axis_rc_code;280;230;Corporate debt securities (CQS1);;;;2.9.1.1
@@ -6821,7 +6821,7 @@ C_72.00;y_axis_rc_code;300;230;Central institutions: Level 2A assets which are c
 C_72.00;y_axis_rc_code;310;220;Total unadjusted level 2B assets;;;;2.9.1.1
 C_72.00;y_axis_rc_code;320;310;Asset-backed securities (residential, CQS1);;;;2.9.1.1
 C_72.00;y_axis_rc_code;330;310;Asset-backed securities (auto, CQS1);;;;2.9.1.1
-C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;%;2.9.1.1
+C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;;2.9.1.1
 C_72.00;y_axis_rc_code;350;310;Asset-backed securities (commercial or individuals, Member State, CQS1);;;;2.9.1.1
 C_72.00;y_axis_rc_code;360;310;Corporate debt securities (CQS2/3);;;;2.9.1.1
 C_72.00;y_axis_rc_code;370;310;Corporate debt securities - non-interest bearing assets (held by credit institutions for religious reasons) (CQS1/2/3;;;;2.9.1.1
@@ -6829,7 +6829,7 @@ C_72.00;y_axis_rc_code;380;310;Shares (major stock index);;;;2.9.1.1
 C_72.00;y_axis_rc_code;390;310;Non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;2.9.1.1
 C_72.00;y_axis_rc_code;400;310;Restricted-use central bank committed liquidity facilities;;;;2.9.1.1
 C_72.00;y_axis_rc_code;410;310;Qualifying CIU shares/units: underlying is asset-backed securities (residential or auto, CQS1);;;;2.9.1.1
-C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;%;2.9.1.1
+C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;;2.9.1.1
 C_72.00;y_axis_rc_code;430;310;Qualifying CIU shares/units: underlying is asset-backed securities (commercial or individuals, Member State, CQS1);;;;2.9.1.1
 C_72.00;y_axis_rc_code;440;310;Qualifying CIU shares/units: underlying is corporate debt securities (CQS2/3), shares (major stock index) or non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;2.9.1.1
 C_72.00;y_axis_rc_code;450;310;Deposits by network member with central institution (no obligated investment);;;;2.9.1.1
@@ -6842,7 +6842,7 @@ C_73.00;x_axis_rc_code;__PARENT__69c0b81540bd;;Weight;;Y;;2.9.1.1
 C_73.00;x_axis_rc_code;10;;Amount;;;;2.9.1.1
 C_73.00;x_axis_rc_code;20;;Market value of collateral extended;;;;2.9.1.1
 C_73.00;x_axis_rc_code;30;;Value of collateral extended according to Article 9;;;;2.9.1.1
-C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;;2.9.1.1
+C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;%;2.9.1.1
 C_73.00;x_axis_rc_code;60;;Outflow;;;;2.9.1.1
 C_73.00;y_axis_rc_code;__PARENT__ee0f1c524423;;1139 Memorandum items;;Y;;2.9.1.1
 C_73.00;y_axis_rc_code;__PARENT__b27fd42b256d;__PARENT__ee0f1c524423;1179 Operational deposits maintained for clearing, custody, cash management or other comparable services in the context of an established operational relationship;;Y;;2.9.1.1
@@ -7001,20 +7001,20 @@ C_74.00;x_axis_rc_code;__PARENT__db3ada31914a;;Applicable weight;;Y;;2.9.1.1
 C_74.00;x_axis_rc_code;__PARENT__434bed5fc150;;Inflow;;Y;;2.9.1.1
 C_74.00;x_axis_rc_code;__PARENT__7c94ad322bfd;;Market value of collateral received;;Y;;2.9.1.1
 C_74.00;x_axis_rc_code;__PARENT__acbc26ffc623;;Value of collateral received according to Article 9;;Y;;2.9.1.1
-C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;%;2.9.1.1
-C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;%;2.9.1.1
+C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;;2.9.1.1
+C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;;2.9.1.1
 C_74.00;x_axis_rc_code;30;__PARENT__43dc8532f7e5;Exempted from the cap on inflows;;;;2.9.1.1
-C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;%;2.9.1.1
-C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;%;2.9.1.1
+C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;;2.9.1.1
+C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;;2.9.1.1
 C_74.00;x_axis_rc_code;60;__PARENT__7c94ad322bfd;Exempted from the cap on inflows;;;;2.9.1.1
 C_74.00;x_axis_rc_code;80;__PARENT__db3ada31914a;Subject to the 75% cap on inflows;;;%;2.9.1.1
 C_74.00;x_axis_rc_code;90;__PARENT__db3ada31914a;Subject to the 90% cap on inflows;;;%;2.9.1.1
-C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;;2.9.1.1
-C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;%;2.9.1.1
-C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;%;2.9.1.1
+C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;%;2.9.1.1
+C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;;2.9.1.1
+C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;;2.9.1.1
 C_74.00;x_axis_rc_code;130;__PARENT__acbc26ffc623;Exempted from the cap on inflows;;;;2.9.1.1
-C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;%;2.9.1.1
-C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;%;2.9.1.1
+C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;;2.9.1.1
+C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;;2.9.1.1
 C_74.00;x_axis_rc_code;160;__PARENT__434bed5fc150;Exempted from the cap on inflows;;;;2.9.1.1
 C_74.00;y_axis_rc_code;__PARENT__f6f64ebd5023;;439 Memorandum items;;Y;;2.9.1.1
 C_74.00;y_axis_rc_code;__PARENT__f846f25fd791;__PARENT__f6f64ebd5023;529 Secured lending waived from Article 17 (2) and (3);;Y;;2.9.1.1
@@ -7104,11 +7104,11 @@ C_75.01;x_axis_rc_code;10;;Market value of collateral lent;;;;2.9.1.1
 C_75.01;x_axis_rc_code;20;;Liquidity value of collateral lent;;;;2.9.1.1
 C_75.01;x_axis_rc_code;30;;Market value of collateral borrowed;;;;2.9.1.1
 C_75.01;x_axis_rc_code;40;;Liquidity value of collateral borrowed;;;;2.9.1.1
-C_75.01;x_axis_rc_code;50;;Standard weight;;;;2.9.1.1
-C_75.01;x_axis_rc_code;60;;Applicable weight;;;;2.9.1.1
+C_75.01;x_axis_rc_code;50;;Standard weight;;;%;2.9.1.1
+C_75.01;x_axis_rc_code;60;;Applicable weight;;;%;2.9.1.1
 C_75.01;x_axis_rc_code;70;;Outflows;;;;2.9.1.1
-C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;%;2.9.1.1
-C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;%;2.9.1.1
+C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;;2.9.1.1
+C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;;2.9.1.1
 C_75.01;x_axis_rc_code;100;;Inflows exempted from the cap on inflows;;;;2.9.1.1
 C_75.01;y_axis_rc_code;__PARENT__c51fcfe0a05c;;2729 Memorandum items;;Y;;2.9.1.1
 C_75.01;y_axis_rc_code;__PARENT__0c5b027f2dd3;__PARENT__c51fcfe0a05c;2749 Collateral swaps waived from Article 17 (2) and (3);;Y;;2.9.1.1
@@ -7394,14 +7394,14 @@ C_75.01;y_axis_rc_code;2790;__PARENT__0c5b027f2dd3;of which: collateral lent is 
 C_75.01;y_axis_rc_code;2800;__PARENT__0c5b027f2dd3;of which: collateral lent is L1 EHQCB;;;;2.9.1.1
 C_75.01;y_axis_rc_code;2810;__PARENT__0c5b027f2dd3;of which: collateral lent is L2A;;;;2.9.1.1
 C_75.01;y_axis_rc_code;2820;__PARENT__0c5b027f2dd3;of which: collateral lent is L2B;;;;2.9.1.1
-C_76.00;x_axis_rc_code;10;;Value / Percentage;;;%;2.9.1.1
+C_76.00;x_axis_rc_code;10;;Value / Percentage;;;;2.9.1.1
 C_76.00;y_axis_rc_code;__PARENT__cf938be92580;;008 Calculations;;Y;;2.9.1.1
 C_76.00;y_axis_rc_code;__PARENT__1f7070f71fa8;__PARENT__cf938be92580;009 Numerator, denominator, ratio;;Y;;2.9.1.1
 C_76.00;y_axis_rc_code;__PARENT__94c7d660cb63;__PARENT__cf938be92580;039 Numerator calculations;;Y;;2.9.1.1
 C_76.00;y_axis_rc_code;__PARENT__84ef61d9b8c4;__PARENT__cf938be92580;299 Denominator calculations;;Y;;2.9.1.1
 C_76.00;y_axis_rc_code;__PARENT__5107a83b9a4d;__PARENT__cf938be92580;379 Pillar 2;;Y;;2.9.1.1
-C_76.00;y_axis_rc_code;10;__PARENT__1f7070f71fa8;Liquidity buffer;;;%;2.9.1.1
-C_76.00;y_axis_rc_code;20;__PARENT__1f7070f71fa8;Net liquidty outflow;;;%;2.9.1.1
+C_76.00;y_axis_rc_code;10;__PARENT__1f7070f71fa8;Liquidity buffer;;;;2.9.1.1
+C_76.00;y_axis_rc_code;20;__PARENT__1f7070f71fa8;Net liquidty outflow;;;;2.9.1.1
 C_76.00;y_axis_rc_code;30;__PARENT__1f7070f71fa8;Liquidity coverage ratio (%);;;%;2.9.1.1
 C_76.00;y_axis_rc_code;40;__PARENT__94c7d660cb63;L1 excl. EHQCB liquidity buffer (value according to Article 9): unadjusted;;;;2.9.1.1
 C_76.00;y_axis_rc_code;50;__PARENT__94c7d660cb63;L1 excl. EHQCB collateral 30 day outflows;;;;2.9.1.1
@@ -7425,11 +7425,11 @@ C_76.00;y_axis_rc_code;280;__PARENT__94c7d660cb63;Excess liquid asset amount;;;;
 C_76.00;y_axis_rc_code;290;__PARENT__94c7d660cb63;Liquidity buffer;;;;2.9.1.1
 C_76.00;y_axis_rc_code;300;__PARENT__84ef61d9b8c4;Total Outflows;;;;2.9.1.1
 C_76.00;y_axis_rc_code;310;__PARENT__84ef61d9b8c4;Fully Exempt Inflows;;;;2.9.1.1
-C_76.00;y_axis_rc_code;320;__PARENT__84ef61d9b8c4;Inflows Subject to 90% Cap;;;%;2.9.1.1
-C_76.00;y_axis_rc_code;330;__PARENT__84ef61d9b8c4;Inflows Subject to 75% Cap;;;%;2.9.1.1
+C_76.00;y_axis_rc_code;320;__PARENT__84ef61d9b8c4;Inflows Subject to 90% Cap;;;;2.9.1.1
+C_76.00;y_axis_rc_code;330;__PARENT__84ef61d9b8c4;Inflows Subject to 75% Cap;;;;2.9.1.1
 C_76.00;y_axis_rc_code;340;__PARENT__84ef61d9b8c4;Reduction for Fully Exempt Inflows;;;;2.9.1.1
-C_76.00;y_axis_rc_code;350;__PARENT__84ef61d9b8c4;Reduction for Inflows Subject to 90% Cap;;;%;2.9.1.1
-C_76.00;y_axis_rc_code;360;__PARENT__84ef61d9b8c4;Reduction for Inflows Subject to 75% Cap;;;%;2.9.1.1
+C_76.00;y_axis_rc_code;350;__PARENT__84ef61d9b8c4;Reduction for Inflows Subject to 90% Cap;;;;2.9.1.1
+C_76.00;y_axis_rc_code;360;__PARENT__84ef61d9b8c4;Reduction for Inflows Subject to 75% Cap;;;;2.9.1.1
 C_76.00;y_axis_rc_code;370;__PARENT__cf938be92580;Net liquidity outflow;;;;2.9.1.1
 C_76.00;y_axis_rc_code;380;__PARENT__5107a83b9a4d;PILLAR 2 REQUIREMENT as set out in Article 105 CRD;;;;2.9.1.1
 C_77.00;x_axis_rc_code;5;;Parent or subsidiary;;;;2.9.1.1
@@ -13649,7 +13649,7 @@ C_71.00;y_axis_rc_code;90;120;8;;;;3.0
 C_71.00;y_axis_rc_code;100;120;9;;;;3.0
 C_71.00;y_axis_rc_code;110;120;10;;;;3.0
 C_72.00;x_axis_rc_code;10;;Amount/Market value;;;;3.0
-C_72.00;x_axis_rc_code;30;;Applicable weight;;;;3.0
+C_72.00;x_axis_rc_code;30;;Applicable weight;;;%;3.0
 C_72.00;x_axis_rc_code;40;;Value according to Article 9;;;;3.0
 C_72.00;y_axis_rc_code;__PARENT__47a4440fb4f1;10;0479 Memorandum;;Y;;3.0
 C_72.00;y_axis_rc_code;10;;Total unadjusted liquid assets;;;;3.0
@@ -13675,8 +13675,8 @@ C_72.00;y_axis_rc_code;200;180;Qualifying CIU shares/units: underlying is extrem
 C_72.00;y_axis_rc_code;210;180;Central institutions: Level 1 EHQ covered bonds which are considered liquid assets for the depositing credit institution;;;;3.0
 C_72.00;y_axis_rc_code;220;10;Total unadjusted level 2 ASSETS;;;;3.0
 C_72.00;y_axis_rc_code;230;220;Total unadjusted level 2A assets;;;;3.0
-C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;%;3.0
-C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;%;3.0
+C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;;3.0
+C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;;3.0
 C_72.00;y_axis_rc_code;260;230;High quality covered bonds (CQS2);;;;3.0
 C_72.00;y_axis_rc_code;270;230;High quality covered bonds (Third Country, CQS1);;;;3.0
 C_72.00;y_axis_rc_code;280;230;Corporate debt securities (CQS1);;;;3.0
@@ -13685,7 +13685,7 @@ C_72.00;y_axis_rc_code;300;230;Central institutions: Level 2A assets which are c
 C_72.00;y_axis_rc_code;310;220;Total unadjusted level 2B assets;;;;3.0
 C_72.00;y_axis_rc_code;320;310;Asset-backed securities (residential, CQS1);;;;3.0
 C_72.00;y_axis_rc_code;330;310;Asset-backed securities (auto, CQS1);;;;3.0
-C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;%;3.0
+C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;;3.0
 C_72.00;y_axis_rc_code;350;310;Asset-backed securities (commercial or individuals, Member State, CQS1);;;;3.0
 C_72.00;y_axis_rc_code;360;310;Corporate debt securities (CQS2/3);;;;3.0
 C_72.00;y_axis_rc_code;370;310;Corporate debt securities - non-interest bearing assets (held by credit institutions for religious reasons) (CQS1/2/3;;;;3.0
@@ -13693,7 +13693,7 @@ C_72.00;y_axis_rc_code;380;310;Shares (major stock index);;;;3.0
 C_72.00;y_axis_rc_code;390;310;Non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;3.0
 C_72.00;y_axis_rc_code;400;310;Restricted-use central bank committed liquidity facilities;;;;3.0
 C_72.00;y_axis_rc_code;410;310;Qualifying CIU shares/units: underlying is asset-backed securities (residential or auto, CQS1);;;;3.0
-C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;%;3.0
+C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;;3.0
 C_72.00;y_axis_rc_code;430;310;Qualifying CIU shares/units: underlying is asset-backed securities (commercial or individuals, Member State, CQS1);;;;3.0
 C_72.00;y_axis_rc_code;440;310;Qualifying CIU shares/units: underlying is corporate debt securities (CQS2/3), shares (major stock index) or non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;3.0
 C_72.00;y_axis_rc_code;450;310;Deposits by network member with central institution (no obligated investment);;;;3.0
@@ -13706,7 +13706,7 @@ C_73.00;x_axis_rc_code;__PARENT__69c0b81540bd;;Weight;;Y;;3.0
 C_73.00;x_axis_rc_code;10;;Amount;;;;3.0
 C_73.00;x_axis_rc_code;20;;Market value of collateral extended;;;;3.0
 C_73.00;x_axis_rc_code;30;;Value of collateral extended according to Article 9;;;;3.0
-C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;;3.0
+C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;%;3.0
 C_73.00;x_axis_rc_code;60;;Outflow;;;;3.0
 C_73.00;y_axis_rc_code;__PARENT__ee0f1c524423;;1139 Memorandum items;;Y;;3.0
 C_73.00;y_axis_rc_code;__PARENT__b27fd42b256d;__PARENT__ee0f1c524423;1179 Operational deposits maintained for clearing, custody, cash management or other comparable services in the context of an established operational relationship;;Y;;3.0
@@ -13865,20 +13865,20 @@ C_74.00;x_axis_rc_code;__PARENT__db3ada31914a;;Applicable weight;;Y;;3.0
 C_74.00;x_axis_rc_code;__PARENT__434bed5fc150;;Inflow;;Y;;3.0
 C_74.00;x_axis_rc_code;__PARENT__7c94ad322bfd;;Market value of collateral received;;Y;;3.0
 C_74.00;x_axis_rc_code;__PARENT__acbc26ffc623;;Value of collateral received according to Article 9;;Y;;3.0
-C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;%;3.0
-C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;%;3.0
+C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;;3.0
+C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;;3.0
 C_74.00;x_axis_rc_code;30;__PARENT__43dc8532f7e5;Exempted from the cap on inflows;;;;3.0
-C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;%;3.0
-C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;%;3.0
+C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;;3.0
+C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;;3.0
 C_74.00;x_axis_rc_code;60;__PARENT__7c94ad322bfd;Exempted from the cap on inflows;;;;3.0
 C_74.00;x_axis_rc_code;80;__PARENT__db3ada31914a;Subject to the 75% cap on inflows;;;%;3.0
 C_74.00;x_axis_rc_code;90;__PARENT__db3ada31914a;Subject to the 90% cap on inflows;;;%;3.0
-C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;;3.0
-C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;%;3.0
-C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;%;3.0
+C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;%;3.0
+C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;;3.0
+C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;;3.0
 C_74.00;x_axis_rc_code;130;__PARENT__acbc26ffc623;Exempted from the cap on inflows;;;;3.0
-C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;%;3.0
-C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;%;3.0
+C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;;3.0
+C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;;3.0
 C_74.00;x_axis_rc_code;160;__PARENT__434bed5fc150;Exempted from the cap on inflows;;;;3.0
 C_74.00;y_axis_rc_code;__PARENT__1ce2e6790a15;;0439 Memorandum items;;Y;;3.0
 C_74.00;y_axis_rc_code;__PARENT__8e0194fb4ed0;__PARENT__1ce2e6790a15;0529 Secured lending waived from Article 17 (2) and (3);;Y;;3.0
@@ -13968,11 +13968,11 @@ C_75.01;x_axis_rc_code;10;;Market value of collateral lent;;;;3.0
 C_75.01;x_axis_rc_code;20;;Liquidity value of collateral lent;;;;3.0
 C_75.01;x_axis_rc_code;30;;Market value of collateral borrowed;;;;3.0
 C_75.01;x_axis_rc_code;40;;Liquidity value of collateral borrowed;;;;3.0
-C_75.01;x_axis_rc_code;50;;Standard weight;;;;3.0
-C_75.01;x_axis_rc_code;60;;Applicable weight;;;;3.0
+C_75.01;x_axis_rc_code;50;;Standard weight;;;%;3.0
+C_75.01;x_axis_rc_code;60;;Applicable weight;;;%;3.0
 C_75.01;x_axis_rc_code;70;;Outflows;;;;3.0
-C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;%;3.0
-C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;%;3.0
+C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;;3.0
+C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;;3.0
 C_75.01;x_axis_rc_code;100;;Inflows exempted from the cap on inflows;;;;3.0
 C_75.01;y_axis_rc_code;__PARENT__c51fcfe0a05c;;2729 Memorandum items;;Y;;3.0
 C_75.01;y_axis_rc_code;__PARENT__0c5b027f2dd3;__PARENT__c51fcfe0a05c;2749 Collateral swaps waived from Article 17 (2) and (3);;Y;;3.0
@@ -14258,14 +14258,14 @@ C_75.01;y_axis_rc_code;2790;__PARENT__0c5b027f2dd3;of which: collateral lent is 
 C_75.01;y_axis_rc_code;2800;__PARENT__0c5b027f2dd3;of which: collateral lent is L1 EHQCB;;;;3.0
 C_75.01;y_axis_rc_code;2810;__PARENT__0c5b027f2dd3;of which: collateral lent is L2A;;;;3.0
 C_75.01;y_axis_rc_code;2820;__PARENT__0c5b027f2dd3;of which: collateral lent is L2B;;;;3.0
-C_76.00;x_axis_rc_code;10;;Value / Percentage;;;%;3.0
+C_76.00;x_axis_rc_code;10;;Value / Percentage;;;;3.0
 C_76.00;y_axis_rc_code;__PARENT__b3b2c45251b7;;0008 Calculations;;Y;;3.0
 C_76.00;y_axis_rc_code;__PARENT__8f61f5fef94f;__PARENT__b3b2c45251b7;0009 Numerator, denominator, ratio;;Y;;3.0
 C_76.00;y_axis_rc_code;__PARENT__8f9ff3f18abc;__PARENT__b3b2c45251b7;0039 Numerator calculations;;Y;;3.0
 C_76.00;y_axis_rc_code;__PARENT__bdc45e3f327b;__PARENT__b3b2c45251b7;0299 Denominator calculations;;Y;;3.0
 C_76.00;y_axis_rc_code;__PARENT__27430a833c69;__PARENT__b3b2c45251b7;0379 Pillar 2;;Y;;3.0
-C_76.00;y_axis_rc_code;10;__PARENT__8f61f5fef94f;Liquidity buffer;;;%;3.0
-C_76.00;y_axis_rc_code;20;__PARENT__8f61f5fef94f;Net liquidty outflow;;;%;3.0
+C_76.00;y_axis_rc_code;10;__PARENT__8f61f5fef94f;Liquidity buffer;;;;3.0
+C_76.00;y_axis_rc_code;20;__PARENT__8f61f5fef94f;Net liquidty outflow;;;;3.0
 C_76.00;y_axis_rc_code;30;__PARENT__8f61f5fef94f;Liquidity coverage ratio (%);;;%;3.0
 C_76.00;y_axis_rc_code;40;__PARENT__8f9ff3f18abc;L1 excl. EHQCB liquidity buffer (value according to Article 9): unadjusted;;;;3.0
 C_76.00;y_axis_rc_code;50;__PARENT__8f9ff3f18abc;L1 excl. EHQCB collateral 30 day outflows;;;;3.0
@@ -14289,11 +14289,11 @@ C_76.00;y_axis_rc_code;280;__PARENT__8f9ff3f18abc;Excess liquid asset amount;;;;
 C_76.00;y_axis_rc_code;290;__PARENT__8f9ff3f18abc;Liquidity buffer;;;;3.0
 C_76.00;y_axis_rc_code;300;__PARENT__bdc45e3f327b;Total Outflows;;;;3.0
 C_76.00;y_axis_rc_code;310;__PARENT__bdc45e3f327b;Fully Exempt Inflows;;;;3.0
-C_76.00;y_axis_rc_code;320;__PARENT__bdc45e3f327b;Inflows Subject to 90% Cap;;;%;3.0
-C_76.00;y_axis_rc_code;330;__PARENT__bdc45e3f327b;Inflows Subject to 75% Cap;;;%;3.0
+C_76.00;y_axis_rc_code;320;__PARENT__bdc45e3f327b;Inflows Subject to 90% Cap;;;;3.0
+C_76.00;y_axis_rc_code;330;__PARENT__bdc45e3f327b;Inflows Subject to 75% Cap;;;;3.0
 C_76.00;y_axis_rc_code;340;__PARENT__bdc45e3f327b;Reduction for Fully Exempt Inflows;;;;3.0
-C_76.00;y_axis_rc_code;350;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 90% Cap;;;%;3.0
-C_76.00;y_axis_rc_code;360;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 75% Cap;;;%;3.0
+C_76.00;y_axis_rc_code;350;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 90% Cap;;;;3.0
+C_76.00;y_axis_rc_code;360;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 75% Cap;;;;3.0
 C_76.00;y_axis_rc_code;370;__PARENT__b3b2c45251b7;Net liquidity outflow;;;;3.0
 C_76.00;y_axis_rc_code;380;__PARENT__27430a833c69;PILLAR 2 REQUIREMENT as set out in Article 105 CRD;;;;3.0
 C_77.00;x_axis_rc_code;5;;Parent or subsidiary;;;;3.0
@@ -24025,7 +24025,7 @@ C_71.00;y_axis_rc_code;90;120;8;;;;3.2
 C_71.00;y_axis_rc_code;100;120;9;;;;3.2
 C_71.00;y_axis_rc_code;110;120;10;;;;3.2
 C_72.00;x_axis_rc_code;10;;Amount/Market value;;;;3.2
-C_72.00;x_axis_rc_code;30;;Applicable weight;;;;3.2
+C_72.00;x_axis_rc_code;30;;Applicable weight;;;%;3.2
 C_72.00;x_axis_rc_code;40;;Value according to Article 9;;;;3.2
 C_72.00;y_axis_rc_code;__PARENT__47a4440fb4f1;10;0479 Memorandum;;Y;;3.2
 C_72.00;y_axis_rc_code;10;;Total unadjusted liquid assets;;;;3.2
@@ -24051,8 +24051,8 @@ C_72.00;y_axis_rc_code;200;180;Qualifying CIU shares/units: underlying is extrem
 C_72.00;y_axis_rc_code;210;180;Central institutions: Level 1 EHQ covered bonds which are considered liquid assets for the depositing credit institution;;;;3.2
 C_72.00;y_axis_rc_code;220;10;Total unadjusted level 2 ASSETS;;;;3.2
 C_72.00;y_axis_rc_code;230;220;Total unadjusted level 2A assets;;;;3.2
-C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;%;3.2
-C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;%;3.2
+C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;;3.2
+C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;;3.2
 C_72.00;y_axis_rc_code;260;230;High quality covered bonds (CQS2);;;;3.2
 C_72.00;y_axis_rc_code;270;230;High quality covered bonds (Third Country, CQS1);;;;3.2
 C_72.00;y_axis_rc_code;280;230;Corporate debt securities (CQS1);;;;3.2
@@ -24061,7 +24061,7 @@ C_72.00;y_axis_rc_code;300;230;Central institutions: Level 2A assets which are c
 C_72.00;y_axis_rc_code;310;220;Total unadjusted level 2B assets;;;;3.2
 C_72.00;y_axis_rc_code;320;310;Asset-backed securities (residential, CQS1);;;;3.2
 C_72.00;y_axis_rc_code;330;310;Asset-backed securities (auto, CQS1);;;;3.2
-C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;%;3.2
+C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;;3.2
 C_72.00;y_axis_rc_code;350;310;Asset-backed securities (commercial or individuals, Member State, CQS1);;;;3.2
 C_72.00;y_axis_rc_code;360;310;Corporate debt securities (CQS2/3);;;;3.2
 C_72.00;y_axis_rc_code;370;310;Corporate debt securities - non-interest bearing assets (held by credit institutions for religious reasons) (CQS1/2/3;;;;3.2
@@ -24069,7 +24069,7 @@ C_72.00;y_axis_rc_code;380;310;Shares (major stock index);;;;3.2
 C_72.00;y_axis_rc_code;390;310;Non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;3.2
 C_72.00;y_axis_rc_code;400;310;Restricted-use central bank committed liquidity facilities;;;;3.2
 C_72.00;y_axis_rc_code;410;310;Qualifying CIU shares/units: underlying is asset-backed securities (residential or auto, CQS1);;;;3.2
-C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;%;3.2
+C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;;3.2
 C_72.00;y_axis_rc_code;430;310;Qualifying CIU shares/units: underlying is asset-backed securities (commercial or individuals, Member State, CQS1);;;;3.2
 C_72.00;y_axis_rc_code;440;310;Qualifying CIU shares/units: underlying is corporate debt securities (CQS2/3), shares (major stock index) or non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;3.2
 C_72.00;y_axis_rc_code;450;310;Deposits by network member with central institution (no obligated investment);;;;3.2
@@ -24082,7 +24082,7 @@ C_73.00;x_axis_rc_code;__PARENT__69c0b81540bd;;Weight;;Y;;3.2
 C_73.00;x_axis_rc_code;10;;Amount;;;;3.2
 C_73.00;x_axis_rc_code;20;;Market value of collateral extended;;;;3.2
 C_73.00;x_axis_rc_code;30;;Value of collateral extended according to Article 9;;;;3.2
-C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;;3.2
+C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;%;3.2
 C_73.00;x_axis_rc_code;60;;Outflow;;;;3.2
 C_73.00;y_axis_rc_code;__PARENT__ee0f1c524423;;1139 Memorandum items;;Y;;3.2
 C_73.00;y_axis_rc_code;__PARENT__b27fd42b256d;__PARENT__ee0f1c524423;1179 Operational deposits maintained for clearing, custody, cash management or other comparable services in the context of an established operational relationship;;Y;;3.2
@@ -24241,20 +24241,20 @@ C_74.00;x_axis_rc_code;__PARENT__db3ada31914a;;Applicable weight;;Y;;3.2
 C_74.00;x_axis_rc_code;__PARENT__434bed5fc150;;Inflow;;Y;;3.2
 C_74.00;x_axis_rc_code;__PARENT__7c94ad322bfd;;Market value of collateral received;;Y;;3.2
 C_74.00;x_axis_rc_code;__PARENT__acbc26ffc623;;Value of collateral received according to Article 9;;Y;;3.2
-C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;%;3.2
-C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;%;3.2
+C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;;3.2
+C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;;3.2
 C_74.00;x_axis_rc_code;30;__PARENT__43dc8532f7e5;Exempted from the cap on inflows;;;;3.2
-C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;%;3.2
-C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;%;3.2
+C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;;3.2
+C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;;3.2
 C_74.00;x_axis_rc_code;60;__PARENT__7c94ad322bfd;Exempted from the cap on inflows;;;;3.2
 C_74.00;x_axis_rc_code;80;__PARENT__db3ada31914a;Subject to the 75% cap on inflows;;;%;3.2
 C_74.00;x_axis_rc_code;90;__PARENT__db3ada31914a;Subject to the 90% cap on inflows;;;%;3.2
-C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;;3.2
-C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;%;3.2
-C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;%;3.2
+C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;%;3.2
+C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;;3.2
+C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;;3.2
 C_74.00;x_axis_rc_code;130;__PARENT__acbc26ffc623;Exempted from the cap on inflows;;;;3.2
-C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;%;3.2
-C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;%;3.2
+C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;;3.2
+C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;;3.2
 C_74.00;x_axis_rc_code;160;__PARENT__434bed5fc150;Exempted from the cap on inflows;;;;3.2
 C_74.00;y_axis_rc_code;__PARENT__1ce2e6790a15;;0439 Memorandum items;;Y;;3.2
 C_74.00;y_axis_rc_code;__PARENT__8e0194fb4ed0;__PARENT__1ce2e6790a15;0529 Secured lending waived from Article 17 (2) and (3);;Y;;3.2
@@ -24344,11 +24344,11 @@ C_75.01;x_axis_rc_code;10;;Market value of collateral lent;;;;3.2
 C_75.01;x_axis_rc_code;20;;Liquidity value of collateral lent;;;;3.2
 C_75.01;x_axis_rc_code;30;;Market value of collateral borrowed;;;;3.2
 C_75.01;x_axis_rc_code;40;;Liquidity value of collateral borrowed;;;;3.2
-C_75.01;x_axis_rc_code;50;;Standard weight;;;;3.2
-C_75.01;x_axis_rc_code;60;;Applicable weight;;;;3.2
+C_75.01;x_axis_rc_code;50;;Standard weight;;;%;3.2
+C_75.01;x_axis_rc_code;60;;Applicable weight;;;%;3.2
 C_75.01;x_axis_rc_code;70;;Outflows;;;;3.2
-C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;%;3.2
-C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;%;3.2
+C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;;3.2
+C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;;3.2
 C_75.01;x_axis_rc_code;100;;Inflows exempted from the cap on inflows;;;;3.2
 C_75.01;y_axis_rc_code;__PARENT__c51fcfe0a05c;;2729 Memorandum items;;Y;;3.2
 C_75.01;y_axis_rc_code;__PARENT__0c5b027f2dd3;__PARENT__c51fcfe0a05c;2749 Collateral swaps waived from Article 17 (2) and (3);;Y;;3.2
@@ -24634,14 +24634,14 @@ C_75.01;y_axis_rc_code;2790;__PARENT__0c5b027f2dd3;of which: collateral lent is 
 C_75.01;y_axis_rc_code;2800;__PARENT__0c5b027f2dd3;of which: collateral lent is L1 EHQCB;;;;3.2
 C_75.01;y_axis_rc_code;2810;__PARENT__0c5b027f2dd3;of which: collateral lent is L2A;;;;3.2
 C_75.01;y_axis_rc_code;2820;__PARENT__0c5b027f2dd3;of which: collateral lent is L2B;;;;3.2
-C_76.00;x_axis_rc_code;10;;Value / Percentage;;;%;3.2
+C_76.00;x_axis_rc_code;10;;Value / Percentage;;;;3.2
 C_76.00;y_axis_rc_code;__PARENT__b3b2c45251b7;;0008 Calculations;;Y;;3.2
 C_76.00;y_axis_rc_code;__PARENT__8f61f5fef94f;__PARENT__b3b2c45251b7;0009 Numerator, denominator, ratio;;Y;;3.2
 C_76.00;y_axis_rc_code;__PARENT__8f9ff3f18abc;__PARENT__b3b2c45251b7;0039 Numerator calculations;;Y;;3.2
 C_76.00;y_axis_rc_code;__PARENT__bdc45e3f327b;__PARENT__b3b2c45251b7;0299 Denominator calculations;;Y;;3.2
 C_76.00;y_axis_rc_code;__PARENT__27430a833c69;__PARENT__b3b2c45251b7;0379 Pillar 2;;Y;;3.2
-C_76.00;y_axis_rc_code;10;__PARENT__8f61f5fef94f;Liquidity buffer;;;%;3.2
-C_76.00;y_axis_rc_code;20;__PARENT__8f61f5fef94f;Net liquidty outflow;;;%;3.2
+C_76.00;y_axis_rc_code;10;__PARENT__8f61f5fef94f;Liquidity buffer;;;;3.2
+C_76.00;y_axis_rc_code;20;__PARENT__8f61f5fef94f;Net liquidty outflow;;;;3.2
 C_76.00;y_axis_rc_code;30;__PARENT__8f61f5fef94f;Liquidity coverage ratio (%);;;%;3.2
 C_76.00;y_axis_rc_code;40;__PARENT__8f9ff3f18abc;L1 excl. EHQCB liquidity buffer (value according to Article 9): unadjusted;;;;3.2
 C_76.00;y_axis_rc_code;50;__PARENT__8f9ff3f18abc;L1 excl. EHQCB collateral 30 day outflows;;;;3.2
@@ -24665,11 +24665,11 @@ C_76.00;y_axis_rc_code;280;__PARENT__8f9ff3f18abc;Excess liquid asset amount;;;;
 C_76.00;y_axis_rc_code;290;__PARENT__8f9ff3f18abc;Liquidity buffer;;;;3.2
 C_76.00;y_axis_rc_code;300;__PARENT__bdc45e3f327b;Total Outflows;;;;3.2
 C_76.00;y_axis_rc_code;310;__PARENT__bdc45e3f327b;Fully Exempt Inflows;;;;3.2
-C_76.00;y_axis_rc_code;320;__PARENT__bdc45e3f327b;Inflows Subject to 90% Cap;;;%;3.2
-C_76.00;y_axis_rc_code;330;__PARENT__bdc45e3f327b;Inflows Subject to 75% Cap;;;%;3.2
+C_76.00;y_axis_rc_code;320;__PARENT__bdc45e3f327b;Inflows Subject to 90% Cap;;;;3.2
+C_76.00;y_axis_rc_code;330;__PARENT__bdc45e3f327b;Inflows Subject to 75% Cap;;;;3.2
 C_76.00;y_axis_rc_code;340;__PARENT__bdc45e3f327b;Reduction for Fully Exempt Inflows;;;;3.2
-C_76.00;y_axis_rc_code;350;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 90% Cap;;;%;3.2
-C_76.00;y_axis_rc_code;360;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 75% Cap;;;%;3.2
+C_76.00;y_axis_rc_code;350;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 90% Cap;;;;3.2
+C_76.00;y_axis_rc_code;360;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 75% Cap;;;;3.2
 C_76.00;y_axis_rc_code;370;__PARENT__b3b2c45251b7;Net liquidity outflow;;;;3.2
 C_76.00;y_axis_rc_code;380;__PARENT__27430a833c69;PILLAR 2 REQUIREMENT as set out in Article 105 CRD;;;;3.2
 C_77.00;x_axis_rc_code;5;;Parent or subsidiary;;;;3.2
@@ -47029,7 +47029,7 @@ C_91.00;y_axis_rc_code;110;__PARENT__d1f9d0b96fa8;Securitisation included in the
 C_91.00;y_axis_rc_code;120;__PARENT__163e0bdc50c3;Exotic underlyings;;;;4.2
 C_91.00;y_axis_rc_code;130;__PARENT__163e0bdc50c3;Other residual risks;;;;4.2
 C_72.00;x_axis_rc_code;10;;Amount/Market value;;;;4.2
-C_72.00;x_axis_rc_code;30;;Applicable weight;;;;4.2
+C_72.00;x_axis_rc_code;30;;Applicable weight;;;%;4.2
 C_72.00;x_axis_rc_code;40;;Value according to Article 9;;;;4.2
 C_72.00;y_axis_rc_code;__PARENT__47a4440fb4f1;10;0479 Memorandum;;Y;;4.2
 C_72.00;y_axis_rc_code;10;;Total unadjusted liquid assets;;;;4.2
@@ -47055,8 +47055,8 @@ C_72.00;y_axis_rc_code;200;180;Qualifying CIU shares/units: underlying is extrem
 C_72.00;y_axis_rc_code;210;180;Central institutions: Level 1 EHQ covered bonds which are considered liquid assets for the depositing credit institution;;;;4.2
 C_72.00;y_axis_rc_code;220;10;Total unadjusted level 2 ASSETS;;;;4.2
 C_72.00;y_axis_rc_code;230;220;Total unadjusted level 2A assets;;;;4.2
-C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;%;4.2
-C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;%;4.2
+C_72.00;y_axis_rc_code;240;230;Regional government / local authorities or Public Sector Entity assets (Member State, RW20%);;;;4.2
+C_72.00;y_axis_rc_code;250;230;Central bank or central / regional government or local authorities or Public Sector Entity assets (Third Country, RW20%);;;;4.2
 C_72.00;y_axis_rc_code;260;230;High quality covered bonds (CQS2);;;;4.2
 C_72.00;y_axis_rc_code;270;230;High quality covered bonds (Third Country, CQS1);;;;4.2
 C_72.00;y_axis_rc_code;280;230;Corporate debt securities (CQS1);;;;4.2
@@ -47065,7 +47065,7 @@ C_72.00;y_axis_rc_code;300;230;Central institutions: Level 2A assets which are c
 C_72.00;y_axis_rc_code;310;220;Total unadjusted level 2B assets;;;;4.2
 C_72.00;y_axis_rc_code;320;310;Asset-backed securities (residential, CQS1);;;;4.2
 C_72.00;y_axis_rc_code;330;310;Asset-backed securities (auto, CQS1);;;;4.2
-C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;%;4.2
+C_72.00;y_axis_rc_code;340;310;High quality covered bonds (RW35%);;;;4.2
 C_72.00;y_axis_rc_code;350;310;Asset-backed securities (commercial or individuals, Member State, CQS1);;;;4.2
 C_72.00;y_axis_rc_code;360;310;Corporate debt securities (CQS2/3);;;;4.2
 C_72.00;y_axis_rc_code;370;310;Corporate debt securities - non-interest bearing assets (held by credit institutions for religious reasons) (CQS1/2/3;;;;4.2
@@ -47073,7 +47073,7 @@ C_72.00;y_axis_rc_code;380;310;Shares (major stock index);;;;4.2
 C_72.00;y_axis_rc_code;390;310;Non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;4.2
 C_72.00;y_axis_rc_code;400;310;Restricted-use central bank committed liquidity facilities;;;;4.2
 C_72.00;y_axis_rc_code;410;310;Qualifying CIU shares/units: underlying is asset-backed securities (residential or auto, CQS1);;;;4.2
-C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;%;4.2
+C_72.00;y_axis_rc_code;420;310;Qualifying CIU shares/units: underlying is high quality covered bonds (RW35%);;;;4.2
 C_72.00;y_axis_rc_code;430;310;Qualifying CIU shares/units: underlying is asset-backed securities (commercial or individuals, Member State, CQS1);;;;4.2
 C_72.00;y_axis_rc_code;440;310;Qualifying CIU shares/units: underlying is corporate debt securities (CQS2/3), shares (major stock index) or non-interest bearing assets (held by credit institutions for religious reasons) (CQS3-5);;;;4.2
 C_72.00;y_axis_rc_code;450;310;Deposits by network member with central institution (no obligated investment);;;;4.2
@@ -47105,7 +47105,7 @@ C_73.00;x_axis_rc_code;__PARENT__69c0b81540bd;;Weight;;Y;;4.2
 C_73.00;x_axis_rc_code;10;;Amount;;;;4.2
 C_73.00;x_axis_rc_code;20;;Market value of collateral extended;;;;4.2
 C_73.00;x_axis_rc_code;30;;Value of collateral extended according to Article 9;;;;4.2
-C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;;4.2
+C_73.00;x_axis_rc_code;50;__PARENT__69c0b81540bd;Applicable weight;;;%;4.2
 C_73.00;x_axis_rc_code;60;;Outflow;;;;4.2
 C_73.00;y_axis_rc_code;__PARENT__ee0f1c524423;;1139 Memorandum items;;Y;;4.2
 C_73.00;y_axis_rc_code;__PARENT__b27fd42b256d;__PARENT__ee0f1c524423;1179 Operational deposits maintained for clearing, custody, cash management or other comparable services in the context of an established operational relationship;;Y;;4.2
@@ -47283,20 +47283,20 @@ C_74.00;x_axis_rc_code;__PARENT__db3ada31914a;;Applicable weight;;Y;;4.2
 C_74.00;x_axis_rc_code;__PARENT__434bed5fc150;;Inflow;;Y;;4.2
 C_74.00;x_axis_rc_code;__PARENT__7c94ad322bfd;;Market value of collateral received;;Y;;4.2
 C_74.00;x_axis_rc_code;__PARENT__acbc26ffc623;;Value of collateral received according to Article 9;;Y;;4.2
-C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;%;4.2
-C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;%;4.2
+C_74.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;Subject to the 75% cap on inflows;;;;4.2
+C_74.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;Subject to the 90% cap on inflows;;;;4.2
 C_74.00;x_axis_rc_code;30;__PARENT__43dc8532f7e5;Exempted from the cap on inflows;;;;4.2
-C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;%;4.2
-C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;%;4.2
+C_74.00;x_axis_rc_code;40;__PARENT__7c94ad322bfd;Subject to the 75% cap on inflows;;;;4.2
+C_74.00;x_axis_rc_code;50;__PARENT__7c94ad322bfd;Subject to the 90% cap on inflows;;;;4.2
 C_74.00;x_axis_rc_code;60;__PARENT__7c94ad322bfd;Exempted from the cap on inflows;;;;4.2
 C_74.00;x_axis_rc_code;80;__PARENT__db3ada31914a;Subject to the 75% cap on inflows;;;%;4.2
 C_74.00;x_axis_rc_code;90;__PARENT__db3ada31914a;Subject to the 90% cap on inflows;;;%;4.2
-C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;;4.2
-C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;%;4.2
-C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;%;4.2
+C_74.00;x_axis_rc_code;100;__PARENT__db3ada31914a;Exempted from the cap on inflows;;;%;4.2
+C_74.00;x_axis_rc_code;110;__PARENT__acbc26ffc623;Subject to the 75% cap on inflows;;;;4.2
+C_74.00;x_axis_rc_code;120;__PARENT__acbc26ffc623;Subject to the 90% cap on inflows;;;;4.2
 C_74.00;x_axis_rc_code;130;__PARENT__acbc26ffc623;Exempted from the cap on inflows;;;;4.2
-C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;%;4.2
-C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;%;4.2
+C_74.00;x_axis_rc_code;140;__PARENT__434bed5fc150;Subject to the 75% cap on inflows;;;;4.2
+C_74.00;x_axis_rc_code;150;__PARENT__434bed5fc150;Subject to the 90% cap on inflows;;;;4.2
 C_74.00;x_axis_rc_code;160;__PARENT__434bed5fc150;Exempted from the cap on inflows;;;;4.2
 C_74.00;y_axis_rc_code;__PARENT__1ce2e6790a15;;0439 Memorandum items;;Y;;4.2
 C_74.00;y_axis_rc_code;__PARENT__8e0194fb4ed0;__PARENT__1ce2e6790a15;0529 Secured lending waived from Article 17 (2) and (3);;Y;;4.2
@@ -47405,11 +47405,11 @@ C_75.01;x_axis_rc_code;10;;Market value of collateral lent;;;;4.2
 C_75.01;x_axis_rc_code;20;;Liquidity value of collateral lent;;;;4.2
 C_75.01;x_axis_rc_code;30;;Market value of collateral borrowed;;;;4.2
 C_75.01;x_axis_rc_code;40;;Liquidity value of collateral borrowed;;;;4.2
-C_75.01;x_axis_rc_code;50;;Standard weight;;;;4.2
-C_75.01;x_axis_rc_code;60;;Applicable weight;;;;4.2
+C_75.01;x_axis_rc_code;50;;Standard weight;;;%;4.2
+C_75.01;x_axis_rc_code;60;;Applicable weight;;;%;4.2
 C_75.01;x_axis_rc_code;70;;Outflows;;;;4.2
-C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;%;4.2
-C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;%;4.2
+C_75.01;x_axis_rc_code;80;;Inflows subject to the 75% cap on inflows;;;;4.2
+C_75.01;x_axis_rc_code;90;;Inflows subject to the 90% cap on inflows;;;;4.2
 C_75.01;x_axis_rc_code;100;;Inflows exempted from the cap on inflows;;;;4.2
 C_75.01;y_axis_rc_code;__PARENT__c51fcfe0a05c;;2729 Memorandum items;;Y;;4.2
 C_75.01;y_axis_rc_code;__PARENT__0c5b027f2dd3;__PARENT__c51fcfe0a05c;2749 Collateral swaps waived from Article 17 (2) and (3);;Y;;4.2
@@ -47714,14 +47714,14 @@ C_75.01;z_axis_rc_code;SGD;;Singapore Dollar;;;;4.2
 C_75.01;z_axis_rc_code;HKD;;Hong Kong Dollar;;;;4.2
 C_75.01;z_axis_rc_code;TRY;;Turkish Lira;;;;4.2
 C_75.01;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
-C_76.00;x_axis_rc_code;10;;Value / Percentage;;;%;4.2
+C_76.00;x_axis_rc_code;10;;Value / Percentage;;;;4.2
 C_76.00;y_axis_rc_code;__PARENT__b3b2c45251b7;;0008 Calculations;;Y;;4.2
 C_76.00;y_axis_rc_code;__PARENT__8f61f5fef94f;__PARENT__b3b2c45251b7;0009 Numerator, denominator, ratio;;Y;;4.2
 C_76.00;y_axis_rc_code;__PARENT__8f9ff3f18abc;__PARENT__b3b2c45251b7;0039 Numerator calculations;;Y;;4.2
 C_76.00;y_axis_rc_code;__PARENT__bdc45e3f327b;__PARENT__b3b2c45251b7;0299 Denominator calculations;;Y;;4.2
 C_76.00;y_axis_rc_code;__PARENT__27430a833c69;__PARENT__b3b2c45251b7;0379 Pillar 2;;Y;;4.2
-C_76.00;y_axis_rc_code;10;__PARENT__8f61f5fef94f;Liquidity buffer;;;%;4.2
-C_76.00;y_axis_rc_code;20;__PARENT__8f61f5fef94f;Net liquidty outflow;;;%;4.2
+C_76.00;y_axis_rc_code;10;__PARENT__8f61f5fef94f;Liquidity buffer;;;;4.2
+C_76.00;y_axis_rc_code;20;__PARENT__8f61f5fef94f;Net liquidty outflow;;;;4.2
 C_76.00;y_axis_rc_code;30;__PARENT__8f61f5fef94f;Liquidity coverage ratio (%);;;%;4.2
 C_76.00;y_axis_rc_code;40;__PARENT__8f9ff3f18abc;L1 excl. EHQCB liquidity buffer (value according to Article 9): unadjusted;;;;4.2
 C_76.00;y_axis_rc_code;50;__PARENT__8f9ff3f18abc;L1 excl. EHQCB collateral 30 day outflows;;;;4.2
@@ -47744,11 +47744,11 @@ C_76.00;y_axis_rc_code;251;__PARENT__8f9ff3f18abc;"L2B ""adjusted amount""";;;;4
 C_76.00;y_axis_rc_code;280;__PARENT__8f9ff3f18abc;Excess liquid asset amount;;;;4.2
 C_76.00;y_axis_rc_code;300;__PARENT__bdc45e3f327b;Total Outflows;;;;4.2
 C_76.00;y_axis_rc_code;310;__PARENT__bdc45e3f327b;Fully Exempt Inflows;;;;4.2
-C_76.00;y_axis_rc_code;320;__PARENT__bdc45e3f327b;Inflows Subject to 90% Cap;;;%;4.2
-C_76.00;y_axis_rc_code;330;__PARENT__bdc45e3f327b;Inflows Subject to 75% Cap;;;%;4.2
+C_76.00;y_axis_rc_code;320;__PARENT__bdc45e3f327b;Inflows Subject to 90% Cap;;;;4.2
+C_76.00;y_axis_rc_code;330;__PARENT__bdc45e3f327b;Inflows Subject to 75% Cap;;;;4.2
 C_76.00;y_axis_rc_code;340;__PARENT__bdc45e3f327b;Reduction for Fully Exempt Inflows;;;;4.2
-C_76.00;y_axis_rc_code;350;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 90% Cap;;;%;4.2
-C_76.00;y_axis_rc_code;360;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 75% Cap;;;%;4.2
+C_76.00;y_axis_rc_code;350;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 90% Cap;;;;4.2
+C_76.00;y_axis_rc_code;360;__PARENT__bdc45e3f327b;Reduction for Inflows Subject to 75% Cap;;;;4.2
 C_76.00;y_axis_rc_code;380;__PARENT__27430a833c69;PILLAR 2 REQUIREMENT as set out in Article 105 CRD;;;;4.2
 C_76.00;y_axis_rc_code;290;__PARENT__8f9ff3f18abc;Liquidity buffer;;;;4.2
 C_76.00;y_axis_rc_code;370;__PARENT__bdc45e3f327b;Net liquidity outflow;;;;4.2

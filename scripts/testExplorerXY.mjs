@@ -60,6 +60,7 @@ assert.equal(header[0][0].colSpan,2);
 assert.equal(header[0][1].rowSpan,2);
 checkHeaders(["A > Shared > One","A > Shared > Two","B > Shared > Three","A > Shared > Four","Solo"].map((hierarchyPath,i)=>({hierarchyPath,code:String(i)})));
 assert.equal(checkHeaders([{hierarchyPath:Array.from({length:12},(_,i)=>`Level ${i}`).join(" > "),code:"deep"},{hierarchyPath:"Short",code:"short"}]).length,12);
+assert.deepEqual(checkHeaders([{hierarchyPath:"Value / Percentage",code:"0010"}]).map(level=>level.map(cell=>cell.label)),[["Value / Percentage"]]);
 
 const singleSelectionDenominator={path:"10",scope:"selection",numeratorCode:"70"};
 assert.equal(isExplorerContributionChild("unrelated branch",singleSelectionDenominator,"70"),true);

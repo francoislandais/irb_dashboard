@@ -241,15 +241,27 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
     """Resolve the scale from the reported measure before label heuristics.
 
     C_80.00 has the same maturity labels under both Amount and Applicable RSF
-    factor. Its Y labels describe assets (including LCR haircuts and maturity
-    ranges), never the scale of the reported measure. This rule covers all
-    source sheet suffixes and frameworks before consulting old curated formats.
+    factor. In C_72–C_75, weight columns are fractions while caps mentioned
+    in amount labels are only categories. C_76's sole X column mixes amounts
+    and a ratio, distinguished by Y code 30. These source-specific rules cover
+    all sheet suffixes and frameworks before consulting old curated formats.
     """
-    if re.fullmatch(r"C_80\.00(?:\.[A-Za-z])?", table_id, flags=re.IGNORECASE):
+    template = re.sub(r"\.[A-Za-z]$", "", table_id).upper()
+    if template == "C_80.00":
         if coordinate == AXIS_COORDINATES["y"]:
             return ""
         if coordinate == AXIS_COORDINATES["x"]:
             return "%" if description.casefold().startswith("applicable rsf factor/") else ""
+    if template in {"C_72.00", "C_73.00", "C_74.00", "C_75.01", "C_76.00"}:
+        if coordinate == AXIS_COORDINATES["y"]:
+            return "%" if template == "C_76.00" and code_text(code) == "30" else ""
+        if coordinate == AXIS_COORDINATES["x"]:
+            measure = description.casefold().strip()
+            if template == "C_74.00":
+                return "%" if measure.startswith("applicable weight/") else ""
+            if template == "C_76.00":
+                return ""
+            return "%" if measure in {"applicable weight", "weight/applicable weight", "standard weight"} else ""
     return production_display_format(table_id, coordinate, code, description) or infer_display_format(description)
 
 

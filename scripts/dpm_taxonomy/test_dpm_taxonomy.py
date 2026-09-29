@@ -19,6 +19,29 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_liquidity_coverage_formats_follow_measure_and_c76_ratio_row(self):
+        cases = {
+            ("C_72.00", "x_axis_rc_code", "30", "Applicable weight"): "%",
+            ("C_72.00", "y_axis_rc_code", "340", "High quality covered bonds (RW35%)"): "",
+            ("C_73.00", "x_axis_rc_code", "50", "Weight/Applicable weight"): "%",
+            ("C_73.00", "x_axis_rc_code", "60", "Outflow"): "",
+            ("C_74.00", "x_axis_rc_code", "10", "Amount/Subject to the 75% cap on inflows"): "",
+            ("C_74.00", "x_axis_rc_code", "80", "Applicable weight/Subject to the 75% cap on inflows"): "%",
+            ("C_74.00", "x_axis_rc_code", "100", "Applicable weight/Exempted from the cap on inflows"): "%",
+            ("C_74.00", "x_axis_rc_code", "140", "Inflow/Subject to the 75% cap on inflows"): "",
+            ("C_75.01", "x_axis_rc_code", "50", "Standard weight"): "%",
+            ("C_75.01", "x_axis_rc_code", "60", "Applicable weight"): "%",
+            ("C_75.01", "x_axis_rc_code", "80", "Inflows subject to the 75% cap on inflows"): "",
+            ("C_76.00", "x_axis_rc_code", "10", "Value / Percentage"): "",
+            ("C_76.00", "y_axis_rc_code", "30", "Liquidity coverage ratio (%)"): "%",
+            ("C_76.00", "y_axis_rc_code", "320", "Inflows Subject to 90% Cap"): "",
+        }
+        for (table_id, coordinate, code, description), expected in cases.items():
+            with self.subTest(table_id=table_id, coordinate=coordinate, code=code):
+                self.assertEqual(builder.dimension_display_format(
+                    f"{table_id}.a", coordinate, code, description
+                ), expected)
+
     def test_c80_rsf_scale_follows_x_measure_across_sheet_suffixes(self):
         cases = {
             ("x_axis_rc_code", "10", "Amount/Non-HQLA by maturity/< 6 months"): "",

@@ -66,12 +66,11 @@ export function buildExplorerXYHeaders(columns) {
   // column.hierarchyPath already has every literal ">" escaped by
   // parseDescriptionHierarchy before being joined with " > " (see
   // core/hierarchyPath.js), so splitting on ">" here is unambiguous - and
-  // unescaping each segment restores it for display. The (?!=) guard stays
-  // as a safety net for the column.description/column.code fallback below,
-  // which is raw, unescaped text (used only when a column has no
-  // hierarchyPath at all).
+  // unescaping each segment restores it for display. A literal slash in a
+  // configured label (e.g. "Value / Percentage") is not a hierarchy marker.
+  // The raw fallback keeps the legacy slash-separated path behavior.
   const paths = columns.map((column) => (column.hierarchyPath
-    ? String(column.hierarchyPath).split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean).map(unescapeHierarchySegment)
+    ? String(column.hierarchyPath).split(" > ").filter(Boolean).map(unescapeHierarchySegment)
     : String(column.description || column.code).split(/\s*(?:>(?!=)|\/)\s*/).filter(Boolean)));
   const depth = Math.max(1, ...paths.map((path) => path.length));
   return Array.from({ length: depth }, (_, level) => {
