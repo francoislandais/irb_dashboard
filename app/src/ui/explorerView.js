@@ -66,6 +66,7 @@ let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
 const explorerTemplateContexts = new Map();
 const explorerSelectionHistories = new Map();
+const explorerTemporalHistoricalAxisCodesByRows = new WeakMap();
 let explorerXYHeaderObserver = null;
 let explorerHistoryReplay = false;
 let explorerHistoryRestoredSelection = null;
@@ -1061,24 +1062,35 @@ function ensureExplorerTemplateSelections(state, template) {
   const yCodes = axisOptions.y.codes;
   const zCodes = axisOptions.z.codes;
   const xCodes = axisOptions.x.codes;
+  const hasHistoricalSelection = Boolean(
+    (context.selectedYCode && !yCodes.includes(context.selectedYCode))
+    || (context.selectedXCode && !xCodes.includes(context.selectedXCode))
+    || (context.selectedZCode && !zCodes.includes(context.selectedZCode))
+  );
+  const historicalAxisCodes = hasHistoricalSelection
+    ? getExplorerTemporalHistoricalAxisCodes(state, tableId)
+    : null;
   let selectionChanged = false;
 
-  if (!context.selectedYCode || !yCodes.includes(context.selectedYCode)) {
+  if (!context.selectedYCode || (!yCodes.includes(context.selectedYCode) && !historicalAxisCodes?.y.has(context.selectedYCode))) {
     context.selectedYCode = yCodes[0] ?? "";
     selectionChanged = true;
   }
 
-  if (!context.selectedXCode || !xCodes.includes(context.selectedXCode)) {
+  if (!context.selectedXCode || (!xCodes.includes(context.selectedXCode) && !historicalAxisCodes?.x.has(context.selectedXCode))) {
     context.selectedXCode = xCodes[0] ?? "";
     selectionChanged = true;
   }
 
-  if (zCodes.length > 0 && (!context.selectedZCode || !zCodes.includes(context.selectedZCode))) {
+  if (zCodes.length > 0 && (!context.selectedZCode || (
+    !zCodes.includes(context.selectedZCode)
+    && !historicalAxisCodes?.z.has(context.selectedZCode)
+  ))) {
     context.selectedZCode = zCodes[0] ?? "";
     selectionChanged = true;
   }
 
-  if (zCodes.length === 0 && context.selectedZCode) {
+  if (zCodes.length === 0 && context.selectedZCode && !historicalAxisCodes?.z.has(context.selectedZCode)) {
     context.selectedZCode = "";
     selectionChanged = true;
   }
@@ -1091,6 +1103,33 @@ function ensureExplorerTemplateSelections(state, template) {
   if (visibleAxes.length > 0 && !visibleAxes.includes(context.activeAxis)) {
     context.activeAxis = visibleAxes[0];
   }
+}
+
+function getExplorerTemporalHistoricalAxisCodes(state, tableId) {
+  const emptyCodes = { x: new Set(), y: new Set(), z: new Set() };
+  const mainFramework = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
+  if (explorerGlobalDisplayMode !== "temporal" || !state?.rows || !mainFramework
+      || !state.taxonomyHistory || !state.taxonomySource) return emptyCodes;
+
+  let cache = explorerTemporalHistoricalAxisCodesByRows.get(state.rows);
+  if (!cache) explorerTemporalHistoricalAxisCodesByRows.set(state.rows, cache = new Map());
+  const cacheKey = `${tableId}\u001f${mainFramework}`;
+  if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+  const historicalFrameworks = new Set(getExplorerTemplateReferenceDates(state, tableId)
+    .map((reference) => getTaxonomyFrameworkForDate(state, tableId, reference.date))
+    .filter((framework) => framework && framework !== mainFramework));
+  const codesByAxis = { x: new Set(), y: new Set(), z: new Set() };
+  historicalFrameworks.forEach((framework) => {
+    const data = getTaxonomyDataForTemplateFramework(state, tableId, framework);
+    data?.explorerPoints.forEach((point) => {
+      if (point.tableId !== tableId) return;
+      const axis = point.coordinate[0];
+      if (codesByAxis[axis]) codesByAxis[axis].add(point.code);
+    });
+  });
+  cache.set(cacheKey, codesByAxis);
+  return codesByAxis;
 }
 
 function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOptions) {
