@@ -2,6 +2,7 @@
 
 ``preview`` écrit du SQL ciblant les tables Hive sources sans l'exécuter.
 ``test`` écrit le même SQL puis simule les résultats avec la fixture locale.
+``hive`` exécute les requêtes via ``vl_connect.devo`` et exporte les applications.
 """
 
 from __future__ import annotations
@@ -12,9 +13,10 @@ import csv
 import json
 import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Protocol
 
 from openpyxl import load_workbook
 
@@ -24,6 +26,7 @@ if __package__:
         _expand_template_expressions,
         _build_kri_filter,
         _build_template_filter,
+        _load_default_devo_client,
         find_kris_using_templates,
     )
 else:
@@ -32,6 +35,7 @@ else:
         _expand_template_expressions,
         _build_kri_filter,
         _build_template_filter,
+        _load_default_devo_client,
         find_kris_using_templates,
     )
 
@@ -73,6 +77,10 @@ class Application:
     leis: tuple[str, ...]
     consolidation: str
     extractions: tuple[Extraction, ...]
+
+
+class QueryClient(Protocol):
+    def read_sql(self, sql: str): ...
 
 
 def _split_list(value: object) -> list[str]:
@@ -338,7 +346,10 @@ def _write_query_index(output: Path, manifest: dict) -> None:
         if application.get("dataset"):
             lines.extend([f"- Dataset de simulation : `{application['dataset']}`", f"- Dictionnaire : `{application['institution_dictionary']}`", f"- Application : `{application['html_app']}`"])
         lines.append("")
-    lines.extend(["Le mode `test` écrit les mêmes requêtes Hive que `preview`, mais construit les résultats depuis la fixture locale sans ouvrir de connexion Hive.", ""])
+    if manifest["mode"] == "test":
+        lines.extend(["Les résultats du mode `test` viennent de la fixture locale ; aucune connexion Hive n'est ouverte.", ""])
+    elif manifest["mode"] == "hive":
+        lines.extend(["Les résultats du mode `hive` ont été extraits via `devo.read_sql`.", ""])
     output.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -462,23 +473,143 @@ def _write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) ->
         writer.writerows(rows)
 
 
+def _clean_cell(value: object) -> str:
+    if value is None:
+        return ""
+    try:
+        if bool(value != value):
+            return ""
+    except (TypeError, ValueError):
+        return ""
+    return str(value)
+
+
+def _dataframe_rows(dataframe: object, required_columns: Iterable[str], query_label: str) -> list[dict[str, str]]:
+    if not hasattr(dataframe, "columns") or not hasattr(dataframe, "to_dict"):
+        raise TypeError(f"{query_label}: devo.read_sql doit retourner un DataFrame.")
+    source_columns = {str(column).strip().lower(): column for column in dataframe.columns}
+    missing = set(required_columns) - source_columns.keys()
+    if missing:
+        raise ValueError(f"{query_label}: colonnes absentes du résultat Hive : {', '.join(sorted(missing))}.")
+    return [
+        {name: _clean_cell(row[source]) for name, source in source_columns.items()}
+        for row in dataframe.to_dict(orient="records")
+    ]
+
+
+def _same_value(left: str, right: str) -> bool:
+    try:
+        return Decimal(left) == Decimal(right)
+    except InvalidOperation:
+        return left == right
+
+
+def _merge_extraction_rows(
+    records: dict[tuple[str, ...], dict[str, str]],
+    all_dates: tuple[str, ...],
+    extraction: Extraction,
+    dataframe: object,
+    query_label: str,
+) -> int:
+    date_columns = ["ref_" + item.replace("-", "_") for item in extraction.reference_dates]
+    rows = _dataframe_rows(dataframe, OUTPUT_COLUMNS + date_columns, query_label)
+    for row in rows:
+        key = tuple(row[column] for column in OUTPUT_COLUMNS)
+        if not key[0] or not key[1]:
+            raise ValueError(f"{query_label}: table_id ou reporting_unit_id vide dans le résultat Hive.")
+        record = records.setdefault(key, {
+            **dict(zip(OUTPUT_COLUMNS, key)),
+            **{"ref_" + item.replace("-", "_"): "" for item in all_dates},
+            "extraction_timestamp": date.today().isoformat(),
+        })
+        for column in date_columns:
+            incoming = row[column]
+            if not incoming:
+                continue
+            previous = record[column]
+            if previous and not _same_value(previous, incoming):
+                raise ValueError(
+                    f"{query_label}: valeurs contradictoires pour {key}, {column} "
+                    f"({previous} contre {incoming})."
+                )
+            record[column] = incoming
+    return len(rows)
+
+
+def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
+    required = ("institution_id", "lei", "jst_code", "institution_name", "consolidation_level")
+    rows = _dataframe_rows(dataframe, required, query_label)
+    result = []
+    for row in rows:
+        if not row["institution_id"] or not row["jst_code"]:
+            raise ValueError(f"{query_label}: Institution ID ou JST code vide dans le résultat Hive.")
+        result.append({
+            "Institution ID": row["institution_id"],
+            "JST code": row["jst_code"],
+            "Institution Name": row["institution_name"],
+            "Consolidation Level": row["consolidation_level"],
+        })
+    if not result:
+        raise ValueError(f"{query_label}: aucune institution trouvée pour les LEI configurés.")
+    return result
+
+
+def _write_application_outputs(
+    output_root: Path,
+    application: Application,
+    folder: str,
+    application_manifest: dict,
+    fields: list[str],
+    rows: list[dict[str, str]],
+    dictionary_rows: list[dict[str, str]],
+) -> None:
+    app_output_dir = output_root / "applications"
+    safe_file_name = folder.lower()
+    dataset_path = app_output_dir / "datasets" / f"{safe_file_name}.csv"
+    dictionary_path = app_output_dir / "institutions" / f"{safe_file_name}_institution_dictionary.csv"
+    _write_csv(dataset_path, fields, rows)
+    dictionary_fields = ["Institution ID", "JST code", "Institution Name", "Consolidation Level"]
+    _write_csv(dictionary_path, dictionary_fields, dictionary_rows)
+    html_path = app_output_dir / "html" / f"Agora Explorer_{folder}.html"
+    export_standalone_app(
+        dataset_path,
+        html_path,
+        institution_dictionary_file_path=dictionary_path,
+        app_name=f"Agora Explorer — {application.name}",
+    )
+    application_manifest.update({
+        "dataset": str(dataset_path.relative_to(output_root)),
+        "institution_dictionary": str(dictionary_path.relative_to(output_root)),
+        "html_app": str(html_path.relative_to(output_root)),
+        "rows": len(rows),
+    })
+
+
 def global_update(
     config_path: str | Path | None = None,
     *,
     mode: str = "preview",
     output_directory: str | Path | None = None,
     as_of: date | None = None,
+    devo_client: QueryClient | None = None,
 ) -> dict:
-    """Point d'entrée du prototype. ``preview`` génère le SQL; ``test`` simule les exports localement."""
+    """Prépare, simule ou exécute toutes les applications du classeur."""
 
     mode = str(mode).strip().lower()
-    if mode not in {"preview", "test"}:
-        raise ValueError("mode doit être 'preview' ou 'test'. Le mode Hive réel n'est pas activé dans ce prototype.")
+    if mode not in {"preview", "test", "hive"}:
+        raise ValueError("mode doit être 'preview', 'test' ou 'hive'.")
+    if mode == "hive" and config_path is None:
+        raise ValueError("Le mode hive exige --config : le classeur d'exemple contient des LEI fictifs.")
     calculation_date = as_of or date.today()
     workbook_path = Path(config_path) if config_path else EXAMPLE_WORKBOOK
     output_root = Path(output_directory) if output_directory else DEFAULT_OUTPUT_DIRECTORY / mode
+    if mode == "hive" and output_directory is None:
+        output_root /= datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    if mode == "hive" and output_root.exists() and any(output_root.iterdir()):
+        raise ValueError(f"Le dossier de sortie Hive doit être vide : {output_root}")
     applications = _read_configuration(workbook_path, calculation_date)
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
+    client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     query_root = output_root / "queries"
     manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "applications": []}
     for application in applications:
@@ -497,12 +628,21 @@ def global_update(
             "metadata_query": metadata_relative,
             "extractions": [],
         }
+        dictionary_rows = []
+        all_dates = tuple(sorted({item for extraction in application.extractions for item in extraction.reference_dates}))
+        records: dict[tuple[str, ...], dict[str, str]] = {}
+        if mode == "hive":
+            try:
+                dictionary_frame = client.read_sql(metadata_sql)
+            except Exception as error:
+                raise RuntimeError(f"{application.name}: échec de la requête des institutions.") from error
+            dictionary_rows = _institution_rows(dictionary_frame, f"{application.name} / institutions")
         for index, extraction in enumerate(application.extractions, start=1):
             source_table = query_table["KRI" if extraction.module == "KRI" else "ITS"]
             sql = _build_extraction_sql(extraction, application, query_table)
             query_relative = (Path("queries") / folder / f"extraction_{index:02d}.sql").as_posix()
             (output_root / query_relative).write_text(sql, encoding="utf-8")
-            application_manifest["extractions"].append({
+            extraction_manifest = {
                 "index": index,
                 "module": extraction.module,
                 "selector": extraction.selector,
@@ -514,30 +654,33 @@ def global_update(
                 "query": query_relative,
                 "source_table": source_table,
                 **({"identity_table": query_table["ITS"]} if extraction.module == "KRI" else {}),
-            })
+            }
+            if mode == "hive":
+                query_label = f"{application.name} / extraction {index:02d}"
+                try:
+                    dataframe = client.read_sql(sql)
+                except Exception as error:
+                    raise RuntimeError(f"{query_label}: échec de la requête Hive ({query_relative}).") from error
+                extraction_manifest["query_rows"] = _merge_extraction_rows(
+                    records, all_dates, extraction, dataframe, query_label,
+                )
+            application_manifest["extractions"].append(extraction_manifest)
         if mode == "test":
-            app_output_dir = output_root / "applications"
-            safe_file_name = folder.lower()
-            dataset_path = app_output_dir / "datasets" / f"{safe_file_name}.csv"
-            dictionary_path = app_output_dir / "institutions" / f"{safe_file_name}_institution_dictionary.csv"
             fields, rows = _build_dummy_dataset(application, fixture)
             dictionary_rows = _dictionary_rows(application, fixture)
-            _write_csv(dataset_path, fields, rows)
-            dictionary_fields = ["Institution ID", "JST code", "Institution Name", "Consolidation Level"]
-            _write_csv(dictionary_path, dictionary_fields, dictionary_rows)
-            html_path = app_output_dir / "html" / f"Agora Explorer_{folder}.html"
-            export_standalone_app(
-                dataset_path,
-                html_path,
-                institution_dictionary_file_path=dictionary_path,
-                app_name=f"Agora Explorer — {application.name}",
+            _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows)
+            application_manifest["simulated_rows"] = len(rows)
+        elif mode == "hive":
+            populated_dates = [
+                "ref_" + item.replace("-", "_") for item in all_dates
+                if any(record["ref_" + item.replace("-", "_")] for record in records.values())
+            ]
+            if not populated_dates:
+                raise ValueError(f"{application.name}: aucune donnée non vide remontée par les extractions Hive.")
+            fields = OUTPUT_COLUMNS + populated_dates + ["extraction_timestamp"]
+            _write_application_outputs(
+                output_root, application, folder, application_manifest, fields, list(records.values()), dictionary_rows,
             )
-            application_manifest.update({
-                "dataset": str(dataset_path.relative_to(output_root)),
-                "institution_dictionary": str(dictionary_path.relative_to(output_root)),
-                "html_app": str(html_path.relative_to(output_root)),
-                "simulated_rows": len(rows),
-            })
         manifest["applications"].append(application_manifest)
     output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = output_root / "manifest.json"
@@ -547,9 +690,9 @@ def global_update(
 
 
 def _main() -> None:
-    parser = argparse.ArgumentParser(description="Génère les requêtes d'export Agora Explorer ou simule les exports.")
+    parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
     parser.add_argument("--config", type=Path, default=None, help="Classeur XLSX de paramétrage")
-    parser.add_argument("--mode", choices=("preview", "test"), default="preview")
+    parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
     args = parser.parse_args()
@@ -557,7 +700,7 @@ def _main() -> None:
         result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
-    print(f"{result['applications']} application(s) planifiée(s) en mode {result['mode']}")
+    print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")
     print(f"Plan et requêtes : {result['output_directory']}")
     print(f"Index : {result['output_directory']}/query_index.md")
 

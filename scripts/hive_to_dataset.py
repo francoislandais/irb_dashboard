@@ -408,7 +408,7 @@ def run_hive_query_to_csv(
 ):
     """Exécute la requête et enregistre le CSV directement dans ``datasets/``.
 
-    ``devo_client`` peut être omis lorsque le package ``devo`` est importable.
+    ``devo_client`` peut être omis lorsque ``vl_connect.devo`` est importable.
     Dans un notebook où ``devo`` est déjà initialisé, le passer simplement avec
     ``devo_client=devo``.
 
@@ -451,7 +451,7 @@ def run_kri_hive_query_to_csv(
 ):
     """Exécute la requête KRI et enregistre le CSV directement dans ``datasets/``.
 
-    ``devo_client`` peut être omis lorsque le package ``devo`` est importable.
+    ``devo_client`` peut être omis lorsque ``vl_connect.devo`` est importable.
     Dans un notebook où ``devo`` est déjà initialisé, le passer simplement avec
     ``devo_client=devo``.
     """
@@ -630,10 +630,13 @@ def _normalize_csv_name(output_name: str) -> str:
 
 def _load_default_devo_client() -> HiveClient:
     try:
-        import devo  # type: ignore[import-not-found]
+        from vl_connect import devo  # type: ignore[import-not-found]
     except ImportError as error:
-        raise RuntimeError(
-            "Aucun client devo n'est disponible. "
-            "Passez le client avec devo_client=devo."
-        ) from error
+        try:
+            import devo  # type: ignore[import-not-found]
+        except ImportError:
+            raise RuntimeError(
+                "Le client vl_connect.devo n'est pas disponible. Installez-le "
+                "dans l'environnement Hive ou passez devo_client=devo."
+            ) from error
     return devo

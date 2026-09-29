@@ -11,6 +11,10 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+
+from openpyxl import Workbook
 
 SCRIPT_DIRECTORY = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIRECTORY))
@@ -182,6 +186,105 @@ class QueryPlanTests(unittest.TestCase):
             payload = json.loads(payload_match.group(1))
             dictionary_text = gzip.decompress(base64.b64decode(payload["institutionDictionaryBase64"])).decode("utf-8")
             self.assertIn("Institution ID,JST code,Institution Name,Consolidation Level", dictionary_text)
+
+
+class HiveExecutionTests(unittest.TestCase):
+    LEI = "AAAABBBBCCCCDDDDEEEE"
+
+    @staticmethod
+    def _workbook(path):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "COREP and KRI"
+        sheet["B1"] = HiveExecutionTests.LEI
+        sheet["B2"] = "CONSO"
+        for column, value in enumerate(("Module", "Template selector", "History years", "Frequency"), 1):
+            sheet.cell(4, column).value = value
+        for row_number, values in enumerate((
+            ("COREP", "C_01.00", 1, "QUARTERLY"),
+            ("COREP", "C_01.00", 1, "SEMI_ANNUAL"),
+            ("KRI", "C_01.00", 1, "QUARTERLY"),
+        ), 5):
+            for column, value in enumerate(values, 1):
+                sheet.cell(row_number, column).value = value
+        workbook.save(path)
+
+    @staticmethod
+    def _client(*, conflict=False):
+        class Frame:
+            def __init__(self, records):
+                self.records = records
+                self.columns = list(records[0])
+
+            def to_dict(self, *, orient):
+                assert orient == "records"
+                return self.records
+
+        class Client:
+            def __init__(self):
+                self.calls = []
+                self.its_calls = 0
+
+            def read_sql(self, sql):
+                self.calls.append(sql)
+                if "AS institution_id" in sql:
+                    return Frame([{
+                        "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_CONSO",
+                        "LEI": HiveExecutionTests.LEI,
+                        "JST_CODE": "JST_A",
+                        "INSTITUTION_NAME": "Bank A",
+                        "CONSOLIDATION_LEVEL": "CONSO",
+                    }])
+                is_kri = "'KRI' AS table_id" in sql
+                if not is_kri:
+                    self.its_calls += 1
+                date_columns = re.findall(r"AS (ref_\d{4}_\d{2}_\d{2})", sql)
+                row = {
+                    "table_id": "KRI" if is_kri else "C_01.00",
+                    "reporting_unit_id": f"{HiveExecutionTests.LEI}_CONSO",
+                    "x_axis_rc_code": "" if is_kri else "0010",
+                    "y_axis_rc_code": "LIQ55" if is_kri else "0020",
+                    "z_axis_rc_code": "",
+                    **{column: None for column in date_columns},
+                }
+                row["ref_2026_06_30"] = 20 if is_kri else 11 if conflict and self.its_calls == 2 else 10
+                return Frame([row])
+
+        return Client()
+
+    def test_hive_mode_runs_sequential_queries_and_exports_real_results(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workbook = root / "config.xlsx"
+            self._workbook(workbook)
+            client = self._client()
+            result = global_update(workbook, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=client)
+            self.assertEqual(result["applications"], 1)
+            self.assertEqual(len(client.calls), 4)
+            output = Path(result["output_directory"])
+            with next((output / "applications" / "datasets").glob("*.csv")).open(encoding="utf-8-sig", newline="") as stream:
+                reader = csv.DictReader(stream)
+                rows = list(reader)
+                self.assertEqual([column for column in reader.fieldnames if column.startswith("ref_")], ["ref_2026_06_30"])
+            self.assertEqual(len(rows), 2)
+            self.assertEqual({row["table_id"]: row["ref_2026_06_30"] for row in rows}, {"C_01.00": "10", "KRI": "20"})
+            self.assertTrue((output / "applications" / "html" / "Agora Explorer_COREP_and_KRI.html").is_file())
+            self.assertIn("devo.read_sql", (output / "query_index.md").read_text(encoding="utf-8"))
+
+    def test_hive_mode_rejects_conflicting_overlapping_extractions(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workbook = root / "config.xlsx"
+            self._workbook(workbook)
+            with self.assertRaisesRegex(ValueError, "valeurs contradictoires"):
+                global_update(workbook, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=self._client(conflict=True))
+
+    def test_default_client_comes_from_vl_connect(self):
+        from hive_to_dataset import _load_default_devo_client
+
+        client = self._client()
+        with patch.dict(sys.modules, {"vl_connect": SimpleNamespace(devo=client)}):
+            self.assertIs(_load_default_devo_client(), client)
 
 
 if __name__ == "__main__":

@@ -129,7 +129,7 @@ df = run_hive_query_to_csv(
 
 Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
-### Prototype de mise à jour globale
+### Mise à jour globale
 
 Le classeur `outputs/global-update-prototype/global_update_examples.xlsx` montre le format proposé : un onglet par application, les LEI en `B1`, le niveau de consolidation en `B2`, puis une ligne par extraction à partir de la ligne 5. La fréquence et la profondeur d'historique s'appliquent séparément à chaque ligne.
 
@@ -150,6 +150,14 @@ python3 scripts/global_update.py --mode test
 ```
 
 Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les requêtes utilisent les deux schémas fournis dans `scripts/fixtures/hive_schemas/` : l'ITS porte le LEI, et les KRI sont reliés à l'ITS par `entity_id` et `cons_level`. Le format d'`Institution ID` est `LEI_niveau`. Aucune extraction Hive réelle n'est lancée par ce prototype.
+
+Sur une machine disposant de `vl_connect`, le mode `hive` exécute réellement les requêtes, dans l'ordre des lignes de chaque onglet, via `from vl_connect import devo` puis `devo.read_sql(sql)`. Il assemble les DataFrames par template, institution, coordonnées et date, exécute aussi la requête des noms d'institutions, puis génère un CSV et un HTML autonome par onglet :
+
+```sh
+python3 scripts/global_update.py --mode hive --config /chemin/vers/configuration.xlsx
+```
+
+Il faut renseigner un classeur réel : le classeur d'exemple contient des LEI fictifs et n'est pas accepté par défaut en mode `hive`. Le résultat est écrit dans un nouveau dossier horodaté sous `outputs/global-update-prototype/generated/hive/` ; `--output` permet de choisir un dossier vide. La même opération peut être lancée depuis Python avec `global_update("/chemin/vers/configuration.xlsx", mode="hive")`, ou avec `devo_client=devo` si le client est déjà initialisé. Le package `vl_connect` et son accès Hive doivent être disponibles dans cet environnement ; ils ne sont pas nécessaires aux modes `preview` et `test`.
 
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. La colonne d’identification est publiée sous le nom `reporting_unit_id` ; les anciens CSV qui utilisent encore `jst_code` restent acceptés par l’application. Il peut ensuite être transforme en application autonome avec :
 
