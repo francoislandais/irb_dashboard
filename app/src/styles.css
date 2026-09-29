@@ -3067,13 +3067,31 @@ table {
   font-weight: 600;
 }
 
+.explorer-reference-date-row .explorer-reference-date-value {
+  text-align: right;
+  width: 6rem;
+}
+
 .explorer-reference-date-row.is-taxonomy-unavailable,
 .explorer-reference-date-row.is-taxonomy-unavailable:hover {
-  background: #eceff0;
-  color: #7b8588;
+  background: transparent;
+  color: #26332d;
   cursor: not-allowed;
   font-weight: 400;
   opacity: 1;
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+.explorer-reference-date-row.is-taxonomy-unavailable .explorer-reference-date-value {
+  align-items: center;
+  align-self: stretch;
+  background: #e2e5e7;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  min-height: 36px;
+  padding-inline: 8px;
 }
 
 .explorer-institution-label {

@@ -98,7 +98,9 @@ const panelRows = renderedPanel.children[1].children;
 assert.equal(panelRows[1].disabled, false);
 assert.equal(panelRows[1].children[1].textContent, "0 %", "a genuine zero stays available");
 assert.equal(panelRows[2].disabled, true);
-assert.equal(panelRows[2].children[1].textContent, "—", "an unavailable date must not show a raw zero");
+assert.equal(panelRows[2].children[0].textContent, "Q4 2024", "the date label remains visible");
+assert.equal(panelRows[2].children[1].textContent, "", "an unavailable value cell stays empty");
+assert.equal(panelRows[2].children[1].className, "explorer-reference-date-value");
 assert.equal(panelRows[2].classList.contains("is-taxonomy-unavailable"), true);
 
 console.log("PASS: reference-date clicks use the temporal fast path, targeted XY rebuild, and cached template dates.");

@@ -3827,8 +3827,9 @@ function renderExplorerReferenceDatePanel(state) {
     const label = document.createElement("span");
     label.textContent = getExplorerFullDateColumnLabel(reference);
     const metric = document.createElement("span");
+    metric.className = "explorer-reference-date-value";
     const rawValue = valuesByReference.get(reference.label);
-    metric.textContent = !isUnavailable && Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
+    metric.textContent = isUnavailable ? "" : Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
     row.append(label, metric);
     row.addEventListener("click", () => {
       selectExplorerReferenceDate(reference.label);
