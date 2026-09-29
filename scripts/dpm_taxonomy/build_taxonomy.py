@@ -61,6 +61,36 @@ LA LE LES MAIS NE NI OU PAR PAS POUR QUE QUI SA SANS SE SES SON SUR UN UNE VERS
 """.split())
 ALL_CAPS_WORD_RE = re.compile(r"[\w]+", re.UNICODE)
 
+# A curated display subset of the EBA's open currency domain. Keep the
+# reporting currency first, then the major international currencies and the
+# European/regional currencies most useful when browsing bank disclosures.
+# The source glossary remains untouched; this order is applied on every build.
+CURRENCY_Z_DISPLAY_ORDER = (
+    "EUR", "USD", "GBP", "CHF", "JPY", "CNY",
+    "CAD", "AUD", "SEK", "DKK", "NOK", "PLN",
+    "CZK", "HUF", "RON", "SGD", "HKD", "TRY",
+)
+
+
+def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    """Shorten open currency axes while retaining non-currency Z members.
+
+    Native aggregate/other options have q-codes and remain available. Closed
+    currency domains with at most 20 currencies keep all their members.
+    """
+    currency_rows = {code: label for code, label in rows if re.fullmatch(r"[A-Z]{3}", code)}
+    if "EUR" not in currency_rows:
+        return rows
+
+    selected = [(code, currency_rows[code]) for code in CURRENCY_Z_DISPLAY_ORDER if code in currency_rows]
+    if len(currency_rows) <= 20:
+        selected.extend((code, label) for code, label in rows
+                        if code in currency_rows and code not in CURRENCY_Z_DISPLAY_ORDER)
+    special = [(code, label) for code, label in rows if not re.fullmatch(r"[A-Z]{3}", code)]
+    aggregate = [(code, label) for code, label in special if "all currencies" in label.casefold()]
+    other = [(code, label) for code, label in special if "all currencies" not in label.casefold()]
+    return aggregate + selected + other
+
 
 def clean(value: Any) -> str:
     if value is None:
@@ -813,7 +843,7 @@ def extract_all() -> tuple[
                         # DPM 2.0 declares enumerated tab dimensions in the
                         # glossary via a Key value reference.
                         if version.startswith("4."):
-                            zs = [(code, desc, 0) for code, desc in dictionary_z_rows(dictionary, sheet)]
+                            zs = [(code, desc, 0) for code, desc in limit_currency_z_rows(dictionary_z_rows(dictionary, sheet))]
                         else:
                             zs = [(code, desc, int(code)) for code, desc in legacy_sheet_z_rows(sheet)]
                     else:

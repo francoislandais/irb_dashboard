@@ -19,6 +19,22 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_open_currency_axis_is_curated_without_losing_native_options(self):
+        rows = [
+            ("qx1", "All currencies"), ("ALL", "Lek"), ("JPY", "Yen"),
+            ("EUR", "Euro"), ("USD", "US Dollar"), ("GBP", "Pound Sterling"),
+            ("qx46", "Other Currency (open axis tables)"),
+        ] + [(f"BA{chr(65 + i)}", f"Currency {i}") for i in range(21)]
+        limited = builder.limit_currency_z_rows(rows)
+        self.assertEqual([code for code, _ in limited[:5]], ["qx1", "EUR", "USD", "GBP", "JPY"])
+        self.assertEqual(limited[-1][0], "qx46")
+        self.assertNotIn("ALL", [code for code, _ in limited])
+        self.assertLessEqual(sum(len(code) == 3 for code, _ in limited), 21)
+        self.assertEqual(
+            [code for code, _ in builder.limit_currency_z_rows(rows[:7])],
+            ["qx1", "EUR", "USD", "GBP", "JPY", "ALL", "qx46"],
+        )
+
     def test_taxonomy_label_sentence_casing_preserves_regulatory_acronyms(self):
         cases = {
             "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST": "Debt instruments at cost or at amortised cost",
