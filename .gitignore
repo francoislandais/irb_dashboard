@@ -24,6 +24,8 @@ outputs/global-update-prototype/*
 # Fixture CSV contrôlée du mode de simulation global_update.
 !scripts/fixtures/
 !scripts/fixtures/global_update_test_data.csv
+!scripts/fixtures/hive_schemas/
+!scripts/fixtures/hive_schemas/*.csv
 
 # Exceptions : mappings internes de l'application.
 !app/assets/*.csv

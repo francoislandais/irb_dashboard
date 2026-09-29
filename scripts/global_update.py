@@ -1,8 +1,7 @@
-"""Prototype de point d'entrée unique pour planifier les exports Agora Explorer.
+"""Point d'entrée unique pour planifier les exports Agora Explorer.
 
-Le mode ``preview`` écrit les requêtes SQL sans les exécuter. Le mode ``test``
-redirige le SQL vers les tables de test documentées et construit les datasets
-depuis le jeu factice local, sans connexion à Hive.
+``preview`` écrit du SQL ciblant les tables Hive sources sans l'exécuter.
+``test`` écrit le même SQL puis simule les résultats avec la fixture locale.
 """
 
 from __future__ import annotations
@@ -23,16 +22,16 @@ if __package__:
     from .export_all_standalone_apps import export_standalone_app
     from .hive_to_dataset import (
         _expand_template_expressions,
-        build_hive_query,
-        build_kri_hive_query,
+        _build_kri_filter,
+        _build_template_filter,
         find_kris_using_templates,
     )
 else:
     from export_all_standalone_apps import export_standalone_app
     from hive_to_dataset import (
         _expand_template_expressions,
-        build_hive_query,
-        build_kri_hive_query,
+        _build_kri_filter,
+        _build_template_filter,
         find_kris_using_templates,
     )
 
@@ -41,18 +40,14 @@ PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 EXAMPLE_WORKBOOK = PROJECT_DIRECTORY / "outputs" / "global-update-prototype" / "global_update_examples.xlsx"
 TEST_ENTITIES_PATH = PROJECT_DIRECTORY / "scripts" / "fixtures" / "global_update_test_entities.json"
 DEFAULT_OUTPUT_DIRECTORY = PROJECT_DIRECTORY / "outputs" / "global-update-prototype" / "generated"
-LEI_TOKEN = "__GLOBAL_UPDATE_LEI_FILTER__"
 FREQUENCIES = {"MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"}
 PERIODS_PER_YEAR = {"MONTHLY": 12, "QUARTERLY": 4, "SEMI_ANNUAL": 2, "ANNUAL": 1}
 CONSOLIDATION_MODES = {"HIGHEST", "CONSO", "SOLO", "CONSO+SOLO", "ALL"}
-TEST_TABLES = {
-    "ITS": "crp_agora.agora_its_bft_current_test",
-    "KRI": "crp_agora.agora_dm_imas_kris_raw_test",
-}
 PRODUCTION_TABLES = {
     "ITS": "crp_agora.agora_its_bft_current",
     "KRI": "crp_agora.agora_dm_imas_kris_raw",
 }
+NORMALIZED_TABLE_ID = "regexp_replace(table_id, '([.][A-Za-z]+|_dp)+$', '')"
 OUTPUT_COLUMNS = [
     "table_id",
     "reporting_unit_id",
@@ -185,66 +180,141 @@ def _selected_levels(mode: str, highest_level: str) -> tuple[str, ...]:
     if mode == "CONSO+SOLO":
         return ("CONSO", "SOLO")
     if mode == "ALL":
-        return ("CONSO", "SOLO", "LIQUIDITY_SUBGROUP")
+        return ("CONSO", "SOLO", "SUBLIQ")
     return (mode,)
 
 
-def _apply_consolidation_filter(sql: str, mode: str) -> str:
-    highest_filter = "AND is_highest_cons = 'Y'"
+def _consolidation_predicate(mode: str) -> str:
     if mode == "HIGHEST":
-        return sql
-    if highest_filter not in sql:
-        raise ValueError("Le générateur Hive existant ne contient pas le filtre is_highest_cons attendu.")
+        return "is_highest_cons = 'Y'"
     if mode == "ALL":
-        return sql.replace(highest_filter, "")
+        return ""
     levels = _selected_levels(mode, "")
-    level_filter = "AND consolidation_level IN (" + ", ".join(_sql_literal(item) for item in levels) + ")"
-    return sql.replace(highest_filter, level_filter)
+    return "cons_level IN (" + ", ".join(_sql_literal(item) for item in levels) + ")"
 
 
-def _replace_lei_filter(sql: str, leis: Iterable[str]) -> str:
-    pattern = re.compile(r"jst_code\s+IN\s*\(\s*'" + re.escape(LEI_TOKEN) + r"'\s*\)", re.IGNORECASE)
-    lei_filter = "lei IN (" + ", ".join(_sql_literal(item) for item in leis) + ")"
-    updated, count = pattern.subn(lei_filter, sql, count=1)
-    if count != 1:
-        raise ValueError("Impossible de remplacer le filtre JST du générateur existant par le filtre LEI.")
-    return updated
+def _lei_filter(leis: Iterable[str]) -> str:
+    return "lei IN (\n        " + ",\n        ".join(_sql_literal(lei) for lei in leis) + "\n    )"
 
 
-def _build_extraction_sql(extraction: Extraction, application: Application, source_table: str) -> str:
+def _date_columns(reference_dates: Iterable[str], prefix: str = "") -> str:
+    return ",\n".join(
+        "    MAX(CASE\n"
+        f"        WHEN {prefix}reference_period = {_sql_literal(reference_date)}\n"
+        f"        THEN {prefix}value_decimal\n"
+        f"    END) AS ref_{reference_date.replace('-', '_')}"
+        for reference_date in reference_dates
+    )
+
+
+def _date_filter(reference_dates: Iterable[str], prefix: str = "") -> str:
+    return f"{prefix}reference_period IN (\n        " + ",\n        ".join(
+        _sql_literal(reference_date) for reference_date in reference_dates
+    ) + "\n    )"
+
+
+def _build_extraction_sql(
+    extraction: Extraction, application: Application, tables: dict[str, str] = PRODUCTION_TABLES,
+) -> str:
+    consolidation = _consolidation_predicate(application.consolidation)
+    consolidation_filter = f"\n      AND {consolidation}" if consolidation else ""
     if extraction.module == "KRI":
-        sql = build_kri_hive_query(extraction.kri_data_point_ids, extraction.reference_dates, [LEI_TOKEN])
-        sql = sql.replace(PRODUCTION_TABLES["KRI"], source_table)
-        sql = sql.replace("jst_code AS reporting_unit_id", "CONCAT(lei, '_', consolidation_level) AS reporting_unit_id")
-        sql = sql.replace("GROUP BY\n    jst_code,\n    kri_data_point_id", "GROUP BY\n    lei,\n    consolidation_level,\n    jst_code,\n    kri_data_point_id")
-        sql = sql.replace("ORDER BY\n    jst_code,\n    kri_data_point_id", "ORDER BY\n    lei,\n    consolidation_level,\n    jst_code,\n    kri_data_point_id")
-    else:
-        sql = build_hive_query([extraction.selector], extraction.reference_dates, [LEI_TOKEN], module_id=extraction.module)
-        sql = sql.replace(PRODUCTION_TABLES["ITS"], source_table)
-        sql = sql.replace("jst_code AS reporting_unit_id", "CONCAT(lei, '_', consolidation_level) AS reporting_unit_id")
-        sql = sql.replace("AS table_id,\n        jst_code,", "AS table_id,\n        lei,\n        consolidation_level,\n        jst_code,")
-        sql = sql.replace("GROUP BY\n    table_id,\n    jst_code,", "GROUP BY\n    table_id,\n    lei,\n    consolidation_level,\n    jst_code,")
-        sql = sql.replace("ORDER BY\n    table_id,\n    jst_code,", "ORDER BY\n    table_id,\n    lei,\n    consolidation_level,\n    jst_code,")
-    sql = _replace_lei_filter(sql, application.leis)
-    return _apply_consolidation_filter(sql, application.consolidation)
+        return f"""WITH reporting_units AS (
+    SELECT DISTINCT
+        entity_id,
+        cons_level,
+        lei
+    FROM {tables['ITS']}
+    WHERE {_lei_filter(application.leis)}{consolidation_filter}
+)
+SELECT
+    'KRI' AS table_id,
+    CONCAT(units.lei, '_', units.cons_level) AS reporting_unit_id,
+    '' AS x_axis_rc_code,
+    kri.kri_data_point_id AS y_axis_rc_code,
+    '' AS z_axis_rc_code,
+{_date_columns(extraction.reference_dates, 'kri.')}
+FROM {tables['KRI']} kri
+JOIN reporting_units units
+  ON kri.entity_id = units.entity_id
+ AND kri.cons_level = units.cons_level
+WHERE kri.value_decimal IS NOT NULL
+  AND {_date_filter(extraction.reference_dates, 'kri.')}
+  AND {_build_kri_filter(extraction.kri_data_point_ids)}
+GROUP BY
+    units.lei,
+    units.cons_level,
+    kri.kri_data_point_id
+ORDER BY
+    units.lei,
+    units.cons_level,
+    kri.kri_data_point_id
+"""
+
+    template_filter = _build_template_filter(
+        [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
+    )
+    return f"""SELECT
+    table_id,
+    CONCAT(lei, '_', cons_level) AS reporting_unit_id,
+    x_axis_rc_code,
+    y_axis_rc_code,
+    z_axis_rc_code,
+{_date_columns(extraction.reference_dates)}
+FROM (
+    SELECT
+        {NORMALIZED_TABLE_ID} AS table_id,
+        lei,
+        cons_level,
+        x_axis_rc_code,
+        y_axis_rc_code,
+        z_axis_rc_code,
+        reference_period,
+        value_decimal
+    FROM {tables['ITS']}
+    WHERE {_lei_filter(application.leis)}{consolidation_filter}
+      AND module_id = {_sql_literal(extraction.module)}
+      AND {_date_filter(extraction.reference_dates)}
+      AND {template_filter}
+) source
+GROUP BY
+    table_id,
+    lei,
+    cons_level,
+    x_axis_rc_code,
+    y_axis_rc_code,
+    z_axis_rc_code
+ORDER BY
+    table_id,
+    lei,
+    cons_level,
+    x_axis_rc_code,
+    y_axis_rc_code,
+    z_axis_rc_code
+"""
 
 
 def _build_institution_sql(application: Application, table: str) -> str:
-    sql = f"""SELECT DISTINCT
-    CONCAT(lei, '_', consolidation_level) AS institution_id,
+    consolidation = _consolidation_predicate(application.consolidation)
+    consolidation_filter = f"\n  AND {consolidation}" if consolidation else ""
+    return f"""SELECT
+    CONCAT(lei, '_', cons_level) AS institution_id,
     lei,
-    jst_code,
-    institution_name,
-    consolidation_level
+    COALESCE(
+        MAX(CASE WHEN TRIM(jst_code_today) <> '' THEN jst_code_today END),
+        MAX(jst_code)
+    ) AS jst_code,
+    MAX(name) AS institution_name,
+    cons_level AS consolidation_level
 FROM {table}
-WHERE lei IN ({', '.join(_sql_literal(lei) for lei in application.leis)})
-  AND is_group_head = 'Y'"""
-    if application.consolidation == "HIGHEST":
-        sql += "\n  AND is_highest_cons = 'Y'"
-    elif application.consolidation != "ALL":
-        levels = _selected_levels(application.consolidation, "")
-        sql += "\n  AND consolidation_level IN (" + ", ".join(_sql_literal(level) for level in levels) + ")"
-    return sql + "\nORDER BY lei, consolidation_level\n"
+WHERE {_lei_filter(application.leis)}{consolidation_filter}
+GROUP BY
+    lei,
+    cons_level
+ORDER BY
+    lei,
+    cons_level
+"""
 
 
 def _safe_name(value: str) -> str:
@@ -268,7 +338,7 @@ def _write_query_index(output: Path, manifest: dict) -> None:
         if application.get("dataset"):
             lines.extend([f"- Dataset de simulation : `{application['dataset']}`", f"- Dictionnaire : `{application['institution_dictionary']}`", f"- Application : `{application['html_app']}`"])
         lines.append("")
-    lines.extend(["Le mode `test` écrit des requêtes dirigées vers les tables suffixées `_test`, mais les résultats sont construits depuis la fixture locale et aucune connexion Hive n'est ouverte.", ""])
+    lines.extend(["Le mode `test` écrit les mêmes requêtes Hive que `preview`, mais construit les résultats depuis la fixture locale sans ouvrir de connexion Hive.", ""])
     output.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -415,7 +485,7 @@ def global_update(
         folder = _safe_name(application.name)
         app_query_dir = query_root / folder
         app_query_dir.mkdir(parents=True, exist_ok=True)
-        query_table = TEST_TABLES if mode == "test" else PRODUCTION_TABLES
+        query_table = PRODUCTION_TABLES
         metadata_relative = (Path("queries") / folder / "institution_metadata.sql").as_posix()
         metadata_sql = _build_institution_sql(application, query_table["ITS"])
         (output_root / metadata_relative).parent.mkdir(parents=True, exist_ok=True)
@@ -429,7 +499,7 @@ def global_update(
         }
         for index, extraction in enumerate(application.extractions, start=1):
             source_table = query_table["KRI" if extraction.module == "KRI" else "ITS"]
-            sql = _build_extraction_sql(extraction, application, source_table)
+            sql = _build_extraction_sql(extraction, application, query_table)
             query_relative = (Path("queries") / folder / f"extraction_{index:02d}.sql").as_posix()
             (output_root / query_relative).write_text(sql, encoding="utf-8")
             application_manifest["extractions"].append({
@@ -443,6 +513,7 @@ def global_update(
                 "kri_data_point_ids": list(extraction.kri_data_point_ids),
                 "query": query_relative,
                 "source_table": source_table,
+                **({"identity_table": query_table["ITS"]} if extraction.module == "KRI" else {}),
             })
         if mode == "test":
             app_output_dir = output_root / "applications"

@@ -545,10 +545,12 @@ def _expand_template_expressions(
     return included, excluded
 
 
-def _build_template_filter(templates: Iterable[str]) -> str:
+def _build_template_filter(
+    templates: Iterable[str], table_id_expression: str | None = None,
+) -> str:
     """Construit le filtre SQL pour inclusions, plages et exclusions."""
 
-    table_id = "regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')"
+    table_id = table_id_expression or "regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')"
     included, excluded = _expand_template_expressions(templates)
 
     def clause(pattern: str) -> str:
