@@ -58,6 +58,9 @@ let setActiveModule = () => {};
 let updateSelectedJst = () => {};
 let updateSelectedUnit = () => {};
 let updatePeerDisplayMode = () => {};
+let updateExplorerTaxonomy = () => {};
+let lastExplorerTaxonomyRequestKey = "";
+let explorerTaxonomyUsesReferenceDate = false;
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
@@ -280,6 +283,7 @@ const elements = {
 
 export function wireExplorerUi(actions, rerender) {
   rerenderApp = rerender;
+  updateExplorerTaxonomy = actions.updateExplorerTaxonomy ?? (() => {});
   setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
   updateSelectedUnit = actions.updateSelectedUnit;
@@ -1293,6 +1297,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   clearExplorerCellRangeSelection();
   ensureActiveExplorerTemplate(state);
   ensureActiveExplorerTemplateMatchesSearch(state);
+  syncExplorerTaxonomyForView(state);
   const context = getActiveExplorerContext();
   const template = getActiveExplorerTemplate();
   const templates = getExplorerTemplates(state);
@@ -2883,6 +2888,28 @@ function setExplorerHeaderReference(referenceLabel) {
   if (state) rerenderApp(state);
 }
 
+function syncExplorerTaxonomyForView(state) {
+  if (!state?.columns?.length || typeof updateExplorerTaxonomy !== "function") return;
+
+  if (isExplorerXYView()) {
+    const template = getActiveExplorerTemplate();
+    const referenceDate = getSelectedExplorerReference(state)?.name ?? "";
+    if (!template?.tableId || !referenceDate) return;
+    // All templates are resolved for the same shared reference date in one pass.
+    const requestKey = `xy:${referenceDate}`;
+    if (requestKey === lastExplorerTaxonomyRequestKey) return;
+    lastExplorerTaxonomyRequestKey = requestKey;
+    explorerTaxonomyUsesReferenceDate = true;
+    updateExplorerTaxonomy(referenceDate);
+    return;
+  }
+
+  if (!explorerTaxonomyUsesReferenceDate) return;
+  explorerTaxonomyUsesReferenceDate = false;
+  lastExplorerTaxonomyRequestKey = "temporal-default";
+  updateExplorerTaxonomy("");
+}
+
 function getSelectedExplorerReference(state = getLatestState()) {
   const references = getReferenceColumns(state?.columns ?? []);
   const selectedReference = references.find(reference => reference.label === explorerGlobalReferenceLabel);
@@ -4319,6 +4346,7 @@ function createExplorerSelectionSummaryCard() {
 }
 
 function createExplorerTaxonomyStatus() {
+  if (!isExplorerXYView()) return null;
   const state = getLatestState();
   const activeTemplate = getActiveExplorerTemplate();
   const tableId = activeTemplate?.tableId ?? activeTemplate?.id ?? "";

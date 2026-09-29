@@ -84,7 +84,7 @@ class RatioBadgeElement {
   addEventListener(name,listener) { this.listeners[name]=listener; }
   remove() { this.removed=true; }
 }
-const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()},getExplorerAxisDisplayName:axis=>({x:"Column",y:"Row",z:"Tab"}[axis]||"Row")});
+const ratioIndicatorContext=vm.createContext({document:{createElement:()=>new RatioBadgeElement()},getExplorerAxisDisplayName:axis=>({x:"Column",y:"Row",z:"Tab"}[axis]||"Row"),getLatestState:()=>({dimensionMapping:{find:()=>null}}),splitHierarchyPath:value=>String(value).split(" / ")});
 ratioIndicatorContext.isExplorerContributionChild=isExplorerContributionChild;
 vm.runInContext(source.slice(source.indexOf("function getExplorerContributionBaseValues("),source.indexOf("function getExplorerDenominatorValues(")),ratioIndicatorContext);
 const selectedDenominatorSeries=[{value:10},{value:20}];

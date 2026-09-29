@@ -3,10 +3,13 @@ import { createDimensionMapping } from "./dimensionMapping.js?v=20260928-diction
 import { parseExplorerPoints } from "./explorerConfig.js?v=20260928-dictionary-casing";
 
 const TAXONOMY_DATA_URL = "./assets/ITS_all_dimension_mapping.csv";
+const TAXONOMY_HISTORY_URL = "./assets/ITS_template_taxonomy_history.csv";
 let sourcePromise = null;
+let historyPromise = null;
+const resolvedTaxonomyDataCache = new Map();
 
-export async function loadTaxonomyDimensionData(requestedTaxonomies = {}) {
-  const { columns, rows } = await loadSource();
+export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { referenceDate = "" } = {}) {
+  const [{ columns, rows }, history] = await Promise.all([loadSource(), loadTaxonomyHistory()]);
   const frameworkIndex = columns.indexOf("framework");
   const tableIdIndex = columns.indexOf("table_id");
   if (frameworkIndex === -1 || tableIdIndex === -1) {
@@ -28,23 +31,40 @@ export async function loadTaxonomyDimensionData(requestedTaxonomies = {}) {
     const availableTaxonomies = [...taxonomies]
       .sort((left, right) => left.localeCompare(right, "en", { numeric: true }));
     const requested = requestedTaxonomies?.[tableId];
+    const dateScoped = referenceDate
+      ? getTaxonomyForReferenceDate(tableId, referenceDate, history, availableTaxonomies)
+      : "";
     availableTaxonomiesByTemplate[tableId] = availableTaxonomies;
-    selectedTaxonomiesByTemplate[tableId] = availableTaxonomies.includes(requested)
-      ? requested
-      : availableTaxonomies.at(-1) ?? "";
+    selectedTaxonomiesByTemplate[tableId] = availableTaxonomies.includes(dateScoped)
+      ? dateScoped
+      : availableTaxonomies.includes(requested)
+        ? requested
+        : availableTaxonomies.at(-1) ?? "";
   });
+
+  const selectionKey = Object.entries(selectedTaxonomiesByTemplate)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([tableId, framework]) => `${tableId}\u001f${framework}`)
+    .join("\u001e");
+  const cached = resolvedTaxonomyDataCache.get(selectionKey);
+  if (cached) return cached;
 
   const selectedRows = deduplicateFrameworkRows(
     rows.filter((row) => selectedTaxonomiesByTemplate[row[tableIdIndex]] === String(row[frameworkIndex] ?? "").trim()),
     columns
   );
 
-  return {
+  const resolvedData = {
     availableTaxonomiesByTemplate,
     selectedTaxonomiesByTemplate,
     dimensionMapping: createDimensionMapping(columns, selectedRows),
     explorerPoints: parseExplorerPoints(columns, selectedRows)
   };
+  resolvedTaxonomyDataCache.set(selectionKey, resolvedData);
+  if (resolvedTaxonomyDataCache.size > 12) {
+    resolvedTaxonomyDataCache.delete(resolvedTaxonomyDataCache.keys().next().value);
+  }
+  return resolvedData;
 }
 
 async function loadSource() {
@@ -60,6 +80,60 @@ async function loadSource() {
       });
   }
   return sourcePromise;
+}
+
+async function loadTaxonomyHistory() {
+  if (!historyPromise) {
+    historyPromise = fetchCsv(TAXONOMY_HISTORY_URL).catch((error) => {
+      historyPromise = null;
+      throw error;
+    });
+  }
+  return historyPromise;
+}
+
+async function fetchCsv(url) {
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error("L'historique des taxonomies n'a pas pu être chargé.");
+  return parseCsv(await response.text());
+}
+
+function getTaxonomyForReferenceDate(tableId, referenceDate, history, availableTaxonomies) {
+  const tableIndex = history.columns.indexOf("table_id");
+  const frameworkIndex = history.columns.indexOf("framework");
+  const fromIndex = history.columns.indexOf("effective_from");
+  const toIndex = history.columns.indexOf("effective_to");
+  if ([tableIndex, frameworkIndex, fromIndex, toIndex].some((index) => index < 0)) return "";
+
+  const date = normalizeReferenceDate(referenceDate);
+  if (!date) return "";
+  const candidates = history.rows
+    .filter((row) => {
+      if (String(row[tableIndex] ?? "").trim() !== tableId) return false;
+      if (!availableTaxonomies.includes(String(row[frameworkIndex] ?? "").trim())) return false;
+      const from = String(row[fromIndex] ?? "").trim();
+      const to = String(row[toIndex] ?? "").trim();
+      return from && from <= date && (!to || date <= to);
+    })
+    .sort((left, right) => {
+      const byStartDate = String(right[fromIndex] ?? "").localeCompare(String(left[fromIndex] ?? ""));
+      if (byStartDate) return byStartDate;
+      return String(right[frameworkIndex] ?? "").localeCompare(String(left[frameworkIndex] ?? ""), "en", { numeric: true });
+    });
+  if (candidates.length) return String(candidates[0][frameworkIndex] ?? "").trim();
+
+  // A reference date before the recorded history uses the earliest available release.
+  const first = history.rows
+    .filter((row) => String(row[tableIndex] ?? "").trim() === tableId
+      && availableTaxonomies.includes(String(row[frameworkIndex] ?? "").trim()))
+    .sort((left, right) => String(left[fromIndex] ?? "").localeCompare(String(right[fromIndex] ?? "")))[0];
+  return String(first?.[frameworkIndex] ?? "").trim();
+}
+
+function normalizeReferenceDate(value) {
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString().slice(0, 10);
+  const normalized = String(value ?? "").trim().replace(/^ref_/, "").replaceAll("_", "-");
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : "";
 }
 
 function deduplicateFrameworkRows(rows, columns) {

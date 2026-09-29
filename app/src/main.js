@@ -2,7 +2,7 @@ import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
 import { parseInstitutionDictionaryCsv } from "./data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
-import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260928-dictionary-casing";
+import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
@@ -43,6 +43,7 @@ const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";
 let currentCsvFileName = standaloneData?.fileName ?? "";
 const csvTextByDatasetId = new Map();
+let taxonomyLoadSequence = 0;
 
 if (standaloneData) document.body.classList.add("is-standalone-app");
 
@@ -177,6 +178,10 @@ const actions = {
   updatePeerDisplayMode(peerDisplayMode) {
     store.setPeerDisplayMode(peerDisplayMode);
     updateUrlPeerDisplayModeParam(store.getState().peerDisplayMode);
+  },
+
+  updateExplorerTaxonomy(referenceDate = "") {
+    return applyTaxonomyDimensionData(referenceDate);
   },
 
   setActiveModule(activeModule) {
@@ -459,11 +464,12 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, kriDictionaryCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, taxonomyHistoryCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, kriDictionaryCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("src/creditRiskStyles.css"),
     fetchAppText("assets/ITS_all_dimension_mapping.csv"),
+    fetchAppText("assets/ITS_template_taxonomy_history.csv"),
     fetchAppText("assets/ITS_impossible_x_y.csv"),
     fetchAppText("assets/ITS_explorer_default_expand_depth.csv"),
     fetchAppText("assets/ITS_explorer_template_groups.csv"),
@@ -476,6 +482,7 @@ async function getStandaloneBundle() {
   return {
     assets: {
       "assets/ITS_all_dimension_mapping.csv": mappingCsv,
+      "assets/ITS_template_taxonomy_history.csv": taxonomyHistoryCsv,
       "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv,
       "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv,
       "assets/ITS_explorer_template_groups.csv": templateGroupsCsv,
@@ -665,9 +672,19 @@ function revealApplication() {
 
 async function loadTaxonomyConfiguration() {
   try {
-    store.setTaxonomyDimensionData(await loadTaxonomyDimensionData());
+    await applyTaxonomyDimensionData();
   } catch (error) {
     store.setDimensionMappingError(error);
+  }
+}
+
+async function applyTaxonomyDimensionData(referenceDate = "") {
+  const sequence = ++taxonomyLoadSequence;
+  try {
+    const taxonomyData = await loadTaxonomyDimensionData({}, { referenceDate });
+    if (sequence === taxonomyLoadSequence) store.setTaxonomyDimensionData(taxonomyData);
+  } catch (error) {
+    if (sequence === taxonomyLoadSequence) store.setDimensionMappingError(error);
   }
 }
 
