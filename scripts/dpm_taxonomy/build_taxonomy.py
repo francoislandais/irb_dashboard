@@ -71,6 +71,11 @@ CURRENCY_Z_DISPLAY_ORDER = (
     "CZK", "HUF", "RON", "SGD", "HKD", "TRY",
 )
 
+C08_IRB_Z_PARENTS = {
+    "with": ("__PARENT__C08_IRB_A", "IRB A — With own estimates of LGD or conversion factors"),
+    "without": ("__PARENT__C08_IRB_F", "IRB F — Without own estimates of LGD or conversion factors"),
+}
+
 
 def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
     """Shorten open currency axes while retaining non-currency Z members.
@@ -90,6 +95,66 @@ def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
     aggregate = [(code, label) for code, label in special if "all currencies" in label.casefold()]
     other = [(code, label) for code, label in special if "all currencies" not in label.casefold()]
     return aggregate + selected + other
+
+
+def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Add display parents to C_08 Z choices after sheet and suffix merging.
+
+    Legacy releases place one Z choice on each numbered worksheet. Grouping
+    the finished table/framework is necessary to assemble both complete IRB
+    branches. Original Z codes and descriptions remain unchanged.
+    """
+    buckets: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if row["coordinate"] == AXIS_COORDINATES["z"] and re.fullmatch(r"C_08\.\d{2}(?:\.\d+)?", row["table_id"]):
+            buckets[(row["module_code"], row["framework"], row["table_id"])].append(row)
+
+    replacements: dict[tuple[str, str, str], list[dict[str, str]]] = {}
+    for key, members in buckets.items():
+        groups: dict[str, list[dict[str, str]]] = {"with": [], "without": [], "other": []}
+        for member in members:
+            label = member["description"].casefold()
+            if re.search(r"\bwithout own estimates? of lgd\b", label):
+                groups["without"].append(member)
+            elif re.search(r"\bwith own estimates? of lgd\b", label):
+                groups["with"].append(member)
+            else:
+                groups["other"].append(member)
+        if not groups["with"] or not groups["without"]:
+            continue
+
+        used_codes = {member["code"] for member in members}
+        if used_codes.intersection(parent_code for parent_code, _ in C08_IRB_Z_PARENTS.values()):
+            raise ValueError(f"C_08 IRB display parent code collides with source Z code: {key}")
+
+        organized = [member.copy() for member in groups["other"]
+                     if "all exposure classes and approaches" in member["description"].casefold()]
+        for group_name in ("with", "without"):
+            parent_code, parent_label = C08_IRB_Z_PARENTS[group_name]
+            organized.append({
+                **members[0], "code": parent_code, "description": parent_label,
+                "parent_coordinate_code": "", "ignore": "Y", "format": "",
+            })
+            group_members = groups[group_name]
+            group_members = sorted(group_members, key=lambda member: not member["description"].casefold().startswith("total "))
+            organized.extend({**member, "parent_coordinate_code": parent_code} for member in group_members)
+        organized.extend(member.copy() for member in groups["other"]
+                         if "all exposure classes and approaches" not in member["description"].casefold())
+        for order, member in enumerate(organized, 1):
+            member["order_first"] = str(order)
+        replacements[key] = organized
+
+    output: list[dict[str, str]] = []
+    emitted: set[tuple[str, str, str]] = set()
+    for row in rows:
+        key = (row["module_code"], row["framework"], row["table_id"])
+        if row["coordinate"] == AXIS_COORDINATES["z"] and key in replacements:
+            if key not in emitted:
+                output.extend(replacements[key])
+                emitted.add(key)
+            continue
+        output.append(row)
+    return output
 
 
 def clean(value: Any) -> str:
@@ -977,7 +1042,8 @@ def extract_all() -> tuple[
     # resolver when the caller requests the former module family.
     sorted_templates = close_template_intervals(normalized_templates.values())
 
-    return list(unique_layouts.values()), sorted_templates, inventory, suffix_conflicts
+    dimensions = group_c08_irb_z_rows(list(unique_layouts.values()))
+    return dimensions, sorted_templates, inventory, suffix_conflicts
 
 
 def write_csv(path: Path, rows: Iterable[dict[str, str]], columns: list[str]) -> None:

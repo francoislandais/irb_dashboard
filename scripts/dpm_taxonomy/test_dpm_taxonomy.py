@@ -19,6 +19,37 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_c08_irb_z_groups_legacy_and_qx_codes_without_changing_identities(self):
+        def dimension(table_id, coordinate, code, description):
+            return {
+                "module_code": "COREP", "framework": "3.2", "table_id": table_id,
+                "coordinate": coordinate, "code": code, "description": description,
+                "parent_coordinate_code": "", "ignore": "", "format": "", "order_first": "",
+            }
+
+        original = [
+            dimension("C_08.01", "z_axis_rc_code", "0002", "Total without own estimates of LGD or conversion factors"),
+            dimension("C_08.01", "x_axis_rc_code", "0010", "Amount"),
+            dimension("C_08.01", "z_axis_rc_code", "0003", "Central banks with own estimates of LGD or conversion factors"),
+            dimension("C_08.01", "z_axis_rc_code", "0001", "Total with own estimates of LGD or conversion factors"),
+            dimension("C_08.01", "z_axis_rc_code", "0004", "Central banks without own estimates of LGD or conversion factors"),
+            dimension("C_08.01", "z_axis_rc_code", "qx01", "All exposure classes and approaches"),
+            dimension("C_08.01", "z_axis_rc_code", "qx2082", "Collective Investment Undertakings (CIU)"),
+            dimension("C_08.06", "z_axis_rc_code", "qx129", "Project finance"),
+        ]
+        result = builder.group_c08_irb_z_rows(original)
+        grouped = [row for row in result if row["table_id"] == "C_08.01" and row["coordinate"] == "z_axis_rc_code"]
+        self.assertEqual([row["code"] for row in grouped], [
+            "qx01", "__PARENT__C08_IRB_A", "0001", "0003",
+            "__PARENT__C08_IRB_F", "0002", "0004", "qx2082",
+        ])
+        self.assertEqual([row["parent_coordinate_code"] for row in grouped[2:4]], ["__PARENT__C08_IRB_A"] * 2)
+        self.assertEqual([row["parent_coordinate_code"] for row in grouped[5:7]], ["__PARENT__C08_IRB_F"] * 2)
+        self.assertEqual([row["ignore"] for row in (grouped[1], grouped[4])], ["Y", "Y"])
+        self.assertEqual([row["order_first"] for row in grouped], [str(number) for number in range(1, 9)])
+        self.assertEqual(next(row for row in result if row["table_id"] == "C_08.06"), original[-1])
+        self.assertEqual(original[0]["parent_coordinate_code"], "")
+
     def test_c03_c04_amounts_override_percent_words_and_stale_formats(self):
         cases = {
             ("C_03.00", "220", "Surplus(+)/Deficit(-) of CET1 capital considering OCR and P2G"): "",
