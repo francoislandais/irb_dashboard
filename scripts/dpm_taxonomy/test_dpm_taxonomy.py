@@ -19,6 +19,24 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_c03_c04_amounts_override_percent_words_and_stale_formats(self):
+        cases = {
+            ("C_03.00", "220", "Surplus(+)/Deficit(-) of CET1 capital considering OCR and P2G"): "",
+            ("C_03.00", "130", "Total SREP capital requirement ratio (TSCR)"): "%",
+            ("C_04.00", "96", "Deferred tax assets subject to a risk weight of 250%"): "",
+            ("C_04.00", "97", "Deferred tax assets subject to a risk weight of 0%"): "",
+            ("C_04.00", "200", "10% CET1 threshold"): "",
+            ("C_04.00", "210", "17.65% CET1 threshold"): "",
+            ("C_04.00", "504", "Investments in CET1 capital - subject to a risk weight of 250%"): "",
+            ("C_04.00", "900", "Output floor/Output floor applied (%)"): "%",
+            ("C_04.00", "900", "Basel I floor/Own funds requirements for Basel I floor - SA alternative"): "",
+        }
+        for (table_id, code, description), expected in cases.items():
+            with self.subTest(table_id=table_id, code=code, description=description):
+                self.assertEqual(builder.dimension_display_format(
+                    f"{table_id}.a", "y_axis_rc_code", code, description
+                ), expected)
+
     def test_liquidity_coverage_formats_follow_measure_and_c76_ratio_row(self):
         cases = {
             ("C_72.00", "x_axis_rc_code", "30", "Applicable weight"): "%",

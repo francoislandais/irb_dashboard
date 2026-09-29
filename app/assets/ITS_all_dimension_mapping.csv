@@ -3374,8 +3374,8 @@ C_04.00;y_axis_rc_code;70;50;Deferred tax liabilities deductible from deferred t
 C_04.00;y_axis_rc_code;80;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and do not arise from temporary differences;;;;2.9.1.1
 C_04.00;y_axis_rc_code;90;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and arise from temporary differences;;;;2.9.1.1
 C_04.00;y_axis_rc_code;93;;Tax overpayments and tax loss carry backs;;;;2.9.1.1
-C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;%;2.9.1.1
-C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;%;2.9.1.1
+C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;;2.9.1.1
+C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;;2.9.1.1
 C_04.00;y_axis_rc_code;100;__PARENT__0ea7eb398625;IRB excess (+) or shortfall (-) of credit risk adjustments, additional value adjustments and other own funds reductions to expected losses for non defaulted exposures;;;;2.9.1.1
 C_04.00;y_axis_rc_code;110;100;Total credit risk adjustments, additional value adjustments and other own funds reductions eligible for inclusion in the calculation of the expected loss amount;;;;2.9.1.1
 C_04.00;y_axis_rc_code;120;110;General credit risk adjustments;;;;2.9.1.1
@@ -3389,8 +3389,8 @@ C_04.00;y_axis_rc_code;160;__PARENT__0ea7eb398625;Risk weighted exposure amounts
 C_04.00;y_axis_rc_code;170;__PARENT__0ea7eb398625;Total gross provisions eligible for inclusion in T2 capital;;;;2.9.1.1
 C_04.00;y_axis_rc_code;180;__PARENT__0ea7eb398625;Risk weighted exposure amounts for calculating the cap to the provision eligible as T2;;;;2.9.1.1
 C_04.00;y_axis_rc_code;190;__PARENT__560ebf6f0598;Threshold non deductible of holdings in financial sector entities where an institution does not have a significant investment;;;;2.9.1.1
-C_04.00;y_axis_rc_code;200;__PARENT__560ebf6f0598;10% CET1 threshold;;;%;2.9.1.1
-C_04.00;y_axis_rc_code;210;__PARENT__560ebf6f0598;17.65% CET1 threshold;;;%;2.9.1.1
+C_04.00;y_axis_rc_code;200;__PARENT__560ebf6f0598;10% CET1 threshold;;;;2.9.1.1
+C_04.00;y_axis_rc_code;210;__PARENT__560ebf6f0598;17.65% CET1 threshold;;;;2.9.1.1
 C_04.00;y_axis_rc_code;225;__PARENT__560ebf6f0598;Eligible capital for the purposes of qualifying holdings outside the financial sector;;;;2.9.1.1
 C_04.00;y_axis_rc_code;226;__PARENT__560ebf6f0598;Eligible capital for the purposes of large exposures;;;;2.9.1.1
 C_04.00;y_axis_rc_code;230;__PARENT__fd73b4392cb3;Holdings of CET1 capital of financial sector entities where the institution does not have a significant investment, net of short positions;;;;2.9.1.1
@@ -10473,8 +10473,8 @@ C_04.00;y_axis_rc_code;70;50;Deferred tax liabilities deductible from deferred t
 C_04.00;y_axis_rc_code;80;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and do not arise from temporary differences;;;;3.0
 C_04.00;y_axis_rc_code;90;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and arise from temporary differences;;;;3.0
 C_04.00;y_axis_rc_code;93;;Tax overpayments and tax loss carry backs;;;;3.0
-C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;%;3.0
-C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;%;3.0
+C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;;3.0
+C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;;3.0
 C_04.00;y_axis_rc_code;901;__PARENT__783589953a44;Exception from deduction of intangible assets from CET1;;;;3.0
 C_04.00;y_axis_rc_code;905;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as equity under applicable accounting standards;;;;3.0
 C_04.00;y_axis_rc_code;906;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as liabilities under applicable accounting standards;;;;3.0
@@ -10491,8 +10491,8 @@ C_04.00;y_axis_rc_code;160;__PARENT__f771178ae324;Risk weighted exposure amounts
 C_04.00;y_axis_rc_code;170;__PARENT__f771178ae324;Total gross provisions eligible for inclusion in T2 capital;;;;3.0
 C_04.00;y_axis_rc_code;180;__PARENT__f771178ae324;Risk weighted exposure amounts for calculating the cap to the provision eligible as T2;;;;3.0
 C_04.00;y_axis_rc_code;190;__PARENT__c154b264029d;Threshold non deductible of holdings in financial sector entities where an institution does not have a significant investment;;;;3.0
-C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;%;3.0
-C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;%;3.0
+C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;;3.0
+C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;;3.0
 C_04.00;y_axis_rc_code;225;__PARENT__c154b264029d;Eligible capital for the purposes of qualifying holdings outside the financial sector;;;;3.0
 C_04.00;y_axis_rc_code;230;__PARENT__9c27234af072;Holdings of CET1 capital of financial sector entities where the institution does not have a significant investment, net of short positions;;;;3.0
 C_04.00;y_axis_rc_code;240;230;Direct holdings of CET1 capital of financial sector entities where the institution does not have a significant investment;;;;3.0
@@ -10534,7 +10534,7 @@ C_04.00;y_axis_rc_code;500;480;(-) Permitted offsetting short positions in relat
 C_04.00;y_axis_rc_code;501;440;Synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;3.0
 C_04.00;y_axis_rc_code;502;501;Gross synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;3.0
 C_04.00;y_axis_rc_code;503;501;(-) Permitted offsetting short positions in relation to the synthetic gross holdings included above;;;;3.0
-C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;%;3.0
+C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;;3.0
 C_04.00;y_axis_rc_code;510;__PARENT__f07923f8af36;Holdings of AT1 capital of financial sector entities where the institution has a significant investment, net of short positions;;;;3.0
 C_04.00;y_axis_rc_code;520;510;Direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;3.0
 C_04.00;y_axis_rc_code;530;520;Gross direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;3.0
@@ -20753,7 +20753,7 @@ C_03.00;y_axis_rc_code;180;160;OCR: to be made up of Tier 1;;;%;3.2
 C_03.00;y_axis_rc_code;190;;OCR and Pillar 2 Guidance (P2G);;;%;3.2
 C_03.00;y_axis_rc_code;200;190;OCR and P2G: to be made up of CET1 capital;;;%;3.2
 C_03.00;y_axis_rc_code;210;190;OCR and P2G: to be made up of Tier 1 capital;;;%;3.2
-C_03.00;y_axis_rc_code;220;;Surplus(+)/Deficit(-) of CET1 capital considering the requirements of Article 92 of Regulation (EU) No 575/2013 and Article 104a of Directive 2013/36/EU;;;%;3.2
+C_03.00;y_axis_rc_code;220;;Surplus(+)/Deficit(-) of CET1 capital considering the requirements of Article 92 of Regulation (EU) No 575/2013 and Article 104a of Directive 2013/36/EU;;;;3.2
 C_03.00;y_axis_rc_code;300;__PARENT__46cc1c6814b1;CET1 Capital ratio without application of the transitional provisions on IFRS 9;;;%;3.2
 C_03.00;y_axis_rc_code;310;__PARENT__46cc1c6814b1;T1 Capital ratio without application of the transitional provisions on IFRS 9;;;%;3.2
 C_03.00;y_axis_rc_code;320;__PARENT__46cc1c6814b1;Total capital ratio without application of the transitional provisions on IFRS 9;;;%;3.2
@@ -20781,8 +20781,8 @@ C_04.00;y_axis_rc_code;70;50;Deferred tax liabilities deductible from deferred t
 C_04.00;y_axis_rc_code;80;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and do not arise from temporary differences;;;;3.2
 C_04.00;y_axis_rc_code;90;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and arise from temporary differences;;;;3.2
 C_04.00;y_axis_rc_code;93;;Tax overpayments and tax loss carry backs;;;;3.2
-C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;%;3.2
-C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;%;3.2
+C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;;3.2
+C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;;3.2
 C_04.00;y_axis_rc_code;901;__PARENT__783589953a44;Software assets accounted for as intangible assets exempted from the deduction from CET1;;;;3.2
 C_04.00;y_axis_rc_code;905;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as equity under applicable accounting standards;;;;3.2
 C_04.00;y_axis_rc_code;906;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as liabilities under applicable accounting standards;;;;3.2
@@ -20799,8 +20799,8 @@ C_04.00;y_axis_rc_code;160;__PARENT__f771178ae324;Risk weighted exposure amounts
 C_04.00;y_axis_rc_code;170;__PARENT__f771178ae324;Total gross provisions eligible for inclusion in T2 capital;;;;3.2
 C_04.00;y_axis_rc_code;180;__PARENT__f771178ae324;Risk weighted exposure amounts for calculating the cap to the provision eligible as T2;;;;3.2
 C_04.00;y_axis_rc_code;190;__PARENT__c154b264029d;Threshold non deductible of holdings in financial sector entities where an institution does not have a significant investment;;;;3.2
-C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;%;3.2
-C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;%;3.2
+C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;;3.2
+C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;;3.2
 C_04.00;y_axis_rc_code;225;__PARENT__c154b264029d;Eligible capital for the purposes of qualifying holdings outside the financial sector;;;;3.2
 C_04.00;y_axis_rc_code;230;__PARENT__9c27234af072;Holdings of CET1 capital of financial sector entities where the institution does not have a significant investment, net of short positions;;;;3.2
 C_04.00;y_axis_rc_code;240;230;Direct holdings of CET1 capital of financial sector entities where the institution does not have a significant investment;;;;3.2
@@ -20842,7 +20842,7 @@ C_04.00;y_axis_rc_code;500;480;(-) Permitted offsetting short positions in relat
 C_04.00;y_axis_rc_code;501;440;Synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;3.2
 C_04.00;y_axis_rc_code;502;501;Gross synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;3.2
 C_04.00;y_axis_rc_code;503;501;(-) Permitted offsetting short positions in relation to the synthetic gross holdings included above;;;;3.2
-C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;%;3.2
+C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;;3.2
 C_04.00;y_axis_rc_code;510;__PARENT__f07923f8af36;Holdings of AT1 capital of financial sector entities where the institution has a significant investment, net of short positions;;;;3.2
 C_04.00;y_axis_rc_code;520;510;Direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;3.2
 C_04.00;y_axis_rc_code;530;520;Gross direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;3.2
@@ -36756,7 +36756,7 @@ C_03.00;y_axis_rc_code;180;160;OCR: to be made up of Tier 1;;;%;4.0
 C_03.00;y_axis_rc_code;190;__PARENT__206d6d54b53c;OCR and Pillar 2 Guidance (P2G);;;%;4.0
 C_03.00;y_axis_rc_code;200;190;OCR and P2G: to be made up of CET1 capital;;;%;4.0
 C_03.00;y_axis_rc_code;210;190;OCR and P2G: to be made up of Tier 1 capital;;;%;4.0
-C_03.00;y_axis_rc_code;220;__PARENT__206d6d54b53c;Surplus(+)/Deficit(-) of CET1 capital considering the requirements of Article 92 of Regulation (EU) No 575/2013 and Article 104a of Directive 2013/36/EU;;;%;4.0
+C_03.00;y_axis_rc_code;220;__PARENT__206d6d54b53c;Surplus(+)/Deficit(-) of CET1 capital considering the requirements of Article 92 of Regulation (EU) No 575/2013 and Article 104a of Directive 2013/36/EU;;;;4.0
 C_03.00;y_axis_rc_code;330;__PARENT__cb6c6a522d58;Fully loaded CET1 Capital ratio;;;%;4.0
 C_03.00;y_axis_rc_code;340;__PARENT__cb6c6a522d58;Fully loaded T1 Capital ratio;;;%;4.0
 C_03.00;y_axis_rc_code;350;__PARENT__cb6c6a522d58;Fully loaded Total capital ratio;;;%;4.0
@@ -36788,8 +36788,8 @@ C_04.00;y_axis_rc_code;70;50;Deferred tax liabilities deductible from deferred t
 C_04.00;y_axis_rc_code;80;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and do not arise from temporary differences;;;;4.0
 C_04.00;y_axis_rc_code;90;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and arise from temporary differences;;;;4.0
 C_04.00;y_axis_rc_code;93;;Tax overpayments and tax loss carry backs;;;;4.0
-C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;%;4.0
-C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;%;4.0
+C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;;4.0
+C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;;4.0
 C_04.00;y_axis_rc_code;901;__PARENT__783589953a44;Software assets accounted for as intangible assets exempted from the deduction from CET1;;;;4.0
 C_04.00;y_axis_rc_code;905;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as equity under applicable accounting standards;;;;4.0
 C_04.00;y_axis_rc_code;906;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as liabilities under applicable accounting standards;;;;4.0
@@ -36806,8 +36806,8 @@ C_04.00;y_axis_rc_code;160;__PARENT__f771178ae324;Risk weighted exposure amounts
 C_04.00;y_axis_rc_code;170;__PARENT__f771178ae324;Total gross provisions eligible for inclusion in T2 capital;;;;4.0
 C_04.00;y_axis_rc_code;180;__PARENT__f771178ae324;Risk weighted exposure amounts for calculating the cap to the provision eligible as T2;;;;4.0
 C_04.00;y_axis_rc_code;190;__PARENT__c154b264029d;Threshold non deductible of holdings in financial sector entities where an institution does not have a significant investment;;;;4.0
-C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;%;4.0
-C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;%;4.0
+C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;;4.0
+C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;;4.0
 C_04.00;y_axis_rc_code;225;__PARENT__c154b264029d;Eligible capital for the purposes of qualifying holdings outside the financial sector;;;;4.0
 C_04.00;y_axis_rc_code;230;__PARENT__9c27234af072;Holdings of CET1 capital of financial sector entities where the institution does not have a significant investment, net of short positions;;;;4.0
 C_04.00;y_axis_rc_code;240;230;Direct holdings of CET1 capital of financial sector entities where the institution does not have a significant investment;;;;4.0
@@ -36849,7 +36849,7 @@ C_04.00;y_axis_rc_code;500;480;(-) Permitted offsetting short positions in relat
 C_04.00;y_axis_rc_code;501;440;Synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;4.0
 C_04.00;y_axis_rc_code;502;501;Gross synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;4.0
 C_04.00;y_axis_rc_code;503;501;(-) Permitted offsetting short positions in relation to the synthetic gross holdings included above;;;;4.0
-C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;%;4.0
+C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;;4.0
 C_04.00;y_axis_rc_code;510;__PARENT__f07923f8af36;Holdings of AT1 capital of financial sector entities where the institution has a significant investment, net of short positions;;;;4.0
 C_04.00;y_axis_rc_code;520;510;Direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;4.0
 C_04.00;y_axis_rc_code;530;520;Gross direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;4.0
@@ -48690,7 +48690,7 @@ C_03.00;y_axis_rc_code;180;160;OCR: to be made up of Tier 1;;;%;4.2
 C_03.00;y_axis_rc_code;190;__PARENT__206d6d54b53c;OCR and Pillar 2 Guidance (P2G);;;%;4.2
 C_03.00;y_axis_rc_code;200;190;OCR and P2G: to be made up of CET1 capital;;;%;4.2
 C_03.00;y_axis_rc_code;210;190;OCR and P2G: to be made up of Tier 1 capital;;;%;4.2
-C_03.00;y_axis_rc_code;220;__PARENT__206d6d54b53c;Surplus(+)/Deficit(-) of CET1 capital considering the requirements of Article 92 of Regulation (EU) No 575/2013 and Article 104a of Directive 2013/36/EU;;;%;4.2
+C_03.00;y_axis_rc_code;220;__PARENT__206d6d54b53c;Surplus(+)/Deficit(-) of CET1 capital considering the requirements of Article 92 of Regulation (EU) No 575/2013 and Article 104a of Directive 2013/36/EU;;;;4.2
 C_03.00;y_axis_rc_code;330;__PARENT__cb6c6a522d58;Fully loaded CET1 Capital ratio;;;%;4.2
 C_03.00;y_axis_rc_code;340;__PARENT__cb6c6a522d58;Fully loaded T1 Capital ratio;;;%;4.2
 C_03.00;y_axis_rc_code;350;__PARENT__cb6c6a522d58;Fully loaded Total capital ratio;;;%;4.2
@@ -48722,8 +48722,8 @@ C_04.00;y_axis_rc_code;70;50;Deferred tax liabilities deductible from deferred t
 C_04.00;y_axis_rc_code;80;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and do not arise from temporary differences;;;;4.2
 C_04.00;y_axis_rc_code;90;70;Deductible deferred tax liabilities associated with deferred tax assets that rely on future profitability and arise from temporary differences;;;;4.2
 C_04.00;y_axis_rc_code;93;;Tax overpayments and tax loss carry backs;;;;4.2
-C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;%;4.2
-C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;%;4.2
+C_04.00;y_axis_rc_code;96;;Deferred tax assets subject to a risk weight of 250%;;;;4.2
+C_04.00;y_axis_rc_code;97;;Deferred tax assets subject to a risk weight of 0%;;;;4.2
 C_04.00;y_axis_rc_code;901;__PARENT__783589953a44;Software assets accounted for as intangible assets exempted from the deduction from CET1;;;;4.2
 C_04.00;y_axis_rc_code;905;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as equity under applicable accounting standards;;;;4.2
 C_04.00;y_axis_rc_code;906;__PARENT__ba3caee82dcd;Capital instruments and the related share premium accounts classified as liabilities under applicable accounting standards;;;;4.2
@@ -48740,8 +48740,8 @@ C_04.00;y_axis_rc_code;160;__PARENT__f771178ae324;Risk weighted exposure amounts
 C_04.00;y_axis_rc_code;170;__PARENT__f771178ae324;Total gross provisions eligible for inclusion in T2 capital;;;;4.2
 C_04.00;y_axis_rc_code;180;__PARENT__f771178ae324;Risk weighted exposure amounts for calculating the cap to the provision eligible as T2;;;;4.2
 C_04.00;y_axis_rc_code;190;__PARENT__c154b264029d;Threshold non deductible of holdings in financial sector entities where an institution does not have a significant investment;;;;4.2
-C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;%;4.2
-C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;%;4.2
+C_04.00;y_axis_rc_code;200;__PARENT__c154b264029d;10% CET1 threshold;;;;4.2
+C_04.00;y_axis_rc_code;210;__PARENT__c154b264029d;17.65% CET1 threshold;;;;4.2
 C_04.00;y_axis_rc_code;225;__PARENT__c154b264029d;Eligible capital for the purposes of qualifying holdings outside the financial sector;;;;4.2
 C_04.00;y_axis_rc_code;230;__PARENT__9c27234af072;Holdings of CET1 capital of financial sector entities where the institution does not have a significant investment, net of short positions;;;;4.2
 C_04.00;y_axis_rc_code;240;230;Direct holdings of CET1 capital of financial sector entities where the institution does not have a significant investment;;;;4.2
@@ -48783,7 +48783,7 @@ C_04.00;y_axis_rc_code;500;480;(-) Permitted offsetting short positions in relat
 C_04.00;y_axis_rc_code;501;440;Synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;4.2
 C_04.00;y_axis_rc_code;502;501;Gross synthetic holdings of CET1 capital of financial sector entities where the institution has a significant investment;;;;4.2
 C_04.00;y_axis_rc_code;503;501;(-) Permitted offsetting short positions in relation to the synthetic gross holdings included above;;;;4.2
-C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;%;4.2
+C_04.00;y_axis_rc_code;504;__PARENT__f07923f8af36;Investments in CET1 capital of financial sector entities where the institution has a significant investment - subject to a risk weight of 250%;;;;4.2
 C_04.00;y_axis_rc_code;510;__PARENT__f07923f8af36;Holdings of AT1 capital of financial sector entities where the institution has a significant investment, net of short positions;;;;4.2
 C_04.00;y_axis_rc_code;520;510;Direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;4.2
 C_04.00;y_axis_rc_code;530;520;Gross direct holdings of AT1 capital of financial sector entities where the institution has a significant investment;;;;4.2

@@ -245,6 +245,8 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
     in amount labels are only categories. C_76's sole X column mixes amounts
     and a ratio, distinguished by Y code 30. These source-specific rules cover
     all sheet suffixes and frameworks before consulting old curated formats.
+    C_03/C_04 monetary rows also override legacy percentage tags and percent
+    words that describe a threshold or risk weight rather than the cell value.
     """
     template = re.sub(r"\.[A-Za-z]$", "", table_id).upper()
     if template == "C_80.00":
@@ -262,6 +264,15 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
             if template == "C_76.00":
                 return ""
             return "%" if measure in {"applicable weight", "weight/applicable weight", "standard weight"} else ""
+    if coordinate == AXIS_COORDINATES["y"]:
+        if template == "C_03.00" and code_text(code) == "220":
+            return ""  # Surplus/deficit of CET1 capital is a monetary amount.
+        if template == "C_04.00":
+            # Risk weights and CET1 thresholds describe the assets/conditions,
+            # not the scale of the reported amount. Older code 900 has a
+            # different label; only the actual output-floor rate is a ratio.
+            is_output_floor_rate = code_text(code) == "900" and description.casefold().endswith("output floor applied (%)")
+            return "%" if is_output_floor_rate else ""
     return production_display_format(table_id, coordinate, code, description) or infer_display_format(description)
 
 
