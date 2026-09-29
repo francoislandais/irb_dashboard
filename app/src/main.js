@@ -20,7 +20,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260928-template-taxonomy";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260928-template-taxonomy";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260929-taxonomy-footer";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -167,18 +167,6 @@ const actions = {
   updateSelectedUnit(unit) {
     store.setSelectedUnit(unit);
     updateUrlUnitParam(store.getState().selectedUnit);
-  },
-
-  async updateSelectedTaxonomy(templateId, taxonomy) {
-    try {
-      const selectedTaxonomiesByTemplate = {
-        ...store.getState().selectedTaxonomiesByTemplate,
-        [templateId]: taxonomy
-      };
-      store.setTaxonomyDimensionData(await loadTaxonomyDimensionData(selectedTaxonomiesByTemplate));
-    } catch (error) {
-      store.setDimensionMappingError(error);
-    }
   },
 
   updatePeerJstCodes(peerJstCodes) {

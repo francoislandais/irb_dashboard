@@ -57,7 +57,6 @@ let rerenderApp = () => {};
 let setActiveModule = () => {};
 let updateSelectedJst = () => {};
 let updateSelectedUnit = () => {};
-let updateSelectedTaxonomy = () => {};
 let updatePeerDisplayMode = () => {};
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
@@ -276,7 +275,7 @@ const elements = {
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
   explorerKriPagination: document.querySelector("#explorer-kri-pagination"),
   explorerTemplateControl: document.querySelector("[data-explorer-template-control]"),
-  explorerTaxonomyPills: document.querySelector("#explorer-taxonomy-pills"),
+  explorerTaxonomyStatus: document.querySelector("#explorer-taxonomy-status"),
   unitSelect: document.querySelector("#unit-select")
 };
 
@@ -285,7 +284,6 @@ export function wireExplorerUi(actions, rerender) {
   setActiveModule = actions.setActiveModule;
   updateSelectedJst = actions.updateSelectedJst;
   updateSelectedUnit = actions.updateSelectedUnit;
-  updateSelectedTaxonomy = actions.updateSelectedTaxonomy;
   updatePeerDisplayMode = actions.updatePeerDisplayMode;
   elements.globalReferenceSelect?.addEventListener("change", (event) => {
     setExplorerHeaderReference(event.target.value);
@@ -3053,8 +3051,9 @@ function renderExplorerAxisTabs() {
   const axisCodes = { x: context.selectedXCode, y: context.selectedYCode, z: context.selectedZCode };
   const activeTemplate = getActiveExplorerTemplate();
   const tableId = activeTemplate?.tableId ?? EXPLORER_TARGET.tableId;
-  const axisOptions = getExplorerAxisOptions(getLatestState() ?? { columns: [], rows: [], explorerPoints: [] }, tableId, activeTemplate?.id);
-  renderExplorerTaxonomyPills(getLatestState(), activeTemplate);
+  const state = getLatestState() ?? { columns: [], rows: [], explorerPoints: [] };
+  const axisOptions = getExplorerAxisOptions(state, tableId, activeTemplate?.id);
+  renderExplorerTaxonomyStatus(state, activeTemplate);
 
   if (elements.explorerTemplateControl) {
     const showsTemplates = explorerContextTopic === "";
@@ -3098,37 +3097,14 @@ function renderExplorerAxisTabs() {
   });
 }
 
-function renderExplorerTaxonomyPills(state, activeTemplate) {
-  const container = elements.explorerTaxonomyPills;
+function renderExplorerTaxonomyStatus(state, activeTemplate) {
+  const container = elements.explorerTaxonomyStatus;
   if (!container) return;
 
   const tableId = activeTemplate?.tableId ?? activeTemplate?.id ?? "";
-  const available = state?.availableTaxonomiesByTemplate?.[tableId] ?? [];
   const selected = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
-  container.replaceChildren();
-  container.hidden = available.length === 0;
-  if (available.length === 0) return;
-
-  const label = document.createElement("span");
-  label.className = "explorer-taxonomy-label";
-  label.textContent = "Taxonomy";
-  container.append(label);
-
-  available.forEach((taxonomy) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "explorer-taxonomy-pill";
-    button.textContent = taxonomy;
-    button.setAttribute("aria-pressed", String(taxonomy === selected));
-    button.setAttribute("aria-label", `Use taxonomy ${taxonomy} for ${tableId}`);
-    button.classList.toggle("is-active", taxonomy === selected);
-    button.addEventListener("click", () => {
-      if (taxonomy === selected) return;
-      saveExplorerScrollPosition();
-      updateSelectedTaxonomy(tableId, taxonomy);
-    });
-    container.append(button);
-  });
+  container.hidden = !selected;
+  container.textContent = selected ? `DPM 2.0 · Framework ${selected}` : "";
 }
 
 function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
