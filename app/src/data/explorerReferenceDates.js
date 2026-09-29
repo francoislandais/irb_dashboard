@@ -44,3 +44,21 @@ export function getExplorerTemplateReferenceDates(state, tableId) {
   byTable.set(tableId, dates);
   return dates;
 }
+
+// The temporal table has already resolved the applicable taxonomy for each
+// date. Reuse those masks for the reference-date panel instead of treating a
+// raw zero in the benchmark series as a reported value. A code can appear in
+// several historical blocks, so a date is unavailable only if every matching
+// row marks it as such.
+export function getExplorerTaxonomyUnavailableReferenceLabels(series, selectedCode) {
+  const unavailable = new Set();
+  if (series?.xy || !series?.taxonomyBlocks?.length || !selectedCode) return unavailable;
+  const matchingRows = series.rows.filter((row) => row.code === selectedCode && !row.isVirtual);
+  if (!matchingRows.length) return unavailable;
+  series.dateColumns.forEach((column, index) => {
+    if (matchingRows.every((row) => row.values?.[index]?.isTaxonomyUnavailable === true)) {
+      unavailable.add(column.label);
+    }
+  });
+  return unavailable;
+}

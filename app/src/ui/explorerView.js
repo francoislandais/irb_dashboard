@@ -1,4 +1,4 @@
-import { getExplorerTemplateReferenceDates } from "../data/explorerReferenceDates.js";
+import { getExplorerTemplateReferenceDates, getExplorerTaxonomyUnavailableReferenceLabels } from "../data/explorerReferenceDates.js";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260922-xy-header-dedupe";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260928-local-description";
@@ -3800,6 +3800,9 @@ function renderExplorerReferenceDatePanel(state) {
   const benchmark = buildExplorerBenchmark(state?.selectedJst ? [state.selectedJst] : []);
   const selectedReference = getSelectedExplorerReference(state);
   const valuesByReference = new Map((benchmark.series[0]?.values ?? []).map((point) => [point.label, point.value]));
+  const unavailableDates = getExplorerTaxonomyUnavailableReferenceLabels(
+    lastRenderedExplorerTableSeries, getSelectedExplorerCodeForActiveAxis()
+  );
   const list = document.createElement("div");
   list.className = "explorer-jst-selection-list explorer-reference-date-list";
   list.setAttribute("role", "listbox");
@@ -3807,18 +3810,25 @@ function renderExplorerReferenceDatePanel(state) {
 
   getExplorerReferencePanelDates(benchmark.dates).forEach((reference) => {
     const isActive = reference.label === selectedReference?.label;
+    const isUnavailable = unavailableDates.has(reference.label);
     const row = document.createElement("button");
     row.type = "button";
     row.className = "explorer-jst-selection-row explorer-reference-date-row";
     row.classList.toggle("is-active", isActive);
+    row.classList.toggle("is-taxonomy-unavailable", isUnavailable);
+    row.disabled = isUnavailable;
     row.setAttribute("role", "option");
     row.setAttribute("aria-selected", String(isActive));
+    if (isUnavailable) {
+      row.setAttribute("aria-disabled", "true");
+      row.title = "This data point is not defined in the taxonomy applicable to this reference date";
+    }
 
     const label = document.createElement("span");
     label.textContent = getExplorerFullDateColumnLabel(reference);
     const metric = document.createElement("span");
     const rawValue = valuesByReference.get(reference.label);
-    metric.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
+    metric.textContent = !isUnavailable && Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
     row.append(label, metric);
     row.addEventListener("click", () => {
       selectExplorerReferenceDate(reference.label);
@@ -3833,6 +3843,9 @@ function renderExplorerReferenceDatePanel(state) {
 function selectExplorerReferenceDate(referenceLabel) {
   const context = getActiveExplorerContext();
   if (!referenceLabel || context.selectedReferenceLabel === referenceLabel) return false;
+  if (getExplorerTaxonomyUnavailableReferenceLabels(
+    lastRenderedExplorerTableSeries, getSelectedExplorerCodeForActiveAxis()
+  ).has(referenceLabel)) return false;
   context.selectedReferenceLabel = referenceLabel;
   context.selectedCellColumnIndex = 0;
   saveExplorerScrollPosition();

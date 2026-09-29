@@ -3067,6 +3067,15 @@ table {
   font-weight: 600;
 }
 
+.explorer-reference-date-row.is-taxonomy-unavailable,
+.explorer-reference-date-row.is-taxonomy-unavailable:hover {
+  background: #eceff0;
+  color: #7b8588;
+  cursor: not-allowed;
+  font-weight: 400;
+  opacity: 1;
+}
+
 .explorer-institution-label {
   display: block;
   min-width: 0;

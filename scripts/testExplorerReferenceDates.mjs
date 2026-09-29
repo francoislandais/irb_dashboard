@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {buildDataIndexes} from '../app/src/data/dataIndex.js';
 import {getReferenceColumns} from '../app/src/data/core/referenceColumns.js';
-import {getExplorerTemplateReferenceDates as dates} from '../app/src/data/explorerReferenceDates.js';
+import {getExplorerTemplateReferenceDates as dates, getExplorerTaxonomyUnavailableReferenceLabels} from '../app/src/data/explorerReferenceDates.js';
 const columns=['table_id','jst_code','x_axis_rc_code','y_axis_rc_code','z_axis_rc_code','ref_2026_01_31','ref_2026_02_28','ref_2026_03_31'];
 const rows=[['FIRST','A','','','','1','',''],['LAST','A','','','','',0,' '],['LAST','B','','','','text',null,'3']];
 for(const indexed of [false,true]) {
@@ -29,4 +29,18 @@ assert.equal(dates(state,'LAST').length,3);assert.equal(foreignReads,0);
 const initial=ownReads;
 for(let i=0;i<1000;i++) dates({...state,selectedJst:'A'},'LAST');
 assert.equal(ownReads,initial);
+
+const temporalSeries={
+ taxonomyBlocks:['4.2','4.0'],
+ dateColumns:[{label:'Q4 2024'},{label:'Q2 2026'}],
+ rows:[
+  {code:'0070',values:[{value:null,isTaxonomyUnavailable:true},{value:0}]},
+  {code:'0090',values:[{value:null,isTaxonomyUnavailable:true},{value:5}]},
+  {code:'0090',values:[{value:0},{value:null,isTaxonomyUnavailable:true}]}
+ ]
+};
+assert.deepEqual([...getExplorerTaxonomyUnavailableReferenceLabels(temporalSeries,'0070')],['Q4 2024']);
+assert.deepEqual([...getExplorerTaxonomyUnavailableReferenceLabels(temporalSeries,'0090')],[],
+ 'a date remains available when a historical block defines the selected code');
+assert.deepEqual([...getExplorerTaxonomyUnavailableReferenceLabels({...temporalSeries,xy:true},'0070')],[]);
 console.log('PASS: unchanged dates, all JSTs, zero/blank handling, dataset/schema cache renewal, no preceding-row reads, no cell reads on 1,000 cached calls.');
