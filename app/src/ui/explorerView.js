@@ -275,7 +275,6 @@ const elements = {
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
   explorerKriPagination: document.querySelector("#explorer-kri-pagination"),
   explorerTemplateControl: document.querySelector("[data-explorer-template-control]"),
-  explorerTaxonomyStatus: document.querySelector("#explorer-taxonomy-status"),
   unitSelect: document.querySelector("#unit-select")
 };
 
@@ -3053,8 +3052,6 @@ function renderExplorerAxisTabs() {
   const tableId = activeTemplate?.tableId ?? EXPLORER_TARGET.tableId;
   const state = getLatestState() ?? { columns: [], rows: [], explorerPoints: [] };
   const axisOptions = getExplorerAxisOptions(state, tableId, activeTemplate?.id);
-  renderExplorerTaxonomyStatus(state, activeTemplate);
-
   if (elements.explorerTemplateControl) {
     const showsTemplates = explorerContextTopic === "";
     elements.explorerTemplateControl.classList.toggle("is-panel-active", showsTemplates);
@@ -3095,16 +3092,6 @@ function renderExplorerAxisTabs() {
     const displayCode = axisCodes[axis] === EXPLORER_ALL_CURRENCIES_CODE ? EXPLORER_ALL_CURRENCIES_LABEL : axisCodes[axis];
     element.replaceChildren(createAxisCaptionLine(displayCode, axis));
   });
-}
-
-function renderExplorerTaxonomyStatus(state, activeTemplate) {
-  const container = elements.explorerTaxonomyStatus;
-  if (!container) return;
-
-  const tableId = activeTemplate?.tableId ?? activeTemplate?.id ?? "";
-  const selected = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
-  container.hidden = !selected;
-  container.textContent = selected ? `DPM 2.0 · Framework ${selected}` : "";
 }
 
 function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
@@ -4291,6 +4278,7 @@ function createExplorerSelectionSummaryCard() {
 
   const description = document.createElement("div");
   description.className = "explorer-selection-summary-description";
+  const taxonomyStatus = createExplorerTaxonomyStatus();
 
   const lines = [
     ["Row", captions.y],
@@ -4300,6 +4288,7 @@ function createExplorerSelectionSummaryCard() {
 
   if (lines.length === 0) {
     description.textContent = "Select a cell in the table to see its details here.";
+    if (taxonomyStatus) description.append(taxonomyStatus);
     pane.append(description);
     return pane;
   }
@@ -4324,8 +4313,23 @@ function createExplorerSelectionSummaryCard() {
     description.append(line);
   });
 
+  if (taxonomyStatus) description.append(taxonomyStatus);
   pane.append(description);
   return pane;
+}
+
+function createExplorerTaxonomyStatus() {
+  const state = getLatestState();
+  const activeTemplate = getActiveExplorerTemplate();
+  const tableId = activeTemplate?.tableId ?? activeTemplate?.id ?? "";
+  const selected = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
+  if (!selected) return null;
+
+  const status = document.createElement("span");
+  status.className = "explorer-taxonomy-status";
+  status.textContent = `DPM 2.0 · Framework ${selected}`;
+  status.setAttribute("aria-label", `DPM 2.0 taxonomy, framework ${selected}`);
+  return status;
 }
 
 function createExplorerSelectionHeadline(metrics, selectedReference) {

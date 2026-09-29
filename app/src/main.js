@@ -20,7 +20,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260928-template-taxonomy";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260929-taxonomy-footer";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20260929-taxonomy-card";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

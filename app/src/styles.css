@@ -1946,8 +1946,8 @@ button:focus-visible {
 }
 
 .explorer-selection-summary-description {
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   gap: 3px;
   min-height: 0;
   overflow-x: hidden;
@@ -2595,11 +2595,13 @@ table {
 }
 
 .explorer-taxonomy-status {
-  align-self: end;
+  align-self: flex-end;
   color: #98a29c;
-  font-size: 0.68rem;
+  flex: 0 0 auto;
+  font-size: 0.64rem;
   line-height: 1.2;
-  padding: 0 4px 2px;
+  margin-top: auto;
+  padding: 8px 0 0;
   text-align: right;
   white-space: nowrap;
 }
