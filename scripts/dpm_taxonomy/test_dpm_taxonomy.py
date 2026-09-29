@@ -19,6 +19,21 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_c80_rsf_scale_follows_x_measure_across_sheet_suffixes(self):
+        cases = {
+            ("x_axis_rc_code", "10", "Amount/Non-HQLA by maturity/< 6 months"): "",
+            ("x_axis_rc_code", "40", "Amount/HQLA"): "",
+            ("x_axis_rc_code", "90", "Applicable RSF factor/Non-HQLA by maturity/< 6 months"): "%",
+            ("x_axis_rc_code", "120", "Applicable RSF factor/HQLA"): "%",
+            ("x_axis_rc_code", "130", "Required stable funding"): "",
+            ("y_axis_rc_code", "90", "Level 1 assets eligible for 0% LCR haircut"): "",
+            ("y_axis_rc_code", "100", "Unencumbered for a residual maturity of less than six months"): "",
+        }
+        for table_id in ("C_80.00.a", "C_80.00.b", "C_80.00"):
+            for (coordinate, code, description), expected in cases.items():
+                with self.subTest(table_id=table_id, coordinate=coordinate, code=code):
+                    self.assertEqual(builder.dimension_display_format(table_id, coordinate, code, description), expected)
+
     def test_open_currency_axis_is_curated_without_losing_native_options(self):
         rows = [
             ("qx1", "All currencies"), ("ALL", "Lek"), ("JPY", "Yen"),

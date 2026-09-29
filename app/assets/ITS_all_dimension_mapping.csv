@@ -14308,98 +14308,98 @@ C_80.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.0
 C_80.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;3.0
 C_80.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;3.0
 C_80.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;3.0
-C_80.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 6 months;;;Unit;3.0
-C_80.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 6 months to < 1 year;;;Unit;3.0
-C_80.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;>= 1 year;;;Unit;3.0
+C_80.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 6 months;;;;3.0
+C_80.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 6 months to < 1 year;;;;3.0
+C_80.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;>= 1 year;;;;3.0
 C_80.00;x_axis_rc_code;40;__PARENT__43dc8532f7e5;HQLA;;;;3.0
-C_80.00;x_axis_rc_code;90;__PARENT__cffac3962595;< 6 months;;;Unit;3.0
-C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;Unit;3.0
-C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;Unit;3.0
-C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;;3.0
+C_80.00;x_axis_rc_code;90;__PARENT__cffac3962595;< 6 months;;;%;3.0
+C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;%;3.0
+C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;%;3.0
+C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;%;3.0
 C_80.00;x_axis_rc_code;130;;Required stable funding;;;;3.0
 C_80.00;y_axis_rc_code;10;;Required stable funding;;;;3.0
 C_80.00;y_axis_rc_code;20;10;RSF from central bank assets;;;;3.0
 C_80.00;y_axis_rc_code;30;20;cash, reserves and HQLA exposures to central banks;;;;3.0
-C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;Unit;3.0
-C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;Unit;3.0
-C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;Unit;3.0
+C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;70;20;other non-HQLA central bank exposures;;;;3.0
 C_80.00;y_axis_rc_code;80;10;RSF from liquid assets;;;;3.0
-C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;120;90;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;130;80;level 1 assets eligible for 5% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;140;130;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;150;130;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;160;130;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;170;80;level 1 eligible for 7% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;180;170;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;190;170;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;200;170;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;210;80;level 1 assets eligible for 12% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;220;210;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;230;210;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;240;210;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;250;80;level 2A assets eligible for 15% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;260;250;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;270;250;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;280;250;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;290;80;level 2A assets eligible for 20% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;300;290;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;310;290;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;320;290;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;330;80;level 2B securitizations eligible for 25% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;340;330;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;350;330;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;360;330;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;370;80;level 2B assets eligible for 30% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;380;370;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;390;370;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;400;370;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;410;80;level 2B assets eligible for 35% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;420;410;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;430;410;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;440;410;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;450;80;level 2B assets eligible for 40% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;460;450;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;470;450;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;480;450;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;490;80;level 2B assets eligible for 50% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;500;490;unencumbered or encumbered for a residual maturity of less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;510;490;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;%;3.0
-C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;Unit;3.0
+C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;120;90;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;130;80;level 1 assets eligible for 5% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;140;130;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;150;130;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;160;130;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;170;80;level 1 eligible for 7% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;180;170;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;190;170;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;200;170;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;210;80;level 1 assets eligible for 12% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;220;210;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;230;210;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;240;210;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;250;80;level 2A assets eligible for 15% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;260;250;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;270;250;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;280;250;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;290;80;level 2A assets eligible for 20% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;300;290;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;310;290;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;320;290;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;330;80;level 2B securitizations eligible for 25% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;340;330;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;350;330;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;360;330;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;370;80;level 2B assets eligible for 30% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;380;370;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;390;370;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;400;370;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;410;80;level 2B assets eligible for 35% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;420;410;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;430;410;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;440;410;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;450;80;level 2B assets eligible for 40% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;460;450;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;470;450;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;480;450;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;490;80;level 2B assets eligible for 50% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;500;490;unencumbered or encumbered for a residual maturity of less than one year;;;;3.0
+C_80.00;y_axis_rc_code;510;490;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;;3.0
+C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;;3.0
+C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;;3.0
 C_80.00;y_axis_rc_code;560;10;RSF from securities other than liquid assets;;;;3.0
 C_80.00;y_axis_rc_code;570;560;non- HQLA securities and exchange traded equities;;;;3.0
-C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;3.0
-C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;Unit;3.0
+C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;;3.0
+C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;600;560;non-HQLA non-exchange traded equities;;;;3.0
-C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;Unit;3.0
+C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;;3.0
 C_80.00;y_axis_rc_code;620;10;RSF from loans;;;;3.0
 C_80.00;y_axis_rc_code;630;620;operational deposits;;;;3.0
 C_80.00;y_axis_rc_code;640;620;securities financing transactions with financial customers;;;;3.0
-C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;%;3.0
-C_80.00;y_axis_rc_code;660;650;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;670;650;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;680;650;encumbered for a residual maturity of one year or more;;;%;3.0
+C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;;3.0
+C_80.00;y_axis_rc_code;660;650;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;670;650;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;680;650;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;690;620;collateralized by other assets;;;;3.0
-C_80.00;y_axis_rc_code;700;690;unencumbered or encumbered for a residual maturity of less than six months;;;Unit;3.0
-C_80.00;y_axis_rc_code;710;690;encumbered for a residual maturity of at least six months but less than one year;;;Unit;3.0
-C_80.00;y_axis_rc_code;720;690;encumbered for a residual maturity of one year or more;;;Unit;3.0
+C_80.00;y_axis_rc_code;700;690;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;710;690;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;720;690;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;730;620;other loans and advances to financial customers;;;;3.0
-C_80.00;y_axis_rc_code;740;620;assets encumbered for a residual maturity of one year or more in a cover pool;;;Unit;3.0
-C_80.00;y_axis_rc_code;750;620;loans to non-financial customers other than central banks where those loans are assigned a risk weight of 35% or less;;;%;3.0
-C_80.00;y_axis_rc_code;760;750;of which, residential mortgages;;;%;3.0
-C_80.00;y_axis_rc_code;770;750;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.0
-C_80.00;y_axis_rc_code;780;750;encumbered for a residual maturity of at least six months but less than one year;;;%;3.0
-C_80.00;y_axis_rc_code;790;750;encumbered for a residual maturity of one year or more;;;%;3.0
+C_80.00;y_axis_rc_code;740;620;assets encumbered for a residual maturity of one year or more in a cover pool;;;;3.0
+C_80.00;y_axis_rc_code;750;620;loans to non-financial customers other than central banks where those loans are assigned a risk weight of 35% or less;;;;3.0
+C_80.00;y_axis_rc_code;760;750;of which, residential mortgages;;;;3.0
+C_80.00;y_axis_rc_code;770;750;unencumbered or encumbered for a residual maturity of less than six months;;;;3.0
+C_80.00;y_axis_rc_code;780;750;encumbered for a residual maturity of at least six months but less than one year;;;;3.0
+C_80.00;y_axis_rc_code;790;750;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;800;620;other loans to non-financial customers other than central banks;;;;3.0
 C_80.00;y_axis_rc_code;810;800;of which, residential mortgages;;;;3.0
-C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;3.0
-C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;Unit;3.0
+C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;;3.0
+C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;840;620;trade finance on-balance sheet products;;;;3.0
 C_80.00;y_axis_rc_code;850;10;RSF from interdependent assets;;;;3.0
 C_80.00;y_axis_rc_code;860;850;centralised regulated savings;;;;3.0
@@ -14411,8 +14411,8 @@ C_80.00;y_axis_rc_code;910;10;RSF from assets within a group or an IPS if subjec
 C_80.00;y_axis_rc_code;960;10;RSF from contributions to CCP default fund;;;;3.0
 C_80.00;y_axis_rc_code;970;10;RSF from other assets;;;;3.0
 C_80.00;y_axis_rc_code;980;970;physically traded commodities;;;;3.0
-C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;3.0
-C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;Unit;3.0
+C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;;3.0
+C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;;3.0
 C_80.00;y_axis_rc_code;1010;970;trade date receivables;;;;3.0
 C_80.00;y_axis_rc_code;1020;970;non-performing assets;;;;3.0
 C_80.00;y_axis_rc_code;1030;970;other assets;;;;3.0
@@ -24684,98 +24684,98 @@ C_80.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.2
 C_80.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;3.2
 C_80.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;3.2
 C_80.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;3.2
-C_80.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 6 months;;;Unit;3.2
-C_80.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 6 months to < 1 year;;;Unit;3.2
-C_80.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;>= 1 year;;;Unit;3.2
+C_80.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 6 months;;;;3.2
+C_80.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 6 months to < 1 year;;;;3.2
+C_80.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;>= 1 year;;;;3.2
 C_80.00;x_axis_rc_code;40;__PARENT__43dc8532f7e5;HQLA;;;;3.2
-C_80.00;x_axis_rc_code;90;__PARENT__cffac3962595;< 6 months;;;Unit;3.2
-C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;Unit;3.2
-C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;Unit;3.2
-C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;;3.2
+C_80.00;x_axis_rc_code;90;__PARENT__cffac3962595;< 6 months;;;%;3.2
+C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;%;3.2
+C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;%;3.2
+C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;%;3.2
 C_80.00;x_axis_rc_code;130;;Required stable funding;;;;3.2
 C_80.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;3.2
 C_80.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;3.2
 C_80.00;y_axis_rc_code;30;20;cash, reserves and HQLA exposures to central banks;;;;3.2
-C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;Unit;3.2
-C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;Unit;3.2
-C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;Unit;3.2
+C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;70;20;other non-HQLA central bank exposures;;;;3.2
 C_80.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from liquid assets;;;;3.2
-C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;120;90;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;130;80;level 1 assets eligible for 5% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;140;130;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;150;130;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;160;130;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;170;80;level 1 eligible for 7% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;180;170;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;190;170;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;200;170;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;210;80;level 1 assets eligible for 12% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;220;210;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;230;210;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;240;210;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;250;80;level 2A assets eligible for 15% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;260;250;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;270;250;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;280;250;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;290;80;level 2A assets eligible for 20% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;300;290;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;310;290;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;320;290;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;330;80;level 2B securitizations eligible for 25% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;340;330;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;350;330;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;360;330;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;370;80;level 2B assets eligible for 30% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;380;370;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;390;370;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;400;370;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;410;80;level 2B assets eligible for 35% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;420;410;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;430;410;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;440;410;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;450;80;level 2B assets eligible for 40% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;460;450;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;470;450;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;480;450;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;490;80;level 2B assets eligible for 50% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;500;490;unencumbered or encumbered for a residual maturity of less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;510;490;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;%;3.2
-C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;Unit;3.2
+C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;120;90;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;130;80;level 1 assets eligible for 5% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;140;130;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;150;130;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;160;130;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;170;80;level 1 eligible for 7% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;180;170;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;190;170;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;200;170;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;210;80;level 1 assets eligible for 12% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;220;210;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;230;210;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;240;210;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;250;80;level 2A assets eligible for 15% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;260;250;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;270;250;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;280;250;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;290;80;level 2A assets eligible for 20% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;300;290;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;310;290;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;320;290;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;330;80;level 2B securitizations eligible for 25% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;340;330;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;350;330;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;360;330;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;370;80;level 2B assets eligible for 30% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;380;370;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;390;370;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;400;370;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;410;80;level 2B assets eligible for 35% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;420;410;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;430;410;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;440;410;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;450;80;level 2B assets eligible for 40% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;460;450;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;470;450;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;480;450;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;490;80;level 2B assets eligible for 50% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;500;490;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
+C_80.00;y_axis_rc_code;510;490;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
+C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;;3.2
+C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;;3.2
 C_80.00;y_axis_rc_code;560;__PARENT__772f51ec440b;RSF from securities other than liquid assets;;;;3.2
 C_80.00;y_axis_rc_code;570;560;non- HQLA securities and exchange traded equities;;;;3.2
-C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;3.2
-C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;Unit;3.2
+C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
+C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;600;560;non-HQLA non-exchange traded equities;;;;3.2
-C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;Unit;3.2
+C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;;3.2
 C_80.00;y_axis_rc_code;620;__PARENT__772f51ec440b;RSF from loans;;;;3.2
 C_80.00;y_axis_rc_code;630;620;operational deposits;;;;3.2
 C_80.00;y_axis_rc_code;640;620;securities financing transactions with financial customers;;;;3.2
-C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;%;3.2
-C_80.00;y_axis_rc_code;660;650;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;670;650;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;680;650;encumbered for a residual maturity of one year or more;;;%;3.2
+C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;;3.2
+C_80.00;y_axis_rc_code;660;650;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;670;650;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;680;650;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;690;620;collateralized by other assets;;;;3.2
-C_80.00;y_axis_rc_code;700;690;unencumbered or encumbered for a residual maturity of less than six months;;;Unit;3.2
-C_80.00;y_axis_rc_code;710;690;encumbered for a residual maturity of at least six months but less than one year;;;Unit;3.2
-C_80.00;y_axis_rc_code;720;690;encumbered for a residual maturity of one year or more;;;Unit;3.2
+C_80.00;y_axis_rc_code;700;690;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;710;690;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;720;690;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;730;620;other loans and advances to financial customers;;;;3.2
-C_80.00;y_axis_rc_code;740;620;assets encumbered for a residual maturity of one year or more in a cover pool;;;Unit;3.2
-C_80.00;y_axis_rc_code;750;620;loans to non-financial customers other than central banks where those loans are assigned a risk weight of 35% or less;;;%;3.2
-C_80.00;y_axis_rc_code;760;750;of which, residential mortgages;;;%;3.2
-C_80.00;y_axis_rc_code;770;750;unencumbered or encumbered for a residual maturity of less than six months;;;%;3.2
-C_80.00;y_axis_rc_code;780;750;encumbered for a residual maturity of at least six months but less than one year;;;%;3.2
-C_80.00;y_axis_rc_code;790;750;encumbered for a residual maturity of one year or more;;;%;3.2
+C_80.00;y_axis_rc_code;740;620;assets encumbered for a residual maturity of one year or more in a cover pool;;;;3.2
+C_80.00;y_axis_rc_code;750;620;loans to non-financial customers other than central banks where those loans are assigned a risk weight of 35% or less;;;;3.2
+C_80.00;y_axis_rc_code;760;750;of which, residential mortgages;;;;3.2
+C_80.00;y_axis_rc_code;770;750;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
+C_80.00;y_axis_rc_code;780;750;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
+C_80.00;y_axis_rc_code;790;750;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;800;620;other loans to non-financial customers other than central banks;;;;3.2
 C_80.00;y_axis_rc_code;810;800;of which, residential mortgages;;;;3.2
-C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;3.2
-C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;Unit;3.2
+C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
+C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;840;620;trade finance on-balance sheet products;;;;3.2
 C_80.00;y_axis_rc_code;850;__PARENT__772f51ec440b;RSF from interdependent assets;;;;3.2
 C_80.00;y_axis_rc_code;860;850;centralised regulated savings;;;;3.2
@@ -24787,8 +24787,8 @@ C_80.00;y_axis_rc_code;910;__PARENT__772f51ec440b;RSF from assets within a group
 C_80.00;y_axis_rc_code;960;__PARENT__772f51ec440b;RSF from contributions to CCP default fund;;;;3.2
 C_80.00;y_axis_rc_code;970;__PARENT__772f51ec440b;RSF from other assets;;;;3.2
 C_80.00;y_axis_rc_code;980;970;physically traded commodities;;;;3.2
-C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;3.2
-C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;Unit;3.2
+C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
+C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;1010;970;trade date receivables;;;;3.2
 C_80.00;y_axis_rc_code;1020;970;non-performing assets;;;;3.2
 C_80.00;y_axis_rc_code;1030;970;other assets;;;;3.2
@@ -48071,98 +48071,98 @@ C_80.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_80.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;4.2
 C_80.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;4.2
 C_80.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;4.2
-C_80.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 6 months;;;Unit;4.2
-C_80.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 6 months to < 1 year;;;Unit;4.2
-C_80.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;>= 1 year;;;Unit;4.2
+C_80.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 6 months;;;;4.2
+C_80.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 6 months to < 1 year;;;;4.2
+C_80.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;>= 1 year;;;;4.2
 C_80.00;x_axis_rc_code;40;__PARENT__43dc8532f7e5;HQLA;;;;4.2
-C_80.00;x_axis_rc_code;90;__PARENT__cffac3962595;< 6 months;;;Unit;4.2
-C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;Unit;4.2
-C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;Unit;4.2
-C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;;4.2
+C_80.00;x_axis_rc_code;90;__PARENT__cffac3962595;< 6 months;;;%;4.2
+C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;%;4.2
+C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;%;4.2
+C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;%;4.2
 C_80.00;x_axis_rc_code;130;;Required stable funding;;;;4.2
 C_80.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;4.2
 C_80.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;4.2
 C_80.00;y_axis_rc_code;30;20;cash, reserves and HQLA exposures to central banks;;;;4.2
-C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;Unit;4.2
-C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;Unit;4.2
-C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;Unit;4.2
+C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;70;20;other non-HQLA central bank exposures;;;;4.2
 C_80.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from liquid assets;;;;4.2
-C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;120;90;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;130;80;level 1 assets eligible for 5% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;140;130;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;150;130;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;160;130;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;170;80;level 1 eligible for 7% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;180;170;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;190;170;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;200;170;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;210;80;level 1 assets eligible for 12% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;220;210;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;230;210;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;240;210;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;250;80;level 2A assets eligible for 15% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;260;250;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;270;250;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;280;250;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;290;80;level 2A assets eligible for 20% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;300;290;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;310;290;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;320;290;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;330;80;level 2B securitizations eligible for 25% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;340;330;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;350;330;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;360;330;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;370;80;level 2B assets eligible for 30% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;380;370;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;390;370;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;400;370;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;410;80;level 2B assets eligible for 35% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;420;410;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;430;410;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;440;410;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;450;80;level 2B assets eligible for 40% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;460;450;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;470;450;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;480;450;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;490;80;level 2B assets eligible for 50% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;500;490;unencumbered or encumbered for a residual maturity of less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;510;490;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;%;4.2
-C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;Unit;4.2
+C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;120;90;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;130;80;level 1 assets eligible for 5% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;140;130;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;150;130;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;160;130;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;170;80;level 1 eligible for 7% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;180;170;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;190;170;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;200;170;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;210;80;level 1 assets eligible for 12% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;220;210;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;230;210;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;240;210;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;250;80;level 2A assets eligible for 15% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;260;250;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;270;250;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;280;250;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;290;80;level 2A assets eligible for 20% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;300;290;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;310;290;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;320;290;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;330;80;level 2B securitizations eligible for 25% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;340;330;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;350;330;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;360;330;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;370;80;level 2B assets eligible for 30% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;380;370;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;390;370;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;400;370;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;410;80;level 2B assets eligible for 35% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;420;410;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;430;410;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;440;410;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;450;80;level 2B assets eligible for 40% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;460;450;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;470;450;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;480;450;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;490;80;level 2B assets eligible for 50% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;500;490;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
+C_80.00;y_axis_rc_code;510;490;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
+C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;;4.2
+C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;;4.2
 C_80.00;y_axis_rc_code;560;__PARENT__772f51ec440b;RSF from securities other than liquid assets;;;;4.2
 C_80.00;y_axis_rc_code;570;560;non- HQLA securities and exchange traded equities;;;;4.2
-C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;4.2
-C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;Unit;4.2
+C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
+C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;600;560;non-HQLA non-exchange traded equities;;;;4.2
-C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;Unit;4.2
+C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;;4.2
 C_80.00;y_axis_rc_code;620;__PARENT__772f51ec440b;RSF from loans;;;;4.2
 C_80.00;y_axis_rc_code;630;620;operational deposits;;;;4.2
 C_80.00;y_axis_rc_code;640;620;securities financing transactions with financial customers;;;;4.2
-C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;%;4.2
-C_80.00;y_axis_rc_code;660;650;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;670;650;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;680;650;encumbered for a residual maturity of one year or more;;;%;4.2
+C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;;4.2
+C_80.00;y_axis_rc_code;660;650;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;670;650;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;680;650;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;690;620;collateralized by other assets;;;;4.2
-C_80.00;y_axis_rc_code;700;690;unencumbered or encumbered for a residual maturity of less than six months;;;Unit;4.2
-C_80.00;y_axis_rc_code;710;690;encumbered for a residual maturity of at least six months but less than one year;;;Unit;4.2
-C_80.00;y_axis_rc_code;720;690;encumbered for a residual maturity of one year or more;;;Unit;4.2
+C_80.00;y_axis_rc_code;700;690;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;710;690;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;720;690;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;730;620;other loans and advances to financial customers;;;;4.2
-C_80.00;y_axis_rc_code;740;620;assets encumbered for a residual maturity of one year or more in a cover pool;;;Unit;4.2
-C_80.00;y_axis_rc_code;750;620;loans to non-financial customers other than central banks where those loans are assigned a risk weight of 35% or less;;;%;4.2
-C_80.00;y_axis_rc_code;760;750;of which, residential mortgages;;;%;4.2
-C_80.00;y_axis_rc_code;770;750;unencumbered or encumbered for a residual maturity of less than six months;;;%;4.2
-C_80.00;y_axis_rc_code;780;750;encumbered for a residual maturity of at least six months but less than one year;;;%;4.2
-C_80.00;y_axis_rc_code;790;750;encumbered for a residual maturity of one year or more;;;%;4.2
+C_80.00;y_axis_rc_code;740;620;assets encumbered for a residual maturity of one year or more in a cover pool;;;;4.2
+C_80.00;y_axis_rc_code;750;620;loans to non-financial customers other than central banks where those loans are assigned a risk weight of 35% or less;;;;4.2
+C_80.00;y_axis_rc_code;760;750;of which, residential mortgages;;;;4.2
+C_80.00;y_axis_rc_code;770;750;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
+C_80.00;y_axis_rc_code;780;750;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
+C_80.00;y_axis_rc_code;790;750;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;800;620;other loans to non-financial customers other than central banks;;;;4.2
 C_80.00;y_axis_rc_code;810;800;of which, residential mortgages;;;;4.2
-C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;4.2
-C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;Unit;4.2
+C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
+C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;840;620;trade finance on-balance sheet products;;;;4.2
 C_80.00;y_axis_rc_code;850;__PARENT__772f51ec440b;RSF from interdependent assets;;;;4.2
 C_80.00;y_axis_rc_code;860;850;centralised regulated savings;;;;4.2
@@ -48174,8 +48174,8 @@ C_80.00;y_axis_rc_code;910;__PARENT__772f51ec440b;RSF from assets within a group
 C_80.00;y_axis_rc_code;960;__PARENT__772f51ec440b;RSF from contributions to CCP default fund;;;;4.2
 C_80.00;y_axis_rc_code;970;__PARENT__772f51ec440b;RSF from other assets;;;;4.2
 C_80.00;y_axis_rc_code;980;970;physically traded commodities;;;;4.2
-C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;Unit;4.2
-C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;Unit;4.2
+C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
+C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;1010;970;trade date receivables;;;;4.2
 C_80.00;y_axis_rc_code;1020;970;non-performing assets;;;;4.2
 C_80.00;y_axis_rc_code;1030;970;other assets;;;;4.2

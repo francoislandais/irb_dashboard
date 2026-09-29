@@ -237,6 +237,22 @@ def production_display_format(table_id: str, coordinate: str, code: str, descrip
     return production_display_format_lookup().get(key, "")
 
 
+def dimension_display_format(table_id: str, coordinate: str, code: str, description: str) -> str:
+    """Resolve the scale from the reported measure before label heuristics.
+
+    C_80.00 has the same maturity labels under both Amount and Applicable RSF
+    factor. Its Y labels describe assets (including LCR haircuts and maturity
+    ranges), never the scale of the reported measure. This rule covers all
+    source sheet suffixes and frameworks before consulting old curated formats.
+    """
+    if re.fullmatch(r"C_80\.00(?:\.[A-Za-z])?", table_id, flags=re.IGNORECASE):
+        if coordinate == AXIS_COORDINATES["y"]:
+            return ""
+        if coordinate == AXIS_COORDINATES["x"]:
+            return "%" if description.casefold().startswith("applicable rsf factor/") else ""
+    return production_display_format(table_id, coordinate, code, description) or infer_display_format(description)
+
+
 def suffix_collision_signature(module: str, base: str, value: str) -> str:
     """Normalize known equivalent labels before treating suffixes as distinct.
 
@@ -883,10 +899,8 @@ def extract_all() -> tuple[
                                 "description": format_taxonomy_label(description),
                                 "order_first": "" if axis == "y" else str(_row_number if axis == "z" and _row_number else order),
                                 "ignore": "Y" if is_virtual_parent else "",
-                                "format": "" if is_virtual_parent else (
-                                    production_display_format(
-                                        table_id, AXIS_COORDINATES[axis], code, format_description
-                                    ) or infer_display_format(format_description)
+                                "format": "" if is_virtual_parent else dimension_display_format(
+                                    table_id, AXIS_COORDINATES[axis], code, format_description
                                 ),
                                 "module_code": module,
                                 "framework": version,
