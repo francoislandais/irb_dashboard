@@ -7,6 +7,7 @@ const TAXONOMY_HISTORY_URL = "./assets/ITS_template_taxonomy_history.csv";
 let sourcePromise = null;
 let historyPromise = null;
 const resolvedTaxonomyDataCache = new Map();
+const frameworkDimensionCache = new Map();
 
 export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { referenceDate = "" } = {}) {
   const [{ columns, rows }, history] = await Promise.all([loadSource(), loadTaxonomyHistory()]);
@@ -58,13 +59,51 @@ export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { refe
     availableTaxonomiesByTemplate,
     selectedTaxonomiesByTemplate,
     dimensionMapping: createDimensionMapping(columns, selectedRows),
-    explorerPoints: parseExplorerPoints(columns, selectedRows)
+    explorerPoints: parseExplorerPoints(columns, selectedRows),
+    taxonomySource: { columns, rows },
+    taxonomyHistory: history
   };
   resolvedTaxonomyDataCache.set(selectionKey, resolvedData);
   if (resolvedTaxonomyDataCache.size > 12) {
     resolvedTaxonomyDataCache.delete(resolvedTaxonomyDataCache.keys().next().value);
   }
   return resolvedData;
+}
+
+export function getTaxonomyFrameworkForDate(state, tableId, referenceDate) {
+  const available = state?.availableTaxonomiesByTemplate?.[tableId] ?? [];
+  return getTaxonomyForReferenceDate(tableId, referenceDate, state?.taxonomyHistory, available);
+}
+
+export function getTaxonomyDataForTemplateFramework(state, tableId, framework) {
+  if (!tableId || !framework) return null;
+  if (state?.selectedTaxonomiesByTemplate?.[tableId] === framework) {
+    return { dimensionMapping: state.dimensionMapping, explorerPoints: state.explorerPoints };
+  }
+
+  const source = state?.taxonomySource;
+  if (!source?.columns || !source?.rows) return null;
+  const cacheKey = `${tableId}\u001f${framework}`;
+  if (frameworkDimensionCache.has(cacheKey)) return frameworkDimensionCache.get(cacheKey);
+
+  const tableIndex = source.columns.indexOf("table_id");
+  const frameworkIndex = source.columns.indexOf("framework");
+  if (tableIndex < 0 || frameworkIndex < 0) return null;
+  const rows = source.rows.filter((row) => (
+    String(row[tableIndex] ?? "").trim() === tableId
+    && String(row[frameworkIndex] ?? "").trim() === framework
+  ));
+  if (rows.length === 0) return null;
+  const uniqueRows = deduplicateFrameworkRows(rows, source.columns);
+  const data = {
+    dimensionMapping: createDimensionMapping(source.columns, uniqueRows),
+    explorerPoints: parseExplorerPoints(source.columns, uniqueRows)
+  };
+  frameworkDimensionCache.set(cacheKey, data);
+  if (frameworkDimensionCache.size > 48) {
+    frameworkDimensionCache.delete(frameworkDimensionCache.keys().next().value);
+  }
+  return data;
 }
 
 async function loadSource() {
@@ -99,6 +138,7 @@ async function fetchCsv(url) {
 }
 
 function getTaxonomyForReferenceDate(tableId, referenceDate, history, availableTaxonomies) {
+  if (!history?.columns || !history?.rows || availableTaxonomies.length === 0) return "";
   const tableIndex = history.columns.indexOf("table_id");
   const frameworkIndex = history.columns.indexOf("framework");
   const fromIndex = history.columns.indexOf("effective_from");
@@ -131,7 +171,16 @@ function getTaxonomyForReferenceDate(tableId, referenceDate, history, availableT
 }
 
 function normalizeReferenceDate(value) {
-  if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString().slice(0, 10);
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    // Reference-column dates are constructed at local midnight by
+    // getReferenceColumns. Converting that instant to UTC first can move a
+    // quarter-end to the previous day in positive time zones (e.g. Paris),
+    // which would select the wrong framework on an effective-date boundary.
+    const year = String(value.getFullYear()).padStart(4, "0");
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
   const normalized = String(value ?? "").trim().replace(/^ref_/, "").replaceAll("_", "-");
   return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : "";
 }

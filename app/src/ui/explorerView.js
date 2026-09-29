@@ -46,6 +46,7 @@ import {
   parseKriFormula
 } from "../data/explorerKriFormula.js?v=20260917-kri-formula";
 import { getLatestState } from "./appState.js";
+import { getTaxonomyDataForTemplateFramework, getTaxonomyFrameworkForDate } from "../data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
@@ -60,7 +61,6 @@ let updateSelectedUnit = () => {};
 let updatePeerDisplayMode = () => {};
 let updateExplorerTaxonomy = () => {};
 let lastExplorerTaxonomyRequestKey = "";
-let explorerTaxonomyUsesReferenceDate = false;
 let activeExplorerTemplateId = EXPLORER_TARGET.tableId;
 let hasAppliedUrlTemplate = false;
 let hasInteractedWithExplorerSelection = false;
@@ -332,7 +332,7 @@ export function wireExplorerUi(actions, rerender) {
       return;
     }
 
-    if (event.target.closest("td.is-xy-impossible")) return;
+    if (event.target.closest("td.is-xy-impossible, td.is-taxonomy-unavailable")) return;
 
     const toggle = event.target.closest("[data-toggle-path]");
     if (toggle) {
@@ -355,7 +355,7 @@ export function wireExplorerUi(actions, rerender) {
     }
   });
   elements.explorerTable.addEventListener("contextmenu", (event) => {
-    if (event.target.closest("td.is-xy-impossible")) { event.preventDefault(); return; }
+    if (event.target.closest("td.is-xy-impossible, td.is-taxonomy-unavailable")) { event.preventDefault(); return; }
     const row = event.target.closest("tbody tr[data-point-code]");
     if (!row) return;
     const cell = event.target.closest("td[data-explorer-cell-column]");
@@ -1356,7 +1356,18 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   });
   const searchedTableSeries = filterExplorerSeriesByAdvancedSearch(tableSeries, state, template?.id, context.activeAxis);
   const geographicTableSeries = searchedTableSeries.xy ? searchedTableSeries : applyExplorerGeographyPresentation(searchedTableSeries, state);
-  const displayedTableSeries = buildExplorerEvolutionSeries(geographicTableSeries, state);
+  let displayedTableSeries = buildExplorerEvolutionSeries(geographicTableSeries, state);
+  displayedTableSeries = buildExplorerTemporalTaxonomySeries(displayedTableSeries, state, {
+    axis: context.activeAxis,
+    selectedXCode: context.selectedXCode,
+    selectedYCode: context.selectedYCode,
+    selectedZCode: context.selectedZCode,
+    tableId: template?.tableId,
+    templateId: template?.id,
+    templates,
+    templateSelections: getExplorerTemplateSelections(),
+    yConfigTableId: template?.id
+  });
   explorerXYHeaderObserver?.disconnect();
   elements.explorerTable.replaceChildren();
   if (elements.explorerExcelExport) {
@@ -1365,6 +1376,12 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
 
   elements.explorerEmpty.hidden = !searchedTableSeries.status;
   elements.explorerEmpty.textContent = searchedTableSeries.status;
+  const hasTaxonomyRows = Boolean(displayedTableSeries.taxonomyBlocks?.length)
+    && displayedTableSeries.rows.some((row) => !row.isTaxonomySectionHeader && !row.isVirtual);
+  if (hasTaxonomyRows) {
+    elements.explorerEmpty.hidden = true;
+    elements.explorerEmpty.textContent = "";
+  }
 
   if (displayedTableSeries.rows.length === 0 || displayedTableSeries.dateColumns.length === 0) {
     // Deliberately NOT clearing shouldRevealExplorerAxisSelection here - an
@@ -1820,6 +1837,7 @@ function renderExplorerTable(series, selectedUnit) {
     valueRow.dataset.isVirtual = String(Boolean(seriesRow.isVirtual));
     valueRow.dataset.parentPath = seriesRow.parentPath;
     valueRow.dataset.indentLevel = String(seriesRow.indentLevel ?? 0);
+    valueRow.classList.toggle("is-taxonomy-section", Boolean(seriesRow.isTaxonomySectionHeader));
     valueRow.classList.toggle("is-contribution-base", Boolean(contributionBase?.row) && normalizedPath === contributionBase.path);
     valueRow.classList.toggle("is-contribution-child", isContributionChild);
     valueRow.classList.toggle("is-axis-impossible", isAxisImpossible);
@@ -1850,6 +1868,15 @@ function renderExplorerTable(series, selectedUnit) {
     }
     valueRow.append(code);
 
+    if (seriesRow.isTaxonomySectionHeader) {
+      const filler = document.createElement("td");
+      filler.className = "taxonomy-section-filler";
+      filler.colSpan = orderedDates.length;
+      valueRow.append(filler);
+      tbody.append(valueRow);
+      return;
+    }
+
     const isContributionFocus = isDateFocus && isContributionChild;
     const reversedValues = isXY ? seriesRow.values : isContributionFocus
       ? buildExplorerDateFocusContributionValues(seriesRow.values, contributionValues, focusSelection)
@@ -1874,6 +1901,13 @@ function renderExplorerTable(series, selectedUnit) {
       td.dataset.explorerExportKind = columnKind;
       const valueFormat = isXY ? point.format ?? "" : seriesRow.format ?? "";
       td.dataset.explorerExportFormat = valueFormat;
+      if (point.isTaxonomyUnavailable) {
+        td.classList.add("is-taxonomy-unavailable");
+        td.setAttribute("aria-disabled", "true");
+        td.title = "This data point is not defined in the taxonomy applicable to this reference date";
+        valueRow.append(td);
+        return;
+      }
       if (isXY && point.isImpossible) {
         td.classList.add("is-xy-impossible");
         td.setAttribute("aria-disabled", "true");
@@ -2198,13 +2232,15 @@ function getExplorerContributionBase(rows, activeAxis) {
   const base = getActiveExplorerContext().contributionBaseByAxis[activeAxis];
   if (!base?.path) return null;
 
-  const path = normalizeHierarchyPath(base.path);
-  const row = rows.find((item) => normalizeHierarchyPath(item.hierarchyPath) === path);
+  const requestedPath = normalizeHierarchyPath(base.path);
+  const row = rows.find((item) => normalizeHierarchyPath(item.hierarchyPath) === requestedPath)
+    ?? rows.find((item) => base.pointCode && item.code === base.pointCode);
   if (!row && base.type !== "common") {
     getActiveExplorerContext().contributionBaseByAxis[activeAxis] = null;
     return null;
   }
 
+  const path = normalizeHierarchyPath(row?.hierarchyPath ?? base.path);
   return { ...base, path, row };
 }
 
@@ -2891,23 +2927,34 @@ function setExplorerHeaderReference(referenceLabel) {
 function syncExplorerTaxonomyForView(state) {
   if (!state?.columns?.length || typeof updateExplorerTaxonomy !== "function") return;
 
-  if (isExplorerXYView()) {
-    const template = getActiveExplorerTemplate();
-    const referenceDate = getSelectedExplorerReference(state)?.name ?? "";
-    if (!template?.tableId || !referenceDate) return;
-    // All templates are resolved for the same shared reference date in one pass.
-    const requestKey = `xy:${referenceDate}`;
-    if (requestKey === lastExplorerTaxonomyRequestKey) return;
-    lastExplorerTaxonomyRequestKey = requestKey;
-    explorerTaxonomyUsesReferenceDate = true;
-    updateExplorerTaxonomy(referenceDate);
-    return;
-  }
+  const template = getActiveExplorerTemplate();
+  if (!template?.tableId) return;
+  const isXY = isExplorerXYView();
+  const referenceDate = isXY
+    ? getSelectedExplorerReference(state)?.name ?? ""
+    : getLatestExplorerReferenceDateForTemplate(state, template.tableId);
+  if (!referenceDate) return;
 
-  if (!explorerTaxonomyUsesReferenceDate) return;
-  explorerTaxonomyUsesReferenceDate = false;
-  lastExplorerTaxonomyRequestKey = "temporal-default";
-  updateExplorerTaxonomy("");
+  // Temporal anchors its main taxonomy to the table's newest available
+  // reference column. XY uses the date explicitly selected by the user.
+  const requestKey = `${isXY ? "xy" : "temporal"}:${template.tableId}:${referenceDate}`;
+  if (requestKey === lastExplorerTaxonomyRequestKey) return;
+  lastExplorerTaxonomyRequestKey = requestKey;
+  updateExplorerTaxonomy(referenceDate);
+}
+
+function getLatestExplorerReferenceDateForTemplate(state, tableId) {
+  const references = getReferenceColumns(state?.columns ?? []);
+  const tableIndex = state?.columns?.indexOf("table_id") ?? -1;
+  if (tableIndex < 0) return references.at(-1)?.name ?? "";
+  const rows = state.rows ?? [];
+  for (let referenceIndex = references.length - 1; referenceIndex >= 0; referenceIndex -= 1) {
+    const reference = references[referenceIndex];
+    if (rows.some((row) => row[tableIndex] === tableId && String(row[reference.index] ?? "").trim() !== "")) {
+      return reference.name;
+    }
+  }
+  return references.at(-1)?.name ?? "";
 }
 
 function getSelectedExplorerReference(state = getLatestState()) {
@@ -3017,6 +3064,156 @@ function buildExplorerEvolutionSeries(series, state) {
       values: selectedIndexes.map((index) => row.values[index])
     }))
   };
+}
+
+function buildExplorerTemporalTaxonomySeries(series, state, options) {
+  if (explorerGlobalDisplayMode !== "temporal" || series?.xy || !series?.dateColumns?.length) return series;
+  const { tableId, templateId, axis } = options;
+  const mainFramework = state?.selectedTaxonomiesByTemplate?.[tableId] ?? "";
+  if (!tableId || !mainFramework || !state?.taxonomyHistory || !state?.taxonomySource) return series;
+
+  const frameworkByDate = series.dateColumns.map((column) => (
+    getTaxonomyFrameworkForDate(state, tableId, column.date)
+  ));
+
+  const frameworkData = new Map();
+  const getFrameworkData = (framework) => {
+    if (!frameworkData.has(framework)) {
+      frameworkData.set(framework, getTaxonomyDataForTemplateFramework(state, tableId, framework));
+    }
+    return frameworkData.get(framework);
+  };
+  const getCodesByCoordinate = (framework) => {
+    const data = getFrameworkData(framework);
+    if (!data) return null;
+    const codes = new Map();
+    data.explorerPoints
+      .filter((point) => point.tableId === tableId)
+      .forEach((point) => {
+        if (!codes.has(point.coordinate)) codes.set(point.coordinate, new Set());
+        codes.get(point.coordinate).add(point.code);
+      });
+    return codes;
+  };
+  const axisCoordinate = `${axis}_axis_rc_code`;
+  const mainCodes = getCodesByCoordinate(mainFramework)?.get(axisCoordinate) ?? new Set();
+  const dateCodeSets = frameworkByDate.map((framework) => framework ? getCodesByCoordinate(framework) : null);
+  const otherAxisSelections = [
+    ["x_axis_rc_code", options.selectedXCode],
+    ["y_axis_rc_code", options.selectedYCode],
+    ["z_axis_rc_code", options.selectedZCode]
+  ].filter(([coordinate, code]) => coordinate !== axisCoordinate
+    && code
+    && !(coordinate === "z_axis_rc_code" && code === EXPLORER_ALL_CURRENCIES_CODE));
+  const isOtherAxisSelectionAvailable = (codeSets) => Boolean(codeSets)
+    && otherAxisSelections.every(([coordinate, code]) => codeSets.get(coordinate)?.has(code));
+
+  const maskedMainRows = series.rows.map((row) => ({
+    ...row,
+    taxonomyFramework: mainFramework,
+    values: row.values.map((point, index) => {
+      const dateFramework = frameworkByDate[index];
+      const codeSets = dateCodeSets[index];
+      if (!dateFramework || !codeSets) return point;
+      const exists = codeSets.get(axisCoordinate)?.has(row.code)
+        && isOtherAxisSelectionAvailable(codeSets);
+      return exists ? point : { ...point, value: null, isTaxonomyUnavailable: true };
+    })
+  }));
+
+  const latestDateIndexByFramework = new Map();
+  frameworkByDate.forEach((framework, index) => {
+    if (framework && framework !== mainFramework) latestDateIndexByFramework.set(framework, index);
+  });
+  const historicalFrameworks = [...latestDateIndexByFramework]
+    .sort((left, right) => right[1] - left[1])
+    .map(([framework]) => framework);
+  const blocks = maskedMainRows.length
+    ? [addExplorerTaxonomySection(mainFramework, maskedMainRows, series.dateColumns)]
+    : [];
+
+  historicalFrameworks.forEach((framework) => {
+    const metadata = getFrameworkData(framework);
+    if (!metadata) return;
+    const frameworkCodes = getCodesByCoordinate(framework)?.get(axisCoordinate) ?? new Set();
+    const historicalOnlyCodes = new Set([...frameworkCodes].filter((code) => !mainCodes.has(code)));
+    if (historicalOnlyCodes.size === 0) return;
+
+    const historicalState = {
+      ...state,
+      dimensionMapping: metadata.dimensionMapping,
+      explorerPoints: metadata.explorerPoints
+    };
+    const historicalSeries = buildExplorerAxisSeries(historicalState, {
+      ...options,
+      tableId,
+      yConfigTableId: templateId
+    });
+    const searchedHistory = filterExplorerSeriesByAdvancedSearch(historicalSeries, historicalState, templateId, axis);
+    const valuesByDate = new Map(searchedHistory.dateColumns.map((column, index) => [
+      getExplorerDateKey(column.date),
+      index
+    ]));
+    const rows = searchedHistory.rows
+      .filter((row) => historicalOnlyCodes.has(row.code))
+      .map((row) => ({
+        ...row,
+        taxonomyFramework: framework,
+        values: series.dateColumns.map((dateColumn, dateIndex) => {
+          const dateFramework = frameworkByDate[dateIndex];
+          const sourceIndex = valuesByDate.get(getExplorerDateKey(dateColumn.date));
+          const sourceValue = sourceIndex === undefined ? null : row.values[sourceIndex];
+          const codeSets = dateCodeSets[dateIndex];
+          if (!dateFramework || !codeSets) {
+            return sourceValue ?? { date: dateColumn.date, label: dateColumn.label, value: null };
+          }
+          const exists = dateFramework === framework
+            && codeSets.get(axisCoordinate)?.has(row.code)
+            && isOtherAxisSelectionAvailable(codeSets);
+          return exists
+            ? sourceValue ?? { date: dateColumn.date, label: dateColumn.label, value: null }
+            : { ...(sourceValue ?? {}), date: dateColumn.date, label: dateColumn.label, value: null, isTaxonomyUnavailable: true };
+        })
+      }));
+    if (rows.length) blocks.push(addExplorerTaxonomySection(framework, rows, series.dateColumns));
+  });
+
+  return {
+    ...series,
+    taxonomyBlocks: blocks.map((block) => block.framework),
+    rows: blocks.flatMap((block) => block.rows)
+  };
+}
+
+function addExplorerTaxonomySection(framework, rows, dateColumns) {
+  const label = `Taxonomy · Framework ${framework}`;
+  const section = {
+    code: `taxonomy-section:${framework}`,
+    description: label,
+    displayDescription: label,
+    format: "",
+    hierarchyPath: label,
+    indentLevel: 0,
+    isVirtual: true,
+    isTaxonomySectionHeader: true,
+    parentPath: "",
+    values: dateColumns.map((dateColumn) => ({ date: dateColumn.date, label: dateColumn.label, value: null }))
+  };
+  const prefixedRows = rows.map((row) => ({
+    ...row,
+    hierarchyPath: `${label} > ${row.hierarchyPath || row.description || row.code}`,
+    indentLevel: (row.indentLevel ?? 0) + 1,
+    parentPath: row.parentPath ? `${label} > ${row.parentPath}` : label
+  }));
+  return { framework, rows: [section, ...prefixedRows] };
+}
+
+function getExplorerDateKey(date) {
+  if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return "";
+  const year = String(date.getFullYear()).padStart(4, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function getCompleteExplorerSelectionsForBenchmark(context, activeAxis) {
@@ -4392,16 +4589,19 @@ function getExplorerSelectedPointMetrics() {
   if (!state || !selectedCode || !lastRenderedExplorerTableSeries) return null;
 
   const rows = lastRenderedExplorerTableSeries.rows.map(normalizeExplorerSeriesRow);
-  const row = rows.find((item) => item.code === selectedCode);
   const selectedReference = getSelectedExplorerReference(state);
   if (lastRenderedExplorerTableSeries.xy) {
     const oppositeCode = getActiveExplorerContext()[lastRenderedExplorerTableSeries.columnAxis === "x" ? "selectedXCode" : "selectedYCode"];
     const index = lastRenderedExplorerTableSeries.dateColumns.findIndex((column) => column.code === oppositeCode);
+    const row = rows.find((item) => item.code === selectedCode && !item.values[index]?.isTaxonomyUnavailable)
+      ?? rows.find((item) => item.code === selectedCode);
     const point = row?.values[index];
     return { currentValue: point?.value ?? null, format: point?.format || "", changes: [],
       parentLabel: "", parentShare: null, parentValue: null, selectedUnit: state.selectedUnit };
   }
   const currentIndex = lastRenderedExplorerTableSeries.dateColumns.findIndex((column) => column.label === selectedReference?.label);
+  const row = rows.find((item) => item.code === selectedCode && !item.values[currentIndex]?.isTaxonomyUnavailable)
+    ?? rows.find((item) => item.code === selectedCode);
   if (!row || currentIndex < 0) return null;
 
   const currentValue = row.values[currentIndex]?.value ?? null;
@@ -5139,6 +5339,14 @@ function getExplorerAxisCaptions() {
   const xDescription = getLatestState()?.dimensionMapping
     ?.find(tableId, "x_axis_rc_code", context.selectedXCode)
     ?.fullDescription;
+  const selectedReference = getSelectedExplorerReference();
+  const selectedDateIndex = lastRenderedExplorerTableSeries?.dateColumns?.findIndex((column) => column.label === selectedReference?.label) ?? -1;
+  const renderedPoint = (code) => lastRenderedExplorerTableSeries?.rows
+    ?.find((row) => row.code === code && !row.values?.[selectedDateIndex]?.isTaxonomyUnavailable)
+    ?? lastRenderedExplorerTableSeries?.rows?.find((row) => row.code === code);
+  const renderedX = renderedPoint(context.selectedXCode);
+  const renderedY = renderedPoint(context.selectedYCode);
+  const renderedZ = renderedPoint(context.selectedZCode);
 
   return {
     // activeTemplate.label is already "<tableId> - <description>" (see
@@ -5146,11 +5354,11 @@ function getExplorerAxisCaptions() {
     // through formatExplorerAxisCaption like the other axes, which would
     // double the table ID (e.g. "F_01.01 - F_01.01 - Own funds").
     template: activeTemplateForCaptions?.label || activeExplorerTemplateId,
-    x: formatExplorerAxisCaption(context.selectedXCode, xDescription || (context.selectedXCode ? `X ${context.selectedXCode}` : "")),
-    y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.fullDescription || yPoint?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
+    x: formatExplorerAxisCaption(context.selectedXCode, xDescription || renderedX?.fullDescription || renderedX?.description || (context.selectedXCode ? `X ${context.selectedXCode}` : "")),
+    y: formatExplorerAxisCaption(context.selectedYCode, yPoint?.fullDescription || yPoint?.description || renderedY?.fullDescription || renderedY?.description || (context.selectedYCode ? `Y ${context.selectedYCode}` : "")),
     z: context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE
       ? EXPLORER_ALL_CURRENCIES_LABEL
-      : formatExplorerAxisCaption(context.selectedZCode, zPoint?.fullDescription || zPoint?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
+      : formatExplorerAxisCaption(context.selectedZCode, zPoint?.fullDescription || zPoint?.description || renderedZ?.fullDescription || renderedZ?.description || (context.selectedZCode ? `Z ${context.selectedZCode}` : ""))
   };
 }
 
@@ -5240,7 +5448,7 @@ function expandDefaultExplorerPaths(rows, parentPaths) {
 
   rows.forEach((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
-    if (parentPaths.has(path) && (row.indentLevel ?? 0) < defaultDepth) {
+    if (parentPaths.has(path) && (row.isTaxonomySectionHeader || (row.indentLevel ?? 0) < defaultDepth)) {
       expandedPaths.add(path);
     }
   });

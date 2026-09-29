@@ -24,6 +24,8 @@ const initialState = {
   selectedInstitutionId: "",
   availableTaxonomiesByTemplate: {},
   selectedTaxonomiesByTemplate: {},
+  taxonomySource: null,
+  taxonomyHistory: null,
   jstOptions: [],
   loadedAt: null,
   explorerPoints: [],
@@ -228,7 +230,7 @@ export function createDataStore() {
       emit();
     },
 
-    setTaxonomyDimensionData({ availableTaxonomiesByTemplate, selectedTaxonomiesByTemplate, dimensionMapping, explorerPoints }) {
+    setTaxonomyDimensionData({ availableTaxonomiesByTemplate, selectedTaxonomiesByTemplate, dimensionMapping, explorerPoints, taxonomySource, taxonomyHistory }) {
       state = {
         ...state,
         availableTaxonomiesByTemplate: availableTaxonomiesByTemplate ?? {},
@@ -236,7 +238,9 @@ export function createDataStore() {
         dimensionMapping,
         dimensionMappingError: "",
         explorerPoints: explorerPoints ?? [],
-        explorerPointsError: ""
+        explorerPointsError: "",
+        taxonomySource: taxonomySource ?? null,
+        taxonomyHistory: taxonomyHistory ?? null
       };
       emit();
     },

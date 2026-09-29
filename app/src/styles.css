@@ -4354,7 +4354,7 @@ table {
    their muted treatment above. */
 .metric-table tbody tr:not(.is-selected):not(.is-ancestor):not(.is-axis-impossible) > th.description-column,
 .metric-table tbody tr:not(.is-selected):not(.is-ancestor):not(.is-axis-impossible) > th.description-column .tree-label,
-.metric-table tbody tr:not(.is-selected):not(.is-axis-impossible) > td:not(.code-column):not(.is-cell-range-selected):not(.is-xy-impossible) {
+.metric-table tbody tr:not(.is-selected):not(.is-axis-impossible) > td:not(.code-column):not(.is-cell-range-selected):not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
   color: #000000;
 }
 
@@ -4362,7 +4362,7 @@ table {
    without competing with the strong highlight reserved for the one cell
    the user actually clicked (see .is-selected-cell below). */
 .metric-table tbody tr.is-selected > th,
-.metric-table tbody tr.is-selected > td:not(.is-xy-impossible) {
+.metric-table tbody tr.is-selected > td:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
   background: #eaf2fa !important;
   color: var(--primary-dark) !important;
   border-bottom-color: #ffffff !important;
@@ -4395,20 +4395,20 @@ table {
    clicking a KRI reference chip inside the formula panel, just to show the
    user where that referenced row lives without changing anything else. */
 .metric-table tbody tr.is-peek-highlighted > th,
-.metric-table tbody tr.is-peek-highlighted > td:not(.is-xy-impossible) {
+.metric-table tbody tr.is-peek-highlighted > td:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
   background: #eaf2fa !important;
   transition: background 0.2s ease;
 }
 
 /* The strong highlight belongs to a single cell: whichever date column was
    last clicked within the selected row. */
-.metric-table tbody tr.is-selected > td.is-selected-cell:not(.is-xy-impossible) {
+.metric-table tbody tr.is-selected > td.is-selected-cell:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
   background: var(--primary-dark) !important;
   color: #f4fbf8 !important;
 }
 
-.metric-table tbody tr > td.is-cell-range-selected:not(.is-xy-impossible),
-.metric-table tbody tr:hover > td.is-cell-range-selected:not(.is-xy-impossible) {
+.metric-table tbody tr > td.is-cell-range-selected:not(.is-xy-impossible):not(.is-taxonomy-unavailable),
+.metric-table tbody tr:hover > td.is-cell-range-selected:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
   background: #d7e4de !important;
   color: var(--primary-dark) !important;
 }
@@ -4694,6 +4694,32 @@ table {
   background: #e2e5e7 !important;
   cursor: default;
   box-shadow: none;
+}
+
+.metric-table tbody tr.is-taxonomy-section > th,
+.metric-table tbody tr.is-taxonomy-section > td {
+  background: #f4f6f5 !important;
+  border-top: 1px solid #dfe4e1;
+  color: #6f7a74 !important;
+}
+
+.metric-table tbody tr.is-taxonomy-section > th.description-column {
+  font-size: 0.76em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding-bottom: 7px;
+  padding-top: 9px;
+}
+
+.metric-table tbody tr.is-taxonomy-section > td.taxonomy-section-filler {
+  padding: 0;
+}
+
+.metric-table tbody tr > td.is-taxonomy-unavailable {
+  background: #e2e5e7 !important;
+  box-shadow: none;
+  color: #7c8582 !important;
+  cursor: default;
 }
 
 .explorer-query-dialog-sql {
