@@ -37228,29 +37228,29 @@ C_08.01;y_axis_rc_code;200;__PARENT__9675679da93e;Mandate-based approach;;;;4.0
 C_08.01;y_axis_rc_code;210;__PARENT__9675679da93e;Fall-back approach;;;;4.0
 C_08.01;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.0
 C_08.01;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.0
-C_08.01;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
-C_08.01;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
-C_08.01;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
-C_08.01;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
-C_08.01;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
-C_08.01;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
-C_08.01;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.01;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.0
-C_08.01;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
-C_08.01;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
 C_08.01;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.0
 C_08.01;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.0
+C_08.01;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
+C_08.01;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.01;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.0
+C_08.01;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
+C_08.01;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
+C_08.01;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
+C_08.01;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
 C_08.01;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.0
 C_08.01;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.0
-C_08.01;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
+C_08.01;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
+C_08.01;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
+C_08.01;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
+C_08.01;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
 C_08.01;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.0
-C_08.01;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
-C_08.01;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
-C_08.01;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
 C_08.01;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.0
 C_08.01;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.0
 C_08.01;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.0
+C_08.01;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
+C_08.01;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
+C_08.01;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
 C_08.01;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.0
 C_08.01;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.0
 C_08.01;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.0
@@ -37316,29 +37316,29 @@ C_08.02;x_axis_rc_code;300;__PARENT__fc0a9f2feef6;Number of obligors;;;Unit;4.0
 C_08.02;x_axis_rc_code;310;__PARENT__fc0a9f2feef6;Pre-credit derivatives risk weighted exposure amount;;;;4.0
 C_08.02;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.0
 C_08.02;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.0
-C_08.02;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
-C_08.02;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
-C_08.02;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
-C_08.02;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
-C_08.02;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
-C_08.02;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
-C_08.02;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.02;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.0
-C_08.02;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
-C_08.02;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
 C_08.02;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.0
 C_08.02;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.0
+C_08.02;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
+C_08.02;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.02;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.0
+C_08.02;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
+C_08.02;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
+C_08.02;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
+C_08.02;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
 C_08.02;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.0
 C_08.02;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.0
-C_08.02;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
+C_08.02;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
+C_08.02;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
+C_08.02;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
+C_08.02;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
 C_08.02;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.0
-C_08.02;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
-C_08.02;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
-C_08.02;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
 C_08.02;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.0
 C_08.02;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.0
 C_08.02;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.0
+C_08.02;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
+C_08.02;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
+C_08.02;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
 C_08.02;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.0
 C_08.02;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.0
 C_08.02;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.0
@@ -37373,29 +37373,29 @@ C_08.03;y_axis_rc_code;150;170;20 to <30;;;;4.0
 C_08.03;y_axis_rc_code;160;170;30 to <100;;;;4.0
 C_08.03;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.0
 C_08.03;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.0
-C_08.03;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
-C_08.03;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
-C_08.03;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
-C_08.03;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
-C_08.03;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
-C_08.03;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
-C_08.03;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.03;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.0
-C_08.03;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
-C_08.03;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
 C_08.03;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.0
 C_08.03;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.0
+C_08.03;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
+C_08.03;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.03;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.0
+C_08.03;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
+C_08.03;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
+C_08.03;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
+C_08.03;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
 C_08.03;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.0
 C_08.03;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.0
-C_08.03;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
+C_08.03;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
+C_08.03;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
+C_08.03;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
+C_08.03;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
 C_08.03;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.0
-C_08.03;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
-C_08.03;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
-C_08.03;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
 C_08.03;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.0
 C_08.03;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.0
 C_08.03;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.0
+C_08.03;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
+C_08.03;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
+C_08.03;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
 C_08.03;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.0
 C_08.03;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.0
 C_08.03;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.0
@@ -37434,29 +37434,29 @@ C_08.05;y_axis_rc_code;150;170;20 to <30;;;;4.0
 C_08.05;y_axis_rc_code;160;170;30 to <100;;;;4.0
 C_08.05;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.0
 C_08.05;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.0
-C_08.05;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
-C_08.05;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
-C_08.05;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
-C_08.05;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
-C_08.05;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
-C_08.05;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
-C_08.05;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.05;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.0
-C_08.05;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
-C_08.05;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
 C_08.05;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.0
 C_08.05;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.0
+C_08.05;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
+C_08.05;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.05;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.0
+C_08.05;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
+C_08.05;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
+C_08.05;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
+C_08.05;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
 C_08.05;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.0
 C_08.05;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.0
-C_08.05;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
+C_08.05;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
+C_08.05;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
+C_08.05;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
+C_08.05;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
 C_08.05;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.0
-C_08.05;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
-C_08.05;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
-C_08.05;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
 C_08.05;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.0
 C_08.05;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.0
 C_08.05;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.0
+C_08.05;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
+C_08.05;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
+C_08.05;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
 C_08.05;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.0
 C_08.05;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.0
 C_08.05;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.0
@@ -37469,29 +37469,29 @@ C_08.05.1;x_axis_rc_code;40;;Observed average default rate (%);;;%;4.0
 C_08.05.1;x_axis_rc_code;50;;Average historical annual default rate (%);;;%;4.0
 C_08.05.1;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
-C_08.05.1;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.0
+C_08.05.1;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.0
 C_08.05.1;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.0
@@ -49162,29 +49162,29 @@ C_08.01;y_axis_rc_code;200;__PARENT__9675679da93e;Mandate-based approach;;;;4.2
 C_08.01;y_axis_rc_code;210;__PARENT__9675679da93e;Fall-back approach;;;;4.2
 C_08.01;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
 C_08.01;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.2
-C_08.01;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
-C_08.01;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
-C_08.01;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
-C_08.01;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
-C_08.01;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
-C_08.01;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
-C_08.01;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.01;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.2
-C_08.01;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
-C_08.01;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
 C_08.01;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.2
 C_08.01;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.2
+C_08.01;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
+C_08.01;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.01;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.2
+C_08.01;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
+C_08.01;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
+C_08.01;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
+C_08.01;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
 C_08.01;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.2
 C_08.01;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.2
-C_08.01;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
+C_08.01;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
+C_08.01;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
+C_08.01;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
+C_08.01;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
 C_08.01;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.2
-C_08.01;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
-C_08.01;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
-C_08.01;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
 C_08.01;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.2
 C_08.01;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.2
 C_08.01;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.2
+C_08.01;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
+C_08.01;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
+C_08.01;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
 C_08.01;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.2
 C_08.01;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.2
 C_08.01;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.2
@@ -49250,29 +49250,29 @@ C_08.02;x_axis_rc_code;300;__PARENT__fc0a9f2feef6;Number of obligors;;;Unit;4.2
 C_08.02;x_axis_rc_code;310;__PARENT__fc0a9f2feef6;Pre-credit derivatives risk weighted exposure amount;;;;4.2
 C_08.02;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
 C_08.02;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.2
-C_08.02;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
-C_08.02;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
-C_08.02;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
-C_08.02;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
-C_08.02;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
-C_08.02;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
-C_08.02;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.02;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.2
-C_08.02;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
-C_08.02;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
 C_08.02;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.2
 C_08.02;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.2
+C_08.02;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
+C_08.02;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.02;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.2
+C_08.02;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
+C_08.02;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
+C_08.02;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
+C_08.02;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
 C_08.02;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.2
 C_08.02;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.2
-C_08.02;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
+C_08.02;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
+C_08.02;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
+C_08.02;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
+C_08.02;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
 C_08.02;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.2
-C_08.02;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
-C_08.02;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
-C_08.02;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
 C_08.02;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.2
 C_08.02;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.2
 C_08.02;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.2
+C_08.02;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
+C_08.02;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
+C_08.02;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
 C_08.02;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.2
 C_08.02;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.2
 C_08.02;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.2
@@ -49307,29 +49307,29 @@ C_08.03;y_axis_rc_code;150;170;20 to <30;;;;4.2
 C_08.03;y_axis_rc_code;160;170;30 to <100;;;;4.2
 C_08.03;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
 C_08.03;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.2
-C_08.03;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
-C_08.03;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
-C_08.03;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
-C_08.03;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
-C_08.03;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
-C_08.03;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
-C_08.03;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.03;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.2
-C_08.03;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
-C_08.03;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
 C_08.03;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.2
 C_08.03;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.2
+C_08.03;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
+C_08.03;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.03;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.2
+C_08.03;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
+C_08.03;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
+C_08.03;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
+C_08.03;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
 C_08.03;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.2
 C_08.03;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.2
-C_08.03;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
+C_08.03;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
+C_08.03;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
+C_08.03;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
+C_08.03;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
 C_08.03;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.2
-C_08.03;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
-C_08.03;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
-C_08.03;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
 C_08.03;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.2
 C_08.03;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.2
 C_08.03;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.2
+C_08.03;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
+C_08.03;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
+C_08.03;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
 C_08.03;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.2
 C_08.03;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.2
 C_08.03;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.2
@@ -49368,29 +49368,29 @@ C_08.05;y_axis_rc_code;150;170;20 to <30;;;;4.2
 C_08.05;y_axis_rc_code;160;170;30 to <100;;;;4.2
 C_08.05;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
 C_08.05;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.2
-C_08.05;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
-C_08.05;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
-C_08.05;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
-C_08.05;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
-C_08.05;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
-C_08.05;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
-C_08.05;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.05;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.2
-C_08.05;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
-C_08.05;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
 C_08.05;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.2
 C_08.05;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.2
+C_08.05;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
+C_08.05;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.05;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.2
+C_08.05;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
+C_08.05;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
+C_08.05;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
+C_08.05;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
 C_08.05;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.2
 C_08.05;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.2
-C_08.05;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
+C_08.05;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
+C_08.05;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
+C_08.05;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
+C_08.05;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
 C_08.05;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.2
-C_08.05;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
-C_08.05;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
-C_08.05;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
 C_08.05;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.2
 C_08.05;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.2
 C_08.05;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.2
+C_08.05;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
+C_08.05;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
+C_08.05;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
 C_08.05;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.2
 C_08.05;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.2
 C_08.05;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.2
@@ -49403,29 +49403,29 @@ C_08.05.1;x_axis_rc_code;40;;Observed average default rate (%);;;%;4.2
 C_08.05.1;x_axis_rc_code;50;;Average historical annual default rate (%);;;%;4.2
 C_08.05.1;z_axis_rc_code;qx01;;All exposure classes and approaches;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2023;;IRB A — With own estimates of LGD or conversion factors;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2021;qx2023;Central governments and central banks;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2071;qx2023;Regional governments or local authorities;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2073;qx2023;Public sector entities;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2013;qx2023;Corporates - Other;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2015;qx2023;Corporates - Specialised Lending;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2075;qx2023;Corporates - Purchased receivables;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2009;qx2023;Retail - Qualifying revolving;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2055;qx2023;Retail exposures - Purchased receivables;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2068;qx2023;Retail exposures - Secured by residential real estate;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2077;qx2023;Memo item: Corporates - Large corporates;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2079;qx2023;Memo item: Corporates - SME;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2081;qx2023;Retail exposures - Other;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2007;qx2023;Memo item: Retail - Other non-SME;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2008;qx2023;Memo item: Retail - Other SME;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2010;qx2023;Memo item: Retail - Secured by immovable property non-SME;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2011;qx2023;Memo item: Retail - Secured by immovable property SME;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2022;;IRB F — Without own estimates of LGD or conversion factors;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
-C_08.05.1;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2020;qx2022;Central governments and central banks;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2072;qx2022;Regional governments or local authorities;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2074;qx2022;Public sector entities;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2018;qx2022;Institutions;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2012;qx2022;Corporates - Other;;;;4.2
+C_08.05.1;z_axis_rc_code;qx2014;qx2022;Corporates - Specialised Lending;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2076;qx2022;Corporates - Purchased receivables;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2078;qx2022;Memo item: Corporates - Large corporates;;;;4.2
 C_08.05.1;z_axis_rc_code;qx2080;qx2022;Memo item: Corporates - SME;;;;4.2

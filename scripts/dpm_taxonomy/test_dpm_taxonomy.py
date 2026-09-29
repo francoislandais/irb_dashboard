@@ -63,6 +63,36 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertEqual(next(row for row in result if row["table_id"] == "C_08.06"), original[-1])
         self.assertEqual(original[0]["parent_coordinate_code"], "")
 
+    def test_c08_irb_z_orders_exposure_families_before_memo_items(self):
+        def member(code, label):
+            return {
+                "module_code": "COREP", "framework": "4.2", "table_id": "C_08.01",
+                "coordinate": "z_axis_rc_code", "code": code, "description": label,
+                "parent_coordinate_code": "", "ignore": "", "format": "", "order_first": "",
+            }
+
+        qualifier = "with own estimates of LGD or conversion factors"
+        source = [
+            member("qx2007", f"Memo item: Retail - Other SME - {qualifier}"),
+            member("qx2012", "Corporates - Other without own estimates of LGD or conversion factors"),
+            member("qx2055", f"Retail exposures - Purchased receivables - {qualifier}"),
+            member("qx2077", f"Memo item: Corporates - Large corporates {qualifier}"),
+            member("qx2013", f"Corporates - Other {qualifier}"),
+            member("qx2073", f"Public sector entities {qualifier}"),
+            member("qx2018", "Institutions without own estimates of LGD or conversion factors"),
+            member("qx2021", f"Central governments and central banks {qualifier}"),
+            member("qx2071", f"Regional governments or local authorities {qualifier}"),
+            member("qx2023", "Total with own estimates of LGD and/or conversion factors"),
+            member("qx2022", "Total without own estimates of LGD or conversion factors"),
+        ]
+        ordered = builder.group_c08_irb_z_rows(source)
+        self.assertEqual([row["code"] for row in ordered], [
+            "qx2023", "qx2021", "qx2071", "qx2073", "qx2013", "qx2055", "qx2077", "qx2007",
+            "qx2022", "qx2018", "qx2012",
+        ])
+        self.assertTrue(all(row["parent_coordinate_code"] == "qx2023" for row in ordered[1:8]))
+        self.assertTrue(all(row["parent_coordinate_code"] == "qx2022" for row in ordered[9:]))
+
     def test_c03_c04_amounts_override_percent_words_and_stale_formats(self):
         cases = {
             ("C_03.00", "220", "Surplus(+)/Deficit(-) of CET1 capital considering OCR and P2G"): "",

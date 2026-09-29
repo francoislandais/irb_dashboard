@@ -79,6 +79,14 @@ C08_IRB_QUALIFIER_RE = re.compile(
     r"\s*(?:[-–—]\s*)?(?:with|without) own estimates? of LGD (?:and/)?or conversion factors\s*$",
     re.IGNORECASE,
 )
+C08_IRB_PORTFOLIO_FAMILIES = (
+    ("central governments", "central banks"),
+    ("regional governments", "local authorities"),
+    ("public sector entities",),
+    ("institutions",),
+    ("corporates",),
+    ("retail",),
+)
 
 
 def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
@@ -99,6 +107,17 @@ def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
     aggregate = [(code, label) for code, label in special if "all currencies" in label.casefold()]
     other = [(code, label) for code, label in special if "all currencies" not in label.casefold()]
     return aggregate + selected + other
+
+
+def c08_irb_portfolio_sort_key(description: str) -> tuple[bool, int]:
+    """Prioritize major exposure families; keep memo items after them all."""
+    label = description.casefold()
+    memo = re.match(r"memo(?:randum)? items?\b\s*:?\s*", label)
+    portfolio = label[memo.end():] if memo else label
+    for rank, prefixes in enumerate(C08_IRB_PORTFOLIO_FAMILIES):
+        if portfolio.startswith(prefixes):
+            return bool(memo), rank
+    return bool(memo), len(C08_IRB_PORTFOLIO_FAMILIES)
 
 
 def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -137,13 +156,15 @@ def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
                 raise ValueError(f"Expected one C_08 IRB {group_name} total in {key}, found {len(totals)}")
             total = totals[0]
             organized.append({**total, "description": C08_IRB_Z_LABELS[group_name], "parent_coordinate_code": ""})
+            portfolios = []
             for member in group_members:
                 if member is total:
                     continue
                 description = C08_IRB_QUALIFIER_RE.sub("", member["description"]).rstrip(" -–—")
                 if not description or description == member["description"]:
                     raise ValueError(f"Cannot shorten C_08 IRB portfolio label: {key} {member['code']}")
-                organized.append({**member, "description": description, "parent_coordinate_code": total["code"]})
+                portfolios.append({**member, "description": description, "parent_coordinate_code": total["code"]})
+            organized.extend(sorted(portfolios, key=lambda member: c08_irb_portfolio_sort_key(member["description"])))
         organized.extend(member.copy() for member in groups["other"]
                          if "all exposure classes and approaches" not in member["description"].casefold())
         for order, member in enumerate(organized, 1):
