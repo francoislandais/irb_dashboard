@@ -155,8 +155,8 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
                 history_years = int(periods)
             except (TypeError, ValueError) as error:
                 raise ValueError(f"{sheet.title}, ligne {row_number}: History years doit être un entier.") from error
-            if not module or not selector:
-                raise ValueError(f"{sheet.title}, ligne {row_number}: Module et Template selector sont requis.")
+            if not selector:
+                raise ValueError(f"{sheet.title}, ligne {row_number}: Template selector est requis.")
             if frequency not in FREQUENCIES:
                 raise ValueError(f"{sheet.title}, ligne {row_number}: fréquence invalide ({frequency}).")
             if history_years < 1:
@@ -262,6 +262,7 @@ ORDER BY
     template_filter = _build_template_filter(
         [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
     )
+    module_filter = f"\n      AND module_id = {_sql_literal(extraction.module)}" if extraction.module else ""
     return f"""SELECT
     table_id,
     CONCAT(lei, '_', cons_level) AS reporting_unit_id,
@@ -280,8 +281,7 @@ FROM (
         reference_period,
         value_decimal
     FROM {tables['ITS']}
-    WHERE {_lei_filter(application.leis)}{consolidation_filter}
-      AND module_id = {_sql_literal(extraction.module)}
+    WHERE {_lei_filter(application.leis)}{consolidation_filter}{module_filter}
       AND {_date_filter(extraction.reference_dates)}
       AND {template_filter}
 ) source
@@ -337,8 +337,9 @@ def _write_query_index(output: Path, manifest: dict) -> None:
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
         for extraction in application["extractions"]:
             year_label = "an" if extraction["history_years"] == 1 else "ans"
+            module_label = extraction["module"] or "ITS (all modules)"
             lines.append(
-                f"- [Extraction {extraction['index']:02d} — {extraction['module']} / {extraction['selector']}]"
+                f"- [Extraction {extraction['index']:02d} — {module_label} / {extraction['selector']}]"
                 f"({extraction['query']}) — {extraction['frequency']}, {extraction['history_years']} {year_label}"
                 f" ({extraction['history_periods']} périodes)"
                 f" ({extraction['reference_dates'][0]} → {extraction['reference_dates'][-1]})"
@@ -424,7 +425,14 @@ def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[
             templates = list(extraction.kri_data_point_ids)
             is_kri = True
         else:
-            templates = _selected_fixture_templates(extraction.selector, module_templates.get(extraction.module, []))
+            available_templates = (
+                module_templates.get(extraction.module, []) if extraction.module
+                else {
+                    table_id for module_name, group in module_templates.items()
+                    if module_name != "KRI" for table_id in group
+                }
+            )
+            templates = _selected_fixture_templates(extraction.selector, available_templates)
             is_kri = False
         date_set = set(extraction.reference_dates)
         for lei in application.leis:

@@ -9,7 +9,7 @@
       "jst_by_level": {
         "CONSO": "DUM001",
         "SOLO": "DUM002",
-        "LIQUIDITY_SUBGROUP": "DUM003"
+        "SUBLIQ": "DUM003"
       }
     },
     {
@@ -19,7 +19,7 @@
       "jst_by_level": {
         "CONSO": "DUM004",
         "SOLO": "DUM005",
-        "LIQUIDITY_SUBGROUP": "DUM006"
+        "SUBLIQ": "DUM006"
       }
     },
     {
@@ -29,7 +29,7 @@
       "jst_by_level": {
         "CONSO": "DUM007",
         "SOLO": "DUM008",
-        "LIQUIDITY_SUBGROUP": "DUM009"
+        "SUBLIQ": "DUM009"
       }
     },
     {
@@ -39,7 +39,7 @@
       "jst_by_level": {
         "CONSO": "DUM010",
         "SOLO": "DUM011",
-        "LIQUIDITY_SUBGROUP": "DUM012"
+        "SUBLIQ": "DUM012"
       }
     }
   ],

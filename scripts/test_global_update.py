@@ -14,7 +14,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 
 SCRIPT_DIRECTORY = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIRECTORY))
@@ -24,10 +24,13 @@ from global_update import (  # noqa: E402
     EXAMPLE_WORKBOOK,
     Extraction,
     PRODUCTION_TABLES,
+    TEST_ENTITIES_PATH,
+    _build_dummy_dataset,
     _build_extraction_sql,
     _build_institution_sql,
     _consolidation_predicate,
     _read_configuration,
+    _read_test_fixture,
     _reference_dates,
     global_update,
 )
@@ -83,6 +86,21 @@ class QueryPlanTests(unittest.TestCase):
         self.assertEqual(_consolidation_predicate("HIGHEST"), "is_highest_cons = 'Y'")
         self.assertEqual(_consolidation_predicate("CONSO+SOLO"), "cons_level IN ('CONSO', 'SOLO')")
         self.assertEqual(_consolidation_predicate("ALL"), "")
+
+    def test_blank_module_uses_its_without_module_id_filter(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workbook = load_workbook(EXAMPLE_WORKBOOK)
+            workbook.worksheets[0]["A5"] = None
+            configuration = Path(temporary_directory) / "configuration.xlsx"
+            workbook.save(configuration)
+            application = _read_configuration(configuration, date(2026, 9, 26))[0]
+            extraction = application.extractions[0]
+            self.assertEqual(extraction.module, "")
+            sql = _build_extraction_sql(extraction, application)
+            self.assertIn(f"FROM {PRODUCTION_TABLES['ITS']}", sql)
+            self.assertNotIn("AND module_id =", sql)
+            _, rows = _build_dummy_dataset(application, _read_test_fixture(TEST_ENTITIES_PATH))
+            self.assertTrue(any(row["table_id"] == "F_12.01" for row in rows))
 
     def test_generated_queries_execute_against_tables_built_from_supplied_schemas(self):
         schema_directory = SCRIPT_DIRECTORY / "fixtures" / "hive_schemas"
