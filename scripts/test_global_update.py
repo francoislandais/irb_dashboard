@@ -276,6 +276,14 @@ frequency = "QUARTERLY"'''
             with self.assertRaisesRegex(ValueError, "notes.txt"):
                 _read_configuration(folder, date(2026, 9, 26))
 
+    def test_temporary_files_do_not_block_configuration(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory))
+            for name in ("finrep.toml.amltmp", "app.toml.tmp", "~$app.toml", "app.toml~"):
+                (folder / name).write_text("partial or locked content", encoding="utf-8")
+            applications = _read_configuration(folder, date(2026, 9, 26))
+            self.assertEqual([application.config_file for application in applications], ["app.toml"])
+
     def test_invalid_syntax_and_fields_include_filename(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             folder = self._config(Path(temporary_directory))

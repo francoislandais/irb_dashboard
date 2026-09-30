@@ -160,7 +160,7 @@ frequency = "MONTHLY"
 
 `module = "COREP"` ou `"FINREP"` applique une correspondance exacte sur `module_id` dans la table ITS. `module = "ITS"` interroge cette table **sans** filtre `module_id`. `module = "KRI"` utilise la table KRI : le bloc contient soit `kri_ids = ["..."]` pour des identifiants directs, soit `templates = ["..."]` pour sélectionner les KRI dépendant de ces templates. Les deux champs ne peuvent pas être présents ensemble. Dans `templates`, un `%` final est un joker et `!` une exclusion ; `"F_xx% xx<48"` développe les familles F_01 à F_47.
 
-Le dossier est validé entièrement avant la première connexion Hive : syntaxe TOML, fichiers inattendus, champs inconnus ou manquants, formats et doublons des LEI, nom de sortie en collision, sélecteurs, fréquences, années et identifiants KRI inconnus. Le message d'erreur indique le fichier et, pour une extraction, son numéro. Python 3.11 ou plus récent lit TOML sans dépendance ; pour Python 3.10, installer `python3 -m pip install -r scripts/requirements-global-update.txt`.
+Le dossier est validé entièrement avant la première connexion Hive : syntaxe TOML, fichiers inattendus, champs inconnus ou manquants, formats et doublons des LEI, nom de sortie en collision, sélecteurs, fréquences, années et identifiants KRI inconnus. Les fichiers temporaires (`*.amltmp`, `*.tmp`, `*.temp`, `*.swp`, `*.swo`, `*.bak`, `*~`, `~$*`) sont ignorés. Le message d'erreur indique le fichier et, pour une extraction, son numéro. Python 3.11 ou plus récent lit TOML sans dépendance ; pour Python 3.10, installer `python3 -m pip install -r scripts/requirements-global-update.txt`.
 
 Le point d'entrée unique peut être importé :
 

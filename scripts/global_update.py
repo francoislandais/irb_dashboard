@@ -117,6 +117,14 @@ def _check_keys(value: dict, allowed: set[str], context: str) -> None:
         raise ValueError(f"{context}: champ(s) inconnu(s) : {', '.join(sorted(unknown))}.")
 
 
+def _is_temporary_file(path: Path) -> bool:
+    name = path.name.lower()
+    return path.is_file() and (
+        name.startswith("~$")
+        or name.endswith((".amltmp", ".tmp", ".temp", ".swp", ".swo", ".bak", "~"))
+    )
+
+
 @lru_cache(maxsize=1)
 def _known_kri_ids() -> frozenset[str]:
     return frozenset(load_kri_dictionary())
@@ -163,7 +171,10 @@ def _reference_dates(frequency: str, history_periods: int, as_of: date) -> tuple
 def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
     if not path.is_dir():
         raise ValueError(f"Dossier de paramétrage introuvable : {path}")
-    entries = sorted((item for item in path.iterdir() if not item.name.startswith(".")), key=lambda item: item.name.casefold())
+    entries = sorted(
+        (item for item in path.iterdir() if not item.name.startswith(".") and not _is_temporary_file(item)),
+        key=lambda item: item.name.casefold(),
+    )
     invalid = [item.name for item in entries if not item.is_file() or item.suffix.lower() != ".toml"]
     if invalid:
         raise ValueError(f"{path}: seuls des fichiers .toml sont attendus ; entrée(s) non reconnue(s) : {', '.join(invalid)}.")
