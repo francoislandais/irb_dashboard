@@ -134,6 +134,8 @@ Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
 Le classeur `outputs/global-update-prototype/global_update_examples.xlsx` montre le format proposé : un onglet par application, les LEI en `B1`, le niveau de consolidation en `B2`, puis une ligne par extraction à partir de la ligne 5. La fréquence et la profondeur d'historique s'appliquent séparément à chaque ligne.
 
+Une cellule `Template selector` peut contenir plusieurs expressions séparées par des virgules, avec ou sans guillemets. Par exemple `"F_xx% xx<48","!F_20.04%","!F_20.05%","!F_20.06%","!F_20.07%","!F_40%"` sélectionne les familles F_01 à F_47 en excluant ces sous-familles de F_20 et toute la famille F_40.
+
 Dans la colonne `Module`, une valeur comme `COREP` ou `FINREP` applique une correspondance exacte sur `module_id`. Une cellule vide utilise la table ITS sans filtre `module_id`. La valeur `KRI` doit rester explicite pour interroger la table KRI.
 
 Après installation de la dépendance du lecteur Excel (`python3 -m pip install -r scripts/requirements-global-update.txt`), le point d'entrée unique peut être importé :

@@ -32,6 +32,7 @@ from global_update import (  # noqa: E402
     _read_configuration,
     _read_test_fixture,
     _reference_dates,
+    _selected_fixture_templates,
     global_update,
 )
 
@@ -101,6 +102,22 @@ class QueryPlanTests(unittest.TestCase):
             self.assertNotIn("AND module_id =", sql)
             _, rows = _build_dummy_dataset(application, _read_test_fixture(TEST_ENTITIES_PATH))
             self.assertTrue(any(row["table_id"] == "F_12.01" for row in rows))
+
+    def test_excel_selector_cell_accepts_a_quoted_range_and_exclusions(self):
+        selector = '"F_xx% xx<48","!F_20.04%","!F_20.05%","!F_20.06%","!F_20.07%","!F_40%"'
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workbook = load_workbook(EXAMPLE_WORKBOOK)
+            workbook.worksheets[0]["B5"] = selector
+            configuration = Path(temporary_directory) / "configuration.xlsx"
+            workbook.save(configuration)
+            extraction = _read_configuration(configuration, date(2026, 9, 26))[0].extractions[0]
+            self.assertEqual(extraction.selector, selector)
+            sql = _build_extraction_sql(extraction, self.applications[0])
+            self.assertIn("LIKE 'F_47%'", sql)
+            self.assertIn("AND NOT", sql)
+            self.assertIn("LIKE 'F_20.04%'", sql)
+        available = ["F_20.03", "F_20.04", "F_20.05", "F_20.06", "F_20.07", "F_40.01", "F_47.01", "F_48.00"]
+        self.assertEqual(_selected_fixture_templates(selector, available), ["F_20.03", "F_47.01"])
 
     def test_generated_queries_execute_against_tables_built_from_supplied_schemas(self):
         schema_directory = SCRIPT_DIRECTORY / "fixtures" / "hive_schemas"

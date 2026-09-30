@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import io
 import re
 from datetime import date
 from pathlib import Path
@@ -513,36 +514,43 @@ def _expand_template_expressions(
     excluded: list[str] = []
 
     for expression in templates:
-        is_exclusion = expression.startswith("!")
-        template = expression[1:].strip() if is_exclusion else expression
-        if not template:
-            raise ValueError(f"Expression de template invalide : {expression!r}.")
+        try:
+            parts = [part.strip() for line in csv.reader(io.StringIO(str(expression)), skipinitialspace=True, strict=True)
+                     for part in line]
+        except csv.Error as error:
+            raise ValueError(f"Liste de templates invalide : {expression!r}.") from error
 
-        target = excluded if is_exclusion else included
-        match = _TEMPLATE_RANGE_PATTERN.fullmatch(template)
-        if match is None:
-            if "%" in template[:-1] or "_" in template.replace("_", "", 1):
+        for part in parts:
+            is_exclusion = part.startswith("!")
+            template = part[1:].strip() if is_exclusion else part
+            if not template:
+                raise ValueError(f"Expression de template invalide : {expression!r}.")
+
+            target = excluded if is_exclusion else included
+            match = _TEMPLATE_RANGE_PATTERN.fullmatch(template)
+            if match is None:
+                if "%" in template[:-1] or "_" in template.replace("_", "", 1):
+                    raise ValueError(
+                        f"Joker invalide dans l'expression {part!r}. "
+                        "Seul un % final est accepté."
+                    )
+                target.append(template)
+                continue
+
+            prefix = match.group("prefix").upper()
+            upper_bound = int(match.group("upper_bound"))
+            if upper_bound <= 1 or upper_bound > 100:
                 raise ValueError(
-                    f"Joker invalide dans l'expression {expression!r}. "
-                    "Seul un % final est accepté."
+                    f"Borne invalide dans l'expression de template {template!r}. "
+                    "La borne doit être comprise entre 2 et 100."
                 )
-            target.append(template)
-            continue
 
-        prefix = match.group("prefix").upper()
-        upper_bound = int(match.group("upper_bound"))
-        if upper_bound <= 1 or upper_bound > 100:
-            raise ValueError(
-                f"Borne invalide dans l'expression de template {template!r}. "
-                "La borne doit être comprise entre 2 et 100."
-            )
-
-        target.extend(f"{prefix}_{number:02d}%" for number in range(1, upper_bound))
+            target.extend(f"{prefix}_{number:02d}%" for number in range(1, upper_bound))
 
     if not included:
         raise ValueError("Au moins un template à inclure doit être indiqué.")
 
-    return included, excluded
+    return list(dict.fromkeys(included)), list(dict.fromkeys(excluded))
 
 
 def _build_template_filter(

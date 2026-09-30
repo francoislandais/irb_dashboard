@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from hive_to_dataset import (
+    _expand_template_expressions,
     build_hive_query,
     build_kri_template_index,
     find_kris_using_templates,
@@ -115,6 +116,36 @@ class HiveModuleFilterTest(unittest.TestCase):
         self.assertIn("AND module_id = 'FUNDING_PLAN'", client.sql)
         self.assertEqual(client.dataframe.output_path.name, "module_extract.csv")
         self.assertFalse(client.dataframe.index)
+
+
+class TemplateSelectorListTest(unittest.TestCase):
+    SELECTOR = '"F_xx% xx<48","!F_20.04%","!F_20.05%","!F_20.06%","!F_20.07%","!F_40%"'
+
+    def test_quoted_excel_cell_expands_inclusions_and_exclusions(self):
+        included, excluded = _expand_template_expressions([self.SELECTOR])
+        self.assertEqual(len(included), 47)
+        self.assertEqual(included[0], "F_01%")
+        self.assertEqual(included[-1], "F_47%")
+        self.assertEqual(excluded, ["F_20.04%", "F_20.05%", "F_20.06%", "F_20.07%", "F_40%"])
+
+    def test_unquoted_comma_list_is_also_accepted(self):
+        self.assertEqual(
+            _expand_template_expressions(["F_18%, !F_18.00%"]),
+            (["F_18%"], ["F_18.00%"]),
+        )
+
+    def test_generated_sql_applies_every_exclusion(self):
+        sql = build_hive_query([self.SELECTOR], REFERENCE_DATES, JST_CODES)
+        self.assertIn("LIKE 'F_01%'", sql)
+        self.assertIn("LIKE 'F_47%'", sql)
+        self.assertNotIn("LIKE 'F_48%'", sql)
+        for excluded in ("F_20.04%", "F_20.05%", "F_20.06%", "F_20.07%", "F_40%"):
+            self.assertIn(f"LIKE '{excluded}'", sql)
+        self.assertIn("AND NOT", sql)
+
+    def test_empty_item_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "Expression de template invalide"):
+            _expand_template_expressions(["F_18%,"])
 
 
 def _kri_dictionary_line(code: str, name: str, formula: str) -> str:
