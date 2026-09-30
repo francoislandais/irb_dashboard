@@ -21,6 +21,7 @@ from typing import Iterable, Protocol
 from openpyxl import load_workbook
 
 if __package__:
+    from .compact_dataset_values import compact_dataset_rows
     from .export_all_standalone_apps import export_standalone_app
     from .hive_to_dataset import (
         _expand_template_expressions,
@@ -30,6 +31,7 @@ if __package__:
         find_kris_using_templates,
     )
 else:
+    from compact_dataset_values import compact_dataset_rows
     from export_all_standalone_apps import export_standalone_app
     from hive_to_dataset import (
         _expand_template_expressions,
@@ -332,6 +334,8 @@ def _safe_name(value: str) -> str:
 
 def _write_query_index(output: Path, manifest: dict) -> None:
     lines = ["# Requêtes générées", "", f"Mode : `{manifest['mode']}`", f"Date de calcul : `{manifest['as_of']}`", ""]
+    if manifest.get("compact_values"):
+        lines.extend(["Stockage compact des valeurs : activé pour les datasets exportés (sans changement du SQL).", ""])
     for application in manifest["applications"]:
         lines.extend([f"## {application['name']}", "", f"Niveau : `{application['consolidation']}`", f"LEI : {', '.join(application['leis'])}", ""])
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
@@ -570,9 +574,14 @@ def _write_application_outputs(
     fields: list[str],
     rows: list[dict[str, str]],
     dictionary_rows: list[dict[str, str]],
+    *,
+    compact_values: bool = False,
 ) -> None:
     app_output_dir = output_root / "applications"
     safe_file_name = folder.lower()
+    if compact_values:
+        fields, rows, value_counts = compact_dataset_rows(fields, rows)
+        application_manifest["compact_values"] = value_counts
     dataset_path = app_output_dir / "datasets" / f"{safe_file_name}.csv"
     dictionary_path = app_output_dir / "institutions" / f"{safe_file_name}_institution_dictionary.csv"
     _write_csv(dataset_path, fields, rows)
@@ -600,6 +609,7 @@ def global_update(
     output_directory: str | Path | None = None,
     as_of: date | None = None,
     devo_client: QueryClient | None = None,
+    compact_values: bool = False,
 ) -> dict:
     """Prépare, simule ou exécute toutes les applications du classeur."""
 
@@ -619,7 +629,7 @@ def global_update(
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     query_root = output_root / "queries"
-    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "applications": []}
+    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "compact_values": compact_values, "applications": []}
     for application in applications:
         folder = _safe_name(application.name)
         app_query_dir = query_root / folder
@@ -676,7 +686,7 @@ def global_update(
         if mode == "test":
             fields, rows = _build_dummy_dataset(application, fixture)
             dictionary_rows = _dictionary_rows(application, fixture)
-            _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows)
+            _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows, compact_values=compact_values)
             application_manifest["simulated_rows"] = len(rows)
         elif mode == "hive":
             populated_dates = [
@@ -688,6 +698,7 @@ def global_update(
             fields = OUTPUT_COLUMNS + populated_dates + ["extraction_timestamp"]
             _write_application_outputs(
                 output_root, application, folder, application_manifest, fields, list(records.values()), dictionary_rows,
+                compact_values=compact_values,
             )
         manifest["applications"].append(application_manifest)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -703,9 +714,10 @@ def _main() -> None:
     parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
+    parser.add_argument("--compact-values", action="store_true", help="Stocker les montants en milliers entiers et les pourcentages sur quatre chiffres significatifs")
     args = parser.parse_args()
     try:
-        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of)
+        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")

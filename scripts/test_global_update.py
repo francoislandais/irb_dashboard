@@ -186,6 +186,7 @@ class QueryPlanTests(unittest.TestCase):
                 mode="test",
                 output_directory=temporary_directory,
                 as_of=date(2026, 9, 26),
+                compact_values=True,
             )
             self.assertEqual(result["applications"], 4)
             output = Path(temporary_directory)
@@ -197,11 +198,17 @@ class QueryPlanTests(unittest.TestCase):
             self.assertEqual(len(html_files), 4)
             self.assertEqual(len(dataset_files), 4)
             self.assertEqual(len(dictionary_files), 4)
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            self.assertTrue(manifest["compact_values"])
+            self.assertGreater(manifest["applications"][0]["compact_values"]["amount_rows"], 0)
             html_text = html_files[0].read_text(encoding="utf-8")
             self.assertIn("institutionDictionaryBase64", html_text)
             payload_match = re.search(r"window\.__AGORA_STANDALONE_DATA__ = (\{.*?\});", html_text)
             self.assertIsNotNone(payload_match)
             payload = json.loads(payload_match.group(1))
+            embedded_csv = gzip.decompress(base64.b64decode(payload["csvBase64"])).decode("utf-8-sig")
+            self.assertIn("value_scale", next(csv.reader(embedded_csv.splitlines())))
+            self.assertIn(",1000,", embedded_csv)
             dictionary_text = gzip.decompress(base64.b64decode(payload["institutionDictionaryBase64"])).decode("utf-8")
             self.assertIn("Institution ID,JST code,Institution Name,Consolidation Level", dictionary_text)
             bundle_match = re.search(r"window\.__AGORA_STANDALONE_BUNDLE_GZIP__ = (\"[^\"]+\");", html_text)
@@ -311,6 +318,23 @@ class HiveExecutionTests(unittest.TestCase):
             self._workbook(workbook)
             with self.assertRaisesRegex(ValueError, "valeurs contradictoires"):
                 global_update(workbook, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=self._client(conflict=True))
+
+    def test_hive_mode_can_compact_amounts_without_touching_unknown_kri(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workbook = root / "config.xlsx"
+            self._workbook(workbook)
+            result = global_update(
+                workbook, mode="hive", output_directory=root / "generated",
+                as_of=date(2026, 9, 26), devo_client=self._client(), compact_values=True,
+            )
+            output = Path(result["output_directory"])
+            with next((output / "applications" / "datasets").glob("*.csv")).open(encoding="utf-8-sig", newline="") as stream:
+                rows = {row["table_id"]: row for row in csv.DictReader(stream)}
+            self.assertEqual(rows["C_01.00"]["ref_2026_06_30"], "0")
+            self.assertEqual(rows["C_01.00"]["value_scale"], "1000")
+            self.assertEqual(rows["KRI"]["ref_2026_06_30"], "20")
+            self.assertEqual(rows["KRI"]["value_scale"], "")
 
     def test_default_client_comes_from_vl_connect(self):
         from hive_to_dataset import _load_default_devo_client

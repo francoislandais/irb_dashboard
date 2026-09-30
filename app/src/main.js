@@ -1,6 +1,7 @@
 import { parseCsv } from "./data/csvParser.js?v=20260917-kri-formula";
 import { parseInstitutionDictionaryCsv } from "./data/institutionDictionary.js?v=20260925-institution-dictionary";
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
+import { expandScaledReferenceValues } from "./data/core/valueScale.js";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
 import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
@@ -215,7 +216,8 @@ async function loadFile(file, handle, options = {}) {
 
 async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const rawParsed = parseCsv(text);
-  const parsed = removeEmptyReferenceColumns(rawParsed.columns, rawParsed.rows);
+  const expanded = expandScaledReferenceValues(rawParsed);
+  const parsed = removeEmptyReferenceColumns(expanded.columns, expanded.rows);
   validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
   const institutionOptions = getIndexedInstitutionIds({ dataIndexes });
