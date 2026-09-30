@@ -28,6 +28,7 @@ from global_update import (  # noqa: E402
     _build_extraction_sql,
     _build_institution_sql,
     _consolidation_predicate,
+    _module_matches,
     _read_configuration,
     _read_test_fixture,
     _reference_dates,
@@ -99,6 +100,26 @@ class QueryPlanTests(unittest.TestCase):
             sql = _build_extraction_sql(extraction, application)
             self.assertIn(f"FROM {PRODUCTION_TABLES['ITS']}", sql)
             self.assertNotIn("AND module_id =", sql)
+            _, rows = _build_dummy_dataset(application, _read_test_fixture(TEST_ENTITIES_PATH))
+            self.assertTrue(any(row["table_id"] == "F_12.01" for row in rows))
+
+    def test_multiple_modules_and_percent_patterns_filter_its(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            configuration = Path(temporary_directory) / "config"
+            shutil.copytree(EXAMPLE_CONFIG_DIRECTORY, configuration)
+            file = configuration / "01-finrep.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace(
+                'module = "FINREP"', 'module = ["COREP", "%FINREP%"]', 1,
+            ), encoding="utf-8")
+            application = _read_configuration(configuration, date(2026, 9, 26))[0]
+            extraction = application.extractions[0]
+            self.assertEqual(extraction.modules, ("COREP", "%FINREP%"))
+            sql = _build_extraction_sql(extraction, application)
+            self.assertIn("module_id = 'COREP'", sql)
+            self.assertIn("module_id RLIKE '^.*FINREP.*$'", sql)
+            self.assertIn("\n          OR ", sql)
+            self.assertTrue(_module_matches("SOMETHING_FINREP_EXTRA", "%FINREP%"))
+            self.assertFalse(_module_matches("FINREP1", "FIN_REP%"))
             _, rows = _build_dummy_dataset(application, _read_test_fixture(TEST_ENTITIES_PATH))
             self.assertTrue(any(row["table_id"] == "F_12.01" for row in rows))
 
@@ -309,6 +330,28 @@ frequency = "QUARTERLY"'''
                 folder = self._config(Path(temporary_directory), extractions=extractions, **{key: value for key, value in case.items() if key != "extractions"})
                 with self.assertRaisesRegex(ValueError, message):
                     _read_configuration(folder, date(2026, 9, 26))
+
+    def test_module_list_validation_and_exact_pattern_sql(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory))
+            file = folder / "app.toml"
+            original = file.read_text(encoding="utf-8")
+            for module, error in (
+                ('module = []', "liste TOML non vide"),
+                ('module = ["COREP", "corep"]', "doublons"),
+                ('module = ["ITS", "COREP"]', "doivent être seuls"),
+                ('module = ["KRI", "COREP"]', "doivent être seuls"),
+                ('module = ["COREP", 3]', "texte non vide"),
+                ('module = "C_REP*"', "module invalide"),
+            ):
+                with self.subTest(module=module):
+                    file.write_text(original.replace('module = "COREP"', module), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, error):
+                        _read_configuration(folder, date(2026, 9, 26))
+            file.write_text(original.replace('module = "COREP"', 'module = ["COREP", "FINREP"]'), encoding="utf-8")
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            sql = _build_extraction_sql(application.extractions[0], application)
+            self.assertIn("module_id IN ('COREP', 'FINREP')", sql)
 
     def test_kri_direct_ids_and_selector_validation(self):
         direct = '''[[extractions]]

@@ -79,6 +79,7 @@ class Extraction:
     selection_type: str = "templates"
     label: str = ""
     category: str = ""
+    modules: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -219,9 +220,21 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             if not isinstance(raw, dict):
                 raise ValueError(f"{block}: un bloc TOML est attendu.")
             _check_keys(raw, {"category", "label", "module", "templates", "kri_ids", "history_years", "frequency"}, block)
-            module = _required_text(raw.get("module"), "module", block).upper()
-            if not re.fullmatch(r"[A-Z][A-Z0-9_]*", module):
-                raise ValueError(f"{block}: module invalide ({module!r}).")
+            raw_module = raw.get("module")
+            if isinstance(raw_module, str):
+                modules = (_required_text(raw_module, "module", block).upper(),)
+            elif isinstance(raw_module, list):
+                modules = tuple(value.upper() for value in _string_list(raw_module, "module", block))
+            else:
+                raise ValueError(f"{block}: module doit être un texte non vide ou une liste de textes non vide.")
+            if len(set(modules)) != len(modules):
+                raise ValueError(f"{block}: module contient des doublons.")
+            invalid_modules = [value for value in modules if not re.fullmatch(r"%*[A-Z][A-Z0-9_%]*", value)]
+            if invalid_modules:
+                raise ValueError(f"{block}: module invalide ({', '.join(invalid_modules)}). Seul % est autorisé comme joker.")
+            if len(modules) > 1 and any(value in {"ITS", "KRI"} for value in modules):
+                raise ValueError(f"{block}: ITS et KRI doivent être seuls dans leur bloc d'extraction.")
+            module = "" if modules == ("ITS",) else ", ".join(modules)
             category = raw.get("category", "")
             if category:
                 category = _required_text(category, "category", block)
@@ -266,7 +279,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
                 selection_type = "kri_ids"
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
-            extractions.append(Extraction("" if module == "ITS" else module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category))
+            extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category, () if module in {"", "KRI"} else modules))
         applications.append(Application(name, leis, consolidation, tuple(extractions), context))
     return tuple(applications)
 
@@ -314,6 +327,29 @@ def _date_filter(reference_dates: Iterable[str], prefix: str = "") -> str:
     ) + "\n    )"
 
 
+def _module_patterns(extraction: Extraction) -> tuple[str, ...]:
+    return extraction.modules or ((extraction.module,) if extraction.module and extraction.module != "KRI" else ())
+
+
+def _module_filter(extraction: Extraction) -> str:
+    patterns = _module_patterns(extraction)
+    if not patterns:
+        return ""
+    exact = [value for value in patterns if "%" not in value]
+    wildcard = [value for value in patterns if "%" in value]
+    conditions = []
+    if len(exact) == 1:
+        conditions.append(f"module_id = {_sql_literal(exact[0])}")
+    elif exact:
+        conditions.append("module_id IN (" + ", ".join(_sql_literal(value) for value in exact) + ")")
+    for pattern in wildcard:
+        expression = "^" + re.escape(pattern).replace("%", ".*") + "$"
+        conditions.append(f"module_id RLIKE {_sql_literal(expression)}")
+    if len(conditions) == 1:
+        return "\n      AND " + conditions[0]
+    return "\n      AND (\n          " + "\n          OR ".join(conditions) + "\n      )"
+
+
 def _build_extraction_sql(
     extraction: Extraction, application: Application, tables: dict[str, str] = PRODUCTION_TABLES,
 ) -> str:
@@ -355,7 +391,7 @@ ORDER BY
     template_filter = _build_template_filter(
         [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
     )
-    module_filter = f"\n      AND module_id = {_sql_literal(extraction.module)}" if extraction.module else ""
+    module_filter = _module_filter(extraction)
     return f"""SELECT
     table_id,
     CONCAT(lei, '_', cons_level) AS reporting_unit_id,
@@ -492,6 +528,10 @@ def _selected_fixture_templates(selector: str, available: Iterable[str]) -> list
     ]
 
 
+def _module_matches(value: str, pattern: str) -> bool:
+    return re.fullmatch(re.escape(pattern).replace("%", ".*"), value) is not None
+
+
 def _dictionary_rows(application: Application, fixture: dict) -> list[dict[str, str]]:
     result = []
     entities_by_lei = {item["lei"]: item for item in fixture["entities"]}
@@ -526,12 +566,11 @@ def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[
             templates = list(extraction.kri_data_point_ids)
             is_kri = True
         else:
-            available_templates = (
-                module_templates.get(extraction.module, []) if extraction.module
-                else {
-                    table_id for module_name, group in module_templates.items()
-                    if module_name != "KRI" for table_id in group
-                }
+            patterns = _module_patterns(extraction)
+            available_templates = dict.fromkeys(
+                table_id for module_name, group in module_templates.items()
+                if module_name != "KRI" and (not patterns or any(_module_matches(module_name, pattern) for pattern in patterns))
+                for table_id in group
             )
             templates = _selected_fixture_templates(extraction.selector, available_templates)
             is_kri = False
@@ -763,6 +802,7 @@ def global_update(
                 "label": extraction.label,
                 "category": extraction.category,
                 "module": extraction.module,
+                "modules": list(_module_patterns(extraction)),
                 "selector": extraction.selector,
                 "selection_type": extraction.selection_type,
                 "history_years": extraction.history_years,

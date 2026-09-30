@@ -5,6 +5,8 @@ consolidation = "CONSO+SOLO"
 [[extractions]]
 category = "FINREP"
 module = "FINREP"
+# Pour combiner plusieurs module_id dans une seule extraction :
+# module = ["FINREP", "FINREP_%", "%COREP%"]
 templates = ["F_01.01"]
 history_years = 4
 frequency = "QUARTERLY"
