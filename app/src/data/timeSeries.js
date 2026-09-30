@@ -1,7 +1,6 @@
 import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
-import { escapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";
 import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-local-description";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
 import {
@@ -231,9 +230,12 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
       const matchedRows = matchedRowsByCode.get(code) ?? [];
       const mapping = state.dimensionMapping?.find(tableId, coordinate, code);
       const description = mapping?.description || `${axis.toUpperCase()} ${code}`;
-      const hierarchy = mapping
-        ? hierarchyResolver.resolve(mapping)
-        : { label: description, level: 0, parentPath: "", path: escapeHierarchySegment(description) };
+      const hierarchy = hierarchyResolver.resolve(mapping ?? {
+        tableId,
+        coordinate,
+        code,
+        description
+      });
 
       return {
         code,
