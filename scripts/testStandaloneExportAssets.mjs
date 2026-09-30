@@ -27,4 +27,6 @@ const taxonomy = await loadTaxonomyDimensionData({}, { referenceDate: "2026-06-3
 assert.equal(taxonomy.selectedTaxonomiesByTemplate["C_01.00"], "4.2");
 assert.equal(taxonomy.dimensionMapping.find("C_01.00", "x_axis_rc_code", "0010")?.description, "Amount");
 assert.equal(taxonomy.dimensionMapping.find("C_01.00", "y_axis_rc_code", "0010")?.description, "Own funds");
+assert.equal(taxonomy.explorerPoints.filter((point) => point.tableId === "KRI").length, 2674);
+assert.equal(taxonomy.explorerPoints.find((point) => point.tableId === "KRI" && point.code === "LIQ55")?.description, "Liquidity buffer quality ratio");
 process.stdout.write(`${requestedAssets.size} portable CSV assets verified\n`);

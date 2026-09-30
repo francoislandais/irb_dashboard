@@ -466,7 +466,7 @@ async function getStandaloneBundle() {
     return window.__AGORA_STANDALONE_BUNDLE__;
   }
 
-  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, taxonomyHistoryCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, kriDictionaryCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, taxonomyHistoryCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, kriDictionaryCsv, kriDimensionMappingCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     fetchAppText("index.html"),
     fetchAppText("src/styles.css"),
     fetchAppText("src/creditRiskStyles.css"),
@@ -476,6 +476,7 @@ async function getStandaloneBundle() {
     fetchAppText("assets/ITS_explorer_default_expand_depth.csv"),
     fetchAppText("assets/ITS_explorer_template_groups.csv"),
     fetchAppText("assets/KRI_dictionnary.csv"),
+    fetchAppText("assets/KRI_dimension_mapping.csv"),
     fetchAppText("vendor/highcharts.js"),
     fetchAppText("vendor/highcharts-treemap.js"),
     collectStandaloneModuleSources("src/main.js")
@@ -488,7 +489,8 @@ async function getStandaloneBundle() {
       "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv,
       "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv,
       "assets/ITS_explorer_template_groups.csv": templateGroupsCsv,
-      "assets/KRI_dictionnary.csv": kriDictionaryCsv
+      "assets/KRI_dictionnary.csv": kriDictionaryCsv,
+      "assets/KRI_dimension_mapping.csv": kriDimensionMappingCsv
     },
     highchartsJs,
     highchartsTreemapJs,

@@ -4,13 +4,17 @@ import { parseExplorerPoints } from "./explorerConfig.js?v=20260928-dictionary-c
 
 const TAXONOMY_DATA_URL = "./assets/ITS_all_dimension_mapping.csv";
 const TAXONOMY_HISTORY_URL = "./assets/ITS_template_taxonomy_history.csv";
+const KRI_DIMENSION_DATA_URL = "./assets/KRI_dimension_mapping.csv";
 let sourcePromise = null;
 let historyPromise = null;
+let kriPointsPromise = null;
 const resolvedTaxonomyDataCache = new Map();
 const frameworkDimensionCache = new Map();
 
 export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { referenceDate = "" } = {}) {
-  const [{ columns, rows }, history] = await Promise.all([loadSource(), loadTaxonomyHistory()]);
+  const [{ columns, rows }, history, kriPoints] = await Promise.all([
+    loadSource(), loadTaxonomyHistory(), loadKriDimensionPoints()
+  ]);
   const frameworkIndex = columns.indexOf("framework");
   const tableIdIndex = columns.indexOf("table_id");
   if (frameworkIndex === -1 || tableIdIndex === -1) {
@@ -59,7 +63,9 @@ export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { refe
     availableTaxonomiesByTemplate,
     selectedTaxonomiesByTemplate,
     dimensionMapping: createDimensionMapping(columns, selectedRows),
-    explorerPoints: parseExplorerPoints(columns, selectedRows),
+    // KRI is not an EBA taxonomy. Its names, order and formats must survive
+    // every regeneration of the versioned ITS dimension mapping.
+    explorerPoints: [...parseExplorerPoints(columns, selectedRows), ...kriPoints],
     taxonomySource: { columns, rows },
     taxonomyHistory: history
   };
@@ -131,9 +137,21 @@ async function loadTaxonomyHistory() {
   return historyPromise;
 }
 
-async function fetchCsv(url) {
+async function loadKriDimensionPoints() {
+  if (!kriPointsPromise) {
+    kriPointsPromise = fetchCsv(KRI_DIMENSION_DATA_URL, "Le référentiel KRI n'a pas pu être chargé.")
+      .then(({ columns, rows }) => parseExplorerPoints(columns, rows))
+      .catch((error) => {
+        kriPointsPromise = null;
+        throw error;
+      });
+  }
+  return kriPointsPromise;
+}
+
+async function fetchCsv(url, errorMessage = "L'historique des taxonomies n'a pas pu être chargé.") {
   const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error("L'historique des taxonomies n'a pas pu être chargé.");
+  if (!response.ok) throw new Error(errorMessage);
   return parseCsv(await response.text());
 }
 

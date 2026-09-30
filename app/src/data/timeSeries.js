@@ -48,7 +48,25 @@ export function getExplorerAxisPointsConfig(state, tableId, axis, yConfigTableId
   return axis === "y" && isExplorerDataOnlyRowTemplate(yConfigTableId)
     ? (() => {
       const availableCodes = new Set(getAvailableExplorerAxisCodes(state, tableId, "y"));
-      return rawPointsConfig.filter((point) => availableCodes.has(point.code));
+      const configuredPoints = rawPointsConfig.filter((point) => availableCodes.has(point.code));
+      const configuredCodes = new Set(configuredPoints.map((point) => point.code));
+      // Unknown or still-loading KRI codes must also belong to a page; the
+      // raw dataset identifies them even without a dictionary entry.
+      const extraPoints = [...availableCodes].filter((code) => !configuredCodes.has(code)).map((code) => {
+        const description = state.explorerKriFormulas?.get(code)?.name || code;
+        return {
+          code,
+          coordinate: "y_axis_rc_code",
+          description,
+          displayDescription: description,
+          format: "",
+          hierarchyPath: description,
+          indentLevel: 0,
+          parentPath: "",
+          tableId
+        };
+      });
+      return [...configuredPoints, ...extraPoints];
     })()
     : rawPointsConfig;
 }

@@ -119,9 +119,14 @@ export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId)
   const availableXCodes = getAvailableExplorerAxisCodes(state, tableId, "x");
   const availableYCodes = getAvailableExplorerAxisCodes(state, tableId, "y");
   const availableZCodes = getAvailableExplorerAxisCodes(state, tableId, "z");
+  const configuredYCodeSet = new Set(configuredYCodes);
+  const availableYCodeSet = new Set(availableYCodes);
   const xCodes = getPreferredExplorerAxisCodes(configuredXCodes, availableXCodes);
   const yCodes = isExplorerDataOnlyRowTemplate(yConfigTableId)
-    ? configuredYCodes.filter((code) => availableYCodes.includes(code))
+    ? [
+        ...configuredYCodes.filter((code) => availableYCodeSet.has(code)),
+        ...availableYCodes.filter((code) => !configuredYCodeSet.has(code))
+      ]
     : getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
   const preferredZCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
   const zCodes = preferredZCodes.length > 0 && explorerTableOffersAllCurrencies(state, tableId)
