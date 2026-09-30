@@ -109,6 +109,7 @@ generated_files
 ```
 
 La generation est entierement realisee en Python : le notebook n'a pas besoin d'appeler Node.js.
+Chaque HTML contient le code, les styles et les CSV de configuration de la version du dépôt utilisée lors de sa génération, notamment le dictionnaire des dimensions et l'historique des taxonomies. Après une mise à jour du dépôt, il faut régénérer les HTML : les fichiers déjà exportés ne se mettent pas à jour automatiquement.
 
 ### Extraire directement depuis Hive vers `datasets/`
 

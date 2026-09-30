@@ -204,6 +204,21 @@ class QueryPlanTests(unittest.TestCase):
             payload = json.loads(payload_match.group(1))
             dictionary_text = gzip.decompress(base64.b64decode(payload["institutionDictionaryBase64"])).decode("utf-8")
             self.assertIn("Institution ID,JST code,Institution Name,Consolidation Level", dictionary_text)
+            bundle_match = re.search(r"window\.__AGORA_STANDALONE_BUNDLE_GZIP__ = (\"[^\"]+\");", html_text)
+            self.assertIsNotNone(bundle_match)
+            bundle = json.loads(gzip.decompress(base64.b64decode(json.loads(bundle_match.group(1)))))
+            requested_assets = {
+                match.removeprefix("./")
+                for source in bundle["moduleSources"].values()
+                for match in re.findall(r"(?:\./)?assets/[A-Za-z0-9_.-]+\.csv", source)
+            }
+            self.assertLessEqual(requested_assets, bundle["assets"].keys())
+            history_asset = "assets/ITS_template_taxonomy_history.csv"
+            self.assertIn(history_asset, requested_assets)
+            self.assertEqual(
+                bundle["assets"][history_asset],
+                (SCRIPT_DIRECTORY.parent / "app" / history_asset).read_text(encoding="utf-8"),
+            )
 
 
 class HiveExecutionTests(unittest.TestCase):

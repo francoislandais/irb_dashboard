@@ -217,6 +217,9 @@ def _build_standalone_bundle(app_directory: Path) -> dict:
             "assets/ITS_all_dimension_mapping.csv": _read_app_text(
                 app_directory, "assets/ITS_all_dimension_mapping.csv"
             ),
+            "assets/ITS_template_taxonomy_history.csv": _read_app_text(
+                app_directory, "assets/ITS_template_taxonomy_history.csv"
+            ),
             "assets/ITS_impossible_x_y.csv": _read_app_text(
                 app_directory, "assets/ITS_impossible_x_y.csv"
             ),

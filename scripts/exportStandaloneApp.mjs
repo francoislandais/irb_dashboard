@@ -39,14 +39,18 @@ export async function exportStandaloneApp(dataFilePath, options = {}) {
   return outputPath;
 }
 
-async function buildStandaloneBundle(appDirectory) {
+export async function buildStandaloneBundle(appDirectory) {
   const readAppText = (relativePath) => readFile(join(appDirectory, relativePath), "utf8");
-  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, impossibleCombinationsCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
+  const [indexHtml, stylesCss, creditRiskStylesCss, mappingCsv, taxonomyHistoryCsv, impossibleCombinationsCsv, defaultExpandDepthCsv, templateGroupsCsv, kriDictionaryCsv, highchartsJs, highchartsTreemapJs, moduleSources] = await Promise.all([
     readAppText("index.html"),
     readAppText("src/styles.css"),
     readAppText("src/creditRiskStyles.css"),
     readAppText("assets/ITS_all_dimension_mapping.csv"),
+    readAppText("assets/ITS_template_taxonomy_history.csv"),
     readAppText("assets/ITS_impossible_x_y.csv"),
+    readAppText("assets/ITS_explorer_default_expand_depth.csv"),
+    readAppText("assets/ITS_explorer_template_groups.csv"),
+    readAppText("assets/KRI_dictionnary.csv"),
     readAppText("vendor/highcharts.js"),
     readAppText("vendor/highcharts-treemap.js"),
     collectModuleSources("src/main.js", readAppText)
@@ -55,7 +59,11 @@ async function buildStandaloneBundle(appDirectory) {
   return {
     assets: {
       "assets/ITS_all_dimension_mapping.csv": mappingCsv,
-      "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv
+      "assets/ITS_template_taxonomy_history.csv": taxonomyHistoryCsv,
+      "assets/ITS_impossible_x_y.csv": impossibleCombinationsCsv,
+      "assets/ITS_explorer_default_expand_depth.csv": defaultExpandDepthCsv,
+      "assets/ITS_explorer_template_groups.csv": templateGroupsCsv,
+      "assets/KRI_dictionnary.csv": kriDictionaryCsv
     },
     highchartsJs,
     highchartsTreemapJs,
