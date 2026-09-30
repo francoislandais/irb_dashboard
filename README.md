@@ -170,17 +170,17 @@ from scripts.global_update import global_update
 result = global_update(mode="preview")
 ```
 
-Le mode `preview` valide tout le dossier et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans `outputs/global-update-prototype/generated/preview/`. Il ne se connecte pas à Hive. Sans `--config`, `preview` et `test` utilisent le dossier d'exemples.
+Le mode `preview` valide tout le dossier et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans `outputs/global-update-prototype/generated/preview/`. Il ne se connecte pas à Hive. Pour les KRI, le SQL de prévisualisation contient des marqueurs explicites à la place des `entity_id`, qui ne sont connus qu'après exécution de la requête des métadonnées. Sans `--config`, `preview` et `test` utilisent le dossier d'exemples.
 
-Le mode `test` écrit le même SQL Hive que `preview`, puis construit localement les datasets factices, un dictionnaire d'institutions et les applications HTML autonomes :
+Le mode `test` remplace ces marqueurs par les `entity_id` de la fixture, puis construit localement les datasets factices, un dictionnaire d'institutions et les applications HTML autonomes :
 
 ```sh
 python3 scripts/global_update.py --mode test
 ```
 
-Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les requêtes utilisent les deux schémas fournis dans `scripts/fixtures/hive_schemas/` : l'ITS porte le LEI, et les KRI sont reliés à l'ITS par `entity_id` et `cons_level`. Le format d'`Institution ID` est `LEI_niveau`. Aucune extraction Hive réelle n'est lancée en mode `test`.
+Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les requêtes utilisent les deux schémas fournis dans `scripts/fixtures/hive_schemas/` : l'ITS porte le LEI ; la requête KRI filtre directement les couples `entity_id` et `cons_level` extraits séparément des métadonnées ITS, sans jointure avec ITS. Le format d'`Institution ID` est `LEI_niveau`. Aucune extraction Hive réelle n'est lancée en mode `test`.
 
-Sur une machine disposant de `vl_connect`, le mode `hive` exécute réellement les requêtes, dans l'ordre des blocs de chaque fichier, via `from vl_connect import devo` puis `devo.read_sql(sql)`. Il assemble les DataFrames par template, institution, coordonnées et date, exécute aussi la requête des noms d'institutions, puis génère un CSV et un HTML autonome par fichier :
+Sur une machine disposant de `vl_connect`, le mode `hive` exécute d'abord la requête des métadonnées institutionnelles via `devo.read_sql(sql)`. Il détermine ensuite les niveaux de consolidation demandés et les applique dans chaque requête de données, puis assemble les DataFrames par template, institution, coordonnées et date. Enfin, il génère un CSV et un HTML autonome par fichier :
 
 ```sh
 python3 scripts/global_update.py --mode preview --config /chemin/vers/mes-applications

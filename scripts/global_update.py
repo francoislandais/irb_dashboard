@@ -371,40 +371,52 @@ def _kri_selection_filter(kri_ids: tuple[str, ...]) -> str:
 
 def _build_extraction_sql(
     extraction: Extraction, application: Application, tables: dict[str, str] = PRODUCTION_TABLES,
+    reporting_units: list[dict[str, str]] | None = None,
 ) -> str:
     consolidation = _consolidation_predicate(application.consolidation)
     consolidation_filter = f"\n      AND {consolidation}" if consolidation else ""
     if extraction.module == "KRI":
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
-        return f"""WITH reporting_units AS (
-    SELECT DISTINCT
-        entity_id,
-        cons_level,
-        lei
-    FROM {tables['ITS']}
-    WHERE {_lei_filter(application.leis)}{consolidation_filter}
-)
-SELECT
+        if reporting_units is None:
+            # Preview cannot know the KRI entity_id values until the separate
+            # institution query has run. Keep the query inspectable without
+            # pretending that a LEI can filter the KRI source directly.
+            unit_case = "__REPORTING_UNIT_CASE_FROM_INSTITUTION_METADATA__"
+            unit_filter = "__REPORTING_UNIT_FILTER_FROM_INSTITUTION_METADATA__"
+            preview_notice = "-- Preview template: execute institution_metadata.sql to resolve the reporting units.\n"
+        else:
+            if not reporting_units:
+                raise ValueError(f"{application.name}: aucune unité de reporting pour la requête KRI.")
+            pairs = [
+                f"(kri.entity_id = {_sql_literal(unit['entity_id'])} "
+                f"AND kri.cons_level = {_sql_literal(unit['consolidation_level'])})"
+                for unit in reporting_units
+            ]
+            unit_case = "CASE\n" + "\n".join(
+                f"        WHEN {pair} THEN {_sql_literal(unit['institution_id'])}"
+                for pair, unit in zip(pairs, reporting_units)
+            ) + "\n    END"
+            unit_filter = "(\n      " + "\n      OR ".join(pairs) + "\n  )"
+            preview_notice = ""
+        return f"""{preview_notice}SELECT
     'KRI' AS table_id,
-    CONCAT(units.lei, '_', units.cons_level) AS reporting_unit_id,
+    {unit_case} AS reporting_unit_id,
     '' AS x_axis_rc_code,
     kri.kri_data_point_id AS y_axis_rc_code,
     '' AS z_axis_rc_code,
 {_date_columns(extraction.reference_dates, 'kri.')}
 FROM {tables['KRI']} kri
-JOIN reporting_units units
-  ON kri.entity_id = units.entity_id
- AND kri.cons_level = units.cons_level
 WHERE kri.value_decimal IS NOT NULL
+  AND {unit_filter}
   AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
 GROUP BY
-    units.lei,
-    units.cons_level,
+    kri.entity_id,
+    kri.cons_level,
     kri.kri_data_point_id
 ORDER BY
-    units.lei,
-    units.cons_level,
+    kri.entity_id,
+    kri.cons_level,
     kri.kri_data_point_id
 """
 
@@ -452,9 +464,8 @@ ORDER BY
 
 
 def _build_institution_sql(application: Application, table: str) -> str:
-    consolidation = _consolidation_predicate(application.consolidation)
-    consolidation_filter = f"\n  AND {consolidation}" if consolidation else ""
     return f"""SELECT
+    entity_id,
     CONCAT(lei, '_', cons_level) AS institution_id,
     lei,
     COALESCE(
@@ -462,10 +473,12 @@ def _build_institution_sql(application: Application, table: str) -> str:
         MAX(jst_code)
     ) AS jst_code,
     MAX(name) AS institution_name,
-    cons_level AS consolidation_level
+    cons_level AS consolidation_level,
+    MAX(is_highest_cons) AS is_highest_cons
 FROM {table}
-WHERE {_lei_filter(application.leis)}{consolidation_filter}
+WHERE {_lei_filter(application.leis)}
 GROUP BY
+    entity_id,
     lei,
     cons_level
 ORDER BY
@@ -506,6 +519,11 @@ def _write_query_index(output: Path, manifest: dict) -> None:
         lines.append("")
     if manifest["mode"] == "test":
         lines.extend(["Les résultats du mode `test` viennent de la fixture locale ; aucune connexion Hive n'est ouverte.", ""])
+    elif manifest["mode"] == "preview" and any(
+        extraction["module"] == "KRI"
+        for application in manifest["applications"] for extraction in application["extractions"]
+    ):
+        lines.extend(["Les requêtes KRI en mode `preview` contiennent des marqueurs pour les `entity_id` : la requête des métadonnées doit être exécutée avant de pouvoir les finaliser. Les modes `test` et `hive` produisent des requêtes complètes.", ""])
     elif manifest["mode"] == "hive":
         lines.extend(["Les résultats du mode `hive` ont été extraits via `devo.read_sql`.", ""])
     output.write_text("\n".join(lines), encoding="utf-8")
@@ -553,23 +571,7 @@ def _module_matches(value: str, pattern: str) -> bool:
 
 
 def _dictionary_rows(application: Application, fixture: dict) -> list[dict[str, str]]:
-    result = []
-    entities_by_lei = {item["lei"]: item for item in fixture["entities"]}
-    for lei in application.leis:
-        entity = entities_by_lei.get(lei)
-        if not entity:
-            continue
-        for level in _selected_levels(application.consolidation, entity["highest_level"]):
-            jst_code = entity["jst_by_level"].get(level)
-            if not jst_code:
-                continue
-            result.append({
-                "Institution ID": f"{lei}_{level}",
-                "JST code": jst_code,
-                "Institution Name": entity["institution_name"],
-                "Consolidation Level": level,
-            })
-    return result
+    return _institution_dictionary_rows(_fixture_reporting_units(application, fixture))
 
 
 def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[str], list[dict[str, str]]]:
@@ -711,21 +713,84 @@ def _merge_extraction_rows(
 
 
 def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
-    required = ("institution_id", "lei", "jst_code", "institution_name", "consolidation_level")
+    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name", "consolidation_level", "is_highest_cons")
     rows = _dataframe_rows(dataframe, required, query_label)
     result = []
+    seen_ids = set()
+    seen_pairs = set()
     for row in rows:
-        if not row["institution_id"] or not row["jst_code"]:
-            raise ValueError(f"{query_label}: Institution ID ou JST code vide dans le résultat Hive.")
+        if not row["entity_id"] or not row["institution_id"] or not row["lei"] or not row["consolidation_level"]:
+            raise ValueError(f"{query_label}: identifiant, LEI ou niveau vide dans le résultat Hive.")
+        pair = (row["entity_id"], row["consolidation_level"])
+        if row["institution_id"] in seen_ids or pair in seen_pairs:
+            raise ValueError(f"{query_label}: unité de reporting ambiguë dans les métadonnées ({row['institution_id']}).")
+        seen_ids.add(row["institution_id"])
+        seen_pairs.add(pair)
         result.append({
-            "Institution ID": row["institution_id"],
-            "JST code": row["jst_code"],
-            "Institution Name": row["institution_name"],
-            "Consolidation Level": row["consolidation_level"],
+            "entity_id": row["entity_id"],
+            "institution_id": row["institution_id"],
+            "lei": row["lei"],
+            "jst_code": row["jst_code"],
+            "institution_name": row["institution_name"],
+            "consolidation_level": row["consolidation_level"],
+            "is_highest_cons": row["is_highest_cons"],
         })
     if not result:
         raise ValueError(f"{query_label}: aucune institution trouvée pour les LEI configurés.")
     return result
+
+
+def _select_institution_rows(rows: list[dict[str, str]], application: Application) -> list[dict[str, str]]:
+    levels = set(_selected_levels(application.consolidation, "")) if application.consolidation != "HIGHEST" else set()
+    selected = [row for row in rows if row["lei"] in application.leis and (
+        row["is_highest_cons"].upper() == "Y" if application.consolidation == "HIGHEST"
+        else row["consolidation_level"] in levels
+    )]
+    if not selected:
+        raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
+    missing_leis = set(application.leis) - {row["lei"] for row in selected}
+    if missing_leis:
+        raise ValueError(f"{application.name}: aucune unité de reporting pour les LEI : {', '.join(sorted(missing_leis))}.")
+    if application.consolidation == "HIGHEST":
+        counts = {lei: sum(row["lei"] == lei for row in selected) for lei in application.leis}
+        ambiguous = [lei for lei, count in counts.items() if count != 1]
+        if ambiguous:
+            raise ValueError(f"{application.name}: plus haut niveau de consolidation ambigu pour les LEI : {', '.join(ambiguous)}.")
+    if any(not row["jst_code"] for row in selected):
+        raise ValueError(f"{application.name}: JST code manquant pour une unité de reporting sélectionnée.")
+    return selected
+
+
+def _institution_dictionary_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [{
+        "Institution ID": row["institution_id"],
+        "JST code": row["jst_code"],
+        "Institution Name": row["institution_name"],
+        "Consolidation Level": row["consolidation_level"],
+    } for row in rows]
+
+
+def _fixture_reporting_units(application: Application, fixture: dict) -> list[dict[str, str]]:
+    entities_by_lei = {entity["lei"]: (index, entity) for index, entity in enumerate(fixture["entities"], start=1)}
+    rows = []
+    for lei in application.leis:
+        match = entities_by_lei.get(lei)
+        if not match:
+            continue
+        index, entity = match
+        for level, jst_code in entity["jst_by_level"].items():
+            if not jst_code:
+                continue
+            rows.append({
+                "entity_id": entity.get("entity_id", f"TEST_ENTITY_{index}"),
+                "institution_id": f"{lei}_{level}",
+                "lei": lei,
+                "jst_code": jst_code,
+                "institution_name": entity["institution_name"],
+                "consolidation_level": level,
+                "is_highest_cons": "Y" if level == entity["highest_level"] else "N",
+            })
+    return _select_institution_rows(rows, application)
 
 
 def _write_application_outputs(
@@ -810,6 +875,7 @@ def global_update(
             "extractions": [],
         }
         dictionary_rows = []
+        reporting_units = None
         all_dates = tuple(sorted({item for extraction in application.extractions for item in extraction.reference_dates}))
         records: dict[tuple[str, ...], dict[str, str]] = {}
         if mode == "hive":
@@ -817,10 +883,16 @@ def global_update(
                 dictionary_frame = client.read_sql(metadata_sql)
             except Exception as error:
                 raise RuntimeError(f"{application.name}: échec de la requête des institutions.") from error
-            dictionary_rows = _institution_rows(dictionary_frame, f"{application.name} / institutions")
+            reporting_units = _select_institution_rows(
+                _institution_rows(dictionary_frame, f"{application.name} / institutions"), application,
+            )
+            dictionary_rows = _institution_dictionary_rows(reporting_units)
+        elif mode == "test":
+            reporting_units = _fixture_reporting_units(application, fixture)
+            dictionary_rows = _institution_dictionary_rows(reporting_units)
         for index, extraction in enumerate(application.extractions, start=1):
             source_table = query_table["KRI" if extraction.module == "KRI" else "ITS"]
-            sql = _build_extraction_sql(extraction, application, query_table)
+            sql = _build_extraction_sql(extraction, application, query_table, reporting_units)
             query_relative = (Path("queries") / folder / f"extraction_{index:02d}.sql").as_posix()
             (output_root / query_relative).write_text(sql, encoding="utf-8")
             extraction_manifest = {
@@ -838,7 +910,6 @@ def global_update(
                 "kri_data_point_ids": list(extraction.kri_data_point_ids),
                 "query": query_relative,
                 "source_table": source_table,
-                **({"identity_table": query_table["ITS"]} if extraction.module == "KRI" else {}),
             }
             if mode == "hive":
                 query_label = f"{application.name} / extraction {index:02d}"
@@ -852,7 +923,6 @@ def global_update(
             application_manifest["extractions"].append(extraction_manifest)
         if mode == "test":
             fields, rows = _build_dummy_dataset(application, fixture)
-            dictionary_rows = _dictionary_rows(application, fixture)
             _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows, compact_values=compact_values)
             application_manifest["simulated_rows"] = len(rows)
         elif mode == "hive":

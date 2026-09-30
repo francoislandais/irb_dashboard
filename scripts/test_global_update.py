@@ -28,6 +28,7 @@ from global_update import (  # noqa: E402
     _build_extraction_sql,
     _build_institution_sql,
     _consolidation_predicate,
+    _select_institution_rows,
     _module_matches,
     _read_configuration,
     _read_test_fixture,
@@ -87,6 +88,14 @@ class QueryPlanTests(unittest.TestCase):
         self.assertEqual(_consolidation_predicate("HIGHEST"), "is_highest_cons = 'Y'")
         self.assertEqual(_consolidation_predicate("CONSO+SOLO"), "cons_level IN ('CONSO', 'SOLO')")
         self.assertEqual(_consolidation_predicate("ALL"), "")
+
+    def test_kri_preview_marks_identity_values_that_require_metadata(self):
+        application = next(app for app in self.applications if any(item.module == "KRI" for item in app.extractions))
+        extraction = next(item for item in application.extractions if item.module == "KRI")
+        sql = _build_extraction_sql(extraction, application)
+        self.assertIn("__REPORTING_UNIT_FILTER_FROM_INSTITUTION_METADATA__", sql)
+        self.assertNotIn("WITH reporting_units", sql)
+        self.assertNotIn("JOIN", sql)
 
     def test_its_module_uses_its_without_module_id_filter(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -206,17 +215,56 @@ class QueryPlanTests(unittest.TestCase):
         self.assertEqual(its_rows[0][-2:], (None, 125.0))
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, both)).fetchall()), 2)
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, all_levels)).fetchall()), 3)
-        kri_rows = connection.execute(_build_extraction_sql(kri_extraction, both)).fetchall()
+        metadata_cursor = connection.execute(_build_institution_sql(both, PRODUCTION_TABLES["ITS"]))
+        metadata_columns = [column[0] for column in metadata_cursor.description]
+        metadata = metadata_cursor.fetchall()
+        reporting_units = [dict(zip(metadata_columns, row)) for row in metadata]
+        both_units = _select_institution_rows(reporting_units, both)
+        all_units = _select_institution_rows(reporting_units, all_levels)
+        kri_sql = _build_extraction_sql(kri_extraction, both, reporting_units=both_units)
+        self.assertNotIn("WITH reporting_units", kri_sql)
+        self.assertNotIn("JOIN", kri_sql)
+        self.assertIn("kri.entity_id = 'E1'", kri_sql)
+        self.assertIn("kri.cons_level = 'SOLO'", kri_sql)
+        kri_rows = connection.execute(kri_sql).fetchall()
         self.assertEqual({row[1]: row[-1] for row in kri_rows}, {f"{lei}_CONSO": 0.2, f"{lei}_SOLO": 0.3})
-        self.assertEqual(len(connection.execute(_build_extraction_sql(kri_extraction, all_levels)).fetchall()), 3)
-        metadata = connection.execute(_build_institution_sql(both, PRODUCTION_TABLES["ITS"])).fetchall()
-        self.assertEqual({row[0] for row in metadata}, {f"{lei}_CONSO", f"{lei}_SOLO"})
-        self.assertEqual(next(row for row in metadata if row[0].endswith("CONSO"))[2:4], ("JST_A", "Bank A"))
+        self.assertEqual(len(connection.execute(_build_extraction_sql(kri_extraction, all_levels, reporting_units=all_units)).fetchall()), 3)
+        cross_unit_sql = _build_extraction_sql(kri_extraction, both, reporting_units=[
+            next(row for row in reporting_units if row["entity_id"] == "E1" and row["consolidation_level"] == "CONSO"),
+            {"entity_id": "E2", "consolidation_level": "SOLO", "institution_id": f"{other_lei}_SOLO"},
+        ])
+        self.assertEqual(
+            {row[1] for row in connection.execute(cross_unit_sql).fetchall()},
+            {f"{lei}_CONSO"},
+        )
+        self.assertEqual({row[1] for row in metadata if row[2] == lei}, {f"{lei}_CONSO", f"{lei}_SOLO", f"{lei}_SUBLIQ"})
+        self.assertEqual(next(row for row in metadata if row[1].endswith("CONSO"))[3:5], ("JST_A", "Bank A"))
+        highest_units = _select_institution_rows(reporting_units, highest)
+        self.assertEqual([row["consolidation_level"] for row in highest_units], ["CONSO"])
+        solo_highest_rows = [
+            {**row, "is_highest_cons": "Y" if row["consolidation_level"] == "SOLO" else "N"}
+            for row in reporting_units
+        ]
+        solo_highest = _select_institution_rows(solo_highest_rows, highest)
+        self.assertEqual([row["consolidation_level"] for row in solo_highest], ["SOLO"])
+        self.assertEqual(
+            {row[1] for row in connection.execute(_build_extraction_sql(kri_extraction, highest, reporting_units=solo_highest))},
+            {f"{lei}_SOLO"},
+        )
+        self.assertNotIn("AND is_highest_cons", _build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
 
         for application in self.applications:
-            connection.execute("EXPLAIN QUERY PLAN " + _build_institution_sql(application, PRODUCTION_TABLES["ITS"]))
+            institution_sql = _build_institution_sql(application, PRODUCTION_TABLES["ITS"])
+            connection.execute("EXPLAIN QUERY PLAN " + institution_sql)
+            cursor = connection.execute(institution_sql)
+            columns = [column[0] for column in cursor.description]
+            application_units = [dict(zip(columns, row)) for row in cursor.fetchall()]
             for extraction in application.extractions:
-                connection.execute("EXPLAIN QUERY PLAN " + _build_extraction_sql(extraction, application))
+                if extraction.module == "KRI":
+                    selected = _select_institution_rows(application_units, application) if application_units else reporting_units[:1]
+                    connection.execute("EXPLAIN QUERY PLAN " + _build_extraction_sql(extraction, application, reporting_units=selected))
+                else:
+                    connection.execute("EXPLAIN QUERY PLAN " + _build_extraction_sql(extraction, application))
 
     def test_test_mode_writes_queries_datasets_dictionary_and_standalone_apps(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -461,12 +509,20 @@ frequency = "QUARTERLY"
             def read_sql(self, sql):
                 self.calls.append(sql)
                 if "AS institution_id" in sql:
-                    return Frame([{
+                    conso = {
+                        "ENTITY_ID": "E1",
                         "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_CONSO",
                         "LEI": HiveExecutionTests.LEI,
                         "JST_CODE": "JST_A",
                         "INSTITUTION_NAME": "Bank A",
                         "CONSOLIDATION_LEVEL": "CONSO",
+                        "IS_HIGHEST_CONS": "Y",
+                    }
+                    return Frame([conso, {
+                        **conso,
+                        "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_SOLO",
+                        "CONSOLIDATION_LEVEL": "SOLO",
+                        "IS_HIGHEST_CONS": "N",
                     }])
                 is_kri = "'KRI' AS table_id" in sql
                 if not is_kri:
@@ -494,6 +550,11 @@ frequency = "QUARTERLY"
             result = global_update(configuration, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=client)
             self.assertEqual(result["applications"], 1)
             self.assertEqual(len(client.calls), 4)
+            kri_sql = next(sql for sql in client.calls if "'KRI' AS table_id" in sql)
+            self.assertNotIn("WITH reporting_units", kri_sql)
+            self.assertNotIn("JOIN", kri_sql)
+            self.assertIn("kri.cons_level = 'CONSO'", kri_sql)
+            self.assertNotIn("kri.cons_level = 'SOLO'", kri_sql)
             output = Path(result["output_directory"])
             with next((output / "applications" / "datasets").glob("*.csv")).open(encoding="utf-8-sig", newline="") as stream:
                 reader = csv.DictReader(stream)
