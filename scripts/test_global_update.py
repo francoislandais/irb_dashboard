@@ -200,6 +200,7 @@ class QueryPlanTests(unittest.TestCase):
                                         ("E1", "SUBLIQ", 0.4), ("E2", "CONSO", 0.9)):
             insert("agora_dm_imas_kris_raw", dict(
                 entity_id=entity_id, cons_level=level, kri_data_point_id="KRI_1",
+                is_highest_cons="Y" if level == "CONSO" else "N",
                 reference_period="2026-03-31", value_decimal=value,
             ))
 
@@ -239,19 +240,21 @@ class QueryPlanTests(unittest.TestCase):
         )
         self.assertEqual({row[1] for row in metadata if row[2] == lei}, {f"{lei}_CONSO", f"{lei}_SOLO", f"{lei}_SUBLIQ"})
         self.assertEqual(next(row for row in metadata if row[1].endswith("CONSO"))[3:5], ("JST_A", "Bank A"))
-        highest_units = _select_institution_rows(reporting_units, highest)
-        self.assertEqual([row["consolidation_level"] for row in highest_units], ["CONSO"])
-        solo_highest_rows = [
-            {**row, "is_highest_cons": "Y" if row["consolidation_level"] == "SOLO" else "N"}
-            for row in reporting_units
-        ]
-        solo_highest = _select_institution_rows(solo_highest_rows, highest)
-        self.assertEqual([row["consolidation_level"] for row in solo_highest], ["SOLO"])
-        self.assertEqual(
-            {row[1] for row in connection.execute(_build_extraction_sql(kri_extraction, highest, reporting_units=solo_highest))},
-            {f"{lei}_SOLO"},
+        highest_cursor = connection.execute(_build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
+        highest_columns = [column[0] for column in highest_cursor.description]
+        highest_units = _select_institution_rows(
+            [dict(zip(highest_columns, row)) for row in highest_cursor.fetchall()], highest,
         )
-        self.assertNotIn("AND is_highest_cons", _build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
+        self.assertEqual([row["consolidation_level"] for row in highest_units], ["CONSO"])
+        self.assertIn("AND is_highest_cons = 'Y'", _build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
+        self.assertNotIn("MAX(is_highest_cons)", _build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
+        highest_kri_sql = _build_extraction_sql(kri_extraction, highest, reporting_units=highest_units)
+        self.assertIn("AND kri.is_highest_cons = 'Y'", highest_kri_sql)
+        self.assertEqual(
+            {row[1] for row in connection.execute(highest_kri_sql)},
+            {f"{lei}_CONSO"},
+        )
+        self.assertIn("AND is_highest_cons = 'Y'", _build_extraction_sql(its_extraction, highest))
 
         for application in self.applications:
             institution_sql = _build_institution_sql(application, PRODUCTION_TABLES["ITS"])
@@ -516,13 +519,11 @@ frequency = "QUARTERLY"
                         "JST_CODE": "JST_A",
                         "INSTITUTION_NAME": "Bank A",
                         "CONSOLIDATION_LEVEL": "CONSO",
-                        "IS_HIGHEST_CONS": "Y",
                     }
                     return Frame([conso, {
                         **conso,
                         "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_SOLO",
                         "CONSOLIDATION_LEVEL": "SOLO",
-                        "IS_HIGHEST_CONS": "N",
                     }])
                 is_kri = "'KRI' AS table_id" in sql
                 if not is_kri:

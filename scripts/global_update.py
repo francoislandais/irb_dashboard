@@ -378,6 +378,7 @@ def _build_extraction_sql(
     if extraction.module == "KRI":
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
+        highest_filter_sql = "\n  AND kri.is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
         if reporting_units is None:
             # Preview cannot know the KRI entity_id values until the separate
             # institution query has run. Keep the query inspectable without
@@ -407,7 +408,7 @@ def _build_extraction_sql(
     '' AS z_axis_rc_code,
 {_date_columns(extraction.reference_dates, 'kri.')}
 FROM {tables['KRI']} kri
-WHERE kri.value_decimal IS NOT NULL
+WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}
   AND {unit_filter}
   AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
 GROUP BY
@@ -464,6 +465,7 @@ ORDER BY
 
 
 def _build_institution_sql(application: Application, table: str) -> str:
+    highest_filter = "\n  AND is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
     return f"""SELECT
     entity_id,
     CONCAT(lei, '_', cons_level) AS institution_id,
@@ -473,10 +475,9 @@ def _build_institution_sql(application: Application, table: str) -> str:
         MAX(jst_code)
     ) AS jst_code,
     MAX(name) AS institution_name,
-    cons_level AS consolidation_level,
-    MAX(is_highest_cons) AS is_highest_cons
+    cons_level AS consolidation_level
 FROM {table}
-WHERE {_lei_filter(application.leis)}
+WHERE {_lei_filter(application.leis)}{highest_filter}
 GROUP BY
     entity_id,
     lei,
@@ -713,7 +714,7 @@ def _merge_extraction_rows(
 
 
 def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
-    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name", "consolidation_level", "is_highest_cons")
+    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name", "consolidation_level")
     rows = _dataframe_rows(dataframe, required, query_label)
     result = []
     seen_ids = set()
@@ -733,7 +734,6 @@ def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str
             "jst_code": row["jst_code"],
             "institution_name": row["institution_name"],
             "consolidation_level": row["consolidation_level"],
-            "is_highest_cons": row["is_highest_cons"],
         })
     if not result:
         raise ValueError(f"{query_label}: aucune institution trouvée pour les LEI configurés.")
@@ -741,21 +741,14 @@ def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str
 
 
 def _select_institution_rows(rows: list[dict[str, str]], application: Application) -> list[dict[str, str]]:
-    levels = set(_selected_levels(application.consolidation, "")) if application.consolidation != "HIGHEST" else set()
-    selected = [row for row in rows if row["lei"] in application.leis and (
-        row["is_highest_cons"].upper() == "Y" if application.consolidation == "HIGHEST"
-        else row["consolidation_level"] in levels
-    )]
+    levels = None if application.consolidation == "HIGHEST" else set(_selected_levels(application.consolidation, ""))
+    selected = [row for row in rows if row["lei"] in application.leis
+                and (levels is None or row["consolidation_level"] in levels)]
     if not selected:
         raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
     missing_leis = set(application.leis) - {row["lei"] for row in selected}
     if missing_leis:
         raise ValueError(f"{application.name}: aucune unité de reporting pour les LEI : {', '.join(sorted(missing_leis))}.")
-    if application.consolidation == "HIGHEST":
-        counts = {lei: sum(row["lei"] == lei for row in selected) for lei in application.leis}
-        ambiguous = [lei for lei, count in counts.items() if count != 1]
-        if ambiguous:
-            raise ValueError(f"{application.name}: plus haut niveau de consolidation ambigu pour les LEI : {', '.join(ambiguous)}.")
     if any(not row["jst_code"] for row in selected):
         raise ValueError(f"{application.name}: JST code manquant pour une unité de reporting sélectionnée.")
     return selected
@@ -781,6 +774,8 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
         for level, jst_code in entity["jst_by_level"].items():
             if not jst_code:
                 continue
+            if application.consolidation == "HIGHEST" and level != entity["highest_level"]:
+                continue
             rows.append({
                 "entity_id": entity.get("entity_id", f"TEST_ENTITY_{index}"),
                 "institution_id": f"{lei}_{level}",
@@ -788,7 +783,6 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
                 "jst_code": jst_code,
                 "institution_name": entity["institution_name"],
                 "consolidation_level": level,
-                "is_highest_cons": "Y" if level == entity["highest_level"] else "N",
             })
     return _select_institution_rows(rows, application)
 
