@@ -5,6 +5,7 @@ import csv
 import gzip
 import json
 import re
+import shutil
 import sqlite3
 import sys
 import tempfile
@@ -14,14 +15,12 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from openpyxl import Workbook, load_workbook
-
 SCRIPT_DIRECTORY = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIRECTORY))
 
 from global_update import (  # noqa: E402
     Application,
-    EXAMPLE_WORKBOOK,
+    EXAMPLE_CONFIG_DIRECTORY,
     Extraction,
     PRODUCTION_TABLES,
     TEST_ENTITIES_PATH,
@@ -64,9 +63,9 @@ class ReferenceDateTests(unittest.TestCase):
 class QueryPlanTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.applications = _read_configuration(EXAMPLE_WORKBOOK, date(2026, 9, 26))
+        cls.applications = _read_configuration(EXAMPLE_CONFIG_DIRECTORY, date(2026, 9, 26))
 
-    def test_example_workbook_has_four_valid_applications(self):
+    def test_example_directory_has_four_valid_applications(self):
         self.assertEqual(len(self.applications), 4)
         self.assertTrue(all(application.extractions for application in self.applications))
         finrep = self.applications[0].extractions
@@ -88,12 +87,12 @@ class QueryPlanTests(unittest.TestCase):
         self.assertEqual(_consolidation_predicate("CONSO+SOLO"), "cons_level IN ('CONSO', 'SOLO')")
         self.assertEqual(_consolidation_predicate("ALL"), "")
 
-    def test_blank_module_uses_its_without_module_id_filter(self):
+    def test_its_module_uses_its_without_module_id_filter(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            workbook = load_workbook(EXAMPLE_WORKBOOK)
-            workbook.worksheets[0]["A5"] = None
-            configuration = Path(temporary_directory) / "configuration.xlsx"
-            workbook.save(configuration)
+            configuration = Path(temporary_directory) / "config"
+            shutil.copytree(EXAMPLE_CONFIG_DIRECTORY, configuration)
+            file = configuration / "01-finrep.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace('module = "FINREP"', 'module = "ITS"', 1), encoding="utf-8")
             application = _read_configuration(configuration, date(2026, 9, 26))[0]
             extraction = application.extractions[0]
             self.assertEqual(extraction.module, "")
@@ -103,13 +102,15 @@ class QueryPlanTests(unittest.TestCase):
             _, rows = _build_dummy_dataset(application, _read_test_fixture(TEST_ENTITIES_PATH))
             self.assertTrue(any(row["table_id"] == "F_12.01" for row in rows))
 
-    def test_excel_selector_cell_accepts_a_quoted_range_and_exclusions(self):
-        selector = '"F_xx% xx<48","!F_20.04%","!F_20.05%","!F_20.06%","!F_20.07%","!F_40%"'
+    def test_template_list_accepts_a_range_and_exclusions(self):
+        patterns = ["F_xx% xx<48", "!F_20.04%", "!F_20.05%", "!F_20.06%", "!F_20.07%", "!F_40%"]
+        selector = ", ".join(patterns)
         with tempfile.TemporaryDirectory() as temporary_directory:
-            workbook = load_workbook(EXAMPLE_WORKBOOK)
-            workbook.worksheets[0]["B5"] = selector
-            configuration = Path(temporary_directory) / "configuration.xlsx"
-            workbook.save(configuration)
+            configuration = Path(temporary_directory) / "config"
+            shutil.copytree(EXAMPLE_CONFIG_DIRECTORY, configuration)
+            file = configuration / "01-finrep.toml"
+            replacement = 'templates = [' + ", ".join(json.dumps(pattern) for pattern in patterns) + ']'
+            file.write_text(file.read_text(encoding="utf-8").replace('templates = ["F_12.01"]', replacement, 1), encoding="utf-8")
             extraction = _read_configuration(configuration, date(2026, 9, 26))[0].extractions[0]
             self.assertEqual(extraction.selector, selector)
             sql = _build_extraction_sql(extraction, self.applications[0])
@@ -199,7 +200,7 @@ class QueryPlanTests(unittest.TestCase):
     def test_test_mode_writes_queries_datasets_dictionary_and_standalone_apps(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             result = global_update(
-                EXAMPLE_WORKBOOK,
+                EXAMPLE_CONFIG_DIRECTORY,
                 mode="test",
                 output_directory=temporary_directory,
                 as_of=date(2026, 9, 26),
@@ -245,26 +246,120 @@ class QueryPlanTests(unittest.TestCase):
             )
 
 
+class ConfigurationValidationTests(unittest.TestCase):
+    LEI = "AAAABBBBCCCCDDDDEEEE"
+
+    def _config(self, root: Path, *, extractions: str = "", **changes) -> Path:
+        folder = root / "configuration"
+        folder.mkdir()
+        values = {
+            "name": 'name = "Example"',
+            "leis": f'leis = ["{self.LEI}"]',
+            "consolidation": 'consolidation = "CONSO"',
+        }
+        values.update(changes)
+        block = extractions or '''[[extractions]]
+module = "COREP"
+templates = ["C_01.00"]
+history_years = 1
+frequency = "QUARTERLY"'''
+        (folder / "app.toml").write_text("\n".join(values.values()) + "\n\n" + block + "\n", encoding="utf-8")
+        return folder
+
+    def test_missing_folder_and_unexpected_file(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            with self.assertRaisesRegex(ValueError, "Dossier de paramétrage introuvable"):
+                _read_configuration(root / "missing", date(2026, 9, 26))
+            folder = self._config(root)
+            (folder / "notes.txt").write_text("not an application", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "notes.txt"):
+                _read_configuration(folder, date(2026, 9, 26))
+
+    def test_invalid_syntax_and_fields_include_filename(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory))
+            file = folder / "app.toml"
+            file.write_text('name = "unterminated', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "app.toml: syntaxe TOML invalide"):
+                _read_configuration(folder, date(2026, 9, 26))
+            file.write_text('name = "Example"\nunknown = true', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "app.toml: champ\\(s\\) inconnu"):
+                _read_configuration(folder, date(2026, 9, 26))
+
+    def test_invalid_lei_consolidation_frequency_and_history(self):
+        cases = [
+            ({"leis": 'leis = ["SHORT"]'}, "LEI"),
+            ({"consolidation": 'consolidation = "GROUP"'}, "consolidation"),
+            ({"extractions": '[[extractions]]\nmodule = "COREP"\ntemplates = ["C_01.00"]\nhistory_years = 0\nfrequency = "QUARTERLY"'}, "history_years"),
+            ({"extractions": '[[extractions]]\nmodule = "COREP"\ntemplates = ["C_01.00"]\nhistory_years = 1\nfrequency = "WEEKLY"'}, "fréquence invalide"),
+            ({"extractions": '[[extractions]]\nmodule = "COREP"\ntemplates = ["!C_01.00"]\nhistory_years = 1\nfrequency = "QUARTERLY"'}, "Au moins un template"),
+        ]
+        for case, message in cases:
+            with self.subTest(message=message), tempfile.TemporaryDirectory() as temporary_directory:
+                extractions = case.get("extractions", "")
+                folder = self._config(Path(temporary_directory), extractions=extractions, **{key: value for key, value in case.items() if key != "extractions"})
+                with self.assertRaisesRegex(ValueError, message):
+                    _read_configuration(folder, date(2026, 9, 26))
+
+    def test_kri_direct_ids_and_selector_validation(self):
+        direct = '''[[extractions]]
+label = "Liquidity KRI"
+module = "KRI"
+kri_ids = ["LIQ55"]
+history_years = 1
+frequency = "QUARTERLY"'''
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory), extractions=direct)
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            extraction = application.extractions[0]
+            self.assertEqual(extraction.selection_type, "kri_ids")
+            self.assertEqual(extraction.kri_data_point_ids, ("LIQ55",))
+            self.assertIn("'LIQ55'", _build_extraction_sql(extraction, application))
+            file = folder / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace("LIQ55", "UNKNOWN_KRI"), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "UNKNOWN_KRI"):
+                _read_configuration(folder, date(2026, 9, 26))
+
+    def test_duplicate_output_names_and_preflight_before_hive(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            folder = self._config(root)
+            (folder / "other.toml").write_text((folder / "app.toml").read_text(encoding="utf-8").replace('name = "Example"', 'name = "Example!"'), encoding="utf-8")
+            client = SimpleNamespace(read_sql=lambda sql: self.fail("Hive called before validation"))
+            with self.assertRaisesRegex(ValueError, "collision"):
+                global_update(folder, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=client)
+            self.assertFalse((root / "generated").exists())
+
+
 class HiveExecutionTests(unittest.TestCase):
     LEI = "AAAABBBBCCCCDDDDEEEE"
 
     @staticmethod
-    def _workbook(path):
-        workbook = Workbook()
-        sheet = workbook.active
-        sheet.title = "COREP and KRI"
-        sheet["B1"] = HiveExecutionTests.LEI
-        sheet["B2"] = "CONSO"
-        for column, value in enumerate(("Module", "Template selector", "History years", "Frequency"), 1):
-            sheet.cell(4, column).value = value
-        for row_number, values in enumerate((
-            ("COREP", "C_01.00", 1, "QUARTERLY"),
-            ("COREP", "C_01.00", 1, "SEMI_ANNUAL"),
-            ("KRI", "C_01.00", 1, "QUARTERLY"),
-        ), 5):
-            for column, value in enumerate(values, 1):
-                sheet.cell(row_number, column).value = value
-        workbook.save(path)
+    def _config(path):
+        path.mkdir()
+        (path / "app.toml").write_text(f'''name = "COREP and KRI"
+leis = ["{HiveExecutionTests.LEI}"]
+consolidation = "CONSO"
+
+[[extractions]]
+module = "COREP"
+templates = ["C_01.00"]
+history_years = 1
+frequency = "QUARTERLY"
+
+[[extractions]]
+module = "COREP"
+templates = ["C_01.00"]
+history_years = 1
+frequency = "SEMI_ANNUAL"
+
+[[extractions]]
+module = "KRI"
+templates = ["C_01.00"]
+history_years = 1
+frequency = "QUARTERLY"
+''', encoding="utf-8")
 
     @staticmethod
     def _client(*, conflict=False):
@@ -312,10 +407,10 @@ class HiveExecutionTests(unittest.TestCase):
     def test_hive_mode_runs_sequential_queries_and_exports_real_results(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
-            workbook = root / "config.xlsx"
-            self._workbook(workbook)
+            configuration = root / "config"
+            self._config(configuration)
             client = self._client()
-            result = global_update(workbook, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=client)
+            result = global_update(configuration, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=client)
             self.assertEqual(result["applications"], 1)
             self.assertEqual(len(client.calls), 4)
             output = Path(result["output_directory"])
@@ -331,18 +426,18 @@ class HiveExecutionTests(unittest.TestCase):
     def test_hive_mode_rejects_conflicting_overlapping_extractions(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
-            workbook = root / "config.xlsx"
-            self._workbook(workbook)
+            configuration = root / "config"
+            self._config(configuration)
             with self.assertRaisesRegex(ValueError, "valeurs contradictoires"):
-                global_update(workbook, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=self._client(conflict=True))
+                global_update(configuration, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=self._client(conflict=True))
 
     def test_hive_mode_can_compact_amounts_without_touching_unknown_kri(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
-            workbook = root / "config.xlsx"
-            self._workbook(workbook)
+            configuration = root / "config"
+            self._config(configuration)
             result = global_update(
-                workbook, mode="hive", output_directory=root / "generated",
+                configuration, mode="hive", output_directory=root / "generated",
                 as_of=date(2026, 9, 26), devo_client=self._client(), compact_values=True,
             )
             output = Path(result["output_directory"])

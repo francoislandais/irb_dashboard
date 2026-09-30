@@ -1,0 +1,24 @@
+name = "FINREP + COREP"
+leis = ["5493001KJTIIGC8Y1R12", "213800WAVVOPS85N2205"]
+consolidation = "CONSO+SOLO"
+
+[[extractions]]
+category = "FINREP"
+module = "FINREP"
+templates = ["F_01.01"]
+history_years = 4
+frequency = "QUARTERLY"
+
+[[extractions]]
+category = "COREP"
+module = "COREP"
+templates = ["C_08.01"]
+history_years = 2
+frequency = "QUARTERLY"
+
+[[extractions]]
+category = "COREP"
+module = "COREP"
+templates = ["C_18.00"]
+history_years = 1
+frequency = "MONTHLY"

@@ -1,0 +1,20 @@
+# Un fichier = une application exportée. Les LEI ci-dessous sont fictifs.
+name = "FINREP"
+leis = ["5493001KJTIIGC8Y1R12", "969500Q2MA9Y1GQG8B61"]
+consolidation = "HIGHEST"
+
+[[extractions]]
+category = "FINREP"
+label = "FINREP mensuel"
+module = "FINREP"
+templates = ["F_12.01"]
+history_years = 2
+frequency = "MONTHLY"
+
+[[extractions]]
+category = "FINREP"
+label = "FINREP jusqu'à F_47"
+module = "FINREP"
+templates = ["F_xx% xx<48"]
+history_years = 2
+frequency = "QUARTERLY"

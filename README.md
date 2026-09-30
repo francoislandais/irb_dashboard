@@ -132,13 +132,37 @@ Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
 ### Mise à jour globale
 
-Le classeur `outputs/global-update-prototype/global_update_examples.xlsx` montre le format proposé : un onglet par application, les LEI en `B1`, le niveau de consolidation en `B2`, puis une ligne par extraction à partir de la ligne 5. La fréquence et la profondeur d'historique s'appliquent séparément à chaque ligne.
+Le paramétrage est un **dossier de fichiers TOML**, un fichier par application exportée. Quatre exemples éditables figurent dans `examples/global-update/`. Chaque fichier définit les LEI et le niveau de consolidation une seule fois, puis autant de blocs `[[extractions]]` que nécessaire. Chaque bloc a sa propre sélection de templates ou de KRI, sa fréquence et sa profondeur d'historique :
 
-Une cellule `Template selector` peut contenir plusieurs expressions séparées par des virgules, avec ou sans guillemets. Par exemple `"F_xx% xx<48","!F_20.04%","!F_20.05%","!F_20.06%","!F_20.07%","!F_40%"` sélectionne les familles F_01 à F_47 en excluant ces sous-familles de F_20 et toute la famille F_40.
+```toml
+name = "Mon application"
+leis = ["5493001KJTIIGC8Y1R12"]
+consolidation = "HIGHEST"
 
-Dans la colonne `Module`, une valeur comme `COREP` ou `FINREP` applique une correspondance exacte sur `module_id`. Une cellule vide utilise la table ITS sans filtre `module_id`. La valeur `KRI` doit rester explicite pour interroger la table KRI.
+[[extractions]]
+category = "FINREP"
+label = "FINREP principal"
+module = "FINREP"
+templates = ["F_xx% xx<48", "!F_20.04%", "!F_40%"]
+history_years = 2
+frequency = "QUARTERLY"
 
-Après installation de la dépendance du lecteur Excel (`python3 -m pip install -r scripts/requirements-global-update.txt`), le point d'entrée unique peut être importé :
+[[extractions]]
+category = "KRI de liquidité"
+label = "KRI de liquidité"
+module = "KRI"
+kri_ids = ["LIQ55"]
+history_years = 3
+frequency = "MONTHLY"
+```
+
+`name` détermine le nom de sortie ; `leis` contient des LEI de 20 caractères. `consolidation` accepte `HIGHEST`, `CONSO`, `SOLO`, `CONSO+SOLO` ou `ALL` (CONSO, SOLO et SUBLIQ). `frequency` accepte `MONTHLY`, `QUARTERLY`, `SEMI_ANNUAL` ou `ANNUAL` ; `history_years` est un entier positif. `category` et `label` sont facultatifs : ils organisent l'index des requêtes, sans changer le filtrage Hive. Les extractions sont exécutées dans l'ordre des blocs, et les fichiers dans l'ordre de leur nom.
+
+`module = "COREP"` ou `"FINREP"` applique une correspondance exacte sur `module_id` dans la table ITS. `module = "ITS"` interroge cette table **sans** filtre `module_id`. `module = "KRI"` utilise la table KRI : le bloc contient soit `kri_ids = ["..."]` pour des identifiants directs, soit `templates = ["..."]` pour sélectionner les KRI dépendant de ces templates. Les deux champs ne peuvent pas être présents ensemble. Dans `templates`, un `%` final est un joker et `!` une exclusion ; `"F_xx% xx<48"` développe les familles F_01 à F_47.
+
+Le dossier est validé entièrement avant la première connexion Hive : syntaxe TOML, fichiers inattendus, champs inconnus ou manquants, formats et doublons des LEI, nom de sortie en collision, sélecteurs, fréquences, années et identifiants KRI inconnus. Le message d'erreur indique le fichier et, pour une extraction, son numéro. Python 3.11 ou plus récent lit TOML sans dépendance ; pour Python 3.10, installer `python3 -m pip install -r scripts/requirements-global-update.txt`.
+
+Le point d'entrée unique peut être importé :
 
 ```python
 from scripts.global_update import global_update
@@ -146,7 +170,7 @@ from scripts.global_update import global_update
 result = global_update(mode="preview")
 ```
 
-Le mode `preview` valide tout le classeur et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans `outputs/global-update-prototype/generated/preview/`. Il ne se connecte pas à Hive.
+Le mode `preview` valide tout le dossier et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans `outputs/global-update-prototype/generated/preview/`. Il ne se connecte pas à Hive. Sans `--config`, `preview` et `test` utilisent le dossier d'exemples.
 
 Le mode `test` écrit le même SQL Hive que `preview`, puis construit localement les datasets factices, un dictionnaire d'institutions et les applications HTML autonomes :
 
@@ -154,17 +178,18 @@ Le mode `test` écrit le même SQL Hive que `preview`, puis construit localement
 python3 scripts/global_update.py --mode test
 ```
 
-Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les requêtes utilisent les deux schémas fournis dans `scripts/fixtures/hive_schemas/` : l'ITS porte le LEI, et les KRI sont reliés à l'ITS par `entity_id` et `cons_level`. Le format d'`Institution ID` est `LEI_niveau`. Aucune extraction Hive réelle n'est lancée par ce prototype.
+Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les requêtes utilisent les deux schémas fournis dans `scripts/fixtures/hive_schemas/` : l'ITS porte le LEI, et les KRI sont reliés à l'ITS par `entity_id` et `cons_level`. Le format d'`Institution ID` est `LEI_niveau`. Aucune extraction Hive réelle n'est lancée en mode `test`.
 
-Sur une machine disposant de `vl_connect`, le mode `hive` exécute réellement les requêtes, dans l'ordre des lignes de chaque onglet, via `from vl_connect import devo` puis `devo.read_sql(sql)`. Il assemble les DataFrames par template, institution, coordonnées et date, exécute aussi la requête des noms d'institutions, puis génère un CSV et un HTML autonome par onglet :
+Sur une machine disposant de `vl_connect`, le mode `hive` exécute réellement les requêtes, dans l'ordre des blocs de chaque fichier, via `from vl_connect import devo` puis `devo.read_sql(sql)`. Il assemble les DataFrames par template, institution, coordonnées et date, exécute aussi la requête des noms d'institutions, puis génère un CSV et un HTML autonome par fichier :
 
 ```sh
-python3 scripts/global_update.py --mode hive --config /chemin/vers/configuration.xlsx
+python3 scripts/global_update.py --mode preview --config /chemin/vers/mes-applications
+python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applications
 ```
 
 Pour réduire facultativement la taille des CSV et des HTML générés, ajouter `--compact-values` à cette commande (ou `compact_values=True` à `global_update`). Le programme consulte le dictionnaire des dimensions et l'historique des taxonomies : les montants sont stockés comme des milliers d'euros entiers, les pourcentages avec quatre chiffres significatifs et les valeurs `Unit` sans modification. La colonne technique `value_scale=1000` signale les lignes de montants ; l'application les remet en euros avant tout calcul ou affichage. Les lignes dont le format est inconnu ou change selon les dates restent inchangées. Cette option est avec perte de précision et ne modifie pas les requêtes Hive elles-mêmes.
 
-Il faut renseigner un classeur réel : le classeur d'exemple contient des LEI fictifs et n'est pas accepté par défaut en mode `hive`. Le résultat est écrit dans un nouveau dossier horodaté sous `outputs/global-update-prototype/generated/hive/` ; `--output` permet de choisir un dossier vide. La même opération peut être lancée depuis Python avec `global_update("/chemin/vers/configuration.xlsx", mode="hive")`, ou avec `devo_client=devo` si le client est déjà initialisé. Le package `vl_connect` et son accès Hive doivent être disponibles dans cet environnement ; ils ne sont pas nécessaires aux modes `preview` et `test`.
+Il faut renseigner un dossier réel : les exemples contiennent des LEI fictifs et ne sont pas acceptés par défaut en mode `hive`. Le résultat est écrit dans un nouveau dossier horodaté sous `outputs/global-update-prototype/generated/hive/` ; `--output` permet de choisir un dossier vide. La même opération peut être lancée depuis Python avec `global_update("/chemin/vers/mes-applications", mode="hive")`, ou avec `devo_client=devo` si le client est déjà initialisé. Le package `vl_connect` et son accès Hive doivent être disponibles dans cet environnement ; ils ne sont pas nécessaires aux modes `preview` et `test`.
 
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. La colonne d’identification est publiée sous le nom `reporting_unit_id` ; les anciens CSV qui utilisent encore `jst_code` restent acceptés par l’application. Il peut ensuite être transforme en application autonome avec :
 

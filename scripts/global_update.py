@@ -12,13 +12,16 @@ import calendar
 import csv
 import json
 import re
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Protocol
-
-from openpyxl import load_workbook
 
 if __package__:
     from .compact_dataset_values import compact_dataset_rows
@@ -29,6 +32,7 @@ if __package__:
         _build_template_filter,
         _load_default_devo_client,
         find_kris_using_templates,
+        load_kri_dictionary,
     )
 else:
     from compact_dataset_values import compact_dataset_rows
@@ -39,11 +43,12 @@ else:
         _build_template_filter,
         _load_default_devo_client,
         find_kris_using_templates,
+        load_kri_dictionary,
     )
 
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
-EXAMPLE_WORKBOOK = PROJECT_DIRECTORY / "outputs" / "global-update-prototype" / "global_update_examples.xlsx"
+EXAMPLE_CONFIG_DIRECTORY = PROJECT_DIRECTORY / "examples" / "global-update"
 TEST_ENTITIES_PATH = PROJECT_DIRECTORY / "scripts" / "fixtures" / "global_update_test_entities.json"
 DEFAULT_OUTPUT_DIRECTORY = PROJECT_DIRECTORY / "outputs" / "global-update-prototype" / "generated"
 FREQUENCIES = {"MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"}
@@ -71,6 +76,9 @@ class Extraction:
     frequency: str
     reference_dates: tuple[str, ...]
     kri_data_point_ids: tuple[str, ...] = ()
+    selection_type: str = "templates"
+    label: str = ""
+    category: str = ""
 
 
 @dataclass(frozen=True)
@@ -79,14 +87,39 @@ class Application:
     leis: tuple[str, ...]
     consolidation: str
     extractions: tuple[Extraction, ...]
+    config_file: str = ""
 
 
 class QueryClient(Protocol):
     def read_sql(self, sql: str): ...
 
 
-def _split_list(value: object) -> list[str]:
-    return list(dict.fromkeys(part.strip() for part in str(value or "").split(",") if part.strip()))
+def _required_text(value: object, field: str, context: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{context}: {field} doit être un texte non vide.")
+    return value.strip()
+
+
+def _string_list(value: object, field: str, context: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{context}: {field} doit être une liste TOML non vide de textes.")
+    if any(not isinstance(item, str) or not item.strip() for item in value):
+        raise ValueError(f"{context}: chaque élément de {field} doit être un texte non vide.")
+    items = tuple(item.strip() for item in value)
+    if len(set(items)) != len(items):
+        raise ValueError(f"{context}: {field} contient des doublons.")
+    return items
+
+
+def _check_keys(value: dict, allowed: set[str], context: str) -> None:
+    unknown = set(value) - allowed
+    if unknown:
+        raise ValueError(f"{context}: champ(s) inconnu(s) : {', '.join(sorted(unknown))}.")
+
+
+@lru_cache(maxsize=1)
+def _known_kri_ids() -> frozenset[str]:
+    return frozenset(load_kri_dictionary())
 
 
 def _month_end(year: int, month: int) -> date:
@@ -128,55 +161,102 @@ def _reference_dates(frequency: str, history_periods: int, as_of: date) -> tuple
 
 
 def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
-    if not path.is_file():
-        raise ValueError(f"Classeur de paramétrage introuvable : {path}")
-    workbook = load_workbook(path, read_only=False, data_only=True)
+    if not path.is_dir():
+        raise ValueError(f"Dossier de paramétrage introuvable : {path}")
+    entries = sorted((item for item in path.iterdir() if not item.name.startswith(".")), key=lambda item: item.name.casefold())
+    invalid = [item.name for item in entries if not item.is_file() or item.suffix.lower() != ".toml"]
+    if invalid:
+        raise ValueError(f"{path}: seuls des fichiers .toml sont attendus ; entrée(s) non reconnue(s) : {', '.join(invalid)}.")
+    if not entries:
+        raise ValueError(f"{path}: aucun fichier .toml à traiter.")
+
     applications: list[Application] = []
     lei_pattern = re.compile(r"^[A-Z0-9]{20}$")
-    for sheet in workbook.worksheets:
-        leis = _split_list(sheet["B1"].value)
-        consolidation = str(sheet["B2"].value or "").strip().upper()
-        if not leis or any(not lei_pattern.fullmatch(lei.upper()) for lei in leis):
-            raise ValueError(f"{sheet.title}: B1 doit contenir une liste de LEI de 20 caractères, séparés par des virgules.")
-        leis = [lei.upper() for lei in leis]
+    names: set[str] = set()
+    output_names: set[str] = set()
+    for file in entries:
+        try:
+            with file.open("rb") as stream:
+                config = tomllib.load(stream)
+        except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
+            raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
+        context = file.name
+        _check_keys(config, {"name", "leis", "consolidation", "extractions"}, context)
+        name = _required_text(config.get("name"), "name", context)
+        if name.casefold() in names:
+            raise ValueError(f"{context}: nom d'application déjà utilisé : {name}.")
+        output_name = _safe_name(name).casefold()
+        if output_name in output_names:
+            raise ValueError(f"{context}: le nom {name!r} entre en collision avec un autre nom de fichier de sortie.")
+        names.add(name.casefold())
+        output_names.add(output_name)
+
+        leis = tuple(lei.upper() for lei in _string_list(config.get("leis"), "leis", context))
+        if any(not lei_pattern.fullmatch(lei) for lei in leis):
+            raise ValueError(f"{context}: chaque LEI doit contenir exactement 20 lettres ou chiffres.")
+        if len(set(leis)) != len(leis):
+            raise ValueError(f"{context}: leis contient des doublons.")
+        consolidation = _required_text(config.get("consolidation"), "consolidation", context).upper()
         if consolidation not in CONSOLIDATION_MODES:
-            raise ValueError(f"{sheet.title}: B2 doit être l'un de {', '.join(sorted(CONSOLIDATION_MODES))}.")
-        expected_headers = ["module", "template selector", "history years", "frequency"]
-        actual_headers = [str(sheet.cell(4, col).value or "").strip().lower() for col in range(1, 5)]
-        if actual_headers != expected_headers:
-            raise ValueError(f"{sheet.title}: les en-têtes A4:D4 doivent être {expected_headers}.")
+            raise ValueError(f"{context}: consolidation doit être l'un de {', '.join(sorted(CONSOLIDATION_MODES))}.")
+        raw_extractions = config.get("extractions")
+        if not isinstance(raw_extractions, list) or not raw_extractions:
+            raise ValueError(f"{context}: au moins un bloc [[extractions]] est requis.")
         extractions: list[Extraction] = []
-        for row_number in range(5, sheet.max_row + 1):
-            module, selector, periods, frequency = [sheet.cell(row_number, col).value for col in range(1, 5)]
-            if all(value is None or str(value).strip() == "" for value in (module, selector, periods, frequency)):
-                continue
-            module = str(module or "").strip().upper()
-            selector = str(selector or "").strip()
-            frequency = str(frequency or "").strip().upper().replace("-", "_").replace(" ", "_")
-            try:
-                history_years = int(periods)
-            except (TypeError, ValueError) as error:
-                raise ValueError(f"{sheet.title}, ligne {row_number}: History years doit être un entier.") from error
-            if not selector:
-                raise ValueError(f"{sheet.title}, ligne {row_number}: Template selector est requis.")
+        for index, raw in enumerate(raw_extractions, start=1):
+            block = f"{context}, extraction {index}"
+            if not isinstance(raw, dict):
+                raise ValueError(f"{block}: un bloc TOML est attendu.")
+            _check_keys(raw, {"category", "label", "module", "templates", "kri_ids", "history_years", "frequency"}, block)
+            module = _required_text(raw.get("module"), "module", block).upper()
+            if not re.fullmatch(r"[A-Z][A-Z0-9_]*", module):
+                raise ValueError(f"{block}: module invalide ({module!r}).")
+            category = raw.get("category", "")
+            if category:
+                category = _required_text(category, "category", block)
+            elif not isinstance(category, str):
+                raise ValueError(f"{block}: category doit être un texte.")
+            label = raw.get("label", "")
+            if label:
+                label = _required_text(label, "label", block)
+            elif not isinstance(label, str):
+                raise ValueError(f"{block}: label doit être un texte.")
+            history_years = raw.get("history_years")
+            if type(history_years) is not int or history_years < 1:
+                raise ValueError(f"{block}: history_years doit être un entier positif.")
+            frequency = _required_text(raw.get("frequency"), "frequency", block).upper().replace("-", "_").replace(" ", "_")
             if frequency not in FREQUENCIES:
-                raise ValueError(f"{sheet.title}, ligne {row_number}: fréquence invalide ({frequency}).")
-            if history_years < 1:
-                raise ValueError(f"{sheet.title}, ligne {row_number}: History years doit être supérieur ou égal à 1.")
+                raise ValueError(f"{block}: fréquence invalide ({frequency}); utiliser {', '.join(sorted(FREQUENCIES))}.")
+            has_templates = "templates" in raw
+            has_kri_ids = "kri_ids" in raw
+            if has_templates == has_kri_ids:
+                raise ValueError(f"{block}: indiquer exactement un champ templates ou kri_ids.")
+            if has_kri_ids and module != "KRI":
+                raise ValueError(f"{block}: kri_ids est réservé au module KRI.")
             kri_ids: tuple[str, ...] = ()
-            if module == "KRI":
-                kri_ids = tuple(find_kris_using_templates([selector]))
-                if not kri_ids:
-                    raise ValueError(f"{sheet.title}, ligne {row_number}: aucun KRI ne dépend de {selector!r}.")
+            if has_templates:
+                templates = _string_list(raw["templates"], "templates", block)
+                try:
+                    _expand_template_expressions(templates)
+                    if module == "KRI":
+                        kri_ids = tuple(find_kris_using_templates(templates))
+                except ValueError as error:
+                    raise ValueError(f"{block}: {error}") from error
+                if module == "KRI" and not kri_ids:
+                    raise ValueError(f"{block}: aucun KRI ne dépend des templates demandés.")
+                selector = ", ".join(templates)
+                selection_type = "templates"
+            else:
+                kri_ids = _string_list(raw["kri_ids"], "kri_ids", block)
+                missing = set(kri_ids) - _known_kri_ids()
+                if missing:
+                    raise ValueError(f"{block}: code(s) KRI inconnus du dictionnaire : {', '.join(sorted(missing))}.")
+                selector = ", ".join(kri_ids)
+                selection_type = "kri_ids"
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
-            extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids))
-        if not extractions:
-            raise ValueError(f"{sheet.title}: au moins une ligne d'extraction est requise.")
-        applications.append(Application(sheet.title, tuple(leis), consolidation, tuple(extractions)))
-    workbook.close()
-    if not applications:
-        raise ValueError("Le classeur ne contient aucun onglet d'application.")
+            extractions.append(Extraction("" if module == "ITS" else module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category))
+        applications.append(Application(name, leis, consolidation, tuple(extractions), context))
     return tuple(applications)
 
 
@@ -337,13 +417,19 @@ def _write_query_index(output: Path, manifest: dict) -> None:
     if manifest.get("compact_values"):
         lines.extend(["Stockage compact des valeurs : activé pour les datasets exportés (sans changement du SQL).", ""])
     for application in manifest["applications"]:
-        lines.extend([f"## {application['name']}", "", f"Niveau : `{application['consolidation']}`", f"LEI : {', '.join(application['leis'])}", ""])
+        lines.extend([f"## {application['name']}", "", f"Configuration : `{application['config_file']}`", f"Niveau : `{application['consolidation']}`", f"LEI : {', '.join(application['leis'])}", ""])
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
+        current_category = None
         for extraction in application["extractions"]:
+            category = extraction["category"] or "Autres extractions"
+            if category != current_category:
+                lines.extend(["", f"### {category}", ""])
+                current_category = category
             year_label = "an" if extraction["history_years"] == 1 else "ans"
             module_label = extraction["module"] or "ITS (all modules)"
+            title = extraction["label"] or f"{module_label} / {extraction['selector']}"
             lines.append(
-                f"- [Extraction {extraction['index']:02d} — {module_label} / {extraction['selector']}]"
+                f"- [Extraction {extraction['index']:02d} — {title}]"
                 f"({extraction['query']}) — {extraction['frequency']}, {extraction['history_years']} {year_label}"
                 f" ({extraction['history_periods']} périodes)"
                 f" ({extraction['reference_dates'][0]} → {extraction['reference_dates'][-1]})"
@@ -611,25 +697,25 @@ def global_update(
     devo_client: QueryClient | None = None,
     compact_values: bool = False,
 ) -> dict:
-    """Prépare, simule ou exécute toutes les applications du classeur."""
+    """Prépare, simule ou exécute toutes les applications du dossier TOML."""
 
     mode = str(mode).strip().lower()
     if mode not in {"preview", "test", "hive"}:
         raise ValueError("mode doit être 'preview', 'test' ou 'hive'.")
     if mode == "hive" and config_path is None:
-        raise ValueError("Le mode hive exige --config : le classeur d'exemple contient des LEI fictifs.")
+        raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
-    workbook_path = Path(config_path) if config_path else EXAMPLE_WORKBOOK
+    config_directory = Path(config_path) if config_path else EXAMPLE_CONFIG_DIRECTORY
     output_root = Path(output_directory) if output_directory else DEFAULT_OUTPUT_DIRECTORY / mode
     if mode == "hive" and output_directory is None:
         output_root /= datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     if mode == "hive" and output_root.exists() and any(output_root.iterdir()):
         raise ValueError(f"Le dossier de sortie Hive doit être vide : {output_root}")
-    applications = _read_configuration(workbook_path, calculation_date)
+    applications = _read_configuration(config_directory, calculation_date)
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     query_root = output_root / "queries"
-    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "compact_values": compact_values, "applications": []}
+    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": str(config_directory.resolve()), "compact_values": compact_values, "applications": []}
     for application in applications:
         folder = _safe_name(application.name)
         app_query_dir = query_root / folder
@@ -641,6 +727,7 @@ def global_update(
         (output_root / metadata_relative).write_text(metadata_sql, encoding="utf-8")
         application_manifest = {
             "name": application.name,
+            "config_file": application.config_file,
             "leis": list(application.leis),
             "consolidation": application.consolidation,
             "metadata_query": metadata_relative,
@@ -662,8 +749,11 @@ def global_update(
             (output_root / query_relative).write_text(sql, encoding="utf-8")
             extraction_manifest = {
                 "index": index,
+                "label": extraction.label,
+                "category": extraction.category,
                 "module": extraction.module,
                 "selector": extraction.selector,
+                "selection_type": extraction.selection_type,
                 "history_years": extraction.history_years,
                 "history_periods": len(extraction.reference_dates),
                 "frequency": extraction.frequency,
@@ -710,7 +800,7 @@ def global_update(
 
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
-    parser.add_argument("--config", type=Path, default=None, help="Classeur XLSX de paramétrage")
+    parser.add_argument("--config", "--config-dir", type=Path, default=None, help="Dossier des fichiers TOML de paramétrage")
     parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")

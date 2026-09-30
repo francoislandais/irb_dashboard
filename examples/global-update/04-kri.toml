@@ -1,0 +1,27 @@
+name = "KRI"
+leis = ["969500Q2MA9Y1GQG8B61", "5493006MHB84DD0ZWV18"]
+consolidation = "ALL"
+
+# Les KRI peuvent être sélectionnés selon les templates dont ils dépendent.
+[[extractions]]
+category = "KRI FINREP"
+label = "KRI liés au FINREP"
+module = "KRI"
+templates = ["F_12.01"]
+history_years = 2
+frequency = "MONTHLY"
+
+[[extractions]]
+category = "KRI COREP"
+label = "KRI liés au COREP"
+module = "KRI"
+templates = ["C_01.00"]
+history_years = 2
+frequency = "QUARTERLY"
+
+# Ou par identifiants directs dans un bloc séparé :
+# [[extractions]]
+# module = "KRI"
+# kri_ids = ["LIQ55"]
+# history_years = 1
+# frequency = "QUARTERLY"

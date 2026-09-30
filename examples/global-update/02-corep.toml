@@ -1,0 +1,17 @@
+name = "COREP"
+leis = ["213800WAVVOPS85N2205", "5493006MHB84DD0ZWV18"]
+consolidation = "CONSO"
+
+[[extractions]]
+category = "COREP capital"
+module = "COREP"
+templates = ["C_01.00"]
+history_years = 3
+frequency = "QUARTERLY"
+
+[[extractions]]
+category = "COREP capital"
+module = "COREP"
+templates = ["C_03.00"]
+history_years = 5
+frequency = "ANNUAL"
