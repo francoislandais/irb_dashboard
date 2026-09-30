@@ -51,20 +51,32 @@ assert.equal(axisContext.shouldRevealExplorerAxisSelection, true);
 assert.equal(axisContext.shouldCenterExplorerReferenceColumn, true);
 
 const scrollSource = source.slice(
-  source.indexOf("function scrollSelectedExplorerRowIntoView()"),
+  source.indexOf("function focusSelectedExplorerRow("),
   source.indexOf("export function saveExplorerScrollPosition()")
 );
-let scrolledRow = null;
-const row = { hidden: false };
+let scrolledCell = null;
+const cell = { scrollIntoView: () => { scrolledCell = cell; } };
+const row = { hidden: false, focus() {}, querySelector: () => cell };
 const scrollContext = vm.createContext({
   CSS: { escape: (value) => value },
   elements: { explorerTable: { querySelector: () => row } },
-  getSelectedExplorerCodeForActiveAxis: () => "0020",
-  scrollExplorerRowIntoViewQuickly: (value) => { scrolledRow = value; }
+  getSelectedExplorerCodeForActiveAxis: () => "0020"
 });
 vm.runInContext(scrollSource, scrollContext);
-vm.runInContext("scrollSelectedExplorerRowIntoView()", scrollContext);
-assert.equal(scrolledRow, row);
+vm.runInContext("focusSelectedExplorerRow()", scrollContext);
+assert.equal(scrolledCell, cell);
+scrolledCell = null;
+vm.runInContext("focusSelectedExplorerRow(false)", scrollContext);
+assert.equal(scrolledCell, null);
 
-assert.match(source, /scheduleExplorerContextOptionReveal\("\.explorer-template-option\.is-active"\)/);
-console.log("PASS: active template reveal, visible-item stability, axis reveal flag and selected-row scrolling.");
+const templateListSource = source.slice(
+  source.indexOf("function createExplorerTemplateList("),
+  source.indexOf("function scheduleExplorerContextOptionReveal(")
+);
+assert.doesNotMatch(templateListSource, /scheduleExplorerContextOptionReveal\(/);
+const templateControlSource = source.slice(
+  source.indexOf('elements.explorerTemplateControl?.addEventListener("click"'),
+  source.indexOf('elements.explorerContextDetailToggle?.addEventListener("click"')
+);
+assert.match(templateControlSource, /if \(openingTemplatePanel\) scheduleExplorerContextOptionReveal\(/);
+console.log("PASS: template reveal only on opening, preserved list scroll, axis reveal flag and selected-row scrolling.");

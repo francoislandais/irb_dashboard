@@ -306,13 +306,16 @@ export function wireExplorerUi(actions, rerender) {
     });
   });
   elements.explorerTemplateControl?.addEventListener("click", () => {
+    const openingTemplatePanel = explorerContextDetailCollapsed || explorerContextTopic !== "";
     revealExplorerContextDetail();
     explorerContextTopic = "";
     renderExplorerAxisTabs();
     renderExplorerActiveFilters(actions.getState());
     renderExplorerContextPanel(actions.getState());
+    if (openingTemplatePanel) scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
   });
   elements.explorerContextDetailToggle?.addEventListener("click", () => {
+    const openingTemplatePanel = explorerContextDetailCollapsed && explorerContextTopic === "";
     if (explorerContextDetailCollapsed) {
       revealExplorerContextDetail();
     } else {
@@ -322,6 +325,7 @@ export function wireExplorerUi(actions, rerender) {
     renderExplorerAxisTabs();
     renderExplorerActiveFilters(getLatestState());
     renderExplorerContextPanel(getLatestState());
+    if (openingTemplatePanel) scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
   });
   elements.explorerTableWrap?.addEventListener("scroll", scheduleExplorerStickyParentsUpdate, { passive: true });
   elements.explorerTable.addEventListener("pointerdown", startExplorerCellRangeSelection);
@@ -2745,7 +2749,9 @@ function renderExplorerActiveFilters(state) {
 
   const jstValue = document.createElement("span");
   jstValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  jstValue.textContent = state?.selectedInstitutionId || state?.selectedJst || "Institution";
+  const selectedInstitutionId = state?.selectedInstitutionId || state?.selectedJst;
+  jstValue.textContent = getInstitutionDisplayInfo(state?.institutionDictionary, selectedInstitutionId)?.institutionName
+    || selectedInstitutionId || "Institution";
   jstToggle.append(jstValue);
   jstToggle.addEventListener("click", () => {
     explorerContextTopic = "jst-code";
@@ -3606,7 +3612,9 @@ function renderExplorerContextPanel(state) {
   // live in a separate, permanent pane above and cannot be replaced here.
   const searchResults = getExplorerAdvancedSearchResults(state);
   article.append(createExplorerTemplateList(searchResults.templates, activeTemplate?.id ?? activeExplorerTemplateId));
+  const previousScrollTop = elements.explorerContextDetail?.scrollTop ?? 0;
   replaceExplorerContextDetail(article);
+  if (elements.explorerContextDetail) elements.explorerContextDetail.scrollTop = previousScrollTop;
 }
 
 function getExplorerSelectionSnapshot() {
@@ -5330,7 +5338,6 @@ function createExplorerTemplateList(templates, activeTemplateId) {
   });
 
   section.append(list);
-  scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
   return section;
 }
 
