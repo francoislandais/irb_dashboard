@@ -25,3 +25,10 @@ frequency = "QUARTERLY"
 # kri_ids = ["LIQ55"]
 # history_years = 1
 # frequency = "QUARTERLY"
+
+# Pour extraire tous les KRI de la table source :
+# [[extractions]]
+# module = "KRI"
+# kri_ids = ["%"]
+# history_years = 1
+# frequency = "QUARTERLY"

@@ -272,9 +272,10 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
                 selection_type = "templates"
             else:
                 kri_ids = _string_list(raw["kri_ids"], "kri_ids", block)
-                missing = set(kri_ids) - _known_kri_ids()
+                known_kri_ids = _known_kri_ids()
+                missing = [pattern for pattern in kri_ids if not any(_kri_pattern_matches(code, pattern) for code in known_kri_ids)]
                 if missing:
-                    raise ValueError(f"{block}: code(s) KRI inconnus du dictionnaire : {', '.join(sorted(missing))}.")
+                    raise ValueError(f"{block}: code(s) ou motif(s) KRI sans correspondance dans le dictionnaire : {', '.join(sorted(missing))}.")
                 selector = ", ".join(kri_ids)
                 selection_type = "kri_ids"
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
@@ -350,12 +351,32 @@ def _module_filter(extraction: Extraction) -> str:
     return "\n      AND (\n          " + "\n          OR ".join(conditions) + "\n      )"
 
 
+def _kri_pattern_matches(code: str, pattern: str) -> bool:
+    return re.fullmatch(re.escape(pattern).replace("%", ".*"), code) is not None
+
+
+def _kri_selection_filter(kri_ids: tuple[str, ...]) -> str:
+    if "%" in kri_ids:
+        return ""
+    exact = [value for value in kri_ids if "%" not in value]
+    wildcard = [value for value in kri_ids if "%" in value]
+    conditions = []
+    if exact:
+        conditions.append(_build_kri_filter(exact))
+    for pattern in wildcard:
+        expression = "^" + re.escape(pattern).replace("%", ".*") + "$"
+        conditions.append(f"kri_data_point_id RLIKE {_sql_literal(expression)}")
+    return conditions[0] if len(conditions) == 1 else "(\n          " + "\n          OR ".join(conditions) + "\n      )"
+
+
 def _build_extraction_sql(
     extraction: Extraction, application: Application, tables: dict[str, str] = PRODUCTION_TABLES,
 ) -> str:
     consolidation = _consolidation_predicate(application.consolidation)
     consolidation_filter = f"\n      AND {consolidation}" if consolidation else ""
     if extraction.module == "KRI":
+        kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
+        kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
         return f"""WITH reporting_units AS (
     SELECT DISTINCT
         entity_id,
@@ -376,8 +397,7 @@ JOIN reporting_units units
   ON kri.entity_id = units.entity_id
  AND kri.cons_level = units.cons_level
 WHERE kri.value_decimal IS NOT NULL
-  AND {_date_filter(extraction.reference_dates, 'kri.')}
-  AND {_build_kri_filter(extraction.kri_data_point_ids)}
+  AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
 GROUP BY
     units.lei,
     units.cons_level,
@@ -563,7 +583,13 @@ def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[
     module_templates = fixture["templates"]
     for extraction in application.extractions:
         if extraction.module == "KRI":
-            templates = list(extraction.kri_data_point_ids)
+            if extraction.selection_type == "kri_ids":
+                exact = (code for code in extraction.kri_data_point_ids if "%" not in code)
+                matched = (code for code in module_templates.get("KRI", [])
+                           if any(_kri_pattern_matches(code, pattern) for pattern in extraction.kri_data_point_ids))
+                templates = list(dict.fromkeys((*exact, *matched)))
+            else:
+                templates = list(extraction.kri_data_point_ids)
             is_kri = True
         else:
             patterns = _module_patterns(extraction)

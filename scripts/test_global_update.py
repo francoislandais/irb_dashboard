@@ -372,6 +372,36 @@ frequency = "QUARTERLY"'''
             with self.assertRaisesRegex(ValueError, "UNKNOWN_KRI"):
                 _read_configuration(folder, date(2026, 9, 26))
 
+    def test_kri_wildcards_and_percent_only(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory), extractions='''[[extractions]]
+module = "KRI"
+kri_ids = ["%"]
+history_years = 1
+frequency = "QUARTERLY"''', leis='leis = ["5493001KJTIIGC8Y1R12"]')
+            file = folder / "app.toml"
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            extraction = application.extractions[0]
+            sql = _build_extraction_sql(extraction, application)
+            self.assertIn("FROM crp_agora.agora_dm_imas_kris_raw kri", sql)
+            self.assertNotIn("kri_data_point_id =", sql)
+            self.assertNotIn("kri_data_point_id RLIKE", sql)
+            self.assertNotIn("kri_data_point_id LIKE", sql)
+            _, rows = _build_dummy_dataset(application, _read_test_fixture(TEST_ENTITIES_PATH))
+            self.assertEqual({row["y_axis_rc_code"] for row in rows}, {"LIQ101", "LIQ205", "CRFA0900"})
+            self.assertNotIn("%", {row["y_axis_rc_code"] for row in rows})
+
+            file.write_text(file.read_text(encoding="utf-8").replace('kri_ids = ["%"]', 'kri_ids = ["LIQ%", "CRFA0900"]'), encoding="utf-8")
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            sql = _build_extraction_sql(application.extractions[0], application)
+            self.assertIn("kri_data_point_id RLIKE '^LIQ.*$'", sql)
+            self.assertIn("kri_data_point_id = 'CRFA0900'", sql)
+            self.assertIn("\n          OR ", sql)
+
+            file.write_text(file.read_text(encoding="utf-8").replace("LIQ%", "NOT_A_KRI%"), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "NOT_A_KRI%"):
+                _read_configuration(folder, date(2026, 9, 26))
+
     def test_duplicate_output_names_and_preflight_before_hive(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
