@@ -462,11 +462,18 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
     C_01.00 reports only monetary amounts, even when a label mentions a
     percentage threshold or risk weight. C_03/C_04 monetary rows also override
     legacy percentage tags and percent words that describe a condition rather
-    than the cell value.
+    than the cell value. C_07.00 rows 300/320 and C_08.01 funded credit
+    protection columns 170–210 likewise report monetary amounts.
     """
     template = re.sub(r"\.[A-Za-z]$", "", table_id).upper()
     if template == "C_01.00":
         return ""
+    if template == "C_07.00" and coordinate == AXIS_COORDINATES["y"] and code_text(code) in {"300", "320"}:
+        return ""
+    if template == "C_08.01" and coordinate == AXIS_COORDINATES["x"]:
+        normalized_code = code_text(code)
+        if normalized_code.isdigit() and 170 <= int(normalized_code) <= 210:
+            return ""
     if template == "C_80.00":
         if coordinate == AXIS_COORDINATES["y"]:
             return ""

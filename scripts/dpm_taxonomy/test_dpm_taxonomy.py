@@ -179,6 +179,28 @@ class DpmTaxonomyTests(unittest.TestCase):
                     f"{table_id}.a", "y_axis_rc_code", code, description
                 ), expected)
 
+    def test_c07_c08_funded_protection_amounts_ignore_percent_labels(self):
+        cases = [
+            ("C_07.00", "y_axis_rc_code", "0300", "Exposures in default subject to a risk weight of 100%"),
+            ("C_07.00", "y_axis_rc_code", "320", "Exposures in default subject to a risk weight of 150%"),
+            ("C_08.01", "x_axis_rc_code", "0170", "Funded credit protection/Own estimates of LGD's are used: other funded credit protection"),
+            ("C_08.01", "x_axis_rc_code", "171", "Funded credit protection/Cash on deposit"),
+            ("C_08.01", "x_axis_rc_code", "172", "Funded credit protection/Life insurance policies"),
+            ("C_08.01", "x_axis_rc_code", "173", "Funded credit protection/Instruments held by a third party"),
+            ("C_08.01", "x_axis_rc_code", "180", "Funded credit protection/Eligible financial collateral"),
+            ("C_08.01", "x_axis_rc_code", "190", "Funded credit protection/Real estate"),
+            ("C_08.01", "x_axis_rc_code", "200", "Funded credit protection/Other physical collateral"),
+            ("C_08.01", "x_axis_rc_code", "210", "Funded credit protection/Receivables"),
+        ]
+        for table_id, coordinate, code, description in cases:
+            with self.subTest(table_id=table_id, coordinate=coordinate, code=code):
+                self.assertEqual(builder.dimension_display_format(
+                    f"{table_id}.a", coordinate, code, description
+                ), "")
+        self.assertEqual(builder.dimension_display_format(
+            "C_08.01", "x_axis_rc_code", "230", "Exposure weighted average LGD (%)"
+        ), "%")
+
     def test_liquidity_coverage_formats_follow_measure_and_c76_ratio_row(self):
         cases = {
             ("C_72.00", "x_axis_rc_code", "30", "Applicable weight"): "%",

@@ -3730,8 +3730,8 @@ C_07.00;x_axis_rc_code;__PARENT__87a7e660f8f5;;Breakdown of the fully adjusted e
 C_07.00;y_axis_rc_code;__PARENT__4b67cfa40f7a;;285 Memorandum items;;Y;;2.9.1.1
 C_07.00;y_axis_rc_code;290;__PARENT__4b67cfa40f7a;Exposures secured by mortgages on commercial immovable property;;;;2.9.1.1
 C_07.00;y_axis_rc_code;310;__PARENT__4b67cfa40f7a;Exposures secured by mortgages on residential property;;;;2.9.1.1
-C_07.00;y_axis_rc_code;300;__PARENT__4b67cfa40f7a;Exposures in default subject to a risk weight of 100%;;;%;2.9.1.1
-C_07.00;y_axis_rc_code;320;__PARENT__4b67cfa40f7a;Exposures in default subject to a risk weight of 150%;;;%;2.9.1.1
+C_07.00;y_axis_rc_code;300;__PARENT__4b67cfa40f7a;Exposures in default subject to a risk weight of 100%;;;;2.9.1.1
+C_07.00;y_axis_rc_code;320;__PARENT__4b67cfa40f7a;Exposures in default subject to a risk weight of 150%;;;;2.9.1.1
 C_08.01;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;2.9.1.1
 C_08.01;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;2.9.1.1
 C_08.01;x_axis_rc_code;__PARENT__fc0a9f2feef6;;Memorandum items:;;Y;;2.9.1.1
@@ -3754,11 +3754,11 @@ C_08.01;x_axis_rc_code;110;;Exposure value;;;;2.9.1.1
 C_08.01;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;2.9.1.1
 C_08.01;x_axis_rc_code;150;__PARENT__22e070676a5d;Guarantees;;;%;2.9.1.1
 C_08.01;x_axis_rc_code;160;__PARENT__22e070676a5d;Credit derivatives;;;%;2.9.1.1
-C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;%;2.9.1.1
-C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;%;2.9.1.1
-C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;2.9.1.1
-C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;2.9.1.1
-C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;2.9.1.1
+C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;;2.9.1.1
+C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;;2.9.1.1
+C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;;2.9.1.1
+C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;;2.9.1.1
+C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;;2.9.1.1
 C_08.01;x_axis_rc_code;220;__PARENT__10a141773ef1;Unfunded credit protection;;;;2.9.1.1
 C_08.01;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;2.9.1.1
 C_08.01;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;2.9.1.1
@@ -10803,8 +10803,8 @@ C_07.00;x_axis_rc_code;__PARENT__87a7e660f8f5;;Breakdown of the fully adjusted e
 C_07.00;y_axis_rc_code;__PARENT__1bdbce8fe17d;;0285 Memorandum items;;Y;;3.0
 C_07.00;y_axis_rc_code;290;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on commercial immovable property;;;;3.0
 C_07.00;y_axis_rc_code;310;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on residential property;;;;3.0
-C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;%;3.0
-C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;%;3.0
+C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;;3.0
+C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;;3.0
 C_08.01;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;3.0
 C_08.01;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;3.0
 C_08.01;x_axis_rc_code;__PARENT__fc0a9f2feef6;;Memorandum items:;;Y;;3.0
@@ -10827,14 +10827,14 @@ C_08.01;x_axis_rc_code;110;;Exposure value;;;;3.0
 C_08.01;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;3.0
 C_08.01;x_axis_rc_code;150;__PARENT__22e070676a5d;Guarantees;;;%;3.0
 C_08.01;x_axis_rc_code;160;__PARENT__22e070676a5d;Credit derivatives;;;%;3.0
-C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;%;3.0
-C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;%;3.0
-C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;%;3.0
-C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;%;3.0
-C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;%;3.0
-C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;3.0
-C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;3.0
-C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;3.0
+C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;;3.0
+C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;;3.0
+C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;;3.0
+C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;;3.0
+C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;;3.0
+C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;;3.0
+C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;;3.0
+C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;;3.0
 C_08.01;x_axis_rc_code;220;__PARENT__10a141773ef1;Unfunded credit protection;;;;3.0
 C_08.01;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;3.0
 C_08.01;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;3.0
@@ -21111,8 +21111,8 @@ C_07.00;x_axis_rc_code;__PARENT__87a7e660f8f5;;Breakdown of the fully adjusted e
 C_07.00;y_axis_rc_code;__PARENT__1bdbce8fe17d;;0285 Memorandum items;;Y;;3.2
 C_07.00;y_axis_rc_code;290;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on commercial immovable property;;;;3.2
 C_07.00;y_axis_rc_code;310;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on residential property;;;;3.2
-C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;%;3.2
-C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;%;3.2
+C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;;3.2
+C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;;3.2
 C_08.01;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;3.2
 C_08.01;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;3.2
 C_08.01;x_axis_rc_code;__PARENT__fc0a9f2feef6;;Memorandum items:;;Y;;3.2
@@ -21135,14 +21135,14 @@ C_08.01;x_axis_rc_code;110;;Exposure value;;;;3.2
 C_08.01;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;3.2
 C_08.01;x_axis_rc_code;150;__PARENT__22e070676a5d;Guarantees;;;%;3.2
 C_08.01;x_axis_rc_code;160;__PARENT__22e070676a5d;Credit derivatives;;;%;3.2
-C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;%;3.2
-C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;%;3.2
-C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;%;3.2
-C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;%;3.2
-C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;%;3.2
-C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;3.2
-C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;3.2
-C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;3.2
+C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;;3.2
+C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;;3.2
+C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;;3.2
+C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;;3.2
+C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;;3.2
+C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;;3.2
+C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;;3.2
+C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;;3.2
 C_08.01;x_axis_rc_code;220;__PARENT__10a141773ef1;Unfunded credit protection;;;;3.2
 C_08.01;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;3.2
 C_08.01;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;3.2
@@ -37150,8 +37150,8 @@ C_07.00;y_axis_rc_code;290;__PARENT__1bdbce8fe17d;Exposures secured by mortgages
 C_07.00;y_axis_rc_code;310;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on residential immovable property;;;;4.0
 C_07.00;y_axis_rc_code;330;__PARENT__1bdbce8fe17d;Acquisition, development and construction (ADC);;;;4.0
 C_07.00;z_axis_rc_code;qx17;;Exposures to corporates without a short-term credit assessment;;;;4.0
-C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;%;4.0
-C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;%;4.0
+C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;;4.0
+C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;;4.0
 C_08.01;x_axis_rc_code;__PARENT__6339922511be;;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors;;Y;;4.0
 C_08.01;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;4.0
 C_08.01;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;4.0
@@ -37182,14 +37182,14 @@ C_08.01;x_axis_rc_code;110;;Exposure value;;;;4.0
 C_08.01;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;4.0
 C_08.01;x_axis_rc_code;150;__PARENT__22e070676a5d;Guarantees;;;%;4.0
 C_08.01;x_axis_rc_code;160;__PARENT__22e070676a5d;Credit derivatives;;;%;4.0
-C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;%;4.0
-C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;%;4.0
-C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;%;4.0
-C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;%;4.0
-C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;%;4.0
-C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;4.0
-C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;4.0
-C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;4.0
+C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;;4.0
+C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;;4.0
+C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;;4.0
+C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;;4.0
+C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;;4.0
+C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;;4.0
+C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;;4.0
+C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;;4.0
 C_08.01;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;4.0
 C_08.01;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;4.0
 C_08.01;x_axis_rc_code;250;;Exposure-weighted average maturity value (days);;;Unit;4.0
@@ -49157,8 +49157,8 @@ C_07.00;y_axis_rc_code;__PARENT__1bdbce8fe17d;;0285 Memorandum items;;Y;;4.2
 C_07.00;y_axis_rc_code;290;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on commercial immovable property;;;;4.2
 C_07.00;y_axis_rc_code;310;__PARENT__1bdbce8fe17d;Exposures secured by mortgages on residential immovable property;;;;4.2
 C_07.00;y_axis_rc_code;330;__PARENT__1bdbce8fe17d;Acquisition, development and construction (ADC);;;;4.2
-C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;%;4.2
-C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;%;4.2
+C_07.00;y_axis_rc_code;300;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 100%;;;;4.2
+C_07.00;y_axis_rc_code;320;__PARENT__1bdbce8fe17d;Exposures in default subject to a risk weight of 150%;;;;4.2
 C_08.01;x_axis_rc_code;__PARENT__6339922511be;;Breakdown of the fully adjusted exposure value of off-balance sheet items by conversion factors;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__022ac6703d0d;;Credit risk mitigation (CRM) techniques with substitution effects on the exposure;;Y;;4.2
 C_08.01;x_axis_rc_code;__PARENT__3d50c795dd97;;Credit risk mitigation techniques taken into account in lgd estimates excluding double default treatment;;Y;;4.2
@@ -49189,14 +49189,14 @@ C_08.01;x_axis_rc_code;110;;Exposure value;;;;4.2
 C_08.01;x_axis_rc_code;140;110;Of which: large financial sector entities and unregulated financial entities;;;;4.2
 C_08.01;x_axis_rc_code;150;__PARENT__22e070676a5d;Guarantees;;;%;4.2
 C_08.01;x_axis_rc_code;160;__PARENT__22e070676a5d;Credit derivatives;;;%;4.2
-C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;%;4.2
-C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;%;4.2
-C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;%;4.2
-C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;%;4.2
-C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;%;4.2
-C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;%;4.2
-C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;%;4.2
-C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;%;4.2
+C_08.01;x_axis_rc_code;170;__PARENT__f36700753b73;Own estimates of LGD's are used: other funded credit protection;;;;4.2
+C_08.01;x_axis_rc_code;171;170;Cash on deposit;;;;4.2
+C_08.01;x_axis_rc_code;172;170;Life insurance policies;;;;4.2
+C_08.01;x_axis_rc_code;173;170;Instruments held by a third party;;;;4.2
+C_08.01;x_axis_rc_code;180;__PARENT__f36700753b73;Eligible financial collateral;;;;4.2
+C_08.01;x_axis_rc_code;190;__PARENT__e4bde03f4686;Real estate;;;;4.2
+C_08.01;x_axis_rc_code;200;__PARENT__e4bde03f4686;Other physical collateral;;;;4.2
+C_08.01;x_axis_rc_code;210;__PARENT__e4bde03f4686;Receivables;;;;4.2
 C_08.01;x_axis_rc_code;230;;Exposure weighted average lgd (%);;;%;4.2
 C_08.01;x_axis_rc_code;240;;Exposure weighted average LGD (%) for large financial sector entities and unregulated financial entities;;;%;4.2
 C_08.01;x_axis_rc_code;250;;Exposure-weighted average maturity value (days);;;Unit;4.2
