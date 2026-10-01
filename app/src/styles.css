@@ -1775,6 +1775,10 @@ button:focus-visible {
   padding-left: calc(18px + (var(--indent-level, 0) * 18px));
 }
 
+.explorer-workspace.is-context-detail-collapsed .explorer-timeline-taxonomy-status {
+  left: 18px;
+}
+
 .explorer-workspace.is-context-detail-collapsed .explorer-context-panel {
   position: absolute;
   z-index: 60;
@@ -2597,6 +2601,18 @@ table {
   font-weight: 400;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+/* Temporal tables (including the Z axis in XY mode) keep their first-level
+   labels flush with the taxonomy caption. Only branches need the toggle
+   gutter; a flat first-level item has no control to reserve space for. */
+.metric-table.has-taxonomy-timeline .tree-cell-content {
+  transform: none;
+  gap: 0;
+}
+
+.metric-table.has-taxonomy-timeline tbody tr[data-indent-level="0"] .tree-toggle-spacer {
+  width: 0;
 }
 
 /* Same content-sized pill as the Credit Risk tabs: white/grey when off,

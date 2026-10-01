@@ -1768,6 +1768,7 @@ function renderExplorerTable(series, selectedUnit) {
   explorerXYHeaderObserver?.disconnect();
   explorerXYHeaderObserver = null;
   elements.explorerTable.classList.toggle("is-xy-view", isXY);
+  elements.explorerTable.classList.toggle("has-taxonomy-timeline", !isXY && Boolean(series.mainTaxonomyFramework));
   elements.explorerTable.style.width = isXY ? `${426 + series.dateColumns.length * 150}px` : "";
   elements.explorerTable.setAttribute("aria-label", isXY ? "XY matrix at selected reference date" : "Explorer time series");
   syncExplorerXYColumnSelection(series);
