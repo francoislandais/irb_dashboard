@@ -162,10 +162,6 @@ const actions = {
     }
   },
 
-  clearInstitutionDictionary() {
-    store.clearInstitutionDictionary();
-  },
-
   updateSelectedUnit(unit) {
     store.setSelectedUnit(unit);
     updateUrlUnitParam(store.getState().selectedUnit);

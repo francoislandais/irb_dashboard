@@ -27,9 +27,6 @@ const elements = {
   institutionPickerMenu: document.querySelector("#institution-picker-menu"),
   institutionPickerName: document.querySelector("#institution-picker-name"),
   institutionPickerLevel: document.querySelector("#institution-picker-level"),
-  institutionDictionaryButton: document.querySelector("#institution-dictionary-button"),
-  institutionDictionaryClear: document.querySelector("#institution-dictionary-clear"),
-  institutionDictionaryInput: document.querySelector("#institution-dictionary-input"),
   moduleButtons: [...document.querySelectorAll("[data-module-target]")],
   moduleViews: [...document.querySelectorAll(".module-view")],
   peersButton: document.querySelector("#peers-button"),
@@ -119,19 +116,6 @@ export function wireUi(actions) {
   elements.institutionPickerMenu.addEventListener("focusout", (event) => {
     if (!elements.institutionPickerMenu.contains(event.relatedTarget)) setInstitutionPickerOpen(false);
   });
-  elements.institutionDictionaryButton.addEventListener("click", () => elements.institutionDictionaryInput.click());
-  elements.institutionDictionaryInput.addEventListener("change", async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      actions.loadInstitutionDictionary(await file.text(), file.name);
-    } catch (error) {
-      actions.setInstitutionDictionaryError(error);
-    } finally {
-      event.target.value = "";
-    }
-  });
-  elements.institutionDictionaryClear.addEventListener("click", actions.clearInstitutionDictionary);
   window.addEventListener("resize", () => {
     const state = actions.getState();
     fitInstitutionField(state.institutionOptions ?? state.jstOptions ?? [], state.institutionDictionary ?? {});
@@ -281,13 +265,6 @@ function renderInstitutionSelect(state) {
     elements.institutionPickerLevel.hidden = true;
     elements.institutionPickerMenu.hidden = true;
     elements.institutionPickerToggle.setAttribute("aria-expanded", "false");
-    elements.institutionDictionaryButton.disabled = false;
-    elements.institutionDictionaryButton.textContent = state.institutionDictionaryFileName ? "Replace names" : "Add names";
-    elements.institutionDictionaryButton.title = state.institutionDictionaryError
-      || state.institutionDictionaryFileName
-      || "Load an optional institution dictionary";
-    elements.institutionDictionaryButton.classList.toggle("has-error", Boolean(state.institutionDictionaryError));
-    elements.institutionDictionaryClear.hidden = !state.institutionDictionaryFileName;
     return;
   }
 
@@ -328,15 +305,6 @@ function renderInstitutionSelect(state) {
   elements.institutionPickerToggle.setAttribute("aria-label", selectedEntry
     ? `Select an institution. Current selection: ${selectedEntry.institutionName}, ${selectedEntry.consolidationLevel}, JST ${selectedEntry.jstCode}`
     : `Select an institution. Current selection: ${selectedInstitutionId}`);
-  elements.institutionDictionaryButton.disabled = false;
-  elements.institutionDictionaryButton.textContent = state.institutionDictionaryError
-    ? "Retry names"
-    : state.institutionDictionaryFileName ? "Replace names" : "Add names";
-  elements.institutionDictionaryButton.title = state.institutionDictionaryError
-    || state.institutionDictionaryFileName
-    || "Load an optional institution dictionary";
-  elements.institutionDictionaryButton.classList.toggle("has-error", Boolean(state.institutionDictionaryError));
-  elements.institutionDictionaryClear.hidden = !state.institutionDictionaryFileName;
 }
 
 function fitInstitutionField(institutionOptions, dictionary) {

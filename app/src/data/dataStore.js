@@ -388,16 +388,6 @@ export function createDataStore() {
       emit();
     },
 
-    clearInstitutionDictionary() {
-      state = {
-        ...state,
-        institutionDictionary: {},
-        institutionDictionaryError: "",
-        institutionDictionaryFileName: ""
-      };
-      emit();
-    },
-
     setSelectedUnit(selectedUnit) {
       state = { ...state, selectedUnit };
       emit();

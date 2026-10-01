@@ -652,22 +652,6 @@ p {
   line-height: 1.2;
 }
 
-.institution-dictionary-button {
-  flex: 0 0 auto;
-}
-
-.institution-dictionary-clear {
-  font-size: 0.95rem;
-  line-height: 1;
-  min-width: 28px;
-  padding: 0 7px;
-}
-
-.institution-dictionary-button.has-error {
-  border-color: #f1a49c;
-  color: #ffd4ce;
-}
-
 .global-bar .compact-field select {
   flex: 1;
   min-width: 0;
