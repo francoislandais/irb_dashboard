@@ -420,10 +420,14 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
     in amount labels are only categories. C_76's sole X column mixes amounts
     and a ratio, distinguished by Y code 30. These source-specific rules cover
     all sheet suffixes and frameworks before consulting old curated formats.
-    C_03/C_04 monetary rows also override legacy percentage tags and percent
-    words that describe a threshold or risk weight rather than the cell value.
+    C_01.00 reports only monetary amounts, even when a label mentions a
+    percentage threshold or risk weight. C_03/C_04 monetary rows also override
+    legacy percentage tags and percent words that describe a condition rather
+    than the cell value.
     """
     template = re.sub(r"\.[A-Za-z]$", "", table_id).upper()
+    if template == "C_01.00":
+        return ""
     if template == "C_80.00":
         if coordinate == AXIS_COORDINATES["y"]:
             return ""

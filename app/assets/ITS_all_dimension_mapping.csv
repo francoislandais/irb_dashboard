@@ -3202,15 +3202,15 @@ C_01.00;y_axis_rc_code;410;390;Deferred tax liabilities associated to defined be
 C_01.00;y_axis_rc_code;420;390;Defined benefit pension fund assets which the institution has an unrestricted ability to use;;;;2.9.1.1
 C_01.00;y_axis_rc_code;430;20;(-) Reciprocal cross holdings in CET1 Capital;;;;2.9.1.1
 C_01.00;y_axis_rc_code;440;20;(-) Excess of deduction from AT1 items over AT1 Capital (see 1.2.10);;;;2.9.1.1
-C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;%;2.9.1.1
-C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;%;2.9.1.1
-C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;%;2.9.1.1
-C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;%;2.9.1.1
-C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;%;2.9.1.1
+C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;;2.9.1.1
+C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;;2.9.1.1
+C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;;2.9.1.1
+C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;;2.9.1.1
+C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;;2.9.1.1
 C_01.00;y_axis_rc_code;480;20;(-) CET1 instruments of financial sector entities where the institution does not have a significant investment;;;;2.9.1.1
 C_01.00;y_axis_rc_code;490;20;(-) Deductible deferred tax assets that rely on future profitability and arise from temporary differences;;;;2.9.1.1
 C_01.00;y_axis_rc_code;500;20;(-) CET1 instruments of financial sector entities where the institution has a significant investment;;;;2.9.1.1
-C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;%;2.9.1.1
+C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;;2.9.1.1
 C_01.00;y_axis_rc_code;520;20;Other transitional adjustments to CET1 Capital;;;;2.9.1.1
 C_01.00;y_axis_rc_code;524;20;(-) Additional deductions of CET1 Capital due to Article 3 CRR;;;;2.9.1.1
 C_01.00;y_axis_rc_code;529;20;CET1 capital elements or deductions - other;;;;2.9.1.1
@@ -10289,17 +10289,17 @@ C_01.00;y_axis_rc_code;410;390;Deferred tax liabilities associated to defined be
 C_01.00;y_axis_rc_code;420;390;Defined benefit pension fund assets which the institution has an unrestricted ability to use;;;;3.0
 C_01.00;y_axis_rc_code;430;20;(-) Reciprocal cross holdings in CET1 Capital;;;;3.0
 C_01.00;y_axis_rc_code;440;20;(-) Excess of deduction from AT1 items over AT1 Capital (see 1.2.10);;;;3.0
-C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;%;3.0
-C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;%;3.0
-C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;%;3.0
-C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;%;3.0
-C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;%;3.0
+C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;;3.0
+C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;;3.0
+C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;;3.0
+C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;;3.0
+C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;;3.0
 C_01.00;y_axis_rc_code;480;20;(-) CET1 instruments of financial sector entities where the institution does not have a significant investment;;;;3.0
 C_01.00;y_axis_rc_code;490;20;(-) Deductible deferred tax assets that rely on future profitability and arise from temporary differences;;;;3.0
 C_01.00;y_axis_rc_code;500;20;(-) CET1 instruments of financial sector entities where the institution has a significant investment;;;;3.0
-C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;%;3.0
-C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;%;3.0
-C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;%;3.0
+C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;;3.0
+C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;;3.0
+C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;;3.0
 C_01.00;y_axis_rc_code;513;20;(-) Insufficient coverage for non-performing exposures;;;;3.0
 C_01.00;y_axis_rc_code;514;20;(-) Minimum value commitment shortfalls;;;;3.0
 C_01.00;y_axis_rc_code;515;20;(-) Other foreseeable tax charges;;;;3.0
@@ -20595,17 +20595,17 @@ C_01.00;y_axis_rc_code;410;390;Deferred tax liabilities associated to defined be
 C_01.00;y_axis_rc_code;420;390;Defined benefit pension fund assets which the institution has an unrestricted ability to use;;;;3.2
 C_01.00;y_axis_rc_code;430;20;(-) Reciprocal cross holdings in CET1 Capital;;;;3.2
 C_01.00;y_axis_rc_code;440;20;(-) Excess of deduction from AT1 items over AT1 Capital (see 1.2.10);;;;3.2
-C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;%;3.2
-C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;%;3.2
-C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;%;3.2
-C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;%;3.2
-C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;%;3.2
+C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;;3.2
+C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;;3.2
+C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;;3.2
+C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;;3.2
+C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;;3.2
 C_01.00;y_axis_rc_code;480;20;(-) CET1 instruments of financial sector entities where the institution does not have a significant investment;;;;3.2
 C_01.00;y_axis_rc_code;490;20;(-) Deductible deferred tax assets that rely on future profitability and arise from temporary differences;;;;3.2
 C_01.00;y_axis_rc_code;500;20;(-) CET1 instruments of financial sector entities where the institution has a significant investment;;;;3.2
-C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;%;3.2
-C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;%;3.2
-C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;%;3.2
+C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;;3.2
+C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;;3.2
+C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;;3.2
 C_01.00;y_axis_rc_code;513;20;(-) Insufficient coverage for non-performing exposures;;;;3.2
 C_01.00;y_axis_rc_code;514;20;(-) Minimum value commitment shortfalls;;;;3.2
 C_01.00;y_axis_rc_code;515;20;(-) Other foreseeable tax charges;;;;3.2
@@ -36559,17 +36559,17 @@ C_01.00;y_axis_rc_code;410;390;Deferred tax liabilities associated to defined be
 C_01.00;y_axis_rc_code;420;390;Defined benefit pension fund assets which the institution has an unrestricted ability to use;;;;4.0
 C_01.00;y_axis_rc_code;430;20;(-) Reciprocal cross holdings in CET1 Capital;;;;4.0
 C_01.00;y_axis_rc_code;440;20;(-) Excess of deduction from AT1 items over AT1 Capital (see 1.2.10);;;;4.0
-C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;%;4.0
-C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;%;4.0
-C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;%;4.0
-C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;%;4.0
-C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;%;4.0
+C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;;4.0
+C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;;4.0
+C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;;4.0
+C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;;4.0
+C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;;4.0
 C_01.00;y_axis_rc_code;480;20;(-) CET1 instruments of financial sector entities where the institution does not have a significant investment;;;;4.0
 C_01.00;y_axis_rc_code;490;20;(-) Deductible deferred tax assets that rely on future profitability and arise from temporary differences;;;;4.0
 C_01.00;y_axis_rc_code;500;20;(-) CET1 instruments of financial sector entities where the institution has a significant investment;;;;4.0
-C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;%;4.0
-C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;%;4.0
-C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;%;4.0
+C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;;4.0
+C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;;4.0
+C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;;4.0
 C_01.00;y_axis_rc_code;513;20;(-) Insufficient coverage for non-performing exposures;;;;4.0
 C_01.00;y_axis_rc_code;514;20;(-) Minimum value commitment shortfalls;;;;4.0
 C_01.00;y_axis_rc_code;515;20;(-) Other foreseeable tax charges;;;;4.0
@@ -48559,17 +48559,17 @@ C_01.00;y_axis_rc_code;410;390;Deferred tax liabilities associated to defined be
 C_01.00;y_axis_rc_code;420;390;Defined benefit pension fund assets which the institution has an unrestricted ability to use;;;;4.2
 C_01.00;y_axis_rc_code;430;20;(-) Reciprocal cross holdings in CET1 Capital;;;;4.2
 C_01.00;y_axis_rc_code;440;20;(-) Excess of deduction from AT1 items over AT1 Capital (see 1.2.10);;;;4.2
-C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;%;4.2
-C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;%;4.2
-C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;%;4.2
-C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;%;4.2
-C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;%;4.2
+C_01.00;y_axis_rc_code;450;20;(-) Qualifying holdings outside the financial sector which can alternatively be subject to a 1.250% risk weight;;;;4.2
+C_01.00;y_axis_rc_code;460;20;(-) Securitisation positions which can alternatively be subject to a 1.250% risk weight;;;;4.2
+C_01.00;y_axis_rc_code;470;20;(-) Free deliveries which can alternatively be subject to a 1.250% risk weight;;;;4.2
+C_01.00;y_axis_rc_code;471;20;(-) Positions in a basket for which an institution cannot determine the risk weight under the IRB approach, and can alternatively be subject to a 1.250% risk weight;;;;4.2
+C_01.00;y_axis_rc_code;472;20;(-) Equity exposures under an internal models approach which can alternatively be subject to a 1.250% risk weight;;;;4.2
 C_01.00;y_axis_rc_code;480;20;(-) CET1 instruments of financial sector entities where the institution does not have a significant investment;;;;4.2
 C_01.00;y_axis_rc_code;490;20;(-) Deductible deferred tax assets that rely on future profitability and arise from temporary differences;;;;4.2
 C_01.00;y_axis_rc_code;500;20;(-) CET1 instruments of financial sector entities where the institution has a significant investment;;;;4.2
-C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;%;4.2
-C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;%;4.2
-C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;%;4.2
+C_01.00;y_axis_rc_code;510;20;(-) Amount exceeding the 17.65% threshold;;;;4.2
+C_01.00;y_axis_rc_code;511;20;(-) Amount exceeding the 17.65% threshold related to CET1 instruments of financial sector entities where the institution has a significant investment;;;;4.2
+C_01.00;y_axis_rc_code;512;20;(-) Amount exceeding the 17.65% threshold related to deferred tax assets arising from temporary differences;;;;4.2
 C_01.00;y_axis_rc_code;513;20;(-) Insufficient coverage for non-performing exposures;;;;4.2
 C_01.00;y_axis_rc_code;514;20;(-) Minimum value commitment shortfalls;;;;4.2
 C_01.00;y_axis_rc_code;515;20;(-) Other foreseeable tax charges;;;;4.2

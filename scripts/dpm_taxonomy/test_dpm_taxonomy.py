@@ -132,6 +132,14 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertTrue(all(row["parent_coordinate_code"] == "qx2023" for row in ordered[1:8]))
         self.assertTrue(all(row["parent_coordinate_code"] == "qx2022" for row in ordered[9:]))
 
+    def test_c01_amounts_ignore_percent_words_on_every_axis(self):
+        for table_id in ("C_01.00", "C_01.00.a"):
+            for coordinate in ("x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code"):
+                with self.subTest(table_id=table_id, coordinate=coordinate):
+                    self.assertEqual(builder.dimension_display_format(
+                        table_id, coordinate, "450", "Amount subject to a 1.250% risk weight"
+                    ), "")
+
     def test_c03_c04_amounts_override_percent_words_and_stale_formats(self):
         cases = {
             ("C_03.00", "220", "Surplus(+)/Deficit(-) of CET1 capital considering OCR and P2G"): "",
