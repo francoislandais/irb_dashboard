@@ -46577,6 +46577,7 @@ C_66.01;y_axis_rc_code;740;__PARENT__0c29e1d44e6f;Withdrawable central bank rese
 C_66.01;y_axis_rc_code;1270;__PARENT__c3acdc831751;Behavioural outflows from deposits;;;;4.2
 C_66.01;y_axis_rc_code;1280;__PARENT__c3acdc831751;Behavioural inflows from loans and advances;;;;4.2
 C_66.01;y_axis_rc_code;1290;__PARENT__c3acdc831751;Behavioural draw-downs of committed facilities;;;;4.2
+C_66.01;z_axis_rc_code;0010;;All currencies;;;;4.2
 C_66.01;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_66.01;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_66.01;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -46621,6 +46622,7 @@ C_67.00;y_axis_rc_code;80;120;7;;;;4.2
 C_67.00;y_axis_rc_code;90;120;8;;;;4.2
 C_67.00;y_axis_rc_code;100;120;9;;;;4.2
 C_67.00;y_axis_rc_code;110;120;10;;;;4.2
+C_67.00;z_axis_rc_code;0010;;All currencies;;;;4.2
 C_67.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_67.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_67.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -46665,6 +46667,7 @@ C_68.00;y_axis_rc_code;160;150;of which SFTs;;;;4.2
 C_68.00;y_axis_rc_code;170;150;of which covered bond issuance;;;;4.2
 C_68.00;y_axis_rc_code;180;150;of which asset backed security issuance;;;;4.2
 C_68.00;y_axis_rc_code;190;150;of which financial liabilities other than derivatives and short positions from intra-group entities;;;;4.2
+C_68.00;z_axis_rc_code;0010;;All currencies;;;;4.2
 C_68.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_68.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_68.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -46722,6 +46725,7 @@ C_69.00;y_axis_rc_code;45;10;Secured funding (non-Central Bank);;;;4.2
 C_69.00;y_axis_rc_code;80;;Other Funding;;;;4.2
 C_69.00;y_axis_rc_code;65;80;of which: Covered bonds;;;;4.2
 C_69.00;y_axis_rc_code;75;80;of which: Asset backed securities including ABCP;;;;4.2
+C_69.00;z_axis_rc_code;0010;;All currencies;;;;4.2
 C_69.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_69.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_69.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -46939,6 +46943,7 @@ C_70.00;y_axis_rc_code;1210;__PARENT__85560b467033;Total funding;;;;4.2
 C_70.00;y_axis_rc_code;1220;1210;Retail funding;;;;4.2
 C_70.00;y_axis_rc_code;1230;1210;Unsecured wholesale funding;;;;4.2
 C_70.00;y_axis_rc_code;1240;1210;Secured funding;;;;4.2
+C_70.00;z_axis_rc_code;0010;;All currencies;;;;4.2
 C_70.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_70.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_70.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -46983,6 +46988,7 @@ C_71.00;y_axis_rc_code;80;120;7;;;;4.2
 C_71.00;y_axis_rc_code;90;120;8;;;;4.2
 C_71.00;y_axis_rc_code;100;120;9;;;;4.2
 C_71.00;y_axis_rc_code;110;120;10;;;;4.2
+C_71.00;z_axis_rc_code;0010;;All currencies;;;;4.2
 C_71.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_71.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_71.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2

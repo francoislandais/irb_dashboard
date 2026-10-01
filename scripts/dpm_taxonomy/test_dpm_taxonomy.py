@@ -19,6 +19,27 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_alm_currency_totals_are_native_z_points_only_for_c66_to_c71(self):
+        def member(table_id, code, description):
+            return {
+                "module_code": "COREP_ALM", "framework": "4.2", "table_id": table_id,
+                "coordinate": "z_axis_rc_code", "code": code, "description": description,
+                "parent_coordinate_code": "", "ignore": "", "format": "", "order_first": "1",
+            }
+
+        rows = [member(table_id, "EUR", "Euro") for table_id in (
+            "C_66.01", "C_67.00", "C_68.00", "C_69.00", "C_70.00", "C_71.00", "C_72.00",
+        )]
+        result = builder.restore_alm_native_total_currency_rows(rows)
+        for table_id in builder.ALM_NATIVE_TOTAL_CURRENCY_TEMPLATES:
+            members = [row for row in result if row["table_id"] == table_id]
+            self.assertEqual([row["code"] for row in members], ["0010", "EUR"])
+            self.assertEqual(members[0]["description"], "All currencies")
+            self.assertEqual(members[0]["order_first"], "0")
+        self.assertEqual([row["code"] for row in result if row["table_id"] == "C_72.00"], ["EUR"])
+        native = [member("C_66.01", "0001", "Total currencies"), member("C_66.01", "EUR", "Euro")]
+        self.assertEqual(builder.restore_alm_native_total_currency_rows(native), native)
+
     def test_c07_42_z_orders_roots_and_folds_only_secured_exposures(self):
         def member(code, description, framework="4.2"):
             return {

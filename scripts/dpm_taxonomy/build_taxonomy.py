@@ -72,6 +72,10 @@ CURRENCY_Z_DISPLAY_ORDER = (
     "HUF", "RON", "TRY", "BRL", "MXN", "ARS",
     "CLP", "COP", "UYU",
 )
+ALM_NATIVE_TOTAL_CURRENCY_TEMPLATES = {
+    "C_66.01", "C_67.00", "C_68.00", "C_69.00", "C_70.00", "C_71.00",
+}
+ALM_NATIVE_TOTAL_CURRENCY_CODE = "0010"
 
 C08_IRB_Z_LABELS = {
     "with": "IRB A — With own estimates of LGD or conversion factors",
@@ -129,6 +133,41 @@ def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
     aggregate = [(code, label) for code, label in special if "all currencies" in label.casefold()]
     other = [(code, label) for code, label in special if "all currencies" not in label.casefold()]
     return aggregate + selected + other
+
+
+def restore_alm_native_total_currency_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Restore the reported ALM total excluded from the EBA currency domain.
+
+    The annotated ALM layouts have separate 'Total currencies' and
+    'Significant currencies' sheets. The glossary lists only the latter, so
+    expanding its domain alone drops the selectable total Z coordinate.
+    """
+    by_template: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if row["coordinate"] == AXIS_COORDINATES["z"] and row["table_id"] in ALM_NATIVE_TOTAL_CURRENCY_TEMPLATES:
+            by_template[(row["module_code"], row["framework"], row["table_id"])].append(row)
+
+    needs_total = {
+        key for key, members in by_template.items()
+        if any(member["code"] == "EUR" for member in members)
+        and not any(re.search(r"\b(?:all|total) currenc(?:y|ies)\b", member["description"], re.IGNORECASE)
+                    for member in members)
+    }
+    result = []
+    inserted = set()
+    for row in rows:
+        key = (row["module_code"], row["framework"], row["table_id"])
+        if key in needs_total and row["coordinate"] == AXIS_COORDINATES["z"] and key not in inserted:
+            if any(member["code"] == ALM_NATIVE_TOTAL_CURRENCY_CODE for member in by_template[key]):
+                raise ValueError(f"ALM total currency code collides with a source Z code: {key}")
+            result.append({
+                **row, "code": ALM_NATIVE_TOTAL_CURRENCY_CODE,
+                "description": "All currencies", "parent_coordinate_code": "",
+                "order_first": "0", "ignore": "", "format": "",
+            })
+            inserted.add(key)
+        result.append(row)
+    return result
 
 
 def c08_irb_portfolio_sort_key(description: str) -> tuple[bool, int]:
@@ -1156,7 +1195,9 @@ def extract_all() -> tuple[
     # resolver when the caller requests the former module family.
     sorted_templates = close_template_intervals(normalized_templates.values())
 
-    dimensions = group_c07_42_z_rows(group_c08_irb_z_rows(list(unique_layouts.values())))
+    dimensions = group_c07_42_z_rows(group_c08_irb_z_rows(
+        restore_alm_native_total_currency_rows(list(unique_layouts.values()))
+    ))
     return dimensions, sorted_templates, inventory, suffix_conflicts
 
 

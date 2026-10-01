@@ -91,14 +91,13 @@ export function explorerTableHasCurrencyZAxis(state, tableId) {
 // Some tables (e.g. C_66.01) already have their own native z-axis point
 // for "all currencies" (an actual code/description pair in the dimension
 // mapping) - synthesizing the __ALL__ sentinel on top of that would offer
-// the user two different ways to ask for the same thing. Matched loosely
-// against both code and description since which of the two actually holds
-// the "All Currency" text isn't consistent across the reference data.
+// the user two different ways to ask for the same thing. Match both "All"
+// and "Total" because source labels vary between frameworks.
 function explorerTableHasNativeAllCurrencyPoint(state, tableId) {
   return (state.explorerPoints ?? []).some((point) => (
     point.tableId === tableId
     && point.coordinate === "z_axis_rc_code"
-    && /all\s*currenc/i.test(`${point.code} ${point.description}`)
+    && /\b(?:all|total)\s*currenc/i.test(`${point.code} ${point.description}`)
   ));
 }
 
