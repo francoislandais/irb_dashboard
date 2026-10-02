@@ -89,6 +89,7 @@ class Application:
     consolidation: str
     extractions: tuple[Extraction, ...]
     config_file: str = ""
+    clusters: tuple[str, ...] = ()
 
 
 class QueryClient(Protocol):
@@ -110,6 +111,12 @@ def _string_list(value: object, field: str, context: str) -> tuple[str, ...]:
     if len(set(items)) != len(items):
         raise ValueError(f"{context}: {field} contient des doublons.")
     return items
+
+
+def _optional_string_list(value: object, field: str, context: str) -> tuple[str, ...]:
+    if value is None or value == []:
+        return ()
+    return _string_list(value, field, context)
 
 
 def _check_keys(value: dict, allowed: set[str], context: str) -> None:
@@ -193,7 +200,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
             raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
         context = file.name
-        _check_keys(config, {"name", "leis", "consolidation", "extractions"}, context)
+        _check_keys(config, {"name", "leis", "cluster", "clusters", "consolidation", "extractions"}, context)
         name = _required_text(config.get("name"), "name", context)
         if name.casefold() in names:
             raise ValueError(f"{context}: nom d'application déjà utilisé : {name}.")
@@ -203,11 +210,17 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         names.add(name.casefold())
         output_names.add(output_name)
 
-        leis = tuple(lei.upper() for lei in _string_list(config.get("leis"), "leis", context))
+        if "cluster" in config and "clusters" in config:
+            raise ValueError(f"{context}: utiliser cluster ou clusters, pas les deux.")
+        leis = tuple(lei.upper() for lei in _optional_string_list(config.get("leis"), "leis", context))
         if any(not lei_pattern.fullmatch(lei) for lei in leis):
             raise ValueError(f"{context}: chaque LEI doit contenir exactement 20 lettres ou chiffres.")
         if len(set(leis)) != len(leis):
             raise ValueError(f"{context}: leis contient des doublons.")
+        cluster_key = "cluster" if "cluster" in config else "clusters"
+        clusters = _optional_string_list(config.get(cluster_key), cluster_key, context)
+        if not leis and not clusters:
+            raise ValueError(f"{context}: renseigner au moins un LEI ou un cluster.")
         consolidation = _required_text(config.get("consolidation"), "consolidation", context).upper()
         if consolidation not in CONSOLIDATION_MODES:
             raise ValueError(f"{context}: consolidation doit être l'un de {', '.join(sorted(CONSOLIDATION_MODES))}.")
@@ -281,7 +294,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
             extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category, () if module in {"", "KRI"} else modules))
-        applications.append(Application(name, leis, consolidation, tuple(extractions), context))
+        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters))
     return tuple(applications)
 
 
@@ -308,8 +321,10 @@ def _consolidation_predicate(mode: str) -> str:
     return "cons_level IN (" + ", ".join(_sql_literal(item) for item in levels) + ")"
 
 
-def _lei_filter(leis: Iterable[str]) -> str:
-    return "lei IN (\n        " + ",\n        ".join(_sql_literal(lei) for lei in leis) + "\n    )"
+def _institution_filter(application: Application, prefix: str = "") -> str:
+    column = "cluster" if application.clusters else "lei"
+    values = application.clusters if application.clusters else application.leis
+    return f"{prefix}{column} IN (\n        " + ",\n        ".join(_sql_literal(value) for value in values) + "\n    )"
 
 
 def _date_columns(reference_dates: Iterable[str], prefix: str = "") -> str:
@@ -379,6 +394,7 @@ def _build_extraction_sql(
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
         highest_filter_sql = "\n  AND kri.is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
+        cluster_filter_sql = f"\n  AND {_institution_filter(application, 'kri.')}" if application.clusters else ""
         if reporting_units is None:
             # Preview cannot know the KRI entity_id values until the separate
             # institution query has run. Keep the query inspectable without
@@ -408,7 +424,7 @@ def _build_extraction_sql(
     '' AS z_axis_rc_code,
 {_date_columns(extraction.reference_dates, 'kri.')}
 FROM {tables['KRI']} kri
-WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}
+WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
   AND {unit_filter}
   AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
 GROUP BY
@@ -443,7 +459,7 @@ FROM (
         reference_period,
         value_decimal
     FROM {tables['ITS']}
-    WHERE {_lei_filter(application.leis)}{consolidation_filter}{module_filter}
+    WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
       AND {_date_filter(extraction.reference_dates)}
       AND {template_filter}
 ) source
@@ -475,9 +491,10 @@ def _build_institution_sql(application: Application, table: str) -> str:
         MAX(jst_code)
     ) AS jst_code,
     MAX(name) AS institution_name,
-    cons_level AS consolidation_level
+    cons_level AS consolidation_level,
+    MAX(cluster) AS cluster
 FROM {table}
-WHERE {_lei_filter(application.leis)}{highest_filter}
+WHERE {_institution_filter(application)}{highest_filter}
 GROUP BY
     entity_id,
     lei,
@@ -498,7 +515,9 @@ def _write_query_index(output: Path, manifest: dict) -> None:
     if manifest.get("compact_values"):
         lines.extend(["Stockage compact des valeurs : activé pour les datasets exportés (sans changement du SQL).", ""])
     for application in manifest["applications"]:
-        lines.extend([f"## {application['name']}", "", f"Configuration : `{application['config_file']}`", f"Niveau : `{application['consolidation']}`", f"LEI : {', '.join(application['leis'])}", ""])
+        selector_label = "Cluster" if application["clusters"] else "LEI"
+        selector_values = application["clusters"] if application["clusters"] else application["leis"]
+        lines.extend([f"## {application['name']}", "", f"Configuration : `{application['config_file']}`", f"Niveau : `{application['consolidation']}`", f"{selector_label} : {', '.join(selector_values)}", ""])
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
         current_category = None
         for extraction in application["extractions"]:
@@ -571,16 +590,10 @@ def _module_matches(value: str, pattern: str) -> bool:
     return re.fullmatch(re.escape(pattern).replace("%", ".*"), value) is not None
 
 
-def _dictionary_rows(application: Application, fixture: dict) -> list[dict[str, str]]:
-    return _institution_dictionary_rows(_fixture_reporting_units(application, fixture))
-
-
 def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[str], list[dict[str, str]]]:
     all_dates = sorted({ref for item in application.extractions for ref in item.reference_dates})
     headers = OUTPUT_COLUMNS + ["ref_" + ref.replace("-", "_") for ref in all_dates] + ["extraction_timestamp"]
-    dictionary = _dictionary_rows(application, fixture)
-    selected_ids = {item["Institution ID"] for item in dictionary}
-    entities_by_lei = {item["lei"]: item for item in fixture["entities"]}
+    reporting_units = _fixture_reporting_units(application, fixture)
     records: dict[tuple[str, ...], dict[str, str]] = {}
     available_dates = _all_month_ends(fixture["period_start"], fixture["period_end"])
     module_templates = fixture["templates"]
@@ -604,37 +617,32 @@ def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[
             templates = _selected_fixture_templates(extraction.selector, available_templates)
             is_kri = False
         date_set = set(extraction.reference_dates)
-        for lei in application.leis:
-            entity = entities_by_lei.get(lei)
-            if not entity:
-                continue
-            for level in _selected_levels(application.consolidation, entity["highest_level"]):
-                jst_code = entity["jst_by_level"].get(level)
-                institution_id = f"{lei}_{level}"
-                if not jst_code or institution_id not in selected_ids:
-                    continue
-                for selected_template in templates:
-                    table_id = "KRI" if is_kri else selected_template
-                    for period_index, reference_date in enumerate(available_dates, start=1):
-                        if reference_date not in date_set:
-                            continue
-                        x_code = ""
-                        y_code = selected_template if is_kri else "0010"
-                        z_code = ""
-                        key = (table_id, institution_id, x_code, y_code, z_code)
-                        record = records.setdefault(key, {
-                            "table_id": table_id,
-                            "reporting_unit_id": institution_id,
-                            "x_axis_rc_code": x_code,
-                            "y_axis_rc_code": y_code,
-                            "z_axis_rc_code": z_code,
-                            **{"ref_" + item.replace("-", "_"): "" for item in all_dates},
-                            "extraction_timestamp": date.today().isoformat(),
-                        })
-                        template_seed = sum(ord(character) for character in table_id + y_code)
-                        entity_seed = sum(ord(character) for character in lei)
-                        seed = template_seed + entity_seed + (0 if level == "CONSO" else 50 if level == "SOLO" else 90)
-                        record["ref_" + reference_date.replace("-", "_")] = str(seed + period_index)
+        for unit in reporting_units:
+            lei = unit["lei"]
+            level = unit["consolidation_level"]
+            institution_id = unit["institution_id"]
+            for selected_template in templates:
+                table_id = "KRI" if is_kri else selected_template
+                for period_index, reference_date in enumerate(available_dates, start=1):
+                    if reference_date not in date_set:
+                        continue
+                    x_code = ""
+                    y_code = selected_template if is_kri else "0010"
+                    z_code = ""
+                    key = (table_id, institution_id, x_code, y_code, z_code)
+                    record = records.setdefault(key, {
+                        "table_id": table_id,
+                        "reporting_unit_id": institution_id,
+                        "x_axis_rc_code": x_code,
+                        "y_axis_rc_code": y_code,
+                        "z_axis_rc_code": z_code,
+                        **{"ref_" + item.replace("-", "_"): "" for item in all_dates},
+                        "extraction_timestamp": date.today().isoformat(),
+                    })
+                    template_seed = sum(ord(character) for character in table_id + y_code)
+                    entity_seed = sum(ord(character) for character in lei)
+                    seed = template_seed + entity_seed + (0 if level == "CONSO" else 50 if level == "SOLO" else 90)
+                    record["ref_" + reference_date.replace("-", "_")] = str(seed + period_index)
     populated = [
         column for column in headers
         if not column.startswith("ref_") or any(row.get(column, "") != "" for row in records.values())
@@ -714,7 +722,7 @@ def _merge_extraction_rows(
 
 
 def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
-    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name", "consolidation_level")
+    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name", "consolidation_level", "cluster")
     rows = _dataframe_rows(dataframe, required, query_label)
     result = []
     seen_ids = set()
@@ -734,21 +742,26 @@ def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str
             "jst_code": row["jst_code"],
             "institution_name": row["institution_name"],
             "consolidation_level": row["consolidation_level"],
+            "cluster": row["cluster"],
         })
     if not result:
-        raise ValueError(f"{query_label}: aucune institution trouvée pour les LEI configurés.")
+        raise ValueError(f"{query_label}: aucune institution trouvée pour le filtre configuré.")
     return result
 
 
 def _select_institution_rows(rows: list[dict[str, str]], application: Application) -> list[dict[str, str]]:
     levels = None if application.consolidation == "HIGHEST" else set(_selected_levels(application.consolidation, ""))
-    selected = [row for row in rows if row["lei"] in application.leis
-                and (levels is None or row["consolidation_level"] in levels)]
+    selected = [
+        row for row in rows
+        if (row.get("cluster") in application.clusters if application.clusters else row["lei"] in application.leis)
+        and (levels is None or row["consolidation_level"] in levels)
+    ]
     if not selected:
         raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
-    missing_leis = set(application.leis) - {row["lei"] for row in selected}
-    if missing_leis:
-        raise ValueError(f"{application.name}: aucune unité de reporting pour les LEI : {', '.join(sorted(missing_leis))}.")
+    if not application.clusters:
+        missing_leis = set(application.leis) - {row["lei"] for row in selected}
+        if missing_leis:
+            raise ValueError(f"{application.name}: aucune unité de reporting pour les LEI : {', '.join(sorted(missing_leis))}.")
     if any(not row["jst_code"] for row in selected):
         raise ValueError(f"{application.name}: JST code manquant pour une unité de reporting sélectionnée.")
     return selected
@@ -765,12 +778,15 @@ def _institution_dictionary_rows(rows: list[dict[str, str]]) -> list[dict[str, s
 
 def _fixture_reporting_units(application: Application, fixture: dict) -> list[dict[str, str]]:
     entities_by_lei = {entity["lei"]: (index, entity) for index, entity in enumerate(fixture["entities"], start=1)}
+    candidates = (
+        list(enumerate(fixture["entities"], start=1)) if application.clusters
+        else [entities_by_lei[lei] for lei in application.leis if lei in entities_by_lei]
+    )
     rows = []
-    for lei in application.leis:
-        match = entities_by_lei.get(lei)
-        if not match:
+    for index, entity in candidates:
+        lei = entity["lei"]
+        if application.clusters and entity.get("cluster") not in application.clusters:
             continue
-        index, entity = match
         for level, jst_code in entity["jst_by_level"].items():
             if not jst_code:
                 continue
@@ -783,6 +799,7 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
                 "jst_code": jst_code,
                 "institution_name": entity["institution_name"],
                 "consolidation_level": level,
+                "cluster": entity.get("cluster", ""),
             })
     return _select_institution_rows(rows, application)
 
@@ -864,6 +881,7 @@ def global_update(
             "name": application.name,
             "config_file": application.config_file,
             "leis": list(application.leis),
+            "clusters": list(application.clusters),
             "consolidation": application.consolidation,
             "metadata_query": metadata_relative,
             "extractions": [],

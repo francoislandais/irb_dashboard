@@ -177,19 +177,19 @@ class QueryPlanTests(unittest.TestCase):
         lei = "AAAABBBBCCCCDDDDEEEE"
         other_lei = "FFFFGGGGHHHHIIIIJJJJ"
         its_rows = [
-            dict(entity_id="E1", lei=lei, cons_level="CONSO", is_highest_cons="Y", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y", name="Bank A",
                  jst_code="OLD", jst_code_today="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=125.0),
-            dict(entity_id="E1", lei=lei, cons_level="SOLO", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="SOLO", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.b",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=75.0),
-            dict(entity_id="E1", lei=lei, cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=50.0),
-            dict(entity_id="E2", lei=other_lei, cons_level="CONSO", is_highest_cons="Y", name="Bank B",
+            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", cons_level="CONSO", is_highest_cons="Y", name="Bank B",
                  jst_code="JST_B", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=900.0),
@@ -200,6 +200,7 @@ class QueryPlanTests(unittest.TestCase):
                                         ("E1", "SUBLIQ", 0.4), ("E2", "CONSO", 0.9)):
             insert("agora_dm_imas_kris_raw", dict(
                 entity_id=entity_id, cons_level=level, kri_data_point_id="KRI_1",
+                cluster="CLUSTER_A" if entity_id == "E1" else "CLUSTER_B",
                 is_highest_cons="Y" if level == "CONSO" else "N",
                 reference_period="2026-03-31", value_decimal=value,
             ))
@@ -210,18 +211,40 @@ class QueryPlanTests(unittest.TestCase):
         highest = Application("example", (lei,), "HIGHEST", (its_extraction, kri_extraction))
         both = Application("example", (lei,), "CONSO+SOLO", (its_extraction, kri_extraction))
         all_levels = Application("example", (lei,), "ALL", (its_extraction, kri_extraction))
+        clustered = Application("example", (), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
+        cluster_overrides_lei = Application("example", (other_lei,), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
         its_rows = connection.execute(_build_extraction_sql(its_extraction, highest)).fetchall()
         self.assertEqual(len(its_rows), 1)
         self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONSO"))
         self.assertEqual(its_rows[0][-2:], (None, 125.0))
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, both)).fetchall()), 2)
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, all_levels)).fetchall()), 3)
+        cluster_its_sql = _build_extraction_sql(its_extraction, clustered)
+        self.assertIn("cluster IN (", cluster_its_sql)
+        self.assertNotIn("lei IN (", cluster_its_sql)
+        self.assertEqual({row[1] for row in connection.execute(cluster_its_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(_build_extraction_sql(its_extraction, cluster_overrides_lei))}, {f"{lei}_CONSO"})
+        two_clusters = Application("example", (), "CONSO", (its_extraction,), clusters=("CLUSTER_A", "CLUSTER_B"))
+        self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, two_clusters)).fetchall()), 2)
         metadata_cursor = connection.execute(_build_institution_sql(both, PRODUCTION_TABLES["ITS"]))
         metadata_columns = [column[0] for column in metadata_cursor.description]
         metadata = metadata_cursor.fetchall()
         reporting_units = [dict(zip(metadata_columns, row)) for row in metadata]
         both_units = _select_institution_rows(reporting_units, both)
         all_units = _select_institution_rows(reporting_units, all_levels)
+        cluster_metadata_sql = _build_institution_sql(clustered, PRODUCTION_TABLES["ITS"])
+        self.assertIn("cluster IN (", cluster_metadata_sql)
+        self.assertNotIn("lei IN (", cluster_metadata_sql)
+        cluster_metadata_cursor = connection.execute(cluster_metadata_sql)
+        cluster_columns = [column[0] for column in cluster_metadata_cursor.description]
+        cluster_units = _select_institution_rows(
+            [dict(zip(cluster_columns, row)) for row in cluster_metadata_cursor.fetchall()], clustered,
+        )
+        self.assertEqual({row["institution_id"] for row in cluster_units}, {f"{lei}_CONSO"})
+        cluster_kri_sql = _build_extraction_sql(kri_extraction, clustered, reporting_units=cluster_units)
+        self.assertIn("kri.cluster IN (", cluster_kri_sql)
+        self.assertNotIn("lei IN (", cluster_kri_sql)
+        self.assertEqual({row[1] for row in connection.execute(cluster_kri_sql)}, {f"{lei}_CONSO"})
         kri_sql = _build_extraction_sql(kri_extraction, both, reporting_units=both_units)
         self.assertNotIn("WITH reporting_units", kri_sql)
         self.assertNotIn("JOIN", kri_sql)
@@ -382,6 +405,42 @@ frequency = "QUARTERLY"'''
                 with self.assertRaisesRegex(ValueError, message):
                     _read_configuration(folder, date(2026, 9, 26))
 
+    def test_cluster_can_replace_an_empty_or_missing_lei_list(self):
+        fixture = _read_test_fixture(TEST_ENTITIES_PATH)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory), leis='leis = []\ncluster = ["CLUSTER_A", "CLUSTER_B"]')
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            self.assertEqual(application.leis, ())
+            self.assertEqual(application.clusters, ("CLUSTER_A", "CLUSTER_B"))
+            self.assertEqual(len(_build_dummy_dataset(application, fixture)[1]), 4)
+            self.assertIn("cluster IN (", _build_institution_sql(application, PRODUCTION_TABLES["ITS"]))
+
+            file = folder / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace("leis = []\n", ""), encoding="utf-8")
+            self.assertEqual(_read_configuration(folder, date(2026, 9, 26))[0].leis, ())
+            file.write_text(file.read_text(encoding="utf-8").replace('cluster = ["CLUSTER_A", "CLUSTER_B"]', 'clusters = ["CLUSTER_A"]'), encoding="utf-8")
+            self.assertEqual(_read_configuration(folder, date(2026, 9, 26))[0].clusters, ("CLUSTER_A",))
+            file.write_text(file.read_text(encoding="utf-8").replace('clusters = ["CLUSTER_A"]', f'leis = ["{self.LEI}"]\ncluster = ["CLUSTER_B"]'), encoding="utf-8")
+            prioritized = _read_configuration(folder, date(2026, 9, 26))[0]
+            self.assertEqual(prioritized.clusters, ("CLUSTER_B",))
+            self.assertIn("cluster IN (", _build_extraction_sql(prioritized.extractions[0], prioritized))
+            self.assertNotIn("lei IN (", _build_extraction_sql(prioritized.extractions[0], prioritized))
+
+    def test_cluster_validation_rejects_empty_selector_and_invalid_lists(self):
+        cases = (
+            ('leis = []', "au moins un LEI ou un cluster"),
+            ('leis = []\ncluster = []', "au moins un LEI ou un cluster"),
+            ('leis = []\ncluster = [""]', "texte non vide"),
+            ('leis = []\ncluster = ["A", "A"]', "doublons"),
+            ('leis = []\ncluster = "A"', "liste TOML"),
+            ('leis = []\ncluster = ["A"]\nclusters = ["B"]', "pas les deux"),
+        )
+        for selection, message in cases:
+            with self.subTest(selection=selection), tempfile.TemporaryDirectory() as temporary_directory:
+                folder = self._config(Path(temporary_directory), leis=selection)
+                with self.assertRaisesRegex(ValueError, message):
+                    _read_configuration(folder, date(2026, 9, 26))
+
     def test_module_list_validation_and_exact_pattern_sql(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             folder = self._config(Path(temporary_directory))
@@ -519,6 +578,7 @@ frequency = "QUARTERLY"
                         "JST_CODE": "JST_A",
                         "INSTITUTION_NAME": "Bank A",
                         "CONSOLIDATION_LEVEL": "CONSO",
+                        "CLUSTER": "CLUSTER_A",
                     }
                     return Frame([conso, {
                         **conso,
@@ -565,6 +625,27 @@ frequency = "QUARTERLY"
             self.assertEqual({row["table_id"]: row["ref_2026_06_30"] for row in rows}, {"C_01.00": "10", "KRI": "20"})
             self.assertTrue((output / "applications" / "html" / "Agora Explorer_COREP_and_KRI.html").is_file())
             self.assertIn("devo.read_sql", (output / "query_index.md").read_text(encoding="utf-8"))
+
+    def test_hive_mode_cluster_only_filters_metadata_and_both_data_tables(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            file = configuration / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace(
+                f'leis = ["{self.LEI}"]', 'leis = []\ncluster = ["CLUSTER_A"]'
+            ), encoding="utf-8")
+            client = self._client()
+            result = global_update(
+                configuration, mode="hive", output_directory=root / "generated",
+                as_of=date(2026, 9, 26), devo_client=client,
+            )
+            self.assertEqual(result["applications"], 1)
+            self.assertEqual(len(client.calls), 4)
+            self.assertTrue(all("cluster IN (" in sql and "lei IN (" not in sql for sql in client.calls))
+            manifest = json.loads((root / "generated" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["applications"][0]["clusters"], ["CLUSTER_A"])
+            self.assertEqual(manifest["applications"][0]["leis"], [])
 
     def test_hive_mode_rejects_conflicting_overlapping_extractions(self):
         with tempfile.TemporaryDirectory() as temporary_directory:

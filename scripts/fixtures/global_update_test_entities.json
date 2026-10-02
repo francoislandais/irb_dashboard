@@ -4,6 +4,7 @@
   "entities": [
     {
       "lei": "5493001KJTIIGC8Y1R12",
+      "cluster": "CLUSTER_A",
       "institution_name": "Northstar Bank",
       "highest_level": "CONSO",
       "jst_by_level": {
@@ -14,6 +15,7 @@
     },
     {
       "lei": "969500Q2MA9Y1GQG8B61",
+      "cluster": "CLUSTER_B",
       "institution_name": "Riverside Credit",
       "highest_level": "SOLO",
       "jst_by_level": {
@@ -24,6 +26,7 @@
     },
     {
       "lei": "213800WAVVOPS85N2205",
+      "cluster": "CLUSTER_A",
       "institution_name": "Summit Financial",
       "highest_level": "CONSO",
       "jst_by_level": {
@@ -34,6 +37,7 @@
     },
     {
       "lei": "5493006MHB84DD0ZWV18",
+      "cluster": "CLUSTER_B",
       "institution_name": "Harbor Group",
       "highest_level": "SOLO",
       "jst_by_level": {

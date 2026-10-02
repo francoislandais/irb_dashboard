@@ -1,6 +1,8 @@
 # Un fichier = une application exportée. Les LEI ci-dessous sont fictifs.
 name = "FINREP"
 leis = ["5493001KJTIIGC8Y1R12", "969500Q2MA9Y1GQG8B61"]
+# Alternative : remplacer la ligne précédente par `leis = []`, puis renseigner
+# cluster = ["CLUSTER_A", "CLUSTER_B"]
 consolidation = "HIGHEST"
 
 [[extractions]]
