@@ -2611,6 +2611,12 @@ table {
   gap: 0;
 }
 
+/* The tree controls moved left with the labels; selection, hover and row
+   dividers must start before the toggle instead of using the old 18px inset. */
+.metric-table.has-taxonomy-timeline {
+  --tree-highlight-offset: 8px;
+}
+
 .metric-table.has-taxonomy-timeline tbody tr[data-indent-level="0"] .tree-toggle-spacer {
   width: 0;
 }

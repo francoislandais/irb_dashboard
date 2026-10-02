@@ -6040,7 +6040,8 @@ function applyLeafFamilyHighlight(rows, selectedRow, parentPath) {
 }
 
 function getExplorerHighlightStart(indentLevel) {
-  return `${18 + (indentLevel * 18)}px`;
+  const offset = elements.explorerTable.classList.contains("has-taxonomy-timeline") ? 8 : 18;
+  return `${offset + (indentLevel * 18)}px`;
 }
 
 function moveExplorerSelection(direction) {
