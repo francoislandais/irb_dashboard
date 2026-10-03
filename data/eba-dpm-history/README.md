@@ -27,6 +27,14 @@ associé depuis les titres des feuilles EBA. Chaque identifiant de l’applicati
 associé au nom de son framework le plus récent disponible; la provenance du nom
 (framework, module, classeur et feuille) reste consultable dans le CSV.
 
+Le champ `format` est recalculé à chaque reconstruction par `build_taxonomy.py`.
+Une mention de pourcentage dans un libellé ne suffit pas à classer la valeur en `%` :
+« exposures with a PD estimate », « exposures with a 90% risk weight », les
+tranches de poids de risque, les seuils LTV et les décotes qualifient des montants.
+Les mesures explicitement exprimées en taux, ratio ou pourcentage restent en `%`.
+Cette distinction précède la reprise des formats du dictionnaire existant afin
+qu'une ancienne erreur ne réapparaisse pas lors de la prochaine extraction.
+
 Les lignes indentées des layouts annotés deviennent des chemins hiérarchiques séparés par `/`. Les colonnes reprennent le code de colonne et le libellé terminal. Pour les layouts DPM 1.0, les feuilles numérotées d’un template fournissent les codes et libellés de l’axe Z : le générateur ne développe pas tous les membres des domaines de dictionnaire référencés, car cela ajouterait des possibilités qui ne s’appliquent pas au template. En DPM 2.0, les dimensions de feuille explicitement déclarées par `Key value` sont résolues dans le glossaire. Les autres références de propriétés ne sont pas des valeurs d’axe Z.
 
 Pour les axes Z en devises, le générateur ordonne les codes selon `CURRENCY_Z_DISPLAY_ORDER` dans `build_taxonomy.py`. Il limite les grands domaines ouverts à 21 devises (EUR et 20 devises étrangères, dont le réal brésilien et les principaux pesos latino-américains), tout en conservant les choix natifs de synthèse comme « All currencies » et « Other currency ». Les petits domaines fermés conservent tous leurs codes. Cette sélection facilite la navigation ; le glossaire EBA source reste complet dans les fichiers téléchargés. L'ordre est un choix de présentation fondé sur les devises les plus pertinentes pour les banques européennes, et non un classement statistique des volumes déclarés.

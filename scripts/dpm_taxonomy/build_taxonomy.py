@@ -44,6 +44,20 @@ DISPLAY_RATE_RE = re.compile(r"(?i)\b(?:default|loss|cure|recovery|capital\s+buf
 DISPLAY_COUNT_RE = re.compile(r"(?i)\b(?:number\s+of|count\s+of|number|count)\b")
 DISPLAY_DURATION_RE = re.compile(r"(?i)\b(?:maturity|duration|repricing\s+time|survival\s+period)\b")
 DISPLAY_DURATION_UNIT_RE = re.compile(r"(?i)\b(?:days?|months?|years?)\b")
+PERCENTAGE_MEASURE_RE = re.compile(
+    r"(?i)(?:\b(?:as|expressed|reported|measured)\s+(?:a\s+)?(?:percentage|percent|%)\s+of\b"
+    r"|\b(?:in|as)\s+%\s+of\b|\b(?:percentage|percent)\s+of\b|(?<!\w)%\s+of\b"
+    r"|\(\s*%\s*\)|(?<!\w)%\s+coverage\b|\btarget\s+%|\bset\s+in\s+percentage\b"
+    r"|\bpart\s+of\s+exposures\s+covered\b.*%"
+    r"|\b(?:weighted\s+average|average)\s+(?:pd|lgd)\b"
+    r"|\bexposures?\s+in\s+default\s+w\s*\(%\))"
+)
+AMOUNT_MEASURE_RE = re.compile(
+    r"(?i)\b(?:amounts?|exposures?|assets?|liabilit(?:y|ies)|positions?|"
+    r"transactions?|holdings?|loans?|securities|inflows?|outflows?|"
+    r"receivables|collateral|cash|funding|own\s+funds|notional\s+value)\b"
+)
+PERCENTAGE_QUALIFIER_RE = re.compile(r"\d[\d\s.,]*\s*%")
 REGULATORY_ACRONYMS = set("""
 ABCP ACPR ACTP AVA BAFIN BIC BNRO BRRD BSI BTAR CCF CET1 CDS CNMV COREP CRD CRR
 CSR CQS CSSF CVA CYSEC DGS DORA EAD EBA ECB EEPE ERBA ESG FINFSA FINREP FKTK FMI
@@ -362,6 +376,47 @@ def code_text(value: Any) -> str:
     return str(int(result)) if len(result) > 1 and result.startswith("0") else result
 
 
+def is_monetary_measure_despite_percent_words(description: str) -> bool:
+    """Reject percentages describing a bucket, threshold or exposure.
+
+    The label often gives a *condition* (90% risk weight, 75% cap, an
+    LTV/coverage threshold) while the cell still reports an amount. Apply
+    this before importing historical formats, which may contain the same
+    false positives. Genuine percentage measures remain eligible.
+    """
+    if re.fullmatch(r"(?i)\s*(?:amount|value|inflow|outflow)\s*(?:or|/)\s*(?:ratio|percentage)\s*", str(description or "")):
+        return True  # The other axis identifies the actual scale.
+    parts = [part.strip() for part in str(description or "").split("/") if part.strip()]
+    if not parts:
+        return False
+    leaf = parts[-1]
+    folded = leaf.casefold()
+    if DISPLAY_COUNT_RE.search(leaf) or (DISPLAY_DURATION_RE.search(leaf) and DISPLAY_DURATION_UNIT_RE.search(leaf)):
+        if "residual maturity" not in folded:
+            return False
+    if PERCENTAGE_MEASURE_RE.search(leaf):
+        return False
+    if re.search(r"\b(?:amount|value|inflow|outflow|required stable funding)\s*(?:or|/)\s*(?:ratio|percentage)\b", folded):
+        return True  # A mixed measure must be resolved on the other axis.
+    if re.search(r"\bleverage\s+ratio\s+(?:total\s+)?exposures?\b", folded):
+        return True
+    if re.search(r"\b(?:loans?|instruments?|assets?)\b.*\b(?:ltv|coverage)\s+(?:ratio\s+)?(?:higher|lower|above|below|between|>|<)", folded):
+        return True
+    if "residual maturity" in folded and re.search(r"\b(?:encumbered|unencumbered)\b", folded):
+        return True
+    if re.search(r"\b(?:ratio|rate|density|share)\b", folded):
+        return False  # The rate or ratio itself is the reported measure.
+    if re.search(r"^(?:applicable|standard|weighted|average|risk)\s+(?:rsf\s+)?(?:factor|weight)\b", folded):
+        return False
+    if PERCENTAGE_QUALIFIER_RE.search(leaf):
+        # A quoted rate is a classification criterion, not the reported rate.
+        # This also covers bare axis buckets such as "[20%-40%[" or "1250% RW".
+        return True
+    if AMOUNT_MEASURE_RE.search(leaf):
+        return True
+    return False
+
+
 def infer_display_format(description: str) -> str:
     """Infer display-only exceptions to the default monetary scale.
 
@@ -376,6 +431,13 @@ def infer_display_format(description: str) -> str:
     folded = [part.casefold() for part in segments]
     full_text = " / ".join(segments)
     leaf = segments[-1].strip()
+
+    if is_monetary_measure_despite_percent_words(description):
+        return ""
+    if DISPLAY_COUNT_RE.search(full_text):
+        return "Unit"
+    if DISPLAY_DURATION_RE.search(full_text) and DISPLAY_DURATION_UNIT_RE.search(full_text):
+        return "Unit"
 
     # Ratio descendants such as surplus/deficit, and explicit ratio
     # numerators or denominators, are amounts rather than percentage values.
@@ -392,12 +454,6 @@ def infer_display_format(description: str) -> str:
 
     if DISPLAY_PERCENT_RE.search(full_text) or DISPLAY_RATE_RE.search(full_text):
         return "%"
-
-    if DISPLAY_COUNT_RE.search(full_text):
-        return "Unit"
-
-    if DISPLAY_DURATION_RE.search(full_text) and DISPLAY_DURATION_UNIT_RE.search(full_text):
-        return "Unit"
 
     return ""
 
@@ -498,7 +554,18 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
             # different label; only the actual output-floor rate is a ratio.
             is_output_floor_rate = code_text(code) == "900" and description.casefold().endswith("output floor applied (%)")
             return "%" if is_output_floor_rate else ""
-    return production_display_format(table_id, coordinate, code, description) or infer_display_format(description)
+    curated_format = production_display_format(table_id, coordinate, code, description)
+    if not curated_format:
+        # Older maps store the terminal label, while extraction uses the full
+        # source hierarchy for inference. Preserve explicitly curated units.
+        leaf_format = production_display_format(table_id, coordinate, code, description.rsplit("/", 1)[-1])
+        if leaf_format == "Unit":
+            curated_format = "Unit"
+    if curated_format == "Unit":
+        return "Unit"
+    if is_monetary_measure_despite_percent_words(description):
+        return ""
+    return curated_format or infer_display_format(description)
 
 
 def suffix_collision_signature(module: str, base: str, value: str) -> str:

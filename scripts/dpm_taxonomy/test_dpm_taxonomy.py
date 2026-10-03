@@ -303,6 +303,47 @@ class DpmTaxonomyTests(unittest.TestCase):
             "%",
         )
 
+    def test_percent_words_qualifying_monetary_exposures_are_not_percent_values(self):
+        amounts = (
+            ("C_10.00", "y_axis_rc_code", "999", "Exposure with 90% risk weight"),
+            ("C_10.00", "x_axis_rc_code", "90", "Exposures secured by mortgages on residential property up to 55% of the property value"),
+            ("C_10.00", "x_axis_rc_code", "110", "Exposures to unrated corporates with a PD estimate"),
+            ("C_10.00", "y_axis_rc_code", "101", "Of which: Exposures to unrated corporates with a PD estimate"),
+            ("C_13.01", "x_axis_rc_code", "220", "<=20% RW"),
+            ("C_18.00", "y_axis_rc_code", "90", "> 1 <= 2 (1,9 for coupon of less than 3%) years"),
+            ("C_19.00", "x_axis_rc_code", "61", "[0-10%["),
+            ("K_03.00", "x_axis_rc_code", "10", "a. 0%"),
+            ("C_40.00", "x_axis_rc_code", "130", "Leverage ratio exposure amount"),
+            ("C_47.00", "x_axis_rc_code", "10", "Amount / Ratio"),
+            ("C_82.00", "y_axis_rc_code", "60", "level 1 assets eligible for 0% LCR haircut"),
+            ("C_82.00", "y_axis_rc_code", "80", "encumbered for a residual maturity of at least six months but less than one year"),
+            ("F_18.02", "y_axis_rc_code", "40", "Of which: Loans with LTV ratio higher than 60% and less than or equal to 80%"),
+            ("K_66.01.a", "y_axis_rc_code", "280", "Deferred tax assets amount above 10% threshold"),
+            ("K_74.00", "y_axis_rc_code", "220", "With a risk weight of less than or equal to 35%"),
+            ("Z_03.00", "x_axis_rc_code", "10", "Amount or Percentage"),
+        )
+        for table_id, coordinate, code, description in amounts:
+            with self.subTest(table_id=table_id, coordinate=coordinate, code=code):
+                self.assertEqual(builder.dimension_display_format(table_id, coordinate, code, description), "")
+
+        actual_percentages = (
+            ("C_08.01", "x_axis_rc_code", "230", "Exposure weighted average LGD (%)"),
+            ("C_03.00", "y_axis_rc_code", "130", "Total SREP capital requirement ratio (TSCR)"),
+            ("I_07.00", "x_axis_rc_code", "70", "Exposure Value (as % of Own Funds)"),
+            ("C_105.01", "x_axis_rc_code", "80", "Cure rate for defaulted assets"),
+            ("C_06.02", "x_axis_rc_code", "10", "Share of holding (%)"),
+            ("D_06.00", "x_axis_rc_code", "40", "% coverage (over total assets)*"),
+            ("R_22.02", "y_axis_rc_code", "10", "Target % set in percentage (two digits e.g. 33.33%) in the diversity policy"),
+            ("K_27.02.a", "x_axis_rc_code", "20", "Part of exposures covered by Financial Collaterals %"),
+        )
+        for table_id, coordinate, code, description in actual_percentages:
+            with self.subTest(table_id=table_id, coordinate=coordinate, code=code):
+                self.assertEqual(builder.dimension_display_format(table_id, coordinate, code, description), "%")
+        self.assertEqual(builder.dimension_display_format(
+            "R_08.00", "y_axis_rc_code", "140",
+            "Number of institutions that have discontinued the practice of higher ratio",
+        ), "Unit")
+
     def test_real_dpm_210_delta_and_2020_applicability_rules(self):
         archive = zipfile.ZipFile(SOURCES / "2.10_layouts.zip")
         covid_file = next(n for n in archive.namelist() if "COVID19" in n and n.endswith(".xlsx"))
