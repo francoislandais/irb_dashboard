@@ -339,6 +339,11 @@ export function wireExplorerUi(actions, rerender) {
 
     if (event.target.closest("td.is-xy-impossible, td.is-taxonomy-unavailable")) return;
 
+    if (event.target.closest("[data-explorer-tree-view-toggle]")) {
+      toggleExplorerTreeView();
+      return;
+    }
+
     const toggle = event.target.closest("[data-toggle-path]");
     if (toggle) {
       toggleExplorerPath(toggle.dataset.togglePath);
@@ -454,6 +459,12 @@ function createExplorerTemplateContext() {
       x: new Set(),
       y: new Set(),
       z: new Set()
+    },
+    treeViewModeByAxis: {
+      template: null,
+      x: null,
+      y: null,
+      z: null
     },
     scrollByAxis: {
       template: { left: 0, top: 0 },
@@ -1801,6 +1812,7 @@ function renderExplorerTable(series, selectedUnit) {
     expandExplorerAncestorsForSelectedCode(tableRows);
   }
   expandDefaultExplorerPaths(displayRows, parentPaths);
+  applyExplorerTreeViewMode(parentPaths);
 
   // Collapsed branches never get a <tr> at all (instead of being built and
   // then hidden with CSS) - heavy templates can have thousands of descendant
@@ -1833,6 +1845,7 @@ function renderExplorerTable(series, selectedUnit) {
     taxonomyStatus.textContent = `Taxonomy framework ${series.mainTaxonomyFramework}`;
     descriptionHeader.append(taxonomyStatus);
   }
+  if (parentPaths.size) descriptionHeader.append(createExplorerTreeViewToggle(parentPaths));
   headerRow.append(descriptionHeader);
 
   const codeHeader = document.createElement("th");
@@ -5533,6 +5546,51 @@ function expandDefaultExplorerPaths(rows, parentPaths) {
   context.defaultExpandedPathsInitializedByAxis[activeAxis] = true;
 }
 
+function applyExplorerTreeViewMode(parentPaths) {
+  const context = getActiveExplorerContext();
+  const mode = context.treeViewModeByAxis[context.activeAxis];
+  if (!mode) return;
+  const expandedPaths = getActiveExplorerExpandedPaths();
+  if (mode === "compact") {
+    expandedPaths.clear();
+  } else {
+    parentPaths.forEach((path) => expandedPaths.add(path));
+  }
+}
+
+function createExplorerTreeViewToggle(parentPaths) {
+  const expandedPaths = getActiveExplorerExpandedPaths();
+  const isExpanded = [...parentPaths].every((path) => expandedPaths.has(path));
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "explorer-tree-view-toggle";
+  button.dataset.explorerTreeViewToggle = "true";
+  button.textContent = isExpanded ? "Compact view" : "Expanded view";
+  button.setAttribute("aria-label", isExpanded ? "Collapse all table branches" : "Expand all table branches");
+  button.title = isExpanded ? "Collapse all table branches" : "Expand all table branches";
+  return button;
+}
+
+function toggleExplorerTreeView() {
+  const series = lastRenderedExplorerTableSeries;
+  if (!series) return;
+  const parentPaths = getParentPaths(series.rows.map(normalizeExplorerSeriesRow));
+  if (!parentPaths.size) return;
+
+  saveExplorerScrollPosition();
+  const context = getActiveExplorerContext();
+  const expandedPaths = getActiveExplorerExpandedPaths();
+  const isExpanded = [...parentPaths].every((path) => expandedPaths.has(path));
+  context.treeViewModeByAxis[context.activeAxis] = isExpanded ? "compact" : "expanded";
+  context.defaultExpandedPathsInitializedByAxis[context.activeAxis] = true;
+  applyExplorerTreeViewMode(parentPaths);
+
+  elements.explorerTable.replaceChildren();
+  renderExplorerTable(series, lastRenderedExplorerSelectedUnit);
+  applyExplorerSelection();
+  restoreExplorerScrollPosition();
+}
+
 function createDescriptionContent(seriesRow, normalizedPath, isParent, options = {}) {
   const fragment = document.createDocumentFragment();
   if (seriesRow.isTaxonomySectionHeader) {
@@ -5633,6 +5691,8 @@ function createTreeConnector(level, startsUnderToggle = false) {
 
 
 function toggleExplorerPath(path) {
+  const context = getActiveExplorerContext();
+  context.treeViewModeByAxis[context.activeAxis] = null;
   const expandedPaths = getActiveExplorerExpandedPaths();
   saveExplorerScrollPosition();
 

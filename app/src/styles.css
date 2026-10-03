@@ -2603,6 +2603,38 @@ table {
   white-space: nowrap;
 }
 
+.metric-table thead .explorer-tree-view-toggle {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  z-index: 1;
+  padding: 3px 8px;
+  border: 1px solid #c9dced;
+  border-radius: 4px;
+  background: #eaf2fa;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.metric-table thead .description-column:has(.explorer-tree-view-toggle) {
+  height: 52px;
+}
+
+.metric-table thead .explorer-tree-view-toggle:hover,
+.metric-table thead .explorer-tree-view-toggle:focus-visible {
+  background: #dcecf9;
+  border-color: #8dbbdb;
+}
+
+.metric-table thead .explorer-tree-view-toggle:focus-visible {
+  outline: 2px solid var(--primary-dark);
+  outline-offset: 2px;
+}
+
 /* Temporal tables (including the Z axis in XY mode) keep their first-level
    labels flush with the taxonomy caption. Only branches need the toggle
    gutter; a flat first-level item has no control to reserve space for. */

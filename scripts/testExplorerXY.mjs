@@ -135,7 +135,8 @@ const sandbox={
   getLatestState:()=>base,getSelectedExplorerCodeForActiveAxis:()=>context.activeAxis==="y"?context.selectedYCode:context.selectedXCode,
   refreshExplorerSelectionOnly:()=>selectedCalls++,saveExplorerScrollPosition(){},focusSelectedExplorerRow(){},
 };
-for(const name of ["clearExplorerCellRangeSelection","expandDefaultExplorerPaths","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar"]) sandbox[name]=()=>{};
+for(const name of ["clearExplorerCellRangeSelection","expandDefaultExplorerPaths","applyExplorerTreeViewMode","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar"]) sandbox[name]=()=>{};
+sandbox.createExplorerTreeViewToggle=()=>new Element("button");
 const ctx=vm.createContext(sandbox);
 vm.runInContext('let explorerGlobalReferenceLabel="",explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,shouldRevealExplorerAxisSelection=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
 base.selectedTaxonomiesByTemplate={TEST:"4.2"};
