@@ -44,6 +44,10 @@ DISPLAY_RATE_RE = re.compile(r"(?i)\b(?:default|loss|cure|recovery|capital\s+buf
 DISPLAY_COUNT_RE = re.compile(r"(?i)\b(?:number\s+of|count\s+of|number|count)\b")
 DISPLAY_DURATION_RE = re.compile(r"(?i)\b(?:maturity|duration|repricing\s+time|survival\s+period)\b")
 DISPLAY_DURATION_UNIT_RE = re.compile(r"(?i)\b(?:days?|months?|years?)\b")
+DURATION_BUCKET_PERIOD_RE = re.compile(
+    r"(?i)\b(?:\d+(?:[.,]\d+)?|one|two|three|six|twelve)\s*"
+    r"(?:working\s+)?(?:days?|months?|years?)\b"
+)
 PERCENTAGE_MEASURE_RE = re.compile(
     r"(?i)(?:\b(?:as|expressed|reported|measured)\s+(?:a\s+)?(?:percentage|percent|%)\s+of\b"
     r"|\b(?:in|as)\s+%\s+of\b|\b(?:percentage|percent)\s+of\b|(?<!\w)%\s+of\b"
@@ -417,6 +421,26 @@ def is_monetary_measure_despite_percent_words(description: str) -> bool:
     return False
 
 
+def is_duration_bucket(description: str) -> bool:
+    """A fixed day/month/year range classifies an amount, not its unit.
+
+    Only the terminal axis label is considered: an ancestor may mention
+    maturity while the leaf reports an actual duration or a different measure.
+    """
+    leaf = str(description or "").rsplit("/", 1)[-1].strip()
+    if not DURATION_BUCKET_PERIOD_RE.search(leaf):
+        return False
+    if DISPLAY_COUNT_RE.search(leaf):
+        return False
+    if re.match(r"(?i)^(?:pd|lgd)\b", leaf):
+        return False  # A probability/loss rate measured over a horizon.
+    if re.search(r"(?i)\b(?:ratio|rate|percentage|percent|share)\b", leaf):
+        return False
+    if re.search(r"(?i)\b(?:weighted\s+average|average)\b.*\b(?:maturity|duration|time)\b", leaf):
+        return False
+    return True
+
+
 def infer_display_format(description: str) -> str:
     """Infer display-only exceptions to the default monetary scale.
 
@@ -432,7 +456,7 @@ def infer_display_format(description: str) -> str:
     full_text = " / ".join(segments)
     leaf = segments[-1].strip()
 
-    if is_monetary_measure_despite_percent_words(description):
+    if is_duration_bucket(description) or is_monetary_measure_despite_percent_words(description):
         return ""
     if DISPLAY_COUNT_RE.search(full_text):
         return "Unit"
@@ -554,6 +578,8 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
             # different label; only the actual output-floor rate is a ratio.
             is_output_floor_rate = code_text(code) == "900" and description.casefold().endswith("output floor applied (%)")
             return "%" if is_output_floor_rate else ""
+    if is_duration_bucket(description):
+        return ""
     curated_format = production_display_format(table_id, coordinate, code, description)
     if not curated_format:
         # Older maps store the terminal label, while extraction uses the full

@@ -344,6 +344,38 @@ class DpmTaxonomyTests(unittest.TestCase):
             "Number of institutions that have discontinued the practice of higher ratio",
         ), "Unit")
 
+    def test_duration_ranges_classify_amounts_without_changing_duration_measures(self):
+        amount_buckets = (
+            ("C_18.00", "y_axis_rc_code", "40", "Residual maturity/0 <= 1 month"),
+            ("C_30.00", "x_axis_rc_code", "20", "Up to 1 Month"),
+            ("C_92.01", "x_axis_rc_code", "250", "0.5 years - 0.5 years"),
+            ("F_90.01", "x_axis_rc_code", "70", "<= 3 months"),
+            ("M_04.00", "y_axis_rc_code", "10", "Of which: residual maturity >= 1 year and < 2 years"),
+            ("P_01.02", "y_axis_rc_code", "150", "Short-term debt securities issued (original maturity <1 year)"),
+            ("T_01.00", "y_axis_rc_code", "311", "o/w residual maturity <= 1 month"),
+        )
+        for table_id, coordinate, code, description in amount_buckets:
+            with self.subTest(table_id=table_id, code=code):
+                self.assertEqual(builder.dimension_display_format(table_id, coordinate, code, description), "")
+
+        duration_measures = (
+            ("C_08.01", "x_axis_rc_code", "250", "Exposure-weighted average maturity value (days)"),
+            ("C_67.00", "x_axis_rc_code", "70", "Weighted average original maturity (days)"),
+            ("F_47.00", "y_axis_rc_code", "40", "Average duration of litigation procedures concluded in the period (in years)"),
+            ("C_96.01.2", "x_axis_rc_code", "30", "Number of business days"),
+        )
+        for table_id, coordinate, code, description in duration_measures:
+            with self.subTest(table_id=table_id, code=code):
+                self.assertEqual(builder.dimension_display_format(table_id, coordinate, code, description), "Unit")
+        for table_id, code, description in (
+            ("C_111.00", "100", "PD - 12 months - IFRS 9"),
+            ("C_112.00", "100", "PD - 0 - 12 months"),
+        ):
+            with self.subTest(table_id=table_id, code=code):
+                self.assertEqual(builder.dimension_display_format(
+                    table_id, "x_axis_rc_code", code, description,
+                ), "%")
+
     def test_real_dpm_210_delta_and_2020_applicability_rules(self):
         archive = zipfile.ZipFile(SOURCES / "2.10_layouts.zip")
         covid_file = next(n for n in archive.namelist() if "COVID19" in n and n.endswith(".xlsx"))

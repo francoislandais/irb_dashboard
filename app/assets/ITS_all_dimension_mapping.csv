@@ -411,12 +411,12 @@ F_90.01;x_axis_rc_code;40;30;Of which: granted;;;;2.10
 F_90.01;x_axis_rc_code;50;40;Of which: legislative moratoria;;;;2.10
 F_90.01;x_axis_rc_code;55;40;Of which: subject to extended moratoria;;;;2.10
 F_90.01;x_axis_rc_code;60;40;Of which: expired;;;;2.10
-F_90.01;x_axis_rc_code;70;__PARENT__5f8f8c55f861;<= 3 months;;;Unit;2.10
-F_90.01;x_axis_rc_code;80;__PARENT__5f8f8c55f861;> 3 months <= 6 months;;;Unit;2.10
-F_90.01;x_axis_rc_code;90;__PARENT__5f8f8c55f861;> 6 months <= 9 months;;;Unit;2.10
-F_90.01;x_axis_rc_code;100;__PARENT__5f8f8c55f861;> 9 months <= 12 months;;;Unit;2.10
-F_90.01;x_axis_rc_code;110;__PARENT__5f8f8c55f861;> 12 months <= 18 months;;;Unit;2.10
-F_90.01;x_axis_rc_code;120;__PARENT__5f8f8c55f861;> 18 months;;;Unit;2.10
+F_90.01;x_axis_rc_code;70;__PARENT__5f8f8c55f861;<= 3 months;;;;2.10
+F_90.01;x_axis_rc_code;80;__PARENT__5f8f8c55f861;> 3 months <= 6 months;;;;2.10
+F_90.01;x_axis_rc_code;90;__PARENT__5f8f8c55f861;> 6 months <= 9 months;;;;2.10
+F_90.01;x_axis_rc_code;100;__PARENT__5f8f8c55f861;> 9 months <= 12 months;;;;2.10
+F_90.01;x_axis_rc_code;110;__PARENT__5f8f8c55f861;> 12 months <= 18 months;;;;2.10
+F_90.01;x_axis_rc_code;120;__PARENT__5f8f8c55f861;> 18 months;;;;2.10
 F_90.01;y_axis_rc_code;10;;EBA-compliant moratoria loans and advances;;;;2.10
 F_90.01;y_axis_rc_code;20;10;of which: Households;;;;2.10
 F_90.01;y_axis_rc_code;30;20;of which: Collateralised by residential immovable property;;;;2.10
@@ -430,12 +430,12 @@ F_90.02;x_axis_rc_code;30;;Gross carrying amount;;;;2.10
 F_90.02;x_axis_rc_code;40;30;Of which: granted;;;;2.10
 F_90.02;x_axis_rc_code;50;40;Of which: expired;;;;2.10
 F_90.02;x_axis_rc_code;55;40;Of which: with extended COVID-19-related forbearance measures;;;;2.10
-F_90.02;x_axis_rc_code;60;__PARENT__faf543ac5676;<= 3 months;;;Unit;2.10
-F_90.02;x_axis_rc_code;70;__PARENT__faf543ac5676;> 3 months <= 6 months;;;Unit;2.10
-F_90.02;x_axis_rc_code;80;__PARENT__faf543ac5676;> 6 months <= 9 months;;;Unit;2.10
-F_90.02;x_axis_rc_code;90;__PARENT__faf543ac5676;> 9 months <= 12 months;;;Unit;2.10
-F_90.02;x_axis_rc_code;100;__PARENT__faf543ac5676;> 12 months <= 18 months;;;Unit;2.10
-F_90.02;x_axis_rc_code;110;__PARENT__faf543ac5676;> 18 months;;;Unit;2.10
+F_90.02;x_axis_rc_code;60;__PARENT__faf543ac5676;<= 3 months;;;;2.10
+F_90.02;x_axis_rc_code;70;__PARENT__faf543ac5676;> 3 months <= 6 months;;;;2.10
+F_90.02;x_axis_rc_code;80;__PARENT__faf543ac5676;> 6 months <= 9 months;;;;2.10
+F_90.02;x_axis_rc_code;90;__PARENT__faf543ac5676;> 9 months <= 12 months;;;;2.10
+F_90.02;x_axis_rc_code;100;__PARENT__faf543ac5676;> 12 months <= 18 months;;;;2.10
+F_90.02;x_axis_rc_code;110;__PARENT__faf543ac5676;> 18 months;;;;2.10
 F_90.02;y_axis_rc_code;10;;Other loans and advances with COVID-19-related forbearance measures;;;;2.10
 F_90.02;y_axis_rc_code;20;10;of which: Households;;;;2.10
 F_90.02;y_axis_rc_code;30;10;of which: Non-financial corporations;;;;2.10
@@ -444,10 +444,10 @@ F_90.03;x_axis_rc_code;10;;Number of obligors;;;Unit;2.10
 F_90.03;x_axis_rc_code;20;10;Of which: with called public gurantee;;;Unit;2.10
 F_90.03;x_axis_rc_code;30;;Gross carrying amount;;;;2.10
 F_90.03;x_axis_rc_code;40;30;Of which: with called public guarantee;;;;2.10
-F_90.03;x_axis_rc_code;50;__PARENT__c1d74be042cd;<= 6 months;;;Unit;2.10
-F_90.03;x_axis_rc_code;60;__PARENT__c1d74be042cd;> 6 months <= 12 months;;;Unit;2.10
-F_90.03;x_axis_rc_code;70;__PARENT__c1d74be042cd;> 1 year <= 2 year;;;Unit;2.10
-F_90.03;x_axis_rc_code;80;__PARENT__c1d74be042cd;> 2 year <= 5 year;;;Unit;2.10
+F_90.03;x_axis_rc_code;50;__PARENT__c1d74be042cd;<= 6 months;;;;2.10
+F_90.03;x_axis_rc_code;60;__PARENT__c1d74be042cd;> 6 months <= 12 months;;;;2.10
+F_90.03;x_axis_rc_code;70;__PARENT__c1d74be042cd;> 1 year <= 2 year;;;;2.10
+F_90.03;x_axis_rc_code;80;__PARENT__c1d74be042cd;> 2 year <= 5 year;;;;2.10
 F_90.03;x_axis_rc_code;90;;Payment received from the public guarantor during the period.;;;;2.10
 F_90.03;y_axis_rc_code;10;;Newly originated loans and advances subject to public guarantee schemes;;;;2.10
 F_90.03;y_axis_rc_code;20;10;of which: Households;;;;2.10
@@ -650,47 +650,47 @@ T_01.00;y_axis_rc_code;190;100;Tax and social security authorities liabilities, 
 T_01.00;y_axis_rc_code;200;100;DGS liabilities (BRRD art. 44/2/g/iv);;;;2.10
 T_01.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;2.10
 T_01.00;y_axis_rc_code;310;300;Deposits, not covered but preferential (BRRD art. 108);;;;2.10
-T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;2.10
-T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;331;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;2.10
 T_01.00;y_axis_rc_code;332;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;2.10
 T_01.00;y_axis_rc_code;333;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;2.10
 T_01.00;y_axis_rc_code;334;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account prudential netting rules;;;;2.10
 T_01.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;2.10
-T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;350;300;Structured notes;;;;2.10
-T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;2.10
-T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;2.10
-T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;2.10
-T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;Unit;2.10
-T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;Unit;2.10
-T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;;2.10
+T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;;2.10
+T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;2.10
-T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.10
-T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;Unit;2.10
+T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;;2.10
+T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;;2.10
 T_01.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;2.10
 T_01.00;y_axis_rc_code;400;300;Residual liabilities;;;;2.10
 T_01.00;y_axis_rc_code;500;;Own funds;;;;2.10
@@ -1293,48 +1293,48 @@ Z_02.00;y_axis_rc_code;190;100;Tax and social security authorities liabilities, 
 Z_02.00;y_axis_rc_code;200;100;DGS liabilities;;;;2.10
 Z_02.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;2.10
 Z_02.00;y_axis_rc_code;310;300;Deposits, not covered but preferential;;;;2.10
-Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;2.10
-Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;330;300;Balance sheet liabilities arising from derivatives;;;;2.10
 Z_02.00;y_axis_rc_code;331;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;2.10
 Z_02.00;y_axis_rc_code;332;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;2.10
 Z_02.00;y_axis_rc_code;333;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;2.10
 Z_02.00;y_axis_rc_code;334;330;Sum of net liability positions taking into account prudential netting rules;;;;2.10
 Z_02.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;2.10
-Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;350;300;Structured notes;;;;2.10
-Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;2.10
-Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;2.10
-Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;2.10
-Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;Unit;2.10
-Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;Unit;2.10
-Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;;2.10
+Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;;2.10
+Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;2.10
-Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.10
-Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;Unit;2.10
+Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;;2.10
+Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;;2.10
 Z_02.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;2.10
 Z_02.00;y_axis_rc_code;400;300;Residual liabilities;;;;2.10
 Z_02.00;y_axis_rc_code;500;;Own funds;;;;2.10
@@ -1799,10 +1799,10 @@ P_01.02;y_axis_rc_code;142;140;Other EEA countries activities;;;;2.10.1
 P_01.02;y_axis_rc_code;143;140;Non-EEA countries activities;;;;2.10.1
 P_01.02;y_axis_rc_code;145;__PARENT__51cb2387bc39;Deposits from central banks (excl. repurchase agreements);;;;2.10.1
 P_01.02;y_axis_rc_code;147;__PARENT__51cb2387bc39;Deposits from general governments (excl. repurchase agreements);;;;2.10.1
-P_01.02;y_axis_rc_code;150;__PARENT__51cb2387bc39;Short-term debt securities issued (original maturity <1 year);;;Unit;2.10.1
+P_01.02;y_axis_rc_code;150;__PARENT__51cb2387bc39;Short-term debt securities issued (original maturity <1 year);;;;2.10.1
 P_01.02;y_axis_rc_code;160;150;Short-term unsecured debt securities issued;;;Unit;2.10.1
 P_01.02;y_axis_rc_code;170;150;Short-term secured debt securities issued;;;Unit;2.10.1
-P_01.02;y_axis_rc_code;180;__PARENT__51cb2387bc39;Long-term debt securities issued (original maturity >=1 year);;;Unit;2.10.1
+P_01.02;y_axis_rc_code;180;__PARENT__51cb2387bc39;Long-term debt securities issued (original maturity >=1 year);;;;2.10.1
 P_01.02;y_axis_rc_code;190;180;Total long-term unsecured debt securities issued;;;Unit;2.10.1
 P_01.02;y_axis_rc_code;191;190;Additional Tier 1 instruments;;;Unit;2.10.1
 P_01.02;y_axis_rc_code;192;190;Tier 2 instruments;;;Unit;2.10.1
@@ -1815,7 +1815,7 @@ P_01.02;y_axis_rc_code;250;220;Covered bonds;;;Unit;2.10.1
 P_01.02;y_axis_rc_code;280;220;Asset backed securities;;;Unit;2.10.1
 P_01.02;y_axis_rc_code;310;220;Other long-term secured debt securities;;;Unit;2.10.1
 P_01.02;y_axis_rc_code;340;__PARENT__51cb2387bc39;Total debt securities issued;;;;2.10.1
-P_01.02;y_axis_rc_code;350;340;o/w (original maturity >= 3 years);;;Unit;2.10.1
+P_01.02;y_axis_rc_code;350;340;o/w (original maturity >= 3 years);;;;2.10.1
 P_01.02;y_axis_rc_code;360;__PARENT__51cb2387bc39;Derivatives;;;;2.10.1
 P_01.02;y_axis_rc_code;370;__PARENT__51cb2387bc39;Total equity;;;;2.10.1
 P_01.02;y_axis_rc_code;381;__PARENT__51cb2387bc39;Other liabilities;;;;2.10.1
@@ -2267,47 +2267,47 @@ T_01.00;y_axis_rc_code;190;100;Tax and social security authorities liabilities, 
 T_01.00;y_axis_rc_code;200;100;DGS liabilities (BRRD art. 44/2/g/iv);;;;2.9.1.1
 T_01.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;2.9.1.1
 T_01.00;y_axis_rc_code;310;300;Deposits, not covered but preferential (BRRD art. 108);;;;2.9.1.1
-T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;2.9.1.1
-T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;331;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;2.9.1.1
 T_01.00;y_axis_rc_code;332;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;2.9.1.1
 T_01.00;y_axis_rc_code;333;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;2.9.1.1
 T_01.00;y_axis_rc_code;334;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account prudential netting rules;;;;2.9.1.1
 T_01.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;2.9.1.1
-T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;350;300;Structured notes;;;;2.9.1.1
-T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;2.9.1.1
-T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;2.9.1.1
-T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;2.9.1.1
-T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;;2.9.1.1
+T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;;2.9.1.1
+T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;2.9.1.1
-T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;Unit;2.9.1.1
+T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;;2.9.1.1
 T_01.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;2.9.1.1
 T_01.00;y_axis_rc_code;400;300;Residual liabilities;;;;2.9.1.1
 T_01.00;y_axis_rc_code;500;;Own funds;;;;2.9.1.1
@@ -2909,48 +2909,48 @@ Z_02.00;y_axis_rc_code;190;100;Tax and social security authorities liabilities, 
 Z_02.00;y_axis_rc_code;200;100;DGS liabilities;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;310;300;Deposits, not covered but preferential;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;330;300;Balance sheet liabilities arising from derivatives;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;331;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;332;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;333;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;334;330;Sum of net liability positions taking into account prudential netting rules;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;350;300;Structured notes;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;2.9.1.1
-Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;2.9.1.1
-Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;Unit;2.9.1.1
-Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;Unit;2.9.1.1
+Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;;2.9.1.1
+Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;400;300;Residual liabilities;;;;2.9.1.1
 Z_02.00;y_axis_rc_code;500;;Own funds;;;;2.9.1.1
@@ -4477,10 +4477,10 @@ C_18.00;y_axis_rc_code;12;11;Derivatives;;;;2.9.1.1
 C_18.00;y_axis_rc_code;13;11;Other assets and liabilities;;;;2.9.1.1
 C_18.00;y_axis_rc_code;20;11;Maturity-based approach;;;;2.9.1.1
 C_18.00;y_axis_rc_code;30;20;Zone 1;;;;2.9.1.1
-C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;Unit;2.9.1.1
-C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;Unit;2.9.1.1
-C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;Unit;2.9.1.1
-C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;Unit;2.9.1.1
+C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;;2.9.1.1
+C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;;2.9.1.1
+C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;;2.9.1.1
+C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;;2.9.1.1
 C_18.00;y_axis_rc_code;80;20;1.2 Zone 2;;;;2.9.1.1
 C_18.00;y_axis_rc_code;90;80;> 1 <= 2 (1,9 for coupon of less than 3%) years;;;;2.9.1.1
 C_18.00;y_axis_rc_code;100;80;> 2 <= 3 (> 1,9 <= 2,8 for coupon of less than 3%) years;;;;2.9.1.1
@@ -4971,58 +4971,58 @@ C_29.00;y_axis_rc_code;999;;Counterparty and Group;;;;2.9.1.1
 C_30.00;x_axis_rc_code;__PARENT__b5a37450eec8;;Counterparty;;Y;;2.9.1.1
 C_30.00;x_axis_rc_code;__PARENT__683a081c7721;;Maturity buckets of the exposure;;Y;;2.9.1.1
 C_30.00;x_axis_rc_code;10;__PARENT__b5a37450eec8;Code;;;;2.9.1.1
-C_30.00;x_axis_rc_code;20;__PARENT__683a081c7721;Up to 1 Month;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;30;__PARENT__683a081c7721;Greater than 1 month up to 2 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;40;__PARENT__683a081c7721;Greater than 2 months up to 3 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;50;__PARENT__683a081c7721;Greater than 3 months up to 4 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;60;__PARENT__683a081c7721;Greater than 4 months up to 5 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;70;__PARENT__683a081c7721;Greater than 5 months up to 6 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;80;__PARENT__683a081c7721;Greater than 6 months up to 7 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;90;__PARENT__683a081c7721;Greater than 7 months up to 8 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;100;__PARENT__683a081c7721;Greater than 8 months up to 9 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;110;__PARENT__683a081c7721;Greater than 9 months up to 10 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;120;__PARENT__683a081c7721;Greater than 10 months up to 11 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;130;__PARENT__683a081c7721;Greater than 11 months up to 12 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;140;__PARENT__683a081c7721;Greater than 12 months up to 15 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;150;__PARENT__683a081c7721;Greater than 15 months up to 18 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;160;__PARENT__683a081c7721;Greater than 18 months up to 21 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;170;__PARENT__683a081c7721;Greater than 21 months up to 24 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;180;__PARENT__683a081c7721;Greater than 24 months up to 27 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;190;__PARENT__683a081c7721;Greater than 27 months up to 30 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;200;__PARENT__683a081c7721;Greater than 30 months up to 33 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;210;__PARENT__683a081c7721;Greater than 33 months up to 36 Months;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;220;__PARENT__683a081c7721;Greater than 3 years up to 5 years;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;230;__PARENT__683a081c7721;Greater than 5 years up to 10 years;;;Unit;2.9.1.1
-C_30.00;x_axis_rc_code;240;__PARENT__683a081c7721;Greater than 10 years;;;Unit;2.9.1.1
+C_30.00;x_axis_rc_code;20;__PARENT__683a081c7721;Up to 1 Month;;;;2.9.1.1
+C_30.00;x_axis_rc_code;30;__PARENT__683a081c7721;Greater than 1 month up to 2 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;40;__PARENT__683a081c7721;Greater than 2 months up to 3 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;50;__PARENT__683a081c7721;Greater than 3 months up to 4 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;60;__PARENT__683a081c7721;Greater than 4 months up to 5 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;70;__PARENT__683a081c7721;Greater than 5 months up to 6 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;80;__PARENT__683a081c7721;Greater than 6 months up to 7 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;90;__PARENT__683a081c7721;Greater than 7 months up to 8 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;100;__PARENT__683a081c7721;Greater than 8 months up to 9 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;110;__PARENT__683a081c7721;Greater than 9 months up to 10 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;120;__PARENT__683a081c7721;Greater than 10 months up to 11 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;130;__PARENT__683a081c7721;Greater than 11 months up to 12 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;140;__PARENT__683a081c7721;Greater than 12 months up to 15 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;150;__PARENT__683a081c7721;Greater than 15 months up to 18 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;160;__PARENT__683a081c7721;Greater than 18 months up to 21 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;170;__PARENT__683a081c7721;Greater than 21 months up to 24 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;180;__PARENT__683a081c7721;Greater than 24 months up to 27 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;190;__PARENT__683a081c7721;Greater than 27 months up to 30 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;200;__PARENT__683a081c7721;Greater than 30 months up to 33 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;210;__PARENT__683a081c7721;Greater than 33 months up to 36 Months;;;;2.9.1.1
+C_30.00;x_axis_rc_code;220;__PARENT__683a081c7721;Greater than 3 years up to 5 years;;;;2.9.1.1
+C_30.00;x_axis_rc_code;230;__PARENT__683a081c7721;Greater than 5 years up to 10 years;;;;2.9.1.1
+C_30.00;x_axis_rc_code;240;__PARENT__683a081c7721;Greater than 10 years;;;;2.9.1.1
 C_30.00;x_axis_rc_code;250;__PARENT__683a081c7721;Undefined maturity;;;;2.9.1.1
 C_30.00;y_axis_rc_code;999;;Counterparty;;;;2.9.1.1
 C_31.00;x_axis_rc_code;__PARENT__b5a37450eec8;;Counterparty;;Y;;2.9.1.1
 C_31.00;x_axis_rc_code;__PARENT__683a081c7721;;Maturity buckets of the exposure;;Y;;2.9.1.1
 C_31.00;x_axis_rc_code;10;__PARENT__b5a37450eec8;Code;;;;2.9.1.1
 C_31.00;x_axis_rc_code;20;__PARENT__b5a37450eec8;Group code;;;;2.9.1.1
-C_31.00;x_axis_rc_code;30;__PARENT__683a081c7721;Up to 1 Month;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;40;__PARENT__683a081c7721;Greater than 1 month up to 2 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;50;__PARENT__683a081c7721;Greater than 2 months up to 3 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;60;__PARENT__683a081c7721;Greater than 3 months up to 4 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;70;__PARENT__683a081c7721;Greater than 4 months up to 5 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;80;__PARENT__683a081c7721;Greater than 5 months up to 6 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;90;__PARENT__683a081c7721;Greater than 6 months up to 7 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;100;__PARENT__683a081c7721;Greater than 7 months up to 8 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;110;__PARENT__683a081c7721;Greater than 8 months up to 9 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;120;__PARENT__683a081c7721;Greater than 9 months up to 10 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;130;__PARENT__683a081c7721;Greater than 10 months up to 11 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;140;__PARENT__683a081c7721;Greater than 11 months up to 12 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;150;__PARENT__683a081c7721;Greater than 12 months up to 15 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;160;__PARENT__683a081c7721;Greater than 15 months up to 18 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;170;__PARENT__683a081c7721;Greater than 18 months up to 21 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;180;__PARENT__683a081c7721;Greater than 21 months up to 24 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;190;__PARENT__683a081c7721;Greater than 24 months up to 27 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;200;__PARENT__683a081c7721;Greater than 27 months up to 30 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;210;__PARENT__683a081c7721;Greater than 30 months up to 33 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;220;__PARENT__683a081c7721;Greater than 33 months up to 36 Months;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;230;__PARENT__683a081c7721;Greater than 3 years up to 5 years;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;240;__PARENT__683a081c7721;Greater than 5 years up to 10 years;;;Unit;2.9.1.1
-C_31.00;x_axis_rc_code;250;__PARENT__683a081c7721;Greater than 10 years;;;Unit;2.9.1.1
+C_31.00;x_axis_rc_code;30;__PARENT__683a081c7721;Up to 1 Month;;;;2.9.1.1
+C_31.00;x_axis_rc_code;40;__PARENT__683a081c7721;Greater than 1 month up to 2 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;50;__PARENT__683a081c7721;Greater than 2 months up to 3 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;60;__PARENT__683a081c7721;Greater than 3 months up to 4 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;70;__PARENT__683a081c7721;Greater than 4 months up to 5 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;80;__PARENT__683a081c7721;Greater than 5 months up to 6 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;90;__PARENT__683a081c7721;Greater than 6 months up to 7 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;100;__PARENT__683a081c7721;Greater than 7 months up to 8 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;110;__PARENT__683a081c7721;Greater than 8 months up to 9 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;120;__PARENT__683a081c7721;Greater than 9 months up to 10 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;130;__PARENT__683a081c7721;Greater than 10 months up to 11 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;140;__PARENT__683a081c7721;Greater than 11 months up to 12 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;150;__PARENT__683a081c7721;Greater than 12 months up to 15 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;160;__PARENT__683a081c7721;Greater than 15 months up to 18 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;170;__PARENT__683a081c7721;Greater than 18 months up to 21 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;180;__PARENT__683a081c7721;Greater than 21 months up to 24 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;190;__PARENT__683a081c7721;Greater than 24 months up to 27 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;200;__PARENT__683a081c7721;Greater than 27 months up to 30 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;210;__PARENT__683a081c7721;Greater than 30 months up to 33 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;220;__PARENT__683a081c7721;Greater than 33 months up to 36 Months;;;;2.9.1.1
+C_31.00;x_axis_rc_code;230;__PARENT__683a081c7721;Greater than 3 years up to 5 years;;;;2.9.1.1
+C_31.00;x_axis_rc_code;240;__PARENT__683a081c7721;Greater than 5 years up to 10 years;;;;2.9.1.1
+C_31.00;x_axis_rc_code;250;__PARENT__683a081c7721;Greater than 10 years;;;;2.9.1.1
 C_31.00;x_axis_rc_code;260;__PARENT__683a081c7721;Undefined maturity;;;;2.9.1.1
 C_31.00;y_axis_rc_code;999;;Counterparty and Group;;;;2.9.1.1
 C_32.01;x_axis_rc_code;__PARENT__3a45b9b7a3de;;Fair-valued assets and liabilities excluded because of partial impact on CET1;;Y;;2.9.1.1
@@ -6035,7 +6035,7 @@ C_61.00;y_axis_rc_code;__PARENT__d0709a7ce8d6;;005 Items providing stable fundin
 C_61.00;y_axis_rc_code;__PARENT__c79093355c12;__PARENT__d0709a7ce8d6;006 own funds after deduction have been applied where appropriate;;Y;;2.9.1.1
 C_61.00;y_axis_rc_code;10;__PARENT__c79093355c12;tier 1 capital instruments;;;;2.9.1.1
 C_61.00;y_axis_rc_code;20;__PARENT__c79093355c12;tier 2 capital instruments;;;;2.9.1.1
-C_61.00;y_axis_rc_code;30;__PARENT__c79093355c12;Memorandum item: Capital instruments and subordinated loans not eligible having an effective maturity of one year or greater;;;Unit;2.9.1.1
+C_61.00;y_axis_rc_code;30;__PARENT__c79093355c12;Memorandum item: Capital instruments and subordinated loans not eligible having an effective maturity of one year or greater;;;;2.9.1.1
 C_61.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;within three months;;;;2.9.1.1
 C_61.00;x_axis_rc_code;20;__PARENT__43dc8532f7e5;between three and 6 months;;;;2.9.1.1
 C_61.00;x_axis_rc_code;30;__PARENT__43dc8532f7e5;between 6 and 9 months;;;;2.9.1.1
@@ -9574,20 +9574,20 @@ F_22.02;y_axis_rc_code;160;130;Other;;;;2.9.1.1
 F_23.01;x_axis_rc_code;10;;Number of instruments;;;Unit;2.9.1.1
 F_23.01;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;Unit;2.9.1.1
 F_23.01;x_axis_rc_code;30;10;Performing;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;Unit;2.9.1.1
+F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;;2.9.1.1
 F_23.01;x_axis_rc_code;50;30;of which: Exposures with forbearance measures;;;Unit;2.9.1.1
 F_23.01;x_axis_rc_code;60;10;Non Performing;;;Unit;2.9.1.1
 F_23.01;x_axis_rc_code;70;60;of which: Exposures with forbearance measures;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;Unit;2.9.1.1
+F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;;2.9.1.1
 F_23.01;x_axis_rc_code;90;80;of which: Exposures with forbearance measures;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;Unit;2.9.1.1
+F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;;2.9.1.1
 F_23.01;x_axis_rc_code;110;100;of which: Exposures with forbearance measures;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;Unit;2.9.1.1
-F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;Unit;2.9.1.1
+F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;;2.9.1.1
+F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;;2.9.1.1
+F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;;2.9.1.1
+F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;;2.9.1.1
+F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;;2.9.1.1
+F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;;2.9.1.1
 F_23.01;y_axis_rc_code;10;;Loans and advances;;;;2.9.1.1
 F_23.01;y_axis_rc_code;20;10;of which: Households;;;;2.9.1.1
 F_23.01;y_axis_rc_code;30;20;of which: Loans collateralised by residential immovable property;;;;2.9.1.1
@@ -11698,10 +11698,10 @@ C_18.00;y_axis_rc_code;12;11;Derivatives;;;;3.0
 C_18.00;y_axis_rc_code;13;11;Other assets and liabilities;;;;3.0
 C_18.00;y_axis_rc_code;20;11;Maturity-based approach;;;;3.0
 C_18.00;y_axis_rc_code;30;20;Zone 1;;;;3.0
-C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;Unit;3.0
-C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;Unit;3.0
-C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;Unit;3.0
-C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;Unit;3.0
+C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;;3.0
+C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;;3.0
+C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;;3.0
+C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;;3.0
 C_18.00;y_axis_rc_code;80;20;1.2 Zone 2;;;;3.0
 C_18.00;y_axis_rc_code;90;80;> 1 <= 2 (1,9 for coupon of less than 3%) years;;;;3.0
 C_18.00;y_axis_rc_code;100;80;> 2 <= 3 (> 1,9 <= 2,8 for coupon of less than 3%) years;;;;3.0
@@ -14483,11 +14483,11 @@ C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.0
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;3.0
 C_82.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;3.0
 C_82.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;3.0
-C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;Unit;3.0
-C_82.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 1 year;;;Unit;3.0
+C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;;3.0
+C_82.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 1 year;;;;3.0
 C_82.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;HQLA;;;;3.0
-C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;Unit;3.0
-C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;Unit;3.0
+C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;;3.0
+C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;;3.0
 C_82.00;x_axis_rc_code;90;__PARENT__cffac3962595;HQLA;;;;3.0
 C_82.00;x_axis_rc_code;100;;Required stable funding;;;;3.0
 C_82.00;y_axis_rc_code;10;;Required stable funding;;;;3.0
@@ -16816,20 +16816,20 @@ F_22.02;y_axis_rc_code;160;130;Other;;;;3.0
 F_23.01;x_axis_rc_code;10;;Number of instruments;;;Unit;3.0
 F_23.01;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;Unit;3.0
 F_23.01;x_axis_rc_code;30;10;Performing;;;Unit;3.0
-F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;Unit;3.0
+F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;;3.0
 F_23.01;x_axis_rc_code;50;30;of which: Exposures with forbearance measures;;;Unit;3.0
 F_23.01;x_axis_rc_code;60;10;Non Performing;;;Unit;3.0
 F_23.01;x_axis_rc_code;70;60;of which: Exposures with forbearance measures;;;Unit;3.0
-F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;Unit;3.0
+F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;;3.0
 F_23.01;x_axis_rc_code;90;80;of which: Exposures with forbearance measures;;;Unit;3.0
-F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;Unit;3.0
+F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;;3.0
 F_23.01;x_axis_rc_code;110;100;of which: Exposures with forbearance measures;;;Unit;3.0
-F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;Unit;3.0
-F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;Unit;3.0
-F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;Unit;3.0
-F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;Unit;3.0
-F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;Unit;3.0
-F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;Unit;3.0
+F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;;3.0
+F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;;3.0
+F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;;3.0
+F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;;3.0
+F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;;3.0
+F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;;3.0
 F_23.01;y_axis_rc_code;10;;Loans and advances;;;;3.0
 F_23.01;y_axis_rc_code;20;10;of which: Households;;;;3.0
 F_23.01;y_axis_rc_code;30;20;of which: Loans collateralised by residential immovable property;;;;3.0
@@ -17849,9 +17849,9 @@ M_01.00;y_axis_rc_code;230;220;Of which containing a write down and conversion c
 M_01.00;y_axis_rc_code;250;__PARENT__4602f8c3de34;Other bailinable liabilities;;;;3.0.1
 M_01.00;y_axis_rc_code;260;250;Of which governed by third country law;;;;3.0.1
 M_01.00;y_axis_rc_code;270;260;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.0.1
-M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;Unit;3.0.1
-M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;Unit;3.0.1
-M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;Unit;3.0.1
+M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;;3.0.1
+M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;;3.0.1
+M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;;3.0.1
 M_01.00;y_axis_rc_code;300;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total risk exposure amount;;;%;3.0.1
 M_01.00;y_axis_rc_code;310;300;Of which: own funds and subordinated liabilities;;;;3.0.1
 M_01.00;y_axis_rc_code;320;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total exposure measure;;;%;3.0.1
@@ -17874,7 +17874,7 @@ M_02.00;y_axis_rc_code;90;70;Eligible liabilities subordinated to excluded liabi
 M_02.00;y_axis_rc_code;100;90;Eligible liabilities instruments issued directly by the resolution entity (not grandfathered);;;;3.0.1
 M_02.00;y_axis_rc_code;110;90;Eligible liabilities instruments issued by other entities within the resolution group (not grandfathered);;;;3.0.1
 M_02.00;y_axis_rc_code;120;90;Eligible liabilities instruments issued prior to 27 June 2019;;;;3.0.1
-M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;3.0.1
+M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;3.0.1
 M_02.00;y_axis_rc_code;140;70;Eligible liabilities not subordinated to excluded liabilities;;;;3.0.1
 M_02.00;y_axis_rc_code;170;140;Amounts eligible after application of the cap of Article 72b(3) of Regulation (EU) No 575/2013 (not grandfathered);;;;3.0.1
 M_02.00;y_axis_rc_code;180;140;Amounts eligible after application of the cap of Article 72b(3) of Regulation (EU) No 575/2013, consisting of items issued prior to 27 June 2019;;;;3.0.1
@@ -17933,38 +17933,38 @@ M_03.00;y_axis_rc_code;550;__PARENT__877f567bb33f;Other bailinable liabilities;;
 M_03.00;y_axis_rc_code;610;;Excluded liabilities;;;;3.0.1
 M_03.00;y_axis_rc_code;560;610;Of which governed by third country law;;;;3.0.1
 M_03.00;y_axis_rc_code;570;560;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.0.1
-M_03.00;y_axis_rc_code;580;610;Residual maturity of < 1 year;;;Unit;3.0.1
-M_03.00;y_axis_rc_code;590;610;Residual maturity of >= 1 year and < 2 years;;;Unit;3.0.1
-M_03.00;y_axis_rc_code;600;610;Residual maturity of >= 2 years;;;Unit;3.0.1
+M_03.00;y_axis_rc_code;580;610;Residual maturity of < 1 year;;;;3.0.1
+M_03.00;y_axis_rc_code;590;610;Residual maturity of >= 1 year and < 2 years;;;;3.0.1
+M_03.00;y_axis_rc_code;600;610;Residual maturity of >= 2 years;;;;3.0.1
 M_04.00;x_axis_rc_code;10;;Amount eligible for MREL / internal MREL;;;;3.0.1
 M_04.00;y_axis_rc_code;100;;Eligible liabilities;;;;3.0.1
 M_04.00;y_axis_rc_code;200;100;Deposits, not covered and not preferential >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;230;200;Of which: issued by subsidiaries;;;;3.0.1
 M_04.00;y_axis_rc_code;300;100;Uncollateralized secured liabilities >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;330;300;Of which: issued by subsidiaries;;;;3.0.1
 M_04.00;y_axis_rc_code;400;100;Structured notes >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;430;400;Of which: issued by subsidiaries;;;;3.0.1
 M_04.00;y_axis_rc_code;500;100;Senior unsecured liabilities >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;530;500;Of which: issued by subsidiaries;;;;3.0.1
 M_04.00;y_axis_rc_code;600;100;Senior non-preferred liabilities >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;630;600;Of which: issued by subsidiaries;;;;3.0.1
 M_04.00;y_axis_rc_code;700;100;Subordinated liabilities (not recognised as own funds) >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;730;700;Of which: issued by subsidiaries;;;;3.0.1
 M_04.00;y_axis_rc_code;800;100;Other MREL eligible liabilities >= 1 year;;;;3.0.1
-M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.0.1
-M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;Unit;3.0.1
+M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;;3.0.1
+M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;;3.0.1
 M_04.00;y_axis_rc_code;830;800;Of which: issued by subsidiaries;;;;3.0.1
 M_05.00;x_axis_rc_code;__PARENT__012b29688a9b;70;Of which: with a residual maturity of;;Y;;3.0.1
 M_05.00;x_axis_rc_code;10;;Insolvency rank;;;;3.0.1
@@ -17974,10 +17974,10 @@ M_05.00;x_axis_rc_code;40;;Liabilities and own funds;;;;3.0.1
 M_05.00;x_axis_rc_code;50;40;Of which: excluded liabilities;;;;3.0.1
 M_05.00;x_axis_rc_code;60;;Liabilities and own funds less excluded liabilities;;;;3.0.1
 M_05.00;x_axis_rc_code;70;60;Of which: own funds and eligible liabilities for the purpose of internal MREL;;;;3.0.1
-M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;Unit;3.0.1
-M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;Unit;3.0.1
-M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;Unit;3.0.1
-M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;Unit;3.0.1
+M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;;3.0.1
+M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;;3.0.1
+M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;;3.0.1
+M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;;3.0.1
 M_05.00;x_axis_rc_code;120;70;Of which: perpetual securities;;;;3.0.1
 M_05.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.0.1
 M_06.00;x_axis_rc_code;__PARENT__8522ce36f8a9;60;Of which: with a residual maturity of;;Y;;3.0.1
@@ -17987,10 +17987,10 @@ M_06.00;x_axis_rc_code;30;;Liabilities and own funds;;;;3.0.1
 M_06.00;x_axis_rc_code;40;30;Of which: excluded liabilities;;;;3.0.1
 M_06.00;x_axis_rc_code;50;;Liabilities and own funds less excluded liabilities;;;;3.0.1
 M_06.00;x_axis_rc_code;60;50;Of which: own funds and eligible liabilities potentially eligible for meeting MREL;;;;3.0.1
-M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;Unit;3.0.1
-M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;Unit;3.0.1
-M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;Unit;3.0.1
-M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;Unit;3.0.1
+M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;;3.0.1
+M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;;3.0.1
+M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;;3.0.1
+M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;;3.0.1
 M_06.00;x_axis_rc_code;110;60;Of which: perpetual securities;;;;3.0.1
 M_06.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.0.1
 M_07.00;x_axis_rc_code;__PARENT__cfa1aed8b504;;Issuing entity;;Y;;3.0.1
@@ -18162,10 +18162,10 @@ C_18.00;y_axis_rc_code;12;11;Derivatives;;;;3.1
 C_18.00;y_axis_rc_code;13;11;Other assets and liabilities;;;;3.1
 C_18.00;y_axis_rc_code;20;11;Maturity-based approach;;;;3.1
 C_18.00;y_axis_rc_code;30;20;Zone 1;;;;3.1
-C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;Unit;3.1
-C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;Unit;3.1
-C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;Unit;3.1
-C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;Unit;3.1
+C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;;3.1
+C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;;3.1
+C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;;3.1
+C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;;3.1
 C_18.00;y_axis_rc_code;80;20;1.2 Zone 2;;;;3.1
 C_18.00;y_axis_rc_code;90;80;> 1 <= 2 (1,9 for coupon of less than 3%) years;;;;3.1
 C_18.00;y_axis_rc_code;100;80;> 2 <= 3 (> 1,9 <= 2,8 for coupon of less than 3%) years;;;;3.1
@@ -19169,47 +19169,47 @@ T_01.00;y_axis_rc_code;200;100;DGS liabilities (BRRD art. 44/2/g/iv);;;;3.1
 T_01.00;y_axis_rc_code;210;100;Liabilities towards other entities of the resolution group (BRRD art. 44/2/h);;;;3.1
 T_01.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;3.1
 T_01.00;y_axis_rc_code;310;300;Deposits, not covered but preferential (BRRD art. 108);;;;3.1
-T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;3.1
-T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;331;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;3.1
 T_01.00;y_axis_rc_code;332;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;3.1
 T_01.00;y_axis_rc_code;333;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;3.1
 T_01.00;y_axis_rc_code;334;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account prudential netting rules;;;;3.1
 T_01.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;3.1
-T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;350;300;Structured notes;;;;3.1
-T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;3.1
-T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;3.1
-T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;3.1
-T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;Unit;3.1
-T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;Unit;3.1
-T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;;3.1
+T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;;3.1
+T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;3.1
-T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.1
-T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;Unit;3.1
+T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;;3.1
+T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;;3.1
 T_01.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;3.1
 T_01.00;y_axis_rc_code;400;300;Residual liabilities;;;;3.1
 T_01.00;y_axis_rc_code;500;;Own funds;;;;3.1
@@ -19814,48 +19814,48 @@ Z_02.00;y_axis_rc_code;200;100;DGS liabilities;;;;3.1
 Z_02.00;y_axis_rc_code;210;100;Liabilities towards other entities of the resolution group;;;;3.1
 Z_02.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;3.1
 Z_02.00;y_axis_rc_code;310;300;Deposits, not covered but preferential;;;;3.1
-Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;3.1
-Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;330;300;Balance sheet liabilities arising from derivatives;;;;3.1
 Z_02.00;y_axis_rc_code;331;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;3.1
 Z_02.00;y_axis_rc_code;332;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;3.1
 Z_02.00;y_axis_rc_code;333;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;3.1
 Z_02.00;y_axis_rc_code;334;330;Sum of net liability positions taking into account prudential netting rules;;;;3.1
 Z_02.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;3.1
-Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;350;300;Structured notes;;;;3.1
-Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;3.1
-Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;3.1
-Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;3.1
-Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;Unit;3.1
-Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;Unit;3.1
-Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;;3.1
+Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;;3.1
+Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;3.1
-Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.1
-Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;Unit;3.1
+Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;;3.1
+Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;;3.1
 Z_02.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;3.1
 Z_02.00;y_axis_rc_code;400;300;Residual liabilities;;;;3.1
 Z_02.00;y_axis_rc_code;500;;Own funds;;;;3.1
@@ -22041,10 +22041,10 @@ C_18.00;y_axis_rc_code;12;11;Derivatives;;;;3.2
 C_18.00;y_axis_rc_code;13;11;Other assets and liabilities;;;;3.2
 C_18.00;y_axis_rc_code;20;11;Maturity-based approach;;;;3.2
 C_18.00;y_axis_rc_code;30;20;Zone 1;;;;3.2
-C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;Unit;3.2
-C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;Unit;3.2
-C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;Unit;3.2
-C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;Unit;3.2
+C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;;3.2
+C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;;3.2
+C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;;3.2
+C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;;3.2
 C_18.00;y_axis_rc_code;80;20;1.2 Zone 2;;;;3.2
 C_18.00;y_axis_rc_code;90;80;> 1 <= 2 (1,9 for coupon of less than 3%) years;;;;3.2
 C_18.00;y_axis_rc_code;100;80;> 2 <= 3 (> 1,9 <= 2,8 for coupon of less than 3%) years;;;;3.2
@@ -24860,11 +24860,11 @@ C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.2
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;3.2
 C_82.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;3.2
 C_82.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;3.2
-C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;Unit;3.2
-C_82.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 1 year;;;Unit;3.2
+C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;;3.2
+C_82.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 1 year;;;;3.2
 C_82.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;HQLA;;;;3.2
-C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;Unit;3.2
-C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;Unit;3.2
+C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;;3.2
+C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;;3.2
 C_82.00;x_axis_rc_code;90;__PARENT__cffac3962595;HQLA;;;;3.2
 C_82.00;x_axis_rc_code;100;;Required stable funding;;;;3.2
 C_82.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;3.2
@@ -25622,12 +25622,12 @@ F_90.01;x_axis_rc_code;40;30;Of which: granted;;;;3.2
 F_90.01;x_axis_rc_code;50;40;Of which: legislative moratoria;;;;3.2
 F_90.01;x_axis_rc_code;55;40;Of which: subject to extended moratoria;;;;3.2
 F_90.01;x_axis_rc_code;60;40;Of which: expired;;;;3.2
-F_90.01;x_axis_rc_code;70;__PARENT__5f8f8c55f861;<= 3 months;;;Unit;3.2
-F_90.01;x_axis_rc_code;80;__PARENT__5f8f8c55f861;> 3 months <= 6 months;;;Unit;3.2
-F_90.01;x_axis_rc_code;90;__PARENT__5f8f8c55f861;> 6 months <= 9 months;;;Unit;3.2
-F_90.01;x_axis_rc_code;100;__PARENT__5f8f8c55f861;> 9 months <= 12 months;;;Unit;3.2
-F_90.01;x_axis_rc_code;110;__PARENT__5f8f8c55f861;> 12 months <= 18 months;;;Unit;3.2
-F_90.01;x_axis_rc_code;120;__PARENT__5f8f8c55f861;> 18 months;;;Unit;3.2
+F_90.01;x_axis_rc_code;70;__PARENT__5f8f8c55f861;<= 3 months;;;;3.2
+F_90.01;x_axis_rc_code;80;__PARENT__5f8f8c55f861;> 3 months <= 6 months;;;;3.2
+F_90.01;x_axis_rc_code;90;__PARENT__5f8f8c55f861;> 6 months <= 9 months;;;;3.2
+F_90.01;x_axis_rc_code;100;__PARENT__5f8f8c55f861;> 9 months <= 12 months;;;;3.2
+F_90.01;x_axis_rc_code;110;__PARENT__5f8f8c55f861;> 12 months <= 18 months;;;;3.2
+F_90.01;x_axis_rc_code;120;__PARENT__5f8f8c55f861;> 18 months;;;;3.2
 F_90.01;y_axis_rc_code;10;;EBA-compliant moratoria loans and advances;;;;3.2
 F_90.01;y_axis_rc_code;20;10;of which: Households;;;;3.2
 F_90.01;y_axis_rc_code;30;20;of which: Collateralised by residential immovable property;;;;3.2
@@ -25641,12 +25641,12 @@ F_90.02;x_axis_rc_code;30;;Gross carrying amount;;;;3.2
 F_90.02;x_axis_rc_code;40;30;Of which: granted;;;;3.2
 F_90.02;x_axis_rc_code;50;40;Of which: expired;;;;3.2
 F_90.02;x_axis_rc_code;55;40;Of which: with extended COVID-19-related forbearance measures;;;;3.2
-F_90.02;x_axis_rc_code;60;__PARENT__faf543ac5676;<= 3 months;;;Unit;3.2
-F_90.02;x_axis_rc_code;70;__PARENT__faf543ac5676;> 3 months <= 6 months;;;Unit;3.2
-F_90.02;x_axis_rc_code;80;__PARENT__faf543ac5676;> 6 months <= 9 months;;;Unit;3.2
-F_90.02;x_axis_rc_code;90;__PARENT__faf543ac5676;> 9 months <= 12 months;;;Unit;3.2
-F_90.02;x_axis_rc_code;100;__PARENT__faf543ac5676;> 12 months <= 18 months;;;Unit;3.2
-F_90.02;x_axis_rc_code;110;__PARENT__faf543ac5676;> 18 months;;;Unit;3.2
+F_90.02;x_axis_rc_code;60;__PARENT__faf543ac5676;<= 3 months;;;;3.2
+F_90.02;x_axis_rc_code;70;__PARENT__faf543ac5676;> 3 months <= 6 months;;;;3.2
+F_90.02;x_axis_rc_code;80;__PARENT__faf543ac5676;> 6 months <= 9 months;;;;3.2
+F_90.02;x_axis_rc_code;90;__PARENT__faf543ac5676;> 9 months <= 12 months;;;;3.2
+F_90.02;x_axis_rc_code;100;__PARENT__faf543ac5676;> 12 months <= 18 months;;;;3.2
+F_90.02;x_axis_rc_code;110;__PARENT__faf543ac5676;> 18 months;;;;3.2
 F_90.02;y_axis_rc_code;10;;Other loans and advances with COVID-19-related forbearance measures;;;;3.2
 F_90.02;y_axis_rc_code;20;10;of which: Households;;;;3.2
 F_90.02;y_axis_rc_code;30;10;of which: Non-financial corporations;;;;3.2
@@ -25655,10 +25655,10 @@ F_90.03;x_axis_rc_code;10;;Number of obligors;;;Unit;3.2
 F_90.03;x_axis_rc_code;20;10;Of which: with called public gurantee;;;Unit;3.2
 F_90.03;x_axis_rc_code;30;;Gross carrying amount;;;;3.2
 F_90.03;x_axis_rc_code;40;30;Of which: with called public guarantee;;;;3.2
-F_90.03;x_axis_rc_code;50;__PARENT__c1d74be042cd;<= 6 months;;;Unit;3.2
-F_90.03;x_axis_rc_code;60;__PARENT__c1d74be042cd;> 6 months <= 12 months;;;Unit;3.2
-F_90.03;x_axis_rc_code;70;__PARENT__c1d74be042cd;> 1 year <= 2 year;;;Unit;3.2
-F_90.03;x_axis_rc_code;80;__PARENT__c1d74be042cd;> 2 year <= 5 year;;;Unit;3.2
+F_90.03;x_axis_rc_code;50;__PARENT__c1d74be042cd;<= 6 months;;;;3.2
+F_90.03;x_axis_rc_code;60;__PARENT__c1d74be042cd;> 6 months <= 12 months;;;;3.2
+F_90.03;x_axis_rc_code;70;__PARENT__c1d74be042cd;> 1 year <= 2 year;;;;3.2
+F_90.03;x_axis_rc_code;80;__PARENT__c1d74be042cd;> 2 year <= 5 year;;;;3.2
 F_90.03;x_axis_rc_code;90;;Payment received from the public guarantor during the period.;;;;3.2
 F_90.03;y_axis_rc_code;10;;Newly originated loans and advances subject to public guarantee schemes;;;;3.2
 F_90.03;y_axis_rc_code;20;10;of which: Households;;;;3.2
@@ -27998,20 +27998,20 @@ F_22.02;y_axis_rc_code;160;130;Other;;;;3.2
 F_23.01;x_axis_rc_code;10;;Number of instruments;;;Unit;3.2
 F_23.01;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;Unit;3.2
 F_23.01;x_axis_rc_code;30;10;Performing;;;Unit;3.2
-F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;Unit;3.2
+F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;;3.2
 F_23.01;x_axis_rc_code;50;30;of which: Exposures with forbearance measures;;;Unit;3.2
 F_23.01;x_axis_rc_code;60;10;Non Performing;;;Unit;3.2
 F_23.01;x_axis_rc_code;70;60;of which: Exposures with forbearance measures;;;Unit;3.2
-F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;Unit;3.2
+F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;;3.2
 F_23.01;x_axis_rc_code;90;80;of which: Exposures with forbearance measures;;;Unit;3.2
-F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;Unit;3.2
+F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;;3.2
 F_23.01;x_axis_rc_code;110;100;of which: Exposures with forbearance measures;;;Unit;3.2
-F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;Unit;3.2
-F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;Unit;3.2
-F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;Unit;3.2
-F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;Unit;3.2
-F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;Unit;3.2
-F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;Unit;3.2
+F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;;3.2
+F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;;3.2
+F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;;3.2
+F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;;3.2
+F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;;3.2
+F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;;3.2
 F_23.01;y_axis_rc_code;10;;Loans and advances;;;;3.2
 F_23.01;y_axis_rc_code;20;10;of which: Households;;;;3.2
 F_23.01;y_axis_rc_code;30;20;of which: Loans collateralised by residential immovable property;;;;3.2
@@ -28753,10 +28753,10 @@ P_01.02;y_axis_rc_code;142;140;Other EEA countries activities;;;;3.2
 P_01.02;y_axis_rc_code;143;140;Non-EEA countries activities;;;;3.2
 P_01.02;y_axis_rc_code;145;__PARENT__51cb2387bc39;Deposits from central banks (excl. repurchase agreements);;;;3.2
 P_01.02;y_axis_rc_code;147;__PARENT__51cb2387bc39;Deposits from general governments (excl. repurchase agreements);;;;3.2
-P_01.02;y_axis_rc_code;150;__PARENT__51cb2387bc39;Short-term debt securities issued (original maturity <1 year);;;Unit;3.2
+P_01.02;y_axis_rc_code;150;__PARENT__51cb2387bc39;Short-term debt securities issued (original maturity <1 year);;;;3.2
 P_01.02;y_axis_rc_code;160;150;Short-term unsecured debt securities issued;;;Unit;3.2
 P_01.02;y_axis_rc_code;170;150;Short-term secured debt securities issued;;;Unit;3.2
-P_01.02;y_axis_rc_code;180;__PARENT__51cb2387bc39;Long-term debt securities issued (original maturity >=1 year);;;Unit;3.2
+P_01.02;y_axis_rc_code;180;__PARENT__51cb2387bc39;Long-term debt securities issued (original maturity >=1 year);;;;3.2
 P_01.02;y_axis_rc_code;190;180;Total long-term unsecured debt securities issued;;;Unit;3.2
 P_01.02;y_axis_rc_code;191;190;Additional Tier 1 instruments;;;Unit;3.2
 P_01.02;y_axis_rc_code;192;190;Tier 2 instruments;;;Unit;3.2
@@ -28769,7 +28769,7 @@ P_01.02;y_axis_rc_code;250;220;Covered bonds;;;Unit;3.2
 P_01.02;y_axis_rc_code;280;220;Asset backed securities;;;Unit;3.2
 P_01.02;y_axis_rc_code;310;220;Other long-term secured debt securities;;;Unit;3.2
 P_01.02;y_axis_rc_code;340;__PARENT__51cb2387bc39;Total debt securities issued;;;;3.2
-P_01.02;y_axis_rc_code;350;340;o/w (original maturity >= 3 years);;;Unit;3.2
+P_01.02;y_axis_rc_code;350;340;o/w (original maturity >= 3 years);;;;3.2
 P_01.02;y_axis_rc_code;360;__PARENT__51cb2387bc39;Derivatives;;;;3.2
 P_01.02;y_axis_rc_code;370;__PARENT__51cb2387bc39;Total equity;;;;3.2
 P_01.02;y_axis_rc_code;381;__PARENT__51cb2387bc39;Other liabilities;;;;3.2
@@ -29139,9 +29139,9 @@ M_01.00;y_axis_rc_code;230;220;Of which containing a write down and conversion c
 M_01.00;y_axis_rc_code;250;__PARENT__4602f8c3de34;Other bailinable liabilities;;;;3.2
 M_01.00;y_axis_rc_code;260;250;Of which governed by third country law;;;;3.2
 M_01.00;y_axis_rc_code;270;260;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.2
-M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;Unit;3.2
-M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;Unit;3.2
-M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;Unit;3.2
+M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;;3.2
+M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;;3.2
+M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;;3.2
 M_01.00;y_axis_rc_code;300;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total risk exposure amount;;;%;3.2
 M_01.00;y_axis_rc_code;310;300;Of which: own funds and subordinated liabilities;;;;3.2
 M_01.00;y_axis_rc_code;320;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total exposure measure;;;%;3.2
@@ -29164,7 +29164,7 @@ M_02.00;y_axis_rc_code;90;70;Eligible liabilities subordinated to excluded liabi
 M_02.00;y_axis_rc_code;100;90;Eligible liabilities instruments issued directly by the resolution entity (not grandfathered);;;;3.2
 M_02.00;y_axis_rc_code;110;90;Eligible liabilities instruments issued by other entities within the resolution group (not grandfathered);;;;3.2
 M_02.00;y_axis_rc_code;120;90;Eligible liabilities instruments issued prior to 27 June 2019;;;;3.2
-M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;3.2
+M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;3.2
 M_02.00;y_axis_rc_code;140;70;Eligible liabilities not subordinated to excluded liabilities;;;;3.2
 M_02.00;y_axis_rc_code;170;140;Amounts eligible after application of the cap of Article 72b(3) of Regulation (EU) No 575/2013 (not grandfathered);;;;3.2
 M_02.00;y_axis_rc_code;180;140;Amounts eligible after application of the cap of Article 72b(3) of Regulation (EU) No 575/2013, consisting of items issued prior to 27 June 2019;;;;3.2
@@ -29223,38 +29223,38 @@ M_03.00;y_axis_rc_code;550;__PARENT__877f567bb33f;Other bailinable liabilities;;
 M_03.00;y_axis_rc_code;610;;Excluded liabilities;;;;3.2
 M_03.00;y_axis_rc_code;560;610;Of which governed by third country law;;;;3.2
 M_03.00;y_axis_rc_code;570;560;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.2
-M_03.00;y_axis_rc_code;580;610;Residual maturity of < 1 year;;;Unit;3.2
-M_03.00;y_axis_rc_code;590;610;Residual maturity of >= 1 year and < 2 years;;;Unit;3.2
-M_03.00;y_axis_rc_code;600;610;Residual maturity of >= 2 years;;;Unit;3.2
+M_03.00;y_axis_rc_code;580;610;Residual maturity of < 1 year;;;;3.2
+M_03.00;y_axis_rc_code;590;610;Residual maturity of >= 1 year and < 2 years;;;;3.2
+M_03.00;y_axis_rc_code;600;610;Residual maturity of >= 2 years;;;;3.2
 M_04.00;x_axis_rc_code;10;;Amount eligible for MREL / internal MREL;;;;3.2
 M_04.00;y_axis_rc_code;100;;Eligible liabilities;;;;3.2
 M_04.00;y_axis_rc_code;200;100;Deposits, not covered and not preferential >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;230;200;Of which: issued by subsidiaries;;;;3.2
 M_04.00;y_axis_rc_code;300;100;Uncollateralized secured liabilities >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;330;300;Of which: issued by subsidiaries;;;;3.2
 M_04.00;y_axis_rc_code;400;100;Structured notes >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;430;400;Of which: issued by subsidiaries;;;;3.2
 M_04.00;y_axis_rc_code;500;100;Senior unsecured liabilities >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;530;500;Of which: issued by subsidiaries;;;;3.2
 M_04.00;y_axis_rc_code;600;100;Senior non-preferred liabilities >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;630;600;Of which: issued by subsidiaries;;;;3.2
 M_04.00;y_axis_rc_code;700;100;Subordinated liabilities (not recognised as own funds) >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;730;700;Of which: issued by subsidiaries;;;;3.2
 M_04.00;y_axis_rc_code;800;100;Other MREL eligible liabilities >= 1 year;;;;3.2
-M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;Unit;3.2
+M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;;3.2
 M_04.00;y_axis_rc_code;830;800;Of which: issued by subsidiaries;;;;3.2
 M_05.00;x_axis_rc_code;__PARENT__012b29688a9b;70;Of which: with a residual maturity of;;Y;;3.2
 M_05.00;x_axis_rc_code;10;;Insolvency rank;;;;3.2
@@ -29264,10 +29264,10 @@ M_05.00;x_axis_rc_code;40;;Liabilities and own funds;;;;3.2
 M_05.00;x_axis_rc_code;50;40;Of which: excluded liabilities;;;;3.2
 M_05.00;x_axis_rc_code;60;;Liabilities and own funds less excluded liabilities;;;;3.2
 M_05.00;x_axis_rc_code;70;60;Of which: own funds and eligible liabilities for the purpose of internal MREL;;;;3.2
-M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;Unit;3.2
-M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;Unit;3.2
-M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;Unit;3.2
-M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;Unit;3.2
+M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;;3.2
+M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;;3.2
+M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;;3.2
+M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;;3.2
 M_05.00;x_axis_rc_code;120;70;Of which: perpetual securities;;;;3.2
 M_05.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.2
 M_06.00;x_axis_rc_code;__PARENT__8522ce36f8a9;60;Of which: with a residual maturity of;;Y;;3.2
@@ -29277,10 +29277,10 @@ M_06.00;x_axis_rc_code;30;;Liabilities and own funds;;;;3.2
 M_06.00;x_axis_rc_code;40;30;Of which: excluded liabilities;;;;3.2
 M_06.00;x_axis_rc_code;50;;Liabilities and own funds less excluded liabilities;;;;3.2
 M_06.00;x_axis_rc_code;60;50;Of which: own funds and eligible liabilities potentially eligible for meeting MREL;;;;3.2
-M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;Unit;3.2
-M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;Unit;3.2
-M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;Unit;3.2
-M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;Unit;3.2
+M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;;3.2
+M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;;3.2
+M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;;3.2
+M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;;3.2
 M_06.00;x_axis_rc_code;110;60;Of which: perpetual securities;;;;3.2
 M_06.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.2
 M_07.00;x_axis_rc_code;__PARENT__cfa1aed8b504;;Issuing entity;;Y;;3.2
@@ -29712,47 +29712,47 @@ T_01.00;y_axis_rc_code;200;100;DGS liabilities (BRRD art. 44/2/g/iv);;;;3.2
 T_01.00;y_axis_rc_code;210;100;Liabilities towards other entities of the resolution group (BRRD art. 44/2/h);;;;3.2
 T_01.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;3.2
 T_01.00;y_axis_rc_code;310;300;Deposits, not covered but preferential (BRRD art. 108);;;;3.2
-T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;311;310;o/w residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;312;310;o/w residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;313;310;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;314;310;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;3.2
-T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;321;320;o/w residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;322;320;o/w residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;323;320;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;324;320;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;331;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;3.2
 T_01.00;y_axis_rc_code;332;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;3.2
 T_01.00;y_axis_rc_code;333;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;3.2
 T_01.00;y_axis_rc_code;334;__PARENT__c2f7ece7cbc3;Sum of net liability positions taking into account prudential netting rules;;;;3.2
 T_01.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;3.2
-T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;341;340;o/w residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;342;340;o/w residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;343;340;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;344;340;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;350;300;Structured notes;;;;3.2
-T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;351;350;o/w residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;352;350;o/w residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;353;350;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;354;350;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;3.2
-T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;361;360;o/w residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;362;360;o/w residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;363;360;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;364;360;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;3.2
-T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;366;365;Of which: residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;367;365;Of which: residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;368;365;Of which: residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;369;365;Of which: residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;3.2
-T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;Unit;3.2
-T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;Unit;3.2
-T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;371;370;o/w residual maturity <= 1 month;;;;3.2
+T_01.00;y_axis_rc_code;372;370;o/w residual maturity > 1 month < 1 year;;;;3.2
+T_01.00;y_axis_rc_code;373;370;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;374;370;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;3.2
-T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;Unit;3.2
-T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;Unit;3.2
+T_01.00;y_axis_rc_code;381;380;o/w residual maturity >= 1 year and < 2 years;;;;3.2
+T_01.00;y_axis_rc_code;382;380;o/w residual maturity >= 2 years;;;;3.2
 T_01.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;3.2
 T_01.00;y_axis_rc_code;400;300;Residual liabilities;;;;3.2
 T_01.00;y_axis_rc_code;500;;Own funds;;;;3.2
@@ -30357,48 +30357,48 @@ Z_02.00;y_axis_rc_code;200;100;DGS liabilities;;;;3.2
 Z_02.00;y_axis_rc_code;210;100;Liabilities towards other entities of the resolution group;;;;3.2
 Z_02.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;3.2
 Z_02.00;y_axis_rc_code;310;300;Deposits, not covered but preferential;;;;3.2
-Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;3.2
-Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;330;300;Balance sheet liabilities arising from derivatives;;;;3.2
 Z_02.00;y_axis_rc_code;331;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;3.2
 Z_02.00;y_axis_rc_code;332;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;3.2
 Z_02.00;y_axis_rc_code;333;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;3.2
 Z_02.00;y_axis_rc_code;334;330;Sum of net liability positions taking into account prudential netting rules;;;;3.2
 Z_02.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;3.2
-Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;350;300;Structured notes;;;;3.2
-Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;3.2
-Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;3.2
-Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;3.2
-Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;Unit;3.2
-Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;Unit;3.2
-Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;;3.2
+Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;;3.2
+Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;3.2
-Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;Unit;3.2
-Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;Unit;3.2
+Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;;3.2
+Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;;3.2
 Z_02.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;3.2
 Z_02.00;y_axis_rc_code;400;300;Residual liabilities;;;;3.2
 Z_02.00;y_axis_rc_code;500;;Own funds;;;;3.2
@@ -31373,10 +31373,10 @@ D_04.00;y_axis_rc_code;10;;Counterparty;;;;3.3
 D_05.00;x_axis_rc_code;__PARENT__cd07ab6b4e79;10;Of which exposures sensitive to impact from climate change physical events;;Y;;3.3
 D_05.00;x_axis_rc_code;__PARENT__e65cc3901191;__PARENT__cd07ab6b4e79;Breakdown by maturity bucket;;Y;;3.3
 D_05.00;x_axis_rc_code;10;;Gross carrying amount (Mln EUR);;;;3.3
-D_05.00;x_axis_rc_code;20;__PARENT__e65cc3901191;<= 5 years;;;Unit;3.3
-D_05.00;x_axis_rc_code;30;__PARENT__e65cc3901191;> 5 year <= 10 years;;;Unit;3.3
-D_05.00;x_axis_rc_code;40;__PARENT__e65cc3901191;> 10 year <= 20 years;;;Unit;3.3
-D_05.00;x_axis_rc_code;50;__PARENT__e65cc3901191;> 20 years;;;Unit;3.3
+D_05.00;x_axis_rc_code;20;__PARENT__e65cc3901191;<= 5 years;;;;3.3
+D_05.00;x_axis_rc_code;30;__PARENT__e65cc3901191;> 5 year <= 10 years;;;;3.3
+D_05.00;x_axis_rc_code;40;__PARENT__e65cc3901191;> 10 year <= 20 years;;;;3.3
+D_05.00;x_axis_rc_code;50;__PARENT__e65cc3901191;> 20 years;;;;3.3
 D_05.00;x_axis_rc_code;60;__PARENT__e65cc3901191;Average weighted maturity;;;;3.3
 D_05.00;x_axis_rc_code;70;__PARENT__cd07ab6b4e79;Of which exposures sensitive to impact from chronic climate change events;;;;3.3
 D_05.00;x_axis_rc_code;80;__PARENT__cd07ab6b4e79;Of which exposures sensitive to impact from acute climate change events;;;;3.3
@@ -32170,10 +32170,10 @@ K_44.00;y_axis_rc_code;10;;1. Counterparty;;;;3.3
 K_45.00;x_axis_rc_code;__PARENT__7190d2a0f4af;10;Of which exposures sensitive to impact from climate change physical events;;Y;;3.3
 K_45.00;x_axis_rc_code;__PARENT__67214a083fa7;__PARENT__7190d2a0f4af;Breakdown by maturity bucket;;Y;;3.3
 K_45.00;x_axis_rc_code;10;;b. Gross carrying amount (Mln EUR);;;;3.3
-K_45.00;x_axis_rc_code;20;__PARENT__67214a083fa7;c. <= 5 years;;;Unit;3.3
-K_45.00;x_axis_rc_code;30;__PARENT__67214a083fa7;d. > 5 year <= 10 years;;;Unit;3.3
-K_45.00;x_axis_rc_code;40;__PARENT__67214a083fa7;e. > 10 year <= 20 years;;;Unit;3.3
-K_45.00;x_axis_rc_code;50;__PARENT__67214a083fa7;f. > 20 years;;;Unit;3.3
+K_45.00;x_axis_rc_code;20;__PARENT__67214a083fa7;c. <= 5 years;;;;3.3
+K_45.00;x_axis_rc_code;30;__PARENT__67214a083fa7;d. > 5 year <= 10 years;;;;3.3
+K_45.00;x_axis_rc_code;40;__PARENT__67214a083fa7;e. > 10 year <= 20 years;;;;3.3
+K_45.00;x_axis_rc_code;50;__PARENT__67214a083fa7;f. > 20 years;;;;3.3
 K_45.00;x_axis_rc_code;60;__PARENT__67214a083fa7;g. Average weighted maturity;;;;3.3
 K_45.00;x_axis_rc_code;70;__PARENT__7190d2a0f4af;h. of which exposures sensitive to impact from chronic climate change events;;;;3.3
 K_45.00;x_axis_rc_code;80;__PARENT__7190d2a0f4af;i. Of which exposures sensitive to impact from acute climate change events;;;;3.3
@@ -34188,9 +34188,9 @@ M_01.00;y_axis_rc_code;230;220;Of which containing a write down and conversion c
 M_01.00;y_axis_rc_code;250;__PARENT__4602f8c3de34;Other bailinable liabilities;;;;3.4
 M_01.00;y_axis_rc_code;260;250;Of which governed by third country law;;;;3.4
 M_01.00;y_axis_rc_code;270;260;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.4
-M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;Unit;3.4
-M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;Unit;3.4
-M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;Unit;3.4
+M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;;3.4
+M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;;3.4
+M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;;3.4
 M_01.00;y_axis_rc_code;300;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total risk exposure amount;;;%;3.4
 M_01.00;y_axis_rc_code;310;300;Of which: own funds and subordinated liabilities;;;;3.4
 M_01.00;y_axis_rc_code;320;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total exposure measure;;;%;3.4
@@ -34213,7 +34213,7 @@ M_02.00;y_axis_rc_code;90;70;Eligible liabilities subordinated to excluded liabi
 M_02.00;y_axis_rc_code;100;90;Eligible liabilities instruments issued directly by the resolution entity (not grandfathered);;;;3.4
 M_02.00;y_axis_rc_code;110;90;Eligible liabilities instruments issued by other entities within the resolution group (not grandfathered);;;;3.4
 M_02.00;y_axis_rc_code;120;90;Eligible liabilities instruments issued prior to 27 June 2019;;;;3.4
-M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;3.4
+M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;3.4
 M_02.00;y_axis_rc_code;132;90;(-) Own eligible liabilities instruments subordinated to excluded liabilities;;;;3.4
 M_02.00;y_axis_rc_code;135;132;(-) Of which: unused prior permission amounts;;;;3.4
 M_02.00;y_axis_rc_code;140;70;Eligible liabilities not subordinated to excluded liabilities;;;;3.4
@@ -34281,38 +34281,38 @@ M_03.00;y_axis_rc_code;550;__PARENT__877f567bb33f;Other bailinable liabilities;;
 M_03.00;y_axis_rc_code;610;;Excluded liabilities;;;;3.4
 M_03.00;y_axis_rc_code;560;610;Of which governed by third country law;;;;3.4
 M_03.00;y_axis_rc_code;570;560;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.4
-M_03.00;y_axis_rc_code;580;610;Residual maturity of < 1 year;;;Unit;3.4
-M_03.00;y_axis_rc_code;590;610;Residual maturity of >= 1 year and < 2 years;;;Unit;3.4
-M_03.00;y_axis_rc_code;600;610;Residual maturity of >= 2 years;;;Unit;3.4
+M_03.00;y_axis_rc_code;580;610;Residual maturity of < 1 year;;;;3.4
+M_03.00;y_axis_rc_code;590;610;Residual maturity of >= 1 year and < 2 years;;;;3.4
+M_03.00;y_axis_rc_code;600;610;Residual maturity of >= 2 years;;;;3.4
 M_04.00;x_axis_rc_code;10;;Amount eligible for MREL / internal MREL;;;;3.4
 M_04.00;y_axis_rc_code;100;;Eligible liabilities;;;;3.4
 M_04.00;y_axis_rc_code;200;100;Deposits, not covered and not preferential >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;230;200;Of which: issued by subsidiaries;;;;3.4
 M_04.00;y_axis_rc_code;300;100;Uncollateralized secured liabilities >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;330;300;Of which: issued by subsidiaries;;;;3.4
 M_04.00;y_axis_rc_code;400;100;Structured notes >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;430;400;Of which: issued by subsidiaries;;;;3.4
 M_04.00;y_axis_rc_code;500;100;Senior unsecured liabilities >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;530;500;Of which: issued by subsidiaries;;;;3.4
 M_04.00;y_axis_rc_code;600;100;Senior non-preferred liabilities >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;630;600;Of which: issued by subsidiaries;;;;3.4
 M_04.00;y_axis_rc_code;700;100;Subordinated liabilities (not recognised as own funds) >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;730;700;Of which: issued by subsidiaries;;;;3.4
 M_04.00;y_axis_rc_code;800;100;Other MREL eligible liabilities >= 1 year;;;;3.4
-M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.4
-M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;Unit;3.4
+M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;;3.4
+M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;;3.4
 M_04.00;y_axis_rc_code;830;800;Of which: issued by subsidiaries;;;;3.4
 M_05.00;x_axis_rc_code;__PARENT__012b29688a9b;70;Of which: with a residual maturity of;;Y;;3.4
 M_05.00;x_axis_rc_code;10;;Insolvency rank;;;;3.4
@@ -34322,10 +34322,10 @@ M_05.00;x_axis_rc_code;40;;Liabilities and own funds;;;;3.4
 M_05.00;x_axis_rc_code;50;40;Of which: excluded liabilities;;;;3.4
 M_05.00;x_axis_rc_code;60;;Liabilities and own funds less excluded liabilities;;;;3.4
 M_05.00;x_axis_rc_code;70;60;Of which: own funds and eligible liabilities for the purpose of internal MREL;;;;3.4
-M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;Unit;3.4
-M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;Unit;3.4
-M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;Unit;3.4
-M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;Unit;3.4
+M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;;3.4
+M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;;3.4
+M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;;3.4
+M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;;3.4
 M_05.00;x_axis_rc_code;120;70;Of which: perpetual securities;;;;3.4
 M_05.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.4
 M_06.00;x_axis_rc_code;__PARENT__8522ce36f8a9;60;Of which: with a residual maturity of;;Y;;3.4
@@ -34335,10 +34335,10 @@ M_06.00;x_axis_rc_code;30;;Liabilities and own funds;;;;3.4
 M_06.00;x_axis_rc_code;40;30;Of which: excluded liabilities;;;;3.4
 M_06.00;x_axis_rc_code;50;;Liabilities and own funds less excluded liabilities;;;;3.4
 M_06.00;x_axis_rc_code;60;50;Of which: own funds and eligible liabilities potentially eligible for meeting MREL;;;;3.4
-M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;Unit;3.4
-M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;Unit;3.4
-M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;Unit;3.4
-M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;Unit;3.4
+M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;;3.4
+M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;;3.4
+M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;;3.4
+M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;;3.4
 M_06.00;x_axis_rc_code;110;60;Of which: perpetual securities;;;;3.4
 M_06.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.4
 M_07.00;x_axis_rc_code;__PARENT__cfa1aed8b504;;Issuing entity;;Y;;3.4
@@ -34467,31 +34467,31 @@ C_92.01;x_axis_rc_code;190;__PARENT__941f3b0673db;30 years;;;;3.5
 C_92.01;x_axis_rc_code;200;__PARENT__9f20be81986c;Inflation;;;;3.5
 C_92.01;x_axis_rc_code;210;__PARENT__9f20be81986c;Cross-currency basis (over EUR);;;;3.5
 C_92.01;x_axis_rc_code;220;__PARENT__9f20be81986c;Cross-currency basis (over USD);;;;3.5
-C_92.01;x_axis_rc_code;250;__PARENT__c7d7b6f28bc0;0.5 years - 0.5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;260;__PARENT__c7d7b6f28bc0;0.5 years - 1 year;;;Unit;3.5
-C_92.01;x_axis_rc_code;270;__PARENT__c7d7b6f28bc0;0.5 years - 3 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;280;__PARENT__c7d7b6f28bc0;0.5 years - 5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;290;__PARENT__c7d7b6f28bc0;0.5 years - 10 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;300;__PARENT__c7d7b6f28bc0;1 year - 0.5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;310;__PARENT__c7d7b6f28bc0;1 year - 1 year;;;Unit;3.5
-C_92.01;x_axis_rc_code;320;__PARENT__c7d7b6f28bc0;1 year - 3 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;330;__PARENT__c7d7b6f28bc0;1 year - 5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;340;__PARENT__c7d7b6f28bc0;1 year - 10 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;350;__PARENT__c7d7b6f28bc0;3 years - 0.5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;360;__PARENT__c7d7b6f28bc0;3 years - 1 year;;;Unit;3.5
-C_92.01;x_axis_rc_code;370;__PARENT__c7d7b6f28bc0;3 years - 3 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;380;__PARENT__c7d7b6f28bc0;3 years - 5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;390;__PARENT__c7d7b6f28bc0;3 years - 10 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;400;__PARENT__c7d7b6f28bc0;5 years - 0.5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;410;__PARENT__c7d7b6f28bc0;5 years - 1 year;;;Unit;3.5
-C_92.01;x_axis_rc_code;420;__PARENT__c7d7b6f28bc0;5 years - 3 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;430;__PARENT__c7d7b6f28bc0;5 years - 5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;440;__PARENT__c7d7b6f28bc0;5 years - 10 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;450;__PARENT__c7d7b6f28bc0;10 years - 0.5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;460;__PARENT__c7d7b6f28bc0;10 years - 1 year;;;Unit;3.5
-C_92.01;x_axis_rc_code;470;__PARENT__c7d7b6f28bc0;10 years - 3 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;480;__PARENT__c7d7b6f28bc0;10 years - 5 years;;;Unit;3.5
-C_92.01;x_axis_rc_code;490;__PARENT__c7d7b6f28bc0;10 years - 10 years;;;Unit;3.5
+C_92.01;x_axis_rc_code;250;__PARENT__c7d7b6f28bc0;0.5 years - 0.5 years;;;;3.5
+C_92.01;x_axis_rc_code;260;__PARENT__c7d7b6f28bc0;0.5 years - 1 year;;;;3.5
+C_92.01;x_axis_rc_code;270;__PARENT__c7d7b6f28bc0;0.5 years - 3 years;;;;3.5
+C_92.01;x_axis_rc_code;280;__PARENT__c7d7b6f28bc0;0.5 years - 5 years;;;;3.5
+C_92.01;x_axis_rc_code;290;__PARENT__c7d7b6f28bc0;0.5 years - 10 years;;;;3.5
+C_92.01;x_axis_rc_code;300;__PARENT__c7d7b6f28bc0;1 year - 0.5 years;;;;3.5
+C_92.01;x_axis_rc_code;310;__PARENT__c7d7b6f28bc0;1 year - 1 year;;;;3.5
+C_92.01;x_axis_rc_code;320;__PARENT__c7d7b6f28bc0;1 year - 3 years;;;;3.5
+C_92.01;x_axis_rc_code;330;__PARENT__c7d7b6f28bc0;1 year - 5 years;;;;3.5
+C_92.01;x_axis_rc_code;340;__PARENT__c7d7b6f28bc0;1 year - 10 years;;;;3.5
+C_92.01;x_axis_rc_code;350;__PARENT__c7d7b6f28bc0;3 years - 0.5 years;;;;3.5
+C_92.01;x_axis_rc_code;360;__PARENT__c7d7b6f28bc0;3 years - 1 year;;;;3.5
+C_92.01;x_axis_rc_code;370;__PARENT__c7d7b6f28bc0;3 years - 3 years;;;;3.5
+C_92.01;x_axis_rc_code;380;__PARENT__c7d7b6f28bc0;3 years - 5 years;;;;3.5
+C_92.01;x_axis_rc_code;390;__PARENT__c7d7b6f28bc0;3 years - 10 years;;;;3.5
+C_92.01;x_axis_rc_code;400;__PARENT__c7d7b6f28bc0;5 years - 0.5 years;;;;3.5
+C_92.01;x_axis_rc_code;410;__PARENT__c7d7b6f28bc0;5 years - 1 year;;;;3.5
+C_92.01;x_axis_rc_code;420;__PARENT__c7d7b6f28bc0;5 years - 3 years;;;;3.5
+C_92.01;x_axis_rc_code;430;__PARENT__c7d7b6f28bc0;5 years - 5 years;;;;3.5
+C_92.01;x_axis_rc_code;440;__PARENT__c7d7b6f28bc0;5 years - 10 years;;;;3.5
+C_92.01;x_axis_rc_code;450;__PARENT__c7d7b6f28bc0;10 years - 0.5 years;;;;3.5
+C_92.01;x_axis_rc_code;460;__PARENT__c7d7b6f28bc0;10 years - 1 year;;;;3.5
+C_92.01;x_axis_rc_code;470;__PARENT__c7d7b6f28bc0;10 years - 3 years;;;;3.5
+C_92.01;x_axis_rc_code;480;__PARENT__c7d7b6f28bc0;10 years - 5 years;;;;3.5
+C_92.01;x_axis_rc_code;490;__PARENT__c7d7b6f28bc0;10 years - 10 years;;;;3.5
 C_92.01;x_axis_rc_code;500;__PARENT__ea00e572b0a3;All maturities of the option - inflation;;;;3.5
 C_92.01;x_axis_rc_code;510;__PARENT__ea00e572b0a3;All maturities of the option - Cross-currency basis (over EUR);;;;3.5
 C_92.01;x_axis_rc_code;520;__PARENT__ea00e572b0a3;All maturities of the option - Cross-currency basis (over USD);;;;3.5
@@ -34586,11 +34586,11 @@ C_92.03;x_axis_rc_code;110;__PARENT__941f3b0673db;1 year;;;;3.5
 C_92.03;x_axis_rc_code;120;__PARENT__941f3b0673db;3 years;;;;3.5
 C_92.03;x_axis_rc_code;130;__PARENT__941f3b0673db;5 years;;;;3.5
 C_92.03;x_axis_rc_code;140;__PARENT__941f3b0673db;10 years;;;;3.5
-C_92.03;x_axis_rc_code;250;__PARENT__c7d7b6f28bc0;0.5 years;;;Unit;3.5
-C_92.03;x_axis_rc_code;260;__PARENT__c7d7b6f28bc0;1 year;;;Unit;3.5
-C_92.03;x_axis_rc_code;270;__PARENT__c7d7b6f28bc0;3 years;;;Unit;3.5
-C_92.03;x_axis_rc_code;280;__PARENT__c7d7b6f28bc0;5 years;;;Unit;3.5
-C_92.03;x_axis_rc_code;290;__PARENT__c7d7b6f28bc0;10 years;;;Unit;3.5
+C_92.03;x_axis_rc_code;250;__PARENT__c7d7b6f28bc0;0.5 years;;;;3.5
+C_92.03;x_axis_rc_code;260;__PARENT__c7d7b6f28bc0;1 year;;;;3.5
+C_92.03;x_axis_rc_code;270;__PARENT__c7d7b6f28bc0;3 years;;;;3.5
+C_92.03;x_axis_rc_code;280;__PARENT__c7d7b6f28bc0;5 years;;;;3.5
+C_92.03;x_axis_rc_code;290;__PARENT__c7d7b6f28bc0;10 years;;;;3.5
 C_92.03;x_axis_rc_code;600;__PARENT__29a6cbeab6f3;Upward net curvature risk position;;;;3.5
 C_92.03;x_axis_rc_code;610;__PARENT__29a6cbeab6f3;Downward net curvature risk position;;;;3.5
 C_92.03;x_axis_rc_code;700;__PARENT__4a70c9337edc;Delta Risk;;;;3.5
@@ -34699,11 +34699,11 @@ C_92.05;x_axis_rc_code;__PARENT__ea00e572b0a3;__PARENT__919ef99870fc;Vega risk f
 C_92.05;x_axis_rc_code;__PARENT__c7d7b6f28bc0;__PARENT__ea00e572b0a3;Maturities (maturity of the option - residual maturity of the underlying);;Y;;3.5
 C_92.05;x_axis_rc_code;100;__PARENT__9f20be81986c;Spot prices;;;;3.5
 C_92.05;x_axis_rc_code;110;__PARENT__9f20be81986c;Repo rates;;;;3.5
-C_92.05;x_axis_rc_code;250;__PARENT__c7d7b6f28bc0;0.5 year;;;Unit;3.5
-C_92.05;x_axis_rc_code;260;__PARENT__c7d7b6f28bc0;1 year;;;Unit;3.5
-C_92.05;x_axis_rc_code;270;__PARENT__c7d7b6f28bc0;3 years;;;Unit;3.5
-C_92.05;x_axis_rc_code;280;__PARENT__c7d7b6f28bc0;5 years;;;Unit;3.5
-C_92.05;x_axis_rc_code;290;__PARENT__c7d7b6f28bc0;10 years;;;Unit;3.5
+C_92.05;x_axis_rc_code;250;__PARENT__c7d7b6f28bc0;0.5 year;;;;3.5
+C_92.05;x_axis_rc_code;260;__PARENT__c7d7b6f28bc0;1 year;;;;3.5
+C_92.05;x_axis_rc_code;270;__PARENT__c7d7b6f28bc0;3 years;;;;3.5
+C_92.05;x_axis_rc_code;280;__PARENT__c7d7b6f28bc0;5 years;;;;3.5
+C_92.05;x_axis_rc_code;290;__PARENT__c7d7b6f28bc0;10 years;;;;3.5
 C_92.05;x_axis_rc_code;600;__PARENT__29a6cbeab6f3;Upward net curvature risk position;;;;3.5
 C_92.05;x_axis_rc_code;610;__PARENT__29a6cbeab6f3;Downward net curvature risk position;;;;3.5
 C_92.05;x_axis_rc_code;700;__PARENT__4a70c9337edc;Delta Risk;;;;3.5
@@ -34822,11 +34822,11 @@ C_92.07.2;x_axis_rc_code;__PARENT__c7146a659885;__PARENT__7b563e197b7e;Medium co
 C_92.07.2;x_axis_rc_code;__PARENT__a4e1de039780;__PARENT__760973f90118;Vega risk: Maturities (maturity of the option);;Y;;3.5
 C_92.07.2;x_axis_rc_code;10;__PARENT__23033354764b;First currency;;;;3.5
 C_92.07.2;x_axis_rc_code;20;__PARENT__23033354764b;Second currency;;;;3.5
-C_92.07.2;x_axis_rc_code;250;__PARENT__a4e1de039780;0.5 years;;;Unit;3.5
-C_92.07.2;x_axis_rc_code;260;__PARENT__a4e1de039780;1 year;;;Unit;3.5
-C_92.07.2;x_axis_rc_code;270;__PARENT__a4e1de039780;3 years;;;Unit;3.5
-C_92.07.2;x_axis_rc_code;280;__PARENT__a4e1de039780;5 years;;;Unit;3.5
-C_92.07.2;x_axis_rc_code;290;__PARENT__a4e1de039780;10 years;;;Unit;3.5
+C_92.07.2;x_axis_rc_code;250;__PARENT__a4e1de039780;0.5 years;;;;3.5
+C_92.07.2;x_axis_rc_code;260;__PARENT__a4e1de039780;1 year;;;;3.5
+C_92.07.2;x_axis_rc_code;270;__PARENT__a4e1de039780;3 years;;;;3.5
+C_92.07.2;x_axis_rc_code;280;__PARENT__a4e1de039780;5 years;;;;3.5
+C_92.07.2;x_axis_rc_code;290;__PARENT__a4e1de039780;10 years;;;;3.5
 C_92.07.2;x_axis_rc_code;710;__PARENT__4a70c9337edc;Vega Risk;;;;3.5
 C_92.07.2;x_axis_rc_code;1010;__PARENT__982403250a9c;Vega Risk;;;;3.5
 C_92.07.2;x_axis_rc_code;1040;__PARENT__c7146a659885;Vega Risk;;;;3.5
@@ -35983,9 +35983,9 @@ M_01.00;y_axis_rc_code;230;220;Of which containing a write down and conversion c
 M_01.00;y_axis_rc_code;250;__PARENT__4602f8c3de34;Other bailinable liabilities;;;;3.5
 M_01.00;y_axis_rc_code;260;250;Of which governed by third country law;;;;3.5
 M_01.00;y_axis_rc_code;270;260;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.5
-M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;Unit;3.5
-M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;Unit;3.5
-M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;Unit;3.5
+M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;;3.5
+M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;;3.5
+M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;;3.5
 M_01.00;y_axis_rc_code;300;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total risk exposure amount;;;%;3.5
 M_01.00;y_axis_rc_code;310;300;Of which: own funds and subordinated liabilities;;;;3.5
 M_01.00;y_axis_rc_code;320;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total exposure measure;;;%;3.5
@@ -36008,7 +36008,7 @@ M_02.00;y_axis_rc_code;90;70;Eligible liabilities subordinated to excluded liabi
 M_02.00;y_axis_rc_code;100;90;Eligible liabilities instruments issued directly by the resolution entity (not grandfathered);;;;3.5
 M_02.00;y_axis_rc_code;110;90;Eligible liabilities instruments issued by other entities within the resolution group (not grandfathered);;;;3.5
 M_02.00;y_axis_rc_code;120;90;Eligible liabilities instruments issued prior to 27 June 2019;;;;3.5
-M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;3.5
+M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;3.5
 M_02.00;y_axis_rc_code;132;90;(-) Own eligible liabilities instruments subordinated to excluded liabilities;;;;3.5
 M_02.00;y_axis_rc_code;135;132;(-) Of which: unused prior permission amounts;;;;3.5
 M_02.00;y_axis_rc_code;140;70;Eligible liabilities not subordinated to excluded liabilities;;;;3.5
@@ -36075,41 +36075,41 @@ M_03.00;y_axis_rc_code;540;500;Of which: Global Systemically Important Instituti
 M_03.00;y_axis_rc_code;550;__PARENT__877f567bb33f;Other bailinable liabilities;;;;3.5
 M_03.00;y_axis_rc_code;560;550;Of which governed by third country law;;;;3.5
 M_03.00;y_axis_rc_code;570;560;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;3.5
-M_03.00;y_axis_rc_code;580;550;Residual maturity of < 1 year;;;Unit;3.5
-M_03.00;y_axis_rc_code;590;550;Residual maturity of >= 1 year and < 2 years;;;Unit;3.5
-M_03.00;y_axis_rc_code;600;550;Residual maturity of >= 2 years;;;Unit;3.5
+M_03.00;y_axis_rc_code;580;550;Residual maturity of < 1 year;;;;3.5
+M_03.00;y_axis_rc_code;590;550;Residual maturity of >= 1 year and < 2 years;;;;3.5
+M_03.00;y_axis_rc_code;600;550;Residual maturity of >= 2 years;;;;3.5
 M_03.00;y_axis_rc_code;610;__PARENT__877f567bb33f;Excluded liabilities;;;;3.5
 M_03.00;y_axis_rc_code;620;;Own funds instruments issued by liquidation entities of the same resolution group;;;;3.5
 M_03.00;y_axis_rc_code;630;;Ratio of holdings of own funds instruments issued by liquidation entities over eligible own funds and eligible liabilities;;;%;3.5
 M_04.00;x_axis_rc_code;10;;Amount eligible for MREL / internal MREL;;;;3.5
 M_04.00;y_axis_rc_code;100;;Eligible liabilities;;;;3.5
 M_04.00;y_axis_rc_code;200;100;Deposits, not covered and not preferential >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;230;200;Of which: issued by subsidiaries;;;;3.5
 M_04.00;y_axis_rc_code;300;100;Uncollateralized secured liabilities >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;330;300;Of which: issued by subsidiaries;;;;3.5
 M_04.00;y_axis_rc_code;400;100;Structured notes >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;430;400;Of which: issued by subsidiaries;;;;3.5
 M_04.00;y_axis_rc_code;500;100;Senior unsecured liabilities >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;530;500;Of which: issued by subsidiaries;;;;3.5
 M_04.00;y_axis_rc_code;600;100;Senior non-preferred liabilities >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;630;600;Of which: issued by subsidiaries;;;;3.5
 M_04.00;y_axis_rc_code;700;100;Subordinated liabilities (not recognised as own funds) >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;730;700;Of which: issued by subsidiaries;;;;3.5
 M_04.00;y_axis_rc_code;800;100;Other MREL eligible liabilities >= 1 year;;;;3.5
-M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;Unit;3.5
-M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;Unit;3.5
+M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;;3.5
+M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;;3.5
 M_04.00;y_axis_rc_code;830;800;Of which: issued by subsidiaries;;;;3.5
 M_05.00;x_axis_rc_code;__PARENT__012b29688a9b;70;Of which: with a residual maturity of;;Y;;3.5
 M_05.00;x_axis_rc_code;10;;Insolvency rank;;;;3.5
@@ -36119,10 +36119,10 @@ M_05.00;x_axis_rc_code;40;;Liabilities and own funds;;;;3.5
 M_05.00;x_axis_rc_code;50;40;Of which: excluded liabilities;;;;3.5
 M_05.00;x_axis_rc_code;60;;Liabilities and own funds less excluded liabilities;;;;3.5
 M_05.00;x_axis_rc_code;70;60;Of which: own funds and eligible liabilities for the purpose of internal MREL;;;;3.5
-M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;Unit;3.5
-M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;Unit;3.5
-M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;Unit;3.5
-M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;Unit;3.5
+M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;;3.5
+M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;;3.5
+M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;;3.5
+M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;;3.5
 M_05.00;x_axis_rc_code;120;70;Of which: perpetual securities;;;;3.5
 M_05.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.5
 M_06.00;x_axis_rc_code;__PARENT__8522ce36f8a9;60;Of which: with a residual maturity of;;Y;;3.5
@@ -36132,10 +36132,10 @@ M_06.00;x_axis_rc_code;30;;Liabilities and own funds;;;;3.5
 M_06.00;x_axis_rc_code;40;30;Of which: excluded liabilities;;;;3.5
 M_06.00;x_axis_rc_code;50;;Liabilities and own funds less excluded liabilities;;;;3.5
 M_06.00;x_axis_rc_code;60;50;Of which: own funds and eligible liabilities potentially eligible for meeting MREL;;;;3.5
-M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;Unit;3.5
-M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;Unit;3.5
-M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;Unit;3.5
-M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;Unit;3.5
+M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;;3.5
+M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;;3.5
+M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;;3.5
+M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;;3.5
 M_06.00;x_axis_rc_code;110;60;Of which: perpetual securities;;;;3.5
 M_06.00;y_axis_rc_code;999;;Own funds and liabilities broken down by insolvency rank;;;;3.5
 M_07.00;x_axis_rc_code;__PARENT__cfa1aed8b504;;Issuing entity;;Y;;3.5
@@ -39119,10 +39119,10 @@ C_18.00;y_axis_rc_code;12;11;Derivatives;;;;4.0
 C_18.00;y_axis_rc_code;13;11;Other assets and liabilities;;;;4.0
 C_18.00;y_axis_rc_code;20;11;Maturity-based approach;;;;4.0
 C_18.00;y_axis_rc_code;30;20;Zone 1;;;;4.0
-C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;Unit;4.0
-C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;Unit;4.0
-C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;Unit;4.0
-C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;Unit;4.0
+C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;;4.0
+C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;;4.0
+C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;;4.0
+C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;;4.0
 C_18.00;y_axis_rc_code;80;20;1.2 Zone 2;;;;4.0
 C_18.00;y_axis_rc_code;90;80;> 1 <= 2 (1,9 for coupon of less than 3%) years;;;;4.0
 C_18.00;y_axis_rc_code;100;80;> 2 <= 3 (> 1,9 <= 2,8 for coupon of less than 3%) years;;;;4.0
@@ -43308,8 +43308,8 @@ K_73.00;y_axis_rc_code;290;__PARENT__90e52e23f32f;22. Total net cash outflows;;;
 K_73.00;y_axis_rc_code;300;__PARENT__90e52e23f32f;23. Liquidity coverage ratio;;;%;4.1
 K_74.00;x_axis_rc_code;__PARENT__4976117d1898;;Unweighted value by residual maturity;;Y;;4.1
 K_74.00;x_axis_rc_code;10;__PARENT__4976117d1898;a. No maturity;;;;4.1
-K_74.00;x_axis_rc_code;20;__PARENT__4976117d1898;b. < 6 months;;;Unit;4.1
-K_74.00;x_axis_rc_code;30;__PARENT__4976117d1898;c. 6 months to < 1yr;;;Unit;4.1
+K_74.00;x_axis_rc_code;20;__PARENT__4976117d1898;b. < 6 months;;;;4.1
+K_74.00;x_axis_rc_code;30;__PARENT__4976117d1898;c. 6 months to < 1yr;;;;4.1
 K_74.00;x_axis_rc_code;40;__PARENT__4976117d1898;d. >= 1yr;;;;4.1
 K_74.00;x_axis_rc_code;50;;e. Weighted value;;;;4.1
 K_74.00;y_axis_rc_code;__PARENT__331e357ba954;;0009 Available stable funding ASF Items.;;Y;;4.1
@@ -43479,10 +43479,10 @@ K_44.00;y_axis_rc_code;10;;1. Counterparty;;;;4.1
 K_45.00;x_axis_rc_code;__PARENT__f39f0516d3b4;10;Of which exposures sensitive to impact from climate change physical events;;Y;;4.1
 K_45.00;x_axis_rc_code;__PARENT__048179cd7a94;__PARENT__f39f0516d3b4;Breakdown by maturity bucket;;Y;;4.1
 K_45.00;x_axis_rc_code;10;;b. Gross carrying amount;;;;4.1
-K_45.00;x_axis_rc_code;20;__PARENT__048179cd7a94;c. <= 5 years;;;Unit;4.1
-K_45.00;x_axis_rc_code;30;__PARENT__048179cd7a94;d. > 5 year <= 10 years;;;Unit;4.1
-K_45.00;x_axis_rc_code;40;__PARENT__048179cd7a94;e. > 10 year <= 20 years;;;Unit;4.1
-K_45.00;x_axis_rc_code;50;__PARENT__048179cd7a94;f. > 20 years;;;Unit;4.1
+K_45.00;x_axis_rc_code;20;__PARENT__048179cd7a94;c. <= 5 years;;;;4.1
+K_45.00;x_axis_rc_code;30;__PARENT__048179cd7a94;d. > 5 year <= 10 years;;;;4.1
+K_45.00;x_axis_rc_code;40;__PARENT__048179cd7a94;e. > 10 year <= 20 years;;;;4.1
+K_45.00;x_axis_rc_code;50;__PARENT__048179cd7a94;f. > 20 years;;;;4.1
 K_45.00;x_axis_rc_code;60;__PARENT__048179cd7a94;g. Average weighted maturity;;;;4.1
 K_45.00;x_axis_rc_code;70;__PARENT__f39f0516d3b4;h. of which exposures sensitive to impact from chronic climate change events;;;;4.1
 K_45.00;x_axis_rc_code;80;__PARENT__f39f0516d3b4;i. Of which exposures sensitive to impact from acute climate change events;;;;4.1
@@ -43876,10 +43876,10 @@ D_04.00;y_axis_rc_code;10;;Counterparty;;;;4.1
 D_05.00;x_axis_rc_code;__PARENT__b7bf125d9253;10;Of which exposures sensitive to impact from climate change physical events;;Y;;4.1
 D_05.00;x_axis_rc_code;__PARENT__800eefde5859;__PARENT__b7bf125d9253;Breakdown by maturity bucket;;Y;;4.1
 D_05.00;x_axis_rc_code;10;;Gross carrying amount;;;;4.1
-D_05.00;x_axis_rc_code;20;__PARENT__800eefde5859;<= 5 years;;;Unit;4.1
-D_05.00;x_axis_rc_code;30;__PARENT__800eefde5859;> 5 year <= 10 years;;;Unit;4.1
-D_05.00;x_axis_rc_code;40;__PARENT__800eefde5859;> 10 year <= 20 years;;;Unit;4.1
-D_05.00;x_axis_rc_code;50;__PARENT__800eefde5859;> 20 years;;;Unit;4.1
+D_05.00;x_axis_rc_code;20;__PARENT__800eefde5859;<= 5 years;;;;4.1
+D_05.00;x_axis_rc_code;30;__PARENT__800eefde5859;> 5 year <= 10 years;;;;4.1
+D_05.00;x_axis_rc_code;40;__PARENT__800eefde5859;> 10 year <= 20 years;;;;4.1
+D_05.00;x_axis_rc_code;50;__PARENT__800eefde5859;> 20 years;;;;4.1
 D_05.00;x_axis_rc_code;60;__PARENT__800eefde5859;Average weighted maturity;;;;4.1
 D_05.00;x_axis_rc_code;70;__PARENT__b7bf125d9253;Of which exposures sensitive to impact from chronic climate change events;;;;4.1
 D_05.00;x_axis_rc_code;80;__PARENT__b7bf125d9253;Of which exposures sensitive to impact from acute climate change events;;;;4.1
@@ -45133,18 +45133,18 @@ Q_03.02;y_axis_rc_code;10;;All other bank deposits counterparties;;;;4.1
 Q_03.02;y_axis_rc_code;20;;All other securities issuers;;;;4.1
 Q_03.02;y_axis_rc_code;30;;All other derivatives counterparties;;;;4.1
 Q_03.03;x_axis_rc_code;__PARENT__de6312f56eec;;Contractual Flow Maturity;;Y;;4.1
-Q_03.03;x_axis_rc_code;10;__PARENT__de6312f56eec;Up to 1 day;;;Unit;4.1
-Q_03.03;x_axis_rc_code;20;__PARENT__de6312f56eec;Greater than 1 day up to 5 days;;;Unit;4.1
-Q_03.03;x_axis_rc_code;30;__PARENT__de6312f56eec;Greater than 5 days up to 2 weeks;;;Unit;4.1
+Q_03.03;x_axis_rc_code;10;__PARENT__de6312f56eec;Up to 1 day;;;;4.1
+Q_03.03;x_axis_rc_code;20;__PARENT__de6312f56eec;Greater than 1 day up to 5 days;;;;4.1
+Q_03.03;x_axis_rc_code;30;__PARENT__de6312f56eec;Greater than 5 days up to 2 weeks;;;;4.1
 Q_03.03;x_axis_rc_code;40;__PARENT__de6312f56eec;Greater than 2 weeks up to 3 weeks;;;;4.1
-Q_03.03;x_axis_rc_code;50;__PARENT__de6312f56eec;Greater than 3 weeks up to 1 month;;;Unit;4.1
-Q_03.03;x_axis_rc_code;60;__PARENT__de6312f56eec;Greater than 1 month up to 2 months;;;Unit;4.1
-Q_03.03;x_axis_rc_code;70;__PARENT__de6312f56eec;Greater than 2 months up to 3 months;;;Unit;4.1
-Q_03.03;x_axis_rc_code;80;__PARENT__de6312f56eec;Greater than 3 months up to 6 months;;;Unit;4.1
-Q_03.03;x_axis_rc_code;90;__PARENT__de6312f56eec;Greater than 6 months up to 12 months;;;Unit;4.1
-Q_03.03;x_axis_rc_code;100;__PARENT__de6312f56eec;Greater than 12 months up to 36 months;;;Unit;4.1
-Q_03.03;x_axis_rc_code;110;__PARENT__de6312f56eec;Greater than 36 months up to 60 months;;;Unit;4.1
-Q_03.03;x_axis_rc_code;120;__PARENT__de6312f56eec;Greater than 60 months;;;Unit;4.1
+Q_03.03;x_axis_rc_code;50;__PARENT__de6312f56eec;Greater than 3 weeks up to 1 month;;;;4.1
+Q_03.03;x_axis_rc_code;60;__PARENT__de6312f56eec;Greater than 1 month up to 2 months;;;;4.1
+Q_03.03;x_axis_rc_code;70;__PARENT__de6312f56eec;Greater than 2 months up to 3 months;;;;4.1
+Q_03.03;x_axis_rc_code;80;__PARENT__de6312f56eec;Greater than 3 months up to 6 months;;;;4.1
+Q_03.03;x_axis_rc_code;90;__PARENT__de6312f56eec;Greater than 6 months up to 12 months;;;;4.1
+Q_03.03;x_axis_rc_code;100;__PARENT__de6312f56eec;Greater than 12 months up to 36 months;;;;4.1
+Q_03.03;x_axis_rc_code;110;__PARENT__de6312f56eec;Greater than 36 months up to 60 months;;;;4.1
+Q_03.03;x_axis_rc_code;120;__PARENT__de6312f56eec;Greater than 60 months;;;;4.1
 Q_03.03;y_axis_rc_code;__PARENT__167b879b40f2;;0190 Reverse repos;;Y;;4.1
 Q_03.03;y_axis_rc_code;__PARENT__f4234e918506;;0270 Repos;;Y;;4.1
 Q_03.03;y_axis_rc_code;__PARENT__4d991c6dd7c6;;0350 Collateral swaps;;Y;;4.1
@@ -45764,7 +45764,7 @@ K_91.00;y_axis_rc_code;90;__PARENT__500a13b9ef63;11. Own funds for the purpose o
 K_91.00;y_axis_rc_code;100;__PARENT__5049c00fc46b;12. Eligible liabilities instruments issued directly by the resolution entity that are subordinated to excluded liabilities not grandfathered;;;;4.1
 K_91.00;y_axis_rc_code;110;__PARENT__5049c00fc46b;EU-12a. Eligible liabilities instruments issued by other entities within the resolution group that are subordinated to excluded liabilities not grandfathered;;;;4.1
 K_91.00;y_axis_rc_code;120;__PARENT__5049c00fc46b;EU-12b. Eligible liabilities instruments that are subordinated to excluded liabilities issued prior to 27 June 2019 subordinated grandfathered;;;;4.1
-K_91.00;y_axis_rc_code;130;__PARENT__5049c00fc46b;EU-12c. Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;4.1
+K_91.00;y_axis_rc_code;130;__PARENT__5049c00fc46b;EU-12c. Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;4.1
 K_91.00;y_axis_rc_code;140;__PARENT__5049c00fc46b;13. Eligible liabilities that are not subordinated to excluded liabilities not grandfathered pre-cap;;;;4.1
 K_91.00;y_axis_rc_code;150;__PARENT__5049c00fc46b;EU-13a. Eligible liabilities that are not subordinated to excluded liabilities issued prior to 27 June 2019 pre-cap;;;;4.1
 K_91.00;y_axis_rc_code;160;__PARENT__5049c00fc46b;14. Amount of non subordinated eligible liabilities instruments, where applicable after application of Article 72b 3 CRR;;;;4.1
@@ -45834,9 +45834,9 @@ K_95.00;y_axis_rc_code;20;__PARENT__c4a78d455f4b;3. Liabilities and own funds;;;
 K_95.00;y_axis_rc_code;30;20;4. of which excluded liabilities;;;;4.1
 K_95.00;y_axis_rc_code;40;__PARENT__c4a78d455f4b;5. Liabilities and own funds less excluded liabilities;;;;4.1
 K_95.00;y_axis_rc_code;50;__PARENT__c4a78d455f4b;6. Subset of liabilities and own funds less excluded liabilities that are own funds and eligible liabilities for the purpose of [choose as a appropriate: internal MREL/internal TLAC];;;;4.1
-K_95.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;Unit;4.1
-K_95.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;Unit;4.1
-K_95.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;Unit;4.1
+K_95.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;;4.1
+K_95.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;;4.1
+K_95.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;;4.1
 K_95.00;y_axis_rc_code;90;50;10. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.1
 K_95.00;y_axis_rc_code;100;50;11. of which perpetual securities;;;;4.1
 K_95.00;z_axis_rc_code;qx262;;Rank 1 - Ranking in insolvency (master scale);;;;4.1
@@ -45869,9 +45869,9 @@ K_96.00;y_axis_rc_code;20;;3. Empty set in the EU;;;;4.1
 K_96.00;y_axis_rc_code;30;;4. Empty set in the EU;;;;4.1
 K_96.00;y_axis_rc_code;40;;5. Empty set in the EU;;;;4.1
 K_96.00;y_axis_rc_code;50;;6. Subset of liabilities and own funds less excluded liabilities that are own funds and eligible liabilities for the purpose of [choose as a appropriate: internal MREL/internal TLAC];;;;4.1
-K_96.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;Unit;4.1
-K_96.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;Unit;4.1
-K_96.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;Unit;4.1
+K_96.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;;4.1
+K_96.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;;4.1
+K_96.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;;4.1
 K_96.00;y_axis_rc_code;90;50;10. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.1
 K_96.00;y_axis_rc_code;100;50;11. of which perpetual securities;;;;4.1
 K_96.00;z_axis_rc_code;qx262;;Rank 1 - Ranking in insolvency (master scale);;;;4.1
@@ -45901,9 +45901,9 @@ K_97.00;y_axis_rc_code;20;;2. Liabilities and own funds;;;;4.1
 K_97.00;y_axis_rc_code;30;20;3. of which excluded liabilities;;;;4.1
 K_97.00;y_axis_rc_code;40;;4. Liabilities and own funds less excluded liabilities;;;;4.1
 K_97.00;y_axis_rc_code;50;;5. Subset of liabilities and own funds less excluded liabilities that are own funds and liabilities potentially eligible for meeting [choose as a appropriate: MREL/TLAC];;;;4.1
-K_97.00;y_axis_rc_code;60;50;6. of which residual maturity >= 1 year < 2 years;;;Unit;4.1
-K_97.00;y_axis_rc_code;70;50;7. of which residual maturity >= 2 year < 5 years;;;Unit;4.1
-K_97.00;y_axis_rc_code;80;50;8. of which residual maturity >= 5 years < 10 years;;;Unit;4.1
+K_97.00;y_axis_rc_code;60;50;6. of which residual maturity >= 1 year < 2 years;;;;4.1
+K_97.00;y_axis_rc_code;70;50;7. of which residual maturity >= 2 year < 5 years;;;;4.1
+K_97.00;y_axis_rc_code;80;50;8. of which residual maturity >= 5 years < 10 years;;;;4.1
 K_97.00;y_axis_rc_code;90;50;9. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.1
 K_97.00;y_axis_rc_code;100;50;10. of which perpetual securities;;;;4.1
 K_97.00;z_axis_rc_code;qx262;;Rank 1 - Ranking in insolvency (master scale);;;;4.1
@@ -45933,9 +45933,9 @@ K_98.00;y_axis_rc_code;17;;2. Empty set in the EU;;;;4.1
 K_98.00;y_axis_rc_code;18;;3. Empty set in the EU;;;;4.1
 K_98.00;y_axis_rc_code;19;;4. Empty set in the EU;;;;4.1
 K_98.00;y_axis_rc_code;20;;5. Own funds and liabilities potentially eligible for meeting MREL;;;;4.1
-K_98.00;y_axis_rc_code;30;20;6. of which residual maturity >= 1 year < 2 years;;;Unit;4.1
-K_98.00;y_axis_rc_code;40;20;7. of which residual maturity >= 2 year < 5 years;;;Unit;4.1
-K_98.00;y_axis_rc_code;50;20;8. of which residual maturity >= 5 years < 10 years;;;Unit;4.1
+K_98.00;y_axis_rc_code;30;20;6. of which residual maturity >= 1 year < 2 years;;;;4.1
+K_98.00;y_axis_rc_code;40;20;7. of which residual maturity >= 2 year < 5 years;;;;4.1
+K_98.00;y_axis_rc_code;50;20;8. of which residual maturity >= 5 years < 10 years;;;;4.1
 K_98.00;y_axis_rc_code;60;20;9. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.1
 K_98.00;y_axis_rc_code;70;20;10. of which perpetual securities;;;;4.1
 K_98.00;z_axis_rc_code;qx262;;Rank 1 - Ranking in insolvency (master scale);;;;4.1
@@ -48348,11 +48348,11 @@ C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;4.2
 C_82.00;x_axis_rc_code;__PARENT__cffac3962595;__PARENT__3bec4b8b94a0;Non-HQLA by maturity;;Y;;4.2
-C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;Unit;4.2
-C_82.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 1 year;;;Unit;4.2
+C_82.00;x_axis_rc_code;10;__PARENT__9b6deddf7d13;< 1 year;;;;4.2
+C_82.00;x_axis_rc_code;20;__PARENT__9b6deddf7d13;>= 1 year;;;;4.2
 C_82.00;x_axis_rc_code;30;__PARENT__9b6deddf7d13;HQLA;;;;4.2
-C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;Unit;4.2
-C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;Unit;4.2
+C_82.00;x_axis_rc_code;70;__PARENT__cffac3962595;< 1 year;;;;4.2
+C_82.00;x_axis_rc_code;80;__PARENT__cffac3962595;>= 1 year;;;;4.2
 C_82.00;x_axis_rc_code;90;__PARENT__cffac3962595;HQLA;;;;4.2
 C_82.00;x_axis_rc_code;100;;Required stable funding;;;;4.2
 C_82.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;4.2
@@ -51199,10 +51199,10 @@ C_18.00;y_axis_rc_code;12;11;Derivatives;;;;4.2
 C_18.00;y_axis_rc_code;13;11;Other assets and liabilities;;;;4.2
 C_18.00;y_axis_rc_code;20;11;Maturity-based approach;;;;4.2
 C_18.00;y_axis_rc_code;30;20;Zone 1;;;;4.2
-C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;Unit;4.2
-C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;Unit;4.2
-C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;Unit;4.2
-C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;Unit;4.2
+C_18.00;y_axis_rc_code;40;30;0 <= 1 month;;;;4.2
+C_18.00;y_axis_rc_code;50;30;> 1 <= 3 months;;;;4.2
+C_18.00;y_axis_rc_code;60;30;> 3 <= 6 months;;;;4.2
+C_18.00;y_axis_rc_code;70;30;> 6 <= 12 months;;;;4.2
 C_18.00;y_axis_rc_code;80;20;1.2 Zone 2;;;;4.2
 C_18.00;y_axis_rc_code;90;80;> 1 <= 2 (1,9 for coupon of less than 3%) years;;;;4.2
 C_18.00;y_axis_rc_code;100;80;> 2 <= 3 (> 1,9 <= 2,8 for coupon of less than 3%) years;;;;4.2
@@ -52662,10 +52662,10 @@ D_04.00;y_axis_rc_code;10;;Counterparty;;;;4.2
 D_05.00;x_axis_rc_code;__PARENT__b7bf125d9253;10;Of which exposures sensitive to impact from climate change physical events;;Y;;4.2
 D_05.00;x_axis_rc_code;__PARENT__800eefde5859;__PARENT__b7bf125d9253;Breakdown by maturity bucket;;Y;;4.2
 D_05.00;x_axis_rc_code;10;;Gross carrying amount;;;;4.2
-D_05.00;x_axis_rc_code;20;__PARENT__800eefde5859;<= 5 years;;;Unit;4.2
-D_05.00;x_axis_rc_code;30;__PARENT__800eefde5859;> 5 year <= 10 years;;;Unit;4.2
-D_05.00;x_axis_rc_code;40;__PARENT__800eefde5859;> 10 year <= 20 years;;;Unit;4.2
-D_05.00;x_axis_rc_code;50;__PARENT__800eefde5859;> 20 years;;;Unit;4.2
+D_05.00;x_axis_rc_code;20;__PARENT__800eefde5859;<= 5 years;;;;4.2
+D_05.00;x_axis_rc_code;30;__PARENT__800eefde5859;> 5 year <= 10 years;;;;4.2
+D_05.00;x_axis_rc_code;40;__PARENT__800eefde5859;> 10 year <= 20 years;;;;4.2
+D_05.00;x_axis_rc_code;50;__PARENT__800eefde5859;> 20 years;;;;4.2
 D_05.00;x_axis_rc_code;60;__PARENT__800eefde5859;Average weighted maturity;;;;4.2
 D_05.00;x_axis_rc_code;70;__PARENT__b7bf125d9253;Of which exposures sensitive to impact from chronic climate change events;;;;4.2
 D_05.00;x_axis_rc_code;80;__PARENT__b7bf125d9253;Of which exposures sensitive to impact from acute climate change events;;;;4.2
@@ -56343,20 +56343,20 @@ F_22.02;y_axis_rc_code;160;130;Other;;;;4.2
 F_23.01;x_axis_rc_code;10;;Number of instruments;;;Unit;4.2
 F_23.01;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;Unit;4.2
 F_23.01;x_axis_rc_code;30;10;Performing;;;Unit;4.2
-F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;Unit;4.2
+F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;;4.2
 F_23.01;x_axis_rc_code;50;30;of which: Exposures with forbearance measures;;;Unit;4.2
 F_23.01;x_axis_rc_code;60;10;Non Performing;;;Unit;4.2
 F_23.01;x_axis_rc_code;70;60;of which: Exposures with forbearance measures;;;Unit;4.2
-F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;Unit;4.2
+F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;;4.2
 F_23.01;x_axis_rc_code;90;80;of which: Exposures with forbearance measures;;;Unit;4.2
-F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;Unit;4.2
+F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;;4.2
 F_23.01;x_axis_rc_code;110;100;of which: Exposures with forbearance measures;;;Unit;4.2
-F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;Unit;4.2
-F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;Unit;4.2
-F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;Unit;4.2
-F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;Unit;4.2
-F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;Unit;4.2
-F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;Unit;4.2
+F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;;4.2
+F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;;4.2
+F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;;4.2
+F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;;4.2
+F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;;4.2
+F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;;4.2
 F_23.01;y_axis_rc_code;10;;Loans and advances;;;;4.2
 F_23.01;y_axis_rc_code;20;10;of which: Households;;;;4.2
 F_23.01;y_axis_rc_code;30;20;of which: Loans collateralised by residential immovable property;;;;4.2
@@ -60620,20 +60620,20 @@ F_22.02;y_axis_rc_code;160;130;Other;;;;4.2.1
 F_23.01;x_axis_rc_code;10;;Number of instruments;;;Unit;4.2.1
 F_23.01;x_axis_rc_code;20;10;of which: Exposures with forbearance measures;;;Unit;4.2.1
 F_23.01;x_axis_rc_code;30;10;Performing;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;Unit;4.2.1
+F_23.01;x_axis_rc_code;40;30;of which: Past due > 30 days <= 90 days;;;;4.2.1
 F_23.01;x_axis_rc_code;50;30;of which: Exposures with forbearance measures;;;Unit;4.2.1
 F_23.01;x_axis_rc_code;60;10;Non Performing;;;Unit;4.2.1
 F_23.01;x_axis_rc_code;70;60;of which: Exposures with forbearance measures;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;Unit;4.2.1
+F_23.01;x_axis_rc_code;80;60;Unlikely to pay that are not past due or past due <= 90 days;;;;4.2.1
 F_23.01;x_axis_rc_code;90;80;of which: Exposures with forbearance measures;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;Unit;4.2.1
+F_23.01;x_axis_rc_code;100;60;Past due > 90 days;;;;4.2.1
 F_23.01;x_axis_rc_code;110;100;of which: Exposures with forbearance measures;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;Unit;4.2.1
-F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;Unit;4.2.1
+F_23.01;x_axis_rc_code;120;100;Past due > 90 days <= 180 days;;;;4.2.1
+F_23.01;x_axis_rc_code;130;100;Past due > 180 days <= 1 year;;;;4.2.1
+F_23.01;x_axis_rc_code;140;100;Past due > 1 years <= 2 years;;;;4.2.1
+F_23.01;x_axis_rc_code;150;100;Past due > 2 years <= 5 years;;;;4.2.1
+F_23.01;x_axis_rc_code;160;100;Past due > 5 years <= 7 years;;;;4.2.1
+F_23.01;x_axis_rc_code;170;100;Past due > 7 years;;;;4.2.1
 F_23.01;y_axis_rc_code;10;;Loans and advances;;;;4.2.1
 F_23.01;y_axis_rc_code;20;10;of which: Households;;;;4.2.1
 F_23.01;y_axis_rc_code;30;20;of which: Loans collateralised by residential immovable property;;;;4.2.1
@@ -61374,10 +61374,10 @@ P_01.02;y_axis_rc_code;142;140;Other EEA countries activities;;;;4.2
 P_01.02;y_axis_rc_code;143;140;Non-EEA countries activities;;;;4.2
 P_01.02;y_axis_rc_code;145;__PARENT__51cb2387bc39;Deposits from central banks (excl. repurchase agreements);;;;4.2
 P_01.02;y_axis_rc_code;147;__PARENT__51cb2387bc39;Deposits from general governments (excl. repurchase agreements);;;;4.2
-P_01.02;y_axis_rc_code;150;__PARENT__51cb2387bc39;Short-term debt securities issued (original maturity <1 year);;;Unit;4.2
+P_01.02;y_axis_rc_code;150;__PARENT__51cb2387bc39;Short-term debt securities issued (original maturity <1 year);;;;4.2
 P_01.02;y_axis_rc_code;160;150;Short-term unsecured debt securities issued;;;Unit;4.2
 P_01.02;y_axis_rc_code;170;150;Short-term secured debt securities issued;;;Unit;4.2
-P_01.02;y_axis_rc_code;180;__PARENT__51cb2387bc39;Long-term debt securities issued (original maturity >=1 year);;;Unit;4.2
+P_01.02;y_axis_rc_code;180;__PARENT__51cb2387bc39;Long-term debt securities issued (original maturity >=1 year);;;;4.2
 P_01.02;y_axis_rc_code;190;180;Total long-term unsecured debt securities issued;;;Unit;4.2
 P_01.02;y_axis_rc_code;191;190;Additional Tier 1 instruments;;;Unit;4.2
 P_01.02;y_axis_rc_code;192;190;Tier 2 instruments;;;Unit;4.2
@@ -61390,7 +61390,7 @@ P_01.02;y_axis_rc_code;250;220;Covered bonds;;;Unit;4.2
 P_01.02;y_axis_rc_code;280;220;Asset backed securities;;;Unit;4.2
 P_01.02;y_axis_rc_code;310;220;Other long-term secured debt securities;;;Unit;4.2
 P_01.02;y_axis_rc_code;340;__PARENT__51cb2387bc39;Total debt securities issued;;;;4.2
-P_01.02;y_axis_rc_code;350;340;o/w (original maturity >= 3 years);;;Unit;4.2
+P_01.02;y_axis_rc_code;350;340;o/w (original maturity >= 3 years);;;;4.2
 P_01.02;y_axis_rc_code;360;__PARENT__51cb2387bc39;Derivatives;;;;4.2
 P_01.02;y_axis_rc_code;370;__PARENT__51cb2387bc39;Total equity;;;;4.2
 P_01.02;y_axis_rc_code;381;__PARENT__51cb2387bc39;Other liabilities;;;;4.2
@@ -63593,18 +63593,18 @@ Q_03.02;y_axis_rc_code;10;;All other bank deposits counterparties;;;;4.2
 Q_03.02;y_axis_rc_code;20;;All other securities issuers;;;;4.2
 Q_03.02;y_axis_rc_code;30;;All other derivatives counterparties;;;;4.2
 Q_03.03;x_axis_rc_code;__PARENT__de6312f56eec;;Contractual Flow Maturity;;Y;;4.2
-Q_03.03;x_axis_rc_code;10;__PARENT__de6312f56eec;Up to 1 day;;;Unit;4.2
-Q_03.03;x_axis_rc_code;20;__PARENT__de6312f56eec;Greater than 1 day up to 5 days;;;Unit;4.2
-Q_03.03;x_axis_rc_code;30;__PARENT__de6312f56eec;Greater than 5 days up to 2 weeks;;;Unit;4.2
+Q_03.03;x_axis_rc_code;10;__PARENT__de6312f56eec;Up to 1 day;;;;4.2
+Q_03.03;x_axis_rc_code;20;__PARENT__de6312f56eec;Greater than 1 day up to 5 days;;;;4.2
+Q_03.03;x_axis_rc_code;30;__PARENT__de6312f56eec;Greater than 5 days up to 2 weeks;;;;4.2
 Q_03.03;x_axis_rc_code;40;__PARENT__de6312f56eec;Greater than 2 weeks up to 3 weeks;;;;4.2
-Q_03.03;x_axis_rc_code;50;__PARENT__de6312f56eec;Greater than 3 weeks up to 1 month;;;Unit;4.2
-Q_03.03;x_axis_rc_code;60;__PARENT__de6312f56eec;Greater than 1 month up to 2 months;;;Unit;4.2
-Q_03.03;x_axis_rc_code;70;__PARENT__de6312f56eec;Greater than 2 months up to 3 months;;;Unit;4.2
-Q_03.03;x_axis_rc_code;80;__PARENT__de6312f56eec;Greater than 3 months up to 6 months;;;Unit;4.2
-Q_03.03;x_axis_rc_code;90;__PARENT__de6312f56eec;Greater than 6 months up to 12 months;;;Unit;4.2
-Q_03.03;x_axis_rc_code;100;__PARENT__de6312f56eec;Greater than 12 months up to 36 months;;;Unit;4.2
-Q_03.03;x_axis_rc_code;110;__PARENT__de6312f56eec;Greater than 36 months up to 60 months;;;Unit;4.2
-Q_03.03;x_axis_rc_code;120;__PARENT__de6312f56eec;Greater than 60 months;;;Unit;4.2
+Q_03.03;x_axis_rc_code;50;__PARENT__de6312f56eec;Greater than 3 weeks up to 1 month;;;;4.2
+Q_03.03;x_axis_rc_code;60;__PARENT__de6312f56eec;Greater than 1 month up to 2 months;;;;4.2
+Q_03.03;x_axis_rc_code;70;__PARENT__de6312f56eec;Greater than 2 months up to 3 months;;;;4.2
+Q_03.03;x_axis_rc_code;80;__PARENT__de6312f56eec;Greater than 3 months up to 6 months;;;;4.2
+Q_03.03;x_axis_rc_code;90;__PARENT__de6312f56eec;Greater than 6 months up to 12 months;;;;4.2
+Q_03.03;x_axis_rc_code;100;__PARENT__de6312f56eec;Greater than 12 months up to 36 months;;;;4.2
+Q_03.03;x_axis_rc_code;110;__PARENT__de6312f56eec;Greater than 36 months up to 60 months;;;;4.2
+Q_03.03;x_axis_rc_code;120;__PARENT__de6312f56eec;Greater than 60 months;;;;4.2
 Q_03.03;y_axis_rc_code;__PARENT__167b879b40f2;;0190 Reverse repos;;Y;;4.2
 Q_03.03;y_axis_rc_code;__PARENT__f4234e918506;;0270 Repos;;Y;;4.2
 Q_03.03;y_axis_rc_code;__PARENT__4d991c6dd7c6;;0350 Collateral swaps;;Y;;4.2
@@ -64079,9 +64079,9 @@ M_01.00;y_axis_rc_code;230;220;Of which containing a write down and conversion c
 M_01.00;y_axis_rc_code;250;__PARENT__4602f8c3de34;Other bailinable liabilities;;;;4.2
 M_01.00;y_axis_rc_code;260;250;Of which governed by third country law;;;;4.2
 M_01.00;y_axis_rc_code;270;260;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;4.2
-M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;Unit;4.2
-M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;Unit;4.2
-M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;Unit;4.2
+M_01.00;y_axis_rc_code;280;250;Residual maturity of < 1 year;;;;4.2
+M_01.00;y_axis_rc_code;285;250;Residual maturity of >= 1 year and < 2 years;;;;4.2
+M_01.00;y_axis_rc_code;290;250;Residual maturity of >= 2 years;;;;4.2
 M_01.00;y_axis_rc_code;300;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total risk exposure amount;;;%;4.2
 M_01.00;y_axis_rc_code;310;300;Of which: own funds and subordinated liabilities;;;;4.2
 M_01.00;y_axis_rc_code;320;__PARENT__9a65f35ed9b2;Own funds and eligible liabilities as a percentage of the total exposure measure;;;%;4.2
@@ -64104,7 +64104,7 @@ M_02.00;y_axis_rc_code;90;70;Eligible liabilities subordinated to excluded liabi
 M_02.00;y_axis_rc_code;100;90;Eligible liabilities instruments issued directly by the resolution entity (not grandfathered);;;;4.2
 M_02.00;y_axis_rc_code;110;90;Eligible liabilities instruments issued by other entities within the resolution group (not grandfathered);;;;4.2
 M_02.00;y_axis_rc_code;120;90;Eligible liabilities instruments issued prior to 27 June 2019;;;;4.2
-M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;4.2
+M_02.00;y_axis_rc_code;130;90;Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;4.2
 M_02.00;y_axis_rc_code;132;90;(-) Own eligible liabilities instruments subordinated to excluded liabilities;;;;4.2
 M_02.00;y_axis_rc_code;135;132;(-) Of which: unused prior permission amounts;;;;4.2
 M_02.00;y_axis_rc_code;140;70;Eligible liabilities not subordinated to excluded liabilities;;;;4.2
@@ -64171,41 +64171,41 @@ M_03.00;y_axis_rc_code;540;500;Of which: Global Systemically Important Instituti
 M_03.00;y_axis_rc_code;550;__PARENT__877f567bb33f;Other bailinable liabilities;;;;4.2
 M_03.00;y_axis_rc_code;560;550;Of which governed by third country law;;;;4.2
 M_03.00;y_axis_rc_code;570;560;Of which containing a write down and conversion clause as referred to in Article 55 of Directive 2014/59/EU;;;;4.2
-M_03.00;y_axis_rc_code;580;550;Residual maturity of < 1 year;;;Unit;4.2
-M_03.00;y_axis_rc_code;590;550;Residual maturity of >= 1 year and < 2 years;;;Unit;4.2
-M_03.00;y_axis_rc_code;600;550;Residual maturity of >= 2 years;;;Unit;4.2
+M_03.00;y_axis_rc_code;580;550;Residual maturity of < 1 year;;;;4.2
+M_03.00;y_axis_rc_code;590;550;Residual maturity of >= 1 year and < 2 years;;;;4.2
+M_03.00;y_axis_rc_code;600;550;Residual maturity of >= 2 years;;;;4.2
 M_03.00;y_axis_rc_code;610;__PARENT__877f567bb33f;Excluded liabilities;;;;4.2
 M_03.00;y_axis_rc_code;620;;Own funds instruments issued by liquidation entities of the same resolution group;;;;4.2
 M_03.00;y_axis_rc_code;630;;Ratio of holdings of own funds instruments issued by liquidation entities over eligible own funds and eligible liabilities;;;%;4.2
 M_04.00;x_axis_rc_code;10;;Amount eligible for MREL / internal MREL;;;;4.2
 M_04.00;y_axis_rc_code;100;;Eligible liabilities;;;;4.2
 M_04.00;y_axis_rc_code;200;100;Deposits, not covered and not preferential >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;210;200;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;220;200;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;230;200;Of which: issued by subsidiaries;;;;4.2
 M_04.00;y_axis_rc_code;300;100;Uncollateralized secured liabilities >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;310;300;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;320;300;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;330;300;Of which: issued by subsidiaries;;;;4.2
 M_04.00;y_axis_rc_code;400;100;Structured notes >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;410;400;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;420;400;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;430;400;Of which: issued by subsidiaries;;;;4.2
 M_04.00;y_axis_rc_code;500;100;Senior unsecured liabilities >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;510;500;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;520;500;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;530;500;Of which: issued by subsidiaries;;;;4.2
 M_04.00;y_axis_rc_code;600;100;Senior non-preferred liabilities >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;610;600;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;620;600;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;630;600;Of which: issued by subsidiaries;;;;4.2
 M_04.00;y_axis_rc_code;700;100;Subordinated liabilities (not recognised as own funds) >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;710;700;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;720;700;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;730;700;Of which: issued by subsidiaries;;;;4.2
 M_04.00;y_axis_rc_code;800;100;Other MREL eligible liabilities >= 1 year;;;;4.2
-M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;Unit;4.2
+M_04.00;y_axis_rc_code;810;800;Of which: residual maturity >= 1 year and < 2 years;;;;4.2
+M_04.00;y_axis_rc_code;820;800;Of which: residual maturity >= 2 years;;;;4.2
 M_04.00;y_axis_rc_code;830;800;Of which: issued by subsidiaries;;;;4.2
 M_05.00;x_axis_rc_code;__PARENT__012b29688a9b;70;Of which: with a residual maturity of;;Y;;4.2
 M_05.00;x_axis_rc_code;10;;Insolvency rank;;;;4.2
@@ -64215,10 +64215,10 @@ M_05.00;x_axis_rc_code;40;;Liabilities and own funds;;;;4.2
 M_05.00;x_axis_rc_code;50;40;Of which: excluded liabilities;;;;4.2
 M_05.00;x_axis_rc_code;60;;Liabilities and own funds less excluded liabilities;;;;4.2
 M_05.00;x_axis_rc_code;70;60;Of which: own funds and eligible liabilities for the purpose of internal MREL;;;;4.2
-M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;Unit;4.2
-M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;Unit;4.2
-M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;Unit;4.2
-M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;Unit;4.2
+M_05.00;x_axis_rc_code;80;__PARENT__012b29688a9b;>= 1 year < 2 years;;;;4.2
+M_05.00;x_axis_rc_code;90;__PARENT__012b29688a9b;>= 2 years < 5 years;;;;4.2
+M_05.00;x_axis_rc_code;100;__PARENT__012b29688a9b;>= 5 years < 10 years;;;;4.2
+M_05.00;x_axis_rc_code;110;__PARENT__012b29688a9b;>= 10 years;;;;4.2
 M_05.00;x_axis_rc_code;120;70;Of which: perpetual securities;;;;4.2
 M_06.00;x_axis_rc_code;__PARENT__8522ce36f8a9;60;Of which: with a residual maturity of;;Y;;4.2
 M_06.00;x_axis_rc_code;10;;Insolvency rank;;;;4.2
@@ -64227,10 +64227,10 @@ M_06.00;x_axis_rc_code;30;;Liabilities and own funds;;;;4.2
 M_06.00;x_axis_rc_code;40;30;Of which: excluded liabilities;;;;4.2
 M_06.00;x_axis_rc_code;50;;Liabilities and own funds less excluded liabilities;;;;4.2
 M_06.00;x_axis_rc_code;60;50;Of which: own funds and eligible liabilities potentially eligible for meeting MREL;;;;4.2
-M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;Unit;4.2
-M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;Unit;4.2
-M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;Unit;4.2
-M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;Unit;4.2
+M_06.00;x_axis_rc_code;70;__PARENT__8522ce36f8a9;>= 1 year < 2 years;;;;4.2
+M_06.00;x_axis_rc_code;80;__PARENT__8522ce36f8a9;>= 2 year < 5 years;;;;4.2
+M_06.00;x_axis_rc_code;90;__PARENT__8522ce36f8a9;>= 5 years < 10 years;;;;4.2
+M_06.00;x_axis_rc_code;100;__PARENT__8522ce36f8a9;>= 10 years;;;;4.2
 M_06.00;x_axis_rc_code;110;60;Of which: perpetual securities;;;;4.2
 M_07.00;x_axis_rc_code;__PARENT__cfa1aed8b504;;Issuing entity;;Y;;4.2
 M_07.00;x_axis_rc_code;__PARENT__678d80abf7d1;;Rank in normal insolvency proceedings;;Y;;4.2
@@ -66221,8 +66221,8 @@ K_73.00;y_axis_rc_code;290;__PARENT__90e52e23f32f;22. Total net cash outflows;;;
 K_73.00;y_axis_rc_code;300;__PARENT__90e52e23f32f;23. Liquidity coverage ratio;;;%;4.2
 K_74.00;x_axis_rc_code;__PARENT__4976117d1898;;Unweighted value by residual maturity;;Y;;4.2
 K_74.00;x_axis_rc_code;10;__PARENT__4976117d1898;a. No maturity;;;;4.2
-K_74.00;x_axis_rc_code;20;__PARENT__4976117d1898;b. < 6 months;;;Unit;4.2
-K_74.00;x_axis_rc_code;30;__PARENT__4976117d1898;c. 6 months to < 1yr;;;Unit;4.2
+K_74.00;x_axis_rc_code;20;__PARENT__4976117d1898;b. < 6 months;;;;4.2
+K_74.00;x_axis_rc_code;30;__PARENT__4976117d1898;c. 6 months to < 1yr;;;;4.2
 K_74.00;x_axis_rc_code;40;__PARENT__4976117d1898;d. >= 1yr;;;;4.2
 K_74.00;x_axis_rc_code;50;;e. Weighted value;;;;4.2
 K_74.00;y_axis_rc_code;__PARENT__331e357ba954;;0009 Available stable funding ASF Items.;;Y;;4.2
@@ -66392,10 +66392,10 @@ K_44.00;y_axis_rc_code;10;;1. Counterparty;;;;4.2
 K_45.00;x_axis_rc_code;__PARENT__f39f0516d3b4;10;Of which exposures sensitive to impact from climate change physical events;;Y;;4.2
 K_45.00;x_axis_rc_code;__PARENT__048179cd7a94;__PARENT__f39f0516d3b4;Breakdown by maturity bucket;;Y;;4.2
 K_45.00;x_axis_rc_code;10;;b. Gross carrying amount;;;;4.2
-K_45.00;x_axis_rc_code;20;__PARENT__048179cd7a94;c. <= 5 years;;;Unit;4.2
-K_45.00;x_axis_rc_code;30;__PARENT__048179cd7a94;d. > 5 year <= 10 years;;;Unit;4.2
-K_45.00;x_axis_rc_code;40;__PARENT__048179cd7a94;e. > 10 year <= 20 years;;;Unit;4.2
-K_45.00;x_axis_rc_code;50;__PARENT__048179cd7a94;f. > 20 years;;;Unit;4.2
+K_45.00;x_axis_rc_code;20;__PARENT__048179cd7a94;c. <= 5 years;;;;4.2
+K_45.00;x_axis_rc_code;30;__PARENT__048179cd7a94;d. > 5 year <= 10 years;;;;4.2
+K_45.00;x_axis_rc_code;40;__PARENT__048179cd7a94;e. > 10 year <= 20 years;;;;4.2
+K_45.00;x_axis_rc_code;50;__PARENT__048179cd7a94;f. > 20 years;;;;4.2
 K_45.00;x_axis_rc_code;60;__PARENT__048179cd7a94;g. Average weighted maturity;;;;4.2
 K_45.00;x_axis_rc_code;70;__PARENT__f39f0516d3b4;h. of which exposures sensitive to impact from chronic climate change events;;;;4.2
 K_45.00;x_axis_rc_code;80;__PARENT__f39f0516d3b4;i. Of which exposures sensitive to impact from acute climate change events;;;;4.2
@@ -67347,7 +67347,7 @@ K_91.00;y_axis_rc_code;90;__PARENT__500a13b9ef63;11. Own funds for the purpose o
 K_91.00;y_axis_rc_code;100;__PARENT__5049c00fc46b;12. Eligible liabilities instruments issued directly by the resolution entity that are subordinated to excluded liabilities not grandfathered;;;;4.2
 K_91.00;y_axis_rc_code;110;__PARENT__5049c00fc46b;EU-12a. Eligible liabilities instruments issued by other entities within the resolution group that are subordinated to excluded liabilities not grandfathered;;;;4.2
 K_91.00;y_axis_rc_code;120;__PARENT__5049c00fc46b;EU-12b. Eligible liabilities instruments that are subordinated to excluded liabilities issued prior to 27 June 2019 subordinated grandfathered;;;;4.2
-K_91.00;y_axis_rc_code;130;__PARENT__5049c00fc46b;EU-12c. Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;Unit;4.2
+K_91.00;y_axis_rc_code;130;__PARENT__5049c00fc46b;EU-12c. Tier 2 instruments with a residual maturity of at least one year to the extent they do not qualify as Tier 2 items;;;;4.2
 K_91.00;y_axis_rc_code;140;__PARENT__5049c00fc46b;13. Eligible liabilities that are not subordinated to excluded liabilities not grandfathered pre-cap;;;;4.2
 K_91.00;y_axis_rc_code;150;__PARENT__5049c00fc46b;EU-13a. Eligible liabilities that are not subordinated to excluded liabilities issued prior to 27 June 2019 pre-cap;;;;4.2
 K_91.00;y_axis_rc_code;160;__PARENT__5049c00fc46b;14. Amount of non subordinated eligible liabilities instruments, where applicable after application of Article 72b 3 CRR;;;;4.2
@@ -67417,9 +67417,9 @@ K_95.00;y_axis_rc_code;20;__PARENT__c4a78d455f4b;3. Liabilities and own funds;;;
 K_95.00;y_axis_rc_code;30;20;4. of which excluded liabilities;;;;4.2
 K_95.00;y_axis_rc_code;40;__PARENT__c4a78d455f4b;5. Liabilities and own funds less excluded liabilities;;;;4.2
 K_95.00;y_axis_rc_code;50;__PARENT__c4a78d455f4b;6. Subset of liabilities and own funds less excluded liabilities that are own funds and eligible liabilities for the purpose of [choose as a appropriate: internal MREL/internal TLAC];;;;4.2
-K_95.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;Unit;4.2
-K_95.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;Unit;4.2
-K_95.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;Unit;4.2
+K_95.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;;4.2
+K_95.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;;4.2
+K_95.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;;4.2
 K_95.00;y_axis_rc_code;90;50;10. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.2
 K_95.00;y_axis_rc_code;100;50;11. of which perpetual securities;;;;4.2
 K_95.00;z_axis_rc_code;qx2085;;Rank 3;;;;4.2
@@ -67452,9 +67452,9 @@ K_96.00;y_axis_rc_code;20;;3. Empty set in the EU;;;;4.2
 K_96.00;y_axis_rc_code;30;;4. Empty set in the EU;;;;4.2
 K_96.00;y_axis_rc_code;40;;5. Empty set in the EU;;;;4.2
 K_96.00;y_axis_rc_code;50;;6. Subset of liabilities and own funds less excluded liabilities that are own funds and eligible liabilities for the purpose of [choose as a appropriate: internal MREL/internal TLAC];;;;4.2
-K_96.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;Unit;4.2
-K_96.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;Unit;4.2
-K_96.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;Unit;4.2
+K_96.00;y_axis_rc_code;60;50;7. of which residual maturity >= 1 year < 2 years;;;;4.2
+K_96.00;y_axis_rc_code;70;50;8. of which residual maturity >= 2 year < 5 years;;;;4.2
+K_96.00;y_axis_rc_code;80;50;9. of which residual maturity >= 5 years < 10 years;;;;4.2
 K_96.00;y_axis_rc_code;90;50;10. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.2
 K_96.00;y_axis_rc_code;100;50;11. of which perpetual securities;;;;4.2
 K_96.00;z_axis_rc_code;qx2085;;Rank 3;;;;4.2
@@ -67484,9 +67484,9 @@ K_97.00;y_axis_rc_code;20;;2. Liabilities and own funds;;;;4.2
 K_97.00;y_axis_rc_code;30;20;3. of which excluded liabilities;;;;4.2
 K_97.00;y_axis_rc_code;40;;4. Liabilities and own funds less excluded liabilities;;;;4.2
 K_97.00;y_axis_rc_code;50;;5. Subset of liabilities and own funds less excluded liabilities that are own funds and liabilities potentially eligible for meeting [choose as a appropriate: MREL/TLAC];;;;4.2
-K_97.00;y_axis_rc_code;60;50;6. of which residual maturity >= 1 year < 2 years;;;Unit;4.2
-K_97.00;y_axis_rc_code;70;50;7. of which residual maturity >= 2 year < 5 years;;;Unit;4.2
-K_97.00;y_axis_rc_code;80;50;8. of which residual maturity >= 5 years < 10 years;;;Unit;4.2
+K_97.00;y_axis_rc_code;60;50;6. of which residual maturity >= 1 year < 2 years;;;;4.2
+K_97.00;y_axis_rc_code;70;50;7. of which residual maturity >= 2 year < 5 years;;;;4.2
+K_97.00;y_axis_rc_code;80;50;8. of which residual maturity >= 5 years < 10 years;;;;4.2
 K_97.00;y_axis_rc_code;90;50;9. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.2
 K_97.00;y_axis_rc_code;100;50;10. of which perpetual securities;;;;4.2
 K_97.00;z_axis_rc_code;qx2085;;Rank 3;;;;4.2
@@ -67516,9 +67516,9 @@ K_98.00;y_axis_rc_code;17;;2. Empty set in the EU;;;;4.2
 K_98.00;y_axis_rc_code;18;;3. Empty set in the EU;;;;4.2
 K_98.00;y_axis_rc_code;19;;4. Empty set in the EU;;;;4.2
 K_98.00;y_axis_rc_code;20;;5. Own funds and liabilities potentially eligible for meeting MREL;;;;4.2
-K_98.00;y_axis_rc_code;30;20;6. of which residual maturity >= 1 year < 2 years;;;Unit;4.2
-K_98.00;y_axis_rc_code;40;20;7. of which residual maturity >= 2 year < 5 years;;;Unit;4.2
-K_98.00;y_axis_rc_code;50;20;8. of which residual maturity >= 5 years < 10 years;;;Unit;4.2
+K_98.00;y_axis_rc_code;30;20;6. of which residual maturity >= 1 year < 2 years;;;;4.2
+K_98.00;y_axis_rc_code;40;20;7. of which residual maturity >= 2 year < 5 years;;;;4.2
+K_98.00;y_axis_rc_code;50;20;8. of which residual maturity >= 5 years < 10 years;;;;4.2
 K_98.00;y_axis_rc_code;60;20;9. of which residual maturity >= 10 years, but excluding perpetual securities;;;;4.2
 K_98.00;y_axis_rc_code;70;20;10. of which perpetual securities;;;;4.2
 K_98.00;z_axis_rc_code;qx2085;;Rank 3;;;;4.2
@@ -68563,48 +68563,48 @@ Z_02.00;y_axis_rc_code;200;100;DGS liabilities;;;;4.2
 Z_02.00;y_axis_rc_code;210;100;Liabilities towards other entities of the resolution group;;;;4.2
 Z_02.00;y_axis_rc_code;300;;Liabilities not excluded from bail-in;;;;4.2
 Z_02.00;y_axis_rc_code;310;300;Deposits, not covered but preferential;;;;4.2
-Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;311;310;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;312;310;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;313;310;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;314;310;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;320;300;Deposits, not covered and not preferential;;;;4.2
-Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;321;320;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;322;320;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;323;320;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;324;320;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;330;300;Balance sheet liabilities arising from derivatives;;;;4.2
 Z_02.00;y_axis_rc_code;331;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, prior to collateral offset;;;;4.2
 Z_02.00;y_axis_rc_code;332;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset;;;;4.2
 Z_02.00;y_axis_rc_code;333;330;Sum of net liability positions taking into account contractual netting sets, after mark-to-market adjustments, post collateral offset, incorporating estimated close-out amounts;;;;4.2
 Z_02.00;y_axis_rc_code;334;330;Sum of net liability positions taking into account prudential netting rules;;;;4.2
 Z_02.00;y_axis_rc_code;340;300;Uncollateralized secured liabilities;;;;4.2
-Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;341;340;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;342;340;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;343;340;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;344;340;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;350;300;Structured notes;;;;4.2
-Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;351;350;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;352;350;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;353;350;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;354;350;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;360;300;Senior unsecured liabilities;;;;4.2
-Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;361;360;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;362;360;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;363;360;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;364;360;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;365;300;Senior non-preferred liabilities;;;;4.2
-Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;366;365;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;367;365;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;368;365;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;369;365;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;370;300;Subordinated liabilities (not recognised as own funds);;;;4.2
-Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;Unit;4.2
-Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;Unit;4.2
-Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;371;370;of which: residual maturity <= 1 month;;;;4.2
+Z_02.00;y_axis_rc_code;372;370;of which: residual maturity > 1 month < 1 year;;;;4.2
+Z_02.00;y_axis_rc_code;373;370;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;374;370;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;380;300;Other MREL eligible liabilities;;;;4.2
-Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;Unit;4.2
-Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;Unit;4.2
+Z_02.00;y_axis_rc_code;381;380;of which: residual maturity >= 1 year and < 2 years;;;;4.2
+Z_02.00;y_axis_rc_code;382;380;of which: residual maturity >= 2 years;;;;4.2
 Z_02.00;y_axis_rc_code;390;300;Non-financial liabilities;;;;4.2
 Z_02.00;y_axis_rc_code;400;300;Residual liabilities;;;;4.2
 Z_02.00;y_axis_rc_code;500;;Own funds;;;;4.2

@@ -34,6 +34,9 @@ tranches de poids de risque, les seuils LTV et les décotes qualifient des monta
 Les mesures explicitement exprimées en taux, ratio ou pourcentage restent en `%`.
 Cette distinction précède la reprise des formats du dictionnaire existant afin
 qu'une ancienne erreur ne réapparaisse pas lors de la prochaine extraction.
+De même, une tranche fixe comme « 0 <= 1 month » classe les montants par
+maturité et ne donne pas l'unité des valeurs; les véritables mesures de durée,
+comme « weighted average maturity (days) », conservent le format `Unit`.
 
 Les lignes indentées des layouts annotés deviennent des chemins hiérarchiques séparés par `/`. Les colonnes reprennent le code de colonne et le libellé terminal. Pour les layouts DPM 1.0, les feuilles numérotées d’un template fournissent les codes et libellés de l’axe Z : le générateur ne développe pas tous les membres des domaines de dictionnaire référencés, car cela ajouterait des possibilités qui ne s’appliquent pas au template. En DPM 2.0, les dimensions de feuille explicitement déclarées par `Key value` sont résolues dans le glossaire. Les autres références de propriétés ne sont pas des valeurs d’axe Z.
 
