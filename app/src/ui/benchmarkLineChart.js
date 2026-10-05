@@ -34,6 +34,7 @@ export function buildBenchmarkLineSeries(benchmarkSeries, selectedJstCode, prima
         // remain visually unambiguous.
         clip: shouldFillSelectedArea,
         color,
+        ...(benchmark.displayLabel ? { custom: { benchmarkLabel: benchmark.displayLabel } } : {}),
         dashStyle,
         data: chartData,
         dataLabels: { enabled: false },
@@ -370,7 +371,8 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst, o
         color: serie.color,
         isSelected: serie.name === selectedJst,
         isSelectable: custom.isEndpointSelectable !== false,
-        name: custom.benchmarkLabel ?? serie.name
+        label: custom.benchmarkLabel ?? serie.name,
+        name: serie.name
       };
     })
     .filter(Boolean)
@@ -428,7 +430,7 @@ export function renderBenchmarkEndpointLabels(chart, selectedJst, onSelectJst, o
       })
       .add();
     const label = chart.renderer
-      .label(candidate.name, labelX, targetY - 9, "rect")
+      .label(candidate.label, labelX, targetY - 9, "rect")
       .css({
         color: candidate.color,
         cursor: candidate.isSelectable ? "pointer" : "default",

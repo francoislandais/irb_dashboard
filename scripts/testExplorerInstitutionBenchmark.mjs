@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import { getInstitutionChartLabels } from '../app/src/data/institutionChartLabels.js';
+import { buildBenchmarkChartModel, renderBenchmarkEndpointLabels } from '../app/src/ui/benchmarkLineChart.js';
 
 const source=readFileSync(new URL('../app/src/ui/explorerView.js',import.meta.url),'utf8');
 const start=source.indexOf('function buildExplorerBenchmark(');
@@ -61,4 +63,48 @@ assert.equal(context.buildExplorerBenchmark(['A','B'],{onlyDateLabel:'Unavailabl
 assert.equal(pointCalculations,0);
 
 assert.match(source,/buildExplorerBenchmark\(institutionOptions,\s*\{\s*onlyDateLabel:/);
+
+const dictionary = {
+  A: { institutionName: 'Banque Alpha' },
+  B: { institutionName: 'Banque Bêta' },
+  C: { institutionName: 'Banque Alpha' }
+};
+const labels = getInstitutionChartLabels([{ jstCode: 'A' }, { jstCode: 'B' }], dictionary);
+assert.equal(labels.get('A'), 'Banque Alpha');
+assert.equal(labels.get('B'), 'Banque Bêta');
+assert.equal(getInstitutionChartLabels([{ jstCode: 'A' }, { jstCode: 'C' }], dictionary).get('A'), 'Banque Alpha (A)');
+assert.equal(getInstitutionChartLabels([{ jstCode: 'UNKNOWN' }], dictionary).get('UNKNOWN'), 'UNKNOWN');
+
+const model = buildBenchmarkChartModel([{
+  jstCode: 'A', displayLabel: labels.get('A'),
+  points: [{ date: new Date(2026, 2, 31), label: 'March', value: 10 }]
+}], 'A', '#006799');
+assert.equal(model.series[0].name, 'A', 'the curve retains its institution ID for selection');
+assert.equal(model.series[0].custom.benchmarkLabel, 'Banque Alpha', 'the curve carries a distinct display label');
+
+let endpointText = '';
+let endpointClick = null;
+let selectedCode = '';
+const rendererItem = () => ({
+  attr() { return this; }, css() { return this; }, add() { return this; },
+  on(_event, callback) { endpointClick = callback; return this; }
+});
+const chart = {
+  chartWidth: 500, plotLeft: 30, plotTop: 20, plotWidth: 250, plotHeight: 120,
+  container: { querySelectorAll: () => [] },
+  renderer: {
+    path: () => rendererItem(),
+    label: (text) => { endpointText = text; return rendererItem(); }
+  },
+  series: [{
+    visible: true, name: 'A', color: '#006799',
+    userOptions: { custom: { benchmarkLabel: 'Banque Alpha' } },
+    points: [{ plotX: 50, plotY: 50 }]
+  }]
+};
+renderBenchmarkEndpointLabels(chart, 'A', (code) => { selectedCode = code; });
+assert.equal(endpointText, 'Banque Alpha');
+endpointClick();
+await new Promise((resolve) => setTimeout(resolve, 0));
+assert.equal(selectedCode, 'A', 'clicking a name label selects its technical institution ID');
 console.log('PASS: institution values and ratios use only the selected reference date; the full chart keeps its history.');

@@ -1,4 +1,6 @@
 import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260928-local-description";
+import { getInstitutionChartLabels } from "../data/institutionChartLabels.js";
+import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import {
   getCostOfRiskFocusedYAxisBounds,
   renderCostOfRiskSmoothingBadge,
@@ -15,7 +17,7 @@ import {
   renderBenchmarkEndpointLabels,
   renderPeerDistributionBands,
   scheduleBenchmarkEndpointLabels
-} from "./benchmarkLineChart.js?v=20260812-costofrisk-domain-split";
+} from "./benchmarkLineChart.js?v=20261005-institution-chart-labels";
 import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 const explorerBenchmarkCharts = new Map();
@@ -55,6 +57,7 @@ export function renderExplorerBenchmarkView({
   container,
   focusYAxis,
   formatValue,
+  institutionDictionary,
   onClearSmoothing,
   onChangeSmoothing,
   onSelectJst,
@@ -74,7 +77,15 @@ export function renderExplorerBenchmarkView({
 
   if (!container || !window.Highcharts) return;
 
-  const benchmarkSeries = benchmark.series.map((serie) => ({ jstCode: serie.jstCode, points: serie.values }));
+  const visibleInstitutions = peerDisplayMode === "anonymised"
+    ? benchmark.series.filter((serie) => serie.jstCode === selectedJst)
+    : benchmark.series;
+  const institutionLabels = getInstitutionChartLabels(visibleInstitutions, institutionDictionary);
+  const benchmarkSeries = benchmark.series.map((serie) => ({
+    jstCode: serie.jstCode,
+    displayLabel: institutionLabels.get(serie.jstCode),
+    points: serie.values
+  }));
   const chartModel = buildBenchmarkChartModel(benchmarkSeries, selectedJst, primaryDark, {
     displayMode: "amount",
     peerDisplayMode,
@@ -109,6 +120,8 @@ export function renderExplorerBenchmarkView({
     ? getCostOfRiskFocusedYAxisBounds(series, selectedJst)
     : getCostOfRiskYAxisBounds(getBenchmarkYAxisBoundsSeries(series, chartModel.distribution));
 
+  const endpointLabelMargin = Math.min(260, Math.max(128,
+    ...[...institutionLabels.values()].map((label) => label.length * 6.5 + 32)));
   const options = {
     chart: {
       animation: false,
@@ -136,7 +149,7 @@ export function renderExplorerBenchmarkView({
       marginTop: compact ? 32 : 40,
       spacingBottom: compact ? 4 : 10,
       spacingLeft: compact ? 2 : 10,
-      spacingRight: compact ? 6 : 128,
+      spacingRight: compact ? 6 : endpointLabelMargin,
       type: "line",
       zooming: { type: "xy" },
       zoomType: "xy"
@@ -153,7 +166,8 @@ export function renderExplorerBenchmarkView({
     tooltip: {
       headerFormat: "<span style=\"font-size:11px\">{point.key:%d/%m/%Y}</span><br/>",
       pointFormatter() {
-        return `<span style="color:${this.series.color}">●</span> <b>${this.series.name}</b>: ${formatValue(this.y)}`;
+        const label = this.series.userOptions?.custom?.benchmarkLabel ?? this.series.name;
+        return `<span style="color:${this.series.color}">●</span> <b>${escapeHtml(label)}</b>: ${formatValue(this.y)}`;
       },
       shared: false,
       split: false,

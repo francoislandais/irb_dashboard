@@ -19,7 +19,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260917-kri-data-only-rows";
-import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260916-benchmark-empty-dates";
+import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20261005-institution-chart-labels";
 import {
   buildExplorerDisplayRows,
   createVirtualExplorerRow,
@@ -1357,6 +1357,7 @@ function refreshExplorerSelectionChrome(state, { selectionOnly = false } = {}) {
       container: elements.explorerBenchmarkChart,
       focusYAxis: explorerBenchmarkFocusYAxis,
       formatValue: (value) => formatBenchmarkValue(value, benchmark),
+      institutionDictionary: state.institutionDictionary,
       onClearSmoothing: clearExplorerBenchmarkSmoothing,
       onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
       onSelectJst: selectExplorerBenchmarkJst,
@@ -1377,6 +1378,7 @@ function refreshExplorerSelectionChrome(state, { selectionOnly = false } = {}) {
       container: elements.explorerBenchmarkExpandedChart,
       focusYAxis: explorerBenchmarkFocusYAxis,
       formatValue: (value) => formatBenchmarkValue(value, benchmark),
+      institutionDictionary: state.institutionDictionary,
       onClearSmoothing: clearExplorerBenchmarkSmoothing,
       onChangeSmoothing: updateExplorerBenchmarkSmoothingWindow,
       onSelectJst: selectExplorerBenchmarkJst,
