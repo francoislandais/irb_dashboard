@@ -22,7 +22,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260928-template-taxonomy";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261005-geography-shared-panel";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261005-euro-area-focus";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,

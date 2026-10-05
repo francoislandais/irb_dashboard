@@ -112,7 +112,7 @@ const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map([
 ]);
 const EXPLORER_GEOGRAPHY_LAYOUTS = [
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
-  { value: "euro-first", label: "Your Area Focus", description: "Euro area, other EU countries, then the rest of the world" },
+  { value: "euro-first", label: "Euro area focus", description: "Euro area, other EU countries, then the rest of the world" },
   { value: "world-regions", label: "World Region", description: "Countries grouped into broad geographical areas" },
   { value: "relevance", label: "Top Contributors", description: "All countries ranked by the selected value at the latest reference date" }
 ];
