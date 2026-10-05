@@ -36,6 +36,7 @@ from global_update import (  # noqa: E402
     _read_test_fixture,
     _reference_dates,
     _selected_fixture_templates,
+    _upload_standalone_apps_to_darwin,
     global_update,
 )
 from export_all_standalone_apps import (  # noqa: E402
@@ -91,6 +92,76 @@ class OutputDirectoryTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 2)
             self.assertIn("--output", result.stderr)
+
+
+class DarwinUploadTests(unittest.TestCase):
+    def test_requires_a_positive_node_and_generated_html(self):
+        for node_id in (0, -1, "1914437350", True):
+            with self.subTest(node_id=node_id), self.assertRaisesRegex(ValueError, "entier positif"):
+                global_update(mode="test", darwin_upload=node_id)
+        with self.assertRaisesRegex(ValueError, "preview ne génère pas de HTML"):
+            global_update(mode="preview", darwin_upload=1914437350)
+
+    def test_uploads_each_generated_html_with_one_connection(self):
+        calls = []
+        connections = []
+
+        class FakeDarwinClient:
+            def upload_file(self, **kwargs):
+                calls.append(kwargs)
+
+        def connect():
+            connections.append(True)
+            return FakeDarwinClient()
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fake_module = SimpleNamespace(darwin=SimpleNamespace(connect=connect))
+            with patch.dict(sys.modules, {"vl_connect": fake_module}):
+                result = global_update(
+                    EXAMPLE_CONFIG_DIRECTORY, mode="test", output_directory=temporary_directory,
+                    as_of=date(2026, 9, 26), darwin_upload=1914437350,
+                )
+            self.assertEqual(result["darwin_uploads"], 4)
+            self.assertEqual(len(connections), 1)
+            self.assertEqual(len(calls), 4)
+            for call in calls:
+                html_path = Path(call["local_file_path"])
+                self.assertTrue(html_path.is_file())
+                self.assertEqual(html_path.name, call["filename"])
+                self.assertEqual(call["node_id"], 1914437350)
+                self.assertIs(call["add_version"], True)
+                self.assertIs(call["is_parent"], True)
+            manifest = json.loads((Path(temporary_directory) / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["darwin_upload"], {"node_id": 1914437350, "uploaded": 4, "total": 4})
+            self.assertTrue(all(app["darwin_upload"]["status"] == "uploaded" for app in manifest["applications"]))
+
+    def test_failed_upload_preserves_local_files_and_completed_status(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory)
+            html_files = [output / "first.html", output / "second.html"]
+            for html_file in html_files:
+                html_file.write_text("<html></html>", encoding="utf-8")
+            manifest = {
+                "applications": [{"html_app": html_file.name} for html_file in html_files],
+                "darwin_upload": {"node_id": 1914437350, "uploaded": 0, "total": 2},
+            }
+            manifest_path = output / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            attempts = []
+
+            def upload_file(**kwargs):
+                attempts.append(kwargs)
+                if len(attempts) == 2:
+                    raise RuntimeError("remote failure")
+
+            fake_module = SimpleNamespace(darwin=SimpleNamespace(connect=lambda: SimpleNamespace(upload_file=upload_file)))
+            with patch.dict(sys.modules, {"vl_connect": fake_module}):
+                with self.assertRaisesRegex(RuntimeError, "second.html"):
+                    _upload_standalone_apps_to_darwin(output, manifest, manifest_path, 1914437350)
+            saved = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["darwin_upload"]["uploaded"], 1)
+            self.assertEqual(saved["applications"][0]["darwin_upload"]["status"], "uploaded")
+            self.assertTrue(all(path.is_file() for path in html_files))
 
 
 class ReferenceDateTests(unittest.TestCase):

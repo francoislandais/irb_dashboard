@@ -841,6 +841,40 @@ def _write_application_outputs(
     })
 
 
+def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int) -> int:
+    """Upload the completed HTML files, keeping the local manifest auditable."""
+
+    try:
+        from vl_connect import darwin
+    except ImportError as error:
+        raise RuntimeError("L'upload Darwin exige le package vl_connect sur cette machine.") from error
+    try:
+        client = darwin.connect()
+    except Exception as error:
+        raise RuntimeError(f"Connexion Darwin impossible pour le nœud {node_id}.") from error
+
+    upload_status = manifest["darwin_upload"]
+    for application in manifest["applications"]:
+        relative_html_path = application["html_app"]
+        html_path = output_root / relative_html_path
+        if not html_path.is_file():
+            raise RuntimeError(f"Application HTML introuvable pour l'upload Darwin : {html_path}")
+        try:
+            client.upload_file(
+                local_file_path=str(html_path),
+                node_id=node_id,
+                filename=html_path.name,
+                add_version=True,
+                is_parent=True,
+            )
+        except Exception as error:
+            raise RuntimeError(f"Upload Darwin échoué pour {html_path.name} (nœud {node_id}).") from error
+        application["darwin_upload"] = {"node_id": node_id, "filename": html_path.name, "status": "uploaded"}
+        upload_status["uploaded"] += 1
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return upload_status["uploaded"]
+
+
 def global_update(
     config_path: str | Path | None = None,
     *,
@@ -849,12 +883,18 @@ def global_update(
     as_of: date | None = None,
     devo_client: QueryClient | None = None,
     compact_values: bool = False,
+    darwin_upload: int | None = None,
 ) -> dict:
     """Prépare, simule ou exécute toutes les applications du dossier TOML."""
 
     mode = str(mode).strip().lower()
     if mode not in {"preview", "test", "hive"}:
         raise ValueError("mode doit être 'preview', 'test' ou 'hive'.")
+    if darwin_upload is not None:
+        if type(darwin_upload) is not int or darwin_upload <= 0:
+            raise ValueError("darwin_upload doit être un identifiant de nœud entier positif.")
+        if mode == "preview":
+            raise ValueError("darwin_upload exige le mode 'test' ou 'hive' : preview ne génère pas de HTML.")
     if mode == "hive" and config_path is None:
         raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
@@ -867,6 +907,8 @@ def global_update(
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     query_root = output_root / "queries"
     manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": str(config_directory.resolve()), "compact_values": compact_values, "applications": []}
+    if darwin_upload is not None:
+        manifest["darwin_upload"] = {"node_id": darwin_upload, "uploaded": 0, "total": len(applications)}
     for application in applications:
         folder = _safe_name(application.name)
         app_query_dir = query_root / folder
@@ -953,7 +995,8 @@ def global_update(
     manifest_path = output_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_query_index(output_root / "query_index.md", manifest)
-    return {"output_directory": str(output_root), "manifest_path": str(manifest_path), "mode": mode, "applications": len(applications)}
+    uploaded = _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload) if darwin_upload is not None else 0
+    return {"output_directory": str(output_root), "manifest_path": str(manifest_path), "mode": mode, "applications": len(applications), "darwin_uploads": uploaded}
 
 
 def _main() -> None:
@@ -963,14 +1006,17 @@ def _main() -> None:
     parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet (obligatoire)")
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
     parser.add_argument("--compact-values", action="store_true", help="Stocker les montants en milliers entiers et les pourcentages sur quatre chiffres significatifs")
+    parser.add_argument("--darwin_upload", "--darwin-upload", type=int, default=None, metavar="NODE_ID", help="Uploader chaque HTML autonome dans le nœud parent Darwin indiqué")
     args = parser.parse_args()
     try:
-        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values)
+        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, darwin_upload=args.darwin_upload)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")
     print(f"Plan et requêtes : {result['output_directory']}")
     print(f"Index : {result['output_directory']}/query_index.md")
+    if args.darwin_upload is not None:
+        print(f"Darwin : {result['darwin_uploads']} application(s) uploadée(s) dans le nœud {args.darwin_upload}")
 
 
 if __name__ == "__main__":

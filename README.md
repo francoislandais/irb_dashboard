@@ -186,6 +186,14 @@ python3 scripts/global_update.py --mode preview --config /chemin/vers/mes-applic
 python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applications --output /chemin/vers/sorties/hive
 ```
 
+Pour envoyer aussi chaque application HTML autonome vers un dossier parent Darwin, ajouter son identifiant numérique :
+
+```sh
+python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applications --output /chemin/vers/sorties/hive --darwin_upload 1914437350
+```
+
+Les HTML sont d'abord enregistrés localement, puis envoyés avec leur nom de fichier, `add_version=True` et `is_parent=True`. Une seule connexion Darwin sert à tout le lot. L'option fonctionne aussi en mode `test`, mais pas en mode `preview` qui ne produit pas de HTML. Elle exige `vl_connect` et l'accès Darwin sur la machine qui lance la commande ; sans l'option, aucune connexion Darwin n'est tentée. Le manifeste local `manifest.json` note chaque envoi réussi, y compris si un envoi ultérieur échoue. Depuis Python, utiliser `global_update(..., darwin_upload=1914437350)`.
+
 Pour réduire facultativement la taille des CSV et des HTML générés, ajouter `--compact-values` à cette commande (ou `compact_values=True` à `global_update`). Le programme consulte le dictionnaire des dimensions et l'historique des taxonomies : les montants sont stockés comme des milliers d'euros entiers, les pourcentages avec quatre chiffres significatifs et les valeurs `Unit` sans modification. La colonne technique `value_scale=1000` signale les lignes de montants ; l'application les remet en euros avant tout calcul ou affichage. Les lignes dont le format est inconnu ou change selon les dates restent inchangées. Cette option est avec perte de précision et ne modifie pas les requêtes Hive elles-mêmes.
 
 Il faut renseigner un dossier réel : les exemples contiennent des LEI fictifs et ne sont pas acceptés par défaut en mode `hive`. Le résultat est écrit exactement dans le dossier indiqué par `--output`, sans dossier horodaté ajouté automatiquement ; ce dossier doit être vide en mode `hive`. La même opération peut être lancée depuis Python avec `global_update("/chemin/vers/mes-applications", mode="hive", output_directory="/chemin/vers/sorties/hive")`, ou avec `devo_client=devo` si le client est déjà initialisé. Le package `vl_connect` et son accès Hive doivent être disponibles dans cet environnement ; ils ne sont pas nécessaires aux modes `preview` et `test`.
