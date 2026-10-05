@@ -34,6 +34,18 @@ export function parseKriDictionary(text) {
   return dictionary;
 }
 
+// KRI references can name a reporting annex rather than the dataset's
+// template. Keep numeric sub-template suffixes such as F_04.02.1 intact.
+export function normalizeKriFormulaTemplateId(templateId) {
+  let normalized = String(templateId ?? "").trim();
+  let previous;
+  do {
+    previous = normalized;
+    normalized = normalized.replace(/(?:\.(?:dp|a|b|c|d|e|w|x)|_dp)$/i, "");
+  } while (normalized !== previous);
+  return normalized;
+}
+
 // ---------------------------------------------------------------------
 // Formula parser
 //

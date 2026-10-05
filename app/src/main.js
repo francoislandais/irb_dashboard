@@ -7,7 +7,7 @@ import { normalizeGeographicCountryAxisCodes } from "./data/geographicCountryAxi
 import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20261003-startup-progress";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
-import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
+import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20261005-formula-navigation";
 import { loadImpossibleXYCombinations } from "./data/impossibleXYCombinations.js?v=20260917-kri-formula";
 import {
   clearStoredDatasetFileHandle,

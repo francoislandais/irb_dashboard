@@ -47,8 +47,9 @@ import { groupExplorerTemplatesByFamily } from "../data/explorerTemplateGroups.j
 import {
   describeExplorerKriOffset,
   EXPLORER_KRI_FORMULA_FUNCTION_LABELS,
+  normalizeKriFormulaTemplateId,
   parseKriFormula
-} from "../data/explorerKriFormula.js?v=20260917-kri-formula";
+} from "../data/explorerKriFormula.js?v=20261005-formula-navigation";
 import { getLatestState } from "./appState.js";
 import { getTaxonomyDataForTemplateFramework, getTaxonomyFrameworkForDate } from "../data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
@@ -5437,14 +5438,6 @@ const EXPLORER_KRI_FORMULA_AXIS_COORDINATES = {
   z: "z_axis_rc_code"
 };
 
-// The Hive extraction strips a trailing annex letter from table_id (see
-// hive_to_dataset.py's regexp_replace) before it ever reaches the app, so a
-// formula's own "C_69.00.a" cellref never matches any of the app's actual
-// template ids ("C_69.00") - without this, resolution below always fails.
-function stripExplorerKriFormulaTemplateAnnex(templateId) {
-  return String(templateId ?? "").replace(/\.[A-Za-z]+$/, "");
-}
-
 function dimValuesAreWildcard(values) {
   return Array.isArray(values) && values.some((value) => value === "*");
 }
@@ -5527,7 +5520,7 @@ function applyExplorerCellRefRangePeek(codes) {
 // that isn't actually in this dataset, an ambiguous section...) this does
 // nothing at all rather than falling back to some other template or row.
 function openExplorerKriFormulaCellRef(node) {
-  const rootTableId = stripExplorerKriFormulaTemplateAnnex(node.template);
+  const rootTableId = normalizeKriFormulaTemplateId(node.template);
   if (!rootTableId) return;
 
   const selectionId = resolveExplorerKriFormulaCellRefSectionId(rootTableId, node);
@@ -5538,18 +5531,21 @@ function openExplorerKriFormulaCellRef(node) {
 
   let columnCode = "";
   if (node.column && !dimValuesAreWildcard(node.column)) {
-    const columnCodes = expandExplorerKriFormulaDimCodes(node.column, "x", selectionId);
+    const columnCodes = expandExplorerKriFormulaDimCodes(node.column, "x", rootTableId);
     if (columnCodes.length === 0) return;
     [columnCode] = columnCodes;
   }
 
   let sheetCode = "";
   if (node.sheet && !dimValuesAreWildcard(node.sheet)) {
-    const sheetCodes = expandExplorerKriFormulaDimCodes(node.sheet, "z", selectionId);
+    const sheetCodes = expandExplorerKriFormulaDimCodes(node.sheet, "z", rootTableId);
     if (sheetCodes.length === 0) return;
     [sheetCode] = sheetCodes;
   }
 
+  // An old metadata search can otherwise redirect the next render to its
+  // first match, even though this click explicitly chose another template.
+  if (explorerAdvancedSearchQuery) clearExplorerAdvancedSearch();
   hasInteractedWithExplorerSelection = true;
   activeExplorerTemplateId = selectionId;
   updateUrlTemplateParam(activeExplorerTemplateId);
