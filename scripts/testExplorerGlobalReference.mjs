@@ -16,8 +16,8 @@ const sandbox={getReferenceColumns,getLatestState:()=>state,getActiveExplorerCon
 const ctx=vm.createContext(sandbox);
 const section=(start,end)=>source.slice(source.indexOf(start),source.indexOf(end));
 vm.runInContext(`let explorerGlobalReferenceLabel=${JSON.stringify(references[0].label)},explorerGlobalDisplayMode="temporal";
-const EXPLORER_REFERENCE_URL_PARAM="explorer_reference_date",EXPLORER_DISPLAY_URL_PARAM="explorer_display",AXIS_URL_PARAM="axis",ROW_URL_PARAM="row",COLUMN_URL_PARAM="column",TAB_URL_PARAM="tab",EXPLORER_ANCHOR_REFERENCE_URL_PARAM="explorer_anchor_date",EXPLORER_HISTORY_PERIODS_URL_PARAM="explorer_history_periods",EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM="explorer_geography_layout",EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM="explorer_geography_search";
-let explorerAnchorReferenceLabel="",explorerGlobalHistoryPeriods=12,DEFAULT_EXPLORER_HISTORY_PERIODS=12,explorerGeographyLayout="euro-first",explorerGeographySearch="";`+
+const EXPLORER_REFERENCE_URL_PARAM="explorer_reference_date",EXPLORER_DISPLAY_URL_PARAM="explorer_display",AXIS_URL_PARAM="axis",ROW_URL_PARAM="row",COLUMN_URL_PARAM="column",TAB_URL_PARAM="tab",EXPLORER_ANCHOR_REFERENCE_URL_PARAM="explorer_anchor_date",EXPLORER_HISTORY_PERIODS_URL_PARAM="explorer_history_periods",EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM="explorer_geography_layout",EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM="explorer_geography_search",EXPLORER_GEOGRAPHY_PAGE_URL_PARAM="explorer_geography_page";
+let explorerAnchorReferenceLabel="",explorerGlobalHistoryPeriods=12,DEFAULT_EXPLORER_HISTORY_PERIODS=12,explorerGeographyLayout="euro-first",explorerGeographySearch="",explorerGeographyPageIndex=0;`+
  section('function createExplorerTemplateContext()', 'function getActiveExplorerTemplate()')+
  section('function getSelectedExplorerReference(', 'function getActiveExplorerEvolutionOption()')+
  section('function updateUrlExplorerSelectionParams()', 'function getUrlDisplayModeParam()')+

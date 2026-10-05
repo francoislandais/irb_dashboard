@@ -3606,11 +3606,19 @@ table {
 .explorer-geography-search-control {
   display: grid;
   min-height: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .explorer-geography-suggestions {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 1;
   margin-top: 3px;
-  overflow: hidden;
+  max-height: min(320px, 50vh);
+  overflow-y: auto;
   border: 1px solid #d8dfdb;
   border-radius: 5px;
   background: #ffffff;
@@ -4326,6 +4334,12 @@ table {
 .metric-table tbody tr:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
   outline-offset: -3px;
+}
+
+/* A selected row already has the blue selection highlight; programmatic
+   focus after a country jump should not add an amber stripe around it. */
+.metric-table tbody tr.is-selected:focus-visible {
+  outline: none;
 }
 
 .metric-table td.date-focus-primary-value {

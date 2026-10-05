@@ -7,6 +7,17 @@ import { buildDataIndexes } from "../app/src/data/dataIndex.js";
 import { createVirtualExplorerRow, getParentPaths } from "../app/src/data/explorer.js";
 
 const source = await readFile(new URL("../app/src/ui/explorerView.js", import.meta.url), "utf8");
+const restorePageSource = source.slice(
+  source.indexOf("function getGeographyPageForSelection("),
+  source.indexOf("function buildExplorerYearGroups(")
+);
+const restorePageContext = vm.createContext({ EXPLORER_GEOGRAPHY_PAGE_SIZE: 20 });
+vm.runInContext(restorePageSource, restorePageContext);
+restorePageContext.codes = Array.from({ length: 50 }, (_, index) => `C${index}`);
+assert.equal(vm.runInContext("getGeographyPageForSelection(codes, 'C42', 0, true)", restorePageContext), 2,
+  "a reopened country selection reveals the page containing that country");
+assert.equal(vm.runInContext("getGeographyPageForSelection(codes, 'C42', 1, false)", restorePageContext), 1,
+  "manual pagination remains stable when no selection needs revealing");
 const sharedContextSource = source.slice(
   source.indexOf("function createExplorerTemplateContext()"),
   source.indexOf("function getActiveExplorerTemplate()")

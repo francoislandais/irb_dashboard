@@ -90,6 +90,7 @@ const EXPLORER_SEARCH_URL_PARAM = "explorer_search";
 const EXPLORER_HISTORY_PERIODS_URL_PARAM = "explorer_history_periods";
 const EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM = "explorer_geography_layout";
 const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
+const EXPLORER_GEOGRAPHY_PAGE_URL_PARAM = "explorer_geography_page";
 const EXPLORER_REFERENCE_URL_PARAM = "explorer_reference_date";
 const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
 const EXPLORER_CONTEXT_URL_PARAM = "explorer_context";
@@ -250,7 +251,8 @@ let explorerKriPageResetKey = "";
 // before building the series (see renderExplorer), read by
 // createExplorerKriPaginationFoot to show "Page X of Y".
 let explorerKriTotalMatchCount = 0;
-let explorerGeographyPageIndex = 0;
+let explorerGeographyPageIndex = getUrlGeographyPageIndex();
+let hasAppliedInitialGeographyPage = false;
 let explorerGeographyPageResetKey = "";
 let explorerGeographyTotalMatchCount = 0;
 let explorerPeerSelectionActions = null;
@@ -539,6 +541,9 @@ function getActiveExplorerContext() {
 }
 
 function ensureActiveExplorerTemplate(state) {
+  // The first render precedes dataset restoration. Do not consume the deep
+  // link while there is no table to match its template and country against.
+  if (!state?.rows?.length) return;
   const templates = getExplorerTemplates(state);
   if (templates.length === 0) return;
 
@@ -552,6 +557,7 @@ function ensureActiveExplorerTemplate(state) {
     // whatever cell ends up selected, instead of sitting at the table's
     // top-left corner until the user scrolls or interacts.
     shouldRevealExplorerAxisSelection = true;
+    updateUrlTemplateParam(activeExplorerTemplateId);
   }
 
   if (!templates.some((template) => template.id === activeExplorerTemplateId)) {
@@ -578,6 +584,8 @@ function applyPendingUrlExplorerSelection(context) {
 }
 
 function updateUrlExplorerSelectionParams() {
+  const state = getLatestState();
+  if (!state?.columns?.length && !state?.rows?.length) return;
   const context = getActiveExplorerContext();
   const url = createUrlState();
   getSelectedExplorerReference();
@@ -599,7 +607,23 @@ function updateUrlExplorerSelectionParams() {
     url.searchParams.set(EXPLORER_GEOGRAPHY_LAYOUT_URL_PARAM, explorerGeographyLayout);
   }
   setOrDeleteUrlParam(url, EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM, explorerGeographySearch.trim());
+  setUrlExplorerGeographyPage(url);
   replaceExplorerUrlState(url);
+}
+
+function setUrlExplorerGeographyPage(url) {
+  if (explorerGeographyPageIndex > 0) {
+    url.searchParams.set(EXPLORER_GEOGRAPHY_PAGE_URL_PARAM, String(explorerGeographyPageIndex + 1));
+  } else {
+    url.searchParams.delete(EXPLORER_GEOGRAPHY_PAGE_URL_PARAM);
+  }
+}
+
+function updateUrlExplorerGeographyPage() {
+  const url = createUrlState();
+  const previous = url.searchParams.get(EXPLORER_GEOGRAPHY_PAGE_URL_PARAM);
+  setUrlExplorerGeographyPage(url);
+  if (previous !== url.searchParams.get(EXPLORER_GEOGRAPHY_PAGE_URL_PARAM)) replaceExplorerUrlState(url);
 }
 
 function setOrDeleteUrlParam(url, key, value) {
@@ -648,6 +672,12 @@ function getUrlGeographyLayoutParam() {
   return EXPLORER_GEOGRAPHY_LAYOUTS.some((option) => option.value === value)
     ? value
     : "euro-first";
+}
+
+function getUrlGeographyPageIndex() {
+  const value = readUrlStateParams().get(EXPLORER_GEOGRAPHY_PAGE_URL_PARAM);
+  const page = Number(value);
+  return value && Number.isSafeInteger(page) && page > 0 ? page - 1 : 0;
 }
 
 function updateUrlTemplateParam(templateId) {
@@ -1401,6 +1431,12 @@ function isExplorerTableUnaffectedByStateChange(previousState, nextState) {
 }
 
 export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
+  // A loading render must not replace the URL's template, axis, country or
+  // context topic with the empty store's defaults.
+  if (!state?.columns?.length && !state?.rows?.length) {
+    renderExplorerContextPanel(state);
+    return;
+  }
   const previousState = lastExplorerRenderedState;
   lastExplorerRenderedState = state;
   if (
@@ -1465,17 +1501,23 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   let geographyOrderedCodes;
   let geographyPageGroupLabels;
   if (isGeographyPaginated) {
+    const matchingCodes = getExplorerGeographyMatchingCodesInOrder(state, template, context);
     const geographyResetKey = [
       activeExplorerTemplateId, state.activeDatasetId, state.selectedJst,
       explorerGeographyLayout, explorerAdvancedSearchQuery,
       explorerGeographyLayout === "relevance" ? context.selectedXCode : "",
-      explorerGeographyLayout === "relevance" ? context.selectedYCode : ""
+      explorerGeographyLayout === "relevance" ? context.selectedYCode : "",
+      matchingCodes.join(",")
     ].join(":");
-    if (geographyResetKey !== explorerGeographyPageResetKey) {
+    if (matchingCodes.length && geographyResetKey !== explorerGeographyPageResetKey) {
       explorerGeographyPageResetKey = geographyResetKey;
-      explorerGeographyPageIndex = 0;
+      // Preserve an explicitly linked page on the first loaded render.
+      explorerGeographyPageIndex = hasAppliedInitialGeographyPage ? 0 : getUrlGeographyPageIndex();
+      hasAppliedInitialGeographyPage = true;
+      // A late taxonomy/mapping load can change the order after the first
+      // render. Keep the URL's country visible in the new page ordering.
+      if (context.selectedZCode) shouldRevealExplorerAxisSelection = true;
     }
-    const matchingCodes = getExplorerGeographyMatchingCodesInOrder(state, template, context);
     geographyOrderedCodes = matchingCodes;
     if (isExplorerGeographyGroupedLayout()) {
       const allCountries = getExplorerGeographyCountries(state);
@@ -1491,11 +1533,12 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
           expandedLabels.add(selectedGroup.label);
         }
       }
-      const selectedIndex = expandedLabels.size && (shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection)
-        ? groups.flatMap((group) => expandedLabels.has(group.label) ? group.countries.map((country) => country.code) : [])
-          .indexOf(context.selectedZCode)
-        : -1;
-      if (selectedIndex >= 0) explorerGeographyPageIndex = Math.floor(selectedIndex / EXPLORER_GEOGRAPHY_PAGE_SIZE);
+      const expandedCodes = groups.flatMap((group) => expandedLabels.has(group.label)
+        ? group.countries.map((country) => country.code) : []);
+      explorerGeographyPageIndex = getGeographyPageForSelection(
+        expandedCodes, context.selectedZCode, explorerGeographyPageIndex,
+        shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection
+      );
       const plan = buildGeographyPagePlan(groups, expandedLabels, explorerGeographyPageIndex, EXPLORER_GEOGRAPHY_PAGE_SIZE);
       explorerGeographyPageIndex = plan.pageIndex;
       explorerGeographyTotalMatchCount = plan.expandedCodes.length;
@@ -1503,15 +1546,16 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
       geographyPageGroupLabels = plan.pageGroupLabels;
     } else {
       explorerGeographyTotalMatchCount = matchingCodes.length;
-      if ((shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection) && context.selectedZCode) {
-        const selectedIndex = matchingCodes.indexOf(context.selectedZCode);
-        if (selectedIndex !== -1) explorerGeographyPageIndex = Math.floor(selectedIndex / EXPLORER_GEOGRAPHY_PAGE_SIZE);
-      }
+      explorerGeographyPageIndex = getGeographyPageForSelection(
+        matchingCodes, context.selectedZCode, explorerGeographyPageIndex,
+        shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection
+      );
       const pageCount = Math.max(1, Math.ceil(matchingCodes.length / EXPLORER_GEOGRAPHY_PAGE_SIZE));
       explorerGeographyPageIndex = Math.min(explorerGeographyPageIndex, pageCount - 1);
       const pageStart = explorerGeographyPageIndex * EXPLORER_GEOGRAPHY_PAGE_SIZE;
       geographyOnlyCodes = new Set(matchingCodes.slice(pageStart, pageStart + EXPLORER_GEOGRAPHY_PAGE_SIZE));
     }
+    if (matchingCodes.length) updateUrlExplorerGeographyPage();
   }
 
   const tableSeries = isExplorerXYView()
@@ -2333,10 +2377,17 @@ function changeExplorerGeographyPage(pageIndex) {
   if (!state) return;
 
   explorerGeographyPageIndex = Math.max(0, pageIndex);
+  updateUrlExplorerGeographyPage();
   shouldFocusOpenedExplorerPoint = false;
   shouldRevealExplorerAxisSelection = false;
   getActiveExplorerContext().scrollByAxis.z = { left: 0, top: 0 };
   rerenderApp(state);
+}
+
+function getGeographyPageForSelection(codes, selectedCode, currentPage, revealSelection) {
+  if (!revealSelection || !selectedCode) return currentPage;
+  const index = codes.indexOf(selectedCode);
+  return index < 0 ? currentPage : Math.floor(index / EXPLORER_GEOGRAPHY_PAGE_SIZE);
 }
 
 function buildExplorerYearGroups(dateColumns) {
@@ -3732,7 +3783,7 @@ function createExplorerTemplateCaption(activeTemplate) {
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
 
-  if (explorerContextTopic === "geography" && !getActiveExplorerGeographyAxis()) {
+  if (explorerContextTopic === "geography" && state?.rows?.length && !getActiveExplorerGeographyAxis()) {
     explorerContextTopic = "";
     explorerGeographySearch = "";
     explorerGeographySearchDraft = "";
