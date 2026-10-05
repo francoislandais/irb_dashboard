@@ -3,10 +3,12 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadTaxonomyDimensionData } from "../app/src/data/taxonomyDimensionData.js";
+import { extractAppMarkup } from "../app/src/standaloneExport.mjs";
 import { buildStandaloneBundle } from "./exportStandaloneApp.mjs";
 
 const appDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "../app");
 const bundle = await buildStandaloneBundle(appDirectory);
+assert.match(extractAppMarkup(bundle.indexHtml), /id="startup-progress"/);
 const requestedAssets = new Set(
   Object.values(bundle.moduleSources).flatMap((source) =>
     [...source.matchAll(/(?:\.\/)?assets\/[A-Za-z0-9_.-]+\.csv/g)]

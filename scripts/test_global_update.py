@@ -7,6 +7,7 @@ import json
 import re
 import shutil
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -22,6 +23,7 @@ from global_update import (  # noqa: E402
     Application,
     EXAMPLE_CONFIG_DIRECTORY,
     Extraction,
+    PROJECT_DIRECTORY,
     PRODUCTION_TABLES,
     TEST_ENTITIES_PATH,
     _build_dummy_dataset,
@@ -36,6 +38,59 @@ from global_update import (  # noqa: E402
     _selected_fixture_templates,
     global_update,
 )
+from export_all_standalone_apps import (  # noqa: E402
+    export_all_standalone_apps,
+    export_consolidated_standalone_app,
+)
+
+
+class OutputDirectoryTests(unittest.TestCase):
+    def test_global_update_requires_an_external_output_directory(self):
+        with self.assertRaisesRegex(ValueError, "obligatoire"):
+            global_update(mode="preview")
+        with self.assertRaisesRegex(ValueError, "hors du projet"):
+            global_update(mode="preview", output_directory=PROJECT_DIRECTORY / "outputs")
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            project_alias = root / "project-link"
+            project_alias.symlink_to(PROJECT_DIRECTORY, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "hors du projet"):
+                global_update(mode="preview", output_directory=project_alias / "outputs")
+
+            output = root / "preview"
+            result = global_update(mode="preview", output_directory=output, as_of=date(2026, 9, 26))
+            self.assertEqual(Path(result["output_directory"]), output.resolve())
+            self.assertTrue((output / "manifest.json").is_file())
+
+    def test_both_export_commands_require_output(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            with self.assertRaisesRegex(ValueError, "obligatoire"):
+                export_all_standalone_apps(datasets_directory=temporary_directory)
+            with self.assertRaisesRegex(ValueError, "obligatoire"):
+                export_consolidated_standalone_app(
+                    ["example.csv"], "merged", datasets_directory=temporary_directory,
+                )
+            with self.assertRaisesRegex(ValueError, "hors du projet"):
+                export_all_standalone_apps(
+                    datasets_directory=temporary_directory,
+                    outputs_directory=PROJECT_DIRECTORY / "outputs",
+                )
+            output = root / "portable"
+            self.assertEqual(
+                export_all_standalone_apps(datasets_directory=temporary_directory, outputs_directory=output),
+                [],
+            )
+            self.assertTrue(output.is_dir())
+
+        for script in ("global_update.py", "export_all_standalone_apps.py"):
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT_DIRECTORY / script)],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("--output", result.stderr)
 
 
 class ReferenceDateTests(unittest.TestCase):

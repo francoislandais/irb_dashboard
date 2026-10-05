@@ -16,6 +16,10 @@ const sandbox = {
   isExplorerXYView: () => true,
   getActiveExplorerTemplate: () => ({ tableId: "C_07.00" }),
   getSelectedExplorerReference: () => ({ name: "ref_2025_12_31" }),
+  getExplorerTemplateReferenceDates: (state, tableId) => state.columns
+    .map((name, index) => ({ name, index }))
+    .filter((reference) => reference.name.startsWith("ref_")
+      && state.rows.some((row) => row[0] === tableId && String(row[reference.index] ?? "").trim() !== "")),
   getReferenceColumns: (columns) => columns
     .map((name, index) => ({ name, label: name, index }))
     .filter((column) => column.name.startsWith("ref_"))

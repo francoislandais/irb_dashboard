@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../app/src/data/explorerXY.js";
 import { buildDataIndexes } from "../app/src/data/dataIndex.js";
+import { getBenchmarkRows, getExplorerSelectionsForAxisCode } from "../app/src/data/explorerBenchmark.js";
+import { getCompleteAxisColumnIndexes } from "../app/src/data/core/axisColumns.js";
 import { normalizeAxisCode } from "../app/src/data/core/axisCode.js";
-import { getReferenceColumns } from "../app/src/data/core/referenceColumns.js";
+import { getReferenceColumns, parseNumericValue } from "../app/src/data/core/referenceColumns.js";
 import { buildExplorerDisplayRows, normalizeExplorerSeriesRow, normalizeHierarchyPath, getParentPaths, getExplicitPaths, getExplorerContributionRatio, isExplorerContributionChild } from "../app/src/data/explorer.js";
 import { formatMetricValue, isUnitFormat, formatContributionPercentValue } from "../app/src/data/core/formatting.js";
 
@@ -119,26 +121,60 @@ assert.equal(ratioIndicatorContext.toggleExplorerContributionBase("y","200"),fal
 vm.runInContext(source.slice(source.indexOf("function formatExplorerRatioDenominator("),source.indexOf("// The template uses the same compact pill shape")),ratioIndicatorContext);
 assert.equal(ratioIndicatorContext.formatExplorerRatioDenominator({axis:"y",baseCode:"100",label:"INFLOWS"}),"Row 100 (INFLOWS)");
 
+// The ratio stays active across views, but its badge belongs to the axis
+// where the denominator was chosen, even when that axis's tab is inactive.
+const badgePlacement={activeAxis:"x",selectedAxis:"x",contribution:{axis:"y",baseCode:"100",enabled:true}};
+const badgeButtons=["x","y","z"].map(axis=>({
+  axis,
+  getAttribute:()=>axis,
+  classList:{toggle(){}},
+  setAttribute(){}
+}));
+const badgeAssignments=new Map();
+const badgePlacementContext=vm.createContext({
+  elements:{explorerAxisButtons:badgeButtons,explorerAxisCaptions:{}},
+  EXPLORER_TARGET:{tableId:"TEST"},
+  getExplorerAxisCaptions:()=>({}),
+  getActiveExplorerContext:()=>badgePlacement,
+  getActiveExplorerTemplate:()=>({tableId:"TEST"}),
+  getLatestState:()=>({}),
+  getExplorerAxisOptions:()=>Object.fromEntries(["x","y","z"].map(axis=>[axis,{isVisible:true,codes:[axis]}])),
+  getExplorerPropagatedContribution:()=>badgePlacement.contribution,
+  syncExplorerAxisRatioIndicator:(button,contribution)=>badgeAssignments.set(button.axis,contribution?.axis ?? null)
+});
+vm.runInContext(source.slice(source.indexOf("function renderExplorerAxisTabs("),source.indexOf("function syncExplorerAxisRatioIndicator(")),badgePlacementContext);
+for (const visibleAxis of ["x","z"]) {
+  badgePlacement.selectedAxis=visibleAxis;
+  badgePlacementContext.renderExplorerAxisTabs();
+  assert.deepEqual(Object.fromEntries(badgeAssignments),{x:null,y:"y",z:null});
+}
+badgePlacement.contribution={axis:"x",baseCode:"0010",enabled:true};
+badgePlacement.selectedAxis="y";
+badgePlacementContext.renderExplorerAxisTabs();
+assert.deepEqual(Object.fromEntries(badgeAssignments),{x:"x",y:null,z:null});
+
 let context={activeAxis:"y",selectedXCode:"0010",selectedYCode:"0010",selectedZCode:"EUR",selectedReferenceLabel:dates[0].label};
 const table=new Element("table");
 let selectedCalls=0;
 const sandbox={
   EXPLORER_ALL_CURRENCIES_CODE:"__ALL__",
-  buildExplorerXYHeaders,buildExplorerDisplayRows,normalizeExplorerSeriesRow,normalizeHierarchyPath,getParentPaths,getExplicitPaths,isUnitFormat,
+  buildExplorerXYSeries,buildExplorerXYHeaders,buildExplorerDisplayRows,normalizeExplorerSeriesRow,normalizeHierarchyPath,getParentPaths,getExplicitPaths,isUnitFormat,
+  getBenchmarkRows,getExplorerSelectionsForAxisCode,getCompleteAxisColumnIndexes,getReferenceColumns,parseNumericValue,
   document:{createElement:tag=>new Element(tag)}, elements:{explorerTable:table},
   getActiveExplorerContext:()=>context,getActiveExplorerAxis:()=>context.activeAxis,
   getActiveExplorerTemplate:()=>({tableId:"TEST"}),isExplorerHistorySelectionActive:()=>false,
   getExplorerAxisDisplayName:()=>"Row",getExplorerContributionBaseValues:()=>null,
-  getExplorerContributionBase:()=>null,getExplorerContributionRatio,isExplorerContributionChild,formatContributionPercentValue,formatMetricValue,
+  getExplorerContributionBase:()=>null,getExplorerPropagatedContribution:()=>null,
+  createExplorerTreeLevelControl:()=>Object.assign(new Element("span"),{className:"explorer-tree-level-control"}),updateExplorerTreeLevelControl:()=>{},
+  getExplorerContributionRatio,isExplorerContributionChild,formatContributionPercentValue,formatMetricValue,
   hasCollapsedExplicitAncestor:()=>false,createExplorerSearchText:row=>row.description,
   createDescriptionContent:()=>new Element("span"),formatExplorerFocusedValue:o=>formatMetricValue(o.pointValue,o.selectedUnit,o.valueFormat),
   getLatestState:()=>base,getSelectedExplorerCodeForActiveAxis:()=>context.activeAxis==="y"?context.selectedYCode:context.selectedXCode,
   refreshExplorerSelectionOnly:()=>selectedCalls++,saveExplorerScrollPosition(){},focusSelectedExplorerRow(){},
 };
-for(const name of ["clearExplorerCellRangeSelection","expandDefaultExplorerPaths","applyExplorerTreeViewMode","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar"]) sandbox[name]=()=>{};
-sandbox.createExplorerTreeViewToggle=()=>new Element("button");
+for(const name of ["clearExplorerCellRangeSelection","clearExplorerCountrySearch","expandDefaultExplorerPaths","applyExplorerTreeViewMode","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar","renderExplorerGeographyPaginationBar","getActiveExplorerGeographyAxis"]) sandbox[name]=()=>{};
 const ctx=vm.createContext(sandbox);
-vm.runInContext('let explorerGlobalReferenceLabel="",explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,shouldRevealExplorerAxisSelection=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
+vm.runInContext('let explorerGlobalReferenceLabel="",explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",lastRenderedExplorerParentPaths=new Set(),explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,shouldRevealExplorerAxisSelection=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
 base.selectedTaxonomiesByTemplate={TEST:"4.2"};
 vm.runInContext(source.slice(source.indexOf("function createExplorerTaxonomyStatus()"),source.indexOf("function createExplorerSelectionHeadline(")),ctx);
 // Real template contexts share the display mode and preserve their normal axis.
@@ -266,6 +302,8 @@ sandbox.matrix=buildExplorerXYSeries({...base,rows:ratioRows,explorerPoints:rati
 table.children=[];
 vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
 let rendered=table.children.find(n=>n.tagName==="TBODY").rows;
+assert.equal(table.children.find(n=>n.tagName==="THEAD").rows[0].cells[1].children[0].className,"explorer-tree-level-control",
+  "hierarchy buttons belong to the frozen table header above the row labels");
 const child=rendered.find(row=>row.dataset.pointCode==="1010");
 assert.equal(child.cells[2].dataset.explorerCellValue,"0.2");
 assert.equal(child.cells[3].dataset.explorerCellValue,"0.25");
@@ -288,6 +326,74 @@ table.children=[];
 vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
 assert.equal(table.children.find(n=>n.tagName==="TBODY").rows.find(row=>row.dataset.pointCode==="1010").cells[2].dataset.explorerCellValue,"20");
 console.log("PASS: XY denominator uses each matching X column for children and grandchildren, handles zero/missing/forbidden bases and resets to amounts.");
+
+// "Current selection" is anchored to its originating code, not to the
+// dimension currently being browsed. Exercise the real propagation selector
+// and the XY cell alignment for denominators on X and Z.
+sandbox.getSelectedExplorerCodeForAxis=(selection,axis)=>selection[`selected${axis.toUpperCase()}Code`];
+sandbox.getExplorerAxisCodePath=()=>"selected path";
+vm.runInContext(source.slice(source.indexOf("function getExplorerPropagatedContribution("),source.indexOf("function getExplorerAxisCodePath(")),ctx);
+context.contributionBaseByAxis.y={path:"row base",pointCode:"1000",numeratorCode:"1010",scope:"selection",type:"axis",tableId:"TEST"};
+context.selectedYCode="1010";
+vm.runInContext('explorerGlobalDisplayMode="temporal"',ctx);
+for (const axis of ["x","z"]) {
+  context.activeAxis=axis;
+  assert.equal(vm.runInContext(`getExplorerPropagatedContribution("${axis}")?.axis`,ctx),"y");
+}
+context.selectedYCode="1020";
+assert.equal(vm.runInContext('getExplorerPropagatedContribution("x")',ctx),null,
+  "changing the original numerator selection ends this ratio");
+context.contributionBaseByAxis.y=null;
+
+const ratioState={...base,rows:ratioRows,explorerPoints:ratioPoints,impossibleXYCombinations:null};
+sandbox.getLatestState=()=>ratioState;
+context.contributionBaseByAxis.y={path:"row base",pointCode:"1000",numeratorCode:"1010",scope:"selection",type:"axis",tableId:"TEST"};
+context.selectedXCode="0020";
+context.selectedYCode="1010";
+context.selectedZCode="EUR";
+vm.runInContext('explorerGlobalDisplayMode="temporal"',ctx);
+for (const [axis,code] of [["x","0020"],["z","EUR"]]) {
+  context.activeAxis=axis;
+  sandbox.temporalBase=vm.runInContext(`getExplorerContributionBaseValues({code:"${code}",isVirtual:false},"selected path","${axis}",null,getExplorerPropagatedContribution("${axis}"))`,ctx);
+  assert.equal(sandbox.temporalBase[0].value,200,
+    `the ${axis.toUpperCase()} view must use Row 1000 at the current X/Z selection`);
+  assert.equal(getExplorerContributionRatio(50,sandbox.temporalBase[0].value),0.25);
+}
+context.contributionBaseByAxis.y=null;
+context.contributionBaseByAxis.x={path:"column base",pointCode:"0010",numeratorCode:"0020",scope:"selection",type:"axis",tableId:"TEST"};
+context.selectedXCode="0020";
+vm.runInContext('explorerGlobalDisplayMode="xy"',ctx);
+context.activeAxis="x";
+assert.equal(context.activeAxis,"y", "XY keeps Y as its rendered row axis");
+assert.equal(vm.runInContext('getExplorerPropagatedContribution("x")?.axis',ctx),"x",
+  "the Column tab must still show the active ratio badge");
+sandbox.matrix=buildExplorerXYSeries(ratioState,{tableId:"TEST",selectedZCode:"EUR",referenceLabel:dates[0].label});
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
+rendered=table.children.find(n=>n.tagName==="TBODY").rows;
+assert.equal(rendered.find(row=>row.dataset.pointCode==="1010").cells[3].dataset.explorerCellValue,"2.5",
+  "the selected X column uses the same Y row's denominator X column");
+assert.equal(rendered.find(row=>row.dataset.pointCode==="1010").cells[2].dataset.explorerCellValue,"20",
+  "other X columns retain their raw values");
+context.selectedXCode="0030";
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
+assert.equal(table.children.find(n=>n.tagName==="TBODY").rows.find(row=>row.dataset.pointCode==="1010").cells[3].dataset.explorerCellValue,"50");
+context.contributionBaseByAxis.x=null;
+
+const usdRows=ratioRows.map((row)=>row.map((value,index)=>index===4?"USD":index>=5&&value!==""?String(Number(value)/2):value));
+const zState={...ratioState,rows:[...ratioRows,...usdRows],explorerPoints:[...ratioPoints,point("z","USD","US Dollar")]};
+sandbox.getLatestState=()=>zState;
+context.contributionBaseByAxis.z={path:"Euro",pointCode:"USD",numeratorCode:"EUR",scope:"selection",type:"axis",tableId:"TEST"};
+context.selectedZCode="EUR";
+sandbox.matrix=buildExplorerXYSeries(zState,{tableId:"TEST",selectedZCode:"EUR",referenceLabel:dates[0].label});
+table.children=[];
+vm.runInContext('renderExplorerTable(matrix,"units")',ctx);
+assert.equal(table.children.find(n=>n.tagName==="TBODY").rows.find(row=>row.dataset.pointCode==="1010").cells[2].dataset.explorerCellValue,"2",
+  "a Z denominator divides corresponding XY cells");
+context.contributionBaseByAxis.z=null;
+sandbox.getLatestState=()=>base;
+console.log("PASS: current-selection denominator follows its numerator across dimensions and aligns X/Z bases in XY view.");
 
 // KRI always renders temporally without changing the global display choice.
 const originalTemplateGetter=sandbox.getActiveExplorerTemplate;

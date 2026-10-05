@@ -80,31 +80,30 @@ await exportStandaloneApp("/chemin/vers/donnees.csv", {
 
 ### Generation de toutes les applications locales
 
-Deux dossiers locaux, exclus de Git, sont utilises :
-
-- `datasets/` recoit les fichiers CSV utilisateur ;
-- `outputs/` recoit les applications HTML generees.
+Les CSV d'entrée restent dans le dossier local `datasets/`. Les HTML générés
+sont enregistrés dans un dossier de sortie explicite, hors du projet.
 
 Deposer les CSV dans `datasets/`, puis executer :
 
 ```sh
-python3 scripts/export_all_standalone_apps.py
+python3 scripts/export_all_standalone_apps.py --output /chemin/vers/mes-exports
 ```
 
 Pour chaque fichier `mon-fichier.csv`, le programme cree :
 
 ```text
-outputs/Agora Explorer_mon-fichier.html
+/chemin/vers/mes-exports/Agora Explorer_mon-fichier.html
 ```
 
-Les dossiers sont crees automatiquement s'ils n'existent pas. Leur contenu n'est jamais suivi par Git.
+Le dossier de sortie est créé automatiquement s'il n'existe pas. Un chemin
+situé dans l'arborescence du projet est refusé.
 
 La fonction peut etre appelee directement depuis un notebook Python :
 
 ```python
 from scripts.export_all_standalone_apps import export_all_standalone_apps
 
-generated_files = export_all_standalone_apps()
+generated_files = export_all_standalone_apps(outputs_directory="/chemin/vers/mes-exports")
 generated_files
 ```
 
@@ -167,15 +166,15 @@ Le point d'entrée unique peut être importé :
 ```python
 from scripts.global_update import global_update
 
-result = global_update(mode="preview")
+result = global_update(mode="preview", output_directory="/chemin/vers/sorties/preview")
 ```
 
-Le mode `preview` valide tout le dossier et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans `outputs/global-update-prototype/generated/preview/`. Il ne se connecte pas à Hive. Pour les KRI, le SQL de prévisualisation contient des marqueurs explicites à la place des `entity_id`, qui ne sont connus qu'après exécution de la requête des métadonnées. Sans `--config`, `preview` et `test` utilisent le dossier d'exemples.
+Le mode `preview` valide tout le dossier et écrit une requête SQL par extraction, la requête dédiée aux métadonnées des institutions, un manifeste et un index lisible dans le dossier indiqué par `--output` (ou `output_directory` en Python). Il ne se connecte pas à Hive. Pour les KRI, le SQL de prévisualisation contient des marqueurs explicites à la place des `entity_id`, qui ne sont connus qu'après exécution de la requête des métadonnées. Sans `--config`, `preview` et `test` utilisent le dossier d'exemples. Le dossier de sortie est obligatoire dans tous les modes et doit être situé hors du projet.
 
 Le mode `test` remplace ces marqueurs par les `entity_id` de la fixture, puis construit localement les datasets factices, un dictionnaire d'institutions et les applications HTML autonomes :
 
 ```sh
-python3 scripts/global_update.py --mode test
+python3 scripts/global_update.py --mode test --output /chemin/vers/sorties/test
 ```
 
 Ce mode ne se connecte pas à Hive : les institutions et les templates disponibles viennent de `scripts/fixtures/global_update_test_entities.json`; des valeurs déterministes sont générées localement pour simuler les résultats. Il valide le flux de bout en bout et l'incorporation du dictionnaire d'institutions dans les applications exportées. Les requêtes utilisent les deux schémas fournis dans `scripts/fixtures/hive_schemas/` : l'ITS porte le LEI ; la requête KRI filtre directement les couples `entity_id` et `cons_level` extraits séparément des métadonnées ITS, sans jointure avec ITS. Le format d'`Institution ID` est `LEI_niveau`. Aucune extraction Hive réelle n'est lancée en mode `test`.
@@ -183,18 +182,18 @@ Ce mode ne se connecte pas à Hive : les institutions et les templates disponibl
 Sur une machine disposant de `vl_connect`, le mode `hive` exécute d'abord la requête des métadonnées institutionnelles via `devo.read_sql(sql)`. Il détermine ensuite les niveaux de consolidation demandés et les applique dans chaque requête de données, puis assemble les DataFrames par template, institution, coordonnées et date. Pour le mode `HIGHEST`, le filtre est directement `is_highest_cons = 'Y'` dans la requête des métadonnées et dans chaque requête de données ITS ou KRI ; cet indicateur n'est pas agrégé. Enfin, il génère un CSV et un HTML autonome par fichier :
 
 ```sh
-python3 scripts/global_update.py --mode preview --config /chemin/vers/mes-applications
-python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applications
+python3 scripts/global_update.py --mode preview --config /chemin/vers/mes-applications --output /chemin/vers/sorties/preview
+python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applications --output /chemin/vers/sorties/hive
 ```
 
 Pour réduire facultativement la taille des CSV et des HTML générés, ajouter `--compact-values` à cette commande (ou `compact_values=True` à `global_update`). Le programme consulte le dictionnaire des dimensions et l'historique des taxonomies : les montants sont stockés comme des milliers d'euros entiers, les pourcentages avec quatre chiffres significatifs et les valeurs `Unit` sans modification. La colonne technique `value_scale=1000` signale les lignes de montants ; l'application les remet en euros avant tout calcul ou affichage. Les lignes dont le format est inconnu ou change selon les dates restent inchangées. Cette option est avec perte de précision et ne modifie pas les requêtes Hive elles-mêmes.
 
-Il faut renseigner un dossier réel : les exemples contiennent des LEI fictifs et ne sont pas acceptés par défaut en mode `hive`. Le résultat est écrit dans un nouveau dossier horodaté sous `outputs/global-update-prototype/generated/hive/` ; `--output` permet de choisir un dossier vide. La même opération peut être lancée depuis Python avec `global_update("/chemin/vers/mes-applications", mode="hive")`, ou avec `devo_client=devo` si le client est déjà initialisé. Le package `vl_connect` et son accès Hive doivent être disponibles dans cet environnement ; ils ne sont pas nécessaires aux modes `preview` et `test`.
+Il faut renseigner un dossier réel : les exemples contiennent des LEI fictifs et ne sont pas acceptés par défaut en mode `hive`. Le résultat est écrit exactement dans le dossier indiqué par `--output`, sans dossier horodaté ajouté automatiquement ; ce dossier doit être vide en mode `hive`. La même opération peut être lancée depuis Python avec `global_update("/chemin/vers/mes-applications", mode="hive", output_directory="/chemin/vers/sorties/hive")`, ou avec `devo_client=devo` si le client est déjà initialisé. Le package `vl_connect` et son accès Hive doivent être disponibles dans cet environnement ; ils ne sont pas nécessaires aux modes `preview` et `test`.
 
 Le résultat est enregistré sous `datasets/finrep_extract.csv`. La colonne d’identification est publiée sous le nom `reporting_unit_id` ; les anciens CSV qui utilisent encore `jst_code` restent acceptés par l’application. Il peut ensuite être transforme en application autonome avec :
 
 ```sh
-python3 scripts/export_all_standalone_apps.py
+python3 scripts/export_all_standalone_apps.py --output /chemin/vers/mes-exports
 ```
 
 ## Organisation du code

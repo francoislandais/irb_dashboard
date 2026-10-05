@@ -15,11 +15,15 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import urlsplit
 
+if __package__:
+    from .output_directory import resolve_external_output_directory
+else:
+    from output_directory import resolve_external_output_directory
+
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 APP_DIRECTORY = PROJECT_DIRECTORY / "app"
 DEFAULT_DATASETS_DIRECTORY = PROJECT_DIRECTORY / "datasets"
-DEFAULT_OUTPUTS_DIRECTORY = PROJECT_DIRECTORY / "outputs"
 DEFAULT_STANDALONE_APP_NAME = "Agora Explorer portable"
 
 
@@ -37,7 +41,7 @@ def export_all_standalone_apps(
     """
 
     datasets_path = _resolve_directory(datasets_directory, DEFAULT_DATASETS_DIRECTORY)
-    outputs_path = _resolve_directory(outputs_directory, DEFAULT_OUTPUTS_DIRECTORY)
+    outputs_path = resolve_external_output_directory(outputs_directory)
     datasets_path.mkdir(parents=True, exist_ok=True)
     outputs_path.mkdir(parents=True, exist_ok=True)
     csv_files = sorted(
@@ -143,7 +147,7 @@ def export_consolidated_standalone_app(
         raise ValueError("La liste des datasets à consolider ne peut pas être vide.")
 
     datasets_path = _resolve_directory(datasets_directory, DEFAULT_DATASETS_DIRECTORY)
-    outputs_path = _resolve_directory(outputs_directory, DEFAULT_OUTPUTS_DIRECTORY)
+    outputs_path = resolve_external_output_directory(outputs_directory)
     outputs_path.mkdir(parents=True, exist_ok=True)
 
     csv_paths = [datasets_path / _normalize_csv_name(name) for name in dataset_names]
@@ -367,6 +371,7 @@ function setStartupStage(activeStage) {
   };
   const status = document.querySelector("#startup-stage");
   if (status && labels[activeStage]) status.textContent = labels[activeStage];
+  document.querySelector("#startup-progress")?.setAttribute("aria-valuetext", labels[activeStage] || "Loading...");
 }
 
 async function decompressStandaloneText(base64) {
@@ -469,7 +474,15 @@ def _resolve_directory(value: str | Path | None, default: Path) -> Path:
 
 
 if __name__ == "__main__":
-    generated = export_all_standalone_apps()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Génère les applications portables depuis datasets/.")
+    parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet")
+    args = parser.parse_args()
+    try:
+        generated = export_all_standalone_apps(outputs_directory=args.output)
+    except Exception as error:
+        parser.exit(2, f"export_all_standalone_apps: {error}\n")
     if not generated:
         print(f"Aucun fichier CSV trouvé dans {DEFAULT_DATASETS_DIRECTORY}")
     else:

@@ -3,7 +3,8 @@ import { parseInstitutionDictionaryCsv } from "./data/institutionDictionary.js?v
 import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchema.js?v=20260925-institution-id";
 import { expandScaledReferenceValues } from "./data/core/valueScale.js";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
-import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
+import { normalizeGeographicCountryAxisCodes } from "./data/geographicCountryAxis.js";
+import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20261003-startup-progress";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
 import { loadExplorerKriFormulas } from "./data/explorerKriFormula.js?v=20260917-kri-formula";
@@ -21,12 +22,12 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20260928-template-taxonomy";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261003-tree-view-toggle";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261005-geography-shared-panel";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
   resolveStandaloneModulePath
-} from "./standaloneExport.mjs?v=20260926-global-update-dictionary";
+} from "./standaloneExport.mjs?v=20261003-startup-progress";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./ui/urlState.js";
 
 const store = createDataStore();
@@ -204,7 +205,7 @@ updateUrlUnitParam(store.getState().selectedUnit);
 
 async function loadFile(file, handle, options = {}) {
   const text = await file.text();
-  setStartupStage("indexing");
+  if (!document.body.classList.contains("is-app-loading")) setStartupStage("indexing");
   currentCsvText = text;
   currentCsvFileName = file.name;
   await loadCsvText(text, file.name, handle, new Date(), options);
@@ -213,6 +214,7 @@ async function loadFile(file, handle, options = {}) {
 async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const rawParsed = parseCsv(text);
   const expanded = expandScaledReferenceValues(rawParsed);
+  normalizeGeographicCountryAxisCodes(expanded.columns, expanded.rows);
   const parsed = removeEmptyReferenceColumns(expanded.columns, expanded.rows);
   validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);
@@ -626,7 +628,7 @@ async function startApplication() {
   wireUi(actions);
   store.subscribe(renderAppState);
   renderAppState(store.getState());
-  if (!hasStandaloneCsvData()) setStartupStage("indexing");
+  if (!hasStandaloneCsvData()) setStartupStage("downloading");
 
   try {
     await Promise.all([
@@ -654,6 +656,39 @@ function setStartupStage(activeStage) {
   };
   const status = document.querySelector("#startup-stage");
   if (status && labels[activeStage]) status.textContent = labels[activeStage];
+  const progress = document.querySelector("#startup-progress");
+  const fill = document.querySelector("#startup-progress-fill");
+  const percent = document.querySelector("#startup-progress-label");
+  progress?.classList.add("is-indeterminate");
+  progress?.removeAttribute("aria-valuenow");
+  progress?.setAttribute("aria-valuetext", labels[activeStage] || "Loading...");
+  if (fill) fill.style.width = "";
+  if (percent) percent.textContent = "";
+}
+
+function setStartupDownloadProgress({ loaded, total, done }) {
+  if (done) {
+    setStartupStage("indexing");
+    return;
+  }
+  const progress = document.querySelector("#startup-progress");
+  const fill = document.querySelector("#startup-progress-fill");
+  const percent = document.querySelector("#startup-progress-label");
+  if (!progress || !fill || !percent) return;
+  if (!total) {
+    progress.classList.add("is-indeterminate");
+    progress.removeAttribute("aria-valuenow");
+    progress.setAttribute("aria-valuetext", "Downloading...");
+    fill.style.width = "";
+    percent.textContent = "";
+    return;
+  }
+  const value = Math.min(100, Math.round(loaded / total * 100));
+  progress.classList.remove("is-indeterminate");
+  progress.setAttribute("aria-valuenow", String(value));
+  progress.setAttribute("aria-valuetext", `${value}% downloaded`);
+  fill.style.width = `${value}%`;
+  percent.textContent = `${value}%`;
 }
 
 function waitForApplicationPaint() {
@@ -672,16 +707,16 @@ function revealApplication() {
 
 async function loadTaxonomyConfiguration() {
   try {
-    await applyTaxonomyDimensionData();
+    await applyTaxonomyDimensionData("", hasStandaloneCsvData() ? undefined : setStartupDownloadProgress);
   } catch (error) {
     store.setDimensionMappingError(error);
   }
 }
 
-async function applyTaxonomyDimensionData(referenceDate = "") {
+async function applyTaxonomyDimensionData(referenceDate = "", onDownloadProgress) {
   const sequence = ++taxonomyLoadSequence;
   try {
-    const taxonomyData = await loadTaxonomyDimensionData({}, { referenceDate });
+    const taxonomyData = await loadTaxonomyDimensionData({}, { referenceDate, onDownloadProgress });
     if (sequence === taxonomyLoadSequence) store.setTaxonomyDimensionData(taxonomyData);
   } catch (error) {
     if (sequence === taxonomyLoadSequence) store.setDimensionMappingError(error);

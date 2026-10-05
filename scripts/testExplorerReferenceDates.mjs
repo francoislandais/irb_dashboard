@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {buildDataIndexes} from '../app/src/data/dataIndex.js';
 import {getReferenceColumns} from '../app/src/data/core/referenceColumns.js';
 import {getExplorerTemplateReferenceDates as dates, getExplorerTaxonomyUnavailableReferenceLabels} from '../app/src/data/explorerReferenceDates.js';
+import {buildExplorerAxisSeries} from '../app/src/data/timeSeries.js';
 const columns=['table_id','jst_code','x_axis_rc_code','y_axis_rc_code','z_axis_rc_code','ref_2026_01_31','ref_2026_02_28','ref_2026_03_31'];
 const rows=[['FIRST','A','','','','1','',''],['LAST','A','','','','',0,' '],['LAST','B','','','','text',null,'3']];
 for(const indexed of [false,true]) {
@@ -29,6 +30,10 @@ assert.equal(dates(state,'LAST').length,3);assert.equal(foreignReads,0);
 const initial=ownReads;
 for(let i=0;i<1000;i++) dates({...state,selectedJst:'A'},'LAST');
 assert.equal(ownReads,initial);
+foreignReads=0;
+const lastSeries=buildExplorerAxisSeries({...state,selectedJst:'A',explorerPoints:[]},{tableId:'LAST',axis:'y'});
+assert.deepEqual(lastSeries.dateColumns.map(column=>column.label),dates(state,'LAST').map(column=>column.label));
+assert.equal(foreignReads,0,'building the series must reuse cached dates without scanning preceding templates');
 
 const temporalSeries={
  taxonomyBlocks:['4.2','4.0'],

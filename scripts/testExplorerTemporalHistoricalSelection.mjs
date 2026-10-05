@@ -23,6 +23,8 @@ const historicalState = {
 };
 const sandbox = {
   EXPLORER_TARGET: { tableId: "T" },
+  EXPLORER_GEOGRAPHIC_TEMPLATES: new Map(),
+  normalizeGeographicCountryCode: (_tableId, code) => code,
   explorerGlobalDisplayMode: "temporal",
   explorerGlobalEvolutionFrequency: "quarterly",
   explorerHasDetectedEvolutionFrequency: true,

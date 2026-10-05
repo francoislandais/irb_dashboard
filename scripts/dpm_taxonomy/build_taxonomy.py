@@ -30,6 +30,8 @@ DATA = ROOT / "data" / "eba-dpm-history"
 SOURCE_DIR = DATA / "sources"
 OUTPUT_DIR = DATA / "generated"
 SCHEDULE = DATA / "module_release_schedule.csv"
+GEOGRAPHIC_COUNTRY_AXIS = Path(__file__).with_name("geographic_country_axis.csv")
+GEOGRAPHIC_COUNTRY_TEMPLATES = {"F_20.04", "F_20.05", "F_20.06", "F_20.07.1"}
 
 AXIS_COORDINATES = {
     "x": "x_axis_rc_code",
@@ -868,7 +870,7 @@ def y_axis_rows(
         if (
             code == "5"
             and label.casefold().startswith("cash balance")
-            and re.fullmatch(r"F_18\.00(?:\.[a-z0-9]+)?", table_id, flags=re.IGNORECASE)
+            and re.fullmatch(r"F_18\.00(?:\.[a-z0-9]+)*", table_id, flags=re.IGNORECASE)
         ):
             depth = max(depth, 1)
         items.append((code or "", label, depth, row_no))
@@ -924,6 +926,42 @@ def y_axis_rows(
             and all(items[index][2] > minimum_depth for index in preceding_coded)
         ):
             attach_preceding_block(0, first_minimum, first_minimum)
+
+    # F_18.00's three debt-instrument headings (180, 201, 231) are printed
+    # *after* their detail rows in some FINREP layouts, but *before* them in
+    # others (including some .dp sheets). The general first/last-total rules only
+    # recover 180. A trailing 201/231 follows detail codes lower than its own
+    # and precedes either higher detail codes or another top-level heading;
+    # a leading heading instead precedes its lower-numbered detail codes.
+    # Use that source-order distinction only for these known F_18.00 blocks.
+    if re.fullmatch(r"F_18\.00(?:\.[a-z0-9]+)*", table_id, flags=re.IGNORECASE):
+        for parent_index in coded_indices:
+            parent_code, _label, parent_depth, _row_no = items[parent_index]
+            if parent_code not in {"201", "231"}:
+                continue
+            start = parent_index - 1
+            while start >= 0 and items[start][2] > parent_depth:
+                start -= 1
+            start += 1
+            preceding_codes = [items[index][0] for index in range(start, parent_index) if items[index][0]]
+            if (
+                not preceding_codes
+                or not preceding_codes[0].isdigit()
+                or int(preceding_codes[0]) >= int(parent_code)
+            ):
+                continue
+            following_code = None
+            for index in range(parent_index + 1, len(items)):
+                if items[index][2] <= parent_depth:
+                    break
+                if items[index][0]:
+                    following_code = items[index][0]
+                    break
+            if following_code is not None and (
+                not following_code.isdigit() or int(following_code) < int(parent_code)
+            ):
+                continue  # This sheet places the heading before its details.
+            attach_preceding_block(start, parent_index, parent_index)
 
     # A final coded, less-indented total can parent the trailing deeper block.
     # Ignore later uncoded notes when choosing that terminal row, and stop at
@@ -1097,6 +1135,48 @@ def legacy_sheet_z_rows(sheet: Any) -> list[tuple[str, str]]:
     return []
 
 
+def fixed_geographic_country_axis(rows: list[dict[str, str]], templates: Iterable[dict[str, str]]) -> list[dict[str, str]]:
+    """Give every geographic template/version the same ISO country Z axis.
+
+    Countries are an open reporting axis, not a taxonomy-dependent template
+    dimension. The fixed list also retains Kosovo and the technical Other
+    countries member, which are present in reported data.
+    """
+    with GEOGRAPHIC_COUNTRY_AXIS.open(encoding="utf-8", newline="") as handle:
+        members = [(row["code"], row["description"]) for row in csv.DictReader(handle)]
+    codes = [code for code, _description in members]
+    if len(codes) != len(set(codes)) or len([code for code in codes if re.fullmatch(r"[A-Z]{2}", code)]) != 250:
+        raise ValueError("The fixed geographic country axis must contain 249 ISO codes and XK, without duplicates.")
+
+    result = [row for row in rows if not (
+        row["table_id"] in GEOGRAPHIC_COUNTRY_TEMPLATES
+        and row["coordinate"] == AXIS_COORDINATES["z"]
+    )]
+    for template in templates:
+        if template["template_id"] not in GEOGRAPHIC_COUNTRY_TEMPLATES:
+            continue
+        for order, (code, description) in enumerate(members, 1):
+            result.append({
+                "table_id": template["template_id"],
+                "coordinate": AXIS_COORDINATES["z"],
+                "code": code,
+                "parent_coordinate_code": "",
+                "description": description,
+                "order_first": str(order),
+                "ignore": "",
+                "format": "",
+                "module_code": template["module_code"],
+                "framework": template["framework"],
+                "effective_from": template["effective_from"],
+                "effective_to": template["effective_to"],
+                "status": template["status"],
+                "source_workbook": GEOGRAPHIC_COUNTRY_AXIS.name,
+                "source_sheet": "",
+                "effective_source": template["effective_source"],
+            })
+    return result
+
+
 def read_schedule() -> list[dict[str, str]]:
     with SCHEDULE.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
@@ -1195,7 +1275,11 @@ def extract_all() -> tuple[
                             "sheet per" in header_text
                             or (table_sheet_counts[table_id] > 1 and bool(re.search(r"\([^)]*\d{3,4}\)\s*$", clean(sheet.title))))
                         )
-                    if has_variable_tab_axis:
+                    if table_id in GEOGRAPHIC_COUNTRY_TEMPLATES:
+                        # Insert the shared country axis after all source
+                        # templates have been collected.
+                        zs = []
+                    elif has_variable_tab_axis:
                         # DPM 1.0 uses one numbered worksheet per tab/Z member;
                         # DPM 2.0 declares enumerated tab dimensions in the
                         # glossary via a Key value reference.
@@ -1295,9 +1379,9 @@ def extract_all() -> tuple[
     # resolver when the caller requests the former module family.
     sorted_templates = close_template_intervals(normalized_templates.values())
 
-    dimensions = group_c07_42_z_rows(group_c08_irb_z_rows(
+    dimensions = fixed_geographic_country_axis(group_c07_42_z_rows(group_c08_irb_z_rows(
         restore_alm_native_total_currency_rows(list(unique_layouts.values()))
-    ))
+    )), sorted_templates)
     return dimensions, sorted_templates, inventory, suffix_conflicts
 
 

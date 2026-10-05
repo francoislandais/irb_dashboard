@@ -78,6 +78,7 @@ function setStartupStage(activeStage) {
   };
   const status = document.querySelector("#startup-stage");
   if (status && labels[activeStage]) status.textContent = labels[activeStage];
+  document.querySelector("#startup-progress")?.setAttribute("aria-valuetext", labels[activeStage] || "Loading...");
 }
 
 async function decompressStandaloneText(base64) {

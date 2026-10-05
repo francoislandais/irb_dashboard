@@ -1,8 +1,11 @@
 import { getExplorerTemplateReferenceDates, getExplorerTaxonomyUnavailableReferenceLabels } from "../data/explorerReferenceDates.js";
+import { buildGeographyPagePlan } from "../data/geographyPagination.js";
+import { analyzeExplorerSelectionHistory, buildExplorerSelectionHistory } from "../data/explorerSelectionInsights.js?v=20261003-description-arrows";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260922-xy-header-dedupe";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
-import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig } from "../data/timeSeries.js?v=20260928-local-description";
+import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig, getExplorerGeographyLatestValues } from "../data/timeSeries.js?v=20261005-geography-contributors";
 import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-padding";
+import { normalizeGeographicCountryCode } from "../data/geographicCountryAxis.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js?v=20260925-institution-id";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
@@ -19,6 +22,7 @@ import {
 import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20260916-benchmark-empty-dates";
 import {
   buildExplorerDisplayRows,
+  createVirtualExplorerRow,
   EXPLORER_ALL_CURRENCIES_CODE,
   EXPLORER_ALL_CURRENCIES_LABEL,
   getAvailableExplorerAxisCodes,
@@ -89,6 +93,13 @@ const EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM = "explorer_geography_search";
 const EXPLORER_REFERENCE_URL_PARAM = "explorer_reference_date";
 const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
 const EXPLORER_CONTEXT_URL_PARAM = "explorer_context";
+const EXPLORER_CONTEXT_TOPICS = new Set([
+  "jst-code", "reference-date", "unit", "display-mode", "benchmark-mode",
+  "kri-formula", "geography", "peer-selection"
+]);
+// The expanded description can be restored later without removing its chart
+// and interaction code; for now the selection card stays compact.
+const EXPLORER_SELECTION_DESCRIPTION_ENABLED = false;
 // 8 prior periods at quarterly cadence is roughly the old default (current
 // year + 2 prior years); other frequencies now get the same period count,
 // just in their own unit (see getExplorerHistoryUnitLabel).
@@ -100,10 +111,10 @@ const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map([
   ["F_20.07.1", "z"]
 ]);
 const EXPLORER_GEOGRAPHY_LAYOUTS = [
-  { value: "euro-first", label: "Euro area first", description: "Euro area, other EU countries, then the rest of the world" },
-  { value: "world-regions", label: "World regions", description: "Countries grouped into broad geographical areas" },
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
-  { value: "relevance", label: "Top 10 contributors", description: "The ten largest country values at the latest populated reference date" }
+  { value: "euro-first", label: "Your Area Focus", description: "Euro area, other EU countries, then the rest of the world" },
+  { value: "world-regions", label: "World Region", description: "Countries grouped into broad geographical areas" },
+  { value: "relevance", label: "Top Contributors", description: "All countries ranked by the selected value at the latest reference date" }
 ];
 const EURO_AREA_CODES = new Set("AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES".split(" "));
 const EU_CODES = new Set("AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split(" "));
@@ -167,7 +178,8 @@ let explorerStickyFrame = 0;
 // visible to understand what they're looking at, so only an explicit
 // "collapsed" in the URL (see setExplorerContextDetailCollapsed) starts it
 // closed.
-let explorerContextDetailCollapsed = readUrlStateParams().get(EXPLORER_CONTEXT_URL_PARAM) === "collapsed";
+const initialExplorerContext = readUrlStateParams().get(EXPLORER_CONTEXT_URL_PARAM) ?? "";
+let explorerContextDetailCollapsed = initialExplorerContext === "collapsed";
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
 let explorerBenchmarkLastSmoothingWindow = 4;
@@ -177,6 +189,7 @@ let shouldFocusOpenedExplorerPoint = false;
 let shouldRevealExplorerAxisSelection = false;
 let lastRenderedExplorerTableSeries = null;
 let lastRenderedExplorerSelectedUnit = null;
+let lastRenderedExplorerParentPaths = new Set();
 // The exact state object last passed to renderExplorer - used only to tell
 // the store producing a new state with nothing but peerDisplayMode different
 // (see isExplorerTableUnaffectedByStateChange) apart from a local UI action
@@ -188,7 +201,14 @@ let explorerCellRanges = [];
 let explorerCellRangePreview = null;
 let explorerQueryPoints = [];
 let suppressNextExplorerRowClick = false;
-let explorerContextTopic = "";
+let explorerContextTopic = EXPLORER_CONTEXT_TOPICS.has(initialExplorerContext) ? initialExplorerContext : "";
+let explorerSelectionDescriptionExpanded = false;
+const explorerSharedGeography = {
+  selectedZCode: "",
+  expandedPaths: new Set(),
+  treeViewMode: null,
+  defaultExpandedPathsInitialized: false
+};
 let explorerRatioPopover = null;
 let explorerRatioPopoverHideTimer = 0;
 let explorerRatioPopoverBadge = null;
@@ -220,6 +240,7 @@ let pendingExplorerCellRefPeekCodes = null;
 // building - or even computing - every row at once. No infinite scroll here
 // on purpose: a page always caps at exactly this many rows, never more.
 const EXPLORER_KRI_PAGE_SIZE = 20;
+const EXPLORER_GEOGRAPHY_PAGE_SIZE = 20;
 let explorerKriPageIndex = 0;
 // Identifies the current row set (template/dataset/JST/search) so a
 // genuinely new list resets back to the first page, while re-rendering the
@@ -229,6 +250,9 @@ let explorerKriPageResetKey = "";
 // before building the series (see renderExplorer), read by
 // createExplorerKriPaginationFoot to show "Page X of Y".
 let explorerKriTotalMatchCount = 0;
+let explorerGeographyPageIndex = 0;
+let explorerGeographyPageResetKey = "";
+let explorerGeographyTotalMatchCount = 0;
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
@@ -278,6 +302,7 @@ const elements = {
   explorerTable: document.querySelector("#explorer-table"),
   explorerTableWrap: document.querySelector(".metric-table-wrap"),
   explorerKriPagination: document.querySelector("#explorer-kri-pagination"),
+  explorerGeographyPagination: document.querySelector("#explorer-geography-pagination"),
   explorerTemplateControl: document.querySelector("[data-explorer-template-control]"),
   unitSelect: document.querySelector("#unit-select")
 };
@@ -289,6 +314,9 @@ export function wireExplorerUi(actions, rerender) {
   updateSelectedJst = actions.updateSelectedJst;
   updateSelectedUnit = actions.updateSelectedUnit;
   updatePeerDisplayMode = actions.updatePeerDisplayMode;
+  elements.explorerActiveFilters?.addEventListener("click", (event) => {
+    if (event.target.closest("button")) setExplorerSelectionDescriptionExpanded(false);
+  }, { capture: true });
   elements.globalReferenceSelect?.addEventListener("change", (event) => {
     setExplorerHeaderReference(event.target.value);
   });
@@ -306,6 +334,7 @@ export function wireExplorerUi(actions, rerender) {
     });
   });
   elements.explorerTemplateControl?.addEventListener("click", () => {
+    setExplorerSelectionDescriptionExpanded(false);
     const openingTemplatePanel = explorerContextDetailCollapsed || explorerContextTopic !== "";
     revealExplorerContextDetail();
     explorerContextTopic = "";
@@ -338,11 +367,6 @@ export function wireExplorerUi(actions, rerender) {
     }
 
     if (event.target.closest("td.is-xy-impossible, td.is-taxonomy-unavailable")) return;
-
-    if (event.target.closest("[data-explorer-tree-view-toggle]")) {
-      toggleExplorerTreeView();
-      return;
-    }
 
     const toggle = event.target.closest("[data-toggle-path]");
     if (toggle) {
@@ -411,6 +435,11 @@ export function wireExplorerUi(actions, rerender) {
     selectExplorerRow(row.dataset.pointCode, { shouldToggle: true, shouldFocus: true });
   });
   document.addEventListener("pointerup", finishExplorerCellRangeSelection, true);
+  document.addEventListener("pointerdown", (event) => {
+    if ((!explorerGeographySearch && !explorerGeographySearchDraft)
+      || event.target.closest(".explorer-geography-search-control, .explorer-geography-country-badge")) return;
+    clearExplorerCountrySearch();
+  }, true);
   elements.explorerExcelExport?.addEventListener("click", exportVisibleExplorerTable);
   elements.explorerQueryButton?.addEventListener("click", openExplorerQuery);
   if (elements.explorerAdvancedSearch) {
@@ -513,7 +542,8 @@ function ensureActiveExplorerTemplate(state) {
   const templates = getExplorerTemplates(state);
   if (templates.length === 0) return;
 
-  if (!hasAppliedUrlTemplate) {
+  const isInitialTemplate = !hasAppliedUrlTemplate;
+  if (isInitialTemplate) {
     hasAppliedUrlTemplate = true;
     const urlTemplateId = findMatchingExplorerTemplateId(templates, getUrlTemplateParam());
     if (urlTemplateId) activeExplorerTemplateId = urlTemplateId;
@@ -530,6 +560,12 @@ function ensureActiveExplorerTemplate(state) {
   }
 
   applyPendingUrlExplorerSelection(getActiveExplorerContext());
+  if (isInitialTemplate && explorerGeographySearch && getActiveExplorerGeographyAxis()) {
+    const context = getActiveExplorerContext();
+    context.activeAxis = "z";
+    context.selectedZCode = normalizeAxisCode(explorerGeographySearch, "z");
+    shouldRevealExplorerAxisSelection = true;
+  }
 }
 
 function applyPendingUrlExplorerSelection(context) {
@@ -1013,7 +1049,28 @@ function getExplorerContextForTemplate(tableId) {
   const contextKey = tableId || EXPLORER_TARGET.tableId;
 
   if (!explorerTemplateContexts.has(contextKey)) {
-    explorerTemplateContexts.set(contextKey, createExplorerTemplateContext());
+    const context = createExplorerTemplateContext();
+    if (EXPLORER_GEOGRAPHIC_TEMPLATES.has(contextKey)) {
+      // These templates use the same fixed country axis. Share both the
+      // selected country and its grouping state, while keeping X/Y local.
+      Object.defineProperty(context, "selectedZCode", {
+        get: () => explorerSharedGeography.selectedZCode,
+        set: (code) => { explorerSharedGeography.selectedZCode = code; },
+        enumerable: true
+      });
+      context.expandedPathsByAxis.z = explorerSharedGeography.expandedPaths;
+      Object.defineProperty(context.treeViewModeByAxis, "z", {
+        get: () => explorerSharedGeography.treeViewMode,
+        set: (mode) => { explorerSharedGeography.treeViewMode = mode; },
+        enumerable: true
+      });
+      Object.defineProperty(context.defaultExpandedPathsInitializedByAxis, "z", {
+        get: () => explorerSharedGeography.defaultExpandedPathsInitialized,
+        set: (initialized) => { explorerSharedGeography.defaultExpandedPathsInitialized = initialized; },
+        enumerable: true
+      });
+    }
+    explorerTemplateContexts.set(contextKey, context);
   }
 
   return explorerTemplateContexts.get(contextKey);
@@ -1066,7 +1123,11 @@ function ensureExplorerSelections(state) {
 function ensureExplorerTemplateSelections(state, template) {
   const templateId = template?.id ?? EXPLORER_TARGET.tableId;
   const tableId = template?.tableId ?? EXPLORER_TARGET.tableId;
+  const isGeographicTemplate = EXPLORER_GEOGRAPHIC_TEMPLATES.has(tableId);
   const context = getExplorerContextForTemplate(templateId);
+  const normalizedZCode = normalizeGeographicCountryCode(tableId, context.selectedZCode);
+  const normalizedLegacySelection = normalizedZCode !== context.selectedZCode;
+  if (normalizedLegacySelection) context.selectedZCode = normalizedZCode;
   // Detected once, ever, from whichever template happens to load first -
   // not per template, since the frequency is now a single shared choice.
   if (!explorerHasDetectedEvolutionFrequency) {
@@ -1085,7 +1146,7 @@ function ensureExplorerTemplateSelections(state, template) {
   const historicalAxisCodes = hasHistoricalSelection
     ? getExplorerTemporalHistoricalAxisCodes(state, tableId)
     : null;
-  let selectionChanged = false;
+  let selectionChanged = normalizedLegacySelection;
 
   if (!context.selectedYCode || (!yCodes.includes(context.selectedYCode) && !historicalAxisCodes?.y.has(context.selectedYCode))) {
     context.selectedYCode = yCodes[0] ?? "";
@@ -1105,7 +1166,7 @@ function ensureExplorerTemplateSelections(state, template) {
     selectionChanged = true;
   }
 
-  if (zCodes.length === 0 && context.selectedZCode && !historicalAxisCodes?.z.has(context.selectedZCode)) {
+  if (!isGeographicTemplate && zCodes.length === 0 && context.selectedZCode && !historicalAxisCodes?.z.has(context.selectedZCode)) {
     context.selectedZCode = "";
     selectionChanged = true;
   }
@@ -1171,7 +1232,7 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
   if (axisOptions.y.codes.length > 0) {
     context.selectedYCode = normalizeAxisCode(firstRow[indexes.yAxisRcCode], "y");
   }
-  if (axisOptions.z.codes.length > 0) {
+  if (axisOptions.z.codes.length > 0 && !EXPLORER_GEOGRAPHIC_TEMPLATES.has(tableId)) {
     context.selectedZCode = normalizeAxisCode(firstRow[indexes.zAxisRcCode], "z");
   }
 }
@@ -1206,14 +1267,17 @@ function setExplorerContextDetailCollapsed(collapsed) {
   }
 
   explorerContextDetailCollapsed = collapsed;
+  updateUrlExplorerContextPanel();
+  syncExplorerContextDetailVisibility();
+}
+
+function updateUrlExplorerContextPanel() {
+  const value = explorerContextDetailCollapsed ? "collapsed" : explorerContextTopic;
   const url = createUrlState();
-  // Expanded is the default now (see the module-level initializer above),
-  // so it's collapsed that needs to be the one written to the URL - an
-  // explicit user choice to hide the panel should survive a reload.
-  if (collapsed) url.searchParams.set(EXPLORER_CONTEXT_URL_PARAM, "collapsed");
+  if ((url.searchParams.get(EXPLORER_CONTEXT_URL_PARAM) ?? "") === value) return;
+  if (value) url.searchParams.set(EXPLORER_CONTEXT_URL_PARAM, value);
   else url.searchParams.delete(EXPLORER_CONTEXT_URL_PARAM);
   replaceUrlState(url);
-  syncExplorerContextDetailVisibility();
 }
 
 function syncExplorerContextDetailVisibility() {
@@ -1363,6 +1427,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   // series first so getExplorerSelectedPointMetrics doesn't briefly show
   // stale numbers from whatever was rendered before this call.
   lastRenderedExplorerTableSeries = null;
+  lastRenderedExplorerParentPaths = new Set();
   if (!deferChromeUntilTable) refreshExplorerSelectionChrome(state);
 
   // Rendering only a page's worth of rows (see renderExplorerTable) doesn't
@@ -1393,6 +1458,62 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
     kriOnlyCodes = new Set(matchingCodes.slice(pageStart, pageStart + EXPLORER_KRI_PAGE_SIZE));
   }
 
+  // Country order is determined from metadata or one latest-date value per
+  // country. Either way, calculate full time series only for the visible page.
+  const isGeographyPaginated = context.activeAxis === getActiveExplorerGeographyAxis();
+  let geographyOnlyCodes;
+  let geographyOrderedCodes;
+  let geographyPageGroupLabels;
+  if (isGeographyPaginated) {
+    const geographyResetKey = [
+      activeExplorerTemplateId, state.activeDatasetId, state.selectedJst,
+      explorerGeographyLayout, explorerAdvancedSearchQuery,
+      explorerGeographyLayout === "relevance" ? context.selectedXCode : "",
+      explorerGeographyLayout === "relevance" ? context.selectedYCode : ""
+    ].join(":");
+    if (geographyResetKey !== explorerGeographyPageResetKey) {
+      explorerGeographyPageResetKey = geographyResetKey;
+      explorerGeographyPageIndex = 0;
+    }
+    const matchingCodes = getExplorerGeographyMatchingCodesInOrder(state, template, context);
+    geographyOrderedCodes = matchingCodes;
+    if (isExplorerGeographyGroupedLayout()) {
+      const allCountries = getExplorerGeographyCountries(state);
+      const countryByCode = new Map(allCountries.map((country) => [country.code, country]));
+      const groups = groupExplorerCountries(matchingCodes.map((code) => countryByCode.get(code)).filter(Boolean));
+      const expandedLabels = getExplorerGeographyExpandedGroupLabels(context, groups, groupExplorerCountries(allCountries));
+      if ((shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection) && context.selectedZCode) {
+        const selectedGroup = groups.find((group) => group.countries.some((country) => country.code === context.selectedZCode));
+        if (selectedGroup && !expandedLabels.has(selectedGroup.label)) {
+          context.treeViewModeByAxis.z = null;
+          context.defaultExpandedPathsInitializedByAxis.z = true;
+          context.expandedPathsByAxis.z.add(normalizeHierarchyPath(selectedGroup.label));
+          expandedLabels.add(selectedGroup.label);
+        }
+      }
+      const selectedIndex = expandedLabels.size && (shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection)
+        ? groups.flatMap((group) => expandedLabels.has(group.label) ? group.countries.map((country) => country.code) : [])
+          .indexOf(context.selectedZCode)
+        : -1;
+      if (selectedIndex >= 0) explorerGeographyPageIndex = Math.floor(selectedIndex / EXPLORER_GEOGRAPHY_PAGE_SIZE);
+      const plan = buildGeographyPagePlan(groups, expandedLabels, explorerGeographyPageIndex, EXPLORER_GEOGRAPHY_PAGE_SIZE);
+      explorerGeographyPageIndex = plan.pageIndex;
+      explorerGeographyTotalMatchCount = plan.expandedCodes.length;
+      geographyOnlyCodes = new Set(plan.pageCodes);
+      geographyPageGroupLabels = plan.pageGroupLabels;
+    } else {
+      explorerGeographyTotalMatchCount = matchingCodes.length;
+      if ((shouldFocusOpenedExplorerPoint || shouldRevealExplorerAxisSelection) && context.selectedZCode) {
+        const selectedIndex = matchingCodes.indexOf(context.selectedZCode);
+        if (selectedIndex !== -1) explorerGeographyPageIndex = Math.floor(selectedIndex / EXPLORER_GEOGRAPHY_PAGE_SIZE);
+      }
+      const pageCount = Math.max(1, Math.ceil(matchingCodes.length / EXPLORER_GEOGRAPHY_PAGE_SIZE));
+      explorerGeographyPageIndex = Math.min(explorerGeographyPageIndex, pageCount - 1);
+      const pageStart = explorerGeographyPageIndex * EXPLORER_GEOGRAPHY_PAGE_SIZE;
+      geographyOnlyCodes = new Set(matchingCodes.slice(pageStart, pageStart + EXPLORER_GEOGRAPHY_PAGE_SIZE));
+    }
+  }
+
   const tableSeries = isExplorerXYView()
     ? buildExplorerXYSeries(state, {
       axis: context.activeAxis, tableId: template?.tableId, yConfigTableId: template?.id,
@@ -1401,7 +1522,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
     })
     : buildExplorerAxisSeries(state, {
     axis: context.activeAxis,
-    onlyCodes: kriOnlyCodes,
+    onlyCodes: kriOnlyCodes ?? geographyOnlyCodes,
     selectedXCode: context.selectedXCode,
     selectedYCode: context.selectedYCode,
     selectedZCode: context.selectedZCode,
@@ -1411,7 +1532,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
     yConfigTableId: template?.id
   });
   const searchedTableSeries = filterExplorerSeriesByAdvancedSearch(tableSeries, state, template?.id, context.activeAxis);
-  const geographicTableSeries = searchedTableSeries.xy ? searchedTableSeries : applyExplorerGeographyPresentation(searchedTableSeries, state);
+  const geographicTableSeries = searchedTableSeries.xy ? searchedTableSeries : applyExplorerGeographyPresentation(searchedTableSeries, state, geographyOrderedCodes, geographyPageGroupLabels);
   let displayedTableSeries = buildExplorerEvolutionSeries(geographicTableSeries, state);
   displayedTableSeries = buildExplorerTemporalTaxonomySeries(displayedTableSeries, state, {
     axis: context.activeAxis,
@@ -1424,6 +1545,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
     templateSelections: getExplorerTemplateSelections(),
     yConfigTableId: template?.id
   });
+  displayedTableSeries = addExplorerGeographyGroupRows(displayedTableSeries, state, template);
   explorerXYHeaderObserver?.disconnect();
   elements.explorerTable.replaceChildren();
   if (elements.explorerExcelExport) {
@@ -1452,6 +1574,7 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
       renderExplorerSelectionPane();
     }
     if (elements.explorerKriPagination) elements.explorerKriPagination.hidden = true;
+    if (elements.explorerGeographyPagination) elements.explorerGeographyPagination.hidden = true;
     return;
   }
 
@@ -1796,8 +1919,13 @@ function renderExplorerTable(series, selectedUnit) {
   const tableRows = series.rows.map(normalizeExplorerSeriesRow);
   const displayRows = buildExplorerDisplayRows(tableRows);
   const contributionBase = getExplorerContributionBase(displayRows, activeAxis);
-  const propagatedContribution = isXY ? null : getExplorerPropagatedContribution(activeAxis);
+  const propagatedContribution = getExplorerPropagatedContribution(activeAxis);
+  const xyPropagatedBaseValues = isXY && propagatedContribution && propagatedContribution.axis !== activeAxis
+    ? createExplorerXYPropagatedBaseValues(series, propagatedContribution)
+    : null;
   const parentPaths = getParentPaths(tableRows);
+  series.geographyGroupLabels?.forEach((label) => parentPaths.add(normalizeHierarchyPath(label)));
+  lastRenderedExplorerParentPaths = parentPaths;
   const nodePaths = getExplicitPaths(displayRows);
   const axisImpossibleByPath = isXY ? new Map() : getExplorerAxisImpossiblePaths(displayRows, activeAxis, parentPaths);
   const dateFocusPrimaryCells = [];
@@ -1822,10 +1950,8 @@ function renderExplorerTable(series, selectedUnit) {
     !hasCollapsedExplicitAncestor(normalizeHierarchyPath(seriesRow.hierarchyPath), nodePaths)
   ));
 
-  // See EXPLORER_KRI_PAGE_SIZE - every other template still renders its
-  // full (lazily-collapsed) row list exactly as before. renderExplorer
-  // already only fetched this page's rows (see its kriOnlyCodes), so
-  // visibleDisplayRows is the page as-is here - nothing left to slice.
+  // KRI and geographic country views already fetched only their current
+  // page's values, so there is nothing to slice after tree expansion.
   const isKriRowAxis = activeAxis === "y" && getActiveExplorerTemplate()?.tableId === "KRI";
   elements.explorerTable.classList.toggle("is-kri-row-axis", isKriRowAxis);
 
@@ -1845,7 +1971,6 @@ function renderExplorerTable(series, selectedUnit) {
     taxonomyStatus.textContent = `Taxonomy framework ${series.mainTaxonomyFramework}`;
     descriptionHeader.append(taxonomyStatus);
   }
-  if (parentPaths.size) descriptionHeader.append(createExplorerTreeViewToggle(parentPaths));
   headerRow.append(descriptionHeader);
 
   const codeHeader = document.createElement("th");
@@ -1855,6 +1980,11 @@ function renderExplorerTable(series, selectedUnit) {
   codeHeader.textContent = isXY ? "Code" : "";
   codeHeader.dataset.explorerExportColumn = "true";
   codeHeader.dataset.explorerExportLabel = "Code";
+  if (parentPaths.size) {
+    const levelControl = createExplorerTreeLevelControl();
+    updateExplorerTreeLevelControl(levelControl, parentPaths);
+    codeHeader.append(levelControl);
+  }
   if (!isDateFocus) codeHeader.rowSpan = 2;
   headerRow.append(codeHeader);
 
@@ -1892,7 +2022,9 @@ function renderExplorerTable(series, selectedUnit) {
     const valueRow = document.createElement("tr");
     const normalizedPath = normalizeHierarchyPath(seriesRow.hierarchyPath);
     const isParent = parentPaths.has(normalizedPath);
-    const contributionValues = getExplorerContributionBaseValues(seriesRow, normalizedPath, activeAxis, contributionBase, propagatedContribution);
+    const contributionValues = getExplorerContributionBaseValues(
+      seriesRow, normalizedPath, activeAxis, contributionBase, isXY ? null : propagatedContribution
+    ) ?? xyPropagatedBaseValues?.(seriesRow);
     const isContributionChild = Boolean(contributionValues);
     const isAxisImpossible = Boolean(axisImpossibleByPath.get(normalizedPath));
 
@@ -1983,14 +2115,15 @@ function renderExplorerTable(series, selectedUnit) {
         valueRow.append(td);
         return;
       }
+      const isContributionCell = isContributionChild && (!isXY || reversedBaseValues[index]?.applies !== false);
       let contributionValue = isContributionFocus
         ? point.value
-        : isContributionChild
+        : isContributionCell
         ? getExplorerContributionRatio(point.value, reversedBaseValues[index]?.value)
         : null;
-      // A missing, forbidden or zero denominator must never display a raw
-      // amount among XY ratios. Keep columns aligned in their original order.
-      if (isXY && isContributionChild &&
+      // A missing, forbidden or zero denominator must never fall back to a
+      // raw amount while this cell is meant to display a ratio.
+      if (isContributionCell &&
           (reversedBaseValues[index]?.isImpossible || !Number.isFinite(contributionValue))) {
         contributionValue = NaN;
       }
@@ -2073,6 +2206,7 @@ function renderExplorerTable(series, selectedUnit) {
   }
   applyExplorerTreeState(parentPaths, nodePaths);
   renderExplorerKriPaginationBar(isKriRowAxis);
+  renderExplorerGeographyPaginationBar(activeAxis === getActiveExplorerGeographyAxis());
 }
 
 function renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader) {
@@ -2135,27 +2269,52 @@ function renderExplorerKriPaginationBar(isKriRowAxis) {
   elements.explorerKriPagination.hidden = !isKriRowAxis;
   if (!isKriRowAxis) return;
 
-  const pageCount = Math.max(1, Math.ceil(explorerKriTotalMatchCount / EXPLORER_KRI_PAGE_SIZE));
+  renderExplorerPaginationBar(
+    elements.explorerKriPagination,
+    explorerKriPageIndex,
+    explorerKriTotalMatchCount,
+    EXPLORER_KRI_PAGE_SIZE,
+    changeExplorerKriPage
+  );
+}
+
+function renderExplorerGeographyPaginationBar(isGeographyPaginated) {
+  if (!elements.explorerGeographyPagination) return;
+  const hasMultiplePages = explorerGeographyTotalMatchCount > EXPLORER_GEOGRAPHY_PAGE_SIZE;
+  elements.explorerGeographyPagination.hidden = !isGeographyPaginated || !hasMultiplePages;
+  if (elements.explorerGeographyPagination.hidden) return;
+
+  renderExplorerPaginationBar(
+    elements.explorerGeographyPagination,
+    explorerGeographyPageIndex,
+    explorerGeographyTotalMatchCount,
+    EXPLORER_GEOGRAPHY_PAGE_SIZE,
+    changeExplorerGeographyPage
+  );
+}
+
+function renderExplorerPaginationBar(container, pageIndex, totalCount, pageSize, onChange) {
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const previousButton = document.createElement("button");
   previousButton.type = "button";
   previousButton.className = "explorer-kri-pagination-button";
   previousButton.textContent = "‹ Previous";
-  previousButton.disabled = explorerKriPageIndex <= 0;
-  previousButton.addEventListener("click", () => changeExplorerKriPage(explorerKriPageIndex - 1));
+  previousButton.disabled = pageIndex <= 0;
+  previousButton.addEventListener("click", () => onChange(pageIndex - 1));
 
   const label = document.createElement("span");
   label.className = "explorer-kri-pagination-label";
-  label.textContent = `Page ${explorerKriPageIndex + 1} of ${pageCount}`;
+  label.textContent = `Page ${pageIndex + 1} of ${pageCount}`;
 
   const nextButton = document.createElement("button");
   nextButton.type = "button";
   nextButton.className = "explorer-kri-pagination-button";
   nextButton.textContent = "Next ›";
-  nextButton.disabled = explorerKriPageIndex >= pageCount - 1;
-  nextButton.addEventListener("click", () => changeExplorerKriPage(explorerKriPageIndex + 1));
+  nextButton.disabled = pageIndex >= pageCount - 1;
+  nextButton.addEventListener("click", () => onChange(pageIndex + 1));
 
-  elements.explorerKriPagination.replaceChildren(previousButton, label, nextButton);
+  container.replaceChildren(previousButton, label, nextButton);
 }
 
 function changeExplorerKriPage(pageIndex) {
@@ -2166,6 +2325,17 @@ function changeExplorerKriPage(pageIndex) {
   // A new page reads from the top, not wherever the previous one happened
   // to be scrolled to.
   getActiveExplorerContext().scrollByAxis.y = { left: 0, top: 0 };
+  rerenderApp(state);
+}
+
+function changeExplorerGeographyPage(pageIndex) {
+  const state = getLatestState();
+  if (!state) return;
+
+  explorerGeographyPageIndex = Math.max(0, pageIndex);
+  shouldFocusOpenedExplorerPoint = false;
+  shouldRevealExplorerAxisSelection = false;
+  getActiveExplorerContext().scrollByAxis.z = { left: 0, top: 0 };
   rerenderApp(state);
 }
 
@@ -2341,6 +2511,41 @@ function getExplorerContributionBaseValues(seriesRow, normalizedPath, activeAxis
       ? null
       : rows.reduce((total, row) => total + parseNumericValue(row[dateColumn.index]), 0)
   }));
+}
+
+// XY always shows Y rows by X columns. A denominator chosen on X or Z must
+// therefore be aligned to those cells rather than to reference-date columns.
+// Build its matrix once per render, including columns hidden by a search.
+function createExplorerXYPropagatedBaseValues(series, contribution) {
+  if (!series.xy || contribution.enabled === false || !["x", "z"].includes(contribution.axis)) return null;
+  const state = getLatestState();
+  const template = getActiveExplorerTemplate();
+  if (!state || !series.reference || !template) return null;
+  const context = getActiveExplorerContext();
+  const baseSeries = buildExplorerXYSeries(state, {
+    tableId: contribution.tableId || template.tableId,
+    yConfigTableId: template.id,
+    selectedZCode: contribution.axis === "z" ? contribution.baseCode : context.selectedZCode,
+    referenceLabel: series.reference.label
+  });
+  const baseColumnByCode = new Map(baseSeries.dateColumns.map((column, index) => [column.code, index]));
+  const baseRowByCode = new Map(baseSeries.rows.map((row) => [row.code, row]));
+  const xBaseIndex = baseColumnByCode.get(contribution.baseCode);
+  const xBase = { path: contribution.basePath, scope: contribution.scope,
+    numeratorCode: contribution.numeratorCode, type: contribution.type };
+
+  return (seriesRow) => {
+    if (seriesRow.isVirtual) return null;
+    const baseRow = baseRowByCode.get(seriesRow.code);
+    return series.dateColumns.map((column) => {
+      const applies = contribution.axis === "z" || isExplorerContributionChild(
+        normalizeHierarchyPath(column.hierarchyPath), xBase, column.code
+      );
+      const baseIndex = contribution.axis === "x" ? xBaseIndex : baseColumnByCode.get(column.code);
+      const point = baseIndex === undefined ? null : baseRow?.values?.[baseIndex];
+      return { value: point?.value ?? null, isImpossible: Boolean(point?.isImpossible), applies };
+    });
+  };
 }
 
 function getExplorerDenominatorValues(base, activeAxis, axisCode) {
@@ -2579,14 +2784,16 @@ function getExplorerPropagatedContribution(activeAxis) {
     const base = context.contributionBaseByAxis[axis];
     if (!base?.path || (!base.pointCode && !base.selections)) continue;
 
-    const selectedCode = axis === activeAxis
-      ? getSelectedExplorerCodeForActiveAxis()
-      : getSelectedExplorerCodeForAxis(context, axis);
+    // In XY the selected tab may be X while the matrix still renders Y rows;
+    // read each axis's own code instead of assuming the rendered axis matches.
+    const selectedCode = getSelectedExplorerCodeForAxis(context, axis);
     const selectedPath = getExplorerAxisCodePath(axis, selectedCode);
     const basePath = normalizeHierarchyPath(base.path);
 
     if (base.scope === "selection") {
-      if (axis !== activeAxis || !base.numeratorCode || String(selectedCode ?? "") !== String(base.numeratorCode)) continue;
+      // A selection-scoped ratio follows its numerator when another axis is
+      // browsed. Only changing the original axis selection ends its scope.
+      if (!base.numeratorCode || String(selectedCode ?? "") !== String(base.numeratorCode)) continue;
     } else if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) continue;
 
     return {
@@ -2697,7 +2904,9 @@ function clearExplorerContributionBase(axis = getActiveExplorerContext().activeA
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
-function buildExplorerBenchmark(jstCodes = null) {
+// The chart needs the full history; the institution picker needs only its
+// currently displayed reference date. Keep both on the same value path.
+function buildExplorerBenchmark(jstCodes = null, { onlyDateLabel = null } = {}) {
   const state = getLatestState();
   const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
   const context = getActiveExplorerContext();
@@ -2712,10 +2921,13 @@ function buildExplorerBenchmark(jstCodes = null) {
   // line saw-tooth instead of just following the populated quarters, the
   // same as the table itself already does.
   const dates = indexes ? getExplorerTemplateReferenceDates(state, tableId) : [];
+  const requestedDates = onlyDateLabel === null
+    ? dates
+    : dates.filter((date) => date.label === onlyDateLabel);
   const format = getBenchmarkValueFormat(state, tableId, context);
   const label = getBenchmarkLabel(state, tableId, context, activeAxis, getActiveExplorerTemplate()?.label);
 
-  if (!state || !indexes || dates.length === 0) {
+  if (!state || !indexes || requestedDates.length === 0) {
     return { dates: [], format, isContribution: false, label, series: [] };
   }
 
@@ -2728,7 +2940,7 @@ function buildExplorerBenchmark(jstCodes = null) {
 
     return {
       jstCode,
-      values: dates.map((dateColumn) => ({
+      values: requestedDates.map((dateColumn) => ({
         date: dateColumn.date,
         label: dateColumn.label,
         value: rows.length === 0
@@ -2739,7 +2951,7 @@ function buildExplorerBenchmark(jstCodes = null) {
   }).filter((item) => item.values.some((point) => point.value !== null));
 
   return {
-    dates,
+    dates: requestedDates,
     format,
     isContribution: Boolean(contribution),
     label: contribution ? `${label} / ${contribution.label}` : label,
@@ -2857,27 +3069,6 @@ function renderExplorerActiveFilters(state) {
   });
   benchmarkChip.append(benchmarkToggle);
 
-  const descriptionChip = document.createElement("span");
-  descriptionChip.className = "cost-of-risk-filter-chip explorer-filter-chip-description";
-  descriptionChip.classList.toggle("is-open", explorerContextTopic === "description");
-  const descriptionToggle = document.createElement("button");
-  descriptionToggle.type = "button";
-  descriptionToggle.className = "cost-of-risk-filter-chip-toggle";
-  descriptionToggle.setAttribute("aria-expanded", String(explorerContextTopic === "description"));
-  descriptionToggle.setAttribute("aria-controls", "explorer-context-detail");
-  descriptionToggle.setAttribute("aria-label", "Show selection description");
-  const descriptionLabel = document.createElement("span");
-  descriptionLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  descriptionLabel.textContent = "Description";
-  descriptionToggle.append(descriptionLabel);
-  descriptionToggle.addEventListener("click", () => {
-    explorerContextTopic = "description";
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
-  });
-  descriptionChip.append(descriptionToggle);
-
   const kriFormulaChip = createExplorerKriFormulaFilterChip();
 
   const chips = [
@@ -2885,13 +3076,12 @@ function renderExplorerActiveFilters(state) {
     dateChip,
     unitChip
   ];
-  if (geographyChip) chips.push(geographyChip);
   chips.push(
     displayChip,
-    benchmarkChip,
-    descriptionChip
+    benchmarkChip
   );
   if (kriFormulaChip) chips.push(kriFormulaChip);
+  if (geographyChip) chips.push(geographyChip);
   elements.explorerActiveFilters.replaceChildren(...chips);
 }
 
@@ -2940,7 +3130,7 @@ function createExplorerGeographyFilterChip() {
   toggle.setAttribute("aria-label", "Change geography layout");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
-  label.textContent = option.label;
+  label.textContent = `Geography: ${option.label}`;
   toggle.append(label);
   toggle.addEventListener("click", () => {
     explorerContextTopic = "geography";
@@ -3013,17 +3203,9 @@ function syncExplorerTaxonomyForView(state) {
 }
 
 function getLatestExplorerReferenceDateForTemplate(state, tableId) {
-  const references = getReferenceColumns(state?.columns ?? []);
-  const tableIndex = state?.columns?.indexOf("table_id") ?? -1;
-  if (tableIndex < 0) return references.at(-1)?.name ?? "";
-  const rows = state.rows ?? [];
-  for (let referenceIndex = references.length - 1; referenceIndex >= 0; referenceIndex -= 1) {
-    const reference = references[referenceIndex];
-    if (rows.some((row) => row[tableIndex] === tableId && String(row[reference.index] ?? "").trim() !== "")) {
-      return reference.name;
-    }
-  }
-  return references.at(-1)?.name ?? "";
+  return getExplorerTemplateReferenceDates(state, tableId).at(-1)?.name
+    ?? getReferenceColumns(state?.columns ?? []).at(-1)?.name
+    ?? "";
 }
 
 function getSelectedExplorerReference(state = getLatestState()) {
@@ -3169,14 +3351,14 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
   const axisCoordinate = `${axis}_axis_rc_code`;
   const mainCodeSets = getCodesByCoordinate(mainFramework);
   const mainCodes = mainCodeSets?.get(axisCoordinate) ?? new Set();
-  const mainCurrencyCodes = mainCodeSets?.get("z_axis_rc_code") ?? new Set();
+  const mainZCodes = mainCodeSets?.get("z_axis_rc_code") ?? new Set();
   // Older DPM workbooks leave open currency axes implicit. Their missing Z
   // members do not mean that reported currencies ceased to exist.
-  const hasOpenCurrencyAxis = mainCurrencyCodes.has("EUR") && mainCurrencyCodes.has("qx46");
+  const hasOpenCurrencyAxis = mainZCodes.has("EUR") && mainZCodes.has("qx46");
   const hasCodeAtDate = (codeSets, coordinate, code) => {
     if (coordinate === "z_axis_rc_code") {
       if (code === EXPLORER_ALL_CURRENCIES_CODE) return true;
-      if (hasOpenCurrencyAxis && mainCurrencyCodes.has(code)) return true;
+      if (hasOpenCurrencyAxis && mainZCodes.has(code)) return true;
     }
     return codeSets.get(coordinate)?.has(code) ?? false;
   };
@@ -3354,6 +3536,7 @@ function renderExplorerAxisTabs() {
   const tableId = activeTemplate?.tableId ?? EXPLORER_TARGET.tableId;
   const state = getLatestState() ?? { columns: [], rows: [], explorerPoints: [] };
   const axisOptions = getExplorerAxisOptions(state, tableId, activeTemplate?.id);
+  const ratioContribution = getExplorerPropagatedContribution(context.activeAxis);
   if (elements.explorerTemplateControl) {
     const showsTemplates = explorerContextTopic === "";
     elements.explorerTemplateControl.classList.toggle("is-panel-active", showsTemplates);
@@ -3365,14 +3548,13 @@ function renderExplorerAxisTabs() {
     const isActive = axis === activeAxis;
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     const isUnusedTabAxis = axis === "z" && (axisOptions.z?.codes?.length ?? 0) === 0;
-    const ratioContribution = isActive ? getExplorerPropagatedContribution(axis) : null;
     button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled", !isAvailable);
     button.disabled = !isAvailable;
     button.hidden = isUnusedTabAxis;
     button.setAttribute("aria-disabled", String(!isAvailable));
     button.setAttribute("aria-selected", String(isActive && isAvailable));
-    syncExplorerAxisRatioIndicator(button, ratioContribution);
+    syncExplorerAxisRatioIndicator(button, ratioContribution?.axis === axis ? ratioContribution : null);
   });
 
   Object.entries(elements.explorerAxisCaptions).forEach(([axis, element]) => {
@@ -3550,13 +3732,15 @@ function createExplorerTemplateCaption(activeTemplate) {
 function renderExplorerContextPanel(state) {
   if (!elements.explorerContextPanel) return;
 
-  if (explorerContextTopic) revealExplorerContextDetail();
-  else syncExplorerContextDetailVisibility();
-
   if (explorerContextTopic === "geography" && !getActiveExplorerGeographyAxis()) {
     explorerContextTopic = "";
     explorerGeographySearch = "";
+    explorerGeographySearchDraft = "";
   }
+
+  if (explorerContextTopic) revealExplorerContextDetail();
+  else syncExplorerContextDetailVisibility();
+  updateUrlExplorerContextPanel();
 
   syncExplorerBenchmarkPlacement();
   if (explorerContextTopic !== "benchmark-mode") {
@@ -3595,11 +3779,6 @@ function renderExplorerContextPanel(state) {
 
   if (explorerContextTopic === "benchmark-mode") {
     renderExplorerBenchmarkModePanel(state);
-    return;
-  }
-
-  if (explorerContextTopic === "description") {
-    renderExplorerDescriptionPanel();
     return;
   }
 
@@ -3723,7 +3902,25 @@ function renderExplorerSelectionPane() {
   if (elements.explorerContextSelection) {
     elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
   }
+  elements.explorerContextPanel?.classList.toggle("is-selection-description-expanded", explorerSelectionDescriptionExpanded);
   elements.explorerSelectionHistory?.replaceChildren(createExplorerSelectionHistoryControls());
+}
+
+function setExplorerSelectionDescriptionExpanded(expanded) {
+  if (!EXPLORER_SELECTION_DESCRIPTION_ENABLED) expanded = false;
+  if (explorerSelectionDescriptionExpanded === expanded) return;
+  explorerSelectionDescriptionExpanded = expanded;
+  const pane = elements.explorerContextSelection?.querySelector(".explorer-selection-summary-pane");
+  const detail = pane?.querySelector(".explorer-selection-summary-expanded-description");
+  const button = pane?.querySelector(".explorer-selection-summary-description-button");
+  if (expanded && detail && !detail.firstChild) detail.append(createExplorerDescriptionContent());
+  pane?.classList.toggle("is-description-expanded", expanded);
+  elements.explorerContextPanel?.classList.toggle("is-selection-description-expanded", expanded);
+  detail?.setAttribute("aria-hidden", String(!expanded));
+  button?.classList.toggle("is-active", expanded);
+  button?.setAttribute("aria-expanded", String(expanded));
+  button?.setAttribute("aria-label", expanded ? "Hide description" : "Show description");
+  if (button) button.title = expanded ? "Hide description" : "Show description";
 }
 
 // The only parts of the context panel whose content actually depends on
@@ -3737,9 +3934,7 @@ function renderExplorerSelectionPane() {
 function refreshExplorerSelectionDependentContextPanel(state) {
   renderExplorerSelectionPane();
 
-  if (explorerContextTopic === "description") {
-    renderExplorerDescriptionPanel();
-  } else if (explorerContextTopic === "reference-date") {
+  if (explorerContextTopic === "reference-date") {
     renderExplorerReferenceDatePanel(state);
   } else if (explorerContextTopic === "jst-code") {
     // Each row shows the selected point's value for that JST (see
@@ -3769,12 +3964,13 @@ function renderExplorerJstSelectionPanel(state) {
   title.className = "explorer-context-title";
   title.textContent = "Institution";
 
-  const benchmark = buildExplorerBenchmark(institutionOptions);
   const selectedReference = getSelectedExplorerReference(state);
-  const valuesByJst = new Map(benchmark.series.map((item) => {
-    const point = item.values.find((candidate) => candidate.label === selectedReference?.label) ?? null;
-    return [item.jstCode, point?.value ?? null];
-  }));
+  const benchmark = buildExplorerBenchmark(institutionOptions, {
+    onlyDateLabel: selectedReference?.label ?? ""
+  });
+  const valuesByJst = new Map(benchmark.series.map((item) => [
+    item.jstCode, item.values[0]?.value ?? null
+  ]));
   const list = document.createElement("div");
   list.className = "explorer-jst-selection-list";
   list.setAttribute("role", "listbox");
@@ -3972,6 +4168,10 @@ function renderExplorerGeographyPanel(state) {
     button.addEventListener("click", () => {
       if (explorerGeographyLayout === option.value) return;
       explorerGeographyLayout = option.value;
+      const context = getActiveExplorerContext();
+      context.expandedPathsByAxis.z.clear();
+      context.defaultExpandedPathsInitializedByAxis.z = false;
+      context.treeViewModeByAxis.z = null;
       updateUrlExplorerSelectionParams();
       saveExplorerScrollPosition();
       if (getLatestState()) rerenderApp(getLatestState());
@@ -4031,7 +4231,7 @@ function renderExplorerGeographyPanel(state) {
   search.addEventListener("blur", () => window.setTimeout(() => { suggestions.hidden = true; }, 0));
   searchControl.append(search, suggestions);
 
-  article.append(title, layoutList, searchControl);
+  article.append(searchControl);
   if (explorerGeographySearch) {
     const badge = document.createElement("span");
     badge.className = "explorer-geography-country-badge";
@@ -4040,13 +4240,14 @@ function renderExplorerGeographyPanel(state) {
     const clear = document.createElement("button");
     clear.type = "button";
     clear.className = "explorer-geography-country-badge-clear";
-    clear.setAttribute("aria-label", `Remove ${badgeLabel.textContent} country filter`);
-    clear.title = "Remove country filter";
+    clear.setAttribute("aria-label", `Clear ${badgeLabel.textContent} country search`);
+    clear.title = "Clear country search";
     clear.textContent = "×";
     clear.addEventListener("click", () => applyExplorerCountrySearch(null));
     badge.append(badgeLabel, clear);
     article.append(badge);
   }
+  article.append(title, layoutList);
   replaceExplorerContextDetail(article);
 }
 
@@ -4070,19 +4271,56 @@ function getExplorerCountrySearchMatches(countries, query) {
 }
 
 function applyExplorerCountrySearch(country) {
-  explorerGeographySearch = country?.code ?? "";
-  explorerGeographySearchDraft = country?.name ?? "";
-  updateUrlExplorerSelectionParams();
+  if (!country) {
+    clearExplorerCountrySearch();
+    return;
+  }
+  const context = getActiveExplorerContext();
   saveExplorerScrollPosition();
+  explorerGeographySearch = country.code;
+  explorerGeographySearchDraft = country.name;
+  context.activeAxis = "z";
+  context.selectedZCode = country.code;
+  hasInteractedWithExplorerSelection = true;
+  shouldRevealExplorerAxisSelection = true;
+  updateUrlExplorerSelectionParams();
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
-function applyExplorerGeographyPresentation(series, state) {
+function clearExplorerCountrySearch() {
+  if (!explorerGeographySearch && !explorerGeographySearchDraft) return;
+  explorerGeographySearch = "";
+  explorerGeographySearchDraft = "";
+  const search = elements.explorerContextDetail?.querySelector(".explorer-geography-search");
+  if (search) search.value = "";
+  const suggestions = elements.explorerContextDetail?.querySelector(".explorer-geography-suggestions");
+  if (suggestions) suggestions.hidden = true;
+  elements.explorerContextDetail?.querySelector(".explorer-geography-country-badge")?.remove();
+  updateUrlExplorerSelectionParams();
+}
+
+function isExplorerGeographyGroupedLayout() {
+  return explorerGeographyLayout === "euro-first" || explorerGeographyLayout === "world-regions";
+}
+
+function getExplorerGeographyExpandedGroupLabels(context, groups, allGroups = groups) {
+  const level = context.treeViewModeByAxis.z;
+  if (allGroups.length && !context.defaultExpandedPathsInitializedByAxis.z) {
+    if (getExplorerDefaultExpandDepthForAxis("z") > 0) allGroups.forEach(({ label }) =>
+      context.expandedPathsByAxis.z.add(normalizeHierarchyPath(label)));
+    context.defaultExpandedPathsInitializedByAxis.z = true;
+  }
+  return new Set(groups.filter(({ label }) => Number.isInteger(level)
+    ? level > 1
+    : context.expandedPathsByAxis.z.has(normalizeHierarchyPath(label)))
+    .map(({ label }) => label));
+}
+
+function applyExplorerGeographyPresentation(series, state, orderedCodes, pageGroupLabels) {
   const geographyAxis = getActiveExplorerGeographyAxis();
   if (!geographyAxis || getActiveExplorerAxis() !== geographyAxis) return series;
 
   const countriesByCode = new Map(getExplorerGeographyCountries(state).map((country) => [country.code, country]));
-  const selectedCountryCode = normalizeAxisCode(explorerGeographySearch, geographyAxis);
   const countries = series.rows.map((row) => {
     const code = normalizeAxisCode(row.code, geographyAxis);
     const country = countriesByCode.get(code) ?? { code, name: row.displayDescription || row.description || code };
@@ -4090,11 +4328,11 @@ function applyExplorerGeographyPresentation(series, state) {
       ...country,
       row
     };
-  }).filter((country) => !selectedCountryCode || country.code === selectedCountryCode);
+  });
   const groups = explorerGeographyLayout === "relevance"
-    ? [{ label: "", countries: getTopExplorerGeographyCountries(countries, series.dateColumns.length - 1) }]
+    ? [{ label: "", countries: sortExplorerGeographyCountriesByCodeOrder(countries, orderedCodes) }]
     : groupExplorerCountries(countries);
-  const groupedLayout = explorerGeographyLayout === "euro-first" || explorerGeographyLayout === "world-regions";
+  const groupedLayout = isExplorerGeographyGroupedLayout();
   const rows = groups.flatMap(({ label, countries: groupedCountries }) => groupedCountries.map((country) => ({
     ...country.row,
     description: groupedLayout ? `${label} > ${country.name}` : country.name,
@@ -4106,26 +4344,69 @@ function applyExplorerGeographyPresentation(series, state) {
   return {
     ...series,
     rows,
-    status: rows.length === 0 && selectedCountryCode ? "No country matches this selection." : series.status
+    geographyGroupLabels: groupedLayout ? pageGroupLabels ?? [] : []
   };
 }
 
-function getTopExplorerGeographyCountries(countries, latestDateIndex) {
-  let rankingDateIndex = latestDateIndex;
-  while (rankingDateIndex > 0 && !countries.some((country) => {
-    const value = country.row.values[rankingDateIndex]?.value;
-    return Number.isFinite(value) && value !== 0;
-  })) {
-    rankingDateIndex -= 1;
+function addExplorerGeographyGroupRows(series, state, template) {
+  const labels = series.geographyGroupLabels;
+  if (!labels?.length) return series;
+  const rowsByGroup = new Map(labels.map((label) => [label, []]));
+  const otherRows = [];
+  series.rows.forEach((row) => {
+    const groupRows = rowsByGroup.get(row.parentPath);
+    if (groupRows) groupRows.push(row);
+    else otherRows.push(row);
+  });
+  const emptyValues = series.dateColumns.map((column) => ({
+    date: column.date, label: column.label, value: null
+  }));
+  const rows = labels.flatMap((label) => [
+    createVirtualExplorerRow(label, label, 0, emptyValues),
+    ...rowsByGroup.get(label)
+  ]);
+  return {
+    ...series,
+    rows: [...rows, ...otherRows],
+    mainTaxonomyFramework: series.mainTaxonomyFramework
+      || state.selectedTaxonomiesByTemplate?.[template?.tableId] || ""
+  };
+}
+
+function sortExplorerGeographyCountriesByCodeOrder(countries, orderedCodes = []) {
+  const positionByCode = new Map(orderedCodes.map((code, index) => [code, index]));
+  return [...countries].sort((left, right) =>
+    (positionByCode.get(left.code) ?? Infinity) - (positionByCode.get(right.code) ?? Infinity));
+}
+
+function getExplorerGeographyMatchingCodesInOrder(state, template, context) {
+  let countries = getExplorerGeographyCountries(state);
+
+  const searchResults = getExplorerAdvancedSearchResults(state);
+  if (searchResults.hasQuery) {
+    const templateResult = searchResults.byTemplate.get(template.id);
+    if (!templateResult) return [];
+    if (templateResult.restrictedAxis === "z") {
+      countries = countries.filter((country) => templateResult.matchesByAxis.z.has(country.code));
+    }
   }
-  return countries
-    .map((country) => ({
-      ...country,
-      latestValue: country.row.values[rankingDateIndex]?.value
-    }))
-    .filter((country) => Number.isFinite(country.latestValue))
-    .sort((left, right) => right.latestValue - left.latestValue || left.name.localeCompare(right.name, "en"))
-    .slice(0, 10);
+  if (explorerGeographyLayout === "relevance") {
+    const latestValues = getExplorerGeographyLatestValues(state, {
+      tableId: template.tableId,
+      selectedXCode: context.selectedXCode,
+      selectedYCode: context.selectedYCode
+    });
+    countries.sort((left, right) => {
+      const leftValue = latestValues.get(left.code);
+      const rightValue = latestValues.get(right.code);
+      if (leftValue === undefined && rightValue !== undefined) return 1;
+      if (rightValue === undefined && leftValue !== undefined) return -1;
+      return (rightValue ?? 0) - (leftValue ?? 0) || left.name.localeCompare(right.name, "en");
+    });
+    return countries.map((country) => country.code);
+  }
+  return groupExplorerCountries(countries)
+    .flatMap((group) => group.countries.map((country) => country.code));
 }
 
 function getExplorerGeographyCountries(state) {
@@ -4604,9 +4885,13 @@ function createExplorerSelectionSummaryCard() {
   ].filter(([, value]) => value);
 
   if (lines.length === 0) {
+    explorerSelectionDescriptionExpanded = false;
     description.textContent = "Select a cell in the table to see its details here.";
     pane.append(description);
     return pane;
+  }
+  if (EXPLORER_SELECTION_DESCRIPTION_ENABLED) {
+    pane.classList.toggle("is-description-expanded", explorerSelectionDescriptionExpanded);
   }
 
   // The headline leads with the figure itself - what the card exists to
@@ -4629,7 +4914,39 @@ function createExplorerSelectionSummaryCard() {
     description.append(line);
   });
 
-  pane.append(description);
+  if (!EXPLORER_SELECTION_DESCRIPTION_ENABLED) {
+    pane.append(description);
+    return pane;
+  }
+
+  const expandedDescription = document.createElement("div");
+  expandedDescription.id = "explorer-selection-description";
+  expandedDescription.className = "explorer-selection-summary-expanded-description";
+  expandedDescription.setAttribute("aria-hidden", String(!explorerSelectionDescriptionExpanded));
+  if (explorerSelectionDescriptionExpanded) expandedDescription.append(createExplorerDescriptionContent());
+
+  const actions = document.createElement("div");
+  actions.className = "explorer-selection-summary-actions";
+  const descriptionButton = document.createElement("button");
+  descriptionButton.type = "button";
+  descriptionButton.className = "explorer-selection-summary-description-button";
+  descriptionButton.classList.toggle("is-active", explorerSelectionDescriptionExpanded);
+  descriptionButton.setAttribute("aria-expanded", String(explorerSelectionDescriptionExpanded));
+  descriptionButton.setAttribute("aria-controls", "explorer-selection-description");
+  descriptionButton.setAttribute("aria-label", explorerSelectionDescriptionExpanded ? "Hide description" : "Show description");
+  descriptionButton.title = explorerSelectionDescriptionExpanded ? "Hide description" : "Show description";
+  const chevron = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  chevron.setAttribute("viewBox", "0 0 24 24");
+  chevron.setAttribute("aria-hidden", "true");
+  const chevronPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  chevronPath.setAttribute("d", "m6 9 6 6 6-6");
+  chevron.append(chevronPath);
+  descriptionButton.append(chevron);
+  descriptionButton.addEventListener("click", () => {
+    setExplorerSelectionDescriptionExpanded(!explorerSelectionDescriptionExpanded);
+  });
+  actions.append(descriptionButton);
+  pane.append(description, expandedDescription, actions);
   return pane;
 }
 
@@ -4729,64 +5046,82 @@ function getExplorerSelectedPointMetrics() {
   };
 }
 
-function renderExplorerDescriptionPanel() {
+function createExplorerDescriptionContent() {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-description-panel";
 
   const title = document.createElement("h2");
   title.className = "explorer-context-title";
-  title.textContent = "Description";
+  title.textContent = "Evolution";
   article.append(title);
 
-  const metrics = getExplorerSelectedPointMetrics();
-  if (!metrics || !Number.isFinite(metrics.currentValue)) {
+  const state = getLatestState();
+  const template = getActiveExplorerTemplate();
+  const context = getActiveExplorerContext();
+  const selectedReference = getSelectedExplorerReference(state);
+  if (!state || !template || !selectedReference) {
     const empty = document.createElement("p");
     empty.className = "explorer-description-empty";
-    empty.textContent = "No value is available for the current selection.";
+    empty.textContent = "Select a reported value to see its history.";
     article.append(empty);
-    replaceExplorerContextDetail(article);
-    return;
+    return article;
   }
 
-  const formatValue = (value, signed = false) => {
-    if (!Number.isFinite(value)) return "-";
-    if (isPercentFormat(metrics.format)) {
-      const formatted = formatMetricValue(value, "euros", metrics.format);
-      return signed && value > 0 ? `+${formatted}` : formatted;
-    }
-    return signed
-      ? formatSignedMetricValue(value, metrics.selectedUnit, metrics.format)
-      : formatMetricValue(value, metrics.selectedUnit, metrics.format);
-  };
-
-  const lead = document.createElement("p");
-  lead.className = "explorer-description-lead";
-  lead.textContent = `The selected figure is ${formatValue(metrics.currentValue)}.`;
-  article.append(lead);
-
-  const movements = document.createElement("div");
-  movements.className = "explorer-description-movements";
-  metrics.changes.forEach((change) => {
-    const section = document.createElement("section");
-    section.className = "explorer-description-movement";
-    const heading = document.createElement("h3");
-    heading.textContent = change.label;
-    const copy = document.createElement("p");
-    if (!Number.isFinite(change.previousValue) || !Number.isFinite(change.absolute)) {
-      copy.textContent = "No comparable figure is available for this horizon.";
-    } else if (change.absolute === 0) {
-      copy.textContent = `The selected figure remained unchanged at ${formatValue(metrics.currentValue)}.`;
-    } else {
-      const direction = change.absolute > 0 ? "increased" : "decreased";
-      const relativeText = Number.isFinite(change.relative) ? ` (${formatSignedPercent(change.relative)})` : "";
-      copy.textContent = `The selected figure ${direction} from ${formatValue(change.previousValue)} to ${formatValue(metrics.currentValue)}: ${formatValue(change.absolute, true)}${relativeText}.`;
-    }
-    section.append(heading, copy);
-    movements.append(section);
+  const selections = getCompleteExplorerSelectionsForBenchmark(context, context.activeAxis);
+  const denominator = getExplorerBenchmarkContributionContext(context, context.activeAxis);
+  const history = buildExplorerSelectionHistory(state, {
+    tableId: template.tableId,
+    institutionId: state.selectedJst,
+    selections,
+    denominator,
+    format: getBenchmarkValueFormat(state, template.tableId, context)
   });
-  article.append(movements);
+  const insights = analyzeExplorerSelectionHistory(history, selectedReference.label, getActiveExplorerEvolutionOption().months);
+  const formatValue = (value) => formatMetricValue(value, state.selectedUnit, history.format);
+  if (!insights.chartPoints.length) {
+    const empty = document.createElement("p");
+    empty.className = "explorer-description-empty";
+    empty.textContent = "No historical observations are available for this selection.";
+    article.append(empty);
+    return article;
+  }
 
-  if (Number.isFinite(metrics.parentShare) && metrics.parentLabel) {
+  article.append(createExplorerSelectionHistoryChart(insights.chartPoints, formatValue, {
+    selectedLabel: selectedReference.label,
+    comparisons: insights.chartComparisons,
+    formatChange: (change) => formatExplorerHistoryChange(change, history.format, state.selectedUnit)
+  }));
+  const current = history.points[insights.currentIndex];
+  if (current?.status !== "valid") {
+    const note = document.createElement("p");
+    note.className = "explorer-description-empty";
+    note.textContent = current?.status === "code-unavailable"
+      ? "This code does not exist at the selected date."
+      : "No value was reported for the selected date.";
+    article.append(note);
+  }
+
+  if (insights.direction) article.append(createExplorerDescriptionObservation(insights.direction));
+  if (insights.unusual) {
+    article.append(createExplorerDescriptionObservation(
+      `Unusually large move compared with ${insights.unusual.comparisonCount} earlier changes.`,
+      true
+    ));
+  }
+  const unavailableCount = insights.chartPoints.filter((point) => point.status === "code-unavailable").length;
+  const missingCount = insights.chartPoints.filter((point) => point.status === "missing").length;
+  if (unavailableCount || missingCount) {
+    const note = document.createElement("p");
+    note.className = "explorer-description-data-note";
+    note.textContent = [
+      unavailableCount ? `${unavailableCount} date${unavailableCount === 1 ? "" : "s"} before this code existed` : "",
+      missingCount ? `${missingCount} date${missingCount === 1 ? "" : "s"} without a reported value` : ""
+    ].filter(Boolean).join(" · ");
+    article.append(note);
+  }
+
+  const metrics = getExplorerSelectedPointMetrics();
+  if (Number.isFinite(metrics?.parentShare) && metrics.parentLabel) {
     const parent = document.createElement("p");
     parent.className = "explorer-description-parent";
     const share = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(metrics.parentShare * 100);
@@ -4794,7 +5129,131 @@ function renderExplorerDescriptionPanel() {
     article.append(parent);
   }
 
-  replaceExplorerContextDetail(article);
+  return article;
+}
+
+function formatExplorerHistoryChange(change, format, selectedUnit) {
+  const sign = change > 0 ? "+" : change < 0 ? "−" : "";
+  if (isPercentFormat(format)) {
+    const points = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(Math.abs(change) * 100);
+    return `${sign}${points} pp`;
+  }
+  const value = formatMetricValue(Math.abs(change), selectedUnit, format);
+  return `${sign}${value}${isUnitFormat(format) ? "" : ` ${getUnitFilterLabel(selectedUnit)}`}`;
+}
+
+function createExplorerDescriptionObservation(text, isUnusual = false) {
+  const note = document.createElement("p");
+  note.className = `explorer-description-observation${isUnusual ? " is-unusual" : ""}`;
+  note.textContent = text;
+  return note;
+}
+
+function createExplorerSelectionHistoryChart(points, formatValue, { selectedLabel, comparisons, formatChange }) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "explorer-description-chart";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 360 164");
+  svg.setAttribute("role", "group");
+  svg.setAttribute("aria-label", "Historical values for the selected cell. Select a date to change the reference date.");
+  const valid = points.filter((point) => point.status === "valid");
+  const values = valid.map((point) => point.value);
+  const minimum = valid.length ? Math.min(...values) : 0;
+  const maximum = valid.length ? Math.max(...values) : 0;
+  const padding = minimum === maximum ? Math.max(Math.abs(minimum) * 0.08, 1) : (maximum - minimum) * 0.12;
+  const lower = minimum - padding;
+  const upper = maximum + padding;
+  const xAt = (index) => points.length === 1 ? 180 : 16 + index * 328 / (points.length - 1);
+  const yAt = (value) => 148 - (value - lower) / (upper - lower) * 66;
+  const draw = (tag, attributes) => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([name, value]) => node.setAttribute(name, String(value)));
+    svg.append(node);
+    return node;
+  };
+  const selectedIndex = points.findIndex((point) => point.label === selectedLabel);
+  draw("line", { x1: 16, x2: 344, y1: 156, y2: 156, class: "explorer-description-chart-axis" });
+  if (selectedIndex >= 0) {
+    draw("line", { x1: xAt(selectedIndex), x2: xAt(selectedIndex), y1: 71, y2: 158,
+      class: "explorer-description-chart-selected-guide" });
+  }
+
+  // Both arrows point to the selected date. Their origins are the actual
+  // observations three and twelve calendar months earlier, never an estimate
+  // obtained by counting displayed columns.
+  for (const [months, y] of [[12, 28], [3, 56]]) {
+    const comparison = comparisons.find((item) => item.months === months);
+    const fromIndex = points.findIndex((point) => point.label === comparison?.previous?.label);
+    if (selectedIndex < 0 || fromIndex < 0 || !Number.isFinite(comparison?.absolute)) continue;
+    const x1 = xAt(fromIndex);
+    const x2 = xAt(selectedIndex);
+    if (x2 <= x1 + 8) continue;
+    draw("line", { x1, y1: y, x2: x2 - 6, y2: y, class: "explorer-description-chart-arrow" });
+    draw("path", { d: `M ${x2 - 7} ${y - 4} L ${x2} ${y} L ${x2 - 7} ${y + 4}`,
+      class: "explorer-description-chart-arrow-head" });
+    const text = draw("text", { x: 16, y: y - 9, class: "explorer-description-chart-arrow-label" });
+    text.textContent = `${months === 3 ? "3m" : "1y"}  ${formatChange(comparison.absolute)}`;
+  }
+
+  if (!valid.length) {
+    const empty = draw("text", { x: 180, y: 118, "text-anchor": "middle",
+      class: "explorer-description-chart-empty" });
+    empty.textContent = "No reported values";
+  }
+  const tooltip = document.createElement("div");
+  tooltip.className = "explorer-description-chart-tooltip";
+  tooltip.hidden = true;
+  points.forEach((point, index) => {
+    const x = xAt(index);
+    const previous = points[index - 1];
+    if (point.status === "valid" && previous?.status === "valid") {
+      draw("line", { x1: xAt(index - 1), y1: yAt(previous.value), x2: x, y2: yAt(point.value),
+        class: "explorer-description-chart-line" });
+    }
+    if (point.status === "valid") {
+      draw("circle", { cx: x, cy: yAt(point.value), r: index === selectedIndex ? 4.5 : 2.8,
+        class: index === selectedIndex ? "explorer-description-chart-point is-selected" : "explorer-description-chart-point" });
+    } else if (point.status === "missing") {
+      draw("circle", { cx: x, cy: 156, r: 2.8, class: "explorer-description-chart-missing" });
+    }
+    const left = index === 0 ? x - 7 : (xAt(index - 1) + x) / 2;
+    const right = index === points.length - 1 ? x + 7 : (x + xAt(index + 1)) / 2;
+    const available = point.status !== "code-unavailable";
+    const hit = draw("rect", { x: left, y: 72, width: right - left, height: 90,
+      class: `explorer-description-chart-hit${available ? " is-selectable" : ""}` });
+    const pointLabel = getExplorerFullDateColumnLabel(point);
+    const detail = point.status === "valid" ? formatValue(point.value)
+      : point.status === "code-unavailable" ? "Code unavailable" : "Not reported";
+    hit.setAttribute("aria-label", `${pointLabel}: ${detail}`);
+    if (available) {
+      hit.setAttribute("role", "button");
+      hit.setAttribute("tabindex", "0");
+      hit.addEventListener("click", () => selectExplorerBenchmarkReferenceDate(point.label));
+      hit.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        selectExplorerBenchmarkReferenceDate(point.label);
+      });
+    }
+    const showTooltip = () => {
+      tooltip.textContent = `${pointLabel} · ${detail}`;
+      tooltip.style.left = `${Math.max(20, Math.min(80, x / 360 * 100))}%`;
+      tooltip.hidden = false;
+    };
+    hit.addEventListener("pointerenter", showTooltip);
+    hit.addEventListener("pointerleave", () => { tooltip.hidden = true; });
+    hit.addEventListener("focus", showTooltip);
+    hit.addEventListener("blur", () => { tooltip.hidden = true; });
+  });
+  const dates = document.createElement("div");
+  dates.className = "explorer-description-chart-dates";
+  const start = document.createElement("span");
+  start.textContent = getExplorerFullDateColumnLabel(points[0]);
+  const end = document.createElement("span");
+  end.textContent = getExplorerFullDateColumnLabel(points.at(-1));
+  dates.append(start, end);
+  wrapper.append(svg, tooltip, dates);
+  return wrapper;
 }
 
 // Phrasing for the handful of functions common enough in the KRI dictionary
@@ -5469,7 +5928,7 @@ function getExplorerOwnAxisContribution(axis) {
   const basePath = normalizeHierarchyPath(base.path);
 
   if (base.scope === "selection") {
-    if (axis !== context.activeAxis || !base.numeratorCode || String(selectedCode ?? "") !== String(base.numeratorCode)) return null;
+    if (!base.numeratorCode || String(selectedCode ?? "") !== String(base.numeratorCode)) return null;
   } else if (base.type !== "common" && !selectedPath.startsWith(`${basePath} > `)) return null;
 
   return {
@@ -5548,41 +6007,96 @@ function expandDefaultExplorerPaths(rows, parentPaths) {
 
 function applyExplorerTreeViewMode(parentPaths) {
   const context = getActiveExplorerContext();
-  const mode = context.treeViewModeByAxis[context.activeAxis];
-  if (!mode) return;
+  const level = context.treeViewModeByAxis[context.activeAxis];
+  if (!Number.isInteger(level)) return;
   const expandedPaths = getActiveExplorerExpandedPaths();
-  if (mode === "compact") {
-    expandedPaths.clear();
-  } else {
-    parentPaths.forEach((path) => expandedPaths.add(path));
+  expandedPaths.clear();
+  if (context.activeAxis === getActiveExplorerGeographyAxis() && isExplorerGeographyGroupedLayout()) {
+    if (level > 1) groupExplorerCountries(getExplorerGeographyCountries(getLatestState()))
+      .forEach(({ label }) => expandedPaths.add(normalizeHierarchyPath(label)));
+    return;
   }
+  parentPaths.forEach((path) => {
+    if (splitHierarchyPath(path).length < level) expandedPaths.add(path);
+  });
 }
 
-function createExplorerTreeViewToggle(parentPaths) {
+function getExplorerTreeMaxLevel(parentPaths) {
+  let maxLevel = 1;
+  parentPaths.forEach((path) => {
+    maxLevel = Math.max(maxLevel, splitHierarchyPath(path).length + 1);
+  });
+  return maxLevel;
+}
+
+function getExplorerTreeCurrentLevel(parentPaths) {
   const expandedPaths = getActiveExplorerExpandedPaths();
-  const isExpanded = [...parentPaths].every((path) => expandedPaths.has(path));
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "explorer-tree-view-toggle";
-  button.dataset.explorerTreeViewToggle = "true";
-  button.textContent = isExpanded ? "Compact view" : "Expanded view";
-  button.setAttribute("aria-label", isExpanded ? "Collapse all table branches" : "Expand all table branches");
-  button.title = isExpanded ? "Collapse all table branches" : "Expand all table branches";
-  return button;
+  let deepestExpanded = 0;
+  let shallowestCollapsed = Infinity;
+  parentPaths.forEach((path) => {
+    const depth = splitHierarchyPath(path).length;
+    if (expandedPaths.has(path)) deepestExpanded = Math.max(deepestExpanded, depth);
+    else shallowestCollapsed = Math.min(shallowestCollapsed, depth);
+  });
+  return deepestExpanded < shallowestCollapsed ? deepestExpanded + 1 : null;
 }
 
-function toggleExplorerTreeView() {
+function updateExplorerTreeLevelControl(control, parentPaths) {
+  const buttons = control.querySelector(".explorer-tree-level-buttons");
+  const maxLevel = getExplorerTreeMaxLevel(parentPaths);
+  if (buttons.children.length !== maxLevel) {
+    buttons.replaceChildren(...Array.from({ length: maxLevel }, (_, index) => {
+      const level = index + 1;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "explorer-tree-level-button";
+      button.textContent = String(level);
+      button.setAttribute("aria-label", `Show table through level ${level}`);
+      button.title = `Show table through level ${level}`;
+      button.addEventListener("click", () => setExplorerTreeViewLevel(level));
+      return button;
+    }));
+  }
+  const currentLevel = getExplorerTreeCurrentLevel(parentPaths);
+  [...buttons.children].forEach((button, index) => {
+    const isActive = index + 1 === currentLevel;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function createExplorerTreeLevelControl() {
+  const control = document.createElement("span");
+  control.className = "explorer-tree-level-control";
+  const buttons = document.createElement("span");
+  buttons.className = "explorer-tree-level-buttons";
+  buttons.setAttribute("role", "group");
+  buttons.setAttribute("aria-label", "Table detail level");
+  control.append(buttons);
+  return control;
+}
+
+function setExplorerTreeViewLevel(level) {
   const series = lastRenderedExplorerTableSeries;
   if (!series) return;
-  const parentPaths = getParentPaths(series.rows.map(normalizeExplorerSeriesRow));
-  if (!parentPaths.size) return;
+  const parentPaths = lastRenderedExplorerParentPaths;
+  if (!parentPaths.size || level < 1 || level > getExplorerTreeMaxLevel(parentPaths)) return;
 
   saveExplorerScrollPosition();
   const context = getActiveExplorerContext();
-  const expandedPaths = getActiveExplorerExpandedPaths();
-  const isExpanded = [...parentPaths].every((path) => expandedPaths.has(path));
-  context.treeViewModeByAxis[context.activeAxis] = isExpanded ? "compact" : "expanded";
+  context.treeViewModeByAxis[context.activeAxis] = level;
   context.defaultExpandedPathsInitializedByAxis[context.activeAxis] = true;
+  if (context.activeAxis === getActiveExplorerGeographyAxis() && isExplorerGeographyGroupedLayout()) {
+    const state = getLatestState();
+    shouldFocusOpenedExplorerPoint = false;
+    shouldRevealExplorerAxisSelection = false;
+    const expandedPaths = getActiveExplorerExpandedPaths();
+    expandedPaths.clear();
+    if (level > 1 && state) groupExplorerCountries(getExplorerGeographyCountries(state))
+      .forEach(({ label }) => expandedPaths.add(normalizeHierarchyPath(label)));
+    if (state) rerenderApp(state);
+    return;
+  }
   applyExplorerTreeViewMode(parentPaths);
 
   elements.explorerTable.replaceChildren();
@@ -5700,6 +6214,13 @@ function toggleExplorerPath(path) {
     collapseExplorerPath(path);
   } else {
     expandedPaths.add(path);
+  }
+
+  if (context.activeAxis === getActiveExplorerGeographyAxis() && isExplorerGeographyGroupedLayout()) {
+    shouldFocusOpenedExplorerPoint = false;
+    shouldRevealExplorerAxisSelection = false;
+    if (getLatestState()) rerenderApp(getLatestState());
+    return;
   }
 
   // Expanding/collapsing a branch only changes which rows are visible, not
@@ -5931,6 +6452,7 @@ function selectExplorerRow(pointCode, options = {}) {
     xyColumnCode ?? context.selectedXCode,
     pointCode || context.selectedYCode
   )) return;
+  clearExplorerCountrySearch();
   hasInteractedWithExplorerSelection = true;
   const activeAxis = context.activeAxis;
 

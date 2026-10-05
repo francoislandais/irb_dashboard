@@ -22,3 +22,4 @@ work/
 
 # Exceptions : mappings internes de l'application.
 !app/assets/*.csv
+!scripts/dpm_taxonomy/geographic_country_axis.csv

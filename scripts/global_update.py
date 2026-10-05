@@ -17,7 +17,7 @@ try:
 except ModuleNotFoundError:  # Python 3.10
     import tomli as tomllib
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
@@ -26,6 +26,7 @@ from typing import Iterable, Protocol
 if __package__:
     from .compact_dataset_values import compact_dataset_rows
     from .export_all_standalone_apps import export_standalone_app
+    from .output_directory import resolve_external_output_directory
     from .hive_to_dataset import (
         _expand_template_expressions,
         _build_kri_filter,
@@ -37,6 +38,7 @@ if __package__:
 else:
     from compact_dataset_values import compact_dataset_rows
     from export_all_standalone_apps import export_standalone_app
+    from output_directory import resolve_external_output_directory
     from hive_to_dataset import (
         _expand_template_expressions,
         _build_kri_filter,
@@ -50,7 +52,6 @@ else:
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 EXAMPLE_CONFIG_DIRECTORY = PROJECT_DIRECTORY / "examples" / "global-update"
 TEST_ENTITIES_PATH = PROJECT_DIRECTORY / "scripts" / "fixtures" / "global_update_test_entities.json"
-DEFAULT_OUTPUT_DIRECTORY = PROJECT_DIRECTORY / "outputs" / "global-update-prototype" / "generated"
 FREQUENCIES = {"MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"}
 PERIODS_PER_YEAR = {"MONTHLY": 12, "QUARTERLY": 4, "SEMI_ANNUAL": 2, "ANNUAL": 1}
 CONSOLIDATION_MODES = {"HIGHEST", "CONSO", "SOLO", "CONSO+SOLO", "ALL"}
@@ -858,9 +859,7 @@ def global_update(
         raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
     config_directory = Path(config_path) if config_path else EXAMPLE_CONFIG_DIRECTORY
-    output_root = Path(output_directory) if output_directory else DEFAULT_OUTPUT_DIRECTORY / mode
-    if mode == "hive" and output_directory is None:
-        output_root /= datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    output_root = resolve_external_output_directory(output_directory)
     if mode == "hive" and output_root.exists() and any(output_root.iterdir()):
         raise ValueError(f"Le dossier de sortie Hive doit être vide : {output_root}")
     applications = _read_configuration(config_directory, calculation_date)
@@ -961,7 +960,7 @@ def _main() -> None:
     parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
     parser.add_argument("--config", "--config-dir", type=Path, default=None, help="Dossier des fichiers TOML de paramétrage")
     parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
-    parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet (obligatoire)")
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
     parser.add_argument("--compact-values", action="store_true", help="Stocker les montants en milliers entiers et les pourcentages sur quatre chiffres significatifs")
     args = parser.parse_args()

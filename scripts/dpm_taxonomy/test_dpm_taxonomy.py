@@ -19,6 +19,29 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_geographic_country_axis_is_fixed_across_templates_and_taxonomies(self):
+        templates = [
+            {
+                "module_code": "FINREP", "template_id": table_id, "framework": framework,
+                "effective_from": "2025-01-01", "effective_to": "", "status": "active",
+                "effective_source": "source",
+            }
+            for table_id in builder.GEOGRAPHIC_COUNTRY_TEMPLATES
+            for framework in ("3.2", "4.2")
+        ]
+        result = builder.fixed_geographic_country_axis([], templates)
+        reference_codes = None
+        for template in templates:
+            codes = [row["code"] for row in result
+                     if row["table_id"] == template["template_id"] and row["framework"] == template["framework"]]
+            self.assertEqual(len(codes), 251)
+            self.assertTrue({"FR", "DE", "XK", "qx2000"}.issubset(codes))
+            self.assertEqual(codes[-2:], ["XK", "qx2000"])
+            if reference_codes is None:
+                reference_codes = codes
+            else:
+                self.assertEqual(codes, reference_codes)
+
     def test_alm_currency_totals_are_native_z_points_only_for_c66_to_c71(self):
         def member(table_id, code, description):
             return {
@@ -566,7 +589,14 @@ class DpmTaxonomyTests(unittest.TestCase):
         self.assertLess(f18_order.index("180"), f18_order.index("5"))
         fair_value_parent = "DEBT INSTRUMENTS AT FAIR VALUE THROUGH OTHER COMPREHENSIVE INCOME OR THROUGH EQUITY SUBJECT TO IMPAIRMENT"
         self.assertEqual(f18["201"], fair_value_parent)
-        self.assertEqual(f18["211"], f"{fair_value_parent}/Debt securities")
+        self.assertEqual(f18["181"], f"{fair_value_parent}/Debt securities")
+        self.assertEqual(f18["182"], f"{fair_value_parent}/Debt securities/Central banks")
+        profit_loss_parent = "DEBT INSTRUMENTS AT STRICT LOCOM, OR FAIR VALUE THROUGH PROFIT OR LOSS OR THROUGH EQUITY NOT SUBJECT TO IMPAIRMENT"
+        self.assertEqual(f18["211"], f"{profit_loss_parent}/Debt securities")
+        self.assertEqual(f18["212"], f"{profit_loss_parent}/Debt securities/Central banks")
+        self.assertEqual(f18["231"], profit_loss_parent)
+        self.assertLess(f18_order.index("201"), f18_order.index("181"))
+        self.assertLess(f18_order.index("231"), f18_order.index("211"))
         self.assertLess(f18_order.index("201"), f18_order.index("211"))
 
         f18_off_balance = {code: description for code, description, _row in builder.y_axis_rows(workbook["F 18.00.b"], 9, "F_18.00.b")}
@@ -586,7 +616,7 @@ class DpmTaxonomyTests(unittest.TestCase):
         workbook.close()
         archive.close()
 
-    def test_finrep_f18_cash_balance_missing_indent_is_corrected_in_42_releases(self):
+    def test_finrep_f18_hierarchy_is_corrected_in_42_releases(self):
         archive = zipfile.ZipFile(SOURCES / "4.2_layouts.zip")
         members = (
             next(n for n in archive.namelist() if "FINREP9FINREP 4.2.xlsx" in n),
@@ -607,6 +637,28 @@ class DpmTaxonomyTests(unittest.TestCase):
                 self.assertEqual(result["70"], f"{parent}/Loans and advances")
                 self.assertEqual(result["180"], parent)
                 self.assertLess(order.index("180"), order.index("5"))
+                with_parents = {
+                    row[0]: row for row in builder.y_axis_rows(sheet, rows_row, "F_18.00.a", include_parent=True)
+                }
+                self.assertEqual(with_parents["181"][3], "201")
+                self.assertEqual(with_parents["182"][3], "181")
+                self.assertEqual(with_parents["191"][3], "201")
+                self.assertEqual(with_parents["211"][3], "231")
+                self.assertEqual(with_parents["212"][3], "211")
+                self.assertEqual(with_parents["221"][3], "231")
+                self.assertLess(order.index("201"), order.index("181"))
+                self.assertLess(order.index("231"), order.index("211"))
+                if "4.2.1" in member:
+                    # .a.dp still trails the headings, while .b.dp lists
+                    # them first. Both must produce the same parent codes.
+                    for sheet_name in ("F_18.00.a.dp", "F_18.00.b.dp"):
+                        dp_sheet = workbook[sheet_name]
+                        dp_rows = builder.y_axis_rows(
+                            dp_sheet, builder.find_marker_rows(dp_sheet)[1], sheet_name, include_parent=True,
+                        )
+                        dp_by_code = {row[0]: row for row in dp_rows}
+                        self.assertEqual(dp_by_code["181"][3], "201")
+                        self.assertEqual(dp_by_code["211"][3], "231")
                 workbook.close()
 
         archive.close()

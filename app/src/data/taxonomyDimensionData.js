@@ -1,6 +1,7 @@
 import { parseCsv } from "./csvParser.js?v=20260917-kri-formula";
 import { createDimensionMapping } from "./dimensionMapping.js?v=20260928-dictionary-casing";
 import { parseExplorerPoints } from "./explorerConfig.js?v=20260928-dictionary-casing";
+import { readResponseTextWithProgress } from "./core/downloadProgress.js";
 
 const TAXONOMY_DATA_URL = "./assets/ITS_all_dimension_mapping.csv";
 const TAXONOMY_HISTORY_URL = "./assets/ITS_template_taxonomy_history.csv";
@@ -11,9 +12,9 @@ let kriPointsPromise = null;
 const resolvedTaxonomyDataCache = new Map();
 const frameworkDimensionCache = new Map();
 
-export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { referenceDate = "" } = {}) {
+export async function loadTaxonomyDimensionData(requestedTaxonomies = {}, { referenceDate = "", onDownloadProgress } = {}) {
   const [{ columns, rows }, history, kriPoints] = await Promise.all([
-    loadSource(), loadTaxonomyHistory(), loadKriDimensionPoints()
+    loadSource(onDownloadProgress), loadTaxonomyHistory(), loadKriDimensionPoints()
   ]);
   const frameworkIndex = columns.indexOf("framework");
   const tableIdIndex = columns.indexOf("table_id");
@@ -112,12 +113,12 @@ export function getTaxonomyDataForTemplateFramework(state, tableId, framework) {
   return data;
 }
 
-async function loadSource() {
+async function loadSource(onDownloadProgress) {
   if (!sourcePromise) {
     sourcePromise = fetch(TAXONOMY_DATA_URL, { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error("Le dictionnaire versionné n'a pas pu être chargé.");
-        return parseCsv(await response.text());
+        return parseCsv(await readResponseTextWithProgress(response, onDownloadProgress));
       })
       .catch((error) => {
         sourcePromise = null;

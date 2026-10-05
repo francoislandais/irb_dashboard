@@ -3,6 +3,7 @@ import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding"
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-local-description";
 import { formatReferenceDate, getReferenceColumns, parseNumericValue } from "./core/referenceColumns.js";
+import { getExplorerTemplateReferenceDates } from "./explorerReferenceDates.js";
 import {
   EXPLORER_ALL_CURRENCIES_CODE,
   EXPLORER_ALL_CURRENCIES_LABEL,
@@ -16,6 +17,7 @@ export const EXPLORER_TARGET = {
   tableId: "C_02.00",
   xAxisRcCode: "0010"
 };
+const geographyLatestValuesByRows = new WeakMap();
 
 export function getUniqueValues(columns, rows, columnName) {
   const columnIndex = columns.indexOf(columnName);
@@ -71,6 +73,39 @@ export function getExplorerAxisPointsConfig(state, tableId, axis, yConfigTableId
     : rawPointsConfig;
 }
 
+// Ranking a geographic Z axis needs one value per country, not a complete
+// time series for every country. Scan the selected institution's rows once
+// at the latest reference date; full series are built only for the page that
+// the caller subsequently requests.
+export function getExplorerGeographyLatestValues(state, { tableId, selectedXCode = "", selectedYCode = "" } = {}) {
+  const values = new Map();
+  const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
+  const latestReference = getExplorerTemplateReferenceDates(state, tableId).at(-1);
+  if (!indexes || !latestReference || !state?.selectedJst || !tableId) return values;
+
+  const xCode = normalizeAxisCode(selectedXCode, "x");
+  const yCode = normalizeAxisCode(selectedYCode, "y");
+  let cache = geographyLatestValuesByRows.get(state.rows);
+  if (!cache) geographyLatestValuesByRows.set(state.rows, cache = new Map());
+  const cacheKey = [state.selectedJst, tableId, xCode, yCode, latestReference.index].join("\u001f");
+  if (cache.has(cacheKey)) return cache.get(cacheKey);
+  const indexedRows = getIndexedRowsByTableJst(state, tableId);
+  const tableRows = state.dataIndexes
+    ? indexedRows
+    : (state.rows ?? []).filter((row) => row[indexes.tableId] === tableId
+      && row[indexes.institutionId] === state.selectedJst);
+  for (const row of tableRows) {
+    if (xCode && normalizeAxisCode(row[indexes.xAxisRcCode], "x") !== xCode) continue;
+    if (yCode && normalizeAxisCode(row[indexes.yAxisRcCode], "y") !== yCode) continue;
+    const zCode = normalizeAxisCode(row[indexes.zAxisRcCode], "z");
+    if (!zCode) continue;
+    values.set(zCode, (values.get(zCode) ?? 0) + parseNumericValue(row[latestReference.index]));
+  }
+  cache.set(cacheKey, values);
+  if (cache.size > 64) cache.delete(cache.keys().next().value);
+  return values;
+}
+
 export function buildExplorerAxisSeries(state, options = {}) {
   const axis = ["x", "y", "z"].includes(options.axis) ? options.axis : "y";
   const tableId = options.tableId || EXPLORER_TARGET.tableId;
@@ -98,13 +133,10 @@ export function buildExplorerAxisSeries(state, options = {}) {
   const indexes = getCompleteAxisColumnIndexes(state.columns);
   const pointsConfig = getExplorerAxisPointsConfig(state, tableId, axis, yConfigTableId);
 
-  // KRI can list thousands of indicators; computing every one's full
-  // date-by-date series (see buildValues) - not just rendering it - is the
-  // actual heavy cost. options.onlyCodes (explorerView.js's KRI pagination)
-  // narrows this down to exactly the page actually being shown, so that
-  // work is skipped entirely for everything else instead of just hiding it
-  // in the DOM afterwards.
-  const limitedPointsConfig = axis === "y" && options.onlyCodes
+  // KRI and geographic Z axes can list many points; computing every full
+  // date-by-date series is the expensive part. Restrict configured points
+  // before matching data so pagination only calculates the visible page.
+  const limitedPointsConfig = (axis === "y" || axis === "z") && options.onlyCodes
     ? pointsConfig.filter((point) => options.onlyCodes.has(point.code))
     : pointsConfig;
 
@@ -134,9 +166,7 @@ export function buildExplorerAxisSeries(state, options = {}) {
   // Keep only the columns this table actually reports on (any JST).
   const dateColumns = axis === "template"
     ? getReferenceColumns(state.columns)
-    : getReferenceColumns(state.columns).filter((reference) => (
-      state.rows.some((row) => row[indexes.tableId] === tableId && String(row[reference.index] ?? "").trim() !== "")
-    ));
+    : getExplorerTemplateReferenceDates(state, tableId);
   const selections = {
     selectedXCode,
     selectedYCode,
