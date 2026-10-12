@@ -1890,20 +1890,19 @@ function isExplorerRowAxisImpossible(seriesRow, activeAxis) {
   return combinations.isImpossible(tableId, seriesRow.code, context.selectedYCode);
 }
 
-// A hierarchy branch is unavailable when none of its terminal descendants
-// can be combined with the selection made on the other axis. Propagating the
-// state from compatible leaves keeps this recursive for any tree depth while
-// preserving selectable parent rows and their expand/collapse controls.
+// A coded parent is a data point in its own right: its compatibility must
+// come from its own X/Y pair, not from its children. Only uncoded headings
+// inherit availability from the compatible points in their branch.
 function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
   const compatibleAncestorPaths = new Set();
-  const leafImpossibleByPath = new Map();
+  const codedImpossibleByPath = new Map();
 
   rows.forEach((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
-    if (!path || parentPaths.has(path)) return;
+    if (!path || row.isVirtual || !row.code) return;
 
     const isImpossible = isExplorerRowAxisImpossible(row, activeAxis);
-    leafImpossibleByPath.set(path, isImpossible);
+    codedImpossibleByPath.set(path, isImpossible);
     if (isImpossible) return;
 
     compatibleAncestorPaths.add(path);
@@ -1914,9 +1913,9 @@ function getExplorerAxisImpossiblePaths(rows, activeAxis, parentPaths) {
 
   return new Map(rows.map((row) => {
     const path = normalizeHierarchyPath(row.hierarchyPath);
-    const isImpossible = parentPaths.has(path)
-      ? !compatibleAncestorPaths.has(path)
-      : Boolean(leafImpossibleByPath.get(path));
+    const isImpossible = row.code && !row.isVirtual
+      ? Boolean(codedImpossibleByPath.get(path))
+      : parentPaths.has(path) && !compatibleAncestorPaths.has(path);
     return [path, isImpossible];
   }));
 }
