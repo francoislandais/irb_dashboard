@@ -22,6 +22,10 @@ import { primaryDark } from "./theme.js?v=20260709-flow-arrow-color";
 
 const explorerBenchmarkCharts = new Map();
 
+export function resizeExplorerBenchmarkChart(container) {
+  explorerBenchmarkCharts.get(container)?.reflow();
+}
+
 export function destroyExplorerBenchmarkChart(container = null) {
   if (container) {
     explorerBenchmarkCharts.get(container)?.destroy();

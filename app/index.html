@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20261005-geography-overlay">
+    <link rel="stylesheet" href="./src/styles.css?v=20261016-approach-responsive-fullheight">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -87,6 +87,7 @@
           <button class="module-link is-active" type="button" data-module-target="explorer">Explorer</button>
           <button class="module-link" type="button" data-module-target="irb">IRB</button>
           <button class="module-link" type="button" data-module-target="credit-risk">Credit Risk</button>
+          <button class="module-link" type="button" data-module-target="approaches">Standard vs IRB</button>
         </nav>
       </aside>
 
@@ -404,12 +405,22 @@
             </div>
           </article>
         </section>
+        <section id="approaches-view" class="module-view approaches-view" aria-label="Standardised versus IRB credit risk">
+          <aside class="approach-context-panel" aria-label="Approach benchmark">
+            <div id="approach-context-selection" class="approach-context-selection"></div>
+            <div class="approach-context-chart-wrap">
+              <div id="approach-benchmark-chart" class="cost-of-risk-chart approach-benchmark-chart" aria-label="Temporal peer benchmark"></div>
+            </div>
+          </aside>
+          <div id="approach-panel-resizer" class="approach-panel-resizer" role="separator" aria-label="Resize benchmark panel" aria-orientation="vertical" aria-controls="approach-main-pane" aria-valuemin="260" tabindex="0"></div>
+          <div id="approach-main-pane" class="approach-main-pane"></div>
+        </section>
       </main>
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20261012-parent-compatibility"></script>
+    <script type="module" src="./src/main.js?v=20261016-approach-responsive"></script>
   </body>
 </html>
