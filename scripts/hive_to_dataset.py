@@ -13,6 +13,12 @@ from typing import Iterable, Protocol
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET_DIRECTORY = PROJECT_DIRECTORY / "datasets"
 DEFAULT_KRI_DICTIONARY_PATH = PROJECT_DIRECTORY / "app" / "assets" / "KRI_dictionnary.csv"
+# C_08.02 reports its grade/pool identifier in OGR; its regular Y axis is
+# empty. Normalize this at the source, before grouping and date pivoting.
+ITS_Y_AXIS_EXPRESSION = (
+    "CASE WHEN SUBSTR(table_id, 1, 7) = 'C_08.02' "
+    "THEN NULLIF(TRIM(ogr), '') ELSE y_axis_rc_code END"
+)
 
 _TEMPLATE_RANGE_PATTERN = re.compile(
     r"^(?P<prefix>[A-Za-z]+)_xx%(?:\s+xx<(?P<upper_bound>\d+))$",
@@ -58,6 +64,8 @@ def build_hive_query(
     Cette table Hive n'expose aucune colonne d'horodatage d'extraction :
     ``extraction_timestamp`` est ajoutée après coup par
     ``run_hive_query_to_csv`` avec la date du jour, pas par cette requête.
+    Pour C_08.02%, la colonne source ``ogr`` remplace l'axe Y vide avant
+    le regroupement par coordonnées et dates de référence.
     """
 
     templates = _clean_values(templates, "templates")
@@ -101,7 +109,7 @@ FROM (
         regexp_replace(table_id, '\\\\.[A-Za-z]+$', '') AS table_id,
         jst_code,
         x_axis_rc_code,
-        y_axis_rc_code,
+        {ITS_Y_AXIS_EXPRESSION} AS y_axis_rc_code,
         z_axis_rc_code,
         reference_period,
         value_decimal

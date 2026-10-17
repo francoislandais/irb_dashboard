@@ -35,6 +35,7 @@ if __package__:
         _build_kri_filter,
         _build_template_filter,
         _load_default_devo_client,
+        ITS_Y_AXIS_EXPRESSION,
         find_kris_using_templates,
         load_kri_dictionary,
     )
@@ -47,6 +48,7 @@ else:
         _build_kri_filter,
         _build_template_filter,
         _load_default_devo_client,
+        ITS_Y_AXIS_EXPRESSION,
         find_kris_using_templates,
         load_kri_dictionary,
     )
@@ -462,7 +464,7 @@ FROM (
         lei,
         cons_level,
         x_axis_rc_code,
-        y_axis_rc_code,
+        {ITS_Y_AXIS_EXPRESSION} AS y_axis_rc_code,
         z_axis_rc_code,
         reference_period,
         value_decimal

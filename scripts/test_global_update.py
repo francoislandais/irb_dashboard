@@ -377,6 +377,23 @@ class QueryPlanTests(unittest.TestCase):
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=900.0),
         ]
+        its_rows.extend([
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+                 module_id="COREP", table_id="C_08.02.a", reference_period=period,
+                 x_axis_rc_code="0110", y_axis_rc_code=None, ogr="012", z_axis_rc_code="qx2023", value_decimal=value)
+            for period, value in (("2025-12-31", 12.0), ("2026-03-31", 13.0))
+        ])
+        its_rows.extend([
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+                 module_id="COREP", table_id="C_08.02.b", reference_period="2026-03-31",
+                 x_axis_rc_code="0110", y_axis_rc_code=None, ogr="099", z_axis_rc_code="qx2023", value_decimal=99.0),
+            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", cons_level="CONSO", is_highest_cons="Y",
+                 module_id="COREP", table_id="C_08.02.a", reference_period="2026-03-31",
+                 x_axis_rc_code="0110", y_axis_rc_code=None, ogr="707", z_axis_rc_code="qx2023", value_decimal=707.0),
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+                 module_id="COREP", table_id="C_08.01", reference_period="2026-03-31",
+                 x_axis_rc_code="0110", y_axis_rc_code="0010", ogr="888", z_axis_rc_code="qx2023", value_decimal=8.0),
+        ])
         for row in its_rows:
             insert("agora_its_bft_current", row)
         for entity_id, level, value in (("E1", "CONSO", 0.2), ("E1", "SOLO", 0.3),
@@ -400,6 +417,19 @@ class QueryPlanTests(unittest.TestCase):
         self.assertEqual(len(its_rows), 1)
         self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONSO"))
         self.assertEqual(its_rows[0][-2:], (None, 125.0))
+        grade_extraction = Extraction("COREP", "C_08.02%", 1, "QUARTERLY", dates)
+        grade_sql = _build_extraction_sql(grade_extraction, highest)
+        self.assertIn("THEN NULLIF(TRIM(ogr), '') ELSE y_axis_rc_code END AS y_axis_rc_code", grade_sql)
+        grade_cursor = connection.execute(grade_sql)
+        grade_rows = [dict(zip((field[0] for field in grade_cursor.description), row)) for row in grade_cursor]
+        self.assertEqual({row["y_axis_rc_code"] for row in grade_rows}, {"012", "099"})
+        self.assertEqual(next(row for row in grade_rows if row["y_axis_rc_code"] == "012")["ref_2025_12_31"], 12.0)
+        self.assertEqual(next(row for row in grade_rows if row["y_axis_rc_code"] == "012")["ref_2026_03_31"], 13.0)
+        self.assertIsNone(next(row for row in grade_rows if row["y_axis_rc_code"] == "099")["ref_2025_12_31"])
+        all_grade_app = Application("all grades", (lei, other_lei), "HIGHEST", (grade_extraction,))
+        self.assertEqual({row[3] for row in connection.execute(_build_extraction_sql(grade_extraction, all_grade_app))}, {"012", "099", "707"})
+        c0801_extraction = Extraction("COREP", "C_08.01", 1, "QUARTERLY", dates)
+        self.assertEqual(connection.execute(_build_extraction_sql(c0801_extraction, highest)).fetchone()[3], "0010")
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, both)).fetchall()), 2)
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, all_levels)).fetchall()), 3)
         cluster_its_sql = _build_extraction_sql(its_extraction, clustered)

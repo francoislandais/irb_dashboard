@@ -41,6 +41,11 @@ class FakeHiveClient:
 
 
 class HiveModuleFilterTest(unittest.TestCase):
+    def test_c0802_uses_ogr_as_y_before_pivoting(self):
+        sql = build_hive_query(["C_08.02%"], REFERENCE_DATES, JST_CODES)
+        self.assertIn("THEN NULLIF(TRIM(ogr), '') ELSE y_axis_rc_code END AS y_axis_rc_code", sql)
+        self.assertIn("GROUP BY\n    table_id,\n    jst_code,\n    x_axis_rc_code,\n    y_axis_rc_code", sql)
+
     def test_filter_is_disabled_by_default(self):
         sql = build_hive_query(TEMPLATES, REFERENCE_DATES, JST_CODES)
 

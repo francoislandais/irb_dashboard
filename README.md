@@ -191,6 +191,8 @@ Ce mode ne se connecte pas à Hive : les institutions et les templates disponibl
 
 Sur une machine disposant de `vl_connect`, le mode `hive` exécute d'abord la requête des métadonnées institutionnelles via `devo.read_sql(sql)`. Il détermine ensuite les niveaux de consolidation demandés et les applique dans chaque requête de données, puis assemble les DataFrames par template, institution, coordonnées et date. Pour le mode `HIGHEST`, le filtre est directement `is_highest_cons = 'Y'` dans la requête des métadonnées et dans chaque requête de données ITS ou KRI ; cet indicateur n'est pas agrégé. Enfin, il génère un CSV et un HTML autonome par fichier :
 
+Pour les seuls `table_id` commençant par `C_08.02`, la requête ITS lit le code de grade/pool dans `ogr` et le renvoie sous le nom `y_axis_rc_code`. La substitution précède le regroupement et le pivot des dates : aucun ensemble de codes OGR n'est fixé dans le programme, et les autres templates conservent leur axe Y d'origine.
+
 ```sh
 python3 scripts/global_update.py --mode preview --config /chemin/vers/mes-applications --output /chemin/vers/sorties/preview
 python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applications --output /chemin/vers/sorties/hive
