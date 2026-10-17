@@ -3,7 +3,7 @@ import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260925-institution-id";
 import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261012-parent-compatibility";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
-import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenchmarkView.js?v=20261017-approach-chart-date";
+import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenchmarkView.js?v=20261017-provisions-on-ead";
 import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";

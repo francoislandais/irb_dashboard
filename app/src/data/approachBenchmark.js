@@ -3,7 +3,7 @@ import { getReferenceColumns } from "./core/referenceColumns.js";
 import { getTaxonomyFrameworkForDate } from "./taxonomyDimensionData.js";
 
 export const APPROACH_FRAMEWORKS = ["3.2", "4.0", "4.2"];
-export const APPROACH_BENCHMARK_METRICS = ["eadShare", "rwaShare", "density.standard", "density.irb", "pd.irb", "lgd.irb", ...["original", "afterCrm", "ead", "rwa"].flatMap(
+export const APPROACH_BENCHMARK_METRICS = ["eadShare", "rwaShare", "density.standard", "density.irb", "pd.irb", "lgd.irb", "elRate.irb", "provisionsRate.irb", ...["original", "afterCrm", "ead", "rwa"].flatMap(
   (stage) => ["standard", "irb"].map((approach) => `${stage}.${approach}`)
 )];
 
@@ -136,6 +136,31 @@ function sumPortfolio(state, reference, institutionId, approach, portfolio, stag
   };
 }
 
+function irbReportedAmountRate(state, reference, institutionId, portfolio, xCode) {
+  const { y, z } = APPROACH_TAXONOMY_MAP[reference.framework].irb[portfolio.id];
+  let numerator = 0, ead = 0, present = 0, conflict = false;
+  for (const zCode of z) {
+    // Keep numerator and denominator on the same reported IRB class. An
+    // absent amount in one class must not be divided by another class's EAD.
+    const amountCell = cellValue(state, reference, institutionId, "C_08.01", xCode, y, zCode);
+    const eadCell = cellValue(state, reference, institutionId, "C_08.01", "0110", y, zCode);
+    conflict ||= amountCell.conflict || eadCell.conflict;
+    if (Number.isFinite(amountCell.value)
+      && Number.isFinite(eadCell.value) && eadCell.value > 0) {
+      // X 0290 is labelled "(-) value adjustments and provisions"; use its
+      // magnitude so either reporting sign convention yields a coverage rate.
+      numerator += xCode === "0290" ? Math.abs(amountCell.value) : amountCell.value;
+      ead += eadCell.value;
+      present += 1;
+    }
+  }
+  return {
+    value: !conflict && ead > 0 && numerator >= 0 ? numerator / ead : null,
+    present, expected: z.length, conflict,
+    source: { tableId: "C_08.01", numeratorX: xCode, denominatorX: "0110", y, z }
+  };
+}
+
 export function standardShare(standard, irb) {
   if (!Number.isFinite(standard) || !Number.isFinite(irb) || standard < 0 || irb < 0) return null;
   const total = standard + irb;
@@ -162,6 +187,16 @@ function portfolioMetrics(state, reference, institutionId, portfolio) {
   return {
     ...portfolio,
     stages,
+    getExpectedLossRate: () => {
+      if (!parameterCache.has("elRate")) parameterCache.set("elRate",
+        irbReportedAmountRate(state, reference, institutionId, portfolio, "0280"));
+      return parameterCache.get("elRate");
+    },
+    getProvisionsRate: () => {
+      if (!parameterCache.has("provisionsRate")) parameterCache.set("provisionsRate",
+        irbReportedAmountRate(state, reference, institutionId, portfolio, "0290"));
+      return parameterCache.get("provisionsRate");
+    },
     getParameter: (kind) => {
       if (!parameterCache.has(kind)) parameterCache.set(kind,
         irbParameter(state, reference, institutionId, portfolio, kind === "pd" ? "0010" : "0230"));
@@ -191,12 +226,14 @@ export function approachMetricValue(metrics, metricId) {
   }
   const [stage, approach] = metricId.split(".");
   if (stage === "density") return metrics.density[approach];
+  if (stage === "elRate") return approach === "irb" ? metrics.getExpectedLossRate().value : null;
+  if (stage === "provisionsRate") return approach === "irb" ? metrics.getProvisionsRate().value : null;
   if (stage === "pd" || stage === "lgd") return approach === "irb" ? metrics.getParameter(stage)?.value ?? null : null;
   return metrics.stages[stage]?.[approach]?.value ?? null;
 }
 
 export const isApproachPercentMetric = (metricId) => metricId.endsWith("Share") ||
-  metricId.startsWith("density.") || metricId === "pd.irb" || metricId === "lgd.irb";
+  metricId.startsWith("density.") || metricId === "pd.irb" || metricId === "lgd.irb" || metricId === "elRate.irb" || metricId === "provisionsRate.irb";
 
 export function buildApproachBenchmarkModel(state, referenceName = "", portfolioId = "total", metricId = "eadShare") {
   if (!state?.dataIndexes || !state?.selectedJst) return { status: "no-data" };

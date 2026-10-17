@@ -95,6 +95,63 @@ class OutputDirectoryTests(unittest.TestCase):
 
 
 class DarwinUploadTests(unittest.TestCase):
+    def test_downloads_tomls_before_processing_and_uploads_requested_dataset(self):
+        downloads = []
+        uploads = []
+        connections = []
+        source = (EXAMPLE_CONFIG_DIRECTORY / "01-finrep.toml").read_text(encoding="utf-8")
+        configs = {
+            101: source.replace('name = "FINREP"', 'name = "Darwin A"\nexport-dataset = true'),
+            102: source.replace('name = "FINREP"', 'name = "Darwin B"'),
+        }
+
+        class FakeDarwinClient:
+            def get_file(self, **kwargs):
+                downloads.append(kwargs)
+                Path(kwargs["local_file_path"]).write_text(configs[kwargs["node_id"]], encoding="utf-8")
+
+            def upload_file(self, **kwargs):
+                uploads.append(kwargs)
+
+        def connect():
+            connections.append(True)
+            return FakeDarwinClient()
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fake_module = SimpleNamespace(darwin=SimpleNamespace(connect=connect))
+            with patch.dict(sys.modules, {"vl_connect": fake_module}):
+                result = global_update(
+                    "darwin:101", darwin_config_ids=[102], mode="test", output_directory=temporary_directory,
+                    as_of=date(2026, 9, 26), darwin_upload=999,
+                )
+            self.assertEqual(result["applications"], 2)
+            self.assertEqual([call["node_id"] for call in downloads], [101, 102])
+            self.assertEqual(len(connections), 1)
+            self.assertEqual(len(uploads), 3)
+            self.assertTrue(all(call["node_id"] == 999 and call["is_parent"] and call["add_version"] for call in uploads))
+            manifest = json.loads((Path(temporary_directory) / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["config_directory"], "darwin:101,darwin:102")
+            self.assertEqual(manifest["darwin_upload"]["datasets_uploaded"], 1)
+            app = next(item for item in manifest["applications"] if item["name"] == "Darwin A")
+            html = Path(app["html_app"])
+            archive = Path(app["compressed_dataset"])
+            self.assertEqual(archive.name, f"{html.stem}_data_source.csv.gz")
+            self.assertEqual(
+                gzip.decompress((Path(temporary_directory) / archive).read_bytes()),
+                (Path(temporary_directory) / app["dataset"]).read_bytes(),
+            )
+            self.assertEqual(app["darwin_dataset_upload"]["status"], "uploaded")
+            self.assertEqual(uploads[1]["filename"], archive.name)
+
+    def test_export_dataset_requires_upload_destination(self):
+        source = (EXAMPLE_CONFIG_DIRECTORY / "01-finrep.toml").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            config_dir = Path(temporary_directory) / "config"
+            config_dir.mkdir()
+            (config_dir / "app.toml").write_text(source.replace('name = "FINREP"', 'name = "FINREP"\nexport-dataset = true'), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "export-dataset.*--darwin_upload"):
+                global_update(config_dir, mode="test", output_directory=Path(temporary_directory) / "output")
+
     def test_requires_a_positive_node_and_generated_html(self):
         for node_id in (0, -1, "1914437350", True):
             with self.subTest(node_id=node_id), self.assertRaisesRegex(ValueError, "entier positif"):

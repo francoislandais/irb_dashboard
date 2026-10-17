@@ -137,6 +137,7 @@ Le paramétrage est un **dossier de fichiers TOML**, un fichier par application 
 name = "Mon application"
 leis = ["5493001KJTIIGC8Y1R12"]
 consolidation = "HIGHEST"
+export-dataset = false
 
 [[extractions]]
 category = "FINREP"
@@ -160,6 +161,15 @@ frequency = "MONTHLY"
 `module` accepte un nom exact (`module = "COREP"`), plusieurs noms (`module = ["COREP", "FINREP"]`) ou des morceaux avec `%` comme joker (`module = ["COREP%", "%FINREP%"]`). Les entrées d'une liste sont réunies par **OU** sur `module_id`. `%` peut se trouver au début, au milieu ou à la fin ; `_` reste littéral. `module = "ITS"` interroge la table ITS **sans** filtre `module_id`. `module = "KRI"` utilise la table KRI : le bloc contient soit `kri_ids = ["..."]` pour des identifiants directs ou des motifs avec `%`, soit `templates = ["..."]` pour sélectionner les KRI dépendant de ces templates. Par exemple, `kri_ids = ["LIQ%", "CRFA0900"]` sélectionne les codes correspondants ; `kri_ids = ["%"]` supprime entièrement le filtre sur `kri_data_point_id` et extrait tous les KRI disponibles pour les institutions, niveaux et dates demandés. `templates = ["%"]` n'est pas équivalent : ce mode ne retient que les KRI liés à un template. `ITS` et `KRI` doivent chacun rester seuls dans leur bloc. Dans `templates`, un `%` final est un joker et `!` une exclusion ; `"F_xx% xx<48"` développe les familles F_01 à F_47.
 
 Le dossier est validé entièrement avant la première connexion Hive : syntaxe TOML, fichiers inattendus, champs inconnus ou manquants, formats et doublons des LEI et clusters, nom de sortie en collision, sélecteurs, fréquences, années et identifiants KRI inconnus. Les fichiers temporaires (`*.amltmp`, `*.tmp`, `*.temp`, `*.swp`, `*.swo`, `*.bak`, `*~`, `~$*`) sont ignorés. Le message d'erreur indique le fichier et, pour une extraction, son numéro. Python 3.11 ou plus récent lit TOML sans dépendance ; pour Python 3.10, installer `python3 -m pip install -r scripts/requirements-global-update.txt`.
+
+Le paramétrage peut aussi provenir de Darwin. Comme dans Conv Task Dashboard, le programme récupère chaque fichier TOML avec `darwin.connect().get_file(local_file_path=..., node_id=...)` dans un dossier temporaire, le valide, puis efface cette copie. Un nœud Darwin désigne **un fichier TOML**, pas un dossier. Pour plusieurs applications, répéter `--config-darwin` ; les fichiers sont traités dans l'ordre des identifiants fournis. Les deux formes suivantes sont équivalentes pour un seul fichier :
+
+```sh
+python3 scripts/global_update.py --mode hive --config darwin:123456 --output /chemin/vers/sorties/hive
+python3 scripts/global_update.py --mode hive --config-darwin 123456 --output /chemin/vers/sorties/hive
+```
+
+On peut ajouter `--config-darwin 234567 --config-darwin 345678` pour plusieurs TOML. La source Darwin marche aussi en modes `preview` et `test` ; elle requiert `vl_connect` et l'accès Darwin, mais le mode `preview` n'interroge toujours pas Hive. Depuis Python : `global_update(123456, mode="hive", output_directory="/chemin/vers/sorties/hive")`, ou `darwin_config_ids=[123456, 234567]` pour plusieurs fichiers. Un dossier local et des nœuds Darwin ne peuvent pas être combinés dans le même lancement.
 
 Le point d'entrée unique peut être importé :
 
@@ -193,6 +203,8 @@ python3 scripts/global_update.py --mode hive --config /chemin/vers/mes-applicati
 ```
 
 Les HTML sont d'abord enregistrés localement, puis envoyés avec leur nom de fichier, `add_version=True` et `is_parent=True`. Une seule connexion Darwin sert à tout le lot. L'option fonctionne aussi en mode `test`, mais pas en mode `preview` qui ne produit pas de HTML. Elle exige `vl_connect` et l'accès Darwin sur la machine qui lance la commande ; sans l'option, aucune connexion Darwin n'est tentée. Le manifeste local `manifest.json` note chaque envoi réussi, y compris si un envoi ultérieur échoue. Depuis Python, utiliser `global_update(..., darwin_upload=1914437350)`.
+
+Pour joindre aussi le dataset source d'une application, inscrire `export-dataset = true` **avant** les blocs `[[extractions]]` de son TOML et lancer en mode `test` ou `hive` avec `--darwin_upload`. Le programme compresse le CSV réellement intégré au HTML en gzip (`.csv.gz`) et l'enregistre localement dans `applications/datasets/`, sous le nom de l'HTML suivi de `_data_source.csv.gz`. Il l'envoie ensuite dans le même dossier parent Darwin que cet HTML, avec versionnement. Les autres applications du lot ne reçoivent que leur HTML. Sans `--darwin_upload`, le programme refuse ce paramétrage avant de lancer Hive. Le manifeste indique le chemin local et l'état de chaque upload.
 
 Pour réduire facultativement la taille des CSV et des HTML générés, ajouter `--compact-values` à cette commande (ou `compact_values=True` à `global_update`). Le programme consulte le dictionnaire des dimensions et l'historique des taxonomies : les montants sont stockés comme des milliers d'euros entiers, les pourcentages avec quatre chiffres significatifs et les valeurs `Unit` sans modification. La colonne technique `value_scale=1000` signale les lignes de montants ; l'application les remet en euros avant tout calcul ou affichage. Les lignes dont le format est inconnu ou change selon les dates restent inchangées. Cette option est avec perte de précision et ne modifie pas les requêtes Hive elles-mêmes.
 

@@ -5,7 +5,7 @@ import {
   approachMetricValue,
   isApproachPercentMetric,
   buildApproachBenchmarkModel
-} from "../data/approachBenchmark.js?v=20261016-approach-benchmark";
+} from "../data/approachBenchmark.js?v=20261017-provisions-on-ead";
 import { formatMetricValue } from "../data/core/formatting.js";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
@@ -50,7 +50,7 @@ const STAGE_LABELS = {
 
 const METRIC_GROUPS = [
   ["Comparison", ["eadShare", "rwaShare", "density.standard", "density.irb"]],
-  ["IRB parameters", ["pd.irb", "lgd.irb"]],
+  ["IRB parameters", ["pd.irb", "lgd.irb", "elRate.irb", "provisionsRate.irb"]],
   ["Reported amounts", ["original", "afterCrm", "ead", "rwa"].flatMap((stage) =>
     [`${stage}.standard`, `${stage}.irb`])]
 ];
@@ -62,6 +62,8 @@ function metricLabel(metricId) {
   if (metricId === "density.irb") return "RWA density · IRB";
   if (metricId === "pd.irb") return "Average PD · IRB";
   if (metricId === "lgd.irb") return "Average LGD · IRB";
+  if (metricId === "elRate.irb") return "Expected loss / EAD · IRB";
+  if (metricId === "provisionsRate.irb") return "Value adjustments & provisions / EAD · IRB";
   const [stage, approach] = metricId.split(".");
   return `${STAGE_LABELS[stage]} · ${approach === "standard" ? "Standardised" : "IRB"}`;
 }
@@ -338,9 +340,11 @@ function buildPortfolioCard(portfolio, state) {
   card.append(button);
   card.append(element("p", "approach-portfolio-note", portfolio.note));
   const parameter = selectedMetricId === "pd.irb" ? portfolio.getParameter("pd")
-    : selectedMetricId === "lgd.irb" ? portfolio.getParameter("lgd") : null;
+    : selectedMetricId === "lgd.irb" ? portfolio.getParameter("lgd")
+      : selectedMetricId === "elRate.irb" ? portfolio.getExpectedLossRate()
+        : selectedMetricId === "provisionsRate.irb" ? portfolio.getProvisionsRate() : null;
   if (parameter) card.append(element("small", "approach-portfolio-coverage",
-    `${parameter.present}/${parameter.expected} IRB classes with a reported parameter and positive EAD`));
+    `${parameter.present}/${parameter.expected} IRB classes with ${selectedMetricId === "elRate.irb" ? "reported expected loss" : selectedMetricId === "provisionsRate.irb" ? "reported adjustments or provisions" : "a reported parameter"} and positive EAD`));
   const incomplete = [portfolio.stages.ead.standard, portfolio.stages.ead.irb, portfolio.stages.rwa.standard, portfolio.stages.rwa.irb]
     .some((metric) => metric.present < metric.expected);
   if (incomplete) card.append(element("small", "approach-portfolio-coverage", "Based on reported classes only; missing classes are omitted"));
@@ -348,7 +352,7 @@ function buildPortfolioCard(portfolio, state) {
 }
 
 function buildPeerDistribution(model) {
-  if (!["pd.irb", "lgd.irb", "density.standard", "density.irb"].includes(selectedMetricId)) return null;
+  if (!["pd.irb", "lgd.irb", "elRate.irb", "provisionsRate.irb", "density.standard", "density.irb"].includes(selectedMetricId)) return null;
   const section = element("section", "approach-distribution");
   const heading = element("div", "approach-section-title");
   heading.append(element("h3", "", `Peer distribution · ${metricLabel(selectedMetricId)}`),
@@ -573,7 +577,7 @@ function renderContextBenchmark(model, state) {
     contextSelection.append(group);
   }
   contextSelection.append(element("small", "approach-context-footnote",
-    `Framework ${model.framework} · ${state.peerDisplayMode === "anonymised" ? "Anonymized peers" : "Named peers"} · RWA density = RWA / EAD`));
+    `Framework ${model.framework} · ${state.peerDisplayMode === "anonymised" ? "Anonymized peers" : "Named peers"} · RWA density = RWA / EAD · IRB expected loss: X 0280 / X 0110 · IRB adjustments & provisions: |X 0290| / X 0110 on matching classes; X 0290 is not identified as IFRS 9 only`));
   contextSelection.scrollTop = previousScroll;
   const chartOptions = {
     benchmark: model.benchmark,

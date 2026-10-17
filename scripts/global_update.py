@@ -10,8 +10,11 @@ from __future__ import annotations
 import argparse
 import calendar
 import csv
+import gzip
 import json
 import re
+import shutil
+import tempfile
 try:
     import tomllib
 except ModuleNotFoundError:  # Python 3.10
@@ -91,6 +94,7 @@ class Application:
     extractions: tuple[Extraction, ...]
     config_file: str = ""
     clusters: tuple[str, ...] = ()
+    export_dataset: bool = False
 
 
 class QueryClient(Protocol):
@@ -201,8 +205,11 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
             raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
         context = file.name
-        _check_keys(config, {"name", "leis", "cluster", "clusters", "consolidation", "extractions"}, context)
+        _check_keys(config, {"name", "leis", "cluster", "clusters", "consolidation", "export-dataset", "extractions"}, context)
         name = _required_text(config.get("name"), "name", context)
+        export_dataset = config.get("export-dataset", False)
+        if type(export_dataset) is not bool:
+            raise ValueError(f"{context}: export-dataset doit être true ou false.")
         if name.casefold() in names:
             raise ValueError(f"{context}: nom d'application déjà utilisé : {name}.")
         output_name = _safe_name(name).casefold()
@@ -295,7 +302,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
             extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category, () if module in {"", "KRI"} else modules))
-        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters))
+        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset))
     return tuple(applications)
 
 
@@ -839,20 +846,52 @@ def _write_application_outputs(
         "html_app": str(html_path.relative_to(output_root)),
         "rows": len(rows),
     })
+    if application.export_dataset:
+        compressed_path = dataset_path.with_name(f"{html_path.stem}_data_source.csv.gz")
+        with dataset_path.open("rb") as source, compressed_path.open("wb") as target:
+            with gzip.GzipFile(fileobj=target, mode="wb", filename="", compresslevel=9, mtime=0) as compressor:
+                shutil.copyfileobj(source, compressor)
+        application_manifest["compressed_dataset"] = str(compressed_path.relative_to(output_root))
 
 
-def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int) -> int:
-    """Upload the completed HTML files, keeping the local manifest auditable."""
+def _connect_darwin():
+    """Use the same vl_connect Darwin client as the dashboard pipeline."""
 
     try:
         from vl_connect import darwin
     except ImportError as error:
-        raise RuntimeError("L'upload Darwin exige le package vl_connect sur cette machine.") from error
+        raise RuntimeError("L'accès Darwin exige le package vl_connect sur cette machine.") from error
     try:
         client = darwin.connect()
     except Exception as error:
-        raise RuntimeError(f"Connexion Darwin impossible pour le nœud {node_id}.") from error
+        raise RuntimeError("Connexion Darwin impossible.") from error
 
+    return client
+
+
+def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, client) -> tuple[Application, ...]:
+    for node_id in node_ids:
+        if type(node_id) is not int or node_id <= 0:
+            raise ValueError("Chaque identifiant Darwin de TOML doit être un entier positif.")
+    if len(set(node_ids)) != len(node_ids):
+        raise ValueError("La liste des identifiants Darwin de TOML contient des doublons.")
+    with tempfile.TemporaryDirectory(prefix="agora-config-") as temporary_directory:
+        directory = Path(temporary_directory)
+        for index, node_id in enumerate(node_ids, start=1):
+            destination = directory / f"darwin_{index:02d}_{node_id}.toml"
+            try:
+                client.get_file(local_file_path=str(destination), node_id=node_id)
+            except Exception as error:
+                raise RuntimeError(f"Téléchargement du TOML Darwin {node_id} échoué.") from error
+            if not destination.is_file():
+                raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier TOML attendu.")
+        return _read_configuration(directory, as_of)
+
+
+def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int, client=None) -> int:
+    """Upload completed HTMLs and requested datasets, recording each success."""
+
+    client = client if client is not None else _connect_darwin()
     upload_status = manifest["darwin_upload"]
     for application in manifest["applications"]:
         relative_html_path = application["html_app"]
@@ -872,11 +911,25 @@ def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifes
         application["darwin_upload"] = {"node_id": node_id, "filename": html_path.name, "status": "uploaded"}
         upload_status["uploaded"] += 1
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if "compressed_dataset" in application:
+            dataset_path = output_root / application["compressed_dataset"]
+            if not dataset_path.is_file():
+                raise RuntimeError(f"Dataset compressé introuvable pour l'upload Darwin : {dataset_path}")
+            try:
+                client.upload_file(
+                    local_file_path=str(dataset_path), node_id=node_id, filename=dataset_path.name,
+                    add_version=True, is_parent=True,
+                )
+            except Exception as error:
+                raise RuntimeError(f"Upload Darwin échoué pour {dataset_path.name} (nœud {node_id}).") from error
+            application["darwin_dataset_upload"] = {"node_id": node_id, "filename": dataset_path.name, "status": "uploaded"}
+            upload_status["datasets_uploaded"] += 1
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return upload_status["uploaded"]
 
 
 def global_update(
-    config_path: str | Path | None = None,
+    config_path: str | Path | int | None = None,
     *,
     mode: str = "preview",
     output_directory: str | Path | None = None,
@@ -884,6 +937,8 @@ def global_update(
     devo_client: QueryClient | None = None,
     compact_values: bool = False,
     darwin_upload: int | None = None,
+    darwin_config_ids: Iterable[int] | None = None,
+    darwin_client=None,
 ) -> dict:
     """Prépare, simule ou exécute toutes les applications du dossier TOML."""
 
@@ -895,20 +950,45 @@ def global_update(
             raise ValueError("darwin_upload doit être un identifiant de nœud entier positif.")
         if mode == "preview":
             raise ValueError("darwin_upload exige le mode 'test' ou 'hive' : preview ne génère pas de HTML.")
-    if mode == "hive" and config_path is None:
+    node_ids = tuple(darwin_config_ids or ())
+    if isinstance(config_path, str) and config_path.startswith("darwin:"):
+        node_text = config_path.removeprefix("darwin:")
+        if not node_text.isdecimal() or int(node_text) <= 0:
+            raise ValueError("--config darwin:NODE_ID exige un identifiant entier positif.")
+        config_path = int(node_text)
+    if type(config_path) is int:
+        node_ids = (config_path, *node_ids)
+        config_path = None
+    if node_ids and config_path is not None:
+        raise ValueError("Choisir un dossier local ou des identifiants Darwin pour les TOML, pas les deux.")
+    if any(type(node_id) is not int or node_id <= 0 for node_id in node_ids):
+        raise ValueError("Chaque identifiant Darwin de TOML doit être un entier positif.")
+    if len(set(node_ids)) != len(node_ids):
+        raise ValueError("La liste des identifiants Darwin de TOML contient des doublons.")
+    if mode == "hive" and config_path is None and not node_ids:
         raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
-    config_directory = Path(config_path) if config_path else EXAMPLE_CONFIG_DIRECTORY
     output_root = resolve_external_output_directory(output_directory)
     if mode == "hive" and output_root.exists() and any(output_root.iterdir()):
         raise ValueError(f"Le dossier de sortie Hive doit être vide : {output_root}")
-    applications = _read_configuration(config_directory, calculation_date)
+    if node_ids:
+        darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
+        applications = _download_darwin_configurations(node_ids, calculation_date, darwin_client)
+        config_source = ",".join(f"darwin:{node_id}" for node_id in node_ids)
+    else:
+        config_directory = Path(config_path) if config_path else EXAMPLE_CONFIG_DIRECTORY
+        applications = _read_configuration(config_directory, calculation_date)
+        config_source = str(config_directory.resolve())
+    if mode != "preview" and darwin_upload is None and any(app.export_dataset for app in applications):
+        raise ValueError("export-dataset = true exige --darwin_upload pour envoyer le dataset compressé.")
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     query_root = output_root / "queries"
-    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": str(config_directory.resolve()), "compact_values": compact_values, "applications": []}
+    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "applications": []}
     if darwin_upload is not None:
         manifest["darwin_upload"] = {"node_id": darwin_upload, "uploaded": 0, "total": len(applications)}
+        if any(app.export_dataset for app in applications):
+            manifest["darwin_upload"]["datasets_uploaded"] = 0
     for application in applications:
         folder = _safe_name(application.name)
         app_query_dir = query_root / folder
@@ -924,6 +1004,7 @@ def global_update(
             "leis": list(application.leis),
             "clusters": list(application.clusters),
             "consolidation": application.consolidation,
+            "export_dataset": application.export_dataset,
             "metadata_query": metadata_relative,
             "extractions": [],
         }
@@ -995,13 +1076,14 @@ def global_update(
     manifest_path = output_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_query_index(output_root / "query_index.md", manifest)
-    uploaded = _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload) if darwin_upload is not None else 0
+    uploaded = _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload, darwin_client) if darwin_upload is not None else 0
     return {"output_directory": str(output_root), "manifest_path": str(manifest_path), "mode": mode, "applications": len(applications), "darwin_uploads": uploaded}
 
 
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
-    parser.add_argument("--config", "--config-dir", type=Path, default=None, help="Dossier des fichiers TOML de paramétrage")
+    parser.add_argument("--config", "--config-dir", default=None, help="Dossier TOML local ou darwin:NODE_ID")
+    parser.add_argument("--config-darwin", type=int, action="append", default=None, metavar="NODE_ID", help="Nœud Darwin d'un TOML ; option répétable pour plusieurs applications")
     parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
     parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet (obligatoire)")
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
@@ -1009,7 +1091,7 @@ def _main() -> None:
     parser.add_argument("--darwin_upload", "--darwin-upload", type=int, default=None, metavar="NODE_ID", help="Uploader chaque HTML autonome dans le nœud parent Darwin indiqué")
     args = parser.parse_args()
     try:
-        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, darwin_upload=args.darwin_upload)
+        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")

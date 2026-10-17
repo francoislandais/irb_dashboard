@@ -4,6 +4,8 @@ leis = ["5493001KJTIIGC8Y1R12", "969500Q2MA9Y1GQG8B61"]
 # Alternative : remplacer la ligne précédente par `leis = []`, puis renseigner
 # cluster = ["CLUSTER_A", "CLUSTER_B"]
 consolidation = "HIGHEST"
+# Facultatif : exporter aussi le CSV compressé vers Darwin avec --darwin_upload.
+# export-dataset = true
 
 [[extractions]]
 category = "FINREP"

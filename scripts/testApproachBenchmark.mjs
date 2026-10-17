@@ -21,6 +21,8 @@ for (const framework of APPROACH_FRAMEWORKS) {
       assert.ok(available.has(`${framework}|${definition.tableId}|y_axis_rc_code|${mapping.y}`), `${framework} ${approach} ${portfolio.id} Y ${mapping.y}`);
     }
   }
+  assert.ok(available.has(`${framework}|C_08.01|x_axis_rc_code|0280`), `${framework} IRB expected loss X 0280`);
+  assert.ok(available.has(`${framework}|C_08.01|x_axis_rc_code|0290`), `${framework} IRB provisions X 0290`);
 }
 
 const columns = ["reporting_unit_id", "table_id", "x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code", "ref_2024_12_31", "ref_2025_03_31", "ref_2026_06_30"];
@@ -78,6 +80,8 @@ for (const [z, ead, rwa, pd, lgd] of [["qx2077", 60, 24, 0.01, 0.3], ["qx2078", 
   add("BANK_A", "C_08.01", "0110", "0070", z, ead);
   add("BANK_A", "C_08.01", "0010", "0070", z, pd);
   add("BANK_A", "C_08.01", "0230", "0070", z, lgd);
+  add("BANK_A", "C_08.01", "0280", "0010", z, ead * pd * lgd);
+  add("BANK_A", "C_08.01", "0290", "0010", z, z === "qx2077" ? -6 : 4);
 }
 const state = {
   columns,
@@ -164,6 +168,26 @@ assert.ok(Math.abs(large.benchmark.series.find((serie) => serie.jstCode === "BAN
 assert.equal(large.timeline[0].getParameter("pd").value, null);
 assert.equal(large.timeline[0].getParameter("pd").expected, 0);
 assert.equal(approachMetricValue(large.selectedPortfolio, "density.irb"), 0.48);
+const expectedLossModel = buildApproachBenchmarkModel(state, "", "largeCorporates", "elRate.irb");
+assert.ok(Math.abs(approachMetricValue(expectedLossModel.selectedPortfolio, "elRate.irb") - 0.0078) < 1e-12);
+assert.equal(expectedLossModel.selectedPortfolio.getExpectedLossRate().present, 2);
+assert.equal(expectedLossModel.benchmark.isPercent, true);
+assert.ok(Math.abs(expectedLossModel.benchmark.series[0].values.at(-1).value - 0.78) < 1e-12);
+const missingLossRows = rows.filter((row) => !(row[1] === "C_08.01" && row[2] === "0280" && row[4] === "qx2078"));
+const missingLossState = { ...state, rows: missingLossRows, dataIndexes: buildDataIndexes(columns, missingLossRows) };
+const partialExpectedLoss = buildApproachBenchmarkModel(missingLossState, "", "largeCorporates", "elRate.irb").selectedPortfolio;
+assert.equal(partialExpectedLoss.getExpectedLossRate().present, 1);
+assert.ok(Math.abs(approachMetricValue(partialExpectedLoss, "elRate.irb") - 0.003) < 1e-12);
+const provisionsModel = buildApproachBenchmarkModel(state, "", "largeCorporates", "provisionsRate.irb");
+assert.equal(approachMetricValue(provisionsModel.selectedPortfolio, "provisionsRate.irb"), 0.1);
+assert.equal(provisionsModel.selectedPortfolio.getProvisionsRate().present, 2);
+assert.equal(provisionsModel.benchmark.isPercent, true);
+assert.equal(provisionsModel.benchmark.series[0].values.at(-1).value, 10);
+const missingProvisionRows = rows.filter((row) => !(row[1] === "C_08.01" && row[2] === "0290" && row[4] === "qx2078"));
+const missingProvisionState = { ...state, rows: missingProvisionRows, dataIndexes: buildDataIndexes(columns, missingProvisionRows) };
+const partialProvisions = buildApproachBenchmarkModel(missingProvisionState, "", "largeCorporates", "provisionsRate.irb").selectedPortfolio;
+assert.equal(partialProvisions.getProvisionsRate().present, 1);
+assert.equal(approachMetricValue(partialProvisions, "provisionsRate.irb"), 0.1);
 const partialParameterRows = rows.filter((row) => !(row[1] === "C_08.01" && row[4] === "qx2078" && row[2] === "0010" && row[3] === "0070"));
 const partialParameterState = { ...state, rows: partialParameterRows, dataIndexes: buildDataIndexes(columns, partialParameterRows) };
 const partialLarge = buildApproachBenchmarkModel(partialParameterState, "", "largeCorporates", "pd.irb").selectedPortfolio;
