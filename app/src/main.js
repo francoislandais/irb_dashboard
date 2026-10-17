@@ -21,8 +21,8 @@ import {
   storeDatasetFileHandle,
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
-import { createDataStore } from "./data/dataStore.js?v=20260928-template-taxonomy";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261016-approach-responsive";
+import { createDataStore } from "./data/dataStore.js?v=20261016-irb-mechanics";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261017-approach-chart-date";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
@@ -39,7 +39,7 @@ const HEADER_URL_PARAM = "header";
 const UNIT_URL_PARAM = "unit";
 const PEERS_EXCLUDED_URL_PARAM = "peers_excluded";
 const PEER_DISPLAY_MODE_URL_PARAM = "peer_mode";
-const MODULE_URL_VALUES = new Set(["explorer", "irb", "credit-risk", "approaches"]);
+const MODULE_URL_VALUES = new Set(["explorer", "irb", "credit-risk", "approaches", "irb-mechanics"]);
 const MODULE_URL_ALIASES = new Map([["cet-1", "irb"]]);
 const standaloneData = window.__AGORA_STANDALONE_DATA__ ?? null;
 let currentCsvText = standaloneData?.csvText ?? "";

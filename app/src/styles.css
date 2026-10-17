@@ -5121,6 +5121,7 @@ table {
 /* Standardised vs IRB is a separate, scrollable credit-risk workspace. */
 .main-view:has(> .approaches-view.is-visible) { padding-block: 0; }
 .approaches-view {
+  position: relative;
   grid-template-columns: var(--approach-sidebar-width, 300px) 8px minmax(0, 1fr);
   gap: 4px;
   height: 100%;
@@ -5133,10 +5134,11 @@ table {
 
 .approach-context-panel {
   display: grid;
-  grid-template-rows: 180px minmax(220px, 1fr);
+  grid-template-rows: var(--approach-selection-height, 180px) 8px minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  padding-right: 5px;
 }
 
 .approach-panel-resizer {
@@ -5161,9 +5163,43 @@ table {
 .approaches-view.is-resizing .approach-panel-resizer::before { background: #7da7ba; }
 .approach-panel-resizer:focus-visible { outline: 2px solid #0a73a7; outline-offset: 2px; }
 .approaches-view.is-resizing { cursor: col-resize; user-select: none; }
+.approach-context-resizer { position: relative; cursor: row-resize; touch-action: none; }
+.approach-context-resizer::before { position: absolute; inset: 3.5px -13px auto 0; height: 1px; background: #d8e0e3; content: ""; }
+.approach-context-resizer:hover::before,
+.approach-context-resizer:focus-visible::before,
+.approaches-view.is-resizing-selection .approach-context-resizer::before { background: #7da7ba; }
+.approach-context-resizer:focus-visible { outline: 2px solid #0a73a7; outline-offset: 2px; }
+.approaches-view.is-resizing-selection { cursor: row-resize; user-select: none; }
+.approach-center-resizer {
+  position: absolute;
+  z-index: 5;
+  top: calc(14px + var(--approach-selection-height, 420px));
+  left: calc(26px + var(--approach-sidebar-width, 300px));
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 1px solid #b6c8d0;
+  border-radius: 7px;
+  background: #fff;
+  color: #5e7f8d;
+  box-shadow: 0 1px 4px #203b4b1a;
+  cursor: move;
+  touch-action: none;
+}
+.approach-center-resizer:hover,
+.approach-center-resizer:focus-visible,
+.approaches-view.is-resizing-center .approach-center-resizer { border-color: #4e91b0; color: #0a73a7; box-shadow: 0 1px 6px #0a73a733; }
+.approach-center-resizer:focus-visible { outline: 2px solid #0a73a7; outline-offset: 2px; }
+.approaches-view.is-resizing-center { cursor: move; user-select: none; }
+.irb-mechanics-view .approach-context-panel { display: block; overflow-x: hidden; overflow-y: auto; padding-right: 5px; }
 
 .approach-context-selection {
   box-sizing: border-box;
+  min-height: 0;
+  overflow-y: auto;
   padding: 18px 14px;
   border-radius: 12px;
   background: #f4f6f5;
@@ -5171,24 +5207,35 @@ table {
 }
 
 .approach-context-eyebrow { color: #738b95; font-size: 11px; letter-spacing: .08em; }
+.approach-context-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 3px 10px; }
+.approach-context-heading h2 { min-width: 0; }
+.approach-context-date { color: #8a9a9f; font-size: 12px; white-space: nowrap; }
+.approach-context-portfolio { color: #60747c; font-size: 12px; }
+.approach-context-metric-group { margin-top: 13px; }
+.approach-context-metric-group h3 { margin: 0 0 7px; color: #71868e; font-size: 11px; font-weight: 600; }
+.approach-context-metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; }
+.approach-context-metric-option { display: grid; align-content: space-between; gap: 3px; min-width: 0; min-height: 49px; padding: 7px 9px; border: 1px solid #dbe5e9; border-radius: 8px; background: #fff; color: #49636f; font: inherit; text-align: left; cursor: pointer; }
+.approach-context-metric-option:hover { border-color: #78adc5; background: #f8fcfe; }
+.approach-context-metric-option[aria-pressed="true"] { border-color: #2985b4; background: #e7f3fb; }
+.approach-context-metric-option span { font-size: 10px; line-height: 1.25; }
+.approach-context-metric-option strong { color: #0d6a99; font-size: 15px; font-variant-numeric: tabular-nums; }
+.approach-context-footnote { display: block; margin-top: 14px; line-height: 1.4; }
 .approach-context-selection h2 { margin: 10px 0 2px; color: #0c638f; font-size: 17px; line-height: 1.3; }
 .approach-context-selection p { margin: 0; color: #526971; font-size: 12px; }
 .approach-context-value { margin: 15px 0 2px; color: #173c4f; font-size: 27px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .approach-context-selection small { color: #72868b; font-size: 11px; }
-.approach-context-chart-wrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; padding-top: 16px; }
+.approach-context-chart-wrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; padding-top: 8px; }
 .approach-context-chart-wrap > .approach-benchmark-chart {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  height: min(330px, 48vh);
+  height: 100%;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
-.approach-context-panel.is-chart-wide .approach-benchmark-chart { height: min(440px, 60vh); }
-
 .approach-main-pane {
   grid-column: 3;
   display: grid;
@@ -5207,7 +5254,6 @@ table {
 .approach-header,
 .approach-card-heading,
 .approach-portfolio-top,
-.approach-portfolio-rwa,
 .approach-share-amounts {
   display: flex;
   justify-content: space-between;
@@ -5220,8 +5266,6 @@ table {
 .approach-header h1 { margin: 8px 0 4px; color: #064f7b; font-size: clamp(26px, 2.8vw, 38px); letter-spacing: -.03em; }
 .approach-header p,
 .approach-section-title p { margin: 0; color: #68777d; line-height: 1.45; }
-.approach-reference-field { display: grid; gap: 5px; color: #62757d; font-size: 12px; white-space: nowrap; }
-.approach-reference-field select { min-width: 150px; height: 38px; padding: 0 10px; border: 1px solid #cbd8de; border-radius: 9px; background: #fff; color: #234555; font: inherit; font-size: 14px; }
 
 .approach-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
 .approach-share-card { min-width: 0; padding: 22px; border: 1px solid #dce6eb; border-radius: 14px; background: #f8fbfd; text-align: left; }
@@ -5241,20 +5285,25 @@ table {
 .approach-section-title h3 { margin: 0; color: #0d5f8b; font-size: 18px; }
 .approach-section-title p { max-width: 60%; font-size: 12px; text-align: right; }
 .approach-portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
-.approach-portfolio-card { display: block; min-width: 0; min-height: 164px; padding: 15px; border: 1px solid #dce5e9; border-radius: 11px; background: #fff; color: inherit; text-align: left; }
+.approach-portfolio-card { display: block; min-width: 0; min-height: 140px; padding: 15px; border: 1px solid #dce5e9; border-radius: 11px; background: #fff; color: inherit; text-align: left; }
 .approach-portfolio-card:hover { border-color: #6eaaca; background: #f9fcfe; }
 .approach-portfolio-card.is-active { border-color: #2386ba; box-shadow: 0 0 0 2px #d8edfa inset; }
-.approach-portfolio-main, .approach-portfolio-rwa { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
-.approach-portfolio-main:hover .approach-portfolio-top h4,
-.approach-portfolio-rwa:hover span { color: #0073a9; }
+.approach-portfolio-main { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; }
+.approach-portfolio-main:hover .approach-portfolio-top h4 { color: #0073a9; }
 .approach-portfolio-top { align-items: baseline; }
 .approach-portfolio-top h4 { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3; }
 .approach-portfolio-share { color: #006ba1; font-size: 18px; font-weight: 650; white-space: nowrap; }
 .approach-portfolio-card .approach-share-bar { height: 7px; margin: 13px 0 10px; }
-.approach-portfolio-rwa { display: flex; justify-content: space-between; gap: 8px; color: #667a82; font-size: 12px; }
-.approach-portfolio-rwa strong { color: #2d667f; white-space: nowrap; }
 .approach-portfolio-note { margin: 12px 0 0; color: #687a80; font-size: 11px; line-height: 1.4; }
 .approach-portfolio-coverage { display: block; margin-top: 8px; color: #a27431; font-size: 11px; }
+
+.approach-distribution { padding: 18px 20px 16px; border: 1px solid #e2eaf0; border-radius: 12px; background: #fbfdfe; }
+.approach-distribution-bars { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: end; gap: 8px; height: 125px; border-bottom: 1px solid #b9cbd4; }
+.approach-distribution-bin { display: flex; flex-direction: column; justify-content: end; align-items: center; height: 100%; min-width: 0; }
+.approach-distribution-count { margin-bottom: 4px; color: #738b97; font-size: 11px; }
+.approach-distribution-bar { display: block; width: 100%; height: var(--distribution-height); border-radius: 4px 4px 0 0; background: #b5d5e6; }
+.approach-distribution-bin.is-selected .approach-distribution-bar { background: #0875a8; }
+.approach-distribution-axis { display: flex; justify-content: space-between; gap: 8px; padding-top: 6px; color: #71868e; font-size: 11px; }
 
 .approach-stage-table,
 .approach-peer-table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -5273,8 +5322,8 @@ table {
 .approach-peer-table td { color: #244955; text-align: right; font-variant-numeric: tabular-nums; }
 .approach-stage-table td small { display: block; margin-top: 2px; color: #91a0a6; font-size: 10px; }
 .approach-stage-table td .approach-stage-coverage { color: #a27431; }
-.approach-metric-button, .approach-history-value { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-variant-numeric: inherit; cursor: pointer; }
-.approach-metric-button:hover, .approach-history-value:hover, .approach-metric-button[aria-pressed="true"] { color: #006da3; text-decoration: underline; }
+.approach-metric-button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-variant-numeric: inherit; cursor: pointer; }
+.approach-metric-button:hover, .approach-metric-button[aria-pressed="true"] { color: #006da3; text-decoration: underline; }
 .approach-stage-table tbody tr:last-child { background: #eef7fb; font-weight: 600; }
 .approach-source-details { margin-top: 13px; color: #607985; font-size: 12px; }
 .approach-source-details summary { width: fit-content; cursor: pointer; color: #126c99; }
@@ -5291,24 +5340,98 @@ table {
 .approach-history-table td:nth-child(2) { text-align: left; }
 .approach-history-table thead { color: #617780; background: #f3f7f9; }
 .approach-history-table tbody tr.is-selected { background: #eaf4fa; }
-.approach-history-date { padding: 0; border: 0; background: none; color: #006da3; font: inherit; cursor: pointer; }
-.approach-history-date:hover { text-decoration: underline; }
 .approach-stages-footnote,
 .approach-method-note,
 .approach-anonymous-note { color: #74858a; font-size: 12px; line-height: 1.5; }
 .approach-empty { padding: 35px; border: 1px solid #e2e9ec; border-radius: 12px; color: #687a80; }
 
+.irb-intro { margin: 0; max-width: 930px; color: #5e737c; font-size: 14px; line-height: 1.6; }
+.irb-controls { padding: 20px; border: 1px solid #dfe9ed; border-radius: 13px; background: #fbfdfe; }
+.irb-mechanics-view .irb-controls { margin-top: 16px; padding: 15px; }
+.irb-controls-top { display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
+.irb-controls h3, .irb-comparison h3, .irb-peers h3 { margin: 0; color: #125f87; font-size: 18px; }
+.irb-controls select { min-width: min(100%, 300px); max-width: 100%; padding: 9px 12px; border: 1px solid #ccdce4; border-radius: 9px; background: #fff; color: #264b5d; font: inherit; }
+.irb-input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 20px; margin-top: 25px; }
+.irb-mechanics-view .irb-input-grid { grid-template-columns: minmax(0, 1fr); gap: 17px; margin-top: 18px; }
+.irb-input { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 8px; align-items: baseline; color: #536c78; font-size: 13px; }
+.irb-input-title { font-weight: 550; }
+.irb-input output { color: #006da3; font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.irb-input input { grid-column: 1 / -1; width: 100%; accent-color: #0877ad; }
+.irb-input input:disabled { opacity: .35; }
+.irb-input-origin { grid-column: 1 / -1; color: #8b9da4; font-size: 11px; }
+.irb-reset { margin-top: 17px; padding: 0; border: 0; background: transparent; color: #0674a8; font: inherit; font-size: 12px; cursor: pointer; }
+.irb-reset:hover { text-decoration: underline; }
+.approach-context-selection .irb-context-reported { margin-top: 12px; color: #607981; font-size: 12px; }
+.approach-context-selection .irb-context-losses { margin-top: 12px; color: #607981; font-size: 12px; }
+.irb-flow, .irb-compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+.irb-flow-card, .irb-compare-card { display: grid; align-content: start; gap: 9px; min-width: 0; padding: 17px; border: 1px solid #e1eaf0; border-radius: 12px; background: #fff; }
+.irb-flow-card:first-child { border-color: #a5d6d0; background: #f5fbfa; }
+.irb-flow-card:nth-child(2) { border-color: #bad5e7; background: #f5fafe; }
+.irb-flow-card:last-child { border-color: #9ec9df; background: #eff8fc; }
+.irb-flow-card span, .irb-compare-card span { color: #5b717b; font-size: 13px; }
+.irb-flow-card strong, .irb-compare-card strong { color: #155575; font-size: clamp(19px, 2vw, 25px); font-weight: 650; font-variant-numeric: tabular-nums; }
+.irb-flow-card small, .irb-compare-card small { color: #7b8d93; font-size: 11px; line-height: 1.4; }
+.irb-comparison, .irb-peers { display: grid; gap: 14px; }
+.irb-chart-section { display: grid; gap: 12px; }
+.irb-chart-section h3 { margin: 0; color: #125f87; font-size: 18px; }
+.irb-simulation { display: grid; gap: 10px; }
+.irb-simulation-header { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.irb-simulation h3 { margin: 0 0 5px; color: #125f87; font-size: 18px; }
+.irb-simulation-redraw { flex: 0 0 auto; padding: 6px 10px; border: 1px solid #cfdee5; border-radius: 7px; background: #fff; color: #176c97; font: inherit; font-size: 12px; cursor: pointer; }
+.irb-simulation-redraw:hover { background: #f0f8fc; }
+.irb-simulation-figure { margin: 0; padding: 8px 12px 0; border: 1px solid #e1eaf0; border-radius: 12px; background: #fff; }
+.irb-simulation-figure svg { display: block; width: 100%; height: auto; }
+.irb-simulation-stats { margin: 0; color: #506f7d; font-size: 12px; line-height: 1.5; }
+.irb-shock-band { fill: #edf6fa; }
+.irb-shock-grid { stroke: #dce7eb; stroke-width: 1; stroke-dasharray: 3 5; }
+.irb-shock-tail { stroke: #b7784c; stroke-width: 1.2; stroke-dasharray: 5 5; }
+.irb-shock-path { fill: none; stroke: #137cac; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.irb-shock-point { fill: #137cac; }
+.irb-shock-point.is-severe { fill: #b7784c; }
+.irb-shock-tick { fill: #778d96; font-size: 11px; text-anchor: end; }
+.irb-shock-tail-label { fill: #987152; font-size: 11px; text-anchor: end; }
+.irb-main-figure { margin: 0; padding: 14px 18px 0; border: 1px solid #e1eaf0; border-radius: 12px; background: #fff; }
+.irb-main-figure svg { display: block; width: 100%; height: auto; }
+.irb-chart-explanation { margin: 0; max-width: 850px; color: #526f79; font-size: 12px; line-height: 1.5; }
+.irb-muted { margin: 0; color: #71858d; font-size: 12px; line-height: 1.5; }
+.irb-peer-list { display: grid; max-height: 260px; overflow-y: auto; }
+.irb-peer-row { display: flex; justify-content: space-between; gap: 14px; padding: 9px 4px; border-bottom: 1px solid #e9eef0; color: #4c6670; font-size: 13px; }
+.irb-peer-row strong, .irb-peer-median { color: #176184; font-variant-numeric: tabular-nums; }
+.irb-source-details { padding-top: 15px; border-top: 1px solid #e4ebee; color: #69808a; font-size: 12px; }
+.irb-source-details summary { width: fit-content; color: #126e9d; cursor: pointer; }
+.irb-source-text { max-width: 920px; line-height: 1.55; }
+.irb-source-text a { color: #0876a6; }
+.irb-axis { stroke: #cedce2; stroke-width: 1; }
+.irb-gaussian-fill { fill: #e8f3f9; }
+.irb-gaussian-line { fill: none; stroke: #1685bb; stroke-width: 2.4; }
+.irb-expected-marker { stroke: #258e7e; stroke-width: 2; }
+.irb-expected-dot { fill: #258e7e; }
+.irb-el-text { fill: #207d70; }
+.irb-tail-text { fill: #ab7049; }
+.irb-ul-text { fill: #a26842; }
+.irb-loss-baseline { fill: none; stroke: #96a9b0; stroke-width: 2; stroke-dasharray: 5 5; }
+.irb-expected-line { stroke: #50a89b; stroke-width: 1.3; stroke-dasharray: 4 4; }
+.irb-stress-curve { fill: none; stroke: #0875ac; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.irb-tail-line { stroke: #b17749; stroke-width: 1.2; stroke-dasharray: 4 4; }
+.irb-tail-dot { fill: #b17749; }
+.irb-unexpected-bracket { stroke: #b17749; stroke-width: 1.3; }
+.irb-chart-label { fill: #607a84; font-size: 13px; }
+.irb-chart-label-end { text-anchor: end; fill: #a16b43; }
+.irb-tick { fill: #82939a; font-size: 11px; text-anchor: middle; }
+.irb-note { text-anchor: start; }
+
 @media (max-width: 850px) {
   .approaches-view { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); overflow: auto; }
   .approach-panel-resizer { display: none; margin: 0; }
-  .approach-context-panel { grid-template-columns: minmax(0, 1fr) minmax(180px, 1fr); grid-template-rows: 180px; }
+  .approach-center-resizer { display: none; }
+  .approach-context-panel { display: block; overflow: visible; }
+  .approach-context-resizer { display: none; }
   .approach-context-chart-wrap { padding-top: 0; }
   .approach-context-chart-wrap > .approach-benchmark-chart { height: 180px; }
   .approach-context-panel.is-chart-wide .approach-benchmark-chart { height: 180px; }
   .approach-main-pane { grid-column: 1; overflow: visible; padding: 0 0 32px; }
   .approach-header,
   .approach-section-title { display: block; }
-  .approach-reference-field { margin-top: 15px; }
   .approach-section-title p { max-width: none; margin-top: 5px; text-align: left; }
   .approach-overview { grid-template-columns: 1fr; }
   .approach-stage-table,

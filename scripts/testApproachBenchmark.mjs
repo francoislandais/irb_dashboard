@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseCsv } from "../app/src/data/csvParser.js";
 import { buildDataIndexes } from "../app/src/data/dataIndex.js";
-import { APPROACHES, APPROACH_FRAMEWORKS, APPROACH_PORTFOLIOS, APPROACH_TAXONOMY_MAP, buildApproachBenchmarkModel, standardShare } from "../app/src/data/approachBenchmark.js";
+import { APPROACHES, APPROACH_FRAMEWORKS, APPROACH_PORTFOLIOS, APPROACH_TAXONOMY_MAP, approachMetricValue, buildApproachBenchmarkModel, standardShare } from "../app/src/data/approachBenchmark.js";
 
 const source = parseCsv(readFileSync(new URL("../app/assets/ITS_all_dimension_mapping.csv", import.meta.url), "latin1"));
 const column = Object.fromEntries(source.columns.map((name, index) => [name, index]));
@@ -72,6 +72,13 @@ add("BANK_A", "C_08.01", "0110", "0010", "0007", "", 20);
 add("BANK_A", "C_08.01", "0110", "0010", "0013", "", 10);
 add("BANK_A", "C_07.00", "0200", "0010", "0003", "", 40);
 add("BANK_A", "C_08.01", "0110", "0010", "0003", "", 30);
+for (const [z, ead, rwa, pd, lgd] of [["qx2077", 60, 24, 0.01, 0.3], ["qx2078", 40, 24, 0.03, 0.5]]) {
+  add("BANK_A", "C_08.01", "0110", "0010", z, ead);
+  add("BANK_A", "C_08.01", "0260", "0010", z, rwa);
+  add("BANK_A", "C_08.01", "0110", "0070", z, ead);
+  add("BANK_A", "C_08.01", "0010", "0070", z, pd);
+  add("BANK_A", "C_08.01", "0230", "0070", z, lgd);
+}
 const state = {
   columns,
   rows,
@@ -145,6 +152,23 @@ assert.equal(transitionModel.framework, "4.0");
 assert.equal(transitionModel.total.eadShare, 0.6);
 assert.equal(standardShare(0, 100), 0);
 assert.equal(standardShare(null, 100), null);
+const large = buildApproachBenchmarkModel(state, "", "largeCorporates", "pd.irb");
+assert.equal(large.selectedPortfolio.eadShare, null);
+assert.equal(large.selectedPortfolio.stages.ead.irb.value, 100);
+assert.equal(large.selectedPortfolio.density.irb, 0.48);
+assert.equal(large.selectedPortfolio.getParameter("pd").value, 0.018);
+assert.equal(large.selectedPortfolio.getParameter("lgd").value, 0.38);
+assert.equal(large.selectedPortfolio.getParameter("pd").present, 2);
+assert.equal(large.benchmark.isPercent, true);
+assert.ok(Math.abs(large.benchmark.series.find((serie) => serie.jstCode === "BANK_A").values.at(-1).value - 1.8) < 1e-10);
+assert.equal(large.timeline[0].getParameter("pd").value, null);
+assert.equal(large.timeline[0].getParameter("pd").expected, 0);
+assert.equal(approachMetricValue(large.selectedPortfolio, "density.irb"), 0.48);
+const partialParameterRows = rows.filter((row) => !(row[1] === "C_08.01" && row[4] === "qx2078" && row[2] === "0010" && row[3] === "0070"));
+const partialParameterState = { ...state, rows: partialParameterRows, dataIndexes: buildDataIndexes(columns, partialParameterRows) };
+const partialLarge = buildApproachBenchmarkModel(partialParameterState, "", "largeCorporates", "pd.irb").selectedPortfolio;
+assert.equal(partialLarge.getParameter("pd").value, 0.01);
+assert.equal(partialLarge.getParameter("pd").present, 1);
 
 // Conflicting duplicates must not inflate an institution's EAD.
 const duplicateRows = [...rows, ["BANK_A", "C_07.00", "0200", "0010", "qx01", "", "", "999"]];

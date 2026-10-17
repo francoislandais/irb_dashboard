@@ -15,6 +15,10 @@ The bridge starts at framework **3.2**, the last pre-CRR3 layout in this project
 
 These X codes and total row Y `0010` occur in all three supported frameworks. The SME standardised subset uses Y `0020` instead. Every table value is read from the corresponding reported X coordinate; the four stages are **not** added together.
 
+The dashboard also offers **risk density** (`reported RWA / reported EAD`) separately for each approach. This is a risk-weight intensity, not a statistical probability density. IRB **PD** (X `0010`) and **LGD** (X `0230`) use the grade/pool row Y `0070` where reported, falling back to Y `0010` for the same Z class. They are averaged across available classes using the corresponding exposure value (X `0110`) as a weight; a missing class is omitted and the coverage count is displayed. No PD or LGD is inferred for the standardised approach. Those aggregate averages are descriptive and must not be inserted once into a nonlinear IRB capital formula to reproduce reported RWA.
+
+When a risk density, PD or LGD indicator is selected, a small histogram shows its empirical distribution across the selected institution and available peers at that date. For PD, these are **institution-level averages**, not the unobservable distribution of individual obligor PDs within each bank. The chart uses a few equal-width bins without fitting a continuous density to a small peer sample.
+
 ## Z-axis crosswalk
 
 Codes joined with `+` are summed only within that approach and group. A parent total is not added to its children. In 3.2, IRB `0001` and `0002` are separate IRB A and IRB F totals. In 4.0/4.2, `qx01` is a reported total but is missing for several institutions in the inspected dataset; the bridge reconstructs it from IRB A `qx2023`, IRB F `qx2022`, and CIU `qx2082` where reported. In the inspected dataset, all 24 non-empty `qx01` values across the four dashboard stages and two post-CRR3 dates reconcile with this decomposition.
@@ -26,10 +30,16 @@ Codes joined with `+` are summed only within that approach and group. A parent t
 | Regional authorities & public-sector entities | 0003 + 0004 | **Not isolated** | qx23 + qx22 | qx2071 + qx2072 + qx2073 + qx2074 |
 | Institutions | 0007 | 0005 + 0006 | qx19 | qx2018 |
 | Corporates | 0008 | 0007 + 0008 + 0009 + 0010 + 0011 + 0012 | qx2036 + qx2037 | qx2012 + qx2013 + qx2014 + qx2015 + qx2075 + qx2076 |
+| Specialised lending | Not isolated | 0009 + 0010 | qx2037 | qx2014 + qx2015 |
 | Retail, excluding property-secured | 0009 | 0015 + 0016 + 0017 | qx26 | qx2009 + qx2055 + qx2081 |
 | SMEs, memo subset | Y 0020 / Z 0001 | 0007 + 0008 + 0013 + 0016 | Y 0020 / Z qx01 | qx2079 + qx2080 + qx2008 + qx2011 |
+| Corporate SMEs, IRB only | Not isolated | 0007 + 0008 | Not isolated | qx2079 + qx2080 |
+| Large corporates, IRB memo | Not separately identifiable | Not separately identifiable | Not separately identifiable | qx2077 + qx2078 |
+| Qualifying revolving retail, IRB only | Not isolated | 0015 | Not isolated | qx2009 |
 
 The standardised short-term assessment class mixes institutions and corporates (3.2 `0014`, post-CRR3 `qx18`), so it is excluded from both corresponding analytical groups. Post-CRR3 `qx17` is a corporate heading in the dictionary but the inspected dataset reports its amounts under `qx2036` (other) and `qx2037` (specialised lending); using the heading would produce a false zero share. The SME subset overlaps corporate and retail exposures and must not be added to either group or to the total. Property-secured exposures have a different perimeter across the two approaches; the narrow retail comparison excludes them on both sides. Regional/public-sector IRB exposures cannot be isolated from the 3.2 Z axis, so no historical cross-approach share is calculated for that group.
+
+Corporate SMEs, large corporates and qualifying revolving retail add IRB-specific views; they do not acquire a fictitious standardised counterpart. Large corporates is an overlapping memo subset whose pre-2025 values are unavailable rather than zero. Specialised lending becomes a cross-approach comparison only in the post-2025 layout.
 
 An empty source cell is omitted from a group sum, with reported-class coverage shown in the dashboard. If one mapped approach has no reported cell and the other has a positive reported amount, its share contribution is zero. A class that **does not exist as a separate 3.2 category** is different from an empty cell: it makes the corresponding group comparison unavailable. Conflicting non-empty values for an identical data point also make that sum unavailable.
 

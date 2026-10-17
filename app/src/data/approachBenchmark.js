@@ -3,7 +3,7 @@ import { getReferenceColumns } from "./core/referenceColumns.js";
 import { getTaxonomyFrameworkForDate } from "./taxonomyDimensionData.js";
 
 export const APPROACH_FRAMEWORKS = ["3.2", "4.0", "4.2"];
-export const APPROACH_BENCHMARK_METRICS = ["eadShare", "rwaShare", ...["original", "afterCrm", "ead", "rwa"].flatMap(
+export const APPROACH_BENCHMARK_METRICS = ["eadShare", "rwaShare", "density.standard", "density.irb", "pd.irb", "lgd.irb", ...["original", "afterCrm", "ead", "rwa"].flatMap(
   (stage) => ["standard", "irb"].map((approach) => `${stage}.${approach}`)
 )];
 
@@ -28,24 +28,31 @@ export const APPROACH_PORTFOLIOS = [
   { id: "regional", label: "Regional government & public sector", note: "Pre-2025 IRB does not isolate this group: no cross-approach share is calculated for those dates." },
   { id: "institutions", label: "Institutions", note: "The standardised mixed short-term institution/corporate class is excluded in every version." },
   { id: "corporates", label: "Corporates", note: "The standardised mixed short-term class is excluded. IRB SME, specialised lending and other corporates are included." },
+  { id: "specialisedLending", label: "Specialised lending", note: "Separately comparable after 2025; the pre-CRR3 standardised class is not isolated." },
   { id: "retail", label: "Retail · excluding property-secured", note: "Property-secured exposures are excluded on both sides because the standardised mortgage class also contains non-retail counterparties." },
-  { id: "sme", label: "SMEs · memo subset", note: "Cross-cutting subset, not additive with other groups. Standardised uses row 0020; IRB uses explicit SME classes." }
+  { id: "sme", label: "SMEs · memo subset", note: "Cross-cutting subset, not additive with other groups. Standardised uses row 0020; IRB uses explicit SME classes." },
+  { id: "corporateSme", label: "Corporate SMEs · IRB", irbOnly: true, note: "IRB corporate-SME classes only; no matching standardised corporate-SME class." },
+  { id: "largeCorporates", label: "Large corporates · IRB memo", irbOnly: true, note: "IRB-only memo class in the post-2025 taxonomy. No separately identifiable standardised equivalent or pre-2025 series." },
+  { id: "retailRevolving", label: "Retail · qualifying revolving · IRB", irbOnly: true, note: "IRB-specific retail class; no separately identifiable standardised counterpart." }
 ];
 
 const source = (z, y = "0010") => ({ y, z });
 const postCrr3 = {
   standard: {
     total: source(["qx01"]), sovereign: source(["qx16"]), regional: source(["qx23", "qx22"]),
-    institutions: source(["qx19"]), corporates: source(["qx2036", "qx2037"]), retail: source(["qx26"]),
-    sme: source(["qx01"], "0020")
+    institutions: source(["qx19"]), corporates: source(["qx2036", "qx2037"]),
+    specialisedLending: source(["qx2037"]), retail: source(["qx26"]),
+    sme: source(["qx01"], "0020"), corporateSme: source([]), largeCorporates: source([]), retailRevolving: source([])
   },
   irb: {
     total: source(["qx2023", "qx2022", "qx2082"]), sovereign: source(["qx2020", "qx2021"]),
     regional: source(["qx2071", "qx2072", "qx2073", "qx2074"]),
-    institutions: source(["qx2018"]),
+    institutions: source(["qx2018"]), specialisedLending: source(["qx2014", "qx2015"]),
     corporates: source(["qx2012", "qx2013", "qx2014", "qx2015", "qx2075", "qx2076"]),
     retail: source(["qx2009", "qx2055", "qx2081"]),
-    sme: source(["qx2079", "qx2080", "qx2008", "qx2011"])
+    sme: source(["qx2079", "qx2080", "qx2008", "qx2011"]),
+    corporateSme: source(["qx2079", "qx2080"]), largeCorporates: source(["qx2077", "qx2078"]),
+    retailRevolving: source(["qx2009"])
   }
 };
 
@@ -56,15 +63,16 @@ export const APPROACH_TAXONOMY_MAP = {
   "3.2": {
     standard: {
       total: source(["0001"]), sovereign: source(["0002"]), regional: source(["0003", "0004"]),
-      institutions: source(["0007"]), corporates: source(["0008"]), retail: source(["0009"]),
-      sme: source(["0001"], "0020")
+      institutions: source(["0007"]), corporates: source(["0008"]), specialisedLending: source([]), retail: source(["0009"]),
+      sme: source(["0001"], "0020"), corporateSme: source([]), largeCorporates: source([]), retailRevolving: source([])
     },
     irb: {
       total: source(["0001", "0002"]), sovereign: source(["0003", "0004"]),
-      regional: source([]), institutions: source(["0005", "0006"]),
+      regional: source([]), institutions: source(["0005", "0006"]), specialisedLending: source(["0009", "0010"]),
       corporates: source(["0007", "0008", "0009", "0010", "0011", "0012"]),
       retail: source(["0015", "0016", "0017"]),
-      sme: source(["0007", "0008", "0013", "0016"])
+      sme: source(["0007", "0008", "0013", "0016"]), corporateSme: source(["0007", "0008"]),
+      largeCorporates: source([]), retailRevolving: source(["0015"])
     }
   },
   "4.0": postCrr3,
@@ -80,6 +88,33 @@ function cellValue(state, reference, institutionId, tableId, xCode, yCode, zCode
   // Duplicate extractions with the same value are harmless; conflicting
   // values must not be silently summed into a misleading benchmark.
   return { value: values.size === 1 ? [...values][0] : null, conflict: values.size > 1 };
+}
+
+function irbParameter(state, reference, institutionId, portfolio, xCode) {
+  const mapping = APPROACH_TAXONOMY_MAP[reference.framework].irb[portfolio.id];
+  let weightedSum = 0, weightSum = 0, present = 0, conflict = false;
+  for (const zCode of mapping.z) {
+    // The grade/pool row is the reporting basis for PD and LGD; a template
+    // that only reports the total row remains usable with the same Z class.
+    let parameter = cellValue(state, reference, institutionId, "C_08.01", xCode, "0070", zCode);
+    let exposure = cellValue(state, reference, institutionId, "C_08.01", "0110", "0070", zCode);
+    if (parameter.value === null && !parameter.conflict) {
+      parameter = cellValue(state, reference, institutionId, "C_08.01", xCode, "0010", zCode);
+      exposure = cellValue(state, reference, institutionId, "C_08.01", "0110", "0010", zCode);
+    }
+    conflict ||= parameter.conflict || exposure.conflict;
+    if (Number.isFinite(parameter.value) && parameter.value >= 0 && parameter.value <= 1
+      && Number.isFinite(exposure.value) && exposure.value > 0) {
+      weightedSum += parameter.value * exposure.value;
+      weightSum += exposure.value;
+      present += 1;
+    }
+  }
+  return {
+    value: !conflict && weightSum > 0 ? weightedSum / weightSum : null,
+    present, expected: mapping.z.length, conflict,
+    source: { tableId: "C_08.01", x: xCode, y: "0070 → 0010", z: mapping.z }
+  };
 }
 
 function sumPortfolio(state, reference, institutionId, approach, portfolio, stage) {
@@ -123,9 +158,20 @@ function portfolioMetrics(state, reference, institutionId, portfolio) {
       irb: sumPortfolio(state, reference, institutionId, "irb", portfolio, stage)
     };
   }
+  const parameterCache = new Map();
   return {
     ...portfolio,
     stages,
+    getParameter: (kind) => {
+      if (!parameterCache.has(kind)) parameterCache.set(kind,
+        irbParameter(state, reference, institutionId, portfolio, kind === "pd" ? "0010" : "0230"));
+      return parameterCache.get(kind);
+    },
+    density: Object.fromEntries(["standard", "irb"].map((approach) => {
+      const ead = stages.ead[approach], rwa = stages.rwa[approach];
+      return [approach, !ead.conflict && !rwa.conflict && ead.value > 0 && Number.isFinite(rwa.value)
+        ? rwa.value / ead.value : null];
+    })),
     eadShare: availableShare(stages.ead.standard, stages.ead.irb),
     rwaShare: availableShare(stages.rwa.standard, stages.rwa.irb)
   };
@@ -139,14 +185,18 @@ function percentile(sorted, fraction) {
   return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
 }
 
-function benchmarkValue(metrics, metricId) {
+export function approachMetricValue(metrics, metricId) {
   if (metricId === "eadShare" || metricId === "rwaShare") {
-    const share = metrics[metricId];
-    return Number.isFinite(share) ? share * 100 : null;
+    return metrics[metricId] ?? null;
   }
   const [stage, approach] = metricId.split(".");
+  if (stage === "density") return metrics.density[approach];
+  if (stage === "pd" || stage === "lgd") return approach === "irb" ? metrics.getParameter(stage)?.value ?? null : null;
   return metrics.stages[stage]?.[approach]?.value ?? null;
 }
+
+export const isApproachPercentMetric = (metricId) => metricId.endsWith("Share") ||
+  metricId.startsWith("density.") || metricId === "pd.irb" || metricId === "lgd.irb";
 
 export function buildApproachBenchmarkModel(state, referenceName = "", portfolioId = "total", metricId = "eadShare") {
   if (!state?.dataIndexes || !state?.selectedJst) return { status: "no-data" };
@@ -175,11 +225,10 @@ export function buildApproachBenchmarkModel(state, referenceName = "", portfolio
   }));
   const selectedPeers = new Set(state.peerJstCodes ?? []);
   const peerIds = (state.jstOptions ?? []).filter((id) => id !== institutionId && selectedPeers.has(id));
-  const totalPeers = peerIds.map((id) => ({ institutionId: id, ...metricsFor(reference, id, APPROACH_PORTFOLIOS[0]) }))
-    .filter((peer) => peer.eadShare !== null || peer.rwaShare !== null);
-  const peers = selectedPortfolio.id === "total" ? totalPeers : peerIds
-    .map((id) => ({ institutionId: id, ...metricsFor(reference, id, selectedPortfolio) }))
-    .filter((peer) => peer.eadShare !== null || peer.rwaShare !== null);
+  const totalPeers = peerIds.map((id) => ({ institutionId: id, ...metricsFor(reference, id, APPROACH_PORTFOLIOS[0]) }));
+  const peers = (selectedPortfolio.id === "total" ? totalPeers : peerIds
+    .map((id) => ({ institutionId: id, ...metricsFor(reference, id, selectedPortfolio) })))
+    .filter((peer) => approachMetricValue(peer, selectedMetricId) !== null);
   const distribution = Object.fromEntries(["eadShare", "rwaShare"].map((key) => {
     const values = totalPeers.map((peer) => peer[key]).filter((value) => value !== null).sort((a, b) => a - b);
     return [key, {
@@ -191,14 +240,17 @@ export function buildApproachBenchmarkModel(state, referenceName = "", portfolio
   }));
   const benchmark = {
     dates: references,
-    isPercent: selectedMetricId.endsWith("Share"),
+    isPercent: isApproachPercentMetric(selectedMetricId),
     metricId: selectedMetricId,
     series: [institutionId, ...peerIds].map((id) => ({
       jstCode: id,
       values: references.map((candidate) => ({
         date: candidate.date,
         label: candidate.label,
-        value: benchmarkValue(metricsFor(candidate, id, selectedPortfolio), selectedMetricId)
+        value: (() => {
+          const value = approachMetricValue(metricsFor(candidate, id, selectedPortfolio), selectedMetricId);
+          return value !== null && isApproachPercentMetric(selectedMetricId) ? value * 100 : value;
+        })()
       }))
     })).filter((item) => item.values.some((point) => Number.isFinite(point.value)))
   };

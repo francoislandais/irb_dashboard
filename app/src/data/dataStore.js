@@ -485,7 +485,8 @@ const MODULE_REQUIREMENTS = [
     id: "credit-risk",
     requiredTableIds: ["F_02.00", "F_12.01", "F_12.02", "F_18.00", "F_18.01", "F_20.04"]
   },
-  { id: "approaches", requiredTableIds: ["C_07.00", "C_08.01"] }
+  { id: "approaches", requiredTableIds: ["C_07.00", "C_08.01"] },
+  { id: "irb-mechanics", requiredTableIds: ["C_08.01"] }
 ];
 
 function getAvailableModules(dataIndexes) {
