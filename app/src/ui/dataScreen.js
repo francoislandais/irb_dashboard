@@ -7,7 +7,7 @@ import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenc
 import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261017-1000-year-simulation";
 import { renderIrbGradeDetail, wireIrbGradeDetailUi } from "./irbGradeDetailView.js?v=20261018-grade-raw-series-slider";
 import { renderIrbGradeDensity, wireIrbGradeDensityUi } from "./irbGradeDensityView.js?v=20261018-grade-density-benchmark-v4";
-import { renderCapitalImpact, wireCapitalImpactUi } from "./capitalImpactView.js";
+import { renderCapitalImpact, wireCapitalImpactUi } from "./capitalImpactView.js?v=20261020-relative-rwa";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";

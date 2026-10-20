@@ -21,11 +21,13 @@ const increase = buildCapitalImpactModel(state, "ref_2025_12_31", 250);
 assert.equal(increase.status, "");
 assert.equal(increase.currentRwa, 1000);
 assert.equal(increase.projectedRwa, 1250);
+assert.equal(increase.deltaPercentOfCurrentRwa, 25);
 assert.equal(increase.ratios[0].projected, 0.096);
 assert.ok(Math.abs(increase.ratios[0].impactBps + 240) < 1e-9);
 assert.ok(Math.abs(increase.ratios[1].impactBps + 300) < 1e-9);
 
 const decrease = buildCapitalImpactModel(state, "ref_2025_12_31", -200);
+assert.equal(decrease.deltaPercentOfCurrentRwa, -20);
 assert.equal(decrease.ratios[0].projected, 0.15);
 assert.ok(Math.abs(decrease.ratios[0].impactBps - 300) < 1e-9);
 

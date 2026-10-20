@@ -1,4 +1,4 @@
-import { buildCapitalImpactModel } from "../data/capitalImpact.js";
+import { buildCapitalImpactModel } from "../data/capitalImpact.js?v=20261020-relative-rwa";
 import { getUnitDefinition } from "../data/core/formatting.js";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
@@ -18,6 +18,7 @@ let currentState = null;
 const percentFormatter = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
 const bpsFormatter = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: "exceptZero" });
 const amountFormatter = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 3 });
+const changePercentFormatter = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: "exceptZero" });
 
 function element(tag, className = "", value = "") {
   const node = document.createElement(tag);
@@ -99,6 +100,10 @@ function renderResults(model, state) {
     `${institution?.institutionName || state.selectedJst} · ${displayReference(model.reference)}`));
   const totals = element("div", "capital-impact-totals");
   totals.append(element("span", "", `Current RWA  ${formatAmount(model.currentRwa, unit.divisor)} ${unitText}`));
+  if (Number.isFinite(model.deltaPercentOfCurrentRwa)) {
+    totals.append(element("span", "capital-impact-relative-change",
+      `Change / current RWA  ${changePercentFormatter.format(model.deltaPercentOfCurrentRwa)} %`));
+  }
   if (Number.isFinite(model.projectedRwa)) {
     totals.append(element("span", "", `After change  ${formatAmount(model.projectedRwa, unit.divisor)} ${unitText}`));
   }

@@ -67,6 +67,7 @@ export function buildCapitalImpactModel(state, referenceName = "", deltaRwa = 0)
     references,
     currentRwa: selected.rwa,
     deltaRwa,
+    deltaPercentOfCurrentRwa: Number.isFinite(deltaRwa) ? deltaRwa / selected.rwa * 100 : null,
     projectedRwa: status ? null : projectedRwa,
     ratios
   };
