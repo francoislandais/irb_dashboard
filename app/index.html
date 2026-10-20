@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20261017-approach-chart-date">
+    <link rel="stylesheet" href="./src/styles.css?v=20261018-grade-density-benchmark-v2">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -89,6 +89,8 @@
           <button class="module-link" type="button" data-module-target="credit-risk">Credit Risk</button>
           <button class="module-link" type="button" data-module-target="approaches">Credit risk overview</button>
           <button class="module-link" type="button" data-module-target="irb-mechanics">IRB RWA Model</button>
+          <button class="module-link" type="button" data-module-target="irb-grades">IRB grade detail</button>
+          <button class="module-link" type="button" data-module-target="irb-grade-density">IRB grade benchmark</button>
         </nav>
       </aside>
 
@@ -427,12 +429,26 @@
           <div id="irb-mechanics-panel-resizer" class="approach-panel-resizer" role="separator" aria-label="Resize IRB model panel" aria-orientation="vertical" aria-controls="irb-mechanics-main-pane" aria-valuemin="260" tabindex="0"></div>
           <div id="irb-mechanics-main-pane" class="approach-main-pane"></div>
         </section>
+        <section id="irb-grades-view" class="module-view approaches-view irb-grades-view" aria-label="IRB grade detail">
+          <aside class="approach-context-panel" aria-label="Grade detail selections">
+            <div id="irb-grades-controls" class="approach-context-selection"></div>
+          </aside>
+          <div id="irb-grades-panel-resizer" class="approach-panel-resizer" role="separator" aria-label="Resize grade detail selections" aria-orientation="vertical" aria-controls="irb-grades-chart" aria-valuemin="260" tabindex="0"></div>
+          <div id="irb-grades-chart" class="approach-main-pane" aria-label="Probability of default by grade"></div>
+        </section>
+        <section id="irb-grade-density-view" class="module-view approaches-view irb-grade-density-view" aria-label="IRB grade benchmark">
+          <aside class="approach-context-panel" aria-label="Grade benchmark selections">
+            <div id="irb-grade-density-controls" class="approach-context-selection"></div>
+          </aside>
+          <div id="irb-grade-density-resizer" class="approach-panel-resizer" role="separator" aria-label="Resize grade benchmark selections" aria-orientation="vertical" aria-controls="irb-grade-density-chart" aria-valuemin="260" tabindex="0"></div>
+          <div id="irb-grade-density-chart" class="approach-main-pane" aria-label="Risk density versus probability of default"></div>
+        </section>
       </main>
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20261017-approach-chart-date"></script>
+    <script type="module" src="./src/main.js?v=20261018-grade-density-benchmark-v4"></script>
   </body>
 </html>

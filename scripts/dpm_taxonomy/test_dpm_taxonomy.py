@@ -30,17 +30,23 @@ class DpmTaxonomyTests(unittest.TestCase):
             for framework in ("3.2", "4.2")
         ]
         result = builder.fixed_geographic_country_axis([], templates)
-        reference_codes = None
+        reference_codes_by_family = {}
         for template in templates:
             codes = [row["code"] for row in result
                      if row["table_id"] == template["template_id"] and row["framework"] == template["framework"]]
-            self.assertEqual(len(codes), 251)
+            is_corep = template["template_id"] in builder.COREP_GEOGRAPHIC_TEMPLATES
+            self.assertEqual(len(codes), 252 if is_corep else 251)
             self.assertTrue({"FR", "DE", "XK", "qx2000"}.issubset(codes))
+            if is_corep:
+                self.assertEqual(codes[0], "qx2014")
+                self.assertNotIn("qx1", codes)
+                self.assertNotIn("qx28", codes)
             self.assertEqual(codes[-2:], ["XK", "qx2000"])
-            if reference_codes is None:
-                reference_codes = codes
+            family = "corep" if is_corep else "finrep"
+            if family not in reference_codes_by_family:
+                reference_codes_by_family[family] = codes
             else:
-                self.assertEqual(codes, reference_codes)
+                self.assertEqual(codes, reference_codes_by_family[family])
 
     def test_alm_currency_totals_are_native_z_points_only_for_c66_to_c71(self):
         def member(table_id, code, description):

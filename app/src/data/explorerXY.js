@@ -40,7 +40,7 @@ export function buildExplorerXYSeries(state, { tableId, yConfigTableId = tableId
     const raw = String(row[reference.index] ?? "").trim();
     const value = raw ? parseNumericValue(raw, NaN) : NaN;
     if (!Number.isFinite(value)) continue;
-    const key = JSON.stringify([normalizeAxisCode(row[indexes.xAxisRcCode], "x"), normalizeAxisCode(row[indexes.yAxisRcCode], "y")]);
+    const key = JSON.stringify([normalizeAxisCode(row[indexes.xAxisRcCode], "x"), normalizeAxisCode(row[indexes.yAxisRcCode], "y", tableId)]);
     values.set(key, (values.get(key) ?? 0) + value);
   }
   const zFormat = state.explorerPoints?.find((point) => point.tableId === tableId && point.coordinate === "z_axis_rc_code" && point.code === zCode)?.format || "";

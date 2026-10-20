@@ -1,4 +1,4 @@
-import { getAllIndexedTableIds, getIndexedAxisCodesAnyJst, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
+import { getAllIndexedTableIds, getIndexedAxisCodes, getIndexedAxisCodesAnyJst, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { unescapeHierarchySegment } from "./core/hierarchyPath.js?v=20260921-hierarchy-gt-escape";
@@ -121,7 +121,9 @@ export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId)
   const configuredYCodeSet = new Set(configuredYCodes);
   const availableYCodeSet = new Set(availableYCodes);
   const xCodes = getPreferredExplorerAxisCodes(configuredXCodes, availableXCodes);
-  const yCodes = isExplorerDataOnlyRowTemplate(yConfigTableId)
+  const yCodes = tableId === "C_08.02"
+    ? availableYCodes
+    : isExplorerDataOnlyRowTemplate(yConfigTableId)
     ? [
         ...configuredYCodes.filter((code) => availableYCodeSet.has(code)),
         ...availableYCodes.filter((code) => !configuredYCodeSet.has(code))
@@ -175,7 +177,7 @@ export function hasExplorerSelectedCombination(rows, columns, context) {
 
   return rows.some((row) => (
     (!context.selectedXCode || normalizeAxisCode(row[indexes.xAxisRcCode], "x") === context.selectedXCode)
-    && (!context.selectedYCode || normalizeAxisCode(row[indexes.yAxisRcCode], "y") === context.selectedYCode)
+    && (!context.selectedYCode || normalizeAxisCode(row[indexes.yAxisRcCode], "y", context.tableId ?? row[indexes.tableId]) === context.selectedYCode)
     && (!selectedZCode || normalizeAxisCode(row[indexes.zAxisRcCode], "z") === selectedZCode)
   ));
 }
@@ -204,7 +206,12 @@ export function getConfiguredExplorerAxisCodes(state, tableId, axis) {
 }
 
 export function getAvailableExplorerAxisCodes(state, tableId, axis) {
-  const indexedCodes = getIndexedAxisCodesAnyJst(state, tableId, axis);
+  // OGR grade identifiers belong to each institution. Do not offer another
+  // institution's grades merely because both report the same template.
+  const institutionGrades = tableId === "C_08.02" && axis === "y";
+  const indexedCodes = institutionGrades
+    ? getIndexedAxisCodes(state, tableId, axis)
+    : getIndexedAxisCodesAnyJst(state, tableId, axis);
   if (indexedCodes.length > 0 || state.dataIndexes) return indexedCodes;
 
   const columnName = `${axis}_axis_rc_code`;
@@ -215,9 +222,11 @@ export function getAvailableExplorerAxisCodes(state, tableId, axis) {
 
   if (Object.values(indexes).some((index) => index === -1)) return [];
 
-  return [...new Set(state.rows
-    .filter((row) => row[indexes.tableId] === tableId)
-    .map((row) => normalizeAxisCode(row[indexes.axisCode], axis))
+  const rows = institutionGrades
+    ? getExplorerRowsForTemplate(state, tableId)
+    : state.rows.filter((row) => row[indexes.tableId] === tableId);
+  return [...new Set(rows
+    .map((row) => normalizeAxisCode(row[indexes.axisCode], axis, tableId))
     .filter(Boolean))]
     .sort((left, right) => left.localeCompare(right, "fr"));
 }

@@ -68,7 +68,7 @@ export function getIndexedRowsByCoordinates(state, tableId, selections, jstCode 
     tableId,
     jstCode,
     normalizeAxisCode(selections.selectedXCode ?? "", "x"),
-    normalizeAxisCode(selections.selectedYCode ?? "", "y"),
+    normalizeAxisCode(selections.selectedYCode ?? "", "y", tableId),
     normalizeAxisCode(selections.selectedZCode ?? "", "z")
   ));
 
@@ -81,7 +81,7 @@ export function getIndexedRowsByAxisPoint(state, tableId, axis, pointCode, jstCo
     tableId,
     jstCode,
     axis,
-    normalizeAxisCode(pointCode ?? "", axis)
+    normalizeAxisCode(pointCode ?? "", axis, tableId)
   ));
 
   return getIndexedRows(state, rowIndexes);
@@ -152,7 +152,7 @@ function ensureDetailedTableJstIndex(state, tableId, jstCode) {
     if (!row) return;
 
     const xCode = normalizeAxisCode(row[indexes.xAxisRcCode], "x");
-    const yCode = normalizeAxisCode(row[indexes.yAxisRcCode], "y");
+    const yCode = normalizeAxisCode(row[indexes.yAxisRcCode], "y", tableId);
     const zCode = normalizeAxisCode(row[indexes.zAxisRcCode], "z");
 
     pushIndexValue(state.dataIndexes.byCoordinates, makeDataKey(tableId, jstCode, xCode, yCode, zCode), rowIndex);

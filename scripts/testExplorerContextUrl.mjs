@@ -141,6 +141,7 @@ const templateContext = vm.createContext({
   findMatchingExplorerTemplateId: (templates, id) => templates.find((template) => template.id === id)?.id ?? "",
   updateUrlTemplateParam: (id) => { writtenTemplate = id; },
   getActiveExplorerContext: () => restoredSelection,
+  getActiveExplorerTemplate: () => ({ tableId: "F_20.04" }),
   getActiveExplorerGeographyAxis: () => "z",
   normalizeAxisCode: (code) => code
 });

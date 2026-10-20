@@ -95,6 +95,48 @@ class OutputDirectoryTests(unittest.TestCase):
 
 
 class DarwinUploadTests(unittest.TestCase):
+    def test_darwin_folder_lists_direct_tomls_then_downloads_them_in_name_order(self):
+        source = (EXAMPLE_CONFIG_DIRECTORY / "01-finrep.toml").read_text(encoding="utf-8")
+        downloads = []
+        pages = []
+
+        class Rest:
+            def get(self, url, *, params):
+                pages.append((url, params.copy()))
+                if params["page"] == 1:
+                    return {"data": [{"id": 13, "name": "b.toml"}, {"id": 99, "name": "draft.toml.amltmp"}], "page_total": 2}
+                return {"data": [{"id": 12, "name": "a.toml"}], "page_total": 2}
+
+        class Darwin:
+            rest = Rest()
+
+            def get_file(self, **kwargs):
+                downloads.append(kwargs["node_id"])
+                name = "Darwin A" if kwargs["node_id"] == 12 else "Darwin B"
+                Path(kwargs["local_file_path"]).write_text(source.replace('name = "FINREP"', f'name = "{name}"'), encoding="utf-8")
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            result = global_update(mode="preview", output_directory=Path(temporary_directory) / "out",
+                                   darwin_folder_id=500, darwin_client=Darwin(), as_of=date(2026, 9, 26))
+            self.assertEqual(result["applications"], 2)
+            self.assertEqual(downloads, [12, 13])
+            self.assertEqual([request[1]["page"] for request in pages], [1, 2])
+            self.assertTrue(all("/nodes/500/nodes" in request[0] for request in pages))
+            manifest = json.loads((Path(temporary_directory) / "out" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["config_directory"], "darwin-folder:500")
+
+    def test_darwin_folder_rejects_non_toml_before_downloading(self):
+        class Darwin:
+            rest = SimpleNamespace(get=lambda url, params: {"data": [{"id": 12, "name": "notes.txt"}], "page_total": 1})
+
+            def get_file(self, **kwargs):
+                self.fail("Download should not start")
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            with self.assertRaisesRegex(ValueError, "notes.txt"):
+                global_update(mode="preview", output_directory=Path(temporary_directory) / "out",
+                              darwin_folder_id=500, darwin_client=Darwin())
+
     def test_downloads_tomls_before_processing_and_uploads_requested_dataset(self):
         downloads = []
         uploads = []

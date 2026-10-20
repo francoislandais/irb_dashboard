@@ -19,6 +19,7 @@ let currentState = null;
 let currentModel = null;
 let scenarioKey = "";
 let simulationSeed = 20261016;
+let liveFrame = 0;
 
 const node = (tag, className = "", value = "") => {
   const el = document.createElement(tag);
@@ -119,6 +120,14 @@ function svgText(svg, x, y, text, className = "") {
   svg.append(el);
 }
 
+const chartIntro = (perfect) => perfect
+  ? "At R = 100%, all obligors respond to the same shock: conditional loss jumps at the default threshold. Expected loss remains the average across shocks, not a point on that step. The brown line is the fixed 99.9th-percentile shock."
+  : "The bell curve shows economic shocks, not amounts of loss. The green line marks the shock at which conditional loss equals expected loss; moving right does not mean expected loss rose. The brown line is the fixed 99.9th-percentile shock. The lower curve converts each shock into a loss, and the bracket measures their difference. Increase R to see a stronger response to adverse shocks.";
+
+const chartExplanation = (input, result) => input.correlation === 1
+  ? `Expected loss = PD ${pct(input.pd)} × LGD ${pct(input.lgd)} = ${pct(result.expectedRate)}. At perfect correlation, the green marker shows the default threshold; conditional loss jumps from 0 to LGD there, so no single shock produces expected loss.`
+  : `Expected loss = PD ${pct(input.pd)} × LGD ${pct(input.lgd)} = ${pct(result.expectedRate)}. Its green marker is placed on the economic-shock axis, not a loss axis. A lower PD reduces expected loss; its equivalent-shock marker can still move right.`;
+
 function lossCurveSvg(input) {
   const width = 820, height = 420;
   const left = 54, plotRight = 654, densityBottom = 165;
@@ -126,11 +135,12 @@ function lossCurveSvg(input) {
   const minShock = -3.5, maxShock = 3.5;
   const x = (shock) => left + (shock - minShock) / (maxShock - minShock) * (plotRight - left);
   const model = calculateIrbMechanics(input);
+  const perfect = model.correlation === 1;
   const baselineR = assetCorrelation(input.pd, input.kind, input.turnover, input.financialMultiplier);
   const expectedX = x(expectedLossShock(input.pd, model.correlation));
   const stressX = x(stressShock);
   const svg = svgElement("svg", { viewBox: `0 0 ${width} ${height}`, role: "img",
-    "aria-label": `Gaussian systemic shock. Expected loss ${pct(model.expectedRate)}; 99.9th-percentile conditional loss ${pct(model.stressRate)}; difference ${pct(model.stressRate - model.expectedRate)} before maturity adjustment. Asset correlation ${pct(model.correlation)}.` });
+    "aria-label": `Gaussian systemic shock. Expected loss ${pct(model.expectedRate)}; 99.9th-percentile conditional loss ${pct(model.stressRate)}; non-negative difference ${pct(Math.max(0, model.stressRate - model.expectedRate))} before maturity adjustment. Asset correlation ${pct(model.correlation)}.` });
   const samples = Array.from({ length: 141 }, (_, i) => minShock + i * (maxShock - minShock) / 140);
   const densityY = (shock) => densityBottom - 110 * Math.exp(-shock * shock / 2);
   const densityPath = samples.map((shock, i) => `${i ? "L" : "M"}${x(shock).toFixed(1)},${densityY(shock).toFixed(1)}`).join(" ");
@@ -141,32 +151,47 @@ function lossCurveSvg(input) {
   const markerBottom = 355;
   svg.append(svgElement("line", { x1: expectedX, y1: 37, x2: expectedX, y2: markerBottom, class: "irb-expected-marker" }));
   svg.append(svgElement("line", { x1: stressX, y1: 37, x2: stressX, y2: markerBottom, class: "irb-tail-line" }));
-  svgText(svg, expectedX - 8, 44, "Shock yielding EL", "irb-chart-label irb-chart-label-end irb-el-text");
+  svgText(svg, expectedX - 8, 44, perfect ? "Default threshold" : "Shock yielding EL", "irb-chart-label irb-chart-label-end irb-el-text");
   svgText(svg, stressX + 8, 44, "99.9% percentile", "irb-chart-label irb-tail-text");
-  svgText(svg, expectedX, densityBottom + 19, `EL ${pct(model.expectedRate)}`, "irb-tick irb-el-text");
+  svgText(svg, expectedX, densityBottom + 19, perfect ? "Threshold" : `EL ${pct(model.expectedRate)}`, "irb-tick irb-el-text");
   svgText(svg, stressX, densityBottom + 19, `L₉₉.₉ ${pct(model.stressRate)}`, "irb-tick irb-tail-text");
   const lossTop = 230, lossBottom = 354;
-  const maxLoss = Math.max(model.stressRate, conditionalLossAtShock(input.pd, input.lgd, baselineR, stressShock), model.expectedRate) * 1.12 || 0.01;
+  const maxLoss = Math.max(model.stressRate, conditionalLossAtShock(input.pd, input.lgd, baselineR, stressShock), model.expectedRate, perfect ? input.lgd : 0) * 1.12 || 0.01;
   const lossY = (rate) => lossBottom - rate / maxLoss * (lossBottom - lossTop);
   svgText(svg, left, 211, "Conditional loss given the same economic shock", "irb-chart-label");
   svg.append(svgElement("line", { x1: left, y1: lossBottom, x2: plotRight, y2: lossBottom, class: "irb-axis" }));
-  const lossPath = (correlation) => samples.map((shock, i) => `${i ? "L" : "M"}${x(shock).toFixed(1)},${lossY(conditionalLossAtShock(input.pd, input.lgd, correlation, shock)).toFixed(1)}`).join(" ");
+  const lossPath = (correlation) => {
+    if (correlation === 1) {
+      const thresholdX = expectedX;
+      return `M${left},${lossY(0)} L${thresholdX},${lossY(0)} L${thresholdX},${lossY(input.lgd)} L${plotRight},${lossY(input.lgd)}`;
+    }
+    return samples.map((shock, i) => `${i ? "L" : "M"}${x(shock).toFixed(1)},${lossY(conditionalLossAtShock(input.pd, input.lgd, correlation, shock)).toFixed(1)}`).join(" ");
+  };
   if (input.correlation !== null) svg.append(svgElement("path", { d: lossPath(baselineR), class: "irb-loss-baseline" }));
   svg.append(svgElement("path", { d: lossPath(model.correlation), class: "irb-stress-curve" }));
   const expectedY = lossY(model.expectedRate), stressedY = lossY(model.stressRate);
   svg.append(svgElement("line", { x1: left, y1: expectedY, x2: plotRight + 17, y2: expectedY, class: "irb-expected-line" }));
-  svg.append(svgElement("circle", { cx: expectedX, cy: expectedY, r: 4, class: "irb-expected-dot" }));
+  if (!perfect) svg.append(svgElement("circle", { cx: expectedX, cy: expectedY, r: 4, class: "irb-expected-dot" }));
   svg.append(svgElement("circle", { cx: stressX, cy: stressedY, r: 5, class: "irb-tail-dot" }));
   const bracketX = plotRight + 18;
-  svg.append(svgElement("line", { x1: bracketX, y1: stressedY, x2: bracketX, y2: expectedY, class: "irb-unexpected-bracket" }));
-  for (const markerY of [stressedY, expectedY]) svg.append(svgElement("line", { x1: bracketX - 5, y1: markerY, x2: bracketX + 5, y2: markerY, class: "irb-unexpected-bracket" }));
-  svgText(svg, bracketX + 10, (stressedY + expectedY) / 2, `UL ${pct(model.stressRate - model.expectedRate)}`, "irb-chart-label irb-ul-text");
+  if (model.stressRate > model.expectedRate) {
+    svg.append(svgElement("line", { x1: bracketX, y1: stressedY, x2: bracketX, y2: expectedY, class: "irb-unexpected-bracket" }));
+    for (const markerY of [stressedY, expectedY]) svg.append(svgElement("line", { x1: bracketX - 5, y1: markerY, x2: bracketX + 5, y2: markerY, class: "irb-unexpected-bracket" }));
+    svgText(svg, bracketX + 10, (stressedY + expectedY) / 2, `UL ${pct(model.stressRate - model.expectedRate)}`, "irb-chart-label irb-ul-text");
+  } else {
+    svgText(svg, bracketX + 10, expectedY, "UL 0%", "irb-chart-label irb-ul-text");
+  }
   svgText(svg, left, 389, `Asset correlation R: ${pct(model.correlation, 1)}${input.correlation === null ? " · Basel formula" : ` · Basel baseline ${pct(baselineR, 1)} (dotted)`}`, "irb-chart-label");
-  svgText(svg, left, 408, "UL shown before maturity adjustment; capital applies the maturity multiplier where relevant.", "irb-tick irb-note");
+  svgText(svg, left, 408, perfect
+    ? "At R = 100%, EL is an average across shocks, not a point on the conditional-loss step."
+    : "UL shown before maturity adjustment; capital applies the maturity multiplier where relevant.", "irb-tick irb-note");
   return svg;
 }
 
-function systemicPathSvg(shocks, input, correlation) {
+const SIMULATED_YEARS = 1000;
+const SYSTEMIC_TAIL_THRESHOLD = 3.090232306;
+
+function systemicPathSvg(shocks) {
   const width = 820, height = 250, left = 55, right = 765, top = 22, bottom = 205;
   const bound = Math.max(3.6, ...shocks.map((shock) => Math.abs(shock))) + 0.2;
   const x = (index) => left + index / (shocks.length - 1) * (right - left);
@@ -174,22 +199,23 @@ function systemicPathSvg(shocks, input, correlation) {
   const svg = svgElement("svg", { viewBox: `0 0 ${width} ${height}`, role: "img",
     "aria-label": `${shocks.length} simulated independent annual draws of the standard-normal adverse systemic factor; positive values mean more adverse conditions.` });
   svg.append(svgElement("rect", { x: left, y: y(1), width: right - left, height: y(-1) - y(1), class: "irb-shock-band" }));
-  for (const level of [-1, 0, 1, 3.090232306]) {
+  for (const level of [-1, 0, 1, SYSTEMIC_TAIL_THRESHOLD]) {
     const lineY = y(level);
     svg.append(svgElement("line", { x1: left, y1: lineY, x2: right, y2: lineY,
-      class: level === 3.090232306 ? "irb-shock-tail" : level === 0 ? "irb-axis" : "irb-shock-grid" }));
-    svgText(svg, 46, lineY + 4, level === 3.090232306 ? "3.09" : String(level), "irb-shock-tick");
+      class: level === SYSTEMIC_TAIL_THRESHOLD ? "irb-shock-tail" : level === 0 ? "irb-axis" : "irb-shock-grid" }));
+    svgText(svg, 46, lineY + 4, level === SYSTEMIC_TAIL_THRESHOLD ? "3.09" : String(level), "irb-shock-tick");
   }
-  svgText(svg, right - 5, y(3.090232306) - 5, "99.9th percentile", "irb-shock-tail-label");
+  svgText(svg, right - 5, y(SYSTEMIC_TAIL_THRESHOLD) - 5, "99.9th percentile", "irb-shock-tail-label");
   const path = shocks.map((shock, index) => `${index ? "L" : "M"}${x(index).toFixed(1)},${y(shock).toFixed(1)}`).join(" ");
   svg.append(svgElement("path", { d: path, class: "irb-shock-path" }));
   shocks.forEach((shock, index) => {
-    const point = svgElement("circle", { cx: x(index), cy: y(shock), r: 2.3, class: shock >= 2 ? "irb-shock-point is-severe" : "irb-shock-point" });
+    if (shock < SYSTEMIC_TAIL_THRESHOLD) return;
+    const point = svgElement("circle", { cx: x(index), cy: y(shock), r: 4, class: "irb-shock-point is-severe" });
     const title = svgElement("title");
-    title.textContent = `Illustrative year ${index + 1}: shock ${shock.toFixed(2)}σ; conditional loss ${pct(conditionalLossAtShock(input.pd, input.lgd, correlation, shock))}`;
+    title.textContent = `Illustrative year ${index + 1}: shock ${shock.toFixed(2)}σ, above the 99.9th-percentile threshold`;
     point.append(title); svg.append(point);
   });
-  for (const index of [0, 19, 39, 59]) svgText(svg, x(index), 230, `${index + 1}`, "irb-tick");
+  for (const year of [1, 250, 500, 750, shocks.length]) svgText(svg, x(year - 1), 230, String(year), "irb-tick");
   svgText(svg, right, 247, "Illustrative year", "irb-shock-tail-label");
   return svg;
 }
@@ -213,12 +239,12 @@ function buildCorrelationInput(result) {
   const value = scenario.correlation ?? result.correlation;
   const slider = node("input");
   slider.type = "range";
-  slider.min = "0"; slider.max = "80"; slider.step = "0.1";
+  slider.min = "0"; slider.max = "100"; slider.step = "0.1";
   slider.value = String(value * 100);
   slider.dataset.irbInput = "correlation";
   field.append(node("span", "irb-input-title", "Asset correlation · R"),
     node("output", "", pct(value, 1)), slider,
-    node("small", "irb-input-origin", scenario.correlation === null ? "Basel formula · varies with PD and class" : "Illustrative 0–80% range · dotted Basel baseline"));
+    node("small", "irb-input-origin", scenario.correlation === null ? "Basel formula · varies with PD and class" : "Illustrative 0–100% range · dotted Basel baseline"));
   return field;
 }
 
@@ -258,6 +284,8 @@ function buildPeerSection(model, state, result) {
 }
 
 function renderCurrent() {
+  if (liveFrame) cancelAnimationFrame(liveFrame);
+  liveFrame = 0;
   if (!currentState || !currentModel) return;
   const mainScrollTop = content.scrollTop;
   const contextScrollTop = contextPanel.scrollTop;
@@ -296,22 +324,23 @@ function renderCurrent() {
   controls.append(reset);
   contextPanel.append(controls);
 
-  const shocks = simulateSystemicShocks(60, simulationSeed);
+  const shocks = simulateSystemicShocks(SIMULATED_YEARS, simulationSeed);
   const sampleMean = shocks.reduce((sum, shock) => sum + shock, 0) / shocks.length;
   const sampleSd = Math.sqrt(shocks.reduce((sum, shock) => sum + (shock - sampleMean) ** 2, 0) / shocks.length);
+  const tailCount = shocks.filter((shock) => shock >= SYSTEMIC_TAIL_THRESHOLD).length;
   const simulation = node("section", "irb-simulation");
   const simulationHeader = node("div", "irb-simulation-header");
   const simulationHeading = node("div");
   simulationHeading.append(node("h3", "", "One possible path of the common factor"),
-    node("p", "irb-muted", "60 independent illustrative annual draws of adverse shock S ~ N(0, 1). This is a sequence of scenarios, not observed history or a forecast."));
+    node("p", "irb-muted", "1,000 independent illustrative annual draws of adverse shock S ~ N(0, 1). This is a sequence of scenarios, not observed history or a forecast."));
   const redraw = node("button", "irb-simulation-redraw", "New draw");
   redraw.type = "button"; redraw.id = "irb-simulation-redraw";
   simulationHeader.append(simulationHeading, redraw);
   const simulationFigure = node("figure", "irb-simulation-figure");
-  simulationFigure.append(systemicPathSvg(shocks, scenario, result.correlation));
+  simulationFigure.append(systemicPathSvg(shocks));
   simulation.append(simulationHeader, simulationFigure,
-    node("p", "irb-simulation-stats", `Theoretical mean 0 · standard deviation 1 · 99.9th percentile +3.09σ. In this draw: mean ${sampleMean.toFixed(2)}σ · standard deviation ${sampleSd.toFixed(2)}σ.`),
-    node("p", "irb-muted", "A high positive S is adverse. The same S affects every borrower; each also has its own independent shock. R sets the share of latent asset-return variance driven by S. These draws do not enter the analytical RWA calculation."));
+    node("p", "irb-simulation-stats", `99.9th-percentile threshold +3.09σ · ${tailCount} exceedance${tailCount === 1 ? "" : "s"} in this 1,000-year draw · mean ${sampleMean.toFixed(2)}σ · standard deviation ${sampleSd.toFixed(2)}σ.`),
+    node("p", "irb-muted", "The chance of exceeding this threshold is 0.1% in any independent year: one exceedance per 1,000 years on average, not a fixed 1,000-year cycle. A high positive S is adverse. The same S affects every borrower; each also has its own independent shock. R sets the share of latent asset-return variance driven by S. These draws do not enter the analytical RWA calculation."));
   content.append(simulation);
 
   const flow = node("section", "irb-flow");
@@ -326,11 +355,11 @@ function renderCurrent() {
   }
   const chartSection = node("section", "irb-chart-section");
   chartSection.append(node("h3", "", "From the Gaussian shock to unexpected loss"),
-    node("p", "irb-muted", "The bell curve shows economic shocks, not amounts of loss. The green line marks the shock at which conditional loss equals expected loss; moving right does not mean expected loss rose. The brown line is the fixed 99.9th-percentile shock. The lower curve converts each shock into a loss, and the bracket measures their difference. Increase R to see a stronger response to adverse shocks."));
+    node("p", "irb-muted irb-chart-intro", chartIntro(result.correlation === 1)));
   const figure = node("figure", "irb-main-figure");
   figure.append(lossCurveSvg({ ...scenario, kind: model.segment.kind }));
   chartSection.append(figure,
-    node("p", "irb-chart-explanation", `Expected loss = PD ${pct(scenario.pd)} × LGD ${pct(scenario.lgd)} = ${pct(result.expectedRate)}. Its green marker is placed on the economic-shock axis, not a loss axis. A lower PD reduces expected loss; its equivalent-shock marker can still move right.`));
+    node("p", "irb-chart-explanation", chartExplanation(scenario, result)));
   content.append(chartSection);
   content.append(flow);
   const comparison = node("section", "irb-comparison");
@@ -367,6 +396,51 @@ function renderCurrent() {
   contextPanel.scrollTop = contextScrollTop;
 }
 
+function renderLiveScenario() {
+  if (!currentState || !currentModel || !scenario) return;
+  const input = { ...scenario, kind: currentModel.segment.kind };
+  const result = calculateIrbMechanics(input);
+  if (!result) return;
+
+  // Keep the range inputs mounted while the pointer is down. Replacing the
+  // controls here would interrupt the native drag after its first input event.
+  content.querySelector(".irb-main-figure")?.replaceChildren(lossCurveSvg(input));
+
+  const flowValues = [
+    [pct(result.expectedRate), "PD × LGD"],
+    [pct(result.stressRate), `Systemic downturn · R ${pct(result.correlation, 1)}`],
+    [pct(result.unexpectedRate), `Difference × maturity factor ${result.maturityFactor.toFixed(2)}`],
+    [pct(result.riskWeight, 1), "Capital × 12.5"]
+  ];
+  content.querySelectorAll(".irb-flow-card").forEach((card, index) => {
+    card.querySelector("strong").textContent = flowValues[index][0];
+    card.querySelector("small").textContent = flowValues[index][1];
+  });
+  const explanation = content.querySelector(".irb-chart-explanation");
+  if (explanation) explanation.textContent = chartExplanation(scenario, result);
+  const intro = content.querySelector(".irb-chart-intro");
+  if (intro) intro.textContent = chartIntro(result.correlation === 1);
+  const modelRwa = content.querySelector(".irb-compare-card strong");
+  if (modelRwa) modelRwa.textContent = amount(result.rwa, currentState);
+
+  const correlationInput = contextPanel.querySelector('[data-irb-input="correlation"]');
+  if (correlationInput && scenario.correlation === null) {
+    correlationInput.value = String(result.correlation * 100);
+    correlationInput.closest(".irb-input").querySelector("output").textContent = pct(result.correlation, 1);
+  }
+  if (correlationInput) correlationInput.closest(".irb-input").querySelector(".irb-input-origin").textContent =
+    scenario.correlation === null ? "Basel formula · varies with PD and class" : "Illustrative 0–100% range · dotted Basel baseline";
+  renderSide(currentModel, result, currentState);
+}
+
+function scheduleLiveScenario() {
+  if (liveFrame) return;
+  liveFrame = requestAnimationFrame(() => {
+    liveFrame = 0;
+    renderLiveScenario();
+  });
+}
+
 export function wireIrbMechanicsUi() {
   if (!root) return;
   wirePanelResize();
@@ -375,7 +449,9 @@ export function wireIrbMechanicsUi() {
     if (inputKey && scenario) {
       scenario[inputKey] = (["pd", "lgd", "correlation"].includes(inputKey)) ? Number(event.target.value) / 100 : Number(event.target.value);
       if (inputKey !== "correlation") scenario.source[inputKey] = false;
-      renderCurrent();
+      if (liveFrame) cancelAnimationFrame(liveFrame);
+      liveFrame = 0;
+      renderLiveScenario();
       return;
     }
     if (event.target.id === "irb-segment") {
@@ -397,6 +473,7 @@ export function wireIrbMechanicsUi() {
       key === "maturity" ? `${scenario[key].toFixed(1)} years`
         : `${(scenario[key] * 100).toFixed(key === "pd" ? 2 : key === "correlation" ? 1 : 0)}%`
     ));
+    scheduleLiveScenario();
   });
   root?.addEventListener("click", (event) => {
     if (event.target.id === "irb-simulation-redraw") {

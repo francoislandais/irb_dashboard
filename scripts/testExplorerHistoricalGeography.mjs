@@ -20,6 +20,10 @@ const pointsByTemplate = {
       ["z_axis_rc_code", "FR"]
     ]
   },
+  ...Object.fromEntries(["C_09.01", "C_09.02", "C_09.04", "C_33.00"].map((tableId) => [tableId, {
+    "4.2": [["x_axis_rc_code", "0010"], ["y_axis_rc_code", "0010"], ["z_axis_rc_code", "FR"]],
+    "3.2": [["x_axis_rc_code", "0010"], ["y_axis_rc_code", "0010"], ["z_axis_rc_code", "FR"]]
+  }])),
   "C_03.00": {
     "4.2": [["x_axis_rc_code", "0010"], ["y_axis_rc_code", "0070"]],
     "3.2": [["x_axis_rc_code", "0010"]]
@@ -37,7 +41,7 @@ const context = vm.createContext({
 vm.runInContext(source.slice(start, end), context);
 
 function check(tableId, axis, code, selectedZCode = "") {
-  const dates = [new Date(2026, 5, 30), new Date(2025, 11, 31)];
+  const dates = [new Date(2026, 5, 30), new Date(2024, 11, 31)];
   context.state = {
     selectedTaxonomiesByTemplate: { [tableId]: "4.2" },
     taxonomyHistory: {},
@@ -55,7 +59,13 @@ assert.equal(check("F_20.04", "z", "FR")[1].value, 2,
   "the fixed country axis must preserve 2025 values in the Z view");
 assert.equal(check("F_20.04", "y", "0010", "FR")[1].value, 2,
   "a selected country must also preserve 2025 values in the Y view");
+for (const tableId of ["C_09.01", "C_09.02", "C_09.04", "C_33.00"]) {
+  assert.equal(check(tableId, "z", "FR")[1].value, 2,
+    `${tableId} must retain reported countries in 2024`);
+  assert.equal(check(tableId, "y", "0010", "FR")[1].value, 2,
+    `${tableId} must retain a selected country's 2024 data`);
+}
 assert.equal(check("C_03.00", "y", "0070")[1].isTaxonomyUnavailable, true,
   "a genuinely new code must remain unavailable in an older taxonomy");
 
-console.log("PASS: fixed F_20.04 country values survive historical taxonomy masking; new codes remain masked.");
+console.log("PASS: fixed geographic country values survive historical taxonomy masking; new codes remain masked.");

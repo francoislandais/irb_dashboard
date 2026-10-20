@@ -1,9 +1,18 @@
-const GEOGRAPHIC_COUNTRY_TEMPLATES = new Set([
-  "F_20.04", "F_20.05", "F_20.06", "F_20.07.1"
+export const GEOGRAPHIC_COUNTRY_TEMPLATES = new Set([
+  "F_20.04", "F_20.05", "F_20.06", "F_20.07.1",
+  "C_09.01", "C_09.02", "C_09.04", "C_33.00"
+]);
+const COREP_GEOGRAPHIC_TEMPLATES = new Set([
+  "C_09.01", "C_09.02", "C_09.04", "C_33.00"
 ]);
 
 export function normalizeGeographicCountryCode(tableId, code) {
-  return GEOGRAPHIC_COUNTRY_TEMPLATES.has(tableId) && code === "x28" ? "qx2000" : code;
+  if (!GEOGRAPHIC_COUNTRY_TEMPLATES.has(tableId)) return code;
+  if (COREP_GEOGRAPHIC_TEMPLATES.has(tableId)) {
+    if (code === "qx1") return "qx2014";
+    if (code === "qx28" || code === "x28") return "qx2000";
+  }
+  return code === "x28" ? "qx2000" : code;
 }
 
 // DPM 1.0 reported this member as x28; DPM 2.0 renamed it qx2000.

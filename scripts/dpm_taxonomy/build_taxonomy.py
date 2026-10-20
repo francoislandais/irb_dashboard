@@ -31,7 +31,11 @@ SOURCE_DIR = DATA / "sources"
 OUTPUT_DIR = DATA / "generated"
 SCHEDULE = DATA / "module_release_schedule.csv"
 GEOGRAPHIC_COUNTRY_AXIS = Path(__file__).with_name("geographic_country_axis.csv")
-GEOGRAPHIC_COUNTRY_TEMPLATES = {"F_20.04", "F_20.05", "F_20.06", "F_20.07.1"}
+GEOGRAPHIC_COUNTRY_TEMPLATES = {
+    "F_20.04", "F_20.05", "F_20.06", "F_20.07.1",
+    "C_09.01", "C_09.02", "C_09.04", "C_33.00",
+}
+COREP_GEOGRAPHIC_TEMPLATES = {"C_09.01", "C_09.02", "C_09.04", "C_33.00"}
 
 AXIS_COORDINATES = {
     "x": "x_axis_rc_code",
@@ -1155,7 +1159,10 @@ def fixed_geographic_country_axis(rows: list[dict[str, str]], templates: Iterabl
     for template in templates:
         if template["template_id"] not in GEOGRAPHIC_COUNTRY_TEMPLATES:
             continue
-        for order, (code, description) in enumerate(members, 1):
+        template_members = members
+        if template["template_id"] in COREP_GEOGRAPHIC_TEMPLATES:
+            template_members = [("qx2014", "All countries"), *members]
+        for order, (code, description) in enumerate(template_members, 1):
             result.append({
                 "table_id": template["template_id"],
                 "coordinate": AXIS_COORDINATES["z"],

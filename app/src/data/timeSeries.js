@@ -1,4 +1,4 @@
-import { getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
+import { getIndexedAxisCodes, getIndexedAxisCodesAnyJst, getIndexedRowsByAxisPoint, getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { getCompleteAxisColumnIndexes } from "./core/axisColumns.js?v=20260925-institution-id";
 import { createCoordinateHierarchyResolver } from "./core/coordinateHierarchy.js?v=20260928-local-description";
@@ -40,6 +40,9 @@ export function buildExplorerSeries(state) {
 // "which page is this code on" (explorerView.js's KRI pagination) without
 // paying for buildExplorerAxisSeries's full, expensive build.
 export function getExplorerAxisPointsConfig(state, tableId, axis, yConfigTableId = tableId) {
+  // Older C_08.02 dictionaries contain only a generic "Obligor Grade"
+  // placeholder. The real Y members always come from each bank's OGR data.
+  if (tableId === "C_08.02" && axis === "y") return [];
   const rawPointsConfig = getAxisPoints(state.explorerPoints ?? [], axis === "y" ? yConfigTableId : tableId, axis);
   // Unlike every other template (whose configured row/column/tab codes stay
   // selectable even without data for the current JST - see
@@ -122,7 +125,7 @@ export function buildExplorerAxisSeries(state, options = {}) {
   // KRI) - substituting another template's code here would silently filter
   // out every row for one that has none.
   const selectedXCode = normalizeAxisCode(options.selectedXCode || "", "x");
-  const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y");
+  const selectedYCode = normalizeAxisCode(options.selectedYCode || "", "y", tableId);
   const rawSelectedZCode = normalizeAxisCode(options.selectedZCode || "", "z");
   // "All Currency" (see explorerTableHasCurrencyZAxis) resolves to an empty
   // selectedZCode, which matchesSelectedAxis then requires to be an
@@ -230,7 +233,7 @@ function buildConfiguredAxisSeriesRows(state, indexes, dateColumns, tableId, axi
       indentLevel: point.indentLevel,
       matchCount: matchedRows.length,
       parentPath: point.parentPath,
-      values: buildValues(dateColumns, matchedRows)
+      values: buildValues(dateColumns, matchedRows, tableId)
     };
   });
 }
@@ -247,12 +250,15 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
   const axisIndexKey = `${axis}AxisRcCode`;
   const coordinate = `${axis}_axis_rc_code`;
   const matchedRowsByCode = new Map();
-  const indexedCodes = getIndexedAxisCodesAnyJst(state, tableId, axis);
+  const indexedCodes = tableId === "C_08.02" && axis === "y"
+    ? getIndexedAxisCodes(state, tableId, axis)
+    : getIndexedAxisCodesAnyJst(state, tableId, axis);
   const codes = indexedCodes.length > 0 || state.dataIndexes
     ? indexedCodes
     : [...new Set(state.rows
-        .filter((row) => row[indexes.tableId] === tableId)
-        .map((row) => normalizeAxisCode(row[indexes[axisIndexKey]], axis))
+        .filter((row) => row[indexes.tableId] === tableId
+          && (tableId !== "C_08.02" || axis !== "y" || row[indexes.institutionId] === state.selectedJst))
+        .map((row) => normalizeAxisCode(row[indexes[axisIndexKey]], axis, tableId))
         .filter(Boolean))]
       .sort((left, right) => left.localeCompare(right, "fr"));
   const rowsToGroup = getRowsForPartialSelection(state, indexes, tableId, {
@@ -261,7 +267,7 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
   });
 
   rowsToGroup.forEach((row) => {
-    const code = normalizeAxisCode(row[indexes[axisIndexKey]], axis);
+    const code = normalizeAxisCode(row[indexes[axisIndexKey]], axis, tableId);
     if (!code) return;
 
     if (!matchedRowsByCode.has(code)) matchedRowsByCode.set(code, []);
@@ -296,7 +302,7 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
         indentLevel: hierarchy.level,
         matchCount: matchedRows.length,
         parentPath: hierarchy.parentPath,
-        values: buildValues(dateColumns, matchedRows)
+        values: buildValues(dateColumns, matchedRows, tableId)
       };
     });
 }
@@ -305,7 +311,7 @@ function buildTemplateSeriesRows(state, indexes, dateColumns, templates, templat
   return templates.map((template) => {
     const templateId = template.id ?? template.tableId;
     const tableId = template.tableId;
-    const selections = normalizeTemplateSelections(templateSelections[templateId]);
+    const selections = normalizeTemplateSelections(templateSelections[templateId], tableId);
     const matchedRows = getRowsForCompleteSelection(state, indexes, tableId, selections);
     const format = getSelectedFilterFormat(state, tableId, "template", selections);
 
@@ -318,15 +324,15 @@ function buildTemplateSeriesRows(state, indexes, dateColumns, templates, templat
       indentLevel: 0,
       matchCount: matchedRows.length,
       parentPath: "",
-      values: buildValues(dateColumns, matchedRows)
+      values: buildValues(dateColumns, matchedRows, tableId)
     };
   });
 }
 
-function normalizeTemplateSelections(selections = {}) {
+function normalizeTemplateSelections(selections = {}, tableId = "") {
   return {
     selectedXCode: normalizeAxisCode(selections.selectedXCode || EXPLORER_TARGET.xAxisRcCode, "x"),
-    selectedYCode: normalizeAxisCode(selections.selectedYCode || "", "y"),
+    selectedYCode: normalizeAxisCode(selections.selectedYCode || "", "y", tableId),
     selectedZCode: normalizeAxisCode(selections.selectedZCode || "", "z")
   };
 }
@@ -357,10 +363,10 @@ function getRowsForAxisPoint(state, indexes, tableId, axis, pointCode, selection
 
   const zMatchOptions = { requireBlankZ: explorerTableHasCurrencyZAxis(state, tableId) };
   return rowsToFilter.filter((row) => (
-    matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, axis)
-    && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, axis)
-    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis, zMatchOptions)
-    && normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === pointCode
+    matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, axis, tableId)
+    && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, axis, tableId)
+    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, axis, tableId, zMatchOptions)
+    && normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis, tableId) === pointCode
   ));
 }
 
@@ -382,9 +388,9 @@ function getRowsForPartialSelection(state, indexes, tableId, selections) {
 
   const zMatchOptions = { requireBlankZ: explorerTableHasCurrencyZAxis(state, tableId) };
   return rowsToFilter.filter((row) => (
-    matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template")
-    && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template")
-    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template", zMatchOptions)
+    matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "template", tableId)
+    && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "template", tableId)
+    && matchesSelectedAxis(row, indexes, "z", selections.selectedZCode, "template", tableId, zMatchOptions)
   ));
 }
 
@@ -446,7 +452,7 @@ function getAxisCodeFormat(state, tableId, coordinate, code) {
   return state.dimensionMapping?.find(tableId, coordinate, code)?.format || "";
 }
 
-function matchesSelectedAxis(row, indexes, axis, selectedCode, activeAxis, { requireBlankZ = false } = {}) {
+function matchesSelectedAxis(row, indexes, axis, selectedCode, activeAxis, tableId, { requireBlankZ = false } = {}) {
   if (axis === activeAxis) return true;
   if (!selectedCode) {
     // A currency Z-axis table's "All Currency" selection resolves to an
@@ -457,18 +463,19 @@ function matchesSelectedAxis(row, indexes, axis, selectedCode, activeAxis, { req
     // currency row on top of it.
     return axis === "z" && requireBlankZ ? isBlankAxisCode(row, indexes, axis) : true;
   }
-  return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === selectedCode;
+  return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis, tableId) === selectedCode;
 }
 
 function isBlankAxisCode(row, indexes, axis) {
   return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === "";
 }
 
-function buildValues(dateColumns, matchedRows) {
+function buildValues(dateColumns, matchedRows, tableId) {
   return dateColumns.map((column) => ({
     date: column.date,
     label: formatReferenceDate(column.date),
-    value: matchedRows.length === 0
+    value: matchedRows.length === 0 || (tableId === "C_08.02"
+      && !matchedRows.some((row) => String(row[column.index] ?? "").trim()))
       ? null
       : matchedRows.reduce((total, row) => total + parseNumericValue(row[column.index]), 0)
   }));

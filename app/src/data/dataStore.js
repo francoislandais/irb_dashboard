@@ -486,7 +486,9 @@ const MODULE_REQUIREMENTS = [
     requiredTableIds: ["F_02.00", "F_12.01", "F_12.02", "F_18.00", "F_18.01", "F_20.04"]
   },
   { id: "approaches", requiredTableIds: ["C_07.00", "C_08.01"] },
-  { id: "irb-mechanics", requiredTableIds: ["C_08.01"] }
+  { id: "irb-mechanics", requiredTableIds: ["C_08.01"] },
+  { id: "irb-grades", requiredTableIds: ["C_08.02"] },
+  { id: "irb-grade-density", requiredTableIds: ["C_08.02"] }
 ];
 
 function getAvailableModules(dataIndexes) {

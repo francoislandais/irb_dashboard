@@ -8,6 +8,7 @@ const columns=['table_id','jst_code','x_axis_rc_code','y_axis_rc_code','z_axis_r
 const rows=[];
 for(const jst of ['A','B']) for(const x of ['10','20']) for(const y of ['10','20']) for(const z of ['', 'EUR']) rows.push(['F_01.01',jst,x,y,z,'1','2']);
 rows.push(['KRI','A','','LIQ52','','3','4'],['KRI','A',"","K'2",'','5','6']);
+rows.push(['C_08.02','A','0010','12','qx01','10',''],['C_08.02','A','0010','012','qx01','20','']);
 const state={columns,rows,selectedJst:'A'};
 const p=(x,y,date='2025-03-31')=>({tableId:'F_01.01',selectedXCode:x,selectedYCode:y,selectedZCode:'__ALL__',referenceDateIso:date});
 const k=id=>({tableId:'KRI',selectedYCode:id,referenceDateIso:'2025-03-31'});
@@ -19,12 +20,12 @@ function execute(sql) {
 import sqlite3,json,sys
 v=json.load(sys.stdin); c=sqlite3.connect(':memory:')
 c.execute("ATTACH DATABASE ':memory:' AS crp_agora")
-c.execute('CREATE TABLE crp_agora.agora_its_bft_current (table_id,jst_code,x_axis_rc_code,y_axis_rc_code,z_axis_rc_code,reference_period,value_decimal,is_group_head,is_highest_cons)')
+c.execute('CREATE TABLE crp_agora.agora_its_bft_current (table_id,jst_code,x_axis_rc_code,y_axis_rc_code,z_axis_rc_code,ogr,reference_period,value_decimal,is_group_head,is_highest_cons)')
 c.execute('CREATE TABLE crp_agora.agora_dm_imas_kris_raw (jst_code,kri_data_point_id,reference_period,value_decimal,is_group_head,is_highest_cons)')
 for r in v['rows']:
  for i,d in enumerate(['2025-03-31','2025-06-30']):
   if r[0]=='KRI': c.execute('INSERT INTO crp_agora.agora_dm_imas_kris_raw VALUES (?,?,?,?,?,?)',(r[1],r[3],d,r[5+i],'Y','Y'))
-  else: c.execute('INSERT INTO crp_agora.agora_its_bft_current VALUES (?,?,?,?,?,?,?,?,?)',(*r[:5],d,r[5+i],'Y','Y'))
+  else: c.execute('INSERT INTO crp_agora.agora_its_bft_current VALUES (?,?,?,?,?,?,?,?,?,?)',(r[0],r[1],r[2],None if r[0]=='C_08.02' else r[3],r[4],r[3] if r[0]=='C_08.02' else None,d,r[5+i],'Y','Y'))
 print(json.dumps(c.execute(v['sql']).fetchall()))
 `],{input:JSON.stringify({sql:portable,rows}),encoding:'utf8'});
  assert.equal(result.status,0,result.stderr+'\n'+sql);
@@ -46,6 +47,12 @@ for(const indexed of [false,true]) {
  assert.match(kri,/kri_data_point_id IN/);assert.equal(execute(kri).length,2);
  assert.equal(execute(build(s,[...diagonal,k('LIQ52')])).length,3);
  assert.equal(execute(build(s,[{...p('10','10'),jstCode:'B'}]))[0][1],'B');
+ const gradePoint=(y)=>({tableId:'C_08.02',selectedXCode:'0010',selectedYCode:y,selectedZCode:'qx01',referenceDateIso:'2025-03-31'});
+ const gradeSql=build(s,[gradePoint('012')]);
+ assert.match(gradeSql,/ogr = '012'/);
+ assert.match(gradeSql,/ogr AS y_axis_rc_code/);
+ assert.deepEqual(execute(gradeSql).map(row=>[row[3],row.at(-1)]),[['012','20']]);
+ assert.deepEqual(execute(build(s,[gradePoint('12')])).map(row=>[row[3],row.at(-1)]),[['12','10']]);
  assert.equal(build(s,[]),null);
  assert.ok(sql.split('\n').every(line=>line.length<110));
 }

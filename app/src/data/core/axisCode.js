@@ -6,8 +6,14 @@ const CODE_WIDTH = 4;
 // (e.g. C_18.00's EBA currency numeric codes) and the source data pads it
 // (e.g. "0006"). Without padding here too, the dictionary's own unpadded
 // "6" would never match that - so numeric Z codes now pad exactly like X/Y.
-export function normalizeAxisCode(code, axisOrCoordinate = "") {
+export function normalizeAxisCode(code, axisOrCoordinate = "", tableId = "") {
   const value = String(code ?? "").trim();
+
+  // C_08.02 uses OGR (an institution's own obligor grade/pool identifier)
+  // as its Y code. Leading zeroes distinguish grades such as "12" and "012".
+  if (tableId === "C_08.02" && (axisOrCoordinate === "y" || axisOrCoordinate === "y_axis_rc_code")) {
+    return value;
+  }
 
   return /^\d+$/.test(value) ? value.padStart(CODE_WIDTH, "0") : value;
 }

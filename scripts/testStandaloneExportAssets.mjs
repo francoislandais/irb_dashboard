@@ -8,6 +8,12 @@ import { buildStandaloneBundle } from "./exportStandaloneApp.mjs";
 
 const appDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "../app");
 const bundle = await buildStandaloneBundle(appDirectory);
+assert.ok(bundle.moduleSources["src/ui/irbGradeDetailView.js"]);
+assert.ok(bundle.moduleSources["src/data/irbGradeDetail.js"]);
+assert.ok(bundle.moduleSources["src/data/irbGradeScale.js"]);
+assert.ok(bundle.moduleSources["src/ui/irbGradeDensityView.js"]);
+assert.ok(bundle.moduleSources["src/data/irbGradeDensity.js"]);
+assert.ok(bundle.moduleSources["src/data/geographicCountryAxis.js"]);
 assert.match(extractAppMarkup(bundle.indexHtml), /id="startup-progress"/);
 const requestedAssets = new Set(
   Object.values(bundle.moduleSources).flatMap((source) =>
@@ -31,4 +37,12 @@ assert.equal(taxonomy.dimensionMapping.find("C_01.00", "x_axis_rc_code", "0010")
 assert.equal(taxonomy.dimensionMapping.find("C_01.00", "y_axis_rc_code", "0010")?.description, "Own funds");
 assert.equal(taxonomy.explorerPoints.filter((point) => point.tableId === "KRI").length, 2674);
 assert.equal(taxonomy.explorerPoints.find((point) => point.tableId === "KRI" && point.code === "LIQ55")?.description, "Liquidity buffer quality ratio");
+const historicalTaxonomy = await loadTaxonomyDimensionData({}, { referenceDate: "2024-12-31" });
+for (const tableId of ["C_09.01", "C_09.02", "C_09.04", "C_33.00"]) {
+  assert.equal(historicalTaxonomy.selectedTaxonomiesByTemplate[tableId], "3.2");
+  for (const countryCode of ["FR", "XK", "qx2000", "qx2014"]) {
+    assert.ok(historicalTaxonomy.dimensionMapping.find(tableId, "z_axis_rc_code", countryCode),
+      `${tableId} has ${countryCode} in its 2024 geography axis`);
+  }
+}
 process.stdout.write(`${requestedAssets.size} portable CSV assets verified\n`);

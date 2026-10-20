@@ -132,12 +132,16 @@ def _check_keys(value: dict, allowed: set[str], context: str) -> None:
         raise ValueError(f"{context}: champ(s) inconnu(s) : {', '.join(sorted(unknown))}.")
 
 
-def _is_temporary_file(path: Path) -> bool:
-    name = path.name.lower()
-    return path.is_file() and (
+def _is_temporary_name(name: str) -> bool:
+    name = name.lower()
+    return (
         name.startswith("~$")
         or name.endswith((".amltmp", ".tmp", ".temp", ".swp", ".swo", ".bak", "~"))
     )
+
+
+def _is_temporary_file(path: Path) -> bool:
+    return path.is_file() and _is_temporary_name(path.name)
 
 
 @lru_cache(maxsize=1)
@@ -871,6 +875,78 @@ def _connect_darwin():
     return client
 
 
+def _darwin_folder_items(folder_id: int, client) -> list[tuple[int, str]]:
+    """List only direct children of a Darwin folder through its REST session."""
+
+    rest = next((candidate for candidate in (getattr(client, "rest", None), getattr(client, "session", None))
+                 if callable(getattr(candidate, "get", None))), None)
+    if rest is None:
+        raise RuntimeError(
+            "Le client Darwin connecté n'expose pas de session REST (.rest ou .session) "
+            "pour lister les fichiers du dossier. Vérifier l'interface de vl_connect.darwin sur cette machine."
+        )
+    url = f"https://darwin.escb.eu/livelink/livelink/api/v1/nodes/{folder_id}/nodes"
+    entries: list[tuple[int, str]] = []
+    page = 1
+    while True:
+        try:
+            response = rest.get(url, params={"page": page, "limit": 200})
+            if hasattr(response, "raise_for_status"):
+                response.raise_for_status()
+            payload = response.json() if hasattr(response, "json") else response
+        except Exception as error:
+            raise RuntimeError(f"Lecture REST du dossier Darwin {folder_id}, page {page}, échouée.") from error
+        if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+            raise ValueError(f"Dossier Darwin {folder_id}: réponse REST inattendue à la page {page}.")
+        for entry in payload["data"]:
+            properties = entry.get("data", entry) if isinstance(entry, dict) else None
+            if isinstance(properties, dict):
+                properties = properties.get("properties", properties)
+            if not isinstance(properties, dict):
+                raise ValueError(f"Dossier Darwin {folder_id}: entrée REST invalide.")
+            node_id, name = properties.get("id"), properties.get("name")
+            if type(node_id) is not int or node_id <= 0 or not isinstance(name, str) or not name:
+                raise ValueError(f"Dossier Darwin {folder_id}: identifiant ou nom de fichier invalide.")
+            if name.startswith(".") or _is_temporary_name(name):
+                continue
+            if properties.get("type") == 0:
+                raise ValueError(f"Dossier Darwin {folder_id}: sous-dossier inattendu : {name}.")
+            if Path(name).name != name or name in {".", ".."} or not name.lower().endswith(".toml"):
+                raise ValueError(f"Dossier Darwin {folder_id}: fichier non TOML ou nom invalide : {name}.")
+            entries.append((node_id, name))
+        total_pages = payload.get("page_total")
+        if type(total_pages) is not int:
+            total_pages = payload.get("paging", {}).get("page_total") if isinstance(payload.get("paging"), dict) else None
+        if type(total_pages) is not int or total_pages < page:
+            raise ValueError(f"Dossier Darwin {folder_id}: pagination REST absente ou incohérente.")
+        if page >= total_pages:
+            break
+        page += 1
+    if not entries:
+        raise ValueError(f"Dossier Darwin {folder_id}: aucun fichier TOML à traiter.")
+    names = [name.casefold() for _, name in entries]
+    if len(names) != len(set(names)):
+        raise ValueError(f"Dossier Darwin {folder_id}: noms de fichiers TOML en doublon.")
+    return sorted(entries, key=lambda item: item[1].casefold())
+
+
+def _download_darwin_folder_configurations(folder_id: int, as_of: date, client) -> tuple[Application, ...]:
+    if type(folder_id) is not int or folder_id <= 0:
+        raise ValueError("L'identifiant du dossier Darwin doit être un entier positif.")
+    items = _darwin_folder_items(folder_id, client)
+    with tempfile.TemporaryDirectory(prefix="agora-config-") as temporary_directory:
+        directory = Path(temporary_directory)
+        for node_id, name in items:
+            destination = directory / name
+            try:
+                client.get_file(local_file_path=str(destination), node_id=node_id)
+            except Exception as error:
+                raise RuntimeError(f"Téléchargement du TOML Darwin {name} ({node_id}) échoué.") from error
+            if not destination.is_file():
+                raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier TOML {name} attendu.")
+        return _read_configuration(directory, as_of)
+
+
 def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, client) -> tuple[Application, ...]:
     for node_id in node_ids:
         if type(node_id) is not int or node_id <= 0:
@@ -940,6 +1016,7 @@ def global_update(
     compact_values: bool = False,
     darwin_upload: int | None = None,
     darwin_config_ids: Iterable[int] | None = None,
+    darwin_folder_id: int | None = None,
     darwin_client=None,
 ) -> dict:
     """Prépare, simule ou exécute toutes les applications du dossier TOML."""
@@ -967,13 +1044,21 @@ def global_update(
         raise ValueError("Chaque identifiant Darwin de TOML doit être un entier positif.")
     if len(set(node_ids)) != len(node_ids):
         raise ValueError("La liste des identifiants Darwin de TOML contient des doublons.")
-    if mode == "hive" and config_path is None and not node_ids:
+    if darwin_folder_id is not None and (type(darwin_folder_id) is not int or darwin_folder_id <= 0):
+        raise ValueError("L'identifiant du dossier Darwin doit être un entier positif.")
+    if darwin_folder_id is not None and (config_path is not None or node_ids):
+        raise ValueError("Choisir soit un dossier Darwin, soit des fichiers Darwin, soit un dossier local.")
+    if mode == "hive" and config_path is None and not node_ids and darwin_folder_id is None:
         raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
     output_root = resolve_external_output_directory(output_directory)
     if mode == "hive" and output_root.exists() and any(output_root.iterdir()):
         raise ValueError(f"Le dossier de sortie Hive doit être vide : {output_root}")
-    if node_ids:
+    if darwin_folder_id is not None:
+        darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
+        applications = _download_darwin_folder_configurations(darwin_folder_id, calculation_date, darwin_client)
+        config_source = f"darwin-folder:{darwin_folder_id}"
+    elif node_ids:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
         applications = _download_darwin_configurations(node_ids, calculation_date, darwin_client)
         config_source = ",".join(f"darwin:{node_id}" for node_id in node_ids)
@@ -1086,6 +1171,7 @@ def _main() -> None:
     parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
     parser.add_argument("--config", "--config-dir", default=None, help="Dossier TOML local ou darwin:NODE_ID")
     parser.add_argument("--config-darwin", type=int, action="append", default=None, metavar="NODE_ID", help="Nœud Darwin d'un TOML ; option répétable pour plusieurs applications")
+    parser.add_argument("--config-darwin-folder", type=int, default=None, metavar="FOLDER_ID", help="Lister les TOML du dossier Darwin et télécharger chaque fichier")
     parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
     parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet (obligatoire)")
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
@@ -1093,7 +1179,7 @@ def _main() -> None:
     parser.add_argument("--darwin_upload", "--darwin-upload", type=int, default=None, metavar="NODE_ID", help="Uploader chaque HTML autonome dans le nœud parent Darwin indiqué")
     args = parser.parse_args()
     try:
-        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin)
+        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin, darwin_folder_id=args.config_darwin_folder)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")

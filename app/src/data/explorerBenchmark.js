@@ -3,11 +3,11 @@ import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding"
 import { parseNumericValue } from "./core/referenceColumns.js";
 import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260922-native-all-currency";
 
-export function getExplorerSelectionsForAxisCode(context, activeAxis, axisCode) {
+export function getExplorerSelectionsForAxisCode(context, activeAxis, axisCode, tableId = "") {
   const zCode = normalizeAxisCode(activeAxis === "z" ? axisCode : context.selectedZCode, "z");
   return {
     selectedXCode: normalizeAxisCode(activeAxis === "x" ? axisCode : context.selectedXCode, "x"),
-    selectedYCode: normalizeAxisCode(activeAxis === "y" ? axisCode : context.selectedYCode, "y"),
+    selectedYCode: normalizeAxisCode(activeAxis === "y" ? axisCode : context.selectedYCode, "y", tableId),
     // "All Currency" (see explorer.js) resolves to an empty selectedZCode -
     // getBenchmarkRows then requires the row's own z_axis_rc_code to be
     // blank rather than treating it as "match any currency".
@@ -49,9 +49,9 @@ export function getBenchmarkRows(state, indexes, tableId, selections, jstCode) {
   return state.rows.filter((row) => (
     row[indexes.jstCode] === jstCode
     && row[indexes.tableId] === tableId
-    && matchesBenchmarkSelection(row, indexes, "x", selections.selectedXCode)
-    && matchesBenchmarkSelection(row, indexes, "y", selections.selectedYCode)
-    && matchesBenchmarkSelection(row, indexes, "z", selections.selectedZCode, requireBlankZ)
+    && matchesBenchmarkSelection(row, indexes, "x", selections.selectedXCode, tableId)
+    && matchesBenchmarkSelection(row, indexes, "y", selections.selectedYCode, tableId)
+    && matchesBenchmarkSelection(row, indexes, "z", selections.selectedZCode, tableId, requireBlankZ)
   ));
 }
 
@@ -59,13 +59,13 @@ function hasCompleteBenchmarkSelection(selections) {
   return Boolean(selections.selectedXCode && selections.selectedYCode && selections.selectedZCode);
 }
 
-function matchesBenchmarkSelection(row, indexes, axis, selectedCode, requireBlankZ = false) {
+function matchesBenchmarkSelection(row, indexes, axis, selectedCode, tableId, requireBlankZ = false) {
   if (!selectedCode) {
     return axis === "z" && requireBlankZ
       ? normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === ""
       : true;
   }
-  return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis) === selectedCode;
+  return normalizeAxisCode(row[indexes[`${axis}AxisRcCode`]], axis, tableId) === selectedCode;
 }
 
 export function getBenchmarkLabel(state, tableId, context, activeAxis, activeTemplateLabel) {

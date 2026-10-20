@@ -187,4 +187,31 @@ assert.equal(xyZResult.rows.find((row) => row.taxonomyFramework === "4.2" && row
 assert.equal(xyZResult.rows.find((row) => row.taxonomyFramework === "4.0" && row.code === "C")
   .values[1].value, 2);
 
+// C_08.02 grades are institution-defined OGR identifiers, absent from every
+// DPM Y list. Valid grade observations must survive the taxonomy mask.
+sandbox.explorerGlobalDisplayMode = "temporal";
+sandbox.getTaxonomyDataForTemplateFramework = (_state, _tableId, framework) => ({
+  dimensionMapping: { framework },
+  explorerPoints: [
+    { tableId: "C_08.02", coordinate: "x_axis_rc_code", code: "0010" },
+    { tableId: "C_08.02", coordinate: "z_axis_rc_code", code: "qx01" }
+  ]
+});
+const gradeState = { ...state, selectedTaxonomiesByTemplate: { "C_08.02": "4.2" } };
+const gradeSeries = {
+  dateColumns: mainSeries.dateColumns,
+  rows: [{ code: "012", description: "Y 012", values: dates.map((date, index) => ({
+    date, label: date.toISOString().slice(0, 10), value: index + 1
+  })) }]
+};
+const gradeOptions = {
+  axis: "y", tableId: "C_08.02", templateId: "C_08.02",
+  selectedXCode: "0010", selectedYCode: "", selectedZCode: "qx01", templates: []
+};
+Object.assign(sandbox, { gradeState, gradeSeries, gradeOptions });
+const gradeResult = vm.runInContext("buildExplorerTemporalTaxonomySeries(gradeSeries, gradeState, gradeOptions)", context);
+assert.deepEqual([...gradeResult.rows[0].values.map((point) => point.value)], [1, 2, 3]);
+assert.ok(gradeResult.rows[0].values.every((point) => !point.isTaxonomyUnavailable));
+assert.deepEqual([...gradeResult.taxonomyBlocks], ["4.2"]);
+
 console.log("PASS: Temporal and XY Tab share taxonomy blocks; XY X/Y remains a matrix.");

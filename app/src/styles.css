@@ -5195,6 +5195,53 @@ table {
 .approach-center-resizer:focus-visible { outline: 2px solid #0a73a7; outline-offset: 2px; }
 .approaches-view.is-resizing-center { cursor: move; user-select: none; }
 .irb-mechanics-view .approach-context-panel { display: block; overflow-x: hidden; overflow-y: auto; padding-right: 5px; }
+.irb-grades-view .approach-context-panel { display: block; overflow-x: hidden; overflow-y: auto; padding-right: 5px; }
+.irb-grades-view .approach-context-selection { min-height: 100%; height: auto; overflow: visible; }
+.irb-grades-view .approach-main-pane { align-content: start; gap: 16px; }
+.irb-grade-title { margin: 8px 0 6px; color: #203d4b; font-size: 21px; }
+.irb-grade-institution { margin: 0 0 24px; color: #607981; font-size: 14px; }
+.irb-grade-field { display: grid; gap: 6px; margin: 0 0 19px; }
+.irb-grade-field-label { color: #4c6873; font-size: 13px; font-weight: 600; }
+.irb-grade-select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #ccd9dc; border-radius: 7px; background: #fff; color: #243e49; font: inherit; }
+.irb-grade-scale-options { display: flex; gap: 6px; }
+.irb-grade-scale-button { padding: 6px 12px; border: 1px solid #cddadd; border-radius: 6px; background: #fff; color: #52717e; font: inherit; font-size: 12px; cursor: pointer; }
+.irb-grade-scale-button.is-active { border-color: #91bee0; background: #e9f3fb; color: #086ca4; font-weight: 600; }
+.irb-grade-explanation { margin: 18px 0 0; color: #61777f; font-size: 12px; line-height: 1.45; }
+.irb-grade-count { margin: 18px 0 0; color: #126b95; font-size: 13px; font-weight: 600; }
+.irb-grade-caution { margin: 12px 0 0; color: #9a622e; font-size: 12px; line-height: 1.4; }
+.irb-grade-chart-header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
+.irb-grade-chart-title { margin: 0; font-size: 22px; font-weight: 600; color: #203d4b; }
+.irb-grade-chart-date { color: #768b91; font-size: 13px; }
+.irb-grade-empty { margin: 24px 0; color: #667b81; }
+.irb-grade-plot { width: 100%; min-width: 0; max-width: 1360px; overflow: hidden; }
+.irb-grade-plot svg { display: block; width: 100%; height: 480px; }
+.irb-grade-grid { stroke: #e3ebed; stroke-width: 1; }
+.irb-grade-y-label { fill: #6b8088; font-size: 12px; text-anchor: end; }
+.irb-grade-x-label { fill: #526a74; font-size: 11px; text-anchor: end; }
+.irb-grade-axis-title { fill: #59717b; font-size: 12px; font-weight: 600; }
+.irb-grade-x-title { text-anchor: end; }
+.irb-grade-line { fill: none; stroke: var(--series-color, #0b76a8); stroke-width: 2; stroke-linejoin: round; }
+.irb-grade-dot { fill: var(--series-color, #0b76a8); stroke: #fff; stroke-width: 1.5; }
+.irb-grade-dot.is-dense { stroke: none; }
+.irb-grade-zero-dot { fill: #fff; stroke: var(--series-color, #0b76a8); stroke-width: 1.8; }
+.irb-grade-legend { display: flex; flex-wrap: wrap; gap: 7px 17px; max-width: 1360px; color: #536b74; font-size: 12px; }
+.irb-grade-legend-item { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.irb-grade-legend-swatch { display: inline-block; flex: 0 0 auto; width: 16px; height: 3px; border-radius: 3px; }
+.irb-grade-timeline { box-sizing: border-box; width: 100%; max-width: 1360px; padding: 8px 0 0; }
+.irb-grade-timeline[hidden] { display: none; }
+.irb-grade-time-slider { display: block; width: 100%; margin: 0; accent-color: #0b76a8; cursor: pointer; }
+.irb-grade-timeline-labels { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 5px; color: #748a92; font-size: 11px; }
+.irb-grade-timeline-current { color: #176f9b; font-weight: 600; }
+.irb-grade-density-view .approach-context-panel { display: block; overflow-x: hidden; overflow-y: auto; padding-right: 5px; }
+.irb-grade-density-view .approach-context-selection { min-height: 100%; height: auto; overflow: visible; }
+.irb-grade-density-view .approach-main-pane { align-content: start; gap: 16px; }
+.irb-grade-density-plot { width: 100%; min-width: 0; min-height: 550px; max-width: 1440px; overflow: hidden; }
+.irb-grade-density-plot svg { display: block; width: 100%; height: 550px; }
+.irb-grade-density-vgrid { stroke: #eff3f4; stroke-width: 1; }
+.irb-grade-density-x-label { fill: #617780; font-size: 11px; text-anchor: middle; }
+.irb-grade-density-legend { display: flex; flex-wrap: wrap; gap: 7px 18px; max-width: 1440px; color: #526e79; font-size: 12px; }
+.irb-grade-density-legend-item { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.irb-grade-density-legend-item.is-focused { color: #194e67; font-weight: 600; }
 
 .approach-context-selection {
   box-sizing: border-box;
@@ -5385,7 +5432,7 @@ table {
 .irb-shock-band { fill: #edf6fa; }
 .irb-shock-grid { stroke: #dce7eb; stroke-width: 1; stroke-dasharray: 3 5; }
 .irb-shock-tail { stroke: #b7784c; stroke-width: 1.2; stroke-dasharray: 5 5; }
-.irb-shock-path { fill: none; stroke: #137cac; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.irb-shock-path { fill: none; stroke: #137cac; stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; }
 .irb-shock-point { fill: #137cac; }
 .irb-shock-point.is-severe { fill: #b7784c; }
 .irb-shock-tick { fill: #778d96; font-size: 11px; text-anchor: end; }

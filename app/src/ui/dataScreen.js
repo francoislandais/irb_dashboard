@@ -4,7 +4,9 @@ import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./c
 import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261012-parent-compatibility";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenchmarkView.js?v=20261017-provisions-on-ead";
-import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js";
+import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261017-1000-year-simulation";
+import { renderIrbGradeDetail, wireIrbGradeDetailUi } from "./irbGradeDetailView.js?v=20261018-grade-raw-series-slider";
+import { renderIrbGradeDensity, wireIrbGradeDensityUi } from "./irbGradeDensityView.js?v=20261018-grade-density-benchmark-v4";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
@@ -134,6 +136,8 @@ export function wireUi(actions) {
   wireIrbUi(actions, renderAppState);
   wireApproachBenchmarkUi(actions, renderAppState);
   wireIrbMechanicsUi();
+  wireIrbGradeDetailUi();
+  wireIrbGradeDensityUi();
 }
 
 function toggleSidebar() {
@@ -214,6 +218,8 @@ export function renderAppState(state) {
   if (state.activeModule === "irb") renderIrb(state);
   if (state.activeModule === "approaches") renderApproachBenchmark(state);
   if (state.activeModule === "irb-mechanics") renderIrbMechanics(state);
+  if (state.activeModule === "irb-grades") renderIrbGradeDetail(state);
+  if (state.activeModule === "irb-grade-density") renderIrbGradeDensity(state);
   if (state.activeModule === "credit-risk") {
     renderCreditRisk(state);
     syncCreditRiskUrlParams();

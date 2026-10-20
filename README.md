@@ -171,6 +171,14 @@ python3 scripts/global_update.py --mode hive --config-darwin 123456 --output /ch
 
 On peut ajouter `--config-darwin 234567 --config-darwin 345678` pour plusieurs TOML. La source Darwin marche aussi en modes `preview` et `test` ; elle requiert `vl_connect` et l'accès Darwin, mais le mode `preview` n'interroge toujours pas Hive. Depuis Python : `global_update(123456, mode="hive", output_directory="/chemin/vers/sorties/hive")`, ou `darwin_config_ids=[123456, 234567]` pour plusieurs fichiers. Un dossier local et des nœuds Darwin ne peuvent pas être combinés dans le même lancement.
 
+Pour traiter **tous les TOML d'un dossier Darwin**, passer son identifiant à `--config-darwin-folder` :
+
+```sh
+python3 scripts/global_update.py --mode hive --config-darwin-folder 123456 --output /chemin/vers/sorties/hive
+```
+
+Le programme liste les enfants directs du dossier via l'API REST Darwin (avec pagination), ignore les fichiers temporaires, vérifie qu'il ne reste que des `.toml`, puis télécharge chacun avec `get_file` dans un dossier temporaire. Tous les TOML sont validés avant la première requête Hive. Les sous-dossiers ne sont pas parcourus. Cette option exige que le client renvoyé par `darwin.connect()` expose une session REST authentifiée sous `.rest` ou `.session`. Les anciens `--config darwin:ID` et `--config-darwin ID` continuent de désigner des fichiers TOML individuels. Depuis Python, utiliser `global_update(..., darwin_folder_id=123456)`.
+
 Le point d'entrée unique peut être importé :
 
 ```python

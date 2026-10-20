@@ -44,7 +44,14 @@ assert.equal(conditionalLossAtShock(basic.pd, basic.lgd, 0, 3.090232306), basic.
 const extremeR = calculateIrbMechanics({ ...basic, correlation: 0.8 });
 assert.equal(extremeR.correlation, 0.8);
 assert(extremeR.stressRate > highR.stressRate);
-assert.equal(calculateIrbMechanics({ ...basic, correlation: 1 }), null);
+const perfectR = calculateIrbMechanics({ ...basic, correlation: 1 });
+assert.equal(perfectR.correlation, 1);
+assert.equal(perfectR.stressRate, basic.lgd);
+assert(Number.isFinite(perfectR.riskWeight));
+assert.equal(conditionalLossAtShock(basic.pd, basic.lgd, 1, -3), 0);
+assert.equal(conditionalLossAtShock(basic.pd, basic.lgd, 1, 3), basic.lgd);
+assert.equal(calculateIrbMechanics({ ...basic, pd: 0.0005, correlation: 1 }).stressRate, 0);
+assert.equal(calculateIrbMechanics({ ...basic, correlation: 1.01 }), null);
 const pdFour = calculateIrbMechanics({ ...basic, pd: 0.04, lgd: 0.3 });
 const pdOne = calculateIrbMechanics({ ...basic, pd: 0.01, lgd: 0.3 });
 assert(pdOne.expectedRate < pdFour.expectedRate);

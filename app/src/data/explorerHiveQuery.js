@@ -49,11 +49,13 @@ export function buildExplorerQueryFromPoints(state, points, { includeDateFilter 
     const rows = state.dataIndexes ? getIndexedRowsByCoordinates(state, point.tableId, selections, jst) : (state.rows ?? []).filter(row =>
       row[indexes.tableId] === point.tableId && row[indexes.jstCode] === jst &&
       [[indexes.xAxisRcCode, selections.selectedXCode, "x"], [indexes.yAxisRcCode, selections.selectedYCode, "y"], [indexes.zAxisRcCode, z, "z"]]
-        .every(([index, code, axis]) => normalizeAxisCode(row[index], axis) === normalizeAxisCode(code ?? "", axis)));
+        .every(([index, code, axis]) => normalizeAxisCode(row[index], axis, point.tableId)
+          === normalizeAxisCode(code ?? "", axis, point.tableId)));
     const kri = point.tableId === "KRI";
+    const usesOgr = point.tableId === "C_08.02";
     const dated = Boolean(includeDateFilter && point.referenceDateIso);
-    const key = `${kri}:${dated}`;
-    if (!groups.has(key)) groups.set(key, { kri, dated, tuples: [] });
+    const key = `${kri}:${usesOgr}:${dated}`;
+    if (!groups.has(key)) groups.set(key, { kri, usesOgr, dated, tuples: [] });
     // Keep all raw variants matching normalized coordinates, not only the first.
     for (const row of rows) {
       const tuple = kri ? [jst, row[indexes.yAxisRcCode]] : [row[indexes.tableId], jst, row[indexes.zAxisRcCode] || "", row[indexes.xAxisRcCode] || "", row[indexes.yAxisRcCode] || ""];
@@ -62,11 +64,11 @@ export function buildExplorerQueryFromPoints(state, points, { includeDateFilter 
     }
   }
   const queries = [];
-  for (const { kri, dated, tuples } of groups.values()) {
+  for (const { kri, usesOgr, dated, tuples } of groups.values()) {
     if (!tuples.length) continue;
-    const columns = kri ? ["jst_code", "kri_data_point_id"] : ["regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')", "jst_code", "z_axis_rc_code", "x_axis_rc_code", "y_axis_rc_code"];
+    const columns = kri ? ["jst_code", "kri_data_point_id"] : ["regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')", "jst_code", "z_axis_rc_code", "x_axis_rc_code", usesOgr ? "ogr" : "y_axis_rc_code"];
     if (dated) columns.push("reference_period");
-    const projection = kri ? ["'KRI' AS table_id", "jst_code AS reporting_unit_id", "'' AS x_axis_rc_code", "kri_data_point_id AS y_axis_rc_code", "'' AS z_axis_rc_code"] : ["table_id", "jst_code AS reporting_unit_id", "x_axis_rc_code", "y_axis_rc_code", "z_axis_rc_code"];
+    const projection = kri ? ["'KRI' AS table_id", "jst_code AS reporting_unit_id", "'' AS x_axis_rc_code", "kri_data_point_id AS y_axis_rc_code", "'' AS z_axis_rc_code"] : ["table_id", "jst_code AS reporting_unit_id", "x_axis_rc_code", usesOgr ? "ogr AS y_axis_rc_code" : "y_axis_rc_code", "z_axis_rc_code"];
     queries.push(`SELECT\n${projection.concat(["reference_period", "value_decimal"]).map(item => `    ${item}`).join(",\n")}\nFROM crp_agora.${kri ? "agora_dm_imas_kris_raw" : "agora_its_bft_current"}\nWHERE is_group_head = 'Y'\n    AND is_highest_cons = 'Y'\n    AND (\n${indent(indent(factorTuples(tuples, columns)))}\n    )`);
   }
   return queries.length ? `${queries.join("\n\nUNION\n\n")}\nORDER BY\n    reference_period,\n    table_id,\n    y_axis_rc_code,\n    x_axis_rc_code;` : null;

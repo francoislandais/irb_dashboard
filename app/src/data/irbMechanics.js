@@ -56,6 +56,10 @@ export function assetCorrelation(pd, kind, turnover = null, financialMultiplier 
 
 export function conditionalLossAtShock(pd, lgd, correlation, shock) {
   if (correlation === 0) return pd * lgd;
+  // At perfect correlation the idiosyncratic shock vanishes. Conditional
+  // default becomes a step at the systemic threshold, rather than a CDF
+  // divided by sqrt(1 - R).
+  if (correlation === 1) return shock >= -inverseNormal(pd) ? lgd : 0;
   return normalCdf((inverseNormal(pd) + Math.sqrt(correlation) * shock) / Math.sqrt(1 - correlation)) * lgd;
 }
 
@@ -85,7 +89,7 @@ export function simulateSystemicShocks(count = 60, seed = 20261016) {
 export function calculateIrbMechanics({ pd, lgd, ead, maturity = 2.5, kind = "corporate", turnover = null, financialMultiplier = false, correlation: correlationOverride = null }) {
   if (![pd, lgd, ead].every(Number.isFinite) || !(pd > 0 && pd < 1)
     || !(lgd >= 0 && lgd <= 1) || ead < 0 || !Number.isFinite(maturity) || maturity <= 0
-    || (correlationOverride !== null && (!Number.isFinite(correlationOverride) || correlationOverride < 0 || correlationOverride >= 1))) return null;
+    || (correlationOverride !== null && (!Number.isFinite(correlationOverride) || correlationOverride < 0 || correlationOverride > 1))) return null;
   const correlation = correlationOverride ?? assetCorrelation(pd, kind, turnover, financialMultiplier);
   const stressedPd = conditionalLossAtShock(pd, 1, correlation, inverseNormal(0.999));
   const expectedRate = pd * lgd;

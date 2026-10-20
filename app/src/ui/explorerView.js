@@ -5,7 +5,7 @@ import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerX
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig, getExplorerGeographyLatestValues } from "../data/timeSeries.js?v=20261005-geography-contributors";
 import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-padding";
-import { normalizeGeographicCountryCode } from "../data/geographicCountryAxis.js";
+import { GEOGRAPHIC_COUNTRY_TEMPLATES, normalizeGeographicCountryCode } from "../data/geographicCountryAxis.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js?v=20260925-institution-id";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
@@ -106,12 +106,9 @@ const EXPLORER_SELECTION_DESCRIPTION_ENABLED = false;
 // year + 2 prior years); other frequencies now get the same period count,
 // just in their own unit (see getExplorerHistoryUnitLabel).
 const DEFAULT_EXPLORER_HISTORY_PERIODS = 8;
-const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map([
-  ["F_20.04", "z"],
-  ["F_20.05", "z"],
-  ["F_20.06", "z"],
-  ["F_20.07.1", "z"]
-]);
+const EXPLORER_GEOGRAPHIC_TEMPLATES = new Map(
+  [...GEOGRAPHIC_COUNTRY_TEMPLATES].map((tableId) => [tableId, "z"])
+);
 const EXPLORER_GEOGRAPHY_LAYOUTS = [
   { value: "alphabetical", label: "Alphabetical", description: "A flat A–Z list of all available countries" },
   { value: "euro-first", label: "Euro area focus", description: "Euro area, other EU countries, then the rest of the world" },
@@ -579,7 +576,7 @@ function applyPendingUrlExplorerSelection(context) {
   if (hasInteractedWithExplorerSelection) return;
 
   if (EXPLORER_AXIS_VALUES.has(pendingUrlAxis)) context.activeAxis = pendingUrlAxis;
-  if (pendingUrlRow) context.selectedYCode = normalizeAxisCode(pendingUrlRow, "y");
+  if (pendingUrlRow) context.selectedYCode = normalizeAxisCode(pendingUrlRow, "y", getActiveExplorerTemplate()?.tableId);
   if (pendingUrlColumn) context.selectedXCode = normalizeAxisCode(pendingUrlColumn, "x");
   if (pendingUrlTab) context.selectedZCode = normalizeAxisCode(pendingUrlTab, "z");
 }
@@ -1254,14 +1251,14 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
   // y-code actually belongs to this section's own list when possible.
   const yCodeSet = new Set(axisOptions.y.codes);
   const firstRow = (yCodeSet.size > 0
-    ? rows.find((row) => yCodeSet.has(normalizeAxisCode(row[indexes.yAxisRcCode], "y")))
+    ? rows.find((row) => yCodeSet.has(normalizeAxisCode(row[indexes.yAxisRcCode], "y", tableId)))
     : null) ?? rows[0];
 
   if (axisOptions.x.codes.length > 0) {
     context.selectedXCode = normalizeAxisCode(firstRow[indexes.xAxisRcCode], "x");
   }
   if (axisOptions.y.codes.length > 0) {
-    context.selectedYCode = normalizeAxisCode(firstRow[indexes.yAxisRcCode], "y");
+    context.selectedYCode = normalizeAxisCode(firstRow[indexes.yAxisRcCode], "y", tableId);
   }
   if (axisOptions.z.codes.length > 0 && !EXPLORER_GEOGRAPHIC_TEMPLATES.has(tableId)) {
     context.selectedZCode = normalizeAxisCode(firstRow[indexes.zAxisRcCode], "z");
@@ -1809,7 +1806,7 @@ export function openExplorerPoint({
   const context = getExplorerContextForTemplate(activeExplorerTemplateId);
   context.activeAxis = yCode ? "y" : xCode ? "x" : zCode ? "z" : "y";
   if (xCode) context.selectedXCode = normalizeAxisCode(xCode, "x");
-  if (yCode) context.selectedYCode = normalizeAxisCode(yCode, "y");
+  if (yCode) context.selectedYCode = normalizeAxisCode(yCode, "y", tableId);
   if (zCode) context.selectedZCode = normalizeAxisCode(zCode, "z");
 
   shouldFocusOpenedExplorerPoint = true;
@@ -2551,7 +2548,7 @@ function getExplorerContributionBaseValues(seriesRow, normalizedPath, activeAxis
   const denominatorTableId = propagatedContribution.tableId || tableId;
   const selections = propagatedContribution.selections
     ? { ...propagatedContribution.selections }
-    : getExplorerSelectionsForAxisCode(getActiveExplorerContext(), activeAxis, seriesRow.code);
+    : getExplorerSelectionsForAxisCode(getActiveExplorerContext(), activeAxis, seriesRow.code, tableId);
   if (!propagatedContribution.selections) {
     selections[`selected${propagatedContribution.axis.toUpperCase()}Code`] = propagatedContribution.baseCode;
   }
@@ -3409,6 +3406,10 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
   // members do not mean that reported currencies ceased to exist.
   const hasOpenCurrencyAxis = mainZCodes.has("EUR") && mainZCodes.has("qx46");
   const hasCodeAtDate = (codeSets, coordinate, code) => {
+    // C_08.02 obligor grades are OGR values reported by each institution,
+    // not a closed list of taxonomy row codes. Their absence from the DPM
+    // mapping must not grey out otherwise reported data.
+    if (tableId === "C_08.02" && coordinate === "y_axis_rc_code") return Boolean(code);
     if (coordinate === "z_axis_rc_code") {
       if (code === EXPLORER_ALL_CURRENCIES_CODE) return true;
       if (hasOpenCurrencyAxis && mainZCodes.has(code)) return true;
@@ -3451,6 +3452,7 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
     : [];
 
   historicalFrameworks.forEach((framework) => {
+    if (tableId === "C_08.02" && axis === "y") return;
     const metadata = getFrameworkData(framework);
     if (!metadata) return;
     const frameworkCodes = getCodesByCoordinate(framework)?.get(axisCoordinate) ?? new Set();
@@ -3531,7 +3533,7 @@ function getExplorerDateKey(date) {
 
 function getCompleteExplorerSelectionsForBenchmark(context, activeAxis) {
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
-  return getExplorerSelectionsForAxisCode(context, activeAxis, selectedCode);
+  return getExplorerSelectionsForAxisCode(context, activeAxis, selectedCode, getActiveExplorerTemplate()?.tableId);
 }
 
 function getExplorerBenchmarkContributionContext(context, activeAxis) {
