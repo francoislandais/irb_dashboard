@@ -7,6 +7,7 @@ import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenc
 import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261017-1000-year-simulation";
 import { renderIrbGradeDetail, wireIrbGradeDetailUi } from "./irbGradeDetailView.js?v=20261018-grade-raw-series-slider";
 import { renderIrbGradeDensity, wireIrbGradeDensityUi } from "./irbGradeDensityView.js?v=20261018-grade-density-benchmark-v4";
+import { renderCapitalImpact, wireCapitalImpactUi } from "./capitalImpactView.js";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
@@ -138,6 +139,7 @@ export function wireUi(actions) {
   wireIrbMechanicsUi();
   wireIrbGradeDetailUi();
   wireIrbGradeDensityUi();
+  wireCapitalImpactUi();
 }
 
 function toggleSidebar() {
@@ -220,6 +222,7 @@ export function renderAppState(state) {
   if (state.activeModule === "irb-mechanics") renderIrbMechanics(state);
   if (state.activeModule === "irb-grades") renderIrbGradeDetail(state);
   if (state.activeModule === "irb-grade-density") renderIrbGradeDensity(state);
+  if (state.activeModule === "capital-impact") renderCapitalImpact(state);
   if (state.activeModule === "credit-risk") {
     renderCreditRisk(state);
     syncCreditRiskUrlParams();

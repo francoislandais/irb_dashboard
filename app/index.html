@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Application locale CSV</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20261018-grade-density-benchmark-v2">
+    <link rel="stylesheet" href="./src/styles.css?v=20261020-capital-impact">
     <link rel="stylesheet" href="./src/creditRiskStyles.css?v=20260910-context-panel-left">
   </head>
   <body class="is-app-loading">
@@ -91,6 +91,7 @@
           <button class="module-link" type="button" data-module-target="irb-mechanics">IRB RWA Model</button>
           <button class="module-link" type="button" data-module-target="irb-grades">IRB grade detail</button>
           <button class="module-link" type="button" data-module-target="irb-grade-density">IRB grade benchmark</button>
+          <button class="module-link" type="button" data-module-target="capital-impact">Capital impact</button>
         </nav>
       </aside>
 
@@ -443,12 +444,36 @@
           <div id="irb-grade-density-resizer" class="approach-panel-resizer" role="separator" aria-label="Resize grade benchmark selections" aria-orientation="vertical" aria-controls="irb-grade-density-chart" aria-valuemin="260" tabindex="0"></div>
           <div id="irb-grade-density-chart" class="approach-main-pane" aria-label="Risk density versus probability of default"></div>
         </section>
+        <section id="capital-impact-view" class="module-view capital-impact-view" aria-label="Capital ratio impact simulator">
+          <div class="capital-impact-page">
+            <header class="capital-impact-heading">
+              <span class="capital-impact-eyebrow">C_03.00 · Capital adequacy</span>
+              <h1>RWA impact simulator</h1>
+              <p>See how a change in risk-weighted assets affects capital ratios at one reference date.</p>
+            </header>
+            <div class="capital-impact-controls">
+              <label class="capital-impact-field" for="capital-impact-reference">
+                <span>Reference date</span>
+                <select id="capital-impact-reference"></select>
+              </label>
+              <label class="capital-impact-field" for="capital-impact-amount">
+                <span>Change in RWA</span>
+                <span class="capital-impact-input-wrap">
+                  <input id="capital-impact-amount" type="number" step="any" value="0" inputmode="decimal">
+                  <span id="capital-impact-unit"></span>
+                </span>
+              </label>
+              <p class="capital-impact-control-hint">Positive adds RWA; negative removes RWA. Capital is held constant.</p>
+            </div>
+            <div id="capital-impact-results" class="capital-impact-results" aria-live="polite"></div>
+          </div>
+        </section>
       </main>
     </div>
 
     <input id="fallback-file-input" type="file" accept=".csv,text/csv" hidden>
     <script src="./vendor/highcharts.js?v=20260704-cost-risk"></script>
     <script src="./vendor/highcharts-treemap.js?v=20260705-cost-risk-treemap-stage"></script>
-    <script type="module" src="./src/main.js?v=20261018-grade-density-benchmark-v4"></script>
+    <script type="module" src="./src/main.js?v=20261020-capital-impact"></script>
   </body>
 </html>

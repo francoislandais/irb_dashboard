@@ -5484,3 +5484,37 @@ table {
   .approach-stage-table,
   .approach-peer-table { font-size: 12px; }
 }
+
+.capital-impact-view { min-height: 0; overflow: auto; padding: clamp(20px, 3vw, 42px); background: #fff; }
+.capital-impact-page { width: min(100%, 1120px); margin: 0 auto; align-content: start; }
+.capital-impact-heading { margin-bottom: 30px; }
+.capital-impact-eyebrow { color: #77909a; font-size: 12px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+.capital-impact-heading h1 { margin: 8px 0 6px; color: #203d4b; font-size: clamp(26px, 3vw, 36px); font-weight: 650; }
+.capital-impact-heading p { margin: 0; color: #667d86; font-size: 14px; }
+.capital-impact-controls { display: flex; align-items: end; flex-wrap: wrap; gap: 14px 22px; padding: 20px 0 24px; border-top: 1px solid #e4ebee; border-bottom: 1px solid #e4ebee; }
+.capital-impact-field { display: grid; gap: 7px; min-width: 190px; color: #4d6872; font-size: 13px; font-weight: 600; }
+.capital-impact-field select, .capital-impact-field input { height: 42px; width: 100%; min-width: 0; border: 1px solid #cbd9de; border-radius: 7px; background: #fff; color: #203d4b; font: inherit; font-size: 16px; padding: 8px 11px; }
+.capital-impact-field select:focus-visible, .capital-impact-field input:focus-visible { outline: 2px solid #91bee0; outline-offset: 2px; }
+.capital-impact-input-wrap { display: flex; align-items: center; gap: 9px; }
+.capital-impact-input-wrap input { width: 180px; }
+.capital-impact-input-wrap > span { color: #6e858e; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.capital-impact-control-hint { flex-basis: 100%; margin: 0; color: #71858d; font-size: 12px; }
+.capital-impact-results { padding-top: 26px; }
+.capital-impact-context { margin: 0 0 16px; color: #456b7c; font-size: 14px; font-weight: 600; }
+.capital-impact-totals { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-bottom: 23px; color: #637b85; font-size: 13px; font-variant-numeric: tabular-nums; }
+.capital-impact-status { margin: 12px 0 20px; color: #9a632e; font-size: 14px; }
+.capital-impact-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.capital-impact-card { display: grid; align-content: start; gap: 15px; min-width: 0; min-height: 190px; padding: 21px; border: 1px solid #e2eaee; border-radius: 12px; background: #fff; }
+.capital-impact-card.is-primary { border-color: #b6d7e8; background: #f5faff; }
+.capital-impact-card-title { margin: 0; color: #41606e; font-size: 14px; font-weight: 650; }
+.capital-impact-card.is-primary .capital-impact-card-title { color: #086da2; }
+.capital-impact-comparison { display: flex; align-items: end; gap: 8px; }
+.capital-impact-ratio-value { display: grid; gap: 5px; min-width: 0; }
+.capital-impact-value-label { color: #85979e; font-size: 11px; }
+.capital-impact-ratio-value strong { color: #23404e; font-size: clamp(19px, 2vw, 27px); font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.capital-impact-arrow { padding-bottom: 3px; color: #94a8b0; font-size: 18px; }
+.capital-impact-bps { color: #167b6c; font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.capital-impact-bps.is-negative { color: #aa6741; }
+.capital-impact-unavailable { color: #84969e; font-size: 13px; }
+.capital-impact-method { max-width: 760px; margin: 22px 0 30px; color: #81929a; font-size: 12px; line-height: 1.55; }
+@media (max-width: 950px) { .capital-impact-cards { grid-template-columns: 1fr; } .capital-impact-card { min-height: 0; } }

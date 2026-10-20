@@ -13,6 +13,8 @@ assert.ok(bundle.moduleSources["src/data/irbGradeDetail.js"]);
 assert.ok(bundle.moduleSources["src/data/irbGradeScale.js"]);
 assert.ok(bundle.moduleSources["src/ui/irbGradeDensityView.js"]);
 assert.ok(bundle.moduleSources["src/data/irbGradeDensity.js"]);
+assert.ok(bundle.moduleSources["src/ui/capitalImpactView.js"]);
+assert.ok(bundle.moduleSources["src/data/capitalImpact.js"]);
 assert.ok(bundle.moduleSources["src/data/geographicCountryAxis.js"]);
 assert.match(extractAppMarkup(bundle.indexHtml), /id="startup-progress"/);
 const requestedAssets = new Set(
