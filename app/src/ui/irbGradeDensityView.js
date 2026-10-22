@@ -16,6 +16,7 @@ let zCode = readUrlStateParams().get(PORTFOLIO_PARAM) || "";
 let referenceName = readUrlStateParams().get(REFERENCE_PARAM) || "";
 let xScaleMode = readUrlStateParams().get(SCALE_PARAM) === "linear" ? "linear" : "log10";
 let currentState = null;
+let currentActions = null;
 let plotObserver = null;
 
 function element(tag, className = "", value = "") {
@@ -102,8 +103,9 @@ function wireResize() {
   }).observe(root);
 }
 
-export function wireIrbGradeDensityUi() {
+export function wireIrbGradeDensityUi(actions) {
   if (!root || !controls || !chart || !resizer) return;
+  currentActions = actions;
   wireResize();
   controls.addEventListener("change", (event) => {
     if (event.target.id === "irb-grade-density-z") zCode = event.target.value;
@@ -115,6 +117,13 @@ export function wireIrbGradeDensityUi() {
     if (!button || !currentState) return;
     xScaleMode = button.dataset.densityScale;
     renderIrbGradeDensity(currentState);
+  });
+  chart.addEventListener("click", (event) => {
+    const label = event.target.closest("button[data-grade-density-institution]");
+    const institutionId = label?.dataset.gradeDensityInstitution;
+    if (institutionId && institutionId !== currentState?.selectedJst) {
+      currentActions?.updateSelectedInstitution(institutionId);
+    }
   });
 }
 
@@ -190,15 +199,20 @@ function drawPlot(svg, model, state, width) {
   }
   svg.append(svgElement("text", { x: 12, y: 18, class: "irb-grade-axis-title" }, "RWA / EAD"));
   svg.append(svgElement("text", { x: width - right, y: height - 9, class: "irb-grade-axis-title irb-grade-x-title" }, `Probability of default${xScaleMode === "log10" ? " · log10" : ""}`));
-  model.series.forEach((series, index) => {
-    const color = COLORS[index % COLORS.length];
+  // SVG paints later elements on top: keep the selected institution above all peers.
+  const drawingOrder = model.series.map((series, index) => ({ series, index }))
+    .sort((left, right) => Number(left.series.institutionId === state.selectedJst)
+      - Number(right.series.institutionId === state.selectedJst));
+  drawingOrder.forEach(({ series, index }) => {
     const focused = series.institutionId === state.selectedJst;
+    const color = focused ? "#075f91" : COLORS[index % COLORS.length];
     const group = svgElement("g", { class: `irb-grade-density-series${focused ? " is-focused" : ""}` });
     for (const point of series.points) {
       const xx = x(point.pd);
       if (xx === null) continue;
-      const circle = svgElement("circle", { cx: xx, cy: y(point.density), r: focused ? 3.4 : 2.8,
-        fill: color, "fill-opacity": focused ? 0.82 : 0.55 });
+      const circle = svgElement("circle", { cx: xx, cy: y(point.density), r: focused ? 5.2 : 2.6,
+        fill: color, "fill-opacity": focused ? 1 : 0.4,
+        ...(focused ? { stroke: "#fff", "stroke-width": 1.7 } : {}) });
       circle.append(svgElement("title", {}, `${institutionLabel(state, series.institutionId)} · grade ${point.gradeId}\nPD: ${formatPercent(point.pd)} · RWA / EAD: ${formatPercent(point.density)}`));
       group.append(circle);
     }
@@ -227,10 +241,12 @@ export function renderIrbGradeDensity(state) {
       : "No complete PD, EAD and RWA observations are available for this exposure class and date."));
     return;
   }
+  const visual = element("div", "irb-grade-density-visual");
   const plot = element("div", "irb-grade-density-plot");
   const svg = svgElement("svg", { role: "img" });
   plot.append(svg);
-  chart.append(plot);
+  visual.append(plot);
+  chart.append(visual);
   const draw = () => drawPlot(svg, model, state, Math.max(360, plot.clientWidth));
   if (typeof ResizeObserver !== "undefined") {
     plotObserver = new ResizeObserver(draw);
@@ -238,12 +254,21 @@ export function renderIrbGradeDensity(state) {
   }
   draw();
   const legend = element("div", "irb-grade-density-legend");
+  legend.setAttribute("aria-label", "Select an institution");
   model.series.forEach((series, index) => {
-    const item = element("div", `irb-grade-density-legend-item${series.institutionId === state.selectedJst ? " is-focused" : ""}`);
+    const focused = series.institutionId === state.selectedJst;
+    const item = element("button", `irb-grade-density-legend-item${focused ? " is-focused" : ""}`);
+    item.type = "button";
+    item.dataset.gradeDensityInstitution = series.institutionId;
+    item.setAttribute("aria-pressed", String(focused));
+    item.title = institutionLabel(state, series.institutionId);
     const swatch = element("span", "irb-grade-legend-swatch");
-    swatch.style.backgroundColor = COLORS[index % COLORS.length];
-    item.append(swatch, element("span", "", `${institutionLabel(state, series.institutionId)} · ${series.points.length} grades`));
+    swatch.style.backgroundColor = focused ? "#075f91" : COLORS[index % COLORS.length];
+    const label = element("span", "irb-grade-density-legend-label");
+    label.append(element("span", "irb-grade-density-legend-name", institutionLabel(state, series.institutionId)));
+    label.append(element("small", "", `${series.points.length} grades`));
+    item.append(swatch, label);
     legend.append(item);
   });
-  chart.append(legend);
+  visual.append(legend);
 }

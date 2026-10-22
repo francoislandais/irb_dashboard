@@ -5235,13 +5235,22 @@ table {
 .irb-grade-density-view .approach-context-panel { display: block; overflow-x: hidden; overflow-y: auto; padding-right: 5px; }
 .irb-grade-density-view .approach-context-selection { min-height: 100%; height: auto; overflow: visible; }
 .irb-grade-density-view .approach-main-pane { align-content: start; gap: 16px; }
+.irb-grade-density-visual { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 220px); align-items: start; gap: 18px; width: 100%; }
 .irb-grade-density-plot { width: 100%; min-width: 0; min-height: 550px; max-width: 1440px; overflow: hidden; }
 .irb-grade-density-plot svg { display: block; width: 100%; height: 550px; }
 .irb-grade-density-vgrid { stroke: #eff3f4; stroke-width: 1; }
 .irb-grade-density-x-label { fill: #617780; font-size: 11px; text-anchor: middle; }
-.irb-grade-density-legend { display: flex; flex-wrap: wrap; gap: 7px 18px; max-width: 1440px; color: #526e79; font-size: 12px; }
-.irb-grade-density-legend-item { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.irb-grade-density-legend-item.is-focused { color: #194e67; font-weight: 600; }
+.irb-grade-density-legend { display: grid; align-content: start; gap: 2px; max-height: 550px; overflow-y: auto; padding: 2px 2px 2px 0; color: #526e79; font-size: 12px; }
+.irb-grade-density-legend-item { display: flex; align-items: start; gap: 8px; width: 100%; min-width: 0; padding: 7px 8px; border: 0; border-left: 2px solid transparent; border-radius: 0 5px 5px 0; background: transparent; color: inherit; font: inherit; line-height: 1.3; text-align: left; cursor: pointer; }
+.irb-grade-density-legend-item:hover, .irb-grade-density-legend-item:focus-visible { background: #f0f7fb; color: #175b7e; }
+.irb-grade-density-legend-item:focus-visible { outline: 2px solid #8fc7e2; outline-offset: -2px; }
+.irb-grade-density-legend-item.is-focused { border-left-color: #075f91; background: #eaf5fb; color: #194e67; font-weight: 650; }
+.irb-grade-density-legend-item .irb-grade-legend-swatch { flex: 0 0 10px; width: 10px; height: 10px; margin-top: 2px; border-radius: 50%; }
+.irb-grade-density-legend-label { display: grid; min-width: 0; gap: 2px; }
+.irb-grade-density-legend-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.irb-grade-density-legend-label small { color: #82939a; font-size: 11px; font-weight: 400; }
+.irb-grade-density-legend-item.is-focused .irb-grade-legend-swatch { flex-basis: 12px; width: 12px; height: 12px; }
+@media (max-width: 880px) { .irb-grade-density-visual { grid-template-columns: minmax(0, 1fr); } .irb-grade-density-legend { display: flex; flex-wrap: wrap; max-height: 150px; } .irb-grade-density-legend-item { width: auto; max-width: 240px; } }
 
 .approach-context-selection {
   box-sizing: border-box;

@@ -42,7 +42,15 @@ export function parseInstitutionDictionaryCsv(text) {
 }
 
 export function getInstitutionDisplayInfo(dictionary, institutionId) {
-  return dictionary?.[institutionId] ?? null;
+  const id = String(institutionId ?? "").trim();
+  if (!id || !dictionary) return null;
+  if (dictionary[id]) return dictionary[id];
+  // Older extracts use LEI_CONS while the current Hive export writes
+  // LEI_CONSO for the same consolidation level. Never substitute SOLO.
+  const match = /^(.*)_(CONS|CONSO)$/i.exec(id);
+  if (!match) return null;
+  const alternate = `${match[1]}_${match[2].toUpperCase() === "CONS" ? "CONSO" : "CONS"}`;
+  return dictionary[alternate] ?? null;
 }
 
 function normalizeHeader(value) {

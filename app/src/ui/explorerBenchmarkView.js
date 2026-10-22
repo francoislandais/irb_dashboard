@@ -1,5 +1,5 @@
 import { getCostOfRiskYAxisBounds } from "../data/costOfRisk.js?v=20260928-local-description";
-import { getInstitutionChartLabels } from "../data/institutionChartLabels.js";
+import { getInstitutionChartLabels } from "../data/institutionChartLabels.js?v=20261021-cons-conso";
 import { escapeHtml } from "./costOfRiskChartUtils.js?v=20260804-axis-year-labels";
 import {
   getCostOfRiskFocusedYAxisBounds,

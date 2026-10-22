@@ -19,7 +19,7 @@ import {
   getExplorerSelectionsForAxisCode,
   getPeerBenchmarkJstCodes
 } from "../data/explorerBenchmark.js?v=20260917-kri-data-only-rows";
-import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20261005-institution-chart-labels";
+import { destroyExplorerBenchmarkChart, renderExplorerBenchmarkView } from "./explorerBenchmarkView.js?v=20261021-cons-conso";
 import {
   buildExplorerDisplayRows,
   createVirtualExplorerRow,
@@ -52,7 +52,7 @@ import {
 } from "../data/explorerKriFormula.js?v=20261005-formula-navigation";
 import { getLatestState } from "./appState.js";
 import { getTaxonomyDataForTemplateFramework, getTaxonomyFrameworkForDate } from "../data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
-import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
+import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20261021-cons-conso";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260925-institution-id";

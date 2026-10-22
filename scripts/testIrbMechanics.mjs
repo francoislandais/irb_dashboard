@@ -24,8 +24,20 @@ for (const [kind, expected] of [["corporate", 0.9232], ["mortgage", 0.5640], ["r
 }
 assert(assetCorrelation(0.01, "corporate", 5) < assetCorrelation(0.01, "corporate"));
 assert.equal(assetCorrelation(0.01, "corporate", null, true), assetCorrelation(0.01, "corporate") * 1.25);
-assert.equal(calculateIrbMechanics({ ...basic, pd: 1, kind: "corporate" }), null);
-assert.equal(calculateIrbMechanics({ ...basic, pd: 0, kind: "corporate" }), null);
+for (const pd of [0, 1]) {
+  for (const correlation of [0, 0.2, 1]) {
+    const boundary = calculateIrbMechanics({ ...basic, pd, correlation });
+    assert.equal(boundary.expectedRate, pd * basic.lgd);
+    assert.equal(boundary.stressRate, boundary.expectedRate);
+    assert.equal(boundary.unexpectedRate, 0);
+    assert.equal(boundary.riskWeight, 0);
+    assert.equal(boundary.maturityFactor, 1);
+    assert.equal(conditionalLossAtShock(pd, basic.lgd, correlation, 3.090232306), pd * basic.lgd);
+  }
+  assert.equal(expectedLossShock(pd, 0.2), null);
+}
+assert.equal(calculateIrbMechanics({ ...basic, pd: -0.01 }), null);
+assert.equal(calculateIrbMechanics({ ...basic, pd: 1.01 }), null);
 assert.equal(calculateIrbMechanics({ ...basic, lgd: -1, kind: "corporate" }), null);
 const baselineR = assetCorrelation(basic.pd, "corporate");
 assert(Math.abs(conditionalLossAtShock(basic.pd, basic.lgd, baselineR, expectedLossShock(basic.pd, baselineR)) - basic.pd * basic.lgd) < 1e-7);

@@ -55,6 +55,10 @@ export function assetCorrelation(pd, kind, turnover = null, financialMultiplier 
 }
 
 export function conditionalLossAtShock(pd, lgd, correlation, shock) {
+  // At the endpoints every obligor either survives or defaults, regardless
+  // of the common shock. inverseNormal is undefined at exactly 0 and 1.
+  if (pd === 0) return 0;
+  if (pd === 1) return lgd;
   if (correlation === 0) return pd * lgd;
   // At perfect correlation the idiosyncratic shock vanishes. Conditional
   // default becomes a step at the systemic threshold, rather than a CDF
@@ -64,6 +68,7 @@ export function conditionalLossAtShock(pd, lgd, correlation, shock) {
 }
 
 export function expectedLossShock(pd, correlation) {
+  if (pd === 0 || pd === 1) return null;
   if (correlation === 0) return 0;
   return inverseNormal(pd) * (Math.sqrt(1 - correlation) - 1) / Math.sqrt(correlation);
 }
@@ -87,14 +92,17 @@ export function simulateSystemicShocks(count = 60, seed = 20261016) {
 }
 
 export function calculateIrbMechanics({ pd, lgd, ead, maturity = 2.5, kind = "corporate", turnover = null, financialMultiplier = false, correlation: correlationOverride = null }) {
-  if (![pd, lgd, ead].every(Number.isFinite) || !(pd > 0 && pd < 1)
+  if (![pd, lgd, ead].every(Number.isFinite) || !(pd >= 0 && pd <= 1)
     || !(lgd >= 0 && lgd <= 1) || ead < 0 || !Number.isFinite(maturity) || maturity <= 0
     || (correlationOverride !== null && (!Number.isFinite(correlationOverride) || correlationOverride < 0 || correlationOverride > 1))) return null;
   const correlation = correlationOverride ?? assetCorrelation(pd, kind, turnover, financialMultiplier);
   const stressedPd = conditionalLossAtShock(pd, 1, correlation, inverseNormal(0.999));
   const expectedRate = pd * lgd;
   const stressRate = stressedPd * lgd;
-  const maturityFactor = ["corporate"].includes(kind)
+  // The corporate maturity formula contains log(PD) and is only defined for
+  // non-defaulted interior PDs. At the illustrative endpoints UL is zero, so
+  // a neutral factor avoids implying a regulatory treatment for defaults.
+  const maturityFactor = kind === "corporate" && pd > 0 && pd < 1
     ? (() => {
       const b = (0.11852 - 0.05478 * Math.log(pd)) ** 2;
       return (1 + (maturity - 2.5) * b) / (1 - 1.5 * b);

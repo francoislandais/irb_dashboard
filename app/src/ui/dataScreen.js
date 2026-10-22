@@ -1,12 +1,12 @@
 import { setLatestState } from "./appState.js";
-import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20260925-institution-dictionary";
-import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20260925-institution-id";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261012-parent-compatibility";
+import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20261021-cons-conso";
+import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20261021-cons-conso";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261021-cons-conso";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenchmarkView.js?v=20261017-provisions-on-ead";
-import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261017-1000-year-simulation";
+import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261021-pd-endpoints";
 import { renderIrbGradeDetail, wireIrbGradeDetailUi } from "./irbGradeDetailView.js?v=20261018-grade-raw-series-slider";
-import { renderIrbGradeDensity, wireIrbGradeDensityUi } from "./irbGradeDensityView.js?v=20261018-grade-density-benchmark-v4";
+import { renderIrbGradeDensity, wireIrbGradeDensityUi } from "./irbGradeDensityView.js?v=20261021-side-institutions-v3";
 import { renderCapitalImpact, wireCapitalImpactUi } from "./capitalImpactView.js?v=20261020-relative-rwa";
 import { showDatasetDialog } from "./datasetDialog.js?v=20260925-institution-id";
 import { showPeerSelectionDialog, updatePeerSelectionDialog } from "./peerSelectionDialog.js?v=20260911-peer-dialog";
@@ -17,6 +17,7 @@ const AUTHORIZE_REMEMBERED_DATASET_OPTION = "__authorize_remembered_dataset__";
 const SIDEBAR_URL_PARAM = "sidebar";
 const SIDEBAR_COLLAPSED_VALUE = "collapsed";
 const SIDEBAR_LOCKED_VALUE = "locked";
+let serverInstitutionNamesButton = null;
 const elements = {
   appShell: document.querySelector(".app-shell"),
   chooseFileButton: document.querySelector("#choose-file-button"),
@@ -44,6 +45,7 @@ const elements = {
 
 export function wireUi(actions) {
   applyUrlSidebarVisibility();
+  wireServerInstitutionNames(actions);
   elements.sidebarToggle?.addEventListener("click", toggleSidebar);
   elements.chooseFileButton?.addEventListener("click", actions.chooseFile);
   elements.reloadFileButton?.addEventListener("click", actions.reloadFile);
@@ -138,8 +140,69 @@ export function wireUi(actions) {
   wireApproachBenchmarkUi(actions, renderAppState);
   wireIrbMechanicsUi();
   wireIrbGradeDetailUi();
-  wireIrbGradeDensityUi();
+  wireIrbGradeDensityUi(actions);
   wireCapitalImpactUi();
+}
+
+function wireServerInstitutionNames(actions) {
+  // The portable HTML executes these same modules, so create this developer
+  // control only when the unbundled app is served over HTTP(S).
+  if (document.documentElement.dataset.standalone === "true"
+    || window.__AGORA_STANDALONE_DATA__
+    || !["http:", "https:"].includes(window.location.protocol)) return;
+  const institutionField = elements.institutionSelect?.closest(".institution-field");
+  if (!institutionField) return;
+
+  const button = document.createElement("button");
+  button.id = "institution-dictionary-button";
+  button.className = "topbar-button";
+  button.type = "button";
+  button.textContent = "Add names";
+  button.title = "Load an institution dictionary CSV";
+
+  const input = document.createElement("input");
+  input.id = "institution-dictionary-input";
+  input.type = "file";
+  input.accept = ".csv,text/csv";
+  input.hidden = true;
+  institutionField.after(button, input);
+  serverInstitutionNamesButton = button;
+
+  button.addEventListener("click", () => input.click());
+  input.addEventListener("change", async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      actions.loadInstitutionDictionary(await file.text(), file.name);
+    } catch (error) {
+      actions.setInstitutionDictionaryError(error);
+    } finally {
+      input.value = "";
+    }
+  });
+}
+
+function renderServerInstitutionNames(state) {
+  if (!serverInstitutionNamesButton) return;
+  const institutionIds = state.institutionOptions ?? state.jstOptions ?? [];
+  const dictionary = state.institutionDictionary ?? {};
+  const matched = institutionIds.filter((id) => getInstitutionDisplayInfo(dictionary, id)?.institutionName).length;
+  if (state.institutionDictionaryError) {
+    serverInstitutionNamesButton.textContent = "Retry names";
+    serverInstitutionNamesButton.title = state.institutionDictionaryError;
+    return;
+  }
+  if (state.institutionDictionaryFileName && institutionIds.length && matched === 0) {
+    const exampleId = institutionIds[0];
+    const exampleDictionaryId = Object.keys(dictionary)[0] || "—";
+    serverInstitutionNamesButton.textContent = "0 names matched";
+    serverInstitutionNamesButton.title = `No Institution ID matches the dataset's reporting_unit_id. Dataset example: ${exampleId}; dictionary example: ${exampleDictionaryId}. Choose the dictionary generated with this dataset.`;
+    return;
+  }
+  serverInstitutionNamesButton.textContent = state.institutionDictionaryFileName ? "Replace names" : "Add names";
+  serverInstitutionNamesButton.title = state.institutionDictionaryFileName
+    ? `Loaded: ${state.institutionDictionaryFileName}. ${matched}/${institutionIds.length} institution names matched. Choose another institution dictionary CSV.`
+    : "Load an institution dictionary CSV";
 }
 
 function toggleSidebar() {
@@ -193,6 +256,7 @@ export function renderAppState(state) {
   if (elements.peersButton) elements.peersButton.disabled = (state.institutionOptions ?? state.jstOptions).length === 0;
   renderDatasetSelect(state.datasets, state.activeDatasetId, state.rememberedFileReady, state.fileName);
   renderInstitutionSelect(state);
+  renderServerInstitutionNames(state);
   renderExplorerHeaderReferenceControl(state);
   renderActiveModule(state.activeModule, state.availableModules);
 

@@ -1,4 +1,4 @@
-import { getInstitutionDisplayInfo } from "./institutionDictionary.js?v=20260925-institution-dictionary";
+import { getInstitutionDisplayInfo } from "./institutionDictionary.js?v=20261021-cons-conso";
 
 export function getInstitutionChartLabels(series, dictionary) {
   const names = new Map(series.map(({ jstCode }) => [

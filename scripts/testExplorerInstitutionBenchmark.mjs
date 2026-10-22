@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import { getInstitutionChartLabels } from '../app/src/data/institutionChartLabels.js';
+import { getInstitutionDisplayInfo } from '../app/src/data/institutionDictionary.js';
 import { buildBenchmarkChartModel, renderBenchmarkEndpointLabels } from '../app/src/ui/benchmarkLineChart.js';
 
 const source=readFileSync(new URL('../app/src/ui/explorerView.js',import.meta.url),'utf8');
@@ -74,6 +75,10 @@ assert.equal(labels.get('A'), 'Banque Alpha');
 assert.equal(labels.get('B'), 'Banque Bêta');
 assert.equal(getInstitutionChartLabels([{ jstCode: 'A' }, { jstCode: 'C' }], dictionary).get('A'), 'Banque Alpha (A)');
 assert.equal(getInstitutionChartLabels([{ jstCode: 'UNKNOWN' }], dictionary).get('UNKNOWN'), 'UNKNOWN');
+const leiDictionary = { LEI_CONSO: { institutionName: 'Banque Gamma', consolidationLevel: 'CONSO' } };
+assert.equal(getInstitutionDisplayInfo(leiDictionary, 'LEI_CONS')?.institutionName, 'Banque Gamma');
+assert.equal(getInstitutionDisplayInfo(leiDictionary, 'LEI_SOLO'), null);
+assert.equal(getInstitutionDisplayInfo({ LEI_CONS: leiDictionary.LEI_CONSO }, 'LEI_CONSO')?.institutionName, 'Banque Gamma');
 
 const model = buildBenchmarkChartModel([{
   jstCode: 'A', displayLabel: labels.get('A'),
