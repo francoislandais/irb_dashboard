@@ -401,7 +401,10 @@ def _kri_selection_filter(kri_ids: tuple[str, ...]) -> str:
 def _build_extraction_sql(
     extraction: Extraction, application: Application, tables: dict[str, str] = PRODUCTION_TABLES,
     reporting_units: list[dict[str, str]] | None = None,
+    *, result_format: str = "long",
 ) -> str:
+    if result_format not in {"long", "wide"}:
+        raise ValueError("result_format doit être 'long' ou 'wide'.")
     consolidation = _consolidation_predicate(application.consolidation)
     consolidation_filter = f"\n      AND {consolidation}" if consolidation else ""
     if extraction.module == "KRI":
@@ -430,6 +433,20 @@ def _build_extraction_sql(
             ) + "\n    END"
             unit_filter = "(\n      " + "\n      OR ".join(pairs) + "\n  )"
             preview_notice = ""
+        if result_format == "long":
+            return f"""{preview_notice}SELECT
+    'KRI' AS table_id,
+    {unit_case} AS reporting_unit_id,
+    '' AS x_axis_rc_code,
+    kri.kri_data_point_id AS y_axis_rc_code,
+    '' AS z_axis_rc_code,
+    kri.reference_period,
+    kri.value_decimal
+FROM {tables['KRI']} kri
+WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
+  AND {unit_filter}
+  AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
+"""
         return f"""{preview_notice}SELECT
     'KRI' AS table_id,
     {unit_case} AS reporting_unit_id,
@@ -455,6 +472,20 @@ ORDER BY
         [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
     )
     module_filter = _module_filter(extraction)
+    if result_format == "long":
+        return f"""SELECT
+    {NORMALIZED_TABLE_ID} AS table_id,
+    CONCAT(lei, '_', cons_level) AS reporting_unit_id,
+    x_axis_rc_code,
+    {ITS_Y_AXIS_EXPRESSION} AS y_axis_rc_code,
+    z_axis_rc_code,
+    reference_period,
+    value_decimal
+FROM {tables['ITS']}
+WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
+  AND {_date_filter(extraction.reference_dates)}
+  AND {template_filter}
+"""
     return f"""SELECT
     table_id,
     CONCAT(lei, '_', cons_level) AS reporting_unit_id,
@@ -526,6 +557,7 @@ def _safe_name(value: str) -> str:
 
 def _write_query_index(output: Path, manifest: dict) -> None:
     lines = ["# Requêtes générées", "", f"Mode : `{manifest['mode']}`", f"Date de calcul : `{manifest['as_of']}`", ""]
+    lines.extend([f"Format des résultats Hive : `{manifest['extraction_format']}` (le CSV final conserve ses colonnes par date).", ""])
     if manifest.get("compact_values"):
         lines.extend(["Stockage compact des valeurs : activé pour les datasets exportés (sans changement du SQL).", ""])
     for application in manifest["applications"]:
@@ -709,9 +741,51 @@ def _merge_extraction_rows(
     extraction: Extraction,
     dataframe: object,
     query_label: str,
+    *, result_format: str = "long",
 ) -> int:
     date_columns = ["ref_" + item.replace("-", "_") for item in extraction.reference_dates]
-    rows = _dataframe_rows(dataframe, OUTPUT_COLUMNS + date_columns, query_label)
+    if result_format == "long":
+        rows = _dataframe_rows(dataframe, OUTPUT_COLUMNS + ["reference_period", "value_decimal"], query_label)
+        query_row_count = len(rows)
+        # Hive's former MAX(CASE ...) ignored NULLs and retained the largest
+        # value when several source rows shared one axis/date combination.
+        wide_rows: dict[tuple[str, ...], dict[str, str]] = {}
+        selected_dates = set(extraction.reference_dates)
+        for row in rows:
+            key = tuple(row[column] for column in OUTPUT_COLUMNS)
+            if not key[0] or not key[1]:
+                raise ValueError(f"{query_label}: table_id ou reporting_unit_id vide dans le résultat Hive.")
+            wide_row = wide_rows.get(key)
+            if wide_row is None:
+                wide_row = {
+                    **{column: row[column] for column in OUTPUT_COLUMNS},
+                    **dict.fromkeys(date_columns, ""),
+                }
+                wide_rows[key] = wide_row
+            raw_date = row["reference_period"]
+            reference_date = raw_date[:10]
+            if reference_date not in selected_dates:
+                raise ValueError(f"{query_label}: date de référence inattendue : {raw_date!r}.")
+            column = "ref_" + reference_date.replace("-", "_")
+            incoming = row["value_decimal"]
+            if not incoming:
+                continue
+            try:
+                numeric = Decimal(incoming)
+            except InvalidOperation as error:
+                raise ValueError(f"{query_label}: valeur numérique invalide : {incoming!r}.") from error
+            if not numeric.is_finite():
+                raise ValueError(f"{query_label}: valeur numérique invalide : {incoming!r}.")
+            previous = wide_row[column]
+            if not previous or numeric > Decimal(previous):
+                wide_row[column] = incoming
+        # Keep rows whose values are all NULL, as the wide SQL did.
+        rows = list(wide_rows.values())
+    elif result_format == "wide":
+        rows = _dataframe_rows(dataframe, OUTPUT_COLUMNS + date_columns, query_label)
+        query_row_count = len(rows)
+    else:
+        raise ValueError("result_format doit être 'long' ou 'wide'.")
     for row in rows:
         key = tuple(row[column] for column in OUTPUT_COLUMNS)
         if not key[0] or not key[1]:
@@ -732,7 +806,7 @@ def _merge_extraction_rows(
                     f"({previous} contre {incoming})."
                 )
             record[column] = incoming
-    return len(rows)
+    return query_row_count
 
 
 def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
@@ -1014,6 +1088,7 @@ def global_update(
     as_of: date | None = None,
     devo_client: QueryClient | None = None,
     compact_values: bool = False,
+    extraction_format: str = "long",
     darwin_upload: int | None = None,
     darwin_config_ids: Iterable[int] | None = None,
     darwin_folder_id: int | None = None,
@@ -1024,6 +1099,8 @@ def global_update(
     mode = str(mode).strip().lower()
     if mode not in {"preview", "test", "hive"}:
         raise ValueError("mode doit être 'preview', 'test' ou 'hive'.")
+    if extraction_format not in {"long", "wide"}:
+        raise ValueError("extraction_format doit être 'long' ou 'wide'.")
     if darwin_upload is not None:
         if type(darwin_upload) is not int or darwin_upload <= 0:
             raise ValueError("darwin_upload doit être un identifiant de nœud entier positif.")
@@ -1071,7 +1148,7 @@ def global_update(
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     query_root = output_root / "queries"
-    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "applications": []}
+    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "extraction_format": extraction_format, "applications": []}
     if darwin_upload is not None:
         manifest["darwin_upload"] = {"node_id": darwin_upload, "uploaded": 0, "total": len(applications)}
         if any(app.export_dataset for app in applications):
@@ -1113,7 +1190,7 @@ def global_update(
             dictionary_rows = _institution_dictionary_rows(reporting_units)
         for index, extraction in enumerate(application.extractions, start=1):
             source_table = query_table["KRI" if extraction.module == "KRI" else "ITS"]
-            sql = _build_extraction_sql(extraction, application, query_table, reporting_units)
+            sql = _build_extraction_sql(extraction, application, query_table, reporting_units, result_format=extraction_format)
             query_relative = (Path("queries") / folder / f"extraction_{index:02d}.sql").as_posix()
             (output_root / query_relative).write_text(sql, encoding="utf-8")
             extraction_manifest = {
@@ -1131,6 +1208,7 @@ def global_update(
                 "kri_data_point_ids": list(extraction.kri_data_point_ids),
                 "query": query_relative,
                 "source_table": source_table,
+                "result_format": extraction_format,
             }
             if mode == "hive":
                 query_label = f"{application.name} / extraction {index:02d}"
@@ -1139,7 +1217,7 @@ def global_update(
                 except Exception as error:
                     raise RuntimeError(f"{query_label}: échec de la requête Hive ({query_relative}).") from error
                 extraction_manifest["query_rows"] = _merge_extraction_rows(
-                    records, all_dates, extraction, dataframe, query_label,
+                    records, all_dates, extraction, dataframe, query_label, result_format=extraction_format,
                 )
             application_manifest["extractions"].append(extraction_manifest)
         if mode == "test":
@@ -1155,7 +1233,9 @@ def global_update(
                 raise ValueError(f"{application.name}: aucune donnée non vide remontée par les extractions Hive.")
             fields = OUTPUT_COLUMNS + populated_dates + ["extraction_timestamp"]
             _write_application_outputs(
-                output_root, application, folder, application_manifest, fields, list(records.values()), dictionary_rows,
+                output_root, application, folder, application_manifest, fields,
+                sorted(records.values(), key=lambda row: tuple(row[column] for column in OUTPUT_COLUMNS))
+                if extraction_format == "long" else list(records.values()), dictionary_rows,
                 compact_values=compact_values,
             )
         manifest["applications"].append(application_manifest)
@@ -1176,10 +1256,11 @@ def _main() -> None:
     parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet (obligatoire)")
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
     parser.add_argument("--compact-values", action="store_true", help="Stocker les montants en milliers entiers et les pourcentages sur quatre chiffres significatifs")
+    parser.add_argument("--extraction-format", choices=("long", "wide"), default="long", help="Résultat Hive : lignes date/valeur transposées en Python (défaut), ou ancien pivot SQL")
     parser.add_argument("--darwin_upload", "--darwin-upload", type=int, default=None, metavar="NODE_ID", help="Uploader chaque HTML autonome dans le nœud parent Darwin indiqué")
     args = parser.parse_args()
     try:
-        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin, darwin_folder_id=args.config_darwin_folder)
+        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, extraction_format=args.extraction_format, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin, darwin_folder_id=args.config_darwin_folder)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")

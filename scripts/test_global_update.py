@@ -30,6 +30,7 @@ from global_update import (  # noqa: E402
     _build_extraction_sql,
     _build_institution_sql,
     _consolidation_predicate,
+    _merge_extraction_rows,
     _select_institution_rows,
     _module_matches,
     _read_configuration,
@@ -307,7 +308,9 @@ class QueryPlanTests(unittest.TestCase):
         self.assertIn(f"FROM {PRODUCTION_TABLES['ITS']}", sql)
         self.assertIn("lei IN (", sql)
         self.assertIn("CONCAT(lei, '_', cons_level) AS reporting_unit_id", sql)
-        self.assertIn("WHEN reference_period =", sql)
+        self.assertIn("reference_period,\n    value_decimal", sql)
+        self.assertNotIn("MAX(CASE", sql)
+        self.assertIn("WHEN reference_period =", _build_extraction_sql(extraction, application, result_format="wide"))
 
     def test_consolidation_modes_use_source_column_and_values(self):
         self.assertEqual(_consolidation_predicate("HIGHEST"), "is_highest_cons = 'Y'")
@@ -455,12 +458,12 @@ class QueryPlanTests(unittest.TestCase):
         all_levels = Application("example", (lei,), "ALL", (its_extraction, kri_extraction))
         clustered = Application("example", (), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
         cluster_overrides_lei = Application("example", (other_lei,), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
-        its_rows = connection.execute(_build_extraction_sql(its_extraction, highest)).fetchall()
+        its_rows = connection.execute(_build_extraction_sql(its_extraction, highest, result_format="wide")).fetchall()
         self.assertEqual(len(its_rows), 1)
         self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONSO"))
         self.assertEqual(its_rows[0][-2:], (None, 125.0))
         grade_extraction = Extraction("COREP", "C_08.02%", 1, "QUARTERLY", dates)
-        grade_sql = _build_extraction_sql(grade_extraction, highest)
+        grade_sql = _build_extraction_sql(grade_extraction, highest, result_format="wide")
         self.assertIn("THEN NULLIF(TRIM(ogr), '') ELSE y_axis_rc_code END AS y_axis_rc_code", grade_sql)
         grade_cursor = connection.execute(grade_sql)
         grade_rows = [dict(zip((field[0] for field in grade_cursor.description), row)) for row in grade_cursor]
@@ -546,6 +549,44 @@ class QueryPlanTests(unittest.TestCase):
                     connection.execute("EXPLAIN QUERY PLAN " + _build_extraction_sql(extraction, application, reporting_units=selected))
                 else:
                     connection.execute("EXPLAIN QUERY PLAN " + _build_extraction_sql(extraction, application))
+
+        # The Python pivot must reproduce the former Hive MAX(CASE ...) even
+        # with repeated cells, NULL values, C_08.02 OGR and KRI identities.
+        insert("agora_its_bft_current", dict(
+            entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+            module_id="COREP", table_id="C_08.02.a", reference_period="2026-03-31",
+            x_axis_rc_code="0110", y_axis_rc_code=None, ogr="012", z_axis_rc_code="qx2023",
+            value_decimal=14.0,
+        ))
+        insert("agora_dm_imas_kris_raw", dict(
+            entity_id="E1", cons_level="CONSO", kri_data_point_id="KRI_1", cluster="CLUSTER_A",
+            is_highest_cons="Y", reference_period="2026-03-31", value_decimal=0.1,
+        ))
+
+        class Frame:
+            def __init__(self, cursor):
+                self.columns = [column[0] for column in cursor.description]
+                self.records = [dict(zip(self.columns, row)) for row in cursor]
+
+            def to_dict(self, *, orient):
+                self.assert_orientation(orient)
+                return self.records
+
+            @staticmethod
+            def assert_orientation(orient):
+                assert orient == "records"
+
+        for extraction, units in ((its_extraction, None), (grade_extraction, None), (kri_extraction, highest_units)):
+            results = []
+            for result_format in ("long", "wide"):
+                sql = _build_extraction_sql(extraction, highest, reporting_units=units, result_format=result_format)
+                records = {}
+                _merge_extraction_rows(records, dates, extraction, Frame(connection.execute(sql)),
+                                       "sqlite fixture", result_format=result_format)
+                results.append(records)
+            self.assertEqual(results[0], results[1])
+            if extraction is grade_extraction:
+                self.assertEqual(next(row for row in results[0].values() if row["y_axis_rc_code"] == "012")["ref_2026_03_31"], "14.0")
 
     def test_test_mode_writes_queries_datasets_dictionary_and_standalone_apps(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -850,9 +891,13 @@ frequency = "QUARTERLY"
                     "x_axis_rc_code": "" if is_kri else "0010",
                     "y_axis_rc_code": "LIQ55" if is_kri else "0020",
                     "z_axis_rc_code": "",
-                    **{column: None for column in date_columns},
                 }
-                row["ref_2026_06_30"] = 20 if is_kri else 11 if conflict and self.its_calls == 2 else 10
+                value = 20 if is_kri else 11 if conflict and self.its_calls == 2 else 10
+                if date_columns:
+                    row.update({column: None for column in date_columns})
+                    row["ref_2026_06_30"] = value
+                else:
+                    row.update(reference_period="2026-06-30", value_decimal=value)
                 return Frame([row])
 
         return Client()
@@ -880,6 +925,24 @@ frequency = "QUARTERLY"
             self.assertEqual({row["table_id"]: row["ref_2026_06_30"] for row in rows}, {"C_01.00": "10", "KRI": "20"})
             self.assertTrue((output / "applications" / "html" / "Agora Explorer_COREP_and_KRI.html").is_file())
             self.assertIn("devo.read_sql", (output / "query_index.md").read_text(encoding="utf-8"))
+            self.assertTrue(all("MAX(CASE" not in sql for sql in client.calls[1:]))
+            self.assertEqual(json.loads((output / "manifest.json").read_text(encoding="utf-8"))["extraction_format"], "long")
+
+    def test_wide_sql_remains_available_and_produces_the_same_dataset(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            csv_outputs = []
+            for result_format in ("long", "wide"):
+                client = self._client()
+                output = root / result_format
+                global_update(configuration, mode="hive", output_directory=output,
+                              as_of=date(2026, 9, 26), devo_client=client, extraction_format=result_format)
+                csv_outputs.append(next((output / "applications" / "datasets").glob("*.csv")).read_bytes())
+                if result_format == "wide":
+                    self.assertTrue(any("MAX(CASE" in sql for sql in client.calls[1:]))
+            self.assertEqual(csv_outputs[0], csv_outputs[1])
 
     def test_hive_mode_cluster_only_filters_metadata_and_both_data_tables(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
