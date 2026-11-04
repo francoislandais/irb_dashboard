@@ -312,6 +312,21 @@ class QueryPlanTests(unittest.TestCase):
         self.assertNotIn("MAX(CASE", sql)
         self.assertIn("WHEN reference_period =", _build_extraction_sql(extraction, application, result_format="wide"))
 
+    def test_both_formats_use_the_same_source_filters_for_two_dates(self):
+        application = self.applications[1]
+        extraction = Extraction("COREP", "C_08.02%", 1, "QUARTERLY", ("2025-12-31", "2026-03-31"))
+        long_sql = _build_extraction_sql(extraction, application)
+        wide_sql = _build_extraction_sql(extraction, application, result_format="wide")
+        source = long_sql[long_sql.index("FROM ("):]
+        self.assertIn(source, wide_sql)
+        self.assertIn("cons_level IN ('CONSO')", source)
+        self.assertIn("module_id = 'COREP'", source)
+        self.assertIn("reference_period IN (\n        '2025-12-31',\n        '2026-03-31'", source)
+        self.assertIn("regexp_replace(table_id, '([.][A-Za-z]+|_dp)+$', '') LIKE 'C_08.02%'", source)
+        self.assertNotIn("2025-09-30", source)
+        self.assertNotIn("GROUP BY", long_sql)
+        self.assertIn("GROUP BY", wide_sql)
+
     def test_consolidation_modes_use_source_column_and_values(self):
         self.assertEqual(_consolidation_predicate("HIGHEST"), "is_highest_cons = 'Y'")
         self.assertEqual(_consolidation_predicate("CONSO+SOLO"), "cons_level IN ('CONSO', 'SOLO')")

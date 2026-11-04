@@ -408,6 +408,8 @@ def _build_extraction_sql(
     consolidation = _consolidation_predicate(application.consolidation)
     consolidation_filter = f"\n      AND {consolidation}" if consolidation else ""
     if extraction.module == "KRI":
+        if not extraction.kri_data_point_ids:
+            raise ValueError(f"{application.name}: extraction KRI sans identifiant à sélectionner.")
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
         highest_filter_sql = "\n  AND kri.is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
@@ -433,6 +435,10 @@ def _build_extraction_sql(
             ) + "\n    END"
             unit_filter = "(\n      " + "\n      OR ".join(pairs) + "\n  )"
             preview_notice = ""
+        kri_source = f"""FROM {tables['KRI']} kri
+WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
+  AND {unit_filter}
+  AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}"""
         if result_format == "long":
             return f"""{preview_notice}SELECT
     'KRI' AS table_id,
@@ -442,10 +448,7 @@ def _build_extraction_sql(
     '' AS z_axis_rc_code,
     kri.reference_period,
     kri.value_decimal
-FROM {tables['KRI']} kri
-WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
-  AND {unit_filter}
-  AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
+{kri_source}
 """
         return f"""{preview_notice}SELECT
     'KRI' AS table_id,
@@ -454,10 +457,7 @@ WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
     kri.kri_data_point_id AS y_axis_rc_code,
     '' AS z_axis_rc_code,
 {_date_columns(extraction.reference_dates, 'kri.')}
-FROM {tables['KRI']} kri
-WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
-  AND {unit_filter}
-  AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}
+{kri_source}
 GROUP BY
     kri.entity_id,
     kri.cons_level,
@@ -472,28 +472,7 @@ ORDER BY
         [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
     )
     module_filter = _module_filter(extraction)
-    if result_format == "long":
-        return f"""SELECT
-    {NORMALIZED_TABLE_ID} AS table_id,
-    CONCAT(lei, '_', cons_level) AS reporting_unit_id,
-    x_axis_rc_code,
-    {ITS_Y_AXIS_EXPRESSION} AS y_axis_rc_code,
-    z_axis_rc_code,
-    reference_period,
-    value_decimal
-FROM {tables['ITS']}
-WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
-  AND {_date_filter(extraction.reference_dates)}
-  AND {template_filter}
-"""
-    return f"""SELECT
-    table_id,
-    CONCAT(lei, '_', cons_level) AS reporting_unit_id,
-    x_axis_rc_code,
-    y_axis_rc_code,
-    z_axis_rc_code,
-{_date_columns(extraction.reference_dates)}
-FROM (
+    its_source = f"""FROM (
     SELECT
         {NORMALIZED_TABLE_ID} AS table_id,
         lei,
@@ -507,7 +486,26 @@ FROM (
     WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
       AND {_date_filter(extraction.reference_dates)}
       AND {template_filter}
-) source
+) source"""
+    if result_format == "long":
+        return f"""SELECT
+    table_id,
+    CONCAT(lei, '_', cons_level) AS reporting_unit_id,
+    x_axis_rc_code,
+    y_axis_rc_code,
+    z_axis_rc_code,
+    reference_period,
+    value_decimal
+{its_source}
+"""
+    return f"""SELECT
+    table_id,
+    CONCAT(lei, '_', cons_level) AS reporting_unit_id,
+    x_axis_rc_code,
+    y_axis_rc_code,
+    z_axis_rc_code,
+{_date_columns(extraction.reference_dates)}
+{its_source}
 GROUP BY
     table_id,
     lei,
