@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import csv
 import gzip
+import io
 import json
 import re
 import shutil
@@ -12,6 +13,7 @@ import sys
 import tempfile
 import unittest
 from datetime import date
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -310,21 +312,26 @@ class QueryPlanTests(unittest.TestCase):
         self.assertIn("CONCAT(lei, '_', cons_level) AS reporting_unit_id", sql)
         self.assertIn("reference_period,\n    value_decimal", sql)
         self.assertNotIn("MAX(CASE", sql)
+        self.assertIn("table_id = 'F_12.01'", sql)
+        self.assertIn("table_id LIKE 'F_12.01.%'", sql)
+        self.assertNotIn("regexp_replace", sql)
+        self.assertNotIn("FROM (", sql)
         self.assertIn("WHEN reference_period =", _build_extraction_sql(extraction, application, result_format="wide"))
 
-    def test_both_formats_use_the_same_source_filters_for_two_dates(self):
+    def test_long_format_keeps_source_filters_for_two_dates_without_regex_or_subquery(self):
         application = self.applications[1]
         extraction = Extraction("COREP", "C_08.02%", 1, "QUARTERLY", ("2025-12-31", "2026-03-31"))
         long_sql = _build_extraction_sql(extraction, application)
         wide_sql = _build_extraction_sql(extraction, application, result_format="wide")
-        source = long_sql[long_sql.index("FROM ("):]
-        self.assertIn(source, wide_sql)
-        self.assertIn("cons_level IN ('CONSO')", source)
-        self.assertIn("module_id = 'COREP'", source)
-        self.assertIn("reference_period IN (\n        '2025-12-31',\n        '2026-03-31'", source)
-        self.assertIn("regexp_replace(table_id, '([.][A-Za-z]+|_dp)+$', '') LIKE 'C_08.02%'", source)
-        self.assertNotIn("2025-09-30", source)
+        self.assertIn("cons_level IN ('CONSO')", long_sql)
+        self.assertIn("module_id = 'COREP'", long_sql)
+        self.assertIn("reference_period IN (\n        '2025-12-31',\n        '2026-03-31'", long_sql)
+        self.assertIn("table_id LIKE 'C_08.02%'", long_sql)
+        self.assertNotIn("2025-09-30", long_sql)
+        self.assertNotIn("regexp_replace", long_sql)
+        self.assertNotIn("FROM (", long_sql)
         self.assertNotIn("GROUP BY", long_sql)
+        self.assertIn("regexp_replace", wide_sql)
         self.assertIn("GROUP BY", wide_sql)
 
     def test_consolidation_modes_use_source_column_and_values(self):
@@ -987,6 +994,59 @@ frequency = "QUARTERLY"
             self._config(configuration)
             with self.assertRaisesRegex(ValueError, "valeurs contradictoires"):
                 global_update(configuration, mode="hive", output_directory=root / "generated", as_of=date(2026, 9, 26), devo_client=self._client(conflict=True))
+
+    def test_hive_uploads_each_completed_extraction_before_a_later_failure(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            client = self._client()
+            original_read_sql = client.read_sql
+
+            def fail_second_extraction(sql):
+                if len(client.calls) == 2:
+                    client.calls.append(sql)
+                    raise RuntimeError("Hive unavailable")
+                return original_read_sql(sql)
+
+            client.read_sql = fail_second_extraction
+            uploads = []
+            darwin = SimpleNamespace(upload_file=lambda **kwargs: uploads.append(kwargs))
+            output = root / "generated"
+            log = io.StringIO()
+            with redirect_stdout(log), self.assertRaisesRegex(RuntimeError, "extraction 02"):
+                global_update(configuration, mode="hive", output_directory=output,
+                              as_of=date(2026, 9, 26), devo_client=client,
+                              darwin_upload=999, darwin_client=darwin)
+            self.assertEqual(len(uploads), 1)
+            self.assertTrue(Path(uploads[0]["local_file_path"]).is_file())
+            self.assertTrue(uploads[0]["add_version"])
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["darwin_upload"]["uploaded"], 1)
+            self.assertEqual(manifest["darwin_upload"]["total"], 3)
+            self.assertEqual(manifest["applications"][0]["status"], "running")
+            self.assertEqual([item["extraction"] for item in manifest["applications"][0]["darwin_upload_history"]], [1])
+            self.assertIn("Extraction 1/3 : 1 ligne(s) reçue(s)", log.getvalue())
+            self.assertIn("Darwin : version 1 envoyée", log.getvalue())
+
+    def test_hive_uploads_a_new_version_after_every_extraction(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            uploads = []
+            darwin = SimpleNamespace(upload_file=lambda **kwargs: uploads.append(kwargs))
+            with redirect_stdout(io.StringIO()):
+                result = global_update(configuration, mode="hive", output_directory=root / "generated",
+                                       as_of=date(2026, 9, 26), devo_client=self._client(),
+                                       darwin_upload=999, darwin_client=darwin)
+            self.assertEqual(result["darwin_uploads"], 3)
+            self.assertEqual(len(uploads), 3)
+            self.assertEqual(len({item["filename"] for item in uploads}), 1)
+            self.assertTrue(all(item["add_version"] and item["is_parent"] for item in uploads))
+            manifest = json.loads((root / "generated" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["applications"][0]["status"], "complete")
+            self.assertEqual([item["extraction"] for item in manifest["applications"][0]["darwin_upload_history"]], [1, 2, 3])
 
     def test_hive_mode_can_compact_amounts_without_touching_unknown_kri(self):
         with tempfile.TemporaryDirectory() as temporary_directory:

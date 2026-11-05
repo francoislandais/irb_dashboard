@@ -472,6 +472,8 @@ ORDER BY
         [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
     )
     module_filter = _module_filter(extraction)
+    common_filters = f"""WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
+      AND {_date_filter(extraction.reference_dates)}"""
     its_source = f"""FROM (
     SELECT
         {NORMALIZED_TABLE_ID} AS table_id,
@@ -483,8 +485,7 @@ ORDER BY
         reference_period,
         value_decimal
     FROM {tables['ITS']}
-    WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
-      AND {_date_filter(extraction.reference_dates)}
+    {common_filters}
       AND {template_filter}
 ) source"""
     if result_format == "long":
@@ -492,11 +493,13 @@ ORDER BY
     table_id,
     CONCAT(lei, '_', cons_level) AS reporting_unit_id,
     x_axis_rc_code,
-    y_axis_rc_code,
+    {ITS_Y_AXIS_EXPRESSION} AS y_axis_rc_code,
     z_axis_rc_code,
     reference_period,
     value_decimal
-{its_source}
+FROM {tables['ITS']}
+{common_filters}
+  AND {_raw_template_prefilter(extraction.selector)}
 """
     return f"""SELECT
     table_id,
@@ -630,6 +633,39 @@ def _selected_fixture_templates(selector: str, available: Iterable[str]) -> list
     ]
 
 
+def _normalize_source_table_id(table_id: str) -> str:
+    """Mirror the legacy SQL normalization after fetching long-form rows."""
+    return re.sub(r"([.][A-Za-z]+|_dp)+$", "", table_id)
+
+
+def _raw_template_prefilter(selector: str) -> str:
+    """Cheap SQL superset; Python applies the exact normalized selection.
+
+    An exact C_01.00 must also admit C_01.00.a and C_01.00_dp.
+    Prefix exclusions are exact on raw IDs too. Exact exclusions stay in
+    Python because an annex suffix must be distinguished from a real code.
+    """
+    included, excluded = _expand_template_expressions([selector])
+    def clause(pattern: str) -> str:
+        if pattern.endswith("%"):
+            return f"table_id LIKE {_sql_literal(pattern)}"
+        return "(" + " OR ".join((
+            f"table_id = {_sql_literal(pattern)}",
+            f"table_id LIKE {_sql_literal(pattern + '.%')}",
+            f"table_id LIKE {_sql_literal(pattern + '_dp%')}",
+        )) + ")"
+    include_filter = "(\n          " + "\n          OR ".join(
+        clause(pattern) for pattern in included
+    ) + "\n      )"
+    prefix_exclusions = [pattern for pattern in excluded if pattern.endswith("%")]
+    if not prefix_exclusions:
+        return include_filter
+    exclude_filter = "(\n          " + "\n          OR ".join(
+        f"table_id LIKE {_sql_literal(pattern)}" for pattern in prefix_exclusions
+    ) + "\n      )"
+    return f"{include_filter}\n      AND NOT {exclude_filter}"
+
+
 def _module_matches(value: str, pattern: str) -> bool:
     return re.fullmatch(re.escape(pattern).replace("%", ".*"), value) is not None
 
@@ -749,7 +785,15 @@ def _merge_extraction_rows(
         # value when several source rows shared one axis/date combination.
         wide_rows: dict[tuple[str, ...], dict[str, str]] = {}
         selected_dates = set(extraction.reference_dates)
+        included, excluded = _expand_template_expressions([extraction.selector]) if extraction.module != "KRI" else ([], [])
         for row in rows:
+            if extraction.module != "KRI":
+                if not row["table_id"] or not row["reporting_unit_id"]:
+                    raise ValueError(f"{query_label}: table_id ou reporting_unit_id vide dans le résultat Hive.")
+                row["table_id"] = _normalize_source_table_id(row["table_id"])
+                if not any(_selector_matches(row["table_id"], pattern) for pattern in included) \
+                        or any(_selector_matches(row["table_id"], pattern) for pattern in excluded):
+                    continue
             key = tuple(row[column] for column in OUTPUT_COLUMNS)
             if not key[0] or not key[1]:
                 raise ValueError(f"{query_label}: table_id ou reporting_unit_id vide dans le résultat Hive.")
@@ -932,6 +976,26 @@ def _write_application_outputs(
         application_manifest["compressed_dataset"] = str(compressed_path.relative_to(output_root))
 
 
+def _write_hive_snapshot(output_root: Path, application: Application, folder: str,
+                         application_manifest: dict, records: dict, all_dates: tuple[str, ...],
+                         dictionary_rows: list[dict[str, str]], *, compact_values: bool,
+                         extraction_format: str, require_data: bool = False) -> bool:
+    populated_dates = [
+        "ref_" + item.replace("-", "_") for item in all_dates
+        if any(record["ref_" + item.replace("-", "_")] for record in records.values())
+    ]
+    if not populated_dates:
+        if require_data:
+            raise ValueError(f"{application.name}: aucune donnée non vide remontée par les extractions Hive.")
+        return False
+    fields = OUTPUT_COLUMNS + populated_dates + ["extraction_timestamp"]
+    rows = (sorted(records.values(), key=lambda row: tuple(row[column] for column in OUTPUT_COLUMNS))
+            if extraction_format == "long" else list(records.values()))
+    _write_application_outputs(output_root, application, folder, application_manifest,
+                               fields, rows, dictionary_rows, compact_values=compact_values)
+    return True
+
+
 def _connect_darwin():
     """Use the same vl_connect Darwin client as the dashboard pipeline."""
 
@@ -1038,12 +1102,12 @@ def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, clie
         return _read_configuration(directory, as_of)
 
 
-def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int, client=None) -> int:
+def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int, client=None, *, applications=None, extraction_index: int | None = None) -> int:
     """Upload completed HTMLs and requested datasets, recording each success."""
 
     client = client if client is not None else _connect_darwin()
     upload_status = manifest["darwin_upload"]
-    for application in manifest["applications"]:
+    for application in manifest["applications"] if applications is None else applications:
         relative_html_path = application["html_app"]
         html_path = output_root / relative_html_path
         if not html_path.is_file():
@@ -1059,6 +1123,8 @@ def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifes
         except Exception as error:
             raise RuntimeError(f"Upload Darwin échoué pour {html_path.name} (nœud {node_id}).") from error
         application["darwin_upload"] = {"node_id": node_id, "filename": html_path.name, "status": "uploaded"}
+        if extraction_index is not None:
+            application.setdefault("darwin_upload_history", []).append({"extraction": extraction_index, "filename": html_path.name, "status": "uploaded"})
         upload_status["uploaded"] += 1
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         if "compressed_dataset" in application:
@@ -1073,6 +1139,8 @@ def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifes
             except Exception as error:
                 raise RuntimeError(f"Upload Darwin échoué pour {dataset_path.name} (nœud {node_id}).") from error
             application["darwin_dataset_upload"] = {"node_id": node_id, "filename": dataset_path.name, "status": "uploaded"}
+            if extraction_index is not None:
+                application.setdefault("darwin_dataset_upload_history", []).append({"extraction": extraction_index, "filename": dataset_path.name, "status": "uploaded"})
             upload_status["datasets_uploaded"] += 1
             manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return upload_status["uploaded"]
@@ -1145,13 +1213,21 @@ def global_update(
         raise ValueError("export-dataset = true exige --darwin_upload pour envoyer le dataset compressé.")
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
+    if mode == "hive" and darwin_upload is not None:
+        darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
     query_root = output_root / "queries"
     manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "extraction_format": extraction_format, "applications": []}
     if darwin_upload is not None:
-        manifest["darwin_upload"] = {"node_id": darwin_upload, "uploaded": 0, "total": len(applications)}
+        planned_versions = sum(len(app.extractions) for app in applications) if mode == "hive" else len(applications)
+        manifest["darwin_upload"] = {"node_id": darwin_upload, "uploaded": 0, "total": planned_versions}
         if any(app.export_dataset for app in applications):
             manifest["darwin_upload"]["datasets_uploaded"] = 0
-    for application in applications:
+    output_root.mkdir(parents=True, exist_ok=True)
+    manifest_path = output_root / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[Agora] {len(applications)} fichier(s) TOML à traiter · mode {mode} · extraction {extraction_format}", flush=True)
+    for application_number, application in enumerate(applications, start=1):
+        print(f"[Agora] Application {application_number}/{len(applications)} : {application.config_file or application.name} ({len(application.extractions)} extraction(s))", flush=True)
         folder = _safe_name(application.name)
         app_query_dir = query_root / folder
         app_query_dir.mkdir(parents=True, exist_ok=True)
@@ -1169,12 +1245,16 @@ def global_update(
             "export_dataset": application.export_dataset,
             "metadata_query": metadata_relative,
             "extractions": [],
+            "status": "running",
         }
+        manifest["applications"].append(application_manifest)
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         dictionary_rows = []
         reporting_units = None
         all_dates = tuple(sorted({item for extraction in application.extractions for item in extraction.reference_dates}))
         records: dict[tuple[str, ...], dict[str, str]] = {}
         if mode == "hive":
+            print(f"[Agora]   Institutions : exécution de {metadata_relative}", flush=True)
             try:
                 dictionary_frame = client.read_sql(metadata_sql)
             except Exception as error:
@@ -1183,6 +1263,7 @@ def global_update(
                 _institution_rows(dictionary_frame, f"{application.name} / institutions"), application,
             )
             dictionary_rows = _institution_dictionary_rows(reporting_units)
+            print(f"[Agora]   Institutions : {len(reporting_units)} unité(s) reçue(s)", flush=True)
         elif mode == "test":
             reporting_units = _fixture_reporting_units(application, fixture)
             dictionary_rows = _institution_dictionary_rows(reporting_units)
@@ -1210,6 +1291,7 @@ def global_update(
             }
             if mode == "hive":
                 query_label = f"{application.name} / extraction {index:02d}"
+                print(f"[Agora]   Extraction {index}/{len(application.extractions)} : exécution de {query_relative} ({extraction.selector})", flush=True)
                 try:
                     dataframe = client.read_sql(sql)
                 except Exception as error:
@@ -1217,31 +1299,40 @@ def global_update(
                 extraction_manifest["query_rows"] = _merge_extraction_rows(
                     records, all_dates, extraction, dataframe, query_label, result_format=extraction_format,
                 )
+                print(f"[Agora]   Extraction {index}/{len(application.extractions)} : {extraction_manifest['query_rows']} ligne(s) reçue(s)", flush=True)
             application_manifest["extractions"].append(extraction_manifest)
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            if mode == "hive" and darwin_upload is not None:
+                if _write_hive_snapshot(output_root, application, folder, application_manifest, records,
+                                        all_dates, dictionary_rows, compact_values=compact_values,
+                                        extraction_format=extraction_format):
+                    print(f"[Agora]   HTML créé : {application_manifest['html_app']} ({application_manifest['rows']} ligne(s))", flush=True)
+                    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                    _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload,
+                                                      darwin_client, applications=[application_manifest], extraction_index=index)
+                    print(f"[Agora]   Darwin : version {index} envoyée au nœud {darwin_upload}", flush=True)
+                else:
+                    print(f"[Agora]   Aucune donnée exploitable après l'extraction {index} : HTML différé", flush=True)
         if mode == "test":
             fields, rows = _build_dummy_dataset(application, fixture)
+            print(f"[Agora]   Construction du HTML à partir des données simulées", flush=True)
             _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows, compact_values=compact_values)
             application_manifest["simulated_rows"] = len(rows)
         elif mode == "hive":
-            populated_dates = [
-                "ref_" + item.replace("-", "_") for item in all_dates
-                if any(record["ref_" + item.replace("-", "_")] for record in records.values())
-            ]
-            if not populated_dates:
+            if darwin_upload is None:
+                print(f"[Agora]   Construction du HTML final", flush=True)
+                _write_hive_snapshot(output_root, application, folder, application_manifest, records,
+                                     all_dates, dictionary_rows, compact_values=compact_values,
+                                     extraction_format=extraction_format, require_data=True)
+            elif "html_app" not in application_manifest:
                 raise ValueError(f"{application.name}: aucune donnée non vide remontée par les extractions Hive.")
-            fields = OUTPUT_COLUMNS + populated_dates + ["extraction_timestamp"]
-            _write_application_outputs(
-                output_root, application, folder, application_manifest, fields,
-                sorted(records.values(), key=lambda row: tuple(row[column] for column in OUTPUT_COLUMNS))
-                if extraction_format == "long" else list(records.values()), dictionary_rows,
-                compact_values=compact_values,
-            )
-        manifest["applications"].append(application_manifest)
-    output_root.mkdir(parents=True, exist_ok=True)
-    manifest_path = output_root / "manifest.json"
+        application_manifest["status"] = "complete"
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"[Agora] Application {application_number}/{len(applications)} terminée : {application_manifest.get('html_app', 'requêtes seules')}", flush=True)
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_query_index(output_root / "query_index.md", manifest)
-    uploaded = _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload, darwin_client) if darwin_upload is not None else 0
+    uploaded = (_upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload, darwin_client)
+                if darwin_upload is not None and mode != "hive" else manifest.get("darwin_upload", {}).get("uploaded", 0))
     return {"output_directory": str(output_root), "manifest_path": str(manifest_path), "mode": mode, "applications": len(applications), "darwin_uploads": uploaded}
 
 
@@ -1265,7 +1356,7 @@ def _main() -> None:
     print(f"Plan et requêtes : {result['output_directory']}")
     print(f"Index : {result['output_directory']}/query_index.md")
     if args.darwin_upload is not None:
-        print(f"Darwin : {result['darwin_uploads']} application(s) uploadée(s) dans le nœud {args.darwin_upload}")
+        print(f"Darwin : {result['darwin_uploads']} version(s) HTML envoyée(s) dans le nœud {args.darwin_upload}")
 
 
 if __name__ == "__main__":
