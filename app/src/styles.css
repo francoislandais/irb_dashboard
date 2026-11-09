@@ -1644,7 +1644,7 @@ button:focus-visible {
   box-sizing: border-box;
   display: grid;
   gap: 8px;
-  grid-template-rows: var(--explorer-selection-row-height) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   height: 100%;
   min-width: 0;
   min-height: 0;
@@ -1660,7 +1660,23 @@ button:focus-visible {
 
 .explorer-context-panel.has-benchmark-preview {
   align-content: start;
-  grid-template-rows: var(--explorer-selection-row-height) auto clamp(190px, 29vh, 250px);
+  grid-template-rows: minmax(0, 1fr) clamp(190px, 29vh, 250px);
+}
+
+.explorer-context-panel.is-benchmark-selection-visible {
+  grid-template-rows: var(--explorer-selection-row-height) minmax(0, 1fr);
+}
+
+.explorer-context-panel.has-benchmark-preview.is-benchmark-selection-visible {
+  grid-template-rows: var(--explorer-selection-row-height) minmax(0, max-content) clamp(190px, 29vh, 250px);
+}
+
+.explorer-context-panel > .cost-of-risk-context-selected-pane {
+  display: none;
+}
+
+.explorer-context-panel.is-benchmark-selection-visible > .cost-of-risk-context-selected-pane {
+  display: block;
 }
 
 .explorer-context-panel.is-selection-description-expanded {
@@ -1674,6 +1690,7 @@ button:focus-visible {
 }
 
 .explorer-context-panel.is-selection-description-expanded > .cost-of-risk-context-selected-pane {
+  display: block;
   z-index: 2;
 }
 
@@ -1790,8 +1807,7 @@ button:focus-visible {
   background-color: rgb(72 86 78 / 0.68);
 }
 
-/* In compact mode the selection card remains in place, while the table uses
-   the column that previously held the contextual option list. */
+/* In compact mode the table uses the column normally held by the context panel. */
 .explorer-workspace.is-context-detail-collapsed {
   grid-template-columns: 0 minmax(0, 1fr);
   gap: 0;
@@ -2027,8 +2043,7 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .explorer-context-panel.is-selection-description-expanded,
-  .explorer-selection-summary-pane.is-description-expanded .explorer-selection-summary-expanded-description,
-  .explorer-selection-summary-description-button.is-active svg {
+  .explorer-selection-summary-pane.is-description-expanded .explorer-selection-summary-expanded-description {
     transition-duration: 0ms;
   }
 }
@@ -2171,6 +2186,161 @@ button:focus-visible {
   justify-content: space-between;
   color: #7a8780;
   font-size: 0.66rem;
+}
+
+.explorer-description-quarterly {
+  display: grid;
+  gap: 6px;
+  border-top: 1px solid #e3e8e5;
+  padding-top: 10px;
+}
+
+.explorer-description-quarterly h3,
+.explorer-description-quarterly h4 {
+  margin: 0;
+  color: #536960;
+  font-size: 0.69rem;
+  font-weight: 600;
+}
+
+.explorer-description-quarterly h4 {
+  margin-top: 4px;
+}
+
+.explorer-description-quarterly-movement {
+  margin: 0;
+  color: #253a30;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.explorer-description-contributors {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.explorer-description-contributors li {
+  margin: 0;
+}
+
+.explorer-description-contributor-link {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #405149;
+  padding: 3px 2px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.explorer-description-contributor-link:hover,
+.explorer-description-contributor-link:focus-visible,
+.explorer-description-contributor-link.is-active {
+  background: #eef5f9;
+  outline: none;
+}
+
+.explorer-description-contributor-link strong {
+  flex: 0 0 auto;
+  color: var(--primary-dark);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.explorer-description-contributor-detail {
+  display: grid;
+  gap: 9px;
+  width: 310px;
+  max-width: calc(100% - 16px);
+  padding: 11px 12px;
+  border: 1px solid #add1e5;
+  border-left: 3px solid #6ba6c8;
+  border-radius: 7px;
+  background: #f7fbfd;
+  color: #435a67;
+  font-size: 0.69rem;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 5px 17px rgb(29 92 127 / 0.12);
+}
+
+.explorer-contributor-popover {
+  position: fixed;
+  z-index: 70;
+  max-width: none;
+  max-height: min(280px, 60vh);
+  overflow: auto;
+}
+
+.explorer-contributor-popover[hidden] {
+  display: none;
+}
+
+.explorer-description-contributor-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.explorer-description-contributor-point {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.explorer-description-contributor-point small {
+  color: #718793;
+  font-size: 0.61rem;
+}
+
+.explorer-description-contributor-point strong {
+  color: #1f526f;
+  font-size: 0.79rem;
+}
+
+.explorer-description-contributor-arrow {
+  flex: 1 1 auto;
+  color: #6ba6c8;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.explorer-description-contributor-metrics {
+  display: grid;
+  gap: 4px;
+  border-top: 1px solid #e2edf3;
+  padding-top: 7px;
+}
+
+.explorer-description-contributor-metrics > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.explorer-description-contributor-metrics strong {
+  flex: 0 0 auto;
+  color: #1f526f;
+  font-variant-numeric: tabular-nums;
+}
+
+.explorer-description-contributors-note {
+  margin: 0;
+  color: #78847e;
+  font-size: 0.65rem;
+  line-height: 1.35;
 }
 
 .explorer-description-observation {
@@ -2395,56 +2565,6 @@ button:focus-visible {
   line-height: 1.5;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
-}
-
-.explorer-selection-summary-actions {
-  display: flex;
-  flex: 0 0 auto;
-  justify-content: center;
-  padding: 0 8px 5px;
-}
-
-.explorer-selection-summary-pane.is-description-expanded .explorer-selection-summary-actions {
-  background: #ffffff;
-}
-
-.explorer-selection-summary-description-button {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 20px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: #8b9b93;
-  cursor: pointer;
-  padding: 0;
-}
-
-.explorer-selection-summary-description-button svg {
-  width: 17px;
-  height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.explorer-selection-summary-description-button.is-active svg {
-  transform: rotate(180deg);
-  transition: transform 160ms ease;
-}
-
-.explorer-selection-summary-description-button:hover,
-.explorer-selection-summary-description-button:focus-visible {
-  background: #e8eeea;
-  color: var(--primary-dark);
-}
-
-.explorer-selection-summary-description-button:focus-visible {
-  outline: 2px solid var(--primary-dark);
-  outline-offset: 2px;
 }
 
 .explorer-selection-summary-benchmark-button {
@@ -2987,6 +3107,49 @@ table {
   display: none;
 }
 
+.explorer-xy-axis-summary {
+  gap: 12px;
+  padding: 8px 12px;
+}
+
+.explorer-xy-axis-summary[hidden] {
+  display: none;
+}
+
+.explorer-xy-axis-part {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.explorer-xy-axis-part.has-ratio-indicator {
+  padding-right: 17px;
+}
+
+.explorer-xy-axis-part .axis-ratio-indicator {
+  top: -5px;
+  right: 0;
+}
+
+.explorer-xy-axis-part.is-ratio-inactive .axis-ratio-indicator {
+  border-color: #c8d0d5;
+  background: #f2f4f5;
+  color: #87939a;
+}
+
+.explorer-xy-axis-divider {
+  width: 1px;
+  align-self: stretch;
+  background: #cfe0f0;
+}
+
+
 .explorer-search-control {
   position: relative;
   z-index: 2000;
@@ -3276,6 +3439,138 @@ table {
   grid-row: 2;
   min-height: 28px;
   padding-left: 18px;
+  position: relative;
+  z-index: 80;
+}
+
+.explorer-filter-dropdown-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 19px;
+  height: 20px;
+  margin-left: 1px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #758881;
+}
+
+.explorer-filter-dropdown-toggle:hover,
+.explorer-filter-dropdown-toggle[aria-expanded="true"] {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+}
+
+.explorer-filter-dropdown-toggle svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.explorer-filter-dropdown-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.explorer-filter-dropdown {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 8px;
+  display: grid;
+  min-width: 190px;
+  width: max-content;
+  max-width: min(390px, calc(100vw - 24px));
+  max-height: min(360px, 55vh);
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid #d9e2dd;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgb(30 51 41 / 0.14);
+}
+
+.explorer-filter-dropdown.has-geography-search {
+  min-width: 270px;
+  overflow: visible;
+}
+
+.explorer-filter-dropdown.has-geography-search .explorer-geography-search-control {
+  margin: 2px 2px 7px;
+}
+
+.explorer-filter-dropdown-options {
+  display: grid;
+  max-height: min(300px, 45vh);
+  overflow-y: auto;
+}
+
+.explorer-filter-dropdown-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  color: #273830;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.explorer-filter-dropdown-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.explorer-filter-dropdown-main > span {
+  overflow-wrap: anywhere;
+}
+
+.explorer-filter-dropdown-metric {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.explorer-filter-dropdown-option:hover:not(:disabled),
+.explorer-filter-dropdown-option:focus-visible:not(:disabled) {
+  background: #f0f5f2;
+}
+
+.explorer-filter-dropdown-option.is-active {
+  background: #eaf2fa;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.explorer-filter-dropdown-option:disabled {
+  color: #a3adaa;
+  cursor: not-allowed;
+}
+
+.explorer-filter-dropdown-option:disabled .explorer-filter-dropdown-metric {
+  min-width: 3.5em;
+  align-self: stretch;
+  border-radius: 3px;
+  background: #e2e5e7;
+}
+
+.explorer-filter-dropdown-option.is-taxonomy-unavailable:disabled {
+  color: #273830;
+}
+
+.explorer-filter-dropdown-option small {
+  color: #71817a;
+  font-size: 0.68rem;
+  font-weight: 400;
 }
 
 .metric-table thead .code-column .explorer-tree-level-control,
@@ -4750,6 +5045,20 @@ table {
   color: #f4fbf8 !important;
 }
 
+.metric-table tbody tr.is-contributor-highlight:not(.is-selected):not(.is-axis-impossible) > th,
+.metric-table tbody tr.is-contributor-highlight:not(.is-selected):not(.is-axis-impossible) > td:not(.is-xy-impossible):not(.is-taxonomy-unavailable),
+.metric-table.is-xy-view thead th.is-contributor-highlight,
+.metric-table.is-xy-view tbody td.is-contributor-highlight:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
+  background: #e8f3fa !important;
+}
+
+.metric-table tbody tr.is-contributor-highlight > td.is-contributor-value-highlight:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
+  background: #d5eaf7 !important;
+  box-shadow: inset 0 0 0 1px #91bed8;
+  color: #115b82;
+  font-weight: 700;
+}
+
 .metric-table tbody tr > td.is-cell-range-selected:not(.is-xy-impossible):not(.is-taxonomy-unavailable),
 .metric-table tbody tr:hover > td.is-cell-range-selected:not(.is-xy-impossible):not(.is-taxonomy-unavailable) {
   background: #d7e4de !important;
@@ -4874,12 +5183,16 @@ table {
     --explorer-selection-row-height: 154px;
     grid-column: 1;
     grid-row: 1;
-    grid-template-rows: var(--explorer-selection-row-height) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     max-height: 100%;
   }
 
   .explorer-context-panel.has-benchmark-preview {
-    grid-template-rows: var(--explorer-selection-row-height) auto clamp(170px, 24vh, 220px);
+    grid-template-rows: minmax(0, 1fr) clamp(170px, 24vh, 220px);
+  }
+
+  .explorer-context-panel.has-benchmark-preview.is-benchmark-selection-visible {
+    grid-template-rows: var(--explorer-selection-row-height) minmax(0, max-content) clamp(170px, 24vh, 220px);
   }
 
   .irb-content:has(.irb-tab-panel[data-irb-panel="density"].is-active),
@@ -4952,7 +5265,17 @@ table {
   overflow-wrap: anywhere;
   text-align: center;
   vertical-align: middle;
-  padding: 8px;
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  line-height: 1.15;
+}
+
+.metric-table.is-xy-view .explorer-xy-leaf > .explorer-xy-header-label,
+.metric-table.is-xy-view .explorer-xy-group:not(.is-horizontally-merged) > .explorer-xy-header-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .metric-table.is-xy-view thead th:not(.description-column):not(.code-column) {
@@ -4962,11 +5285,12 @@ table {
 .metric-table.is-xy-view thead th.description-column,
 .metric-table.is-xy-view thead th.code-column {
   border: 0;
+  background: #ffffff;
   color: transparent;
 }
 
 .metric-table.is-xy-view .explorer-xy-group {
-  background: #edf2ef;
+  background: #f7f8f7;
 }
 
 .metric-table.is-xy-view .explorer-xy-group.is-horizontally-merged {
@@ -4981,12 +5305,15 @@ table {
   display: block;
   width: max-content;
   max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: left;
   z-index: 2;
 }
 
 .metric-table.is-xy-view .explorer-xy-leaf {
-  background: #ffffff;
+  background: #f7f8f7;
   cursor: pointer;
 }
 
@@ -5004,7 +5331,7 @@ table {
    heavily-qualified base rule would keep winning and the border would
    never actually go away. */
 .metric-table.is-xy-view thead th.explorer-xy-group.is-duplicate-label {
-  background: #ffffff;
+  background: #f7f8f7;
   border-left: 0;
 }
 
@@ -5015,7 +5342,7 @@ table {
 
 .explorer-xy-header-code {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
   color: #74817a;
   font-size: 0.68rem;
 }

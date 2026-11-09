@@ -134,6 +134,8 @@ const badgeAssignments=new Map();
 const badgePlacementContext=vm.createContext({
   elements:{explorerAxisButtons:badgeButtons,explorerAxisCaptions:{}},
   EXPLORER_TARGET:{tableId:"TEST"},
+  explorerGlobalDisplayMode:"temporal",
+  isExplorerXYView:()=>Boolean(badgePlacement.isXY),
   getExplorerAxisCaptions:()=>({}),
   getActiveExplorerContext:()=>badgePlacement,
   getActiveExplorerTemplate:()=>({tableId:"TEST"}),
@@ -152,6 +154,46 @@ badgePlacement.contribution={axis:"x",baseCode:"0010",enabled:true};
 badgePlacement.selectedAxis="y";
 badgePlacementContext.renderExplorerAxisTabs();
 assert.deepEqual(Object.fromEntries(badgeAssignments),{x:"x",y:null,z:null});
+
+// XY presents a combined button while retaining each dimension's own ratio
+// marker. The combined button remains available when Z is displayed.
+const xyParts=Object.fromEntries(["x","y"].map(axis=>[axis,{
+  axis,title:"",value:{textContent:""},querySelector(){return this.value;}
+}]));
+const xySummary={hidden:true,classes:{},attributes:{},
+  classList:{toggle(name,value){xySummary.classes[name]=value;}},
+  setAttribute(name,value){this.attributes[name]=value;}
+};
+badgePlacementContext.elements.explorerXYAxisSummary=xySummary;
+badgePlacementContext.elements.explorerXYAxisCaptions=xyParts;
+badgePlacementContext.getExplorerAxisDisplayName=axis=>axis==="y"?"Row":"Column";
+badgePlacementContext.EXPLORER_ALL_CURRENCIES_CODE="__ALL__";
+badgePlacementContext.explorerGlobalDisplayMode="xy";
+badgePlacement.isXY=true;
+badgePlacement.selectedXCode="0020";
+badgePlacement.selectedYCode="0010";
+badgePlacementContext.renderExplorerAxisTabs();
+assert.equal(xySummary.hidden,false);
+assert.equal(badgeButtons.find(button=>button.axis==="x").hidden,true);
+assert.equal(badgeButtons.find(button=>button.axis==="y").hidden,true);
+assert.equal(xyParts.y.value.textContent,"Row : 0010");
+assert.equal(xyParts.x.value.textContent,"Column : 0020");
+assert.equal(badgeAssignments.get("x"),"x");
+badgePlacement.selectedAxis="z";
+badgePlacement.isXY=false;
+badgePlacementContext.renderExplorerAxisTabs();
+assert.equal(xySummary.hidden,false);
+assert.equal(xySummary.classes["is-active"],false);
+assert.equal(xySummary.attributes["aria-selected"],"false");
+assert.equal(badgeButtons.find(button=>button.axis==="x").hidden,true);
+assert.equal(badgeButtons.find(button=>button.axis==="y").hidden,true);
+assert.equal(badgeButtons.find(button=>button.axis==="z").hidden,false);
+badgePlacementContext.explorerGlobalDisplayMode="temporal";
+badgePlacement.isXY=false;
+badgePlacementContext.renderExplorerAxisTabs();
+assert.equal(xySummary.hidden,true);
+assert.equal(badgeButtons.find(button=>button.axis==="x").hidden,false);
+assert.equal(badgeButtons.find(button=>button.axis==="y").hidden,false);
 
 let context={activeAxis:"y",selectedXCode:"0010",selectedYCode:"0010",selectedZCode:"EUR",selectedReferenceLabel:dates[0].label};
 const table=new Element("table");
@@ -172,7 +214,7 @@ const sandbox={
   getLatestState:()=>base,getSelectedExplorerCodeForActiveAxis:()=>context.activeAxis==="y"?context.selectedYCode:context.selectedXCode,
   refreshExplorerSelectionOnly:()=>selectedCalls++,saveExplorerScrollPosition(){},focusSelectedExplorerRow(){},
 };
-for(const name of ["clearExplorerCellRangeSelection","clearExplorerCountrySearch","expandDefaultExplorerPaths","applyExplorerTreeViewMode","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","renderExplorerKriPaginationBar","renderExplorerGeographyPaginationBar","getActiveExplorerGeographyAxis"]) sandbox[name]=()=>{};
+for(const name of ["clearExplorerCellRangeSelection","clearExplorerCountrySearch","expandDefaultExplorerPaths","applyExplorerTreeViewMode","applyExplorerDateFocusValueIntensity","applyExplorerTreeState","syncExplorerContributorHighlights","renderExplorerKriPaginationBar","renderExplorerGeographyPaginationBar","getActiveExplorerGeographyAxis"]) sandbox[name]=()=>{};
 const ctx=vm.createContext(sandbox);
 vm.runInContext('let explorerGlobalReferenceLabel="",explorerGlobalDisplayMode="xy",lastRenderedExplorerTableSeries=null,lastRenderedExplorerSelectedUnit="",lastRenderedExplorerParentPaths=new Set(),explorerXYHeaderObserver=null,shouldFocusOpenedExplorerPoint=false,shouldRevealExplorerAxisSelection=false,hasInteractedWithExplorerSelection=false,explorerContextTopic="";'+source.slice(source.indexOf("function isExplorerXYView()"),source.indexOf("// A separate element outside"))+source.slice(source.indexOf("function selectExplorerRow("),source.indexOf("function applyExplorerSelection()")),ctx);
 base.selectedTaxonomiesByTemplate={TEST:"4.2"};

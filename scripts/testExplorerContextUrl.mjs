@@ -5,13 +5,13 @@ import vm from "node:vm";
 const source = await readFile(new URL("../app/src/ui/explorerView.js", import.meta.url), "utf8");
 const topicDefinitions = source.slice(
   source.indexOf("const EXPLORER_CONTEXT_TOPICS ="),
-  source.indexOf("// The expanded description can be restored")
+  source.indexOf("const DEFAULT_EXPLORER_HISTORY_PERIODS =")
 );
 const declaration = (prefix) => source.split("\n").find((line) => line.startsWith(prefix));
 const initialStateSource = [
   declaration("const initialExplorerContext ="),
   declaration("let explorerContextDetailCollapsed ="),
-  declaration("let explorerContextTopic =")
+  source.slice(source.indexOf("let explorerContextTopic ="), source.indexOf("const explorerSharedGeography ="))
 ].join("\n");
 const panelStateSource = source.slice(
   source.indexOf("function setExplorerContextDetailCollapsed("),
@@ -19,11 +19,12 @@ const panelStateSource = source.slice(
 );
 assert.ok(topicDefinitions && initialStateSource && panelStateSource);
 
-for (const [initialValue, expectedTopic, expectedCollapsed] of [
-  ["geography", "geography", false],
-  ["benchmark-mode", "benchmark-mode", false],
-  ["collapsed", "", true],
-  ["unknown", "", false]
+for (const [initialValue, expectedTopic, expectedCollapsed, expectedDescription] of [
+  ["geography", "", false, false],
+  ["benchmark-mode", "benchmark-mode", false, false],
+  ["description", "", false, true],
+  ["collapsed", "", true, false],
+  ["unknown", "", false, false]
 ]) {
   let url = new URL(`https://example.test/?explorer_context=${initialValue}`);
   const state = vm.createContext({
@@ -36,8 +37,10 @@ for (const [initialValue, expectedTopic, expectedCollapsed] of [
   vm.runInContext(`${topicDefinitions}\n${initialStateSource}\n${panelStateSource}`, state);
   assert.equal(vm.runInContext("explorerContextTopic", state), expectedTopic);
   assert.equal(vm.runInContext("explorerContextDetailCollapsed", state), expectedCollapsed);
+  assert.equal(vm.runInContext("explorerSelectionDescriptionExpanded", state), expectedDescription);
 
   if (expectedCollapsed) vm.runInContext("setExplorerContextDetailCollapsed(false)", state);
+  vm.runInContext("explorerSelectionDescriptionExpanded = false", state);
   vm.runInContext('explorerContextTopic = "geography"; updateUrlExplorerContextPanel()', state);
   assert.equal(url.searchParams.get("explorer_context"), "geography");
   vm.runInContext('explorerContextTopic = ""; updateUrlExplorerContextPanel()', state);
@@ -46,14 +49,18 @@ for (const [initialValue, expectedTopic, expectedCollapsed] of [
   assert.equal(url.searchParams.get("explorer_context"), "collapsed");
   vm.runInContext("setExplorerContextDetailCollapsed(false)", state);
   assert.equal(url.searchParams.get("explorer_context"), "geography");
+  vm.runInContext("explorerSelectionDescriptionExpanded = true; updateUrlExplorerContextPanel()", state);
+  assert.equal(url.searchParams.get("explorer_context"), "description");
 }
 
 const summarySource = source.slice(
-  source.indexOf("function createExplorerSelectionSummaryCard()"),
+  source.indexOf("function renderExplorerSelectionPane()"),
   source.indexOf("function createExplorerTaxonomyStatus()")
 );
-assert.match(summarySource, /if \(!EXPLORER_SELECTION_DESCRIPTION_ENABLED\) \{\s*pane\.append\(description\);\s*return pane;/,
-  "the summary remains visible while the description expander is disabled");
+assert.match(summarySource, /explorerContextTopic === "benchmark-mode"\s*&& !explorerContextDetailCollapsed && !explorerSelectionDescriptionExpanded/,
+  "the selected point summary is also shown while the Benchmark panel is open");
+assert.match(summarySource, /explorerSelectionDescriptionExpanded \|\| showBenchmarkSelection \? \[createExplorerSelectionSummaryCard\(\)\] : \[\]/,
+  "the selected point summary stays hidden in other context panels");
 
 const contextRenderSource = source.slice(
   source.indexOf("function renderExplorerContextPanel("),
@@ -73,6 +80,7 @@ for (const [topic, hasRows, geographicTemplate, expectedTopic] of [
     explorerGeographySearch: "US",
     explorerGeographySearchDraft: "United States",
     explorerContextDetailCollapsed: false,
+    explorerSelectionDescriptionExpanded: false,
     EXPLORER_CONTEXT_URL_PARAM: "explorer_context",
     getActiveExplorerGeographyAxis: () => geographicTemplate ? "z" : "",
     revealExplorerContextDetail: () => {},
@@ -155,4 +163,4 @@ assert.equal(vm.runInContext("activeExplorerTemplateId", templateContext), "F_20
 assert.equal(restoredSelection.activeAxis, "z");
 assert.equal(restoredSelection.selectedZCode, "US");
 assert.equal(writtenTemplate, "F_20.04");
-console.log("PASS: context panel topics survive URL reloads and the selection description expander stays hidden.");
+console.log("PASS: context panel and Description view survive URL reloads; hidden selection summary is omitted.");

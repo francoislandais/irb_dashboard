@@ -150,3 +150,33 @@ export function analyzeExplorerSelectionHistory(history, selectedLabel, requeste
   }
   return { currentIndex, comparisons, chartComparisons, cadenceMonths, chartPoints, direction, unusual };
 }
+
+// A child's contribution is its absolute quarterly move divided by the
+// parent's value at the start of the quarter. This is a percentage-point
+// contribution to the parent's growth, not the child's own growth rate.
+export function analyzeExplorerQuarterlyContributors(parentCurrent, parentPrevious, children, maxShown = 4) {
+  if (!Number.isFinite(parentCurrent) || !Number.isFinite(parentPrevious) || parentPrevious === 0) return null;
+  const baseline = Math.abs(parentPrevious);
+  const parentDelta = parentCurrent - parentPrevious;
+  const parentMovePoints = parentDelta / baseline * 100;
+  const available = children.filter((child) => Number.isFinite(child.current)
+    && Number.isFinite(child.previous)).map((child) => ({
+    ...child,
+    delta: child.current - child.previous,
+    points: (child.current - child.previous) / baseline * 100
+  }));
+  const threshold = Math.max(0.5, Math.abs(parentMovePoints) * 0.1);
+  const contributors = available.filter((child) => Math.abs(child.points) >= threshold)
+    .sort((left, right) => Math.abs(right.points) - Math.abs(left.points))
+    .slice(0, maxShown);
+  const sumAt = (key) => available.reduce((total, child) => total + child[key], 0);
+  const closeToParent = (sum, parent) => Math.abs(sum - parent) <= Math.max(1e-9, Math.abs(parent) * 0.02);
+  return {
+    contributors,
+    isAdditive: available.length > 0
+      && closeToParent(sumAt("current"), parentCurrent)
+      && closeToParent(sumAt("previous"), parentPrevious),
+    reportedCount: available.length,
+    threshold
+  };
+}

@@ -1,6 +1,6 @@
 import { getExplorerTemplateReferenceDates, getExplorerTaxonomyUnavailableReferenceLabels } from "../data/explorerReferenceDates.js";
 import { buildGeographyPagePlan } from "../data/geographyPagination.js";
-import { analyzeExplorerSelectionHistory, buildExplorerSelectionHistory } from "../data/explorerSelectionInsights.js?v=20261003-description-arrows";
+import { analyzeExplorerQuarterlyContributors, analyzeExplorerSelectionHistory, buildExplorerSelectionHistory } from "../data/explorerSelectionInsights.js?v=20261108-quarterly-contributors";
 import { buildExplorerXYSeries, buildExplorerXYHeaders } from "../data/explorerXY.js?v=20260922-xy-header-dedupe";
 import { createExplorerSelectionHistory, sameExplorerSelection } from "../data/explorerSelectionHistory.js";
 import { buildExplorerAxisSeries, EXPLORER_TARGET, getExplorerAxisPointsConfig, getExplorerGeographyLatestValues } from "../data/timeSeries.js?v=20261005-geography-contributors";
@@ -32,6 +32,7 @@ import {
   getExplorerContributionRatio,
   getExplorerRowsForTemplate,
   getExplorerTemplates,
+  explorerTableHasCurrencyZAxis,
   getHierarchyAncestorPaths,
   getParentPaths,
   getSelectedExplorerCodeForAxis,
@@ -53,7 +54,7 @@ import {
 import { getLatestState } from "./appState.js";
 import { getTaxonomyDataForTemplateFramework, getTaxonomyFrameworkForDate } from "../data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
 import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20261021-cons-conso";
-import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel } from "./unitFilterView.js?v=20260910-context-title-only";
+import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260925-institution-id";
 import { showExplorerQueryDialog } from "./explorerQueryDialog.js?v=20260917-query-light-en";
@@ -97,11 +98,12 @@ const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
 const EXPLORER_CONTEXT_URL_PARAM = "explorer_context";
 const EXPLORER_CONTEXT_TOPICS = new Set([
   "jst-code", "reference-date", "unit", "display-mode", "benchmark-mode",
-  "kri-formula", "geography", "peer-selection"
+  "kri-formula", "geography", "peer-selection", "description"
 ]);
-// The expanded description can be restored later without removing its chart
-// and interaction code; for now the selection card stays compact.
-const EXPLORER_SELECTION_DESCRIPTION_ENABLED = false;
+const EXPLORER_INLINE_FILTER_TOPICS = new Set([
+  "jst-code", "reference-date", "unit", "display-mode", "geography"
+]);
+const EXPLORER_SELECTION_DESCRIPTION_ENABLED = true;
 // 8 prior periods at quarterly cadence is roughly the old default (current
 // year + 2 prior years); other frequencies now get the same period count,
 // just in their own unit (see getExplorerHistoryUnitLabel).
@@ -148,6 +150,10 @@ const EXPLORER_EVOLUTION_OPTIONS = [
 const EXPLORER_DISPLAY_OPTIONS = [
   { value: "xy", label: "XY view", description: "Y rows × X columns at the selected date, for every template" },
   { value: "temporal", label: "Temporal", description: "All reference dates at the selected frequency" }
+];
+const EXPLORER_BENCHMARK_MODE_OPTIONS = [
+  { value: "explicit", label: "Benchmark", detail: "Named institutions and peer curves" },
+  { value: "anonymised", label: "Anonymous benchmark", detail: "Anonymized peer percentile distribution" }
 ];
 // "template" used to be a fourth browsable axis (clicking the template tab
 // turned the main table into a list of templates); that mode is retired in
@@ -200,8 +206,14 @@ let explorerCellRanges = [];
 let explorerCellRangePreview = null;
 let explorerQueryPoints = [];
 let suppressNextExplorerRowClick = false;
-let explorerContextTopic = EXPLORER_CONTEXT_TOPICS.has(initialExplorerContext) ? initialExplorerContext : "";
-let explorerSelectionDescriptionExpanded = false;
+let explorerContextTopic = EXPLORER_CONTEXT_TOPICS.has(initialExplorerContext)
+  && initialExplorerContext !== "description"
+  && !EXPLORER_INLINE_FILTER_TOPICS.has(initialExplorerContext) ? initialExplorerContext : "";
+let explorerSelectionDescriptionExpanded = initialExplorerContext === "description";
+let explorerContributorHighlight = null;
+let explorerContributorPopover = null;
+let explorerContributorPopoverAnchor = null;
+let explorerContributorPopoverFrame = 0;
 const explorerSharedGeography = {
   selectedZCode: "",
   expandedPaths: new Set(),
@@ -255,6 +267,7 @@ let explorerGeographyPageResetKey = "";
 let explorerGeographyTotalMatchCount = 0;
 let explorerPeerSelectionActions = null;
 let explorerAdvancedSearchQuery = readUrlStateParams().get(EXPLORER_SEARCH_URL_PARAM) ?? "";
+let explorerInlineFilterTopic = "";
 let explorerGeographyLayout = getUrlGeographyLayoutParam();
 let explorerGeographySearch = readUrlStateParams().get(EXPLORER_GEOGRAPHY_SEARCH_URL_PARAM) ?? "";
 let explorerGeographySearchDraft = explorerGeographySearch;
@@ -269,6 +282,11 @@ let shouldCenterExplorerReferenceColumn = false;
 
 const elements = {
   explorerAxisButtons: [...document.querySelectorAll("[data-explorer-axis]")],
+  explorerXYAxisSummary: document.querySelector(".explorer-xy-axis-summary"),
+  explorerXYAxisCaptions: {
+    x: document.querySelector('[data-explorer-xy-caption="x"]'),
+    y: document.querySelector('[data-explorer-xy-caption="y"]')
+  },
   explorerAxisCaptions: {
     template: document.querySelector('[data-axis-caption="template"]'),
     x: document.querySelector('[data-axis-caption="x"]'),
@@ -315,8 +333,27 @@ export function wireExplorerUi(actions, rerender) {
   updateSelectedUnit = actions.updateSelectedUnit;
   updatePeerDisplayMode = actions.updatePeerDisplayMode;
   elements.explorerActiveFilters?.addEventListener("click", (event) => {
-    if (event.target.closest("button")) setExplorerSelectionDescriptionExpanded(false);
+    if (event.target.closest("button") && !event.target.closest(".explorer-filter-chip-description")) {
+      setExplorerSelectionDescriptionExpanded(false);
+    }
+    const filterToggle = event.target.closest(".cost-of-risk-filter-chip-toggle");
+    const hasInlineDropdown = filterToggle?.parentElement?.querySelector(".explorer-filter-dropdown-toggle");
+    if (!event.target.closest(".explorer-filter-dropdown-toggle, .explorer-filter-dropdown") && !hasInlineDropdown) {
+      explorerInlineFilterTopic = "";
+    }
   }, { capture: true });
+  document.addEventListener("pointerdown", (event) => {
+    if (!explorerInlineFilterTopic || elements.explorerActiveFilters?.contains(event.target)) return;
+    explorerInlineFilterTopic = "";
+    renderExplorerActiveFilters(getLatestState());
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !explorerInlineFilterTopic) return;
+    const topic = explorerInlineFilterTopic;
+    explorerInlineFilterTopic = "";
+    renderExplorerActiveFilters(getLatestState());
+    elements.explorerActiveFilters?.querySelector(`[data-explorer-filter-dropdown="${topic}"]`)?.focus();
+  });
   elements.globalReferenceSelect?.addEventListener("change", (event) => {
     setExplorerHeaderReference(event.target.value);
   });
@@ -332,6 +369,15 @@ export function wireExplorerUi(actions, rerender) {
       if (requestedAxis === "x" && isExplorerXYView()) shouldCenterExplorerReferenceColumn = true;
       rerenderApp(actions.getState());
     });
+  });
+  elements.explorerXYAxisSummary?.addEventListener("click", () => {
+    const context = getActiveExplorerContext();
+    if (context.selectedAxis !== "z") return;
+    hasInteractedWithExplorerSelection = true;
+    saveExplorerScrollPosition();
+    context.activeAxis = "y";
+    shouldRevealExplorerAxisSelection = true;
+    rerenderApp(actions.getState());
   });
   elements.explorerTemplateControl?.addEventListener("click", () => {
     setExplorerSelectionDescriptionExpanded(false);
@@ -356,7 +402,11 @@ export function wireExplorerUi(actions, rerender) {
     renderExplorerContextPanel(getLatestState());
     if (openingTemplatePanel) scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
   });
-  elements.explorerTableWrap?.addEventListener("scroll", scheduleExplorerStickyParentsUpdate, { passive: true });
+  elements.explorerTableWrap?.addEventListener("scroll", () => {
+    scheduleExplorerStickyParentsUpdate();
+    scheduleExplorerContributorPopoverPosition();
+  }, { passive: true });
+  window.addEventListener("resize", scheduleExplorerContributorPopoverPosition);
   elements.explorerTable.addEventListener("pointerdown", startExplorerCellRangeSelection);
   elements.explorerTable.addEventListener("pointerover", updateExplorerCellRangeSelection);
   elements.explorerTable.addEventListener("click", (event) => {
@@ -1300,7 +1350,8 @@ function setExplorerContextDetailCollapsed(collapsed) {
 }
 
 function updateUrlExplorerContextPanel() {
-  const value = explorerContextDetailCollapsed ? "collapsed" : explorerContextTopic;
+  const value = explorerContextDetailCollapsed ? "collapsed"
+    : explorerSelectionDescriptionExpanded ? "description" : explorerContextTopic;
   const url = createUrlState();
   if ((url.searchParams.get(EXPLORER_CONTEXT_URL_PARAM) ?? "") === value) return;
   if (value) url.searchParams.set(EXPLORER_CONTEXT_URL_PARAM, value);
@@ -2248,6 +2299,7 @@ function renderExplorerTable(series, selectedUnit) {
     }
   }
   applyExplorerTreeState(parentPaths, nodePaths);
+  syncExplorerContributorHighlights();
   renderExplorerKriPaginationBar(isKriRowAxis);
   renderExplorerGeographyPaginationBar(activeAxis === getActiveExplorerGeographyAxis());
 }
@@ -2270,8 +2322,10 @@ function renderExplorerXYHeader(thead, series, descriptionHeader, codeHeader) {
       cell.classList.toggle("is-horizontally-merged", header.colSpan > 1);
       cell.classList.toggle("is-duplicate-label", Boolean(header.isDuplicateLabel));
       cell.classList.toggle("opens-into-next-duplicate", Boolean(header.opensIntoNextDuplicate));
+      cell.title = header.leaf
+        ? series.dateColumns[header.columnIndex].description || header.label
+        : header.fullLabel || header.label;
       if (header.isDuplicateLabel) {
-        cell.title = header.fullLabel;
         cell.setAttribute("aria-label", header.fullLabel);
       }
       const label = document.createElement("span");
@@ -3009,18 +3063,111 @@ function buildExplorerBenchmark(jstCodes = null, { onlyDateLabel = null } = {}) 
   };
 }
 
+function toggleExplorerInlineFilter(topic) {
+  explorerInlineFilterTopic = explorerInlineFilterTopic === topic ? "" : topic;
+  if (EXPLORER_INLINE_FILTER_TOPICS.has(explorerContextTopic)) {
+    explorerContextTopic = "";
+    renderExplorerContextPanel(getLatestState());
+  }
+  renderExplorerActiveFilters(getLatestState());
+  elements.explorerActiveFilters?.querySelector(`[data-explorer-filter-dropdown="${topic}"]`)?.focus();
+}
+
+function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOptions = options.length > 0) {
+  const choiceName = ({
+    "jst-code": "institution",
+    "reference-date": "reference date",
+    unit: "display unit",
+    "display-mode": "table display",
+    geography: "geography layout"
+  })[topic] ?? topic.replaceAll("-", " ");
+  const arrow = document.createElement("button");
+  arrow.type = "button";
+  arrow.className = "explorer-filter-dropdown-toggle";
+  arrow.dataset.explorerFilterDropdown = topic;
+  arrow.setAttribute("aria-label", `Choose ${choiceName}`);
+  arrow.title = `Choose ${choiceName}`;
+  arrow.setAttribute("aria-expanded", String(explorerInlineFilterTopic === topic));
+  arrow.setAttribute("aria-controls", `explorer-filter-menu-${topic}`);
+  arrow.disabled = !hasOptions;
+  arrow.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2.5 4.5 3.5 3 3.5-3"/></svg>';
+  arrow.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleExplorerInlineFilter(topic);
+  });
+  chip.append(arrow);
+
+  if (explorerInlineFilterTopic !== topic || !options.length) return;
+  const menu = document.createElement("span");
+  menu.id = `explorer-filter-menu-${topic}`;
+  menu.className = "explorer-filter-dropdown";
+  if (topic === "geography") {
+    menu.classList.add("has-geography-search");
+    menu.setAttribute("role", "dialog");
+    menu.setAttribute("aria-label", "Geography");
+    menu.append(createExplorerGeographySearchControls(getLatestState()));
+  } else {
+    menu.setAttribute("role", "listbox");
+    menu.setAttribute("aria-label", `Choose ${choiceName}`);
+  }
+  const optionList = topic === "geography" ? document.createElement("span") : menu;
+  if (topic === "geography") {
+    optionList.className = "explorer-filter-dropdown-options";
+    optionList.setAttribute("role", "listbox");
+    optionList.setAttribute("aria-label", `Choose ${choiceName}`);
+  }
+  options.forEach((option) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "explorer-filter-dropdown-option";
+    item.classList.toggle("is-active", Boolean(option.selected));
+    item.classList.toggle("is-taxonomy-unavailable", topic === "reference-date" && Boolean(option.disabled));
+    item.disabled = Boolean(option.disabled);
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(Boolean(option.selected)));
+    if (option.disabled) item.setAttribute("aria-disabled", "true");
+    const main = document.createElement("span");
+    main.className = "explorer-filter-dropdown-main";
+    const label = document.createElement("span");
+    label.textContent = option.label;
+    main.append(label);
+    if (option.detail) {
+      const detail = document.createElement("small");
+      detail.textContent = option.detail;
+      main.append(detail);
+    }
+    item.append(main);
+    if (option.metric !== undefined) {
+      const metric = document.createElement("span");
+      metric.className = "explorer-filter-dropdown-metric";
+      metric.textContent = option.metric;
+      item.append(metric);
+    }
+    item.addEventListener("click", (event) => {
+      event.stopPropagation();
+      explorerInlineFilterTopic = "";
+      menu.remove();
+      arrow.setAttribute("aria-expanded", "false");
+      onSelect(option.value);
+    });
+    optionList.append(item);
+  });
+  if (optionList !== menu) menu.append(optionList);
+  chip.append(menu);
+}
+
 function renderExplorerActiveFilters(state) {
   if (!elements.explorerActiveFilters) return;
 
   const jstChip = document.createElement("span");
   jstChip.className = "cost-of-risk-filter-chip explorer-filter-chip-jst";
-  jstChip.classList.toggle("is-open", explorerContextTopic === "jst-code");
+  jstChip.classList.toggle("is-open", explorerInlineFilterTopic === "jst-code");
 
   const jstToggle = document.createElement("button");
   jstToggle.type = "button";
   jstToggle.className = "cost-of-risk-filter-chip-toggle";
-  jstToggle.setAttribute("aria-expanded", String(explorerContextTopic === "jst-code"));
-  jstToggle.setAttribute("aria-controls", "explorer-context-detail");
+  jstToggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "jst-code"));
+  jstToggle.setAttribute("aria-controls", "explorer-filter-menu-jst-code");
 
   const jstValue = document.createElement("span");
   jstValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
@@ -3028,79 +3175,62 @@ function renderExplorerActiveFilters(state) {
   jstValue.textContent = getInstitutionDisplayInfo(state?.institutionDictionary, selectedInstitutionId)?.institutionName
     || selectedInstitutionId || "Institution";
   jstToggle.append(jstValue);
-  jstToggle.addEventListener("click", () => {
-    explorerContextTopic = "jst-code";
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
-  });
+  jstToggle.addEventListener("click", () => toggleExplorerInlineFilter("jst-code"));
 
   jstChip.append(jstToggle);
 
   const reference = getSelectedExplorerReference(state);
   const dateChip = document.createElement("span");
   dateChip.className = "cost-of-risk-filter-chip cost-of-risk-filter-chip--date explorer-filter-chip-date";
-  dateChip.classList.toggle("is-open", explorerContextTopic === "reference-date");
+  dateChip.classList.toggle("is-open", explorerInlineFilterTopic === "reference-date");
 
   const dateToggle = document.createElement("button");
   dateToggle.type = "button";
   dateToggle.className = "cost-of-risk-filter-chip-toggle";
-  dateToggle.setAttribute("aria-expanded", String(explorerContextTopic === "reference-date"));
-  dateToggle.setAttribute("aria-controls", "explorer-context-detail");
+  dateToggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "reference-date"));
+  dateToggle.setAttribute("aria-controls", "explorer-filter-menu-reference-date");
   dateToggle.setAttribute("aria-label", "Change reference date");
 
   const dateValue = document.createElement("span");
   dateValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
   dateValue.textContent = reference ? getExplorerFullDateColumnLabel(reference) : "Reference date";
   dateToggle.append(dateValue);
-  dateToggle.addEventListener("click", () => {
-    explorerContextTopic = "reference-date";
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
-  });
+  dateToggle.addEventListener("click", () => toggleExplorerInlineFilter("reference-date"));
 
   dateChip.append(dateToggle);
   const unitChip = createUnitFilterChip({
     selectedUnit: state?.selectedUnit,
-    isOpen: explorerContextTopic === "unit",
-    onOpen: () => {
-      explorerContextTopic = "unit";
-      renderExplorerAxisTabs();
-      renderExplorerActiveFilters(getLatestState());
-      renderExplorerContextPanel(getLatestState());
-    }
+    isOpen: explorerInlineFilterTopic === "unit",
+    onOpen: () => toggleExplorerInlineFilter("unit")
   });
+  const unitToggle = unitChip.querySelector(".cost-of-risk-filter-chip-toggle");
+  unitToggle?.setAttribute("aria-controls", "explorer-filter-menu-unit");
   const geographyChip = createExplorerGeographyFilterChip();
+  if (!geographyChip && explorerInlineFilterTopic === "geography") explorerInlineFilterTopic = "";
   const displayOption = getActiveExplorerDisplayOption();
   const displayChip = document.createElement("span");
   displayChip.className = "cost-of-risk-filter-chip explorer-filter-chip-display";
-  displayChip.classList.toggle("is-open", explorerContextTopic === "display-mode");
+  displayChip.classList.toggle("is-open", explorerInlineFilterTopic === "display-mode");
   const displayToggle = document.createElement("button");
   displayToggle.type = "button";
   displayToggle.className = "cost-of-risk-filter-chip-toggle";
-  displayToggle.setAttribute("aria-expanded", String(explorerContextTopic === "display-mode"));
-  displayToggle.setAttribute("aria-controls", "explorer-context-detail");
+  displayToggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "display-mode"));
+  displayToggle.setAttribute("aria-controls", "explorer-filter-menu-display-mode");
   displayToggle.setAttribute("aria-label", "Change table display");
   const displayLabel = document.createElement("span");
   displayLabel.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
   displayLabel.textContent = displayOption.label;
   displayToggle.append(displayLabel);
-  displayToggle.addEventListener("click", () => {
-    explorerContextTopic = "display-mode";
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
-  });
+  displayToggle.addEventListener("click", () => toggleExplorerInlineFilter("display-mode"));
   displayChip.append(displayToggle);
 
   const benchmarkChip = document.createElement("span");
   benchmarkChip.className = "cost-of-risk-filter-chip explorer-filter-chip-benchmark";
-  benchmarkChip.classList.toggle("is-open", explorerContextTopic === "benchmark-mode");
+  benchmarkChip.classList.toggle("is-open", explorerContextTopic === "benchmark-mode" && !explorerContextDetailCollapsed);
   const benchmarkToggle = document.createElement("button");
   benchmarkToggle.type = "button";
   benchmarkToggle.className = "cost-of-risk-filter-chip-toggle";
-  benchmarkToggle.setAttribute("aria-expanded", String(explorerContextTopic === "benchmark-mode"));
+  benchmarkToggle.setAttribute("aria-expanded", String(explorerContextTopic === "benchmark-mode" && !explorerContextDetailCollapsed));
   benchmarkToggle.setAttribute("aria-controls", "explorer-context-detail");
   benchmarkToggle.setAttribute("aria-label", "Change benchmark display");
   const benchmarkLabel = document.createElement("span");
@@ -3108,18 +3238,29 @@ function renderExplorerActiveFilters(state) {
   benchmarkLabel.textContent = "Benchmark display";
   benchmarkToggle.append(benchmarkLabel);
   benchmarkToggle.addEventListener("click", () => {
+    explorerInlineFilterTopic = "";
     explorerContextTopic = "benchmark-mode";
-    // Unlike its sibling topic toggles, opening this panel also needs the
-    // compact benchmark chart itself built (refreshExplorerSelectionChrome
-    // does that, alongside axis tabs/filters/panel) - a full rerenderApp
-    // would additionally rebuild the entire table and axis series for
-    // nothing, which is what made this one noticeably slower to open.
-    const state = getLatestState();
-    if (state) refreshExplorerSelectionChrome(state);
+    const latestState = getLatestState();
+    if (latestState) refreshExplorerSelectionChrome(latestState);
   });
   benchmarkChip.append(benchmarkToggle);
 
   const kriFormulaChip = createExplorerKriFormulaFilterChip();
+  const descriptionChip = document.createElement("span");
+  descriptionChip.className = "cost-of-risk-filter-chip explorer-filter-chip-description";
+  descriptionChip.classList.toggle("is-open", explorerSelectionDescriptionExpanded);
+  const descriptionToggle = document.createElement("button");
+  descriptionToggle.type = "button";
+  descriptionToggle.className = "cost-of-risk-filter-chip-toggle";
+  descriptionToggle.setAttribute("aria-expanded", String(explorerSelectionDescriptionExpanded));
+  descriptionToggle.setAttribute("aria-controls", "explorer-selection-description");
+  descriptionToggle.setAttribute("aria-label", explorerSelectionDescriptionExpanded ? "Hide description" : "Show description");
+  descriptionToggle.textContent = "Description";
+  descriptionToggle.addEventListener("click", () => {
+    if (!explorerSelectionDescriptionExpanded && explorerContextDetailCollapsed) revealExplorerContextDetail();
+    setExplorerSelectionDescriptionExpanded(!explorerSelectionDescriptionExpanded);
+  });
+  descriptionChip.append(descriptionToggle);
 
   const chips = [
     jstChip,
@@ -3132,7 +3273,71 @@ function renderExplorerActiveFilters(state) {
   );
   if (kriFormulaChip) chips.push(kriFormulaChip);
   if (geographyChip) chips.push(geographyChip);
+  if (EXPLORER_SELECTION_DESCRIPTION_ENABLED) chips.push(descriptionChip);
+
+  const institutionOptions = state?.institutionOptions ?? state?.jstOptions ?? [];
+  const selectedReference = getSelectedExplorerReference(state);
+  const institutionBenchmark = explorerInlineFilterTopic === "jst-code"
+    ? buildExplorerBenchmark(institutionOptions, { onlyDateLabel: selectedReference?.label ?? "" }) : null;
+  const valuesByInstitution = new Map((institutionBenchmark?.series ?? []).map((item) => [
+    item.jstCode, item.values[0]?.value ?? null
+  ]));
+  const institutionChoices = explorerInlineFilterTopic === "jst-code"
+    ? institutionOptions.map((institutionId) => {
+      const entry = getInstitutionDisplayInfo(state?.institutionDictionary, institutionId);
+      const rawValue = valuesByInstitution.get(institutionId);
+      return { value: institutionId, label: entry?.institutionName || institutionId,
+        detail: entry ? [entry.consolidationLevel, entry.jstCode].filter(Boolean).join(" — ") : "",
+        metric: Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, institutionBenchmark) : "—",
+        selected: institutionId === selectedInstitutionId };
+    }) : [];
+  addExplorerInlineFilterDropdown(jstChip, "jst-code", institutionChoices, (institutionId) => {
+    if (institutionId !== selectedInstitutionId) updateSelectedJst(institutionId);
+  }, institutionOptions.length > 0);
+  const unavailableDates = explorerInlineFilterTopic === "reference-date"
+    ? getExplorerTaxonomyUnavailableReferenceLabels(
+      lastRenderedExplorerTableSeries, getSelectedExplorerCodeForActiveAxis()
+    ) : null;
+  const dateBenchmark = explorerInlineFilterTopic === "reference-date"
+    ? buildExplorerBenchmark(state?.selectedJst ? [state.selectedJst] : []) : null;
+  const valuesByReference = new Map((dateBenchmark?.series[0]?.values ?? []).map((point) => [
+    point.label, point.value
+  ]));
+  const dateChoices = explorerInlineFilterTopic === "reference-date"
+    ? getExplorerReferencePanelDates(getExplorerTemplateReferenceDates(
+      state, getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId
+    )).map((date) => ({
+      value: date.label,
+      label: getExplorerFullDateColumnLabel(date),
+      metric: unavailableDates.has(date.label) ? "" : Number.isFinite(valuesByReference.get(date.label))
+        ? formatBenchmarkValue(valuesByReference.get(date.label), dateBenchmark) : "—",
+      selected: date.label === reference?.label,
+      disabled: unavailableDates.has(date.label)
+    })) : [];
+  addExplorerInlineFilterDropdown(dateChip, "reference-date", dateChoices,
+    selectExplorerReferenceDate, Boolean(reference));
+  addExplorerInlineFilterDropdown(unitChip, "unit", UNIT_FILTER_OPTIONS.map((option) => ({
+    ...option, selected: option.value === (state?.selectedUnit || "millions")
+  })), (unit) => {
+    if (unit !== state?.selectedUnit) updateSelectedUnit(unit);
+  });
+  addExplorerInlineFilterDropdown(displayChip, "display-mode", EXPLORER_DISPLAY_OPTIONS.map((option) => ({
+    ...option, detail: option.description, selected: option.value === displayOption.value
+  })), selectExplorerDisplayMode);
+  if (geographyChip) addExplorerInlineFilterDropdown(geographyChip, "geography",
+    EXPLORER_GEOGRAPHY_LAYOUTS.map((option) => ({
+      ...option, detail: option.description, selected: option.value === explorerGeographyLayout
+    })), selectExplorerGeographyLayout);
   elements.explorerActiveFilters.replaceChildren(...chips);
+  const openMenu = elements.explorerActiveFilters.querySelector(".explorer-filter-dropdown");
+  if (openMenu) {
+    const pane = elements.explorerActiveFilters.closest(".metric-panel").getBoundingClientRect();
+    const chip = openMenu.parentElement.getBoundingClientRect();
+    openMenu.style.maxWidth = `${Math.max(160, Math.min(390, pane.width - 16))}px`;
+    const left = Math.max(pane.left + 8, Math.min(chip.left, pane.right - openMenu.offsetWidth - 8));
+    openMenu.style.right = "auto";
+    openMenu.style.left = `${left - chip.left}px`;
+  }
 }
 
 // Only KRI's dictionary carries a "formula" per row-axis code - every other
@@ -3171,28 +3376,18 @@ function createExplorerGeographyFilterChip() {
     ?? EXPLORER_GEOGRAPHY_LAYOUTS[0];
   const chip = document.createElement("span");
   chip.className = "cost-of-risk-filter-chip explorer-filter-chip-geography";
-  chip.classList.toggle("is-open", explorerContextTopic === "geography");
+  chip.classList.toggle("is-open", explorerInlineFilterTopic === "geography");
   const toggle = document.createElement("button");
   toggle.type = "button";
   toggle.className = "cost-of-risk-filter-chip-toggle";
-  toggle.setAttribute("aria-expanded", String(explorerContextTopic === "geography"));
-  toggle.setAttribute("aria-controls", "explorer-context-detail");
+  toggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "geography"));
+  toggle.setAttribute("aria-controls", "explorer-filter-menu-geography");
   toggle.setAttribute("aria-label", "Change geography layout");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
   label.textContent = `Geography: ${option.label}`;
   toggle.append(label);
-  toggle.addEventListener("click", () => {
-    explorerContextTopic = "geography";
-    const context = getActiveExplorerContext();
-    const geographyAxis = getActiveExplorerGeographyAxis();
-    if (geographyAxis && context.activeAxis !== geographyAxis) {
-      context.activeAxis = geographyAxis;
-      updateUrlExplorerSelectionParams();
-    }
-    renderExplorerAxisTabs();
-    if (getLatestState()) rerenderApp(getLatestState());
-  });
+  toggle.addEventListener("click", () => toggleExplorerInlineFilter("geography"));
   chip.append(toggle);
   return chip;
 }
@@ -3592,6 +3787,8 @@ function renderExplorerAxisTabs() {
   const state = getLatestState() ?? { columns: [], rows: [], explorerPoints: [] };
   const axisOptions = getExplorerAxisOptions(state, tableId, activeTemplate?.id);
   const ratioContribution = getExplorerPropagatedContribution(context.activeAxis);
+  const isXYMode = explorerGlobalDisplayMode === "xy" && tableId !== "KRI";
+  const isXY = isExplorerXYView();
   if (elements.explorerTemplateControl) {
     const showsTemplates = explorerContextTopic === "";
     elements.explorerTemplateControl.classList.toggle("is-panel-active", showsTemplates);
@@ -3606,7 +3803,7 @@ function renderExplorerAxisTabs() {
     button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled", !isAvailable);
     button.disabled = !isAvailable;
-    button.hidden = isUnusedTabAxis;
+    button.hidden = isUnusedTabAxis || (isXYMode && (axis === "x" || axis === "y"));
     button.setAttribute("aria-disabled", String(!isAvailable));
     button.setAttribute("aria-selected", String(isActive && isAvailable));
     syncExplorerAxisRatioIndicator(button, ratioContribution?.axis === axis ? ratioContribution : null);
@@ -3631,6 +3828,21 @@ function renderExplorerAxisTabs() {
     const displayCode = axisCodes[axis] === EXPLORER_ALL_CURRENCIES_CODE ? EXPLORER_ALL_CURRENCIES_LABEL : axisCodes[axis];
     element.replaceChildren(createAxisCaptionLine(displayCode, axis));
   });
+
+  if (elements.explorerXYAxisSummary) {
+    elements.explorerXYAxisSummary.hidden = !isXYMode;
+    elements.explorerXYAxisSummary.classList.toggle("is-active", isXY);
+    elements.explorerXYAxisSummary.setAttribute("aria-selected", String(isXY));
+    if (isXYMode) for (const axis of ["y", "x"]) {
+      const part = elements.explorerXYAxisCaptions?.[axis];
+      if (!part) continue;
+      const displayCode = axisCodes[axis] === EXPLORER_ALL_CURRENCIES_CODE
+        ? EXPLORER_ALL_CURRENCIES_LABEL : axisCodes[axis];
+      part.querySelector(".explorer-xy-axis-value").textContent = `${getExplorerAxisDisplayName(axis)} : ${displayCode || "none"}`;
+      part.title = captions[axis];
+      syncExplorerAxisRatioIndicator(part, ratioContribution?.axis === axis ? ratioContribution : null);
+    }
+  }
 }
 
 function syncExplorerAxisRatioIndicator(button, denominatorLabel) {
@@ -3954,10 +4166,15 @@ function createExplorerSelectionHistoryControls() {
 }
 
 function renderExplorerSelectionPane() {
+  const showBenchmarkSelection = explorerContextTopic === "benchmark-mode"
+    && !explorerContextDetailCollapsed && !explorerSelectionDescriptionExpanded;
   if (elements.explorerContextSelection) {
-    elements.explorerContextSelection.replaceChildren(createExplorerSelectionSummaryCard());
+    elements.explorerContextSelection.replaceChildren(
+      ...(explorerSelectionDescriptionExpanded || showBenchmarkSelection ? [createExplorerSelectionSummaryCard()] : [])
+    );
   }
   elements.explorerContextPanel?.classList.toggle("is-selection-description-expanded", explorerSelectionDescriptionExpanded);
+  elements.explorerContextPanel?.classList.toggle("is-benchmark-selection-visible", showBenchmarkSelection);
   elements.explorerSelectionHistory?.replaceChildren(createExplorerSelectionHistoryControls());
 }
 
@@ -3965,14 +4182,15 @@ function setExplorerSelectionDescriptionExpanded(expanded) {
   if (!EXPLORER_SELECTION_DESCRIPTION_ENABLED) expanded = false;
   if (explorerSelectionDescriptionExpanded === expanded) return;
   explorerSelectionDescriptionExpanded = expanded;
-  const pane = elements.explorerContextSelection?.querySelector(".explorer-selection-summary-pane");
-  const detail = pane?.querySelector(".explorer-selection-summary-expanded-description");
-  const button = pane?.querySelector(".explorer-selection-summary-description-button");
-  if (expanded && detail && !detail.firstChild) detail.append(createExplorerDescriptionContent());
-  pane?.classList.toggle("is-description-expanded", expanded);
-  elements.explorerContextPanel?.classList.toggle("is-selection-description-expanded", expanded);
-  detail?.setAttribute("aria-hidden", String(!expanded));
-  button?.classList.toggle("is-active", expanded);
+  if (!expanded) {
+    explorerContributorHighlight = null;
+    syncExplorerContributorHighlights();
+  }
+  updateUrlExplorerContextPanel();
+  renderExplorerSelectionPane();
+  const button = elements.explorerActiveFilters?.querySelector(".explorer-filter-chip-description .cost-of-risk-filter-chip-toggle");
+  const chip = button?.parentElement;
+  chip?.classList.toggle("is-open", expanded);
   button?.setAttribute("aria-expanded", String(expanded));
   button?.setAttribute("aria-label", expanded ? "Hide description" : "Show description");
   if (button) button.title = expanded ? "Hide description" : "Show description";
@@ -4200,6 +4418,18 @@ function scheduleExplorerReferenceColumnCentering() {
   });
 }
 
+function selectExplorerGeographyLayout(value) {
+  if (explorerGeographyLayout === value) return;
+  explorerGeographyLayout = value;
+  const context = getActiveExplorerContext();
+  context.expandedPathsByAxis.z.clear();
+  context.defaultExpandedPathsInitializedByAxis.z = false;
+  context.treeViewModeByAxis.z = null;
+  updateUrlExplorerSelectionParams();
+  saveExplorerScrollPosition();
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
 function renderExplorerGeographyPanel(state) {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-geography-panel";
@@ -4220,20 +4450,17 @@ function renderExplorerGeographyPanel(state) {
     const detail = document.createElement("span");
     detail.textContent = option.description;
     button.append(label, detail);
-    button.addEventListener("click", () => {
-      if (explorerGeographyLayout === option.value) return;
-      explorerGeographyLayout = option.value;
-      const context = getActiveExplorerContext();
-      context.expandedPathsByAxis.z.clear();
-      context.defaultExpandedPathsInitializedByAxis.z = false;
-      context.treeViewModeByAxis.z = null;
-      updateUrlExplorerSelectionParams();
-      saveExplorerScrollPosition();
-      if (getLatestState()) rerenderApp(getLatestState());
-    });
+    button.addEventListener("click", () => selectExplorerGeographyLayout(option.value));
     layoutList.append(button);
   });
 
+  article.append(createExplorerGeographySearchControls(state));
+  article.append(title, layoutList);
+  replaceExplorerContextDetail(article);
+}
+
+function createExplorerGeographySearchControls(state) {
+  const fragment = document.createDocumentFragment();
   const countries = getExplorerGeographyCountries(state);
   const selectedCountry = countries.find((country) => country.code === explorerGeographySearch);
   if (selectedCountry && explorerGeographySearchDraft === explorerGeographySearch) {
@@ -4266,7 +4493,10 @@ function renderExplorerGeographyPanel(state) {
       code.textContent = country.code;
       option.append(name, code);
       option.addEventListener("mousedown", (event) => event.preventDefault());
-      option.addEventListener("click", () => applyExplorerCountrySearch(country));
+      option.addEventListener("click", () => {
+        explorerInlineFilterTopic = "";
+        applyExplorerCountrySearch(country);
+      });
       suggestions.append(option);
     });
     suggestions.hidden = explorerGeographySearchDraft.trim().length === 0 || matches.length === 0;
@@ -4286,7 +4516,7 @@ function renderExplorerGeographyPanel(state) {
   search.addEventListener("blur", () => window.setTimeout(() => { suggestions.hidden = true; }, 0));
   searchControl.append(search, suggestions);
 
-  article.append(searchControl);
+  fragment.append(searchControl);
   if (explorerGeographySearch) {
     const badge = document.createElement("span");
     badge.className = "explorer-geography-country-badge";
@@ -4300,10 +4530,9 @@ function renderExplorerGeographyPanel(state) {
     clear.textContent = "×";
     clear.addEventListener("click", () => applyExplorerCountrySearch(null));
     badge.append(badgeLabel, clear);
-    article.append(badge);
+    fragment.append(badge);
   }
-  article.append(title, layoutList);
-  replaceExplorerContextDetail(article);
+  return fragment;
 }
 
 function getExplorerCountrySearchMatches(countries, query) {
@@ -4346,11 +4575,13 @@ function clearExplorerCountrySearch() {
   if (!explorerGeographySearch && !explorerGeographySearchDraft) return;
   explorerGeographySearch = "";
   explorerGeographySearchDraft = "";
-  const search = elements.explorerContextDetail?.querySelector(".explorer-geography-search");
-  if (search) search.value = "";
-  const suggestions = elements.explorerContextDetail?.querySelector(".explorer-geography-suggestions");
-  if (suggestions) suggestions.hidden = true;
-  elements.explorerContextDetail?.querySelector(".explorer-geography-country-badge")?.remove();
+  for (const root of [elements.explorerContextDetail, elements.explorerActiveFilters]) {
+    const search = root?.querySelector(".explorer-geography-search");
+    if (search) search.value = "";
+    const suggestions = root?.querySelector(".explorer-geography-suggestions");
+    if (suggestions) suggestions.hidden = true;
+    root?.querySelector(".explorer-geography-country-badge")?.remove();
+  }
   updateUrlExplorerSelectionParams();
 }
 
@@ -4516,8 +4747,17 @@ function groupExplorerCountries(countries) {
   }).filter((group) => group.countries.length > 0);
 }
 
-function renderExplorerDisplayModePanel() {
+function selectExplorerDisplayMode(value) {
+  if (explorerGlobalDisplayMode === value) return;
+  explorerGlobalDisplayMode = value;
+  updateUrlExplorerSelectionParams();
   const context = getActiveExplorerContext();
+  context.selectedCellColumnIndex = 0;
+  saveExplorerScrollPosition();
+  if (getLatestState()) rerenderApp(getLatestState());
+}
+
+function renderExplorerDisplayModePanel() {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-display-mode-panel";
   const title = document.createElement("h2");
@@ -4541,14 +4781,7 @@ function renderExplorerDisplayModePanel() {
     const detail = document.createElement("span");
     detail.textContent = option.description;
     row.append(label, detail);
-    row.addEventListener("click", () => {
-      if (explorerGlobalDisplayMode === option.value) return;
-      explorerGlobalDisplayMode = option.value;
-      updateUrlExplorerSelectionParams();
-      context.selectedCellColumnIndex = 0;
-      saveExplorerScrollPosition();
-      if (getLatestState()) rerenderApp(getLatestState());
-    });
+    row.addEventListener("click", () => selectExplorerDisplayMode(option.value));
     list.append(row);
   });
 
@@ -4671,7 +4904,16 @@ function createExplorerEvolutionFrequencyControl() {
   return section;
 }
 
-function renderExplorerBenchmarkModePanel(state) {
+function selectExplorerBenchmarkMode(value) {
+  const state = getLatestState();
+  const activeMode = state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  if (activeMode === value) return;
+  hasInteractedWithExplorerSelection = true;
+  saveExplorerScrollPosition();
+  updatePeerDisplayMode(value);
+}
+
+function renderExplorerBenchmarkModePanel() {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-benchmark-mode-panel";
   const title = document.createElement("h2");
@@ -4681,12 +4923,8 @@ function renderExplorerBenchmarkModePanel(state) {
   list.className = "explorer-jst-selection-list explorer-benchmark-mode-list";
   list.setAttribute("role", "listbox");
   list.setAttribute("aria-label", "Benchmark display");
-
-  [
-    { value: "explicit", label: "Benchmark", detail: "Named institutions and peer curves" },
-    { value: "anonymised", label: "Anonymous benchmark", detail: "Anonymized peer percentile distribution" }
-  ].forEach((option) => {
-    const activeMode = state?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  const activeMode = getLatestState()?.peerDisplayMode === "anonymised" ? "anonymised" : "explicit";
+  EXPLORER_BENCHMARK_MODE_OPTIONS.forEach((option) => {
     const isActive = activeMode === option.value;
     const row = document.createElement("button");
     row.type = "button";
@@ -4699,15 +4937,9 @@ function renderExplorerBenchmarkModePanel(state) {
     const detail = document.createElement("span");
     detail.textContent = option.detail;
     row.append(label, detail);
-    row.addEventListener("click", () => {
-      if (activeMode === option.value) return;
-      hasInteractedWithExplorerSelection = true;
-      saveExplorerScrollPosition();
-      updatePeerDisplayMode(option.value);
-    });
+    row.addEventListener("click", () => selectExplorerBenchmarkMode(option.value));
     list.append(row);
   });
-
   article.append(title, list);
   replaceExplorerContextDetail(article);
 }
@@ -4940,7 +5172,6 @@ function createExplorerSelectionSummaryCard() {
   ].filter(([, value]) => value);
 
   if (lines.length === 0) {
-    explorerSelectionDescriptionExpanded = false;
     description.textContent = "Select a cell in the table to see its details here.";
     pane.append(description);
     return pane;
@@ -4979,29 +5210,7 @@ function createExplorerSelectionSummaryCard() {
   expandedDescription.className = "explorer-selection-summary-expanded-description";
   expandedDescription.setAttribute("aria-hidden", String(!explorerSelectionDescriptionExpanded));
   if (explorerSelectionDescriptionExpanded) expandedDescription.append(createExplorerDescriptionContent());
-
-  const actions = document.createElement("div");
-  actions.className = "explorer-selection-summary-actions";
-  const descriptionButton = document.createElement("button");
-  descriptionButton.type = "button";
-  descriptionButton.className = "explorer-selection-summary-description-button";
-  descriptionButton.classList.toggle("is-active", explorerSelectionDescriptionExpanded);
-  descriptionButton.setAttribute("aria-expanded", String(explorerSelectionDescriptionExpanded));
-  descriptionButton.setAttribute("aria-controls", "explorer-selection-description");
-  descriptionButton.setAttribute("aria-label", explorerSelectionDescriptionExpanded ? "Hide description" : "Show description");
-  descriptionButton.title = explorerSelectionDescriptionExpanded ? "Hide description" : "Show description";
-  const chevron = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  chevron.setAttribute("viewBox", "0 0 24 24");
-  chevron.setAttribute("aria-hidden", "true");
-  const chevronPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  chevronPath.setAttribute("d", "m6 9 6 6 6-6");
-  chevron.append(chevronPath);
-  descriptionButton.append(chevron);
-  descriptionButton.addEventListener("click", () => {
-    setExplorerSelectionDescriptionExpanded(!explorerSelectionDescriptionExpanded);
-  });
-  actions.append(descriptionButton);
-  pane.append(description, expandedDescription, actions);
+  pane.append(description, expandedDescription);
   return pane;
 }
 
@@ -5101,6 +5310,90 @@ function getExplorerSelectedPointMetrics() {
   };
 }
 
+function getExplorerDescriptionChildren(state, template, axis, selectedReference) {
+  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  if (!selectedCode || !["x", "y", "z"].includes(axis)) return [];
+  const tableId = template.tableId;
+  const normalizeCode = (code) => normalizeAxisCode(code, axis, tableId);
+  const findChildren = (points, dateIndex = -1) => {
+    const parent = points.find((point) => normalizeCode(point.code) === normalizeCode(selectedCode)
+      && (dateIndex < 0 || !point.values?.[dateIndex]?.isTaxonomyUnavailable));
+    if (!parent) return [];
+    const parentPath = normalizeHierarchyPath(parent.hierarchyPath);
+    if (!parentPath) return [];
+    const seen = new Set();
+    return points.filter((point) => {
+      const code = normalizeCode(point.code);
+      if (!code || point.isVirtual || seen.has(code)
+        || normalizeHierarchyPath(point.parentPath) !== parentPath
+        || (dateIndex >= 0 && point.values?.[dateIndex]?.isTaxonomyUnavailable)) return false;
+      seen.add(code);
+      return true;
+    }).map((point) => ({
+      code: normalizeCode(point.code),
+      label: splitHierarchyPath(point.displayDescription || point.description || point.code).at(-1) || point.code,
+      path: normalizeHierarchyPath(point.hierarchyPath),
+      format: point.format || ""
+    }));
+  };
+  const rendered = lastRenderedExplorerTableSeries;
+  if (rendered && !rendered.xy) {
+    const dateIndex = rendered.dateColumns.findIndex((date) => date.label === selectedReference.label);
+    if (dateIndex >= 0) {
+      const children = findChildren(rendered.rows.map(normalizeExplorerSeriesRow), dateIndex);
+      if (children.length) return children;
+    }
+  }
+  const framework = getTaxonomyFrameworkForDate(state, tableId, selectedReference.date);
+  const frameworkPoints = getTaxonomyDataForTemplateFramework(state, tableId, framework)?.explorerPoints ?? [];
+  const coordinate = `${axis}_axis_rc_code`;
+  const taxonomyChildren = findChildren(frameworkPoints.filter((point) => point.tableId === tableId
+    && point.coordinate === coordinate));
+  return taxonomyChildren.length ? taxonomyChildren
+    : findChildren(getExplorerAxisPointsConfig(state, tableId, axis, template.id));
+}
+
+function getExplorerQuarterlyChildMovements(state, template, axis, selections, selectedReference, previous, children) {
+  const indexes = getCompleteAxisColumnIndexes(state.columns ?? []);
+  const previousDate = getExplorerTemplateReferenceDates(state, template.tableId)
+    .find((date) => date.label === previous.label);
+  if (!indexes || !previousDate || !children.length) return [];
+  const values = new Map(children.map((child) => [child.code, {
+    ...child, current: 0, previous: 0, currentCount: 0, previousCount: 0
+  }]));
+  const requireBlankZ = explorerTableHasCurrencyZAxis(state, template.tableId);
+  const axisColumns = {
+    x: indexes.xAxisRcCode,
+    y: indexes.yAxisRcCode,
+    z: indexes.zAxisRcCode
+  };
+  for (const row of getExplorerRowsForTemplate(state, template.tableId)) {
+    if (row[indexes.jstCode] !== state.selectedJst) continue;
+    if (["x", "y", "z"].some((candidate) => {
+      if (candidate === axis) return false;
+      const selected = selections[`selected${candidate.toUpperCase()}Code`];
+      const code = normalizeAxisCode(row[axisColumns[candidate]], candidate, template.tableId);
+      return selected ? code !== selected : candidate === "z" && requireBlankZ && code !== "";
+    })) continue;
+    const code = normalizeAxisCode(row[axisColumns[axis]], axis, template.tableId);
+    const child = values.get(code);
+    if (!child) continue;
+    for (const [key, date] of [["current", selectedReference], ["previous", previousDate]]) {
+      const raw = String(row[date.index] ?? "").trim();
+      if (!raw) continue;
+      const value = parseNumericValue(raw, NaN);
+      if (!Number.isFinite(value)) continue;
+      child[key] += value;
+      child[`${key}Count`]++;
+    }
+  }
+  return [...values.values()].map((child) => ({
+    ...child,
+    current: child.currentCount ? child.current : null,
+    previous: child.previousCount ? child.previous : null
+  }));
+}
+
 function createExplorerDescriptionContent() {
   const article = document.createElement("article");
   article.className = "explorer-context-article explorer-description-panel";
@@ -5147,6 +5440,9 @@ function createExplorerDescriptionContent() {
     formatChange: (change) => formatExplorerHistoryChange(change, history.format, state.selectedUnit)
   }));
   const current = history.points[insights.currentIndex];
+  article.append(createExplorerQuarterlyDescription({
+    state, template, context, selectedReference, selections, denominator, history, insights, current
+  }));
   if (current?.status !== "valid") {
     const note = document.createElement("p");
     note.className = "explorer-description-empty";
@@ -5185,6 +5481,326 @@ function createExplorerDescriptionContent() {
   }
 
   return article;
+}
+
+function formatExplorerRelativeMovement(relative) {
+  const sign = relative > 0 ? "+" : relative < 0 ? "−" : "";
+  const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 })
+    .format(Math.abs(relative) * 100);
+  return `${sign}${number} %`;
+}
+
+function formatExplorerContributionPoints(points) {
+  const sign = points > 0 ? "+" : points < 0 ? "−" : "";
+  const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 })
+    .format(Math.abs(points));
+  return `${sign}${number} pp`;
+}
+
+function getExplorerContributorHighlightKey() {
+  const state = getLatestState();
+  const context = getActiveExplorerContext();
+  const axis = context.activeAxis;
+  const denominator = getExplorerBenchmarkContributionContext(context, axis);
+  return JSON.stringify([
+    state?.activeDatasetId || state?.fileName || "", state?.selectedJst || "",
+    getActiveExplorerTemplate()?.id || "", axis, getSelectedExplorerCodeForActiveAxis(),
+    context.selectedXCode, context.selectedYCode, context.selectedZCode,
+    getSelectedExplorerReference(state)?.label || "",
+    denominator?.tableId || "", denominator?.selections || null
+  ]);
+}
+
+function syncExplorerContributorHighlights() {
+  const table = elements.explorerTable;
+  if (!table) return;
+  explorerContributorPopover?.remove();
+  explorerContributorPopover = null;
+  explorerContributorPopoverAnchor = null;
+  table.querySelectorAll(".is-contributor-highlight, .is-contributor-value-highlight")
+    .forEach((element) => {
+      element.classList.remove("is-contributor-highlight", "is-contributor-value-highlight");
+  });
+  const highlight = explorerContributorHighlight;
+  if (!highlight) return;
+  if (highlight.key !== getExplorerContributorHighlightKey()) {
+    explorerContributorHighlight = null;
+    return;
+  }
+  if (lastRenderedExplorerTableSeries?.xy && highlight.axis === "x") {
+    table.querySelectorAll("thead th[data-explorer-xy-column-code], tbody td[data-explorer-xy-column-code]")
+      .forEach((cell) => {
+        cell.classList.toggle("is-contributor-highlight", cell.dataset.explorerXyColumnCode === highlight.code);
+      });
+    const header = [...table.querySelectorAll("thead th[data-explorer-xy-column-code]")]
+      .find((cell) => cell.dataset.explorerXyColumnCode === highlight.code);
+    if (header) renderExplorerContributorPopover(header, highlight);
+    return;
+  }
+  let detailAnchor = null;
+  table.querySelectorAll("tbody tr[data-point-code]").forEach((row) => {
+    const matches = row.dataset.pointCode === highlight.code && row.dataset.normalizedPath === highlight.path;
+    row.classList.toggle("is-contributor-highlight", matches);
+    if (matches) {
+      const cells = [...row.querySelectorAll("td[data-explorer-cell-date]")];
+      const current = cells.find((cell) => cell.dataset.explorerCellDate === highlight.currentLabel);
+      const previous = cells.find((cell) => cell.dataset.explorerCellDate === highlight.previousLabel);
+      current?.classList.add("is-contributor-value-highlight");
+      previous?.classList.add("is-contributor-value-highlight");
+      if (!detailAnchor && !row.hidden) detailAnchor = { row, current, previous };
+    }
+  });
+  if (detailAnchor) renderExplorerContributorPopover(detailAnchor.row, highlight,
+    detailAnchor.current, detailAnchor.previous);
+}
+
+function highlightExplorerContributor(child, axis) {
+  explorerContributorHighlight = {
+    key: getExplorerContributorHighlightKey(), axis, code: child.code, path: child.path,
+    currentLabel: child.currentLabel, previousLabel: child.previousLabel,
+    child, detailOptions: child.detailOptions
+  };
+  syncExplorerContributorHighlights();
+}
+
+function renderExplorerContributorPopover(anchor, highlight, current = null, previous = null) {
+  const card = createExplorerContributorDetail(highlight.child, highlight.detailOptions);
+  card.classList.add("explorer-contributor-popover");
+  elements.explorerTableWrap.append(card);
+  explorerContributorPopover = card;
+  explorerContributorPopoverAnchor = { anchor, current, previous };
+  positionExplorerContributorPopover();
+}
+
+function scheduleExplorerContributorPopoverPosition() {
+  if (explorerContributorPopoverFrame) return;
+  explorerContributorPopoverFrame = requestAnimationFrame(() => {
+    explorerContributorPopoverFrame = 0;
+    positionExplorerContributorPopover();
+  });
+}
+
+function positionExplorerContributorPopover() {
+  const card = explorerContributorPopover;
+  const target = explorerContributorPopoverAnchor;
+  const wrap = elements.explorerTableWrap;
+  if (!card || !target || !wrap) return;
+  const { anchor, current, previous } = target;
+  if (!anchor.isConnected || anchor.hidden || wrap.hidden) {
+    card.hidden = true;
+    return;
+  }
+  const viewport = wrap.getBoundingClientRect();
+  const anchorBounds = anchor.getBoundingClientRect();
+  if (!viewport.width || !viewport.height || anchorBounds.bottom < viewport.top
+    || anchorBounds.top > viewport.bottom) {
+    card.hidden = true;
+    return;
+  }
+  card.hidden = false;
+  const width = Math.min(310, viewport.width - 16);
+  card.style.width = `${width}px`;
+  const first = current ?? previous;
+  const last = previous ?? current;
+  const center = first && last
+    ? (first.getBoundingClientRect().left + last.getBoundingClientRect().right) / 2
+    : anchorBounds.left + anchorBounds.width / 2;
+  const left = Math.max(viewport.left + 8,
+    Math.min(center - width / 2, viewport.right - width - 8));
+  const height = card.getBoundingClientRect().height;
+  const bottomLimit = Math.min(viewport.bottom, window.innerHeight) - 8;
+  const below = anchorBounds.bottom + 8;
+  const top = below + height <= bottomLimit ? below
+    : Math.max(viewport.top + 8, anchorBounds.top - height - 8);
+  card.style.left = `${left}px`;
+  card.style.top = `${top}px`;
+}
+
+function revealExplorerContributor(child, axis) {
+  const table = elements.explorerTable;
+  const wrap = elements.explorerTableWrap;
+  if (!table || !wrap) return false;
+  if (lastRenderedExplorerTableSeries?.xy && axis === "x") {
+    const header = [...table.querySelectorAll("thead th[data-explorer-xy-column-code]")]
+      .find((cell) => cell.dataset.explorerXyColumnCode === child.code);
+    if (!header) return false;
+    const viewport = wrap.getBoundingClientRect();
+    const target = header.getBoundingClientRect();
+    const left = wrap.scrollLeft + target.left - viewport.left - viewport.width / 2 + target.width / 2;
+    wrap.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+    highlightExplorerContributor(child, axis);
+    return true;
+  }
+  const findRow = () => [...table.querySelectorAll("tbody tr[data-point-code]")]
+    .find((row) => row.dataset.pointCode === child.code && row.dataset.normalizedPath === child.path);
+  let row = findRow();
+  if (!row || row.hidden) {
+    const expandedPaths = getActiveExplorerExpandedPaths();
+    const ancestors = getHierarchyAncestorPaths(child.path);
+    if (ancestors.some((path) => !expandedPaths.has(path)) && lastRenderedExplorerTableSeries) {
+      saveExplorerScrollPosition();
+      ancestors.forEach((path) => expandedPaths.add(path));
+      const context = getActiveExplorerContext();
+      context.treeViewModeByAxis[axis] = null;
+      context.defaultExpandedPathsInitializedByAxis[axis] = true;
+      table.replaceChildren();
+      renderExplorerTable(lastRenderedExplorerTableSeries, lastRenderedExplorerSelectedUnit);
+      applyExplorerSelection();
+      restoreExplorerScrollPosition();
+      row = findRow();
+    }
+  }
+  if (row?.hidden && getActiveExplorerSearchQuery()) {
+    getActiveExplorerContext().searchByAxis[axis] = "";
+    const searchInput = document.querySelector("#explorer-search");
+    if (searchInput) searchInput.value = "";
+    applyExplorerSearchFilter();
+  }
+  if (!row || row.hidden) return false;
+  row.focus({ preventScroll: true });
+  scrollExplorerRowIntoViewQuickly(row);
+  highlightExplorerContributor(child, axis);
+  const values = [...row.querySelectorAll("td.is-contributor-value-highlight")];
+  if (values.length) {
+    const leftEdge = Math.min(...values.map((cell) => cell.getBoundingClientRect().left));
+    const rightEdge = Math.max(...values.map((cell) => cell.getBoundingClientRect().right));
+    const viewport = wrap.getBoundingClientRect();
+    const targetLeft = wrap.scrollLeft + (leftEdge + rightEdge) / 2
+      - viewport.left - viewport.width / 2;
+    wrap.scrollLeft = Math.max(0, Math.min(targetLeft, wrap.scrollWidth - wrap.clientWidth));
+  }
+  return true;
+}
+
+function createExplorerContributorDetail(child, { previousLabel, currentLabel, selectedUnit,
+  parentDelta, isAdditive }) {
+  const detail = document.createElement("div");
+  detail.className = "explorer-description-contributor-detail";
+  const values = document.createElement("div");
+  values.className = "explorer-description-contributor-values";
+  for (const [label, value, isCurrent] of [
+    [previousLabel, child.previous, false], [currentLabel, child.current, true]
+  ]) {
+    if (isCurrent) {
+      const arrow = document.createElement("span");
+      arrow.className = "explorer-description-contributor-arrow";
+      arrow.textContent = "→";
+      arrow.setAttribute("aria-hidden", "true");
+      values.append(arrow);
+    }
+    const point = document.createElement("span");
+    point.className = "explorer-description-contributor-point";
+    const date = document.createElement("small");
+    date.textContent = label;
+    const amount = document.createElement("strong");
+    amount.textContent = formatMetricValue(value, selectedUnit, child.format);
+    point.append(date, amount);
+    values.append(point);
+  }
+  detail.append(values);
+  const metrics = document.createElement("div");
+  metrics.className = "explorer-description-contributor-metrics";
+  const appendMetric = (label, value) => {
+    const metric = document.createElement("div");
+    const name = document.createElement("span");
+    name.textContent = label;
+    const result = document.createElement("strong");
+    result.textContent = value;
+    metric.append(name, result);
+    metrics.append(metric);
+  };
+  appendMetric("Change", child.previous !== 0
+    ? formatExplorerRelativeMovement(child.delta / Math.abs(child.previous))
+    : "New amount (zero base)");
+  appendMetric("Contribution to parent growth", formatExplorerContributionPoints(child.points));
+  if (isAdditive && parentDelta !== 0) {
+    appendMetric("Share of parent’s net change",
+      formatExplorerRelativeMovement(child.delta / parentDelta));
+  }
+  detail.append(metrics);
+  return detail;
+}
+
+function createExplorerQuarterlyDescription({ state, template, context, selectedReference,
+  selections, denominator, history, insights, current }) {
+  const section = document.createElement("section");
+  section.className = "explorer-description-quarterly";
+  const heading = document.createElement("h3");
+  heading.textContent = "Quarterly change";
+  section.append(heading);
+  const comparison = insights.chartComparisons.find((item) => item.months === 3);
+  const movement = document.createElement("p");
+  movement.className = "explorer-description-quarterly-movement";
+  if (!Number.isFinite(comparison?.absolute)) {
+    movement.textContent = "No comparable reported value three months earlier.";
+    section.append(movement);
+    return section;
+  }
+  const previousLabel = getExplorerFullDateColumnLabel(comparison.previous);
+  const absolute = formatExplorerHistoryChange(comparison.absolute, history.format, state.selectedUnit);
+  const relative = Number.isFinite(comparison.relative)
+    ? formatExplorerRelativeMovement(comparison.relative) : "";
+  movement.textContent = isPercentFormat(history.format)
+    ? `${absolute}${relative ? ` (${relative} relative)` : ""} vs ${previousLabel}`
+    : `${relative ? `${relative} (${absolute})` : absolute} vs ${previousLabel}`;
+  section.append(movement);
+
+  if (denominator || isPercentFormat(history.format) || isUnitFormat(history.format)
+    || current?.status !== "valid" || comparison.previous?.status !== "valid") return section;
+  const children = getExplorerDescriptionChildren(state, template, context.activeAxis, selectedReference)
+    .filter((child) => !isPercentFormat(child.format) && !isUnitFormat(child.format));
+  if (!children.length) return section;
+  const movements = getExplorerQuarterlyChildMovements(state, template, context.activeAxis,
+    selections, selectedReference, comparison.previous, children);
+  const breakdown = analyzeExplorerQuarterlyContributors(current.value, comparison.previous.value, movements);
+  if (!breakdown?.contributors.length) return section;
+
+  const subheading = document.createElement("h4");
+  subheading.textContent = breakdown.isAdditive ? "Main contributors" : "Notable child movements";
+  section.append(subheading);
+  const list = document.createElement("ul");
+  list.className = "explorer-description-contributors";
+  breakdown.contributors.forEach((child) => {
+    const contributor = {
+      ...child, currentLabel: selectedReference.label, previousLabel: comparison.previous.label,
+      detailOptions: {
+        previousLabel, currentLabel: getExplorerFullDateColumnLabel(selectedReference),
+        selectedUnit: state.selectedUnit, parentDelta: current.value - comparison.previous.value,
+        isAdditive: breakdown.isAdditive
+      }
+    };
+    const item = document.createElement("li");
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "explorer-description-contributor-link";
+    link.title = `Go to ${child.label} in the table`;
+    const label = document.createElement("span");
+    label.textContent = child.label;
+    const points = document.createElement("strong");
+    points.textContent = formatExplorerContributionPoints(child.points);
+    link.append(label, points);
+    const showDetail = () => {
+      list.querySelectorAll(".explorer-description-contributor-link.is-active")
+        .forEach((element) => element.classList.remove("is-active"));
+      link.classList.add("is-active");
+    };
+    link.addEventListener("click", () => {
+      if (revealExplorerContributor(contributor, context.activeAxis)) showDetail();
+    });
+    item.append(link);
+    list.append(item);
+    if (explorerContributorHighlight?.key === getExplorerContributorHighlightKey()
+      && explorerContributorHighlight.code === contributor.code
+      && explorerContributorHighlight.path === contributor.path) showDetail();
+  });
+  section.append(list);
+  const note = document.createElement("p");
+  note.className = "explorer-description-contributors-note";
+  note.textContent = breakdown.isAdditive
+    ? "Contributions are measured against the parent's value in the previous quarter."
+    : "Reported child movements may not add up to the parent's total change.";
+  section.append(note);
+  return section;
 }
 
 function formatExplorerHistoryChange(change, format, selectedUnit) {
@@ -6334,6 +6950,7 @@ function applyExplorerSearchFilter() {
       row.hidden = row.dataset.treeHidden === "true";
       row.classList.remove("is-search-match");
     });
+    scheduleExplorerContributorPopoverPosition();
     scheduleExplorerStickyParentsUpdate();
     return;
   }
@@ -6358,6 +6975,7 @@ function applyExplorerSearchFilter() {
     row.classList.toggle("is-search-match", matchedPaths.has(path));
   });
 
+  scheduleExplorerContributorPopoverPosition();
   scheduleExplorerStickyParentsUpdate();
 }
 
@@ -6608,6 +7226,8 @@ function applyExplorerSelection() {
     ));
     selectedYearHeader?.classList.add("is-selected-year-header");
   }
+
+  syncExplorerContributorHighlights();
 
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
   if (!selectedCode) return;
