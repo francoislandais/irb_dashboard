@@ -20,7 +20,7 @@ const panelStateSource = source.slice(
 assert.ok(topicDefinitions && initialStateSource && panelStateSource);
 
 for (const [initialValue, expectedTopic, expectedCollapsed, expectedDescription] of [
-  ["geography", "", false, false],
+  ["geography", "geography", false, false],
   ["benchmark-mode", "benchmark-mode", false, false],
   ["description", "", false, true],
   ["collapsed", "", true, false],

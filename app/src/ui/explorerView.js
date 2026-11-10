@@ -101,7 +101,7 @@ const EXPLORER_CONTEXT_TOPICS = new Set([
   "kri-formula", "geography", "peer-selection", "description"
 ]);
 const EXPLORER_INLINE_FILTER_TOPICS = new Set([
-  "jst-code", "reference-date", "unit", "display-mode", "geography"
+  "jst-code", "reference-date", "unit", "display-mode"
 ]);
 const EXPLORER_SELECTION_DESCRIPTION_ENABLED = true;
 // 8 prior periods at quarterly cadence is roughly the old default (current
@@ -3078,8 +3078,7 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
     "jst-code": "institution",
     "reference-date": "reference date",
     unit: "display unit",
-    "display-mode": "table display",
-    geography: "geography layout"
+    "display-mode": "table display"
   })[topic] ?? topic.replaceAll("-", " ");
   const arrow = document.createElement("button");
   arrow.type = "button";
@@ -3101,21 +3100,8 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
   const menu = document.createElement("span");
   menu.id = `explorer-filter-menu-${topic}`;
   menu.className = "explorer-filter-dropdown";
-  if (topic === "geography") {
-    menu.classList.add("has-geography-search");
-    menu.setAttribute("role", "dialog");
-    menu.setAttribute("aria-label", "Geography");
-    menu.append(createExplorerGeographySearchControls(getLatestState()));
-  } else {
-    menu.setAttribute("role", "listbox");
-    menu.setAttribute("aria-label", `Choose ${choiceName}`);
-  }
-  const optionList = topic === "geography" ? document.createElement("span") : menu;
-  if (topic === "geography") {
-    optionList.className = "explorer-filter-dropdown-options";
-    optionList.setAttribute("role", "listbox");
-    optionList.setAttribute("aria-label", `Choose ${choiceName}`);
-  }
+  menu.setAttribute("role", "listbox");
+  menu.setAttribute("aria-label", `Choose ${choiceName}`);
   options.forEach((option) => {
     const item = document.createElement("button");
     item.type = "button";
@@ -3150,9 +3136,8 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
       arrow.setAttribute("aria-expanded", "false");
       onSelect(option.value);
     });
-    optionList.append(item);
+    menu.append(item);
   });
-  if (optionList !== menu) menu.append(optionList);
   chip.append(menu);
 }
 
@@ -3206,7 +3191,6 @@ function renderExplorerActiveFilters(state) {
   const unitToggle = unitChip.querySelector(".cost-of-risk-filter-chip-toggle");
   unitToggle?.setAttribute("aria-controls", "explorer-filter-menu-unit");
   const geographyChip = createExplorerGeographyFilterChip();
-  if (!geographyChip && explorerInlineFilterTopic === "geography") explorerInlineFilterTopic = "";
   const displayOption = getActiveExplorerDisplayOption();
   const displayChip = document.createElement("span");
   displayChip.className = "cost-of-risk-filter-chip explorer-filter-chip-display";
@@ -3324,10 +3308,6 @@ function renderExplorerActiveFilters(state) {
   addExplorerInlineFilterDropdown(displayChip, "display-mode", EXPLORER_DISPLAY_OPTIONS.map((option) => ({
     ...option, detail: option.description, selected: option.value === displayOption.value
   })), selectExplorerDisplayMode);
-  if (geographyChip) addExplorerInlineFilterDropdown(geographyChip, "geography",
-    EXPLORER_GEOGRAPHY_LAYOUTS.map((option) => ({
-      ...option, detail: option.description, selected: option.value === explorerGeographyLayout
-    })), selectExplorerGeographyLayout);
   elements.explorerActiveFilters.replaceChildren(...chips);
   const openMenu = elements.explorerActiveFilters.querySelector(".explorer-filter-dropdown");
   if (openMenu) {
@@ -3376,18 +3356,29 @@ function createExplorerGeographyFilterChip() {
     ?? EXPLORER_GEOGRAPHY_LAYOUTS[0];
   const chip = document.createElement("span");
   chip.className = "cost-of-risk-filter-chip explorer-filter-chip-geography";
-  chip.classList.toggle("is-open", explorerInlineFilterTopic === "geography");
+  chip.classList.toggle("is-open", explorerContextTopic === "geography" && !explorerContextDetailCollapsed);
   const toggle = document.createElement("button");
   toggle.type = "button";
   toggle.className = "cost-of-risk-filter-chip-toggle";
-  toggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "geography"));
-  toggle.setAttribute("aria-controls", "explorer-filter-menu-geography");
+  toggle.setAttribute("aria-expanded", String(explorerContextTopic === "geography" && !explorerContextDetailCollapsed));
+  toggle.setAttribute("aria-controls", "explorer-context-detail");
   toggle.setAttribute("aria-label", "Change geography layout");
   const label = document.createElement("span");
   label.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
   label.textContent = `Geography: ${option.label}`;
   toggle.append(label);
-  toggle.addEventListener("click", () => toggleExplorerInlineFilter("geography"));
+  toggle.addEventListener("click", () => {
+    explorerInlineFilterTopic = "";
+    explorerContextTopic = "geography";
+    const context = getActiveExplorerContext();
+    const geographyAxis = getActiveExplorerGeographyAxis();
+    if (geographyAxis && context.activeAxis !== geographyAxis) {
+      context.activeAxis = geographyAxis;
+      updateUrlExplorerSelectionParams();
+    }
+    renderExplorerAxisTabs();
+    if (getLatestState()) rerenderApp(getLatestState());
+  });
   chip.append(toggle);
   return chip;
 }
@@ -4494,7 +4485,6 @@ function createExplorerGeographySearchControls(state) {
       option.append(name, code);
       option.addEventListener("mousedown", (event) => event.preventDefault());
       option.addEventListener("click", () => {
-        explorerInlineFilterTopic = "";
         applyExplorerCountrySearch(country);
       });
       suggestions.append(option);

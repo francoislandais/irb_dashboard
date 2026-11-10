@@ -3494,21 +3494,6 @@ table {
   box-shadow: 0 8px 22px rgb(30 51 41 / 0.14);
 }
 
-.explorer-filter-dropdown.has-geography-search {
-  min-width: 270px;
-  overflow: visible;
-}
-
-.explorer-filter-dropdown.has-geography-search .explorer-geography-search-control {
-  margin: 2px 2px 7px;
-}
-
-.explorer-filter-dropdown-options {
-  display: grid;
-  max-height: min(300px, 45vh);
-  overflow-y: auto;
-}
-
 .explorer-filter-dropdown-option {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
