@@ -427,19 +427,19 @@ class QueryPlanTests(unittest.TestCase):
         lei = "AAAABBBBCCCCDDDDEEEE"
         other_lei = "FFFFGGGGHHHHIIIIJJJJ"
         its_rows = [
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", cons_level="CONSO", is_highest_cons="Y", name="Bank A",
                  jst_code="OLD", jst_code_today="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=125.0),
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="SOLO", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", cons_level="SOLO", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.b",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=75.0),
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=50.0),
-            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", cons_level="CONSO", is_highest_cons="Y", name="Bank B",
+            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", ssm_supervision_country="DE", cons_level="CONSO", is_highest_cons="Y", name="Bank B",
                  jst_code="JST_B", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=900.0),
@@ -472,6 +472,7 @@ class QueryPlanTests(unittest.TestCase):
             insert("agora_dm_imas_kris_raw", dict(
                 entity_id=entity_id, cons_level=level, kri_data_point_id="KRI_1",
                 cluster="CLUSTER_A" if entity_id == "E1" else "CLUSTER_B",
+                ssm_supervision_country="FR" if entity_id == "E1" else "DE",
                 is_highest_cons="Y" if level == "CONSO" else "N",
                 reference_period="2026-03-31", value_decimal=value,
             ))
@@ -484,6 +485,8 @@ class QueryPlanTests(unittest.TestCase):
         all_levels = Application("example", (lei,), "ALL", (its_extraction, kri_extraction))
         clustered = Application("example", (), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
         cluster_overrides_lei = Application("example", (other_lei,), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
+        country_overrides_both = Application("example", (other_lei,), "CONSO", (its_extraction, kri_extraction),
+                                             clusters=("CLUSTER_B",), ssm_supervision_countries=("FR",))
         its_rows = connection.execute(_build_extraction_sql(its_extraction, highest, result_format="wide")).fetchall()
         self.assertEqual(len(its_rows), 1)
         self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONSO"))
@@ -508,6 +511,11 @@ class QueryPlanTests(unittest.TestCase):
         self.assertNotIn("lei IN (", cluster_its_sql)
         self.assertEqual({row[1] for row in connection.execute(cluster_its_sql)}, {f"{lei}_CONSO"})
         self.assertEqual({row[1] for row in connection.execute(_build_extraction_sql(its_extraction, cluster_overrides_lei))}, {f"{lei}_CONSO"})
+        country_its_sql = _build_extraction_sql(its_extraction, country_overrides_both)
+        self.assertIn("ssm_supervision_country IN (", country_its_sql)
+        self.assertNotIn("cluster IN (", country_its_sql)
+        self.assertNotIn("lei IN (", country_its_sql)
+        self.assertEqual({row[1] for row in connection.execute(country_its_sql)}, {f"{lei}_CONSO"})
         two_clusters = Application("example", (), "CONSO", (its_extraction,), clusters=("CLUSTER_A", "CLUSTER_B"))
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, two_clusters)).fetchall()), 2)
         metadata_cursor = connection.execute(_build_institution_sql(both, PRODUCTION_TABLES["ITS"]))
@@ -525,10 +533,21 @@ class QueryPlanTests(unittest.TestCase):
             [dict(zip(cluster_columns, row)) for row in cluster_metadata_cursor.fetchall()], clustered,
         )
         self.assertEqual({row["institution_id"] for row in cluster_units}, {f"{lei}_CONSO"})
+        country_metadata_sql = _build_institution_sql(country_overrides_both, PRODUCTION_TABLES["ITS"])
+        country_cursor = connection.execute(country_metadata_sql)
+        country_columns = [column[0] for column in country_cursor.description]
+        country_units = _select_institution_rows(
+            [dict(zip(country_columns, row)) for row in country_cursor.fetchall()], country_overrides_both,
+        )
+        self.assertEqual({row["institution_id"] for row in country_units}, {f"{lei}_CONSO"})
+        self.assertEqual(country_units[0]["ssm_supervision_country"], "FR")
         cluster_kri_sql = _build_extraction_sql(kri_extraction, clustered, reporting_units=cluster_units)
         self.assertIn("kri.cluster IN (", cluster_kri_sql)
         self.assertNotIn("lei IN (", cluster_kri_sql)
         self.assertEqual({row[1] for row in connection.execute(cluster_kri_sql)}, {f"{lei}_CONSO"})
+        country_kri_sql = _build_extraction_sql(kri_extraction, country_overrides_both, reporting_units=country_units)
+        self.assertIn("kri.ssm_supervision_country IN (", country_kri_sql)
+        self.assertEqual({row[1] for row in connection.execute(country_kri_sql)}, {f"{lei}_CONSO"})
         kri_sql = _build_extraction_sql(kri_extraction, both, reporting_units=both_units)
         self.assertNotIn("WITH reporting_units", kri_sql)
         self.assertNotIn("JOIN", kri_sql)
@@ -748,10 +767,42 @@ frequency = "QUARTERLY"'''
             self.assertIn("cluster IN (", _build_extraction_sql(prioritized.extractions[0], prioritized))
             self.assertNotIn("lei IN (", _build_extraction_sql(prioritized.extractions[0], prioritized))
 
+    def test_country_can_replace_lei_and_cluster(self):
+        fixture = _read_test_fixture(TEST_ENTITIES_PATH)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory), leis='leis = []\nssm_supervision_country = ["fr"]')
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            self.assertEqual(application.ssm_supervision_countries, ("FR",))
+            self.assertEqual(application.leis, ())
+            self.assertIn("ssm_supervision_country IN (", _build_institution_sql(application, PRODUCTION_TABLES["ITS"]))
+            self.assertEqual(len(_build_dummy_dataset(application, fixture)[1]), 2)
+            file = folder / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace(
+                'leis = []\nssm_supervision_country = ["fr"]',
+                f'leis = ["{self.LEI}"]\ncluster = ["CLUSTER_B"]\nssm_supervision_country = ["FR"]',
+            ), encoding="utf-8")
+            prioritized = _read_configuration(folder, date(2026, 9, 26))[0]
+            sql = _build_extraction_sql(prioritized.extractions[0], prioritized)
+            self.assertIn("ssm_supervision_country IN (", sql)
+            self.assertNotIn("cluster IN (", sql)
+            self.assertNotIn("lei IN (", sql)
+
+    def test_country_validation(self):
+        for selection, message in (
+            ('leis = []\nssm_supervision_country = []', "au moins un LEI"),
+            ('leis = []\nssm_supervision_country = ["FRA"]', "deux lettres"),
+            ('leis = []\nssm_supervision_country = ["FR", "fr"]', "doublons"),
+            ('leis = []\nssm_supervision_country = "FR"', "liste TOML"),
+        ):
+            with self.subTest(selection=selection), tempfile.TemporaryDirectory() as temporary_directory:
+                folder = self._config(Path(temporary_directory), leis=selection)
+                with self.assertRaisesRegex(ValueError, message):
+                    _read_configuration(folder, date(2026, 9, 26))
+
     def test_cluster_validation_rejects_empty_selector_and_invalid_lists(self):
         cases = (
-            ('leis = []', "au moins un LEI ou un cluster"),
-            ('leis = []\ncluster = []', "au moins un LEI ou un cluster"),
+            ('leis = []', "au moins un LEI, un cluster ou un pays"),
+            ('leis = []\ncluster = []', "au moins un LEI, un cluster ou un pays"),
             ('leis = []\ncluster = [""]', "texte non vide"),
             ('leis = []\ncluster = ["A", "A"]', "doublons"),
             ('leis = []\ncluster = "A"', "liste TOML"),
@@ -901,6 +952,7 @@ frequency = "QUARTERLY"
                         "INSTITUTION_NAME": "Bank A",
                         "CONSOLIDATION_LEVEL": "CONSO",
                         "CLUSTER": "CLUSTER_A",
+                        "SSM_SUPERVISION_COUNTRY": "FR",
                     }
                     return Frame([conso, {
                         **conso,
@@ -1009,6 +1061,76 @@ frequency = "QUARTERLY"
             with dictionary_path.open(encoding="utf-8-sig", newline="") as stream:
                 institution_rows = list(csv.DictReader(stream))
             self.assertEqual([row["Institution ID"] for row in institution_rows], [f"{self.LEI}_CONSO"])
+
+    def test_hive_mode_excludes_units_without_jst_from_dictionary_and_data(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            file = configuration / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace(
+                f'leis = ["{self.LEI}"]', 'leis = []\nssm_supervision_country = ["FR"]',
+            ), encoding="utf-8")
+            client = self._client()
+            original_read_sql = client.read_sql
+            bad_lei = "FFFFGGGGHHHHIIIIJJJJ"
+            bad_id = f"{bad_lei}_CONSO"
+
+            def read_sql_with_missing_jst(sql):
+                frame = original_read_sql(sql)
+                if "AS institution_id" in sql:
+                    frame.records.append({**frame.records[0], "ENTITY_ID": "E_bad",
+                                          "INSTITUTION_ID": bad_id, "LEI": bad_lei,
+                                          "JST_CODE": None})
+                else:
+                    frame.records.append({**frame.records[0], "reporting_unit_id": bad_id})
+                return frame
+
+            client.read_sql = read_sql_with_missing_jst
+            output = root / "generated"
+            global_update(configuration, mode="hive", output_directory=output,
+                          as_of=date(2026, 9, 26), devo_client=client)
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            entry = manifest["applications"][0]
+            self.assertEqual(entry["ssm_supervision_country"], ["FR"])
+            with (output / entry["institution_dictionary"]).open(encoding="utf-8-sig", newline="") as stream:
+                self.assertEqual([row["Institution ID"] for row in csv.DictReader(stream)], [f"{self.LEI}_CONSO"])
+            with (output / entry["dataset"]).open(encoding="utf-8-sig", newline="") as stream:
+                self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONSO"})
+
+    def test_hive_mode_skips_application_when_every_jst_is_missing(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            first = configuration / "app.toml"
+            first.rename(configuration / "01-app.toml")
+            (configuration / "02-app.toml").write_text(
+                (configuration / "01-app.toml").read_text(encoding="utf-8").replace('name = "COREP and KRI"', 'name = "Next"'),
+                encoding="utf-8",
+            )
+            client = self._client()
+            original_read_sql = client.read_sql
+            metadata_calls = 0
+
+            def read_sql_with_first_jst_missing(sql):
+                nonlocal metadata_calls
+                frame = original_read_sql(sql)
+                if "AS institution_id" in sql:
+                    metadata_calls += 1
+                    if metadata_calls == 1:
+                        for record in frame.records:
+                            record["JST_CODE"] = ""
+                return frame
+
+            client.read_sql = read_sql_with_first_jst_missing
+            output = root / "generated"
+            global_update(configuration, mode="hive", output_directory=output,
+                          as_of=date(2026, 9, 26), devo_client=client)
+            applications = json.loads((output / "manifest.json").read_text(encoding="utf-8"))["applications"]
+            self.assertEqual([entry["status"] for entry in applications], ["skipped", "complete"])
+            self.assertIn("JST", applications[0]["skip_reason"])
+            self.assertTrue((output / applications[1]["html_app"]).is_file())
 
     def test_hive_mode_rejects_conflicting_overlapping_extractions(self):
         with tempfile.TemporaryDirectory() as temporary_directory:

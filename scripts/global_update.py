@@ -97,6 +97,7 @@ class Application:
     config_file: str = ""
     clusters: tuple[str, ...] = ()
     export_dataset: bool = False
+    ssm_supervision_countries: tuple[str, ...] = ()
 
 
 class QueryClient(Protocol):
@@ -211,7 +212,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
             raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
         context = file.name
-        _check_keys(config, {"name", "leis", "cluster", "clusters", "consolidation", "export-dataset", "extractions"}, context)
+        _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "consolidation", "export-dataset", "extractions"}, context)
         name = _required_text(config.get("name"), "name", context)
         export_dataset = config.get("export-dataset", False)
         if type(export_dataset) is not bool:
@@ -233,8 +234,15 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             raise ValueError(f"{context}: leis contient des doublons.")
         cluster_key = "cluster" if "cluster" in config else "clusters"
         clusters = _optional_string_list(config.get(cluster_key), cluster_key, context)
-        if not leis and not clusters:
-            raise ValueError(f"{context}: renseigner au moins un LEI ou un cluster.")
+        countries = tuple(country.upper() for country in _optional_string_list(
+            config.get("ssm_supervision_country"), "ssm_supervision_country", context,
+        ))
+        if any(not re.fullmatch(r"[A-Z]{2}", country) for country in countries):
+            raise ValueError(f"{context}: ssm_supervision_country doit contenir des codes pays à deux lettres.")
+        if len(set(countries)) != len(countries):
+            raise ValueError(f"{context}: ssm_supervision_country contient des doublons.")
+        if not leis and not clusters and not countries:
+            raise ValueError(f"{context}: renseigner au moins un LEI, un cluster ou un pays de supervision.")
         consolidation = _required_text(config.get("consolidation"), "consolidation", context).upper()
         if consolidation not in CONSOLIDATION_MODES:
             raise ValueError(f"{context}: consolidation doit être l'un de {', '.join(sorted(CONSOLIDATION_MODES))}.")
@@ -308,7 +316,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
             extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category, () if module in {"", "KRI"} else modules))
-        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset))
+        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset, countries))
     return tuple(applications)
 
 
@@ -336,9 +344,21 @@ def _consolidation_predicate(mode: str) -> str:
 
 
 def _institution_filter(application: Application, prefix: str = "") -> str:
-    column = "cluster" if application.clusters else "lei"
-    values = application.clusters if application.clusters else application.leis
+    if application.ssm_supervision_countries:
+        column, values = "ssm_supervision_country", application.ssm_supervision_countries
+    elif application.clusters:
+        column, values = "cluster", application.clusters
+    else:
+        column, values = "lei", application.leis
     return f"{prefix}{column} IN (\n        " + ",\n        ".join(_sql_literal(value) for value in values) + "\n    )"
+
+
+def _institution_selector_matches(row: dict[str, str], application: Application) -> bool:
+    if application.ssm_supervision_countries:
+        return row.get("ssm_supervision_country", "") in application.ssm_supervision_countries
+    if application.clusters:
+        return row.get("cluster", "") in application.clusters
+    return row.get("lei", "") in application.leis
 
 
 def _date_columns(reference_dates: Iterable[str], prefix: str = "") -> str:
@@ -413,7 +433,8 @@ def _build_extraction_sql(
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
         highest_filter_sql = "\n  AND kri.is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
-        cluster_filter_sql = f"\n  AND {_institution_filter(application, 'kri.')}" if application.clusters else ""
+        scope_filter_sql = (f"\n  AND {_institution_filter(application, 'kri.')}"
+                            if application.clusters or application.ssm_supervision_countries else "")
         if reporting_units is None:
             # Preview cannot know the KRI entity_id values until the separate
             # institution query has run. Keep the query inspectable without
@@ -436,7 +457,7 @@ def _build_extraction_sql(
             unit_filter = "(\n      " + "\n      OR ".join(pairs) + "\n  )"
             preview_notice = ""
         kri_source = f"""FROM {tables['KRI']} kri
-WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{cluster_filter_sql}
+WHERE kri.value_decimal IS NOT NULL{highest_filter_sql}{scope_filter_sql}
   AND {unit_filter}
   AND {_date_filter(extraction.reference_dates, 'kri.')}{kri_filter_sql}"""
         if result_format == "long":
@@ -534,12 +555,13 @@ def _build_institution_sql(application: Application, table: str) -> str:
     CONCAT(lei, '_', cons_level) AS institution_id,
     lei,
     COALESCE(
-        MAX(CASE WHEN TRIM(jst_code_today) <> '' THEN jst_code_today END),
-        MAX(jst_code)
+        MAX(CASE WHEN TRIM(jst_code_today) <> '' THEN TRIM(jst_code_today) END),
+        MAX(CASE WHEN TRIM(jst_code) <> '' THEN TRIM(jst_code) END)
     ) AS jst_code,
     MAX(name) AS institution_name,
     cons_level AS consolidation_level,
-    MAX(cluster) AS cluster
+    MAX(cluster) AS cluster,
+    MAX(ssm_supervision_country) AS ssm_supervision_country
 FROM {table}
 WHERE {_institution_filter(application)}
   AND lei IS NOT NULL AND TRIM(lei) <> ''{highest_filter}
@@ -564,8 +586,12 @@ def _write_query_index(output: Path, manifest: dict) -> None:
     if manifest.get("compact_values"):
         lines.extend(["Stockage compact des valeurs : activé pour les datasets exportés (sans changement du SQL).", ""])
     for application in manifest["applications"]:
-        selector_label = "Cluster" if application["clusters"] else "LEI"
-        selector_values = application["clusters"] if application["clusters"] else application["leis"]
+        if application["ssm_supervision_country"]:
+            selector_label, selector_values = "Pays de supervision", application["ssm_supervision_country"]
+        elif application["clusters"]:
+            selector_label, selector_values = "Cluster", application["clusters"]
+        else:
+            selector_label, selector_values = "LEI", application["leis"]
         lines.extend([f"## {application['name']}", "", f"Configuration : `{application['config_file']}`", f"Niveau : `{application['consolidation']}`", f"{selector_label} : {', '.join(selector_values)}", ""])
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
         current_category = None
@@ -778,11 +804,14 @@ def _merge_extraction_rows(
     dataframe: object,
     query_label: str,
     *, result_format: str = "long",
+    allowed_reporting_unit_ids: set[str] | None = None,
 ) -> int:
     date_columns = ["ref_" + item.replace("-", "_") for item in extraction.reference_dates]
     if result_format == "long":
         rows = _dataframe_rows(dataframe, OUTPUT_COLUMNS + ["reference_period", "value_decimal"], query_label)
         query_row_count = len(rows)
+        if allowed_reporting_unit_ids is not None:
+            rows = [row for row in rows if row["reporting_unit_id"] in allowed_reporting_unit_ids]
         # Hive's former MAX(CASE ...) ignored NULLs and retained the largest
         # value when several source rows shared one axis/date combination.
         wide_rows: dict[tuple[str, ...], dict[str, str]] = {}
@@ -828,6 +857,8 @@ def _merge_extraction_rows(
     elif result_format == "wide":
         rows = _dataframe_rows(dataframe, OUTPUT_COLUMNS + date_columns, query_label)
         query_row_count = len(rows)
+        if allowed_reporting_unit_ids is not None:
+            rows = [row for row in rows if row["reporting_unit_id"] in allowed_reporting_unit_ids]
     else:
         raise ValueError("result_format doit être 'long' ou 'wide'.")
     for row in rows:
@@ -854,7 +885,8 @@ def _merge_extraction_rows(
 
 
 def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
-    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name", "consolidation_level", "cluster")
+    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name",
+                "consolidation_level", "cluster", "ssm_supervision_country")
     rows = _dataframe_rows(dataframe, required, query_label)
     result = []
     seen_ids = set()
@@ -877,6 +909,7 @@ def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str
             "institution_name": row["institution_name"],
             "consolidation_level": row["consolidation_level"],
             "cluster": row["cluster"],
+            "ssm_supervision_country": row["ssm_supervision_country"],
         })
     if not result:
         raise ValueError(f"{query_label}: aucune institution trouvée pour le filtre configuré.")
@@ -887,19 +920,17 @@ def _select_institution_rows(rows: list[dict[str, str]], application: Applicatio
     levels = None if application.consolidation == "HIGHEST" else set(_selected_levels(application.consolidation, ""))
     selected = [
         row for row in rows
-        if row["lei"].strip()
-        and (row.get("cluster") in application.clusters if application.clusters else row["lei"] in application.leis)
+        if (row.get("lei") or "").strip()
+        and _institution_selector_matches(row, application)
         and (levels is None or row["consolidation_level"] in levels)
     ]
     if not selected:
         raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
-    if not application.clusters:
+    if not application.clusters and not application.ssm_supervision_countries:
         missing_leis = set(application.leis) - {row["lei"] for row in selected}
         if missing_leis:
             raise ValueError(f"{application.name}: aucune unité de reporting pour les LEI : {', '.join(sorted(missing_leis))}.")
-    if any(not row["jst_code"] for row in selected):
-        raise ValueError(f"{application.name}: JST code manquant pour une unité de reporting sélectionnée.")
-    return selected
+    return [row for row in selected if (row.get("jst_code") or "").strip()]
 
 
 def _institution_dictionary_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -914,17 +945,16 @@ def _institution_dictionary_rows(rows: list[dict[str, str]]) -> list[dict[str, s
 def _fixture_reporting_units(application: Application, fixture: dict) -> list[dict[str, str]]:
     entities_by_lei = {entity["lei"]: (index, entity) for index, entity in enumerate(fixture["entities"], start=1)}
     candidates = (
-        list(enumerate(fixture["entities"], start=1)) if application.clusters
+        list(enumerate(fixture["entities"], start=1))
+        if application.clusters or application.ssm_supervision_countries
         else [entities_by_lei[lei] for lei in application.leis if lei in entities_by_lei]
     )
     rows = []
     for index, entity in candidates:
         lei = entity["lei"]
-        if application.clusters and entity.get("cluster") not in application.clusters:
+        if not _institution_selector_matches(entity, application):
             continue
         for level, jst_code in entity["jst_by_level"].items():
-            if not jst_code:
-                continue
             if application.consolidation == "HIGHEST" and level != entity["highest_level"]:
                 continue
             rows.append({
@@ -935,6 +965,7 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
                 "institution_name": entity["institution_name"],
                 "consolidation_level": level,
                 "cluster": entity.get("cluster", ""),
+                "ssm_supervision_country": entity.get("ssm_supervision_country", ""),
             })
     return _select_institution_rows(rows, application)
 
@@ -1246,6 +1277,7 @@ def global_update(
             "config_file": application.config_file,
             "leis": list(application.leis),
             "clusters": list(application.clusters),
+            "ssm_supervision_country": list(application.ssm_supervision_countries),
             "consolidation": application.consolidation,
             "export_dataset": application.export_dataset,
             "metadata_query": metadata_relative,
@@ -1272,6 +1304,16 @@ def global_update(
         elif mode == "test":
             reporting_units = _fixture_reporting_units(application, fixture)
             dictionary_rows = _institution_dictionary_rows(reporting_units)
+        if reporting_units is not None and not reporting_units:
+            application_manifest["status"] = "skipped"
+            application_manifest["skip_reason"] = "Aucune unité avec JST code disponible."
+            if darwin_upload is not None:
+                manifest["darwin_upload"]["total"] -= len(application.extractions) if mode == "hive" else 1
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            print(f"[Agora] Application {application_number}/{len(applications)} ignorée : aucune unité avec JST code disponible", flush=True)
+            continue
+        allowed_reporting_unit_ids = ({unit["institution_id"] for unit in reporting_units}
+                                      if reporting_units is not None else None)
         for index, extraction in enumerate(application.extractions, start=1):
             source_table = query_table["KRI" if extraction.module == "KRI" else "ITS"]
             sql = _build_extraction_sql(extraction, application, query_table, reporting_units, result_format=extraction_format)
@@ -1302,7 +1344,9 @@ def global_update(
                 except Exception as error:
                     raise RuntimeError(f"{query_label}: échec de la requête Hive ({query_relative}).") from error
                 extraction_manifest["query_rows"] = _merge_extraction_rows(
-                    records, all_dates, extraction, dataframe, query_label, result_format=extraction_format,
+                    records, all_dates, extraction, dataframe, query_label,
+                    result_format=extraction_format,
+                    allowed_reporting_unit_ids=allowed_reporting_unit_ids,
                 )
                 print(f"[Agora]   Extraction {index}/{len(application.extractions)} : {extraction_manifest['query_rows']} ligne(s) reçue(s)", flush=True)
             application_manifest["extractions"].append(extraction_manifest)
