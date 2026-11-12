@@ -1098,6 +1098,56 @@ frequency = "QUARTERLY"
             with (output / entry["dataset"]).open(encoding="utf-8-sig", newline="") as stream:
                 self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONSO"})
 
+    def test_hive_mode_reports_and_excludes_ambiguous_reporting_units(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            file = configuration / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace(
+                f'leis = ["{self.LEI}"]', 'leis = []\nssm_supervision_country = ["FR"]',
+            ), encoding="utf-8")
+            client = self._client()
+            original_read_sql = client.read_sql
+            shared_id = "FFFFGGGGHHHHIIIIJJJJ_CONSO"
+            pair_ids = ("KKKKLLLLMMMMNNNNOOOO_CONSO", "PPPPQQQQRRRRSSSSTTTT_CONSO")
+
+            def read_sql_with_ambiguities(sql):
+                frame = original_read_sql(sql)
+                if "AS institution_id" in sql:
+                    valid = frame.records[0]
+                    frame.records.extend([
+                        dict(valid),  # Une répétition strictement identique se déduplique.
+                        {**valid, "ENTITY_ID": "E2", "INSTITUTION_ID": shared_id, "LEI": shared_id[:20]},
+                        {**valid, "ENTITY_ID": "E3", "INSTITUTION_ID": shared_id, "LEI": shared_id[:20]},
+                        {**valid, "ENTITY_ID": "E4", "INSTITUTION_ID": pair_ids[0], "LEI": pair_ids[0][:20]},
+                        {**valid, "ENTITY_ID": "E4", "INSTITUTION_ID": pair_ids[1], "LEI": pair_ids[1][:20]},
+                    ])
+                else:
+                    frame.records.extend({**frame.records[0], "reporting_unit_id": unit_id}
+                                         for unit_id in (shared_id, *pair_ids))
+                return frame
+
+            client.read_sql = read_sql_with_ambiguities
+            output = root / "generated"
+            log = io.StringIO()
+            with redirect_stdout(log):
+                global_update(configuration, mode="hive", output_directory=output,
+                              as_of=date(2026, 9, 26), devo_client=client)
+            entry = json.loads((output / "manifest.json").read_text(encoding="utf-8"))["applications"][0]
+            self.assertEqual(entry["status"], "complete")
+            self.assertEqual(len(entry["institution_anomalies"]), 4)
+            self.assertTrue(all(anomaly["reason"] == "unité de reporting ambiguë"
+                                for anomaly in entry["institution_anomalies"]))
+            self.assertIn("4 anomalie(s) exclue(s)", log.getvalue())
+            with (output / entry["institution_dictionary"]).open(encoding="utf-8-sig", newline="") as stream:
+                self.assertEqual([row["Institution ID"] for row in csv.DictReader(stream)], [f"{self.LEI}_CONSO"])
+            with (output / entry["dataset"]).open(encoding="utf-8-sig", newline="") as stream:
+                self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONSO"})
+            kri_sql = next(sql for sql in client.calls if "'KRI' AS table_id" in sql)
+            self.assertNotIn("kri.entity_id = 'E2'", kri_sql)
+            self.assertNotIn("kri.entity_id = 'E4'", kri_sql)
+
     def test_hive_mode_skips_application_when_every_jst_is_missing(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -1130,6 +1180,41 @@ frequency = "QUARTERLY"
             applications = json.loads((output / "manifest.json").read_text(encoding="utf-8"))["applications"]
             self.assertEqual([entry["status"] for entry in applications], ["skipped", "complete"])
             self.assertIn("JST", applications[0]["skip_reason"])
+            self.assertTrue((output / applications[1]["html_app"]).is_file())
+
+    def test_hive_mode_continues_with_next_toml_when_all_units_are_ambiguous(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            configuration = root / "config"
+            self._config(configuration)
+            (configuration / "app.toml").rename(configuration / "01-app.toml")
+            (configuration / "02-app.toml").write_text(
+                (configuration / "01-app.toml").read_text(encoding="utf-8").replace(
+                    'name = "COREP and KRI"', 'name = "Next"',
+                ), encoding="utf-8",
+            )
+            client = self._client()
+            original_read_sql = client.read_sql
+            metadata_calls = 0
+
+            def read_sql_with_first_unit_ambiguous(sql):
+                nonlocal metadata_calls
+                frame = original_read_sql(sql)
+                if "AS institution_id" in sql:
+                    metadata_calls += 1
+                    if metadata_calls == 1:
+                        first = frame.records[0]
+                        frame.records = [first, {**first, "ENTITY_ID": "E_conflict"}]
+                return frame
+
+            client.read_sql = read_sql_with_first_unit_ambiguous
+            output = root / "generated"
+            global_update(configuration, mode="hive", output_directory=output,
+                          as_of=date(2026, 9, 26), devo_client=client)
+            applications = json.loads((output / "manifest.json").read_text(encoding="utf-8"))["applications"]
+            self.assertEqual([entry["status"] for entry in applications], ["skipped", "complete"])
+            self.assertEqual(len(applications[0]["institution_anomalies"]), 2)
+            self.assertIn("ambiguë", applications[0]["skip_reason"])
             self.assertTrue((output / applications[1]["html_app"]).is_file())
 
     def test_hive_mode_rejects_conflicting_overlapping_extractions(self):

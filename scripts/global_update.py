@@ -884,39 +884,64 @@ def _merge_extraction_rows(
     return query_row_count
 
 
-def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str]]:
+def _institution_anomaly(row: dict[str, str], reason: str) -> dict[str, str]:
+    return {
+        "reason": reason,
+        "entity_id": row.get("entity_id", ""),
+        "institution_id": row.get("institution_id", ""),
+        "lei": row.get("lei", ""),
+        "consolidation_level": row.get("consolidation_level", ""),
+        "cluster": row.get("cluster", ""),
+        "ssm_supervision_country": row.get("ssm_supervision_country", ""),
+    }
+
+
+def _institution_rows(
+    dataframe: object, query_label: str, anomalies: list[dict[str, str]] | None = None,
+) -> list[dict[str, str]]:
     required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name",
                 "consolidation_level", "cluster", "ssm_supervision_country")
     rows = _dataframe_rows(dataframe, required, query_label)
-    result = []
-    seen_ids = set()
-    seen_pairs = set()
+    if not rows:
+        raise ValueError(f"{query_label}: aucune institution trouvée pour le filtre configuré.")
+    candidates: list[dict[str, str]] = []
+    signatures: set[tuple[str, ...]] = set()
+    by_id: dict[str, set[tuple[str, ...]]] = {}
+    by_pair: dict[tuple[str, str], set[tuple[str, ...]]] = {}
     for row in rows:
         if not row["lei"].strip():
+            if anomalies is not None:
+                anomalies.append(_institution_anomaly(row, "LEI manquant"))
             continue
         if not row["entity_id"] or not row["institution_id"] or not row["consolidation_level"]:
-            raise ValueError(f"{query_label}: identifiant ou niveau vide dans le résultat Hive.")
+            if anomalies is not None:
+                anomalies.append(_institution_anomaly(row, "identifiant ou niveau manquant"))
+            continue
+        signature = tuple(row[field] for field in required)
+        if signature in signatures:
+            continue
+        signatures.add(signature)
         pair = (row["entity_id"], row["consolidation_level"])
-        if row["institution_id"] in seen_ids or pair in seen_pairs:
-            raise ValueError(f"{query_label}: unité de reporting ambiguë dans les métadonnées ({row['institution_id']}).")
-        seen_ids.add(row["institution_id"])
-        seen_pairs.add(pair)
-        result.append({
-            "entity_id": row["entity_id"],
-            "institution_id": row["institution_id"],
-            "lei": row["lei"],
-            "jst_code": row["jst_code"],
-            "institution_name": row["institution_name"],
-            "consolidation_level": row["consolidation_level"],
-            "cluster": row["cluster"],
-            "ssm_supervision_country": row["ssm_supervision_country"],
-        })
-    if not result:
-        raise ValueError(f"{query_label}: aucune institution trouvée pour le filtre configuré.")
+        by_id.setdefault(row["institution_id"], set()).add(signature)
+        by_pair.setdefault(pair, set()).add(signature)
+        candidates.append(row)
+    ambiguous_ids = {key for key, group in by_id.items() if len(group) > 1}
+    ambiguous_pairs = {key for key, group in by_pair.items() if len(group) > 1}
+    result = []
+    for row in candidates:
+        if (row["institution_id"] in ambiguous_ids
+                or (row["entity_id"], row["consolidation_level"]) in ambiguous_pairs):
+            if anomalies is not None:
+                anomalies.append(_institution_anomaly(row, "unité de reporting ambiguë"))
+            continue
+        result.append(row)
     return result
 
 
-def _select_institution_rows(rows: list[dict[str, str]], application: Application) -> list[dict[str, str]]:
+def _select_institution_rows(
+    rows: list[dict[str, str]], application: Application,
+    anomalies: list[dict[str, str]] | None = None,
+) -> list[dict[str, str]]:
     levels = None if application.consolidation == "HIGHEST" else set(_selected_levels(application.consolidation, ""))
     selected = [
         row for row in rows
@@ -925,12 +950,26 @@ def _select_institution_rows(rows: list[dict[str, str]], application: Applicatio
         and (levels is None or row["consolidation_level"] in levels)
     ]
     if not selected:
+        if anomalies and any(
+            _institution_selector_matches(row, application)
+            and (levels is None or not row["consolidation_level"] or row["consolidation_level"] in levels)
+            for row in anomalies
+        ):
+            return []
         raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
     if not application.clusters and not application.ssm_supervision_countries:
-        missing_leis = set(application.leis) - {row["lei"] for row in selected}
+        excluded_leis = {row["lei"] for row in (anomalies or [])}
+        missing_leis = set(application.leis) - {row["lei"] for row in selected} - excluded_leis
         if missing_leis:
             raise ValueError(f"{application.name}: aucune unité de reporting pour les LEI : {', '.join(sorted(missing_leis))}.")
-    return [row for row in selected if (row.get("jst_code") or "").strip()]
+    valid = []
+    for row in selected:
+        if not (row.get("jst_code") or "").strip():
+            if anomalies is not None:
+                anomalies.append(_institution_anomaly(row, "JST code manquant"))
+            continue
+        valid.append(row)
+    return valid
 
 
 def _institution_dictionary_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -1296,9 +1335,18 @@ def global_update(
                 dictionary_frame = client.read_sql(metadata_sql)
             except Exception as error:
                 raise RuntimeError(f"{application.name}: échec de la requête des institutions.") from error
-            reporting_units = _select_institution_rows(
-                _institution_rows(dictionary_frame, f"{application.name} / institutions"), application,
+            anomalies: list[dict[str, str]] = []
+            institution_rows = _institution_rows(
+                dictionary_frame, f"{application.name} / institutions", anomalies,
             )
+            reporting_units = (_select_institution_rows(institution_rows, application, anomalies)
+                               if institution_rows else [])
+            if anomalies:
+                application_manifest["institution_anomalies"] = anomalies
+                print(f"[Agora]   Institutions : {len(anomalies)} anomalie(s) exclue(s) ; détail dans manifest.json", flush=True)
+                for anomaly in anomalies[:5]:
+                    identifier = anomaly["institution_id"] or anomaly["entity_id"] or anomaly["lei"] or "(identifiant vide)"
+                    print(f"[Agora]     {identifier} : {anomaly['reason']}", flush=True)
             dictionary_rows = _institution_dictionary_rows(reporting_units)
             print(f"[Agora]   Institutions : {len(reporting_units)} unité(s) reçue(s)", flush=True)
         elif mode == "test":
@@ -1306,11 +1354,14 @@ def global_update(
             dictionary_rows = _institution_dictionary_rows(reporting_units)
         if reporting_units is not None and not reporting_units:
             application_manifest["status"] = "skipped"
-            application_manifest["skip_reason"] = "Aucune unité avec JST code disponible."
+            reasons = sorted({item["reason"] for item in anomalies}) if mode == "hive" else ["JST code manquant"]
+            application_manifest["skip_reason"] = (
+                "Aucune unité de reporting valide après exclusion : " + ", ".join(reasons) + "."
+            )
             if darwin_upload is not None:
                 manifest["darwin_upload"]["total"] -= len(application.extractions) if mode == "hive" else 1
             manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            print(f"[Agora] Application {application_number}/{len(applications)} ignorée : aucune unité avec JST code disponible", flush=True)
+            print(f"[Agora] Application {application_number}/{len(applications)} ignorée : aucune unité de reporting valide", flush=True)
             continue
         allowed_reporting_unit_ids = ({unit["institution_id"] for unit in reporting_units}
                                       if reporting_units is not None else None)
