@@ -427,19 +427,19 @@ class QueryPlanTests(unittest.TestCase):
         lei = "AAAABBBBCCCCDDDDEEEE"
         other_lei = "FFFFGGGGHHHHIIIIJJJJ"
         its_rows = [
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", cons_level="CONSO", is_highest_cons="Y", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="CONSO", is_highest_cons="Y", name="Bank A",
                  jst_code="OLD", jst_code_today="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=125.0),
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", cons_level="SOLO", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="SOLO", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.b",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=75.0),
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=50.0),
-            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", ssm_supervision_country="DE", cons_level="CONSO", is_highest_cons="Y", name="Bank B",
+            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", ssm_supervision_country="DE", ssmsignificance="LSI", cons_level="CONSO", is_highest_cons="Y", name="Bank B",
                  jst_code="JST_B", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=900.0),
@@ -473,6 +473,7 @@ class QueryPlanTests(unittest.TestCase):
                 entity_id=entity_id, cons_level=level, kri_data_point_id="KRI_1",
                 cluster="CLUSTER_A" if entity_id == "E1" else "CLUSTER_B",
                 ssm_supervision_country="FR" if entity_id == "E1" else "DE",
+                ssmsignificance="SI" if entity_id == "E1" else "LSI",
                 is_highest_cons="Y" if level == "CONSO" else "N",
                 reference_period="2026-03-31", value_decimal=value,
             ))
@@ -487,6 +488,14 @@ class QueryPlanTests(unittest.TestCase):
         cluster_overrides_lei = Application("example", (other_lei,), "CONSO", (its_extraction, kri_extraction), clusters=("CLUSTER_A",))
         country_overrides_both = Application("example", (other_lei,), "CONSO", (its_extraction, kri_extraction),
                                              clusters=("CLUSTER_B",), ssm_supervision_countries=("FR",))
+        significance_only = Application("example", (), "CONSO", (its_extraction, kri_extraction),
+                                        ssm_significances=("SI",))
+        lei_and_significance = Application("example", (lei,), "CONSO", (its_extraction, kri_extraction),
+                                           ssm_significances=("SI",))
+        incompatible_country_significance = Application(
+            "example", (), "CONSO", (its_extraction, kri_extraction),
+            ssm_supervision_countries=("FR",), ssm_significances=("LSI",),
+        )
         its_rows = connection.execute(_build_extraction_sql(its_extraction, highest, result_format="wide")).fetchall()
         self.assertEqual(len(its_rows), 1)
         self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONSO"))
@@ -516,6 +525,13 @@ class QueryPlanTests(unittest.TestCase):
         self.assertNotIn("cluster IN (", country_its_sql)
         self.assertNotIn("lei IN (", country_its_sql)
         self.assertEqual({row[1] for row in connection.execute(country_its_sql)}, {f"{lei}_CONSO"})
+        significance_its_sql = _build_extraction_sql(its_extraction, significance_only)
+        self.assertIn("ssmsignificance IN (", significance_its_sql)
+        self.assertNotIn("lei IN (", significance_its_sql)
+        self.assertEqual({row[1] for row in connection.execute(significance_its_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual(connection.execute(_build_extraction_sql(
+            its_extraction, incompatible_country_significance,
+        )).fetchall(), [])
         two_clusters = Application("example", (), "CONSO", (its_extraction,), clusters=("CLUSTER_A", "CLUSTER_B"))
         self.assertEqual(len(connection.execute(_build_extraction_sql(its_extraction, two_clusters)).fetchall()), 2)
         metadata_cursor = connection.execute(_build_institution_sql(both, PRODUCTION_TABLES["ITS"]))
@@ -548,6 +564,25 @@ class QueryPlanTests(unittest.TestCase):
         country_kri_sql = _build_extraction_sql(kri_extraction, country_overrides_both, reporting_units=country_units)
         self.assertIn("kri.ssm_supervision_country IN (", country_kri_sql)
         self.assertEqual({row[1] for row in connection.execute(country_kri_sql)}, {f"{lei}_CONSO"})
+        significance_metadata = connection.execute(_build_institution_sql(
+            significance_only, PRODUCTION_TABLES["ITS"],
+        ))
+        significance_columns = [column[0] for column in significance_metadata.description]
+        significance_units = _select_institution_rows([
+            dict(zip(significance_columns, row)) for row in significance_metadata.fetchall()
+        ], significance_only)
+        self.assertEqual({unit["institution_id"] for unit in significance_units}, {f"{lei}_CONSO"})
+        significance_kri_sql = _build_extraction_sql(
+            kri_extraction, significance_only, reporting_units=significance_units,
+        )
+        self.assertIn("kri.ssmsignificance IN (", significance_kri_sql)
+        self.assertEqual({row[1] for row in connection.execute(significance_kri_sql)}, {f"{lei}_CONSO"})
+        lei_significance_kri_sql = _build_extraction_sql(
+            kri_extraction, lei_and_significance, reporting_units=significance_units,
+        )
+        self.assertIn("kri.ssmsignificance IN (", lei_significance_kri_sql)
+        self.assertNotIn("kri.lei", lei_significance_kri_sql)
+        self.assertEqual({row[1] for row in connection.execute(lei_significance_kri_sql)}, {f"{lei}_CONSO"})
         kri_sql = _build_extraction_sql(kri_extraction, both, reporting_units=both_units)
         self.assertNotIn("WITH reporting_units", kri_sql)
         self.assertNotIn("JOIN", kri_sql)
@@ -799,10 +834,44 @@ frequency = "QUARTERLY"'''
                 with self.assertRaisesRegex(ValueError, message):
                     _read_configuration(folder, date(2026, 9, 26))
 
+    def test_ssm_significance_can_be_used_alone_or_with_country(self):
+        fixture = _read_test_fixture(TEST_ENTITIES_PATH)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = self._config(Path(temporary_directory), leis='leis = []\nssmsignificance = ["SI"]')
+            application = _read_configuration(folder, date(2026, 9, 26))[0]
+            self.assertEqual(application.ssm_significances, ("SI",))
+            self.assertEqual(len(_build_dummy_dataset(application, fixture)[1]), 2)
+            sql = _build_institution_sql(application, PRODUCTION_TABLES["ITS"])
+            self.assertIn("WHERE ssmsignificance IN (", sql)
+            self.assertNotIn("lei IN (", sql)
+
+            file = folder / "app.toml"
+            file.write_text(file.read_text(encoding="utf-8").replace(
+                'leis = []\nssmsignificance = ["SI"]',
+                'leis = []\nssm_supervision_country = ["FR"]\nssmsignificance = ["SI"]',
+            ), encoding="utf-8")
+            combined = _read_configuration(folder, date(2026, 9, 26))[0]
+            self.assertEqual(len(_build_dummy_dataset(combined, fixture)[1]), 1)
+            sql = _build_extraction_sql(combined.extractions[0], combined)
+            self.assertIn("ssm_supervision_country IN (", sql)
+            self.assertIn("AND ssmsignificance IN (", sql)
+
+    def test_ssm_significance_validation(self):
+        for selection, message in (
+            ('leis = []\nssmsignificance = []', "au moins un LEI"),
+            ('leis = []\nssmsignificance = "SI"', "liste TOML"),
+            ('leis = []\nssmsignificance = ["SI", "SI"]', "doublons"),
+            ('leis = []\nssmsignificance = [""]', "texte non vide"),
+        ):
+            with self.subTest(selection=selection), tempfile.TemporaryDirectory() as temporary_directory:
+                folder = self._config(Path(temporary_directory), leis=selection)
+                with self.assertRaisesRegex(ValueError, message):
+                    _read_configuration(folder, date(2026, 9, 26))
+
     def test_cluster_validation_rejects_empty_selector_and_invalid_lists(self):
         cases = (
-            ('leis = []', "au moins un LEI, un cluster ou un pays"),
-            ('leis = []\ncluster = []', "au moins un LEI, un cluster ou un pays"),
+            ('leis = []', "au moins un LEI, un cluster, un pays"),
+            ('leis = []\ncluster = []', "au moins un LEI, un cluster, un pays"),
             ('leis = []\ncluster = [""]', "texte non vide"),
             ('leis = []\ncluster = ["A", "A"]', "doublons"),
             ('leis = []\ncluster = "A"', "liste TOML"),
@@ -953,6 +1022,7 @@ frequency = "QUARTERLY"
                         "CONSOLIDATION_LEVEL": "CONSO",
                         "CLUSTER": "CLUSTER_A",
                         "SSM_SUPERVISION_COUNTRY": "FR",
+                        "SSMSIGNIFICANCE": "SI",
                     }
                     return Frame([conso, {
                         **conso,

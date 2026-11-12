@@ -98,6 +98,7 @@ class Application:
     clusters: tuple[str, ...] = ()
     export_dataset: bool = False
     ssm_supervision_countries: tuple[str, ...] = ()
+    ssm_significances: tuple[str, ...] = ()
 
 
 class QueryClient(Protocol):
@@ -212,7 +213,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
             raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
         context = file.name
-        _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "consolidation", "export-dataset", "extractions"}, context)
+        _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "ssmsignificance", "consolidation", "export-dataset", "extractions"}, context)
         name = _required_text(config.get("name"), "name", context)
         export_dataset = config.get("export-dataset", False)
         if type(export_dataset) is not bool:
@@ -241,8 +242,9 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             raise ValueError(f"{context}: ssm_supervision_country doit contenir des codes pays à deux lettres.")
         if len(set(countries)) != len(countries):
             raise ValueError(f"{context}: ssm_supervision_country contient des doublons.")
-        if not leis and not clusters and not countries:
-            raise ValueError(f"{context}: renseigner au moins un LEI, un cluster ou un pays de supervision.")
+        significances = _optional_string_list(config.get("ssmsignificance"), "ssmsignificance", context)
+        if not leis and not clusters and not countries and not significances:
+            raise ValueError(f"{context}: renseigner au moins un LEI, un cluster, un pays de supervision ou ssmsignificance.")
         consolidation = _required_text(config.get("consolidation"), "consolidation", context).upper()
         if consolidation not in CONSOLIDATION_MODES:
             raise ValueError(f"{context}: consolidation doit être l'un de {', '.join(sorted(CONSOLIDATION_MODES))}.")
@@ -316,7 +318,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
             extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category, () if module in {"", "KRI"} else modules))
-        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset, countries))
+        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset, countries, significances))
     return tuple(applications)
 
 
@@ -343,22 +345,36 @@ def _consolidation_predicate(mode: str) -> str:
     return "cons_level IN (" + ", ".join(_sql_literal(item) for item in levels) + ")"
 
 
-def _institution_filter(application: Application, prefix: str = "") -> str:
+def _institution_filter(application: Application, prefix: str = "", *, include_lei: bool = True) -> str:
     if application.ssm_supervision_countries:
         column, values = "ssm_supervision_country", application.ssm_supervision_countries
     elif application.clusters:
         column, values = "cluster", application.clusters
-    else:
+    elif application.leis and include_lei:
         column, values = "lei", application.leis
-    return f"{prefix}{column} IN (\n        " + ",\n        ".join(_sql_literal(value) for value in values) + "\n    )"
+    else:
+        column, values = "", ()
+    filters = []
+    if values:
+        filters.append(f"{prefix}{column} IN (\n        " + ",\n        ".join(_sql_literal(value) for value in values) + "\n    )")
+    if application.ssm_significances:
+        filters.append(f"{prefix}ssmsignificance IN (\n        " + ",\n        ".join(
+            _sql_literal(value) for value in application.ssm_significances
+        ) + "\n    )")
+    return "\n  AND ".join(filters)
 
 
 def _institution_selector_matches(row: dict[str, str], application: Application) -> bool:
     if application.ssm_supervision_countries:
-        return row.get("ssm_supervision_country", "") in application.ssm_supervision_countries
-    if application.clusters:
-        return row.get("cluster", "") in application.clusters
-    return row.get("lei", "") in application.leis
+        selected = row.get("ssm_supervision_country", "") in application.ssm_supervision_countries
+    elif application.clusters:
+        selected = row.get("cluster", "") in application.clusters
+    elif application.leis:
+        selected = row.get("lei", "") in application.leis
+    else:
+        selected = True
+    return selected and (not application.ssm_significances
+                         or row.get("ssmsignificance", "") in application.ssm_significances)
 
 
 def _date_columns(reference_dates: Iterable[str], prefix: str = "") -> str:
@@ -433,8 +449,9 @@ def _build_extraction_sql(
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
         highest_filter_sql = "\n  AND kri.is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
-        scope_filter_sql = (f"\n  AND {_institution_filter(application, 'kri.')}"
-                            if application.clusters or application.ssm_supervision_countries else "")
+        scope_filter_sql = (f"\n  AND {_institution_filter(application, 'kri.', include_lei=False)}"
+                            if application.clusters or application.ssm_supervision_countries
+                            or application.ssm_significances else "")
         if reporting_units is None:
             # Preview cannot know the KRI entity_id values until the separate
             # institution query has run. Keep the query inspectable without
@@ -561,7 +578,8 @@ def _build_institution_sql(application: Application, table: str) -> str:
     MAX(name) AS institution_name,
     cons_level AS consolidation_level,
     MAX(cluster) AS cluster,
-    MAX(ssm_supervision_country) AS ssm_supervision_country
+    MAX(ssm_supervision_country) AS ssm_supervision_country,
+    MAX(ssmsignificance) AS ssmsignificance
 FROM {table}
 WHERE {_institution_filter(application)}
   AND lei IS NOT NULL AND TRIM(lei) <> ''{highest_filter}
@@ -590,9 +608,16 @@ def _write_query_index(output: Path, manifest: dict) -> None:
             selector_label, selector_values = "Pays de supervision", application["ssm_supervision_country"]
         elif application["clusters"]:
             selector_label, selector_values = "Cluster", application["clusters"]
-        else:
+        elif application["leis"]:
             selector_label, selector_values = "LEI", application["leis"]
-        lines.extend([f"## {application['name']}", "", f"Configuration : `{application['config_file']}`", f"Niveau : `{application['consolidation']}`", f"{selector_label} : {', '.join(selector_values)}", ""])
+        else:
+            selector_label, selector_values = "", []
+        lines.extend([f"## {application['name']}", "", f"Configuration : `{application['config_file']}`", f"Niveau : `{application['consolidation']}`"])
+        if selector_values:
+            lines.append(f"{selector_label} : {', '.join(selector_values)}")
+        if application["ssmsignificance"]:
+            lines.append(f"SSM significance : {', '.join(application['ssmsignificance'])}")
+        lines.append("")
         lines.append(f"- [Requête des métadonnées institutionnelles]({application['metadata_query']})")
         current_category = None
         for extraction in application["extractions"]:
@@ -893,6 +918,7 @@ def _institution_anomaly(row: dict[str, str], reason: str) -> dict[str, str]:
         "consolidation_level": row.get("consolidation_level", ""),
         "cluster": row.get("cluster", ""),
         "ssm_supervision_country": row.get("ssm_supervision_country", ""),
+        "ssmsignificance": row.get("ssmsignificance", ""),
     }
 
 
@@ -900,7 +926,7 @@ def _institution_rows(
     dataframe: object, query_label: str, anomalies: list[dict[str, str]] | None = None,
 ) -> list[dict[str, str]]:
     required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name",
-                "consolidation_level", "cluster", "ssm_supervision_country")
+                "consolidation_level", "cluster", "ssm_supervision_country", "ssmsignificance")
     rows = _dataframe_rows(dataframe, required, query_label)
     if not rows:
         raise ValueError(f"{query_label}: aucune institution trouvée pour le filtre configuré.")
@@ -957,7 +983,7 @@ def _select_institution_rows(
         ):
             return []
         raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
-    if not application.clusters and not application.ssm_supervision_countries:
+    if application.leis and not application.clusters and not application.ssm_supervision_countries:
         excluded_leis = {row["lei"] for row in (anomalies or [])}
         missing_leis = set(application.leis) - {row["lei"] for row in selected} - excluded_leis
         if missing_leis:
@@ -985,7 +1011,7 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
     entities_by_lei = {entity["lei"]: (index, entity) for index, entity in enumerate(fixture["entities"], start=1)}
     candidates = (
         list(enumerate(fixture["entities"], start=1))
-        if application.clusters or application.ssm_supervision_countries
+        if application.clusters or application.ssm_supervision_countries or application.ssm_significances
         else [entities_by_lei[lei] for lei in application.leis if lei in entities_by_lei]
     )
     rows = []
@@ -1005,6 +1031,7 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
                 "consolidation_level": level,
                 "cluster": entity.get("cluster", ""),
                 "ssm_supervision_country": entity.get("ssm_supervision_country", ""),
+                "ssmsignificance": entity.get("ssmsignificance", ""),
             })
     return _select_institution_rows(rows, application)
 
@@ -1317,6 +1344,7 @@ def global_update(
             "leis": list(application.leis),
             "clusters": list(application.clusters),
             "ssm_supervision_country": list(application.ssm_supervision_countries),
+            "ssmsignificance": list(application.ssm_significances),
             "consolidation": application.consolidation,
             "export_dataset": application.export_dataset,
             "metadata_query": metadata_relative,
