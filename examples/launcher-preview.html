@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agora Explorer · Applications</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #243b43; background: #fff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    input, button { font: inherit; }
+    .masthead { background: #08699f; color: #fff; }
+    .masthead-inner { max-width: 1120px; margin: auto; padding: 13px 28px; font-size: 17px; font-weight: 700; }
+    main { max-width: 1120px; margin: auto; padding: 42px 28px 70px; }
+    .heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 27px; }
+    h1 { margin: 0; color: #173848; font-size: 28px; font-weight: 650; letter-spacing: -.03em; }
+    .subtitle { margin: 7px 0 0; color: #687c7c; font-size: 13px; }
+    .search { width: min(280px, 100%); padding: 9px 12px; border: 1px solid #d6e0e1; border-radius: 5px; outline: none; color: #243b43; font-size: 13px; }
+    .search:focus { border-color: #6ba9cf; box-shadow: 0 0 0 3px #e7f2f8; }
+    .scope-group { margin-top: 30px; }
+    .scope-group[hidden] { display: none; }
+    .scope-group:first-child { margin-top: 0; }
+    .group-title { margin: 0; color: #173848; font-size: 18px; font-weight: 650; }
+    .group-levels { margin: 5px 0 11px; color: #687c7c; font-size: 12px; }
+    .group-list { border-top: 1px solid #dce5e5; }
+    .application { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 28px; padding: 17px 0; border-bottom: 1px solid #e2e9e9; }
+    .application[hidden] { display: none; }
+    .app-title { margin: 0; color: #075f95; font-size: 17px; font-weight: 650; }
+    .app-description { margin: 5px 0 0; color: #5e7175; font-size: 13px; line-height: 1.5; }
+    .app-meta { display: flex; flex-wrap: wrap; gap: 7px 22px; margin-top: 8px; color: #52666b; font-size: 12px; line-height: 1.5; }
+    .app-meta strong { color: #314c54; font-weight: 650; }
+    .app-meta span { overflow-wrap: anywhere; }
+    .app-action { display: flex; align-items: center; }
+    .open-button { padding: 9px 13px; border: 1px solid #b9d3e4; border-radius: 5px; background: #eaf3f9; color: #075f95; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .open-button:disabled { opacity: .6; cursor: not-allowed; }
+    .preview-note { margin: 22px 0 0; color: #8a9a9e; font-size: 11px; }
+    .empty-state { padding: 36px 0; color: #687c7c; font-size: 13px; }
+    .empty-state[hidden] { display: none; }
+    @media (max-width: 620px) {
+      .masthead-inner { padding: 12px 18px; }
+      main { padding: 30px 18px 50px; }
+      .heading { align-items: stretch; flex-direction: column; gap: 17px; }
+      .search { width: 100%; }
+      .application { grid-template-columns: 1fr; gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead"><div class="masthead-inner">Agora Explorer</div></header>
+  <main>
+    <div class="heading">
+      <div><h1>Applications</h1><p class="subtitle">Choose an application by its reporting scope and institutions.</p></div>
+      <input class="search" id="application-search" type="search" placeholder="Search applications or institutions" aria-label="Search applications or institutions">
+    </div>
+    <div id="application-list">
+      <section class="scope-group" data-search="Northstar Bank Riverside Credit CONSO SOLO" aria-labelledby="northstar-title">
+        <h2 class="group-title" id="northstar-title">Northstar Bank · Riverside Credit</h2>
+        <p class="group-levels">Northstar Bank: CONSO · Riverside Credit: SOLO</p>
+        <div class="group-list">
+          <article class="application">
+            <div><h3 class="app-title">FINREP</h3><p class="app-description">Balance sheet and impairment reporting.</p>
+              <div class="app-meta"><span><strong>Scope:</strong> F_12.01 monthly; FINREP through F_47 quarterly</span></div></div>
+            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
+          </article>
+          <article class="application">
+            <div><h3 class="app-title">FINREP + COREP</h3><p class="app-description">Financial statements and credit risk in one application.</p>
+              <div class="app-meta"><span><strong>Scope:</strong> F_01.01, C_08.01, C_18.00</span></div></div>
+            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
+          </article>
+        </div>
+      </section>
+      <section class="scope-group" data-search="Summit Financial Harbor Group CONSO" aria-labelledby="summit-title">
+        <h2 class="group-title" id="summit-title">Summit Financial · Harbor Group</h2>
+        <p class="group-levels">Summit Financial: CONSO · Harbor Group: CONSO</p>
+        <div class="group-list">
+          <article class="application">
+            <div><h3 class="app-title">COREP</h3><p class="app-description">Own funds and capital ratios.</p>
+              <div class="app-meta"><span><strong>Scope:</strong> C_01.00 quarterly; C_03.00 annually</span></div></div>
+            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
+          </article>
+          <article class="application">
+            <div><h3 class="app-title">KRI</h3><p class="app-description">Indicators linked to FINREP and COREP.</p>
+              <div class="app-meta"><span><strong>Scope:</strong> FINREP linked KRI monthly; COREP linked KRI quarterly</span></div></div>
+            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
+          </article>
+        </div>
+      </section>
+    </div>
+    <p class="empty-state" id="empty-state" hidden>No application matches this search.</p>
+    <p class="preview-note">Preview with example data. Application links will be connected to Darwin later.</p>
+  </main>
+  <script>
+    const search = document.querySelector('#application-search');
+    const groups = [...document.querySelectorAll('.scope-group')];
+    const empty = document.querySelector('#empty-state');
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLocaleLowerCase();
+      let visible = 0;
+      for (const group of groups) {
+        const matchesGroup = group.dataset.search.toLocaleLowerCase().includes(query);
+        let groupVisible = 0;
+        for (const application of group.querySelectorAll('.application')) {
+          application.hidden = Boolean(query) && !matchesGroup && !application.textContent.toLocaleLowerCase().includes(query);
+          if (!application.hidden) groupVisible += 1;
+        }
+        group.hidden = groupVisible === 0;
+        visible += groupVisible;
+      }
+      empty.hidden = visible !== 0;
+    });
+  </script>
+</body>
+</html>

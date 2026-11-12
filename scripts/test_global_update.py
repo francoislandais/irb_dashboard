@@ -443,6 +443,10 @@ class QueryPlanTests(unittest.TestCase):
                  jst_code="JST_B", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=900.0),
+            dict(entity_id="E_missing", lei=" ", cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y", name="Missing LEI",
+                 jst_code="JST_MISSING", module_id="COREP", table_id="C_01.00.a",
+                 reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
+                 z_axis_rc_code="qx01", value_decimal=999.0),
         ]
         its_rows.extend([
             dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
@@ -976,6 +980,19 @@ frequency = "QUARTERLY"
                 f'leis = ["{self.LEI}"]', 'leis = []\ncluster = ["CLUSTER_A"]'
             ), encoding="utf-8")
             client = self._client()
+            original_read_sql = client.read_sql
+
+            def read_sql_with_missing_leis(sql):
+                frame = original_read_sql(sql)
+                if "AS institution_id" in sql:
+                    valid = frame.records[0]
+                    frame.records.extend([
+                        {**valid, "ENTITY_ID": "E_missing_null", "INSTITUTION_ID": None, "LEI": None},
+                        {**valid, "ENTITY_ID": "E_missing_blank", "INSTITUTION_ID": "_CONSO", "LEI": "   "},
+                    ])
+                return frame
+
+            client.read_sql = read_sql_with_missing_leis
             result = global_update(
                 configuration, mode="hive", output_directory=root / "generated",
                 as_of=date(2026, 9, 26), devo_client=client,
@@ -983,9 +1000,15 @@ frequency = "QUARTERLY"
             self.assertEqual(result["applications"], 1)
             self.assertEqual(len(client.calls), 4)
             self.assertTrue(all("cluster IN (" in sql and "lei IN (" not in sql for sql in client.calls))
+            self.assertTrue(all("AND lei IS NOT NULL AND TRIM(lei) <> ''" in sql
+                                for sql in client.calls if f"FROM {PRODUCTION_TABLES['ITS']}" in sql))
             manifest = json.loads((root / "generated" / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["applications"][0]["clusters"], ["CLUSTER_A"])
             self.assertEqual(manifest["applications"][0]["leis"], [])
+            dictionary_path = root / "generated" / manifest["applications"][0]["institution_dictionary"]
+            with dictionary_path.open(encoding="utf-8-sig", newline="") as stream:
+                institution_rows = list(csv.DictReader(stream))
+            self.assertEqual([row["Institution ID"] for row in institution_rows], [f"{self.LEI}_CONSO"])
 
     def test_hive_mode_rejects_conflicting_overlapping_extractions(self):
         with tempfile.TemporaryDirectory() as temporary_directory:

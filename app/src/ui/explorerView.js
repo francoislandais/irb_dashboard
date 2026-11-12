@@ -210,6 +210,7 @@ let explorerContextTopic = EXPLORER_CONTEXT_TOPICS.has(initialExplorerContext)
   && initialExplorerContext !== "description"
   && !EXPLORER_INLINE_FILTER_TOPICS.has(initialExplorerContext) ? initialExplorerContext : "";
 let explorerSelectionDescriptionExpanded = initialExplorerContext === "description";
+let explorerDescriptionTableFocusRequested = false;
 let explorerContributorHighlight = null;
 let explorerContributorPopover = null;
 let explorerContributorPopoverAnchor = null;
@@ -347,6 +348,13 @@ export function wireExplorerUi(actions, rerender) {
     explorerInlineFilterTopic = "";
     renderExplorerActiveFilters(getLatestState());
   });
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".explorer-filter-chip-description .cost-of-risk-filter-chip-toggle")) return;
+    if (!explorerDescriptionTableFocusRequested && !explorerContributorHighlight) return;
+    explorerDescriptionTableFocusRequested = false;
+    explorerContributorHighlight = null;
+    syncExplorerContributorHighlights();
+  }, { capture: true });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || !explorerInlineFilterTopic) return;
     const topic = explorerInlineFilterTopic;
@@ -3102,10 +3110,12 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
   menu.className = "explorer-filter-dropdown";
   menu.setAttribute("role", "listbox");
   menu.setAttribute("aria-label", `Choose ${choiceName}`);
+  let frequencyRow = null;
   options.forEach((option) => {
     const item = document.createElement("button");
     item.type = "button";
     item.className = "explorer-filter-dropdown-option";
+    item.classList.toggle("is-sub-option", Boolean(option.subOption));
     item.classList.toggle("is-active", Boolean(option.selected));
     item.classList.toggle("is-taxonomy-unavailable", topic === "reference-date" && Boolean(option.disabled));
     item.disabled = Boolean(option.disabled);
@@ -3136,7 +3146,18 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
       arrow.setAttribute("aria-expanded", "false");
       onSelect(option.value);
     });
-    menu.append(item);
+    if (option.subOption) {
+      if (!frequencyRow) {
+        frequencyRow = document.createElement("span");
+        frequencyRow.className = "explorer-filter-dropdown-frequency-row";
+        frequencyRow.setAttribute("role", "group");
+        frequencyRow.setAttribute("aria-label", "Temporal frequency");
+        menu.append(frequencyRow);
+      }
+      frequencyRow.append(item);
+    } else {
+      menu.append(item);
+    }
   });
   chip.append(menu);
 }
@@ -3238,11 +3259,11 @@ function renderExplorerActiveFilters(state) {
   descriptionToggle.className = "cost-of-risk-filter-chip-toggle";
   descriptionToggle.setAttribute("aria-expanded", String(explorerSelectionDescriptionExpanded));
   descriptionToggle.setAttribute("aria-controls", "explorer-selection-description");
-  descriptionToggle.setAttribute("aria-label", explorerSelectionDescriptionExpanded ? "Hide description" : "Show description");
+  descriptionToggle.setAttribute("aria-label", "Show description");
   descriptionToggle.textContent = "Description";
   descriptionToggle.addEventListener("click", () => {
     if (!explorerSelectionDescriptionExpanded && explorerContextDetailCollapsed) revealExplorerContextDetail();
-    setExplorerSelectionDescriptionExpanded(!explorerSelectionDescriptionExpanded);
+    setExplorerSelectionDescriptionExpanded(true);
   });
   descriptionChip.append(descriptionToggle);
 
@@ -3305,9 +3326,23 @@ function renderExplorerActiveFilters(state) {
   })), (unit) => {
     if (unit !== state?.selectedUnit) updateSelectedUnit(unit);
   });
-  addExplorerInlineFilterDropdown(displayChip, "display-mode", EXPLORER_DISPLAY_OPTIONS.map((option) => ({
-    ...option, detail: option.description, selected: option.value === displayOption.value
-  })), selectExplorerDisplayMode);
+  const displayChoices = EXPLORER_DISPLAY_OPTIONS.flatMap((option) => {
+    const choice = { ...option, detail: option.description, selected: option.value === displayOption.value };
+    if (option.value !== "temporal") return [choice];
+    return [choice, ...EXPLORER_EVOLUTION_OPTIONS.map((frequency) => ({
+      value: `temporal:${frequency.value}`,
+      label: frequency.label,
+      selected: frequency.value === explorerGlobalEvolutionFrequency,
+      subOption: true
+    }))];
+  });
+  addExplorerInlineFilterDropdown(displayChip, "display-mode", displayChoices, (value) => {
+    if (value.startsWith("temporal:")) {
+      selectExplorerDisplayMode("temporal", value.slice("temporal:".length));
+    } else {
+      selectExplorerDisplayMode(value);
+    }
+  });
   elements.explorerActiveFilters.replaceChildren(...chips);
   const openMenu = elements.explorerActiveFilters.querySelector(".explorer-filter-dropdown");
   if (openMenu) {
@@ -4171,20 +4206,19 @@ function renderExplorerSelectionPane() {
 
 function setExplorerSelectionDescriptionExpanded(expanded) {
   if (!EXPLORER_SELECTION_DESCRIPTION_ENABLED) expanded = false;
-  if (explorerSelectionDescriptionExpanded === expanded) return;
+  if (!expanded && !explorerSelectionDescriptionExpanded) return;
   explorerSelectionDescriptionExpanded = expanded;
-  if (!expanded) {
-    explorerContributorHighlight = null;
-    syncExplorerContributorHighlights();
-  }
+  explorerDescriptionTableFocusRequested = expanded;
+  explorerContributorHighlight = null;
   updateUrlExplorerContextPanel();
   renderExplorerSelectionPane();
+  syncExplorerContributorHighlights();
   const button = elements.explorerActiveFilters?.querySelector(".explorer-filter-chip-description .cost-of-risk-filter-chip-toggle");
   const chip = button?.parentElement;
   chip?.classList.toggle("is-open", expanded);
   button?.setAttribute("aria-expanded", String(expanded));
-  button?.setAttribute("aria-label", expanded ? "Hide description" : "Show description");
-  if (button) button.title = expanded ? "Hide description" : "Show description";
+  button?.setAttribute("aria-label", "Show description");
+  if (button) button.title = "Show description";
 }
 
 // The only parts of the context panel whose content actually depends on
@@ -4737,12 +4771,15 @@ function groupExplorerCountries(countries) {
   }).filter((group) => group.countries.length > 0);
 }
 
-function selectExplorerDisplayMode(value) {
-  if (explorerGlobalDisplayMode === value) return;
+function selectExplorerDisplayMode(value, frequency = null) {
+  const displayChanged = explorerGlobalDisplayMode !== value;
+  const frequencyChanged = frequency !== null && explorerGlobalEvolutionFrequency !== frequency;
+  if (!displayChanged && !frequencyChanged) return;
   explorerGlobalDisplayMode = value;
+  if (frequencyChanged) explorerGlobalEvolutionFrequency = frequency;
   updateUrlExplorerSelectionParams();
   const context = getActiveExplorerContext();
-  context.selectedCellColumnIndex = 0;
+  if (displayChanged) context.selectedCellColumnIndex = 0;
   saveExplorerScrollPosition();
   if (getLatestState()) rerenderApp(getLatestState());
 }
@@ -5501,20 +5538,108 @@ function getExplorerContributorHighlightKey() {
   ]);
 }
 
+function applyExplorerDescriptionTableFocus(table, row, current, previous) {
+  if (!row || !current) return;
+  row.classList.add("is-contributor-focus-row");
+  current.classList.add("is-contributor-value-highlight");
+  previous?.classList.add("is-contributor-value-highlight");
+  const focusedDates = new Set([current, previous].filter(Boolean)
+    .map((cell) => cell.dataset.explorerCellDate));
+  const parentPath = normalizeHierarchyPath(row.dataset.parentPath);
+  const parent = parentPath ? [...table.querySelectorAll("tbody tr[data-normalized-path]")]
+    .find((candidate) => candidate.dataset.normalizedPath === parentPath && !candidate.hidden) : null;
+  if (parent) {
+    const parentCells = [...parent.querySelectorAll("td[data-explorer-cell-date]")]
+      .filter((cell) => focusedDates.has(cell.dataset.explorerCellDate)
+        && Number.isFinite(Number(cell.dataset.explorerCellValue)));
+    if (parentCells.length) {
+      parent.classList.add("is-contributor-focus-row");
+      parentCells.forEach((cell) => cell.classList.add("is-contributor-value-highlight"));
+    }
+  }
+  const dateIndexes = [];
+  table.querySelectorAll("thead th[data-explorer-date-column]").forEach((header) => {
+    const index = Number(header.dataset.explorerDateColumn);
+    if ([current, previous].filter(Boolean)
+      .some((cell) => Number(cell.dataset.explorerCellColumn) === index)) {
+      header.classList.add("is-contributor-context-date");
+      dateIndexes.push(index);
+    }
+  });
+  table.querySelectorAll("thead th[data-explorer-year-column-start]").forEach((header) => {
+    const start = Number(header.dataset.explorerYearColumnStart);
+    const end = Number(header.dataset.explorerYearColumnEnd);
+    if (dateIndexes.some((index) => index >= start && index <= end)) {
+      header.classList.add("is-contributor-context-date");
+    }
+  });
+  table.classList.add("is-contributor-focus-active");
+  return parent;
+}
+
+function focusExplorerSelectedDescription(table) {
+  const state = getLatestState();
+  const series = lastRenderedExplorerTableSeries;
+  const template = getActiveExplorerTemplate();
+  if (!explorerDescriptionTableFocusRequested || !explorerSelectionDescriptionExpanded
+    || !state || !series || series.xy
+    || !template || explorerGlobalDisplayMode === "focus") return;
+  const reference = getSelectedExplorerReference(state);
+  const currentDate = series.dateColumns.find((date) => date.label === reference?.label);
+  if (!currentDate?.date) return;
+  const monthKey = (date) => date.getFullYear() * 12 + date.getMonth();
+  const previousDate = series.dateColumns.find((date) =>
+    monthKey(date.date) === monthKey(currentDate.date) - 3);
+  const selectedCode = getSelectedExplorerCodeForActiveAxis();
+  const row = [...table.querySelectorAll("tbody tr[data-point-code]")]
+    .find((candidate) => candidate.dataset.pointCode === selectedCode
+      && !candidate.hidden
+      && candidate.querySelector(`td[data-explorer-cell-date="${currentDate.label}"][data-explorer-cell-value]`));
+  if (!row) return;
+  const current = [...row.querySelectorAll("td[data-explorer-cell-date]")]
+    .find((cell) => cell.dataset.explorerCellDate === currentDate.label);
+  const previous = previousDate ? [...row.querySelectorAll("td[data-explorer-cell-date]")]
+    .find((cell) => cell.dataset.explorerCellDate === previousDate.label
+      && cell.hasAttribute("data-explorer-cell-value")) : null;
+  const parent = applyExplorerDescriptionTableFocus(table, row, current, previous);
+  const currentValue = Number(current.dataset.explorerCellValue);
+  const previousValue = previous ? Number(previous.dataset.explorerCellValue) : null;
+  const delta = previousValue === null ? null : currentValue - previousValue;
+  const parentPrevious = parent && previousDate
+    ? [...parent.querySelectorAll("td[data-explorer-cell-date]")]
+      .find((cell) => cell.dataset.explorerCellDate === previousDate.label) : null;
+  const parentValue = parentPrevious?.hasAttribute("data-explorer-cell-value")
+    ? Number(parentPrevious.dataset.explorerCellValue) : null;
+  const format = current.dataset.explorerCellKind === "ratio"
+    ? "Percent" : current.dataset.explorerExportFormat || "";
+  const points = delta !== null && Number.isFinite(parentValue) && parentValue !== 0
+    && !isPercentFormat(format) && !isUnitFormat(format)
+    ? delta / Math.abs(parentValue) * 100 : null;
+  renderExplorerContributorPopover(row, {
+    child: { current: currentValue, previous: previousValue, delta, points, format },
+    detailOptions: { parentDelta: null, isAdditive: false, selectedUnit: state.selectedUnit }
+  }, current, previous);
+}
+
 function syncExplorerContributorHighlights() {
   const table = elements.explorerTable;
   if (!table) return;
   explorerContributorPopover?.remove();
   explorerContributorPopover = null;
   explorerContributorPopoverAnchor = null;
-  table.querySelectorAll(".is-contributor-highlight, .is-contributor-value-highlight")
+  table.classList.remove("is-contributor-focus-active");
+  table.querySelectorAll(".is-contributor-highlight, .is-contributor-value-highlight, .is-contributor-focus-row, .is-contributor-context-date")
     .forEach((element) => {
-      element.classList.remove("is-contributor-highlight", "is-contributor-value-highlight");
+      element.classList.remove("is-contributor-highlight", "is-contributor-value-highlight",
+        "is-contributor-focus-row", "is-contributor-context-date");
   });
-  const highlight = explorerContributorHighlight;
-  if (!highlight) return;
-  if (highlight.key !== getExplorerContributorHighlightKey()) {
+  let highlight = explorerContributorHighlight;
+  if (highlight && highlight.key !== getExplorerContributorHighlightKey()) {
     explorerContributorHighlight = null;
+    highlight = null;
+  }
+  if (!highlight) {
+    focusExplorerSelectedDescription(table);
     return;
   }
   if (lastRenderedExplorerTableSeries?.xy && highlight.axis === "x") {
@@ -5540,8 +5665,11 @@ function syncExplorerContributorHighlights() {
       if (!detailAnchor && !row.hidden) detailAnchor = { row, current, previous };
     }
   });
-  if (detailAnchor) renderExplorerContributorPopover(detailAnchor.row, highlight,
-    detailAnchor.current, detailAnchor.previous);
+  if (detailAnchor) {
+    const { row, current, previous } = detailAnchor;
+    applyExplorerDescriptionTableFocus(table, row, current, previous);
+    renderExplorerContributorPopover(row, highlight, current, previous);
+  }
 }
 
 function highlightExplorerContributor(child, axis) {
@@ -5590,13 +5718,10 @@ function positionExplorerContributorPopover() {
   card.hidden = false;
   const width = Math.min(310, viewport.width - 16);
   card.style.width = `${width}px`;
-  const first = current ?? previous;
-  const last = previous ?? current;
-  const center = first && last
-    ? (first.getBoundingClientRect().left + last.getBoundingClientRect().right) / 2
-    : anchorBounds.left + anchorBounds.width / 2;
-  const left = Math.max(viewport.left + 8,
-    Math.min(center - width / 2, viewport.right - width - 8));
+  const dateCells = [current, previous].filter(Boolean)
+    .map((cell) => cell.getBoundingClientRect());
+  const dateLeft = dateCells.length ? Math.min(...dateCells.map((bounds) => bounds.left)) : anchorBounds.left;
+  const left = Math.max(viewport.left + 8, Math.min(dateLeft, viewport.right - width - 8));
   const height = card.getBoundingClientRect().height;
   const bottomLimit = Math.min(viewport.bottom, window.innerHeight) - 8;
   const below = anchorBounds.bottom + 8;
@@ -5662,32 +5787,9 @@ function revealExplorerContributor(child, axis) {
   return true;
 }
 
-function createExplorerContributorDetail(child, { previousLabel, currentLabel, selectedUnit,
-  parentDelta, isAdditive }) {
+function createExplorerContributorDetail(child, { parentDelta, isAdditive, selectedUnit }) {
   const detail = document.createElement("div");
   detail.className = "explorer-description-contributor-detail";
-  const values = document.createElement("div");
-  values.className = "explorer-description-contributor-values";
-  for (const [label, value, isCurrent] of [
-    [previousLabel, child.previous, false], [currentLabel, child.current, true]
-  ]) {
-    if (isCurrent) {
-      const arrow = document.createElement("span");
-      arrow.className = "explorer-description-contributor-arrow";
-      arrow.textContent = "→";
-      arrow.setAttribute("aria-hidden", "true");
-      values.append(arrow);
-    }
-    const point = document.createElement("span");
-    point.className = "explorer-description-contributor-point";
-    const date = document.createElement("small");
-    date.textContent = label;
-    const amount = document.createElement("strong");
-    amount.textContent = formatMetricValue(value, selectedUnit, child.format);
-    point.append(date, amount);
-    values.append(point);
-  }
-  detail.append(values);
   const metrics = document.createElement("div");
   metrics.className = "explorer-description-contributor-metrics";
   const appendMetric = (label, value) => {
@@ -5699,11 +5801,19 @@ function createExplorerContributorDetail(child, { previousLabel, currentLabel, s
     metric.append(name, result);
     metrics.append(metric);
   };
-  appendMetric("Change", child.previous !== 0
-    ? formatExplorerRelativeMovement(child.delta / Math.abs(child.previous))
-    : "New amount (zero base)");
-  appendMetric("Contribution to parent growth", formatExplorerContributionPoints(child.points));
-  if (isAdditive && parentDelta !== 0) {
+  if (Number.isFinite(child.delta) && !isPercentFormat(child.format) && !isUnitFormat(child.format)) {
+    appendMetric("Absolute change", formatExplorerHistoryChange(child.delta, child.format, selectedUnit));
+  }
+  appendMetric("Change", !Number.isFinite(child.delta) ? "No comparable value"
+    : isPercentFormat(child.format) || isUnitFormat(child.format)
+      ? formatExplorerHistoryChange(child.delta, child.format, selectedUnit)
+      : child.previous !== 0
+        ? formatExplorerRelativeMovement(child.delta / Math.abs(child.previous))
+        : "New amount (zero base)");
+  if (Number.isFinite(child.points)) {
+    appendMetric("Contribution to parent growth", formatExplorerContributionPoints(child.points));
+  }
+  if (isAdditive && Number.isFinite(parentDelta) && parentDelta !== 0) {
     appendMetric("Share of parent’s net change",
       formatExplorerRelativeMovement(child.delta / parentDelta));
   }
@@ -5732,7 +5842,7 @@ function createExplorerQuarterlyDescription({ state, template, context, selected
     ? formatExplorerRelativeMovement(comparison.relative) : "";
   movement.textContent = isPercentFormat(history.format)
     ? `${absolute}${relative ? ` (${relative} relative)` : ""} vs ${previousLabel}`
-    : `${relative ? `${relative} (${absolute})` : absolute} vs ${previousLabel}`;
+    : `${absolute}${relative ? ` (${relative})` : ""} vs ${previousLabel}`;
   section.append(movement);
 
   if (denominator || isPercentFormat(history.format) || isUnitFormat(history.format)
@@ -5754,9 +5864,9 @@ function createExplorerQuarterlyDescription({ state, template, context, selected
     const contributor = {
       ...child, currentLabel: selectedReference.label, previousLabel: comparison.previous.label,
       detailOptions: {
-        previousLabel, currentLabel: getExplorerFullDateColumnLabel(selectedReference),
-        selectedUnit: state.selectedUnit, parentDelta: current.value - comparison.previous.value,
-        isAdditive: breakdown.isAdditive
+        parentDelta: current.value - comparison.previous.value,
+        isAdditive: breakdown.isAdditive,
+        selectedUnit: state.selectedUnit
       }
     };
     const item = document.createElement("li");

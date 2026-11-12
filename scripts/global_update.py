@@ -472,7 +472,8 @@ ORDER BY
         [extraction.selector], table_id_expression=NORMALIZED_TABLE_ID,
     )
     module_filter = _module_filter(extraction)
-    common_filters = f"""WHERE {_institution_filter(application)}{consolidation_filter}{module_filter}
+    common_filters = f"""WHERE {_institution_filter(application)}
+      AND lei IS NOT NULL AND TRIM(lei) <> ''{consolidation_filter}{module_filter}
       AND {_date_filter(extraction.reference_dates)}"""
     its_source = f"""FROM (
     SELECT
@@ -540,7 +541,8 @@ def _build_institution_sql(application: Application, table: str) -> str:
     cons_level AS consolidation_level,
     MAX(cluster) AS cluster
 FROM {table}
-WHERE {_institution_filter(application)}{highest_filter}
+WHERE {_institution_filter(application)}
+  AND lei IS NOT NULL AND TRIM(lei) <> ''{highest_filter}
 GROUP BY
     entity_id,
     lei,
@@ -858,8 +860,10 @@ def _institution_rows(dataframe: object, query_label: str) -> list[dict[str, str
     seen_ids = set()
     seen_pairs = set()
     for row in rows:
-        if not row["entity_id"] or not row["institution_id"] or not row["lei"] or not row["consolidation_level"]:
-            raise ValueError(f"{query_label}: identifiant, LEI ou niveau vide dans le résultat Hive.")
+        if not row["lei"].strip():
+            continue
+        if not row["entity_id"] or not row["institution_id"] or not row["consolidation_level"]:
+            raise ValueError(f"{query_label}: identifiant ou niveau vide dans le résultat Hive.")
         pair = (row["entity_id"], row["consolidation_level"])
         if row["institution_id"] in seen_ids or pair in seen_pairs:
             raise ValueError(f"{query_label}: unité de reporting ambiguë dans les métadonnées ({row['institution_id']}).")
@@ -883,7 +887,8 @@ def _select_institution_rows(rows: list[dict[str, str]], application: Applicatio
     levels = None if application.consolidation == "HIGHEST" else set(_selected_levels(application.consolidation, ""))
     selected = [
         row for row in rows
-        if (row.get("cluster") in application.clusters if application.clusters else row["lei"] in application.leis)
+        if row["lei"].strip()
+        and (row.get("cluster") in application.clusters if application.clusters else row["lei"] in application.leis)
         and (levels is None or row["consolidation_level"] in levels)
     ]
     if not selected:
