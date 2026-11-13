@@ -1746,59 +1746,6 @@ button:focus-visible {
   pointer-events: none;
 }
 
-.explorer-context-detail-toggle {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  min-height: 34px;
-  margin-left: -14px;
-  margin-right: 10px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--primary-dark);
-  padding: 0;
-  transition: opacity 120ms ease;
-}
-
-.explorer-context-detail-toggle svg {
-  width: 30px;
-  height: 30px;
-}
-
-/* Expanded already shows the panel, so the icon that collapses it back
-   stays a quiet gray from the selection card's own palette instead of
-   the attention-grabbing blue - only the collapsed state (nothing to see
-   yet) needs to stand out and invite a click. Smaller and lighter than the
-   collapsed icon, on the same light gray fill as the selection card, so
-   it reads as a subtle, thin-lined affordance rather than a bold control. */
-.explorer-context-detail-toggle[aria-expanded="true"] {
-  background: #f6f8f7;
-}
-
-.explorer-context-detail-toggle svg.explorer-context-detail-toggle-icon-close {
-  display: none;
-  width: 18px;
-  height: 18px;
-  color: #b3bcb6;
-}
-
-.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-open {
-  display: none;
-}
-
-.explorer-context-detail-toggle[aria-expanded="true"] .explorer-context-detail-toggle-icon-close {
-  display: block;
-}
-
-.explorer-context-detail-toggle:hover,
-.explorer-context-detail-toggle:focus-visible {
-  opacity: 0.7;
-  outline: none;
-}
-
 .explorer-context-panel > .cost-of-risk-context-selected-pane,
 .explorer-context-panel > .cost-of-risk-context-detail-pane {
   border: 0;
@@ -1809,10 +1756,6 @@ button:focus-visible {
   padding-right: 0;
 }
 
-/* Lines up the selection card's own border with the Explorer options
-   toggle's border (see .explorer-context-detail-toggle) - the toggle sits
-   4px lower than this pane's un-padded top, so cancelling the inherited
-   8px top padding down to 4px brings both borders to the same y. */
 .explorer-context-panel > .cost-of-risk-context-selected-pane {
   padding-top: 4px;
 }
@@ -1851,59 +1794,6 @@ button:focus-visible {
 .explorer-context-panel > .cost-of-risk-context-detail-pane::-webkit-scrollbar-thumb:hover {
   background-color: rgb(72 86 78 / 0.68);
 }
-
-/* In compact mode the table uses the column normally held by the context panel. */
-.explorer-workspace.is-context-detail-collapsed {
-  grid-template-columns: 0 minmax(0, 1fr);
-  gap: 0;
-}
-
-.explorer-workspace.is-context-detail-collapsed .explorer-main-pane {
-  grid-column: 2;
-}
-
-/* The toggle's -14px margin-left and the axis-tabs row's 2px padding only
-   make sense when there's a context panel right next to them to hug (see
-   .explorer-context-detail-toggle) - with the panel gone in collapsed mode
-   they left the toggle overflowing further left than the filter row and
-   the table, instead of the three sharing one left edge. */
-.explorer-workspace.is-context-detail-collapsed .explorer-context-detail-toggle {
-  margin-left: 0;
-}
-
-.explorer-workspace.is-context-detail-collapsed .axis-tabs {
-  padding-left: 18px;
-}
-
-.explorer-workspace.is-context-detail-collapsed .metric-table .description-column {
-  padding-left: calc(18px + (var(--indent-level, 0) * 18px));
-}
-
-.explorer-workspace.is-context-detail-collapsed .explorer-timeline-taxonomy-status {
-  left: 18px;
-}
-
-.explorer-workspace.is-context-detail-collapsed .explorer-context-panel {
-  position: absolute;
-  z-index: 60;
-  width: 300px;
-  height: 100%;
-  align-self: start;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateX(-18px);
-  pointer-events: none;
-  transition: opacity 140ms ease, transform 220ms ease, visibility 0s linear 220ms;
-}
-
-.explorer-workspace.is-context-detail-collapsed .explorer-context-panel > .cost-of-risk-context-detail-pane {
-  visibility: hidden;
-  opacity: 0;
-  transform: translateX(-14px);
-  pointer-events: none;
-  transition: opacity 140ms ease, transform 220ms ease, visibility 0s linear 220ms;
-}
-
 
 .explorer-context-panel .explorer-jst-selection-row,
 .explorer-context-panel .explorer-template-option,
@@ -5911,3 +5801,181 @@ table {
 .capital-impact-unavailable { color: #84969e; font-size: 13px; }
 .capital-impact-method { max-width: 760px; margin: 22px 0 30px; color: #81929a; font-size: 12px; line-height: 1.55; }
 @media (max-width: 950px) { .capital-impact-cards { grid-template-columns: 1fr; } .capital-impact-card { min-height: 0; } }
+
+/* Compact application shell: only the dataset title remains in the blue bar. */
+.app-shell {
+  --module-nav-width: 165px;
+  position: relative;
+  grid-template-rows: 48px minmax(0, 1fr);
+}
+.app-shell.is-sidebar-collapsed {
+  --module-nav-width: 0px;
+}
+.app-shell:has(.explorer-view.is-visible)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--module-nav-width) + 326px);
+  height: 48px;
+  z-index: 39;
+  pointer-events: none;
+  background: #f3f5f6;
+}
+.app-header {
+  position: relative;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: calc(var(--module-nav-width) + 326px);
+  z-index: 40;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 48px;
+  overflow: hidden;
+  background: var(--primary-dark);
+}
+.app-header .global-bar {
+  display: none;
+}
+.app-header .brand {
+  min-width: 0;
+  min-height: 48px;
+}
+.app-header .brand strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.main-view,
+.app-shell.is-header-hidden .main-view {
+  grid-row: 1 / -1;
+}
+
+/* The resize line remains the Explorer panel's collapse control. */
+.explorer-workspace,
+.explorer-workspace.is-context-detail-collapsed {
+  --explorer-context-width: 300px;
+  --explorer-tabs-left: 320px;
+  grid-template-columns: var(--explorer-context-width) 6px minmax(0, 1fr);
+  gap: 0;
+  transition: none;
+}
+.explorer-workspace.is-context-detail-collapsed:not(.is-context-dragging) {
+  grid-template-columns: 0 0 minmax(0, 1fr);
+}
+.explorer-main-pane,
+.explorer-workspace.is-context-detail-collapsed .explorer-main-pane {
+  grid-column: 3;
+  grid-row: 1;
+  grid-template-rows: 32px auto minmax(0, 1fr) auto;
+}
+.explorer-context-panel,
+.explorer-workspace.is-context-detail-collapsed .explorer-context-panel {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  width: calc(100% + 24px);
+  margin-left: -24px;
+  min-width: 0;
+  height: 100%;
+  padding-top: 42px;
+  transform: none;
+  transition: none;
+}
+.explorer-workspace.is-context-detail-collapsed .explorer-context-panel {
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.explorer-workspace.is-context-detail-collapsed .explorer-context-panel > .cost-of-risk-context-detail-pane {
+  transform: none;
+  transition: none;
+}
+.explorer-context-resizer {
+  grid-column: 2;
+  grid-row: 1;
+  z-index: 12;
+  position: relative;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+  background: transparent;
+}
+.explorer-workspace.is-context-detail-collapsed:not(.is-context-dragging) .explorer-context-resizer {
+  display: none;
+}
+.explorer-context-resizer::before {
+  content: "";
+  position: absolute;
+  inset: 25px auto 0 2px;
+  width: 1px;
+  background: #d8e0e3;
+}
+.explorer-context-resizer:hover::before,
+.explorer-context-resizer.is-dragging::before,
+.explorer-context-resizer:focus-visible::before {
+  background: #82a9be;
+}
+.explorer-context-resizer:focus-visible {
+  outline: 2px solid #82a9be;
+  outline-offset: -2px;
+}
+.explorer-main-pane .axis-tabs,
+.explorer-workspace.is-context-detail-collapsed .axis-tabs {
+  position: absolute;
+  top: -23px;
+  left: var(--explorer-tabs-left);
+  width: calc(100% - var(--explorer-tabs-left));
+  max-width: none;
+  height: 48px;
+  margin-left: 0;
+  padding: 6px 2px;
+  background: #f3f5f6;
+  box-shadow: -18px 0 0 #f3f5f6;
+  border: 0;
+  z-index: 41;
+}
+@media (max-width: 1180px) {
+  .explorer-workspace,
+  .explorer-workspace.is-context-detail-collapsed {
+    grid-template-columns: var(--explorer-context-width) 6px minmax(0, 1fr);
+  }
+  .explorer-main-pane,
+  .explorer-workspace.is-context-detail-collapsed .explorer-main-pane {
+    grid-column: 3;
+  }
+}
+@media (max-width: 860px) {
+  .app-shell,
+  .app-shell.is-sidebar-collapsed {
+    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-rows: 48px minmax(0, 1fr);
+    --module-nav-width: 0px;
+  }
+  .app-shell:not(.is-sidebar-collapsed) {
+    grid-template-columns: 165px minmax(0, 1fr);
+    --module-nav-width: 165px;
+  }
+  .main-view,
+  .app-shell.is-header-hidden .main-view {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    padding: 3px 6px 8px;
+  }
+  .sidebar {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .app-shell:not(.is-sidebar-collapsed) .sidebar {
+    display: flex;
+  }
+  .app-header {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+}
+
+/* Other modules keep their own controls below the fixed title strip. */
+.main-view:not(:has(> .explorer-view.is-visible)) {
+  padding-top: 50px;
+}

@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
-import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261021-cons-conso";
+import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261113-compact-shell-v2";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20261021-cons-conso";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261021-cons-conso";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261113-compact-shell-v3";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenchmarkView.js?v=20261017-provisions-on-ead";
 import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261021-pd-endpoints";
@@ -20,6 +20,7 @@ const SIDEBAR_LOCKED_VALUE = "locked";
 let serverInstitutionNamesButton = null;
 const elements = {
   appShell: document.querySelector(".app-shell"),
+  appBrandTitle: document.querySelector("#app-brand-title"),
   chooseFileButton: document.querySelector("#choose-file-button"),
   columnCount: document.querySelector("#column-count"),
   datasetInfoButton: document.querySelector("#dataset-info-button"),
@@ -256,6 +257,9 @@ export function renderAppState(state) {
   if (elements.rowCount) elements.rowCount.textContent = state.rows.length.toLocaleString("fr-FR");
   if (elements.columnCount) elements.columnCount.textContent = state.columns.length.toLocaleString("fr-FR");
   if (elements.fileName) elements.fileName.textContent = activeDataset?.label || state.fileName || "-";
+  if (elements.appBrandTitle && document.documentElement.dataset.standalone !== "true") {
+    elements.appBrandTitle.textContent = activeDataset?.label || state.fileName || "Agora Explorer";
+  }
   if (elements.reloadFileButton) elements.reloadFileButton.disabled = !state.fileHandle;
   if (elements.forgetFileButton) {
     elements.forgetFileButton.disabled = !hasData || activeDataset?.source === "embedded";

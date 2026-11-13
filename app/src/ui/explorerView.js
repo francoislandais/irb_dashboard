@@ -53,7 +53,7 @@ import {
 } from "../data/explorerKriFormula.js?v=20261005-formula-navigation";
 import { getLatestState } from "./appState.js";
 import { getTaxonomyDataForTemplateFramework, getTaxonomyFrameworkForDate } from "../data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
-import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261021-cons-conso";
+import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261113-compact-shell-v2";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260925-institution-id";
@@ -185,6 +185,19 @@ let explorerStickyFrame = 0;
 // closed.
 const initialExplorerContext = readUrlStateParams().get(EXPLORER_CONTEXT_URL_PARAM) ?? "";
 let explorerContextDetailCollapsed = initialExplorerContext === "collapsed";
+const EXPLORER_CONTEXT_WIDTH_KEY = "agora-explorer-context-width";
+function readExplorerContextWidth() {
+  try { return Number(window.localStorage.getItem(EXPLORER_CONTEXT_WIDTH_KEY)); }
+  catch { return NaN; }
+}
+function rememberExplorerContextWidth(width) {
+  try { window.localStorage.setItem(EXPLORER_CONTEXT_WIDTH_KEY, String(Math.round(width))); }
+  catch { /* Local files can have storage disabled. The current layout still works. */ }
+}
+const storedExplorerContextWidth = readExplorerContextWidth();
+let explorerContextWidth = Number.isFinite(storedExplorerContextWidth) && storedExplorerContextWidth >= 160
+  ? Math.min(storedExplorerContextWidth, 640) : 300;
+let explorerContextRestoreWidth = explorerContextWidth;
 let explorerBenchmarkExpanded = false;
 let explorerBenchmarkSmoothingWindow = 1;
 let explorerBenchmarkLastSmoothingWindow = 4;
@@ -307,7 +320,7 @@ const elements = {
   explorerBenchmarkPreview: document.querySelector(".explorer-benchmark-preview"),
   explorerBenchmarkView: document.querySelector("#explorer-benchmark-view"),
   explorerContextDetail: document.querySelector("#explorer-context-detail"),
-  explorerContextDetailToggle: document.querySelector("#explorer-context-detail-toggle"),
+  explorerContextResizer: document.querySelector("#explorer-context-resizer"),
   explorerContextPanel: document.querySelector("#explorer-context-panel"),
   explorerSelectionHistory: document.querySelector("#explorer-selection-history"),
   globalReferenceSelect: document.querySelector("#global-reference-select"),
@@ -397,19 +410,7 @@ export function wireExplorerUi(actions, rerender) {
     renderExplorerContextPanel(actions.getState());
     if (openingTemplatePanel) scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
   });
-  elements.explorerContextDetailToggle?.addEventListener("click", () => {
-    const openingTemplatePanel = explorerContextDetailCollapsed && explorerContextTopic === "";
-    if (explorerContextDetailCollapsed) {
-      revealExplorerContextDetail();
-    } else {
-      explorerContextTopic = "";
-      setExplorerContextDetailCollapsed(true);
-    }
-    renderExplorerAxisTabs();
-    renderExplorerActiveFilters(getLatestState());
-    renderExplorerContextPanel(getLatestState());
-    if (openingTemplatePanel) scheduleExplorerContextOptionReveal(".explorer-template-option.is-active");
-  });
+  wireExplorerContextResizer();
   elements.explorerTableWrap?.addEventListener("scroll", () => {
     scheduleExplorerStickyParentsUpdate();
     scheduleExplorerContributorPopoverPosition();
@@ -1367,15 +1368,83 @@ function updateUrlExplorerContextPanel() {
   replaceUrlState(url);
 }
 
-function syncExplorerContextDetailVisibility() {
-  const collapsed = explorerContextDetailCollapsed;
+function maxExplorerContextWidth() {
+  return Math.max(0, Math.min(640, (elements.explorerWorkspace?.clientWidth || 940) - 280));
+}
+
+function applyExplorerContextWidth(width) {
+  const boundedWidth = Math.max(0, Math.min(width, maxExplorerContextWidth()));
+  const collapsed = boundedWidth <= 12;
+  const effectiveWidth = collapsed ? 0 : boundedWidth;
+  elements.explorerWorkspace?.style.setProperty("--explorer-context-width", `${effectiveWidth}px`);
   elements.explorerWorkspace?.classList.toggle("is-context-detail-collapsed", collapsed);
   elements.explorerContextPanel?.classList.toggle("is-detail-collapsed", collapsed);
-  if (elements.explorerContextDetailToggle) {
-    elements.explorerContextDetailToggle.setAttribute("aria-expanded", String(!collapsed));
-    elements.explorerContextDetailToggle.setAttribute("aria-label", collapsed ? "Show Explorer options" : "Hide Explorer options");
-    elements.explorerContextDetailToggle.setAttribute("title", collapsed ? "Show Explorer options" : "Hide Explorer options");
+  elements.explorerContextResizer?.setAttribute("aria-valuenow", String(Math.round(effectiveWidth)));
+  elements.explorerContextResizer?.setAttribute("aria-valuemax", String(maxExplorerContextWidth()));
+  return collapsed;
+}
+
+function commitExplorerContextWidth(collapsed) {
+  explorerContextDetailCollapsed = collapsed;
+  if (collapsed) {
+    explorerContextTopic = "";
+    explorerContextWidth = explorerContextRestoreWidth;
+  } else {
+    explorerContextWidth = Number(elements.explorerContextResizer?.getAttribute("aria-valuenow"));
+    if (explorerContextWidth >= 160) {
+      explorerContextRestoreWidth = explorerContextWidth;
+      rememberExplorerContextWidth(explorerContextWidth);
+    }
   }
+  updateUrlExplorerContextPanel();
+  syncExplorerContextDetailVisibility();
+  renderExplorerAxisTabs();
+  renderExplorerActiveFilters(getLatestState());
+}
+
+function wireExplorerContextResizer() {
+  const handle = elements.explorerContextResizer;
+  if (!handle) return;
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    handle.setPointerCapture(event.pointerId);
+    handle.classList.add("is-dragging");
+    elements.explorerWorkspace?.classList.add("is-context-dragging");
+  });
+  handle.addEventListener("pointermove", (event) => {
+    if (!handle.hasPointerCapture(event.pointerId)) return;
+    const left = elements.explorerWorkspace?.getBoundingClientRect().left || 0;
+    const width = event.clientX - left;
+    const collapsed = applyExplorerContextWidth(width);
+    if (!collapsed) explorerContextWidth = Number(handle.getAttribute("aria-valuenow"));
+  });
+  const finish = (event) => {
+    if (!handle.hasPointerCapture(event.pointerId)) return;
+    const collapsed = Number(handle.getAttribute("aria-valuenow")) === 0;
+    handle.releasePointerCapture(event.pointerId);
+    handle.classList.remove("is-dragging");
+    elements.explorerWorkspace?.classList.remove("is-context-dragging");
+    commitExplorerContextWidth(collapsed);
+  };
+  handle.addEventListener("pointerup", finish);
+  handle.addEventListener("pointercancel", finish);
+  handle.addEventListener("keydown", (event) => {
+    const current = explorerContextDetailCollapsed ? 0 : explorerContextWidth;
+    let next;
+    if (event.key === "ArrowLeft") next = Math.max(0, current - 24);
+    else if (event.key === "ArrowRight") next = current + 24;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = maxExplorerContextWidth();
+    else return;
+    event.preventDefault();
+    commitExplorerContextWidth(applyExplorerContextWidth(next));
+  });
+}
+
+function syncExplorerContextDetailVisibility() {
+  const collapsed = explorerContextDetailCollapsed;
+  applyExplorerContextWidth(collapsed ? 0 : explorerContextWidth);
   elements.explorerTemplateControl?.setAttribute("aria-expanded", String(!collapsed));
   window.setTimeout(scheduleExplorerStickyParentsUpdate, 0);
 }
@@ -3854,7 +3923,7 @@ function renderExplorerAxisTabs() {
   const isXYMode = explorerGlobalDisplayMode === "xy" && tableId !== "KRI";
   const isXY = isExplorerXYView();
   if (elements.explorerTemplateControl) {
-    const showsTemplates = explorerContextTopic === "";
+    const showsTemplates = explorerContextTopic === "" && !explorerContextDetailCollapsed;
     elements.explorerTemplateControl.classList.toggle("is-panel-active", showsTemplates);
     elements.explorerTemplateControl.setAttribute("aria-expanded", String(showsTemplates));
   }

@@ -22,7 +22,7 @@ import {
   storeFileHandle
 } from "./data/localFileSource.js?v=20260704-local-source";
 import { createDataStore } from "./data/dataStore.js?v=20261020-capital-impact";
-import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261021-server-names-match";
+import { renderAppState, wireUi } from "./ui/dataScreen.js?v=20261113-compact-shell-v3";
 import {
   buildStandaloneHtml,
   getStandaloneModuleDependencies,
