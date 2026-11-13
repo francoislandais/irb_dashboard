@@ -1,0 +1,90 @@
+# Un seul fichier décrit toutes les applications. Les LEI ci-dessous sont fictifs.
+# Chaque [[applications]] définit son périmètre institutionnel.
+# Les [[applications.extractions]] qui suivent appartiennent à cette application.
+
+[[applications]]
+name = "FINREP"
+leis = ["5493001KJTIIGC8Y1R12", "969500Q2MA9Y1GQG8B61"]
+consolidation = "HIGHEST"
+
+[[applications.extractions]]
+category = "FINREP"
+label = "FINREP mensuel"
+module = "FINREP"
+templates = ["F_12.01"]
+history_years = 2
+frequency = "MONTHLY"
+
+[[applications.extractions]]
+category = "FINREP"
+label = "FINREP jusqu'à F_47"
+module = "FINREP"
+templates = ["F_xx% xx<48"]
+history_years = 2
+frequency = "QUARTERLY"
+
+[[applications]]
+name = "COREP"
+leis = ["213800WAVVOPS85N2205", "5493006MHB84DD0ZWV18"]
+consolidation = "CONSO"
+
+[[applications.extractions]]
+category = "COREP capital"
+module = "COREP"
+templates = ["C_01.00"]
+history_years = 3
+frequency = "QUARTERLY"
+
+[[applications.extractions]]
+category = "COREP capital"
+module = "COREP"
+templates = ["C_03.00"]
+history_years = 5
+frequency = "ANNUAL"
+
+[[applications]]
+name = "FINREP + COREP"
+leis = ["5493001KJTIIGC8Y1R12", "213800WAVVOPS85N2205"]
+consolidation = "CONSO+SOLO"
+
+[[applications.extractions]]
+category = "FINREP"
+module = "FINREP"
+templates = ["F_01.01"]
+history_years = 4
+frequency = "QUARTERLY"
+
+[[applications.extractions]]
+category = "COREP"
+module = "COREP"
+templates = ["C_08.01"]
+history_years = 2
+frequency = "QUARTERLY"
+
+[[applications.extractions]]
+category = "COREP"
+module = "COREP"
+templates = ["C_18.00"]
+history_years = 1
+frequency = "MONTHLY"
+
+[[applications]]
+name = "KRI"
+leis = ["969500Q2MA9Y1GQG8B61", "5493006MHB84DD0ZWV18"]
+consolidation = "ALL"
+
+[[applications.extractions]]
+category = "KRI FINREP"
+label = "KRI liés au FINREP"
+module = "KRI"
+templates = ["F_12.01"]
+history_years = 2
+frequency = "MONTHLY"
+
+[[applications.extractions]]
+category = "KRI COREP"
+label = "KRI liés au COREP"
+module = "KRI"
+templates = ["C_01.00"]
+history_years = 2
+frequency = "QUARTERLY"

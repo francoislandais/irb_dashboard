@@ -53,6 +53,18 @@ export function getInstitutionDisplayInfo(dictionary, institutionId) {
   return dictionary[alternate] ?? null;
 }
 
+export function matchesInstitutionSearch(query, ...fields) {
+  const normalize = (value) => String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase()
+    .trim();
+  const terms = normalize(query).split(/\s+/).filter(Boolean);
+  if (!terms.length) return true;
+  const text = normalize(fields.join(" "));
+  return terms.every((term) => text.includes(term));
+}
+
 function normalizeHeader(value) {
   return String(value ?? "").replace(/^\uFEFF/, "").trim().toLowerCase();
 }

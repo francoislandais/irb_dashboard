@@ -30,6 +30,7 @@ if __package__:
     from .compact_dataset_values import compact_dataset_rows
     from .export_all_standalone_apps import export_standalone_app
     from .output_directory import resolve_external_output_directory
+    from .launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
     from .hive_to_dataset import (
         _expand_template_expressions,
         _build_kri_filter,
@@ -43,6 +44,7 @@ else:
     from compact_dataset_values import compact_dataset_rows
     from export_all_standalone_apps import export_standalone_app
     from output_directory import resolve_external_output_directory
+    from launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
     from hive_to_dataset import (
         _expand_template_expressions,
         _build_kri_filter,
@@ -189,13 +191,39 @@ def _reference_dates(frequency: str, history_periods: int, as_of: date) -> tuple
     return tuple(item.isoformat() for item in dates)
 
 
+def _configuration_blocks(entries: list[Path]):
+    """Iterate over applications from a combined or legacy TOML file."""
+    for file in entries:
+        try:
+            with file.open("rb") as stream:
+                config = tomllib.load(stream)
+        except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
+            raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
+        if "applications" not in config:
+            yield config, file.name
+            continue
+        _check_keys(config, {"applications"}, file.name)
+        blocks = config["applications"]
+        if not isinstance(blocks, list) or not blocks:
+            raise ValueError(f"{file.name}: au moins un bloc [[applications]] est requis.")
+        for index, block in enumerate(blocks, start=1):
+            if not isinstance(block, dict):
+                raise ValueError(f"{file.name}, application {index}: un bloc TOML est attendu.")
+            yield block, f"{file.name}, application {index}"
+
+
 def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
-    if not path.is_dir():
-        raise ValueError(f"Dossier de paramétrage introuvable : {path}")
-    entries = sorted(
-        (item for item in path.iterdir() if not item.name.startswith(".") and not _is_temporary_file(item)),
-        key=lambda item: item.name.casefold(),
-    )
+    if path.is_file():
+        if path.suffix.lower() != ".toml":
+            raise ValueError(f"{path}: un fichier .toml est attendu.")
+        entries = [path]
+    elif path.is_dir():
+        entries = sorted(
+            (item for item in path.iterdir() if not item.name.startswith(".") and not _is_temporary_file(item)),
+            key=lambda item: item.name.casefold(),
+        )
+    else:
+        raise ValueError(f"Fichier ou dossier de paramétrage introuvable : {path}")
     invalid = [item.name for item in entries if not item.is_file() or item.suffix.lower() != ".toml"]
     if invalid:
         raise ValueError(f"{path}: seuls des fichiers .toml sont attendus ; entrée(s) non reconnue(s) : {', '.join(invalid)}.")
@@ -206,13 +234,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
     lei_pattern = re.compile(r"^[A-Z0-9]{20}$")
     names: set[str] = set()
     output_names: set[str] = set()
-    for file in entries:
-        try:
-            with file.open("rb") as stream:
-                config = tomllib.load(stream)
-        except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
-            raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
-        context = file.name
+    for config, context in _configuration_blocks(entries):
         _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "ssmsignificance", "consolidation", "export-dataset", "extractions"}, context)
         name = _required_text(config.get("name"), "name", context)
         export_dataset = config.get("export-dataset", False)
@@ -1262,7 +1284,7 @@ def global_update(
     darwin_folder_id: int | None = None,
     darwin_client=None,
 ) -> dict:
-    """Prépare, simule ou exécute toutes les applications du dossier TOML."""
+    """Prépare, simule ou exécute toutes les applications du paramétrage TOML."""
 
     mode = str(mode).strip().lower()
     if mode not in {"preview", "test", "hive"}:
@@ -1284,7 +1306,7 @@ def global_update(
         node_ids = (config_path, *node_ids)
         config_path = None
     if node_ids and config_path is not None:
-        raise ValueError("Choisir un dossier local ou des identifiants Darwin pour les TOML, pas les deux.")
+        raise ValueError("Choisir un fichier ou dossier local ou des identifiants Darwin pour les TOML, pas les deux.")
     if any(type(node_id) is not int or node_id <= 0 for node_id in node_ids):
         raise ValueError("Chaque identifiant Darwin de TOML doit être un entier positif.")
     if len(set(node_ids)) != len(node_ids):
@@ -1292,7 +1314,7 @@ def global_update(
     if darwin_folder_id is not None and (type(darwin_folder_id) is not int or darwin_folder_id <= 0):
         raise ValueError("L'identifiant du dossier Darwin doit être un entier positif.")
     if darwin_folder_id is not None and (config_path is not None or node_ids):
-        raise ValueError("Choisir soit un dossier Darwin, soit des fichiers Darwin, soit un dossier local.")
+        raise ValueError("Choisir soit un dossier Darwin, soit des fichiers Darwin, soit un fichier ou dossier local.")
     if mode == "hive" and config_path is None and not node_ids and darwin_folder_id is None:
         raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
@@ -1315,7 +1337,7 @@ def global_update(
         raise ValueError("export-dataset = true exige --darwin_upload pour envoyer le dataset compressé.")
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
-    if mode == "hive" and darwin_upload is not None:
+    if darwin_upload is not None:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
     query_root = output_root / "queries"
     manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "extraction_format": extraction_format, "applications": []}
@@ -1327,7 +1349,7 @@ def global_update(
     output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = output_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"[Agora] {len(applications)} fichier(s) TOML à traiter · mode {mode} · extraction {extraction_format}", flush=True)
+    print(f"[Agora] {len(applications)} application(s) à traiter · mode {mode} · extraction {extraction_format}", flush=True)
     for application_number, application in enumerate(applications, start=1):
         print(f"[Agora] Application {application_number}/{len(applications)} : {application.config_file or application.name} ({len(application.extractions)} extraction(s))", flush=True)
         folder = _safe_name(application.name)
@@ -1380,6 +1402,13 @@ def global_update(
         elif mode == "test":
             reporting_units = _fixture_reporting_units(application, fixture)
             dictionary_rows = _institution_dictionary_rows(reporting_units)
+        if reporting_units:
+            application_manifest["institutions"] = [{
+                "institution_id": unit["institution_id"],
+                "institution_name": unit["institution_name"],
+                "consolidation_level": unit["consolidation_level"],
+                "jst_code": unit["jst_code"],
+            } for unit in reporting_units]
         if reporting_units is not None and not reporting_units:
             application_manifest["status"] = "skipped"
             reasons = sorted({item["reason"] for item in anomalies}) if mode == "hive" else ["JST code manquant"]
@@ -1461,12 +1490,46 @@ def global_update(
     _write_query_index(output_root / "query_index.md", manifest)
     uploaded = (_upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload, darwin_client)
                 if darwin_upload is not None and mode != "hive" else manifest.get("darwin_upload", {}).get("uploaded", 0))
-    return {"output_directory": str(output_root), "manifest_path": str(manifest_path), "mode": mode, "applications": len(applications), "darwin_uploads": uploaded}
+    completed_apps = [app for app in manifest["applications"] if app.get("status") == "complete" and app.get("html_app")]
+    if completed_apps:
+        if darwin_upload is not None:
+            print(f"[Agora] Lanceur : listing des HTML du dossier Darwin {darwin_upload}", flush=True)
+            listing_client = darwin_client
+            if not callable(getattr(listing_client, "listdir", None)) and not any(
+                callable(getattr(getattr(listing_client, field, None), "get", None))
+                for field in ("rest", "session")
+            ):
+                listing_client = connect_darwin_listing_client()
+            links = resolve_darwin_app_links(completed_apps, darwin_upload, listing_client)
+        else:
+            links = {Path(app["html_app"]).name: app["html_app"] for app in completed_apps}
+        for app in completed_apps:
+            link = links[Path(app["html_app"]).name]
+            app["launcher_link"] = link
+            if darwin_upload is not None:
+                app["darwin_upload"]["file_node_id"] = int(link.rsplit("/", 1)[-1])
+        launcher_path = output_root / "Agora Explorer_launcher.html"
+        launcher_path.write_text(render_launcher_html(completed_apps, links), encoding="utf-8")
+        manifest["launcher"] = {"html": launcher_path.name, "applications": len(completed_apps)}
+        print(f"[Agora] Lanceur créé : {launcher_path.name} ({len(completed_apps)} application(s))", flush=True)
+        if darwin_upload is not None:
+            try:
+                darwin_client.upload_file(
+                    local_file_path=str(launcher_path), node_id=darwin_upload,
+                    filename=launcher_path.name, add_version=True, is_parent=True,
+                )
+            except Exception as error:
+                manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                raise RuntimeError(f"Upload Darwin échoué pour le lanceur {launcher_path.name}.") from error
+            manifest["launcher"]["darwin_upload"] = {"node_id": darwin_upload, "status": "uploaded"}
+            print(f"[Agora] Lanceur envoyé dans Darwin : {launcher_path.name}", flush=True)
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {"output_directory": str(output_root), "manifest_path": str(manifest_path), "mode": mode, "applications": len(applications), "darwin_uploads": uploaded, "launcher": manifest.get("launcher", {}).get("html")}
 
 
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
-    parser.add_argument("--config", "--config-dir", default=None, help="Dossier TOML local ou darwin:NODE_ID")
+    parser.add_argument("--config", "--config-dir", default=None, help="Fichier ou dossier TOML local, ou darwin:NODE_ID")
     parser.add_argument("--config-darwin", type=int, action="append", default=None, metavar="NODE_ID", help="Nœud Darwin d'un TOML ; option répétable pour plusieurs applications")
     parser.add_argument("--config-darwin-folder", type=int, default=None, metavar="FOLDER_ID", help="Lister les TOML du dossier Darwin et télécharger chaque fichier")
     parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
@@ -1483,8 +1546,10 @@ def _main() -> None:
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")
     print(f"Plan et requêtes : {result['output_directory']}")
     print(f"Index : {result['output_directory']}/query_index.md")
+    if result["launcher"]:
+        print(f"Lanceur : {result['output_directory']}/{result['launcher']}")
     if args.darwin_upload is not None:
-        print(f"Darwin : {result['darwin_uploads']} version(s) HTML envoyée(s) dans le nœud {args.darwin_upload}")
+        print(f"Darwin : {result['darwin_uploads']} version(s) d'application envoyée(s) dans le nœud {args.darwin_upload}")
 
 
 if __name__ == "__main__":

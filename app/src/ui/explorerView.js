@@ -53,7 +53,7 @@ import {
 } from "../data/explorerKriFormula.js?v=20261005-formula-navigation";
 import { getLatestState } from "./appState.js";
 import { getTaxonomyDataForTemplateFramework, getTaxonomyFrameworkForDate } from "../data/taxonomyDimensionData.js?v=20260929-reference-taxonomy";
-import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20261021-cons-conso";
+import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261021-cons-conso";
 import { createUnitFilterChip, createUnitSelectionPanel, getUnitFilterLabel, UNIT_FILTER_OPTIONS } from "./unitFilterView.js?v=20260910-context-title-only";
 import { downloadExcelWorkbook } from "./excelWorkbook.js?v=20260916-raw-unit";
 import { buildExplorerQueryFromPoints } from "../data/explorerHiveQuery.js?v=20260925-institution-id";
@@ -3078,7 +3078,8 @@ function toggleExplorerInlineFilter(topic) {
     renderExplorerContextPanel(getLatestState());
   }
   renderExplorerActiveFilters(getLatestState());
-  elements.explorerActiveFilters?.querySelector(`[data-explorer-filter-dropdown="${topic}"]`)?.focus();
+  (elements.explorerActiveFilters?.querySelector(".explorer-filter-institution-search")
+    ?? elements.explorerActiveFilters?.querySelector(`[data-explorer-filter-dropdown="${topic}"]`))?.focus();
 }
 
 function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOptions = options.length > 0) {
@@ -3108,8 +3109,43 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
   const menu = document.createElement("span");
   menu.id = `explorer-filter-menu-${topic}`;
   menu.className = "explorer-filter-dropdown";
-  menu.setAttribute("role", "listbox");
-  menu.setAttribute("aria-label", `Choose ${choiceName}`);
+  const isInstitution = topic === "jst-code";
+  if (!isInstitution) {
+    menu.setAttribute("role", "listbox");
+    menu.setAttribute("aria-label", `Choose ${choiceName}`);
+  }
+  const optionHost = isInstitution ? document.createElement("span") : menu;
+  if (isInstitution) {
+    const search = document.createElement("input");
+    search.type = "search";
+    search.className = "explorer-filter-institution-search";
+    search.placeholder = "Search name, JST or LEI";
+    search.setAttribute("aria-label", "Search institutions by name, JST or LEI");
+    search.autocomplete = "off";
+    optionHost.className = "explorer-filter-institution-options";
+    optionHost.setAttribute("role", "listbox");
+    optionHost.setAttribute("aria-label", "Choose institution");
+    const empty = document.createElement("span");
+    empty.className = "explorer-filter-institution-empty";
+    empty.textContent = "No matching institution";
+    empty.hidden = true;
+    menu.append(search, optionHost, empty);
+    search.addEventListener("input", () => {
+      let visible = 0;
+      [...optionHost.children].forEach((item, index) => {
+        item.hidden = !matchesInstitutionSearch(search.value, options[index].searchText);
+        if (!item.hidden) visible += 1;
+      });
+      empty.hidden = visible > 0;
+    });
+    search.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowDown" && event.key !== "Enter") return;
+      event.preventDefault();
+      const first = [...optionHost.children].find((item) => !item.hidden);
+      if (event.key === "Enter") first?.click();
+      else first?.focus();
+    });
+  }
   let frequencyRow = null;
   options.forEach((option) => {
     const item = document.createElement("button");
@@ -3152,11 +3188,11 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
         frequencyRow.className = "explorer-filter-dropdown-frequency-row";
         frequencyRow.setAttribute("role", "group");
         frequencyRow.setAttribute("aria-label", "Temporal frequency");
-        menu.append(frequencyRow);
+        optionHost.append(frequencyRow);
       }
       frequencyRow.append(item);
     } else {
-      menu.append(item);
+      optionHost.append(item);
     }
   });
   chip.append(menu);
@@ -3293,6 +3329,8 @@ function renderExplorerActiveFilters(state) {
       const rawValue = valuesByInstitution.get(institutionId);
       return { value: institutionId, label: entry?.institutionName || institutionId,
         detail: entry ? [entry.consolidationLevel, entry.jstCode].filter(Boolean).join(" — ") : "",
+        searchText: [institutionId, entry?.institutionId, entry?.institutionName,
+          entry?.jstCode, entry?.consolidationLevel].filter(Boolean).join(" "),
         metric: Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, institutionBenchmark) : "—",
         selected: institutionId === selectedInstitutionId };
     }) : [];

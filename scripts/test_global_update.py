@@ -158,6 +158,11 @@ class DarwinUploadTests(unittest.TestCase):
             def upload_file(self, **kwargs):
                 uploads.append(kwargs)
 
+            def listdir(self, **kwargs):
+                return [SimpleNamespace(id=1000 + index, properties=SimpleNamespace(
+                    id=1000 + index, name=upload["filename"], parent_id=kwargs["node_id"],
+                )) for index, upload in enumerate(uploads) if upload["filename"].endswith(".html")]
+
         def connect():
             connections.append(True)
             return FakeDarwinClient()
@@ -172,7 +177,7 @@ class DarwinUploadTests(unittest.TestCase):
             self.assertEqual(result["applications"], 2)
             self.assertEqual([call["node_id"] for call in downloads], [101, 102])
             self.assertEqual(len(connections), 1)
-            self.assertEqual(len(uploads), 3)
+            self.assertEqual(len(uploads), 4)
             self.assertTrue(all(call["node_id"] == 999 and call["is_parent"] and call["add_version"] for call in uploads))
             manifest = json.loads((Path(temporary_directory) / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["config_directory"], "darwin:101,darwin:102")
@@ -212,6 +217,11 @@ class DarwinUploadTests(unittest.TestCase):
             def upload_file(self, **kwargs):
                 calls.append(kwargs)
 
+            def listdir(self, **kwargs):
+                return [SimpleNamespace(id=1000 + index, properties=SimpleNamespace(
+                    id=1000 + index, name=call["filename"], parent_id=kwargs["node_id"],
+                )) for index, call in enumerate(calls)]
+
         def connect():
             connections.append(True)
             return FakeDarwinClient()
@@ -225,7 +235,7 @@ class DarwinUploadTests(unittest.TestCase):
                 )
             self.assertEqual(result["darwin_uploads"], 4)
             self.assertEqual(len(connections), 1)
-            self.assertEqual(len(calls), 4)
+            self.assertEqual(len(calls), 5)
             for call in calls:
                 html_path = Path(call["local_file_path"])
                 self.assertTrue(html_path.is_file())
@@ -236,6 +246,10 @@ class DarwinUploadTests(unittest.TestCase):
             manifest = json.loads((Path(temporary_directory) / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["darwin_upload"], {"node_id": 1914437350, "uploaded": 4, "total": 4})
             self.assertTrue(all(app["darwin_upload"]["status"] == "uploaded" for app in manifest["applications"]))
+            self.assertEqual(manifest["applications"][0]["darwin_upload"]["file_node_id"], 1000)
+            self.assertEqual(manifest["launcher"]["darwin_upload"]["status"], "uploaded")
+            launcher = (Path(temporary_directory) / manifest["launcher"]["html"]).read_text(encoding="utf-8")
+            self.assertIn("https://darwin.escb.eu/livelink/livelink/app/nodes/1000", launcher)
 
     def test_failed_upload_preserves_local_files_and_completed_status(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -720,6 +734,57 @@ class QueryPlanTests(unittest.TestCase):
 class ConfigurationValidationTests(unittest.TestCase):
     LEI = "AAAABBBBCCCCDDDDEEEE"
 
+    def test_single_toml_reproduces_legacy_applications_and_builds_html(self):
+        combined_path = PROJECT_DIRECTORY / "examples" / "global-update-combined.toml"
+        legacy = _read_configuration(EXAMPLE_CONFIG_DIRECTORY, date(2026, 9, 26))
+        combined = _read_configuration(combined_path, date(2026, 9, 26))
+        self.assertEqual(
+            [(app.name, app.leis, app.consolidation, app.extractions) for app in combined],
+            [(app.name, app.leis, app.consolidation, app.extractions) for app in legacy],
+        )
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "output"
+            result = global_update(combined_path, mode="test", output_directory=output, as_of=date(2026, 9, 26))
+            self.assertEqual(result["applications"], 4)
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["config_directory"], str(combined_path.resolve()))
+            self.assertTrue((output / "Agora Explorer_launcher.html").is_file())
+            self.assertEqual(len(manifest["applications"]), 4)
+            self.assertTrue(all((output / app["html_app"]).is_file() for app in manifest["applications"]))
+            self.assertEqual(
+                [app["config_file"] for app in manifest["applications"]],
+                [f"global-update-combined.toml, application {index}" for index in range(1, 5)],
+            )
+
+    def test_single_toml_reports_block_errors_before_processing(self):
+        combined_path = PROJECT_DIRECTORY / "examples" / "global-update-combined.toml"
+        original = combined_path.read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            config = Path(temporary_directory) / "applications.toml"
+            config.write_text(original.replace('name = "COREP"', 'name = "FINREP"', 1), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, r"applications.toml, application 2: nom d'application déjà utilisé"):
+                _read_configuration(config, date(2026, 9, 26))
+            config.write_text(original.replace('templates = ["C_01.00"]', 'templates = []', 1), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, r"applications.toml, application 2, extraction 1"):
+                _read_configuration(config, date(2026, 9, 26))
+
+    def test_single_darwin_node_can_define_multiple_applications(self):
+        combined_path = PROJECT_DIRECTORY / "examples" / "global-update-combined.toml"
+        downloaded = []
+
+        class Darwin:
+            def get_file(self, **kwargs):
+                downloaded.append(kwargs["node_id"])
+                Path(kwargs["local_file_path"]).write_bytes(combined_path.read_bytes())
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            result = global_update(
+                "darwin:123", mode="preview", output_directory=Path(temporary_directory) / "output",
+                darwin_client=Darwin(), as_of=date(2026, 9, 26),
+            )
+            self.assertEqual(result["applications"], 4)
+            self.assertEqual(downloaded, [123])
+
     def _config(self, root: Path, *, extractions: str = "", **changes) -> Path:
         folder = root / "configuration"
         folder.mkdir()
@@ -740,7 +805,7 @@ frequency = "QUARTERLY"'''
     def test_missing_folder_and_unexpected_file(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
-            with self.assertRaisesRegex(ValueError, "Dossier de paramétrage introuvable"):
+            with self.assertRaisesRegex(ValueError, "Fichier ou dossier de paramétrage introuvable"):
                 _read_configuration(root / "missing", date(2026, 9, 26))
             folder = self._config(root)
             (folder / "notes.txt").write_text("not an application", encoding="utf-8")
@@ -1335,14 +1400,19 @@ frequency = "QUARTERLY"
             configuration = root / "config"
             self._config(configuration)
             uploads = []
-            darwin = SimpleNamespace(upload_file=lambda **kwargs: uploads.append(kwargs))
+            darwin = SimpleNamespace(
+                upload_file=lambda **kwargs: uploads.append(kwargs),
+                listdir=lambda **kwargs: [SimpleNamespace(id=1000, properties=SimpleNamespace(
+                    id=1000, name=uploads[0]["filename"], parent_id=kwargs["node_id"],
+                ))],
+            )
             with redirect_stdout(io.StringIO()):
                 result = global_update(configuration, mode="hive", output_directory=root / "generated",
                                        as_of=date(2026, 9, 26), devo_client=self._client(),
                                        darwin_upload=999, darwin_client=darwin)
             self.assertEqual(result["darwin_uploads"], 3)
-            self.assertEqual(len(uploads), 3)
-            self.assertEqual(len({item["filename"] for item in uploads}), 1)
+            self.assertEqual(len(uploads), 4)
+            self.assertEqual(len({item["filename"] for item in uploads}), 2)
             self.assertTrue(all(item["add_version"] and item["is_parent"] for item in uploads))
             manifest = json.loads((root / "generated" / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["applications"][0]["status"], "complete")

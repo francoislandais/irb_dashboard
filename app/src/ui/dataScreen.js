@@ -1,5 +1,5 @@
 import { setLatestState } from "./appState.js";
-import { getInstitutionDisplayInfo } from "../data/institutionDictionary.js?v=20261021-cons-conso";
+import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261021-cons-conso";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20261021-cons-conso";
 import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261021-cons-conso";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
@@ -31,6 +31,9 @@ const elements = {
   institutionSelect: document.querySelector("#institution-select"),
   institutionPickerToggle: document.querySelector("#institution-picker-toggle"),
   institutionPickerMenu: document.querySelector("#institution-picker-menu"),
+  institutionPickerSearch: document.querySelector("#institution-picker-search"),
+  institutionPickerOptions: document.querySelector("#institution-picker-options"),
+  institutionPickerEmpty: document.querySelector("#institution-picker-empty"),
   institutionPickerName: document.querySelector("#institution-picker-name"),
   institutionPickerLevel: document.querySelector("#institution-picker-level"),
   moduleButtons: [...document.querySelectorAll("[data-module-target]")],
@@ -86,6 +89,7 @@ export function wireUi(actions) {
   elements.institutionPickerToggle.addEventListener("click", () => {
     setInstitutionPickerOpen(elements.institutionPickerMenu.hidden);
   });
+  elements.institutionPickerSearch.addEventListener("input", filterInstitutionPickerOptions);
   elements.institutionPickerMenu.addEventListener("click", (event) => {
     const option = event.target.closest("[data-institution-option]");
     if (!option) return;
@@ -101,11 +105,10 @@ export function wireUi(actions) {
     if (event.key === "ArrowDown" && elements.institutionPickerMenu.hidden) {
       event.preventDefault();
       setInstitutionPickerOpen(true);
-      elements.institutionPickerMenu.querySelector("[data-institution-option]")?.focus();
     }
   });
   elements.institutionPickerMenu.addEventListener("keydown", (event) => {
-    const options = [...elements.institutionPickerMenu.querySelectorAll("[data-institution-option]")];
+    const options = [...elements.institutionPickerOptions.querySelectorAll("[data-institution-option]:not([hidden])")];
     const currentIndex = options.indexOf(document.activeElement);
     if (event.key === "Escape") {
       event.preventDefault();
@@ -114,10 +117,15 @@ export function wireUi(actions) {
       return;
     }
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (!options.length) return;
       event.preventDefault();
       const step = event.key === "ArrowDown" ? 1 : -1;
       const nextIndex = (currentIndex + step + options.length) % options.length;
       options[nextIndex]?.focus();
+    }
+    if (event.key === "Enter" && document.activeElement === elements.institutionPickerSearch) {
+      event.preventDefault();
+      options[0]?.click();
     }
   });
   elements.institutionPickerMenu.addEventListener("focusout", (event) => {
@@ -334,7 +342,7 @@ function renderInstitutionSelect(state) {
   const selectedInstitutionId = state.selectedInstitutionId ?? state.selectedJst;
   const dictionary = state.institutionDictionary ?? {};
   elements.institutionSelect.replaceChildren();
-  elements.institutionPickerMenu.replaceChildren();
+  elements.institutionPickerOptions.replaceChildren();
   fitInstitutionField(institutionOptions, dictionary);
 
   if (institutionOptions.length === 0) {
@@ -356,6 +364,8 @@ function renderInstitutionSelect(state) {
     row.type = "button";
     row.className = "institution-picker-option";
     row.dataset.institutionOption = institutionId;
+    row.dataset.institutionSearch = [institutionId, entry?.institutionId, institutionName,
+      entry?.jstCode, entry?.consolidationLevel].filter(Boolean).join(" ");
     row.setAttribute("role", "option");
     row.setAttribute("aria-selected", String(institutionId === selectedInstitutionId));
     row.setAttribute("aria-label", [entry?.consolidationLevel, institutionName, entry?.jstCode || institutionId].filter(Boolean).join(", "));
@@ -372,8 +382,9 @@ function renderInstitutionSelect(state) {
       text.append(subline);
     }
     row.append(text);
-    elements.institutionPickerMenu.append(row);
+    elements.institutionPickerOptions.append(row);
   });
+  filterInstitutionPickerOptions();
   const selectedEntry = getInstitutionDisplayInfo(dictionary, selectedInstitutionId);
   elements.institutionPickerName.textContent = selectedEntry?.institutionName || selectedInstitutionId;
   elements.institutionPickerLevel.textContent = selectedEntry?.consolidationLevel
@@ -416,6 +427,22 @@ function fitInstitutionField(institutionOptions, dictionary) {
 function setInstitutionPickerOpen(isOpen) {
   elements.institutionPickerMenu.hidden = !isOpen || elements.institutionPickerToggle.disabled;
   elements.institutionPickerToggle.setAttribute("aria-expanded", String(!elements.institutionPickerMenu.hidden));
+  if (elements.institutionPickerMenu.hidden) {
+    elements.institutionPickerSearch.value = "";
+    filterInstitutionPickerOptions();
+  } else {
+    elements.institutionPickerSearch.focus();
+  }
+}
+
+function filterInstitutionPickerOptions() {
+  let visible = 0;
+  elements.institutionPickerOptions.querySelectorAll("[data-institution-option]").forEach((option) => {
+    option.hidden = !matchesInstitutionSearch(elements.institutionPickerSearch.value,
+      option.dataset.institutionSearch);
+    if (!option.hidden) visible += 1;
+  });
+  elements.institutionPickerEmpty.hidden = visible > 0;
 }
 
 function renderActiveModule(activeModule, availableModules = []) {

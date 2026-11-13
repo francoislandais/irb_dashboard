@@ -634,6 +634,47 @@ p {
   display: none;
 }
 
+.institution-picker-search,
+.explorer-filter-institution-search {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cfd8d3;
+  border-radius: 5px;
+  background: #fff;
+  color: #273830;
+  font: inherit;
+  font-size: 0.75rem;
+  outline: none;
+}
+
+.institution-picker-search:focus-visible,
+.explorer-filter-institution-search:focus-visible {
+  border-color: #9baaa3;
+}
+
+.institution-picker-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-bottom: 4px;
+}
+
+.institution-picker-empty,
+.explorer-filter-institution-empty {
+  margin: 0;
+  padding: 10px;
+  color: #71817a;
+  font-size: 0.75rem;
+}
+
+.institution-picker-empty[hidden],
+.explorer-filter-institution-empty[hidden],
+.institution-picker-option[hidden],
+.explorer-filter-dropdown-option[hidden] {
+  display: none;
+}
+
 .institution-picker-option {
   align-items: start;
   background: transparent;
@@ -727,6 +768,10 @@ p {
 button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
   outline-offset: 2px;
+}
+
+.field .institution-picker-search:focus {
+  outline: none;
 }
 
 .content-grid {
@@ -3459,6 +3504,17 @@ table {
   border-radius: 7px;
   background: #fff;
   box-shadow: 0 8px 22px rgb(30 51 41 / 0.14);
+}
+
+.explorer-filter-institution-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-bottom: 4px;
+}
+
+.explorer-filter-institution-options {
+  display: grid;
 }
 
 .explorer-filter-dropdown-option {

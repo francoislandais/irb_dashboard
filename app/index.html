@@ -37,14 +37,18 @@
           <div class="field compact-field institution-field">
             <span>Institution</span>
             <div class="institution-picker">
-              <button id="institution-picker-toggle" class="institution-picker-toggle" type="button" disabled aria-haspopup="listbox" aria-expanded="false" aria-label="Select an institution">
+              <button id="institution-picker-toggle" class="institution-picker-toggle" type="button" disabled aria-haspopup="dialog" aria-expanded="false" aria-label="Select an institution">
                 <span class="institution-picker-current">
                   <span id="institution-picker-name" class="institution-picker-name">Chargez un CSV</span>
                   <span id="institution-picker-level" class="institution-level-badge" hidden></span>
                 </span>
                 <span class="institution-picker-chevron" aria-hidden="true">▾</span>
               </button>
-              <div id="institution-picker-menu" class="institution-picker-menu" role="listbox" aria-label="Institutions" hidden></div>
+              <div id="institution-picker-menu" class="institution-picker-menu" role="dialog" aria-label="Choose institution" hidden>
+                <input id="institution-picker-search" class="institution-picker-search" type="search" placeholder="Search name, JST or LEI" aria-label="Search institutions by name, JST or LEI" autocomplete="off">
+                <div id="institution-picker-options" class="institution-picker-options" role="listbox" aria-label="Institutions"></div>
+                <p id="institution-picker-empty" class="institution-picker-empty" hidden>No matching institution</p>
+              </div>
               <select id="institution-select" hidden aria-hidden="true" tabindex="-1"></select>
             </div>
           </div>
