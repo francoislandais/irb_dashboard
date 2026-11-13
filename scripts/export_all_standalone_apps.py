@@ -327,6 +327,13 @@ def _build_standalone_html(
             "institutionDictionaryFileName": "institution_dictionary.csv",
         })
     app_markup = _extract_app_markup(bundle["indexHtml"])
+    if app_name is not None:
+        brand_marker = '<strong id="app-brand-title">Agora Explorer</strong>'
+        if brand_marker not in app_markup:
+            raise ValueError("Le titre du bandeau est introuvable dans l'application source.")
+        app_markup = app_markup.replace(
+            brand_marker, f'<strong id="app-brand-title">{page_title}</strong>', 1,
+        )
     return f'''<!doctype html>
 <html lang="fr" data-standalone="true">
   <head>

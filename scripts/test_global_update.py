@@ -49,6 +49,37 @@ from export_all_standalone_apps import (  # noqa: E402
 
 
 class OutputDirectoryTests(unittest.TestCase):
+    def test_existing_output_is_replaced_on_rerun(self):
+        config = EXAMPLE_CONFIG_DIRECTORY / "02-corep.toml"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "temp_out"
+            global_update(config, mode="test", output_directory=output, as_of=date(2026, 9, 26))
+            stale = output / "obsolete.txt"
+            stale.write_text("ancienne sortie", encoding="utf-8")
+
+            global_update(config, mode="test", output_directory=output, as_of=date(2026, 9, 26))
+            self.assertFalse(stale.exists())
+            self.assertTrue((output / "manifest.json").is_file())
+            self.assertTrue((output / "applications" / "html" / "Agora Explorer_COREP.html").is_file())
+
+    def test_invalid_configuration_keeps_existing_output(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            output = root / "temp_out"
+            output.mkdir()
+            marker = output / "keep.txt"
+            marker.write_text("à conserver", encoding="utf-8")
+            invalid_config = root / "invalid.toml"
+            invalid_config.write_text('name = "invalid"\n', encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                global_update(invalid_config, mode="preview", output_directory=output)
+            self.assertEqual(marker.read_text(encoding="utf-8"), "à conserver")
+
+            with self.assertRaisesRegex(ValueError, "paramétrage TOML ne peut pas se trouver"):
+                global_update(marker, mode="preview", output_directory=output)
+            self.assertEqual(marker.read_text(encoding="utf-8"), "à conserver")
+
     def test_global_update_requires_an_external_output_directory(self):
         with self.assertRaisesRegex(ValueError, "obligatoire"):
             global_update(mode="preview")
@@ -249,7 +280,7 @@ class DarwinUploadTests(unittest.TestCase):
             self.assertEqual(manifest["applications"][0]["darwin_upload"]["file_node_id"], 1000)
             self.assertEqual(manifest["launcher"]["darwin_upload"]["status"], "uploaded")
             launcher = (Path(temporary_directory) / manifest["launcher"]["html"]).read_text(encoding="utf-8")
-            self.assertIn("https://darwin.escb.eu/livelink/livelink/app/nodes/1000", launcher)
+            self.assertIn("https://darwin.escb.eu/livelink/livelink/fetchcsui/1914437350/Agora%20Explorer_FINREP.html?nodeid=1000&amp;vernum=-2", launcher)
 
     def test_failed_upload_preserves_local_files_and_completed_status(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -751,6 +782,10 @@ class ConfigurationValidationTests(unittest.TestCase):
             self.assertTrue((output / "Agora Explorer_launcher.html").is_file())
             self.assertEqual(len(manifest["applications"]), 4)
             self.assertTrue(all((output / app["html_app"]).is_file() for app in manifest["applications"]))
+            finrep_html = (output / manifest["applications"][0]["html_app"]).read_text(encoding="utf-8")
+            self.assertIn("<title>FINREP</title>", finrep_html)
+            self.assertIn('<strong id="app-brand-title">FINREP</strong>', finrep_html)
+            self.assertNotIn("Agora Explorer — FINREP", finrep_html)
             self.assertEqual(
                 [app["config_file"] for app in manifest["applications"]],
                 [f"global-update-combined.toml, application {index}" for index in range(1, 5)],

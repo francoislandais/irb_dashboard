@@ -5,9 +5,10 @@ from __future__ import annotations
 from collections import defaultdict
 from html import escape
 from pathlib import Path
+from urllib.parse import quote
 
 
-DARWIN_NODE_URL = "https://darwin.escb.eu/livelink/livelink/app/nodes/{node_id}"
+DARWIN_FILE_URL = "https://darwin.escb.eu/livelink/livelink/fetchcsui/{folder_id}/{filename}?nodeid={node_id}&vernum=-2"
 TEMPLATE_PATH = Path(__file__).resolve().parents[1] / "examples" / "launcher-preview.html"
 
 
@@ -114,15 +115,40 @@ def resolve_darwin_app_links(applications: list[dict], folder_id: int, client) -
         if duplicates:
             problems.append("plusieurs nœuds Darwin portent le même nom : " + ", ".join(duplicates))
         raise ValueError(" ; ".join(problems))
-    return {name: DARWIN_NODE_URL.format(node_id=matches[name][0]) for name in wanted}
+    return {
+        name: DARWIN_FILE_URL.format(folder_id=folder_id, filename=quote(name, safe=""), node_id=matches[name][0])
+        for name in wanted
+    }
+
+
+def _institution_lei(member: dict) -> str:
+    lei = str(member.get("lei") or "").strip()
+    if lei:
+        return lei
+    institution_id = str(member.get("institution_id") or "").strip()
+    return institution_id.rsplit("_", 1)[0] if "_" in institution_id else institution_id
+
+
+def _collect_institutions(applications: list[dict]) -> dict[str, dict]:
+    institutions: dict[str, dict] = {}
+    for app in applications:
+        for member in app.get("institutions") or []:
+            lei = _institution_lei(member)
+            if not lei:
+                continue
+            institution = institutions.setdefault(lei, {"lei": lei, "institution_name": lei, "jst_codes": set()})
+            name = str(member.get("institution_name") or "").strip()
+            if name and institution["institution_name"] == lei:
+                institution["institution_name"] = name
+            jst_code = str(member.get("jst_code") or "").strip()
+            if jst_code:
+                institution["jst_codes"].add(jst_code)
+    return institutions
 
 
 def _peer_group_title(app: dict, members: list[dict]) -> str:
     if len(members) <= 3:
-        return " · ".join(
-            f'{member["institution_name"]} ({member["consolidation_level"]})'
-            for member in members
-        )
+        return " · ".join(member["institution_name"] for member in members)
     if app.get("ssm_supervision_country"):
         scope = "Supervision country: " + ", ".join(app["ssm_supervision_country"])
     elif app.get("clusters"):
@@ -134,30 +160,40 @@ def _peer_group_title(app: dict, members: list[dict]) -> str:
     return f"{scope} ({len(members)} institutions)"
 
 
+def _member_markup(member: dict) -> str:
+    jst_codes = ", ".join(sorted(member["jst_codes"]))
+    metadata = f'LEI {member["lei"]}' + (f" · JST {jst_codes}" if jst_codes else "")
+    return (
+        '<span class="group-member" '
+        f'data-institution-lei="{escape(member["lei"], quote=True)}" '
+        f'data-institution-name="{escape(member["institution_name"], quote=True)}" '
+        f'data-institution-jst="{escape(jst_codes, quote=True)}">'
+        f'<strong>{escape(member["institution_name"])}</strong>'
+        f'<small>{escape(metadata)}</small></span>'
+    )
+
+
 def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str:
     """Populate the reviewed launcher layout with real institutions and links."""
 
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
+    institutions = _collect_institutions(applications)
     grouped: dict[tuple[str, ...], list[dict]] = {}
     for app in applications:
         members = app.get("institutions") or []
         if not members or not app.get("html_app"):
             continue
-        key = tuple(sorted(member["institution_id"] for member in members))
+        key = tuple(sorted({_institution_lei(member) for member in members} - {""}))
+        if not key:
+            continue
         grouped.setdefault(key, []).append(app)
     sections = []
-    for number, apps in enumerate(grouped.values(), start=1):
-        members_by_id = {member["institution_id"]: member for app in apps for member in app["institutions"]}
-        members = sorted(members_by_id.values(), key=lambda item: (
-            item["institution_name"].casefold(), item["consolidation_level"], item["institution_id"]
+    for number, (leis, apps) in enumerate(grouped.items(), start=1):
+        members = sorted((institutions[lei] for lei in leis), key=lambda item: (
+            item["institution_name"].casefold(), item["lei"]
         ))
         title = _peer_group_title(apps[0], members)
-        member_labels = " · ".join(
-            f'<span data-institution-id="{escape(member["institution_id"], quote=True)}" '
-            f'data-institution-name="{escape(member["institution_name"], quote=True)}">'
-            f'{escape(member["institution_name"])}: {escape(member["consolidation_level"])}</span>'
-            for member in members
-        )
+        member_labels = "".join(_member_markup(member) for member in members)
         articles = []
         for app in apps:
             filename = Path(app["html_app"]).name
@@ -172,8 +208,7 @@ def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str
                 '<article class="application">'
                 f'<div><h3 class="app-title">{escape(app["name"])}</h3>'
                 f'<p class="app-description">{escape(description or "Reporting data")}</p>'
-                f'<div class="app-meta"><span><strong>Consolidation:</strong> {escape(app["consolidation"])}</span>'
-                f'<span><strong>Institutions:</strong> {len(members)}</span></div></div>'
+                f'<div class="app-meta"><span><strong>Institutions:</strong> {len(members)}</span></div></div>'
                 f'<div class="app-action"><a class="open-button" href="{escape(link, quote=True)}" '
                 'target="_blank" rel="noopener noreferrer">Open application ↗</a></div></article>'
             )

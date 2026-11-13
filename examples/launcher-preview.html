@@ -27,7 +27,10 @@
     .scope-group[hidden] { display: none; }
     .scope-group:first-child { margin-top: 0; }
     .group-title { margin: 0; color: #173848; font-size: 18px; font-weight: 650; }
-    .group-levels { margin: 5px 0 11px; color: #687c7c; font-size: 12px; }
+    .group-levels { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 7px 0 14px; }
+    .group-member { display: inline-flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .group-member strong { color: #425b63; font-size: 12px; font-weight: 600; }
+    .group-member small { color: #8b9b9f; font-size: 11px; overflow-wrap: anywhere; }
     .group-list { border-top: 1px solid #dce5e5; }
     .application { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 28px; padding: 17px 0; border-bottom: 1px solid #e2e9e9; }
     .application[hidden] { display: none; }
@@ -72,7 +75,7 @@
       <!-- AGORA_GROUPS_START -->
       <section class="scope-group" data-group-id="northstar-riverside" aria-labelledby="northstar-title">
         <h2 class="group-title" id="northstar-title">Northstar Bank · Riverside Credit</h2>
-        <p class="group-levels"><span data-institution-id="northstar" data-institution-name="Northstar Bank">Northstar Bank: CONSO</span> · <span data-institution-id="riverside" data-institution-name="Riverside Credit">Riverside Credit: SOLO</span></p>
+        <p class="group-levels"><span class="group-member" data-institution-lei="5493001KJTIIGC8Y1R12" data-institution-name="Northstar Bank" data-institution-jst="DUM001"><strong>Northstar Bank</strong><small>LEI 5493001KJTIIGC8Y1R12 · JST DUM001</small></span><span class="group-member" data-institution-lei="969500Q2MA9Y1GQG8B61" data-institution-name="Riverside Credit" data-institution-jst="DUM004"><strong>Riverside Credit</strong><small>LEI 969500Q2MA9Y1GQG8B61 · JST DUM004</small></span></p>
         <div class="group-list">
           <article class="application">
             <div><h3 class="app-title">FINREP</h3><p class="app-description">Balance sheet and impairment reporting.</p>
@@ -88,7 +91,7 @@
       </section>
       <section class="scope-group" data-group-id="northstar-summit" aria-labelledby="northstar-summit-title">
         <h2 class="group-title" id="northstar-summit-title">Northstar Bank · Summit Financial</h2>
-        <p class="group-levels"><span data-institution-id="northstar" data-institution-name="Northstar Bank">Northstar Bank: CONSO</span> · <span data-institution-id="summit" data-institution-name="Summit Financial">Summit Financial: CONSO</span></p>
+        <p class="group-levels"><span class="group-member" data-institution-lei="5493001KJTIIGC8Y1R12" data-institution-name="Northstar Bank" data-institution-jst="DUM001"><strong>Northstar Bank</strong><small>LEI 5493001KJTIIGC8Y1R12 · JST DUM001</small></span><span class="group-member" data-institution-lei="213800WAVVOPS85N2205" data-institution-name="Summit Financial" data-institution-jst="DUM007"><strong>Summit Financial</strong><small>LEI 213800WAVVOPS85N2205 · JST DUM007</small></span></p>
         <div class="group-list">
           <article class="application">
             <div><h3 class="app-title">Credit risk</h3><p class="app-description">Capital requirements and IRB portfolios.</p>
@@ -99,7 +102,7 @@
       </section>
       <section class="scope-group" data-group-id="summit-harbor" aria-labelledby="summit-title">
         <h2 class="group-title" id="summit-title">Summit Financial · Harbor Group</h2>
-        <p class="group-levels"><span data-institution-id="summit" data-institution-name="Summit Financial">Summit Financial: CONSO</span> · <span data-institution-id="harbor" data-institution-name="Harbor Group">Harbor Group: CONSO</span></p>
+        <p class="group-levels"><span class="group-member" data-institution-lei="213800WAVVOPS85N2205" data-institution-name="Summit Financial" data-institution-jst="DUM007"><strong>Summit Financial</strong><small>LEI 213800WAVVOPS85N2205 · JST DUM007</small></span><span class="group-member" data-institution-lei="5493006MHB84DD0ZWV18" data-institution-name="Harbor Group" data-institution-jst="DUM010"><strong>Harbor Group</strong><small>LEI 5493006MHB84DD0ZWV18 · JST DUM010</small></span></p>
         <div class="group-list">
           <article class="application">
             <div><h3 class="app-title">COREP</h3><p class="app-description">Own funds and capital ratios.</p>
@@ -127,14 +130,19 @@
     const empty = document.querySelector('#empty-state');
     const summary = document.querySelector('#result-summary');
     const institutions = new Map();
-    groups.forEach((group) => group.querySelectorAll('[data-institution-id]').forEach((entry) => {
-      institutions.set(entry.dataset.institutionId, entry.dataset.institutionName);
+    groups.forEach((group) => group.querySelectorAll('[data-institution-lei]').forEach((entry) => {
+      institutions.set(entry.dataset.institutionLei, {
+        name: entry.dataset.institutionName,
+        jst: entry.dataset.institutionJst,
+      });
     }));
-    [...institutions].sort((a, b) => a[1].localeCompare(b[1])).forEach(([id, name]) => {
-      institutionFilter.add(new Option(name, id));
+    [...institutions].sort((a, b) => a[1].name.localeCompare(b[1].name)).forEach(([lei, institution]) => {
+      institutionFilter.add(new Option(
+        `${institution.name} · LEI ${lei}${institution.jst ? ` · JST ${institution.jst}` : ''}`, lei,
+      ));
     });
-    const includesInstitution = (group, id) => !id || [...group.querySelectorAll('[data-institution-id]')]
-      .some((entry) => entry.dataset.institutionId === id);
+    const includesInstitution = (group, lei) => !lei || [...group.querySelectorAll('[data-institution-lei]')]
+      .some((entry) => entry.dataset.institutionLei === lei);
     function updatePeerGroups() {
       const previous = peerGroupFilter.value;
       const compatible = groups.filter((group) => includesInstitution(group, institutionFilter.value));

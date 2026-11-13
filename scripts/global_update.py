@@ -25,6 +25,7 @@ from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Protocol
+from urllib.parse import parse_qs, urlsplit
 
 if __package__:
     from .compact_dataset_values import compact_dataset_rows
@@ -1084,7 +1085,7 @@ def _write_application_outputs(
         dataset_path,
         html_path,
         institution_dictionary_file_path=dictionary_path,
-        app_name=f"Agora Explorer — {application.name}",
+        app_name=application.name,
     )
     application_manifest.update({
         "dataset": str(dataset_path.relative_to(output_root)),
@@ -1319,8 +1320,10 @@ def global_update(
         raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
     output_root = resolve_external_output_directory(output_directory)
-    if mode == "hive" and output_root.exists() and any(output_root.iterdir()):
-        raise ValueError(f"Le dossier de sortie Hive doit être vide : {output_root}")
+    if PROJECT_DIRECTORY.is_relative_to(output_root):
+        raise ValueError(f"Le dossier de sortie ne peut pas contenir le projet : {output_root}")
+    if config_path is not None and Path(config_path).expanduser().resolve().is_relative_to(output_root):
+        raise ValueError(f"Le paramétrage TOML ne peut pas se trouver dans le dossier de sortie à remplacer : {output_root}")
     if darwin_folder_id is not None:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
         applications = _download_darwin_folder_configurations(darwin_folder_id, calculation_date, darwin_client)
@@ -1339,6 +1342,9 @@ def global_update(
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
     if darwin_upload is not None:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
+    if output_root.exists():
+        print(f"[Agora] Remplacement du dossier de sortie existant : {output_root}", flush=True)
+        shutil.rmtree(output_root)
     query_root = output_root / "queries"
     manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "extraction_format": extraction_format, "applications": []}
     if darwin_upload is not None:
@@ -1405,6 +1411,7 @@ def global_update(
         if reporting_units:
             application_manifest["institutions"] = [{
                 "institution_id": unit["institution_id"],
+                "lei": unit["lei"],
                 "institution_name": unit["institution_name"],
                 "consolidation_level": unit["consolidation_level"],
                 "jst_code": unit["jst_code"],
@@ -1507,7 +1514,7 @@ def global_update(
             link = links[Path(app["html_app"]).name]
             app["launcher_link"] = link
             if darwin_upload is not None:
-                app["darwin_upload"]["file_node_id"] = int(link.rsplit("/", 1)[-1])
+                app["darwin_upload"]["file_node_id"] = int(parse_qs(urlsplit(link).query)["nodeid"][0])
         launcher_path = output_root / "Agora Explorer_launcher.html"
         launcher_path.write_text(render_launcher_html(completed_apps, links), encoding="utf-8")
         manifest["launcher"] = {"html": launcher_path.name, "applications": len(completed_apps)}
