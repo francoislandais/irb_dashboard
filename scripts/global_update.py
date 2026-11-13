@@ -192,12 +192,26 @@ def _reference_dates(frequency: str, history_periods: int, as_of: date) -> tuple
     return tuple(item.isoformat() for item in dates)
 
 
+_APPLICATION_TOGGLE = "# AGORA_TOGGLE"
+
+
+def _active_toml_text(raw: str) -> str:
+    """Remove ranges delimited by the standalone toggle comment before TOML parsing."""
+    active = True
+    kept = []
+    for line in raw.splitlines(keepends=True):
+        if line.strip() == _APPLICATION_TOGGLE:
+            active = not active
+        elif active:
+            kept.append(line)
+    return "".join(kept)
+
+
 def _configuration_blocks(entries: list[Path]):
     """Iterate over applications from a combined or legacy TOML file."""
     for file in entries:
         try:
-            with file.open("rb") as stream:
-                config = tomllib.load(stream)
+            config = tomllib.loads(_active_toml_text(file.read_text(encoding="utf-8")))
         except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
             raise ValueError(f"{file}: syntaxe TOML invalide : {error}") from error
         if "applications" not in config:
@@ -236,7 +250,12 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
     names: set[str] = set()
     output_names: set[str] = set()
     for config, context in _configuration_blocks(entries):
-        _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "ssmsignificance", "consolidation", "export-dataset", "extractions"}, context)
+        _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "ssmsignificance", "consolidation", "export-dataset", "extractions", "activate"}, context)
+        activate = config.get("activate", True)
+        if type(activate) not in (bool, int) or activate not in (0, 1):
+            raise ValueError(f"{context}: activate doit être true, false, 1 ou 0.")
+        if not activate:
+            continue
         name = _required_text(config.get("name"), "name", context)
         export_dataset = config.get("export-dataset", False)
         if type(export_dataset) is not bool:

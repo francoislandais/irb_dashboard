@@ -803,6 +803,31 @@ class ConfigurationValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, r"applications.toml, application 2, extraction 1"):
                 _read_configuration(config, date(2026, 9, 26))
 
+    def test_combined_toml_toggle_and_activate(self):
+        source = (PROJECT_DIRECTORY / "examples" / "global-update-combined.toml").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            config = Path(temporary_directory) / "applications.toml"
+            source = source.replace('name = "FINREP"', 'name = "FINREP"\nactivate = 1', 1)
+            source = source.replace('name = "COREP"', 'name = "COREP"\nactivate = false', 1)
+            source = source.replace('[[applications]]\nname = "FINREP + COREP"',
+                                    '# AGORA_TOGGLE\ninvalid TOML ignored here\n# AGORA_TOGGLE\n[[applications]]\nname = "FINREP + COREP"', 1)
+            config.write_text(source, encoding="utf-8")
+            self.assertEqual([app.name for app in _read_configuration(config, date(2026, 9, 26))],
+                             ["FINREP", "FINREP + COREP", "KRI"])
+            config.write_text(source.replace('name = "KRI"', 'name = "KRI"\nactivate = 0', 1), encoding="utf-8")
+            self.assertEqual([app.name for app in _read_configuration(config, date(2026, 9, 26))],
+                             ["FINREP", "FINREP + COREP"])
+            config.write_text(source.replace('[[applications]]\nname = "KRI"',
+                                             '# AGORA_TOGGLE\n[[applications]]\nname = "KRI"', 1), encoding="utf-8")
+            self.assertEqual([app.name for app in _read_configuration(config, date(2026, 9, 26))],
+                             ["FINREP", "FINREP + COREP"])
+            config.write_text(source.replace('[[applications]]\nname = "FINREP + COREP"',
+                                             '# AGORA_TOGGLE\n[[applications]]\nname = "FINREP + COREP"', 1)
+                                     .replace('[[applications]]\nname = "KRI"',
+                                              '# AGORA_TOGGLE\n[[applications]]\nname = "KRI"', 1), encoding="utf-8")
+            self.assertEqual([app.name for app in _read_configuration(config, date(2026, 9, 26))],
+                             ["FINREP", "KRI"])
+
     def test_single_darwin_node_can_define_multiple_applications(self):
         combined_path = PROJECT_DIRECTORY / "examples" / "global-update-combined.toml"
         downloaded = []

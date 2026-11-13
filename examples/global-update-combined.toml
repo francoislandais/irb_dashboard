@@ -1,6 +1,8 @@
 # Un seul fichier décrit toutes les applications. Les LEI ci-dessous sont fictifs.
 # Chaque [[applications]] définit son périmètre institutionnel.
 # Les [[applications.extractions]] qui suivent appartiennent à cette application.
+# Optionnel : activate = false (ou 0) désactive une application.
+# La ligne # AGORA_TOGGLE entre deux applications suspend puis rétablit la lecture.
 
 [[applications]]
 name = "FINREP"

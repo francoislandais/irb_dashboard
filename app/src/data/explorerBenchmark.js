@@ -1,4 +1,4 @@
-import { getIndexedRowsByCoordinates } from "./dataIndex.js?v=20260925-institution-id";
+import { getIndexedRowsByCoordinates, getIndexedRowsByTableJst } from "./dataIndex.js?v=20260925-institution-id";
 import { normalizeAxisCode } from "./core/axisCode.js?v=20260921-z-axis-padding";
 import { parseNumericValue } from "./core/referenceColumns.js";
 import { EXPLORER_ALL_CURRENCIES_CODE, EXPLORER_ALL_CURRENCIES_LABEL, explorerTableHasCurrencyZAxis } from "./explorer.js?v=20260922-native-all-currency";
@@ -46,7 +46,13 @@ export function getBenchmarkRows(state, indexes, tableId, selections, jstCode) {
   // z_axis_rc_code is blank", not "ignore z" - which would sum that
   // pre-aggregated total together with every individual currency row too.
   const requireBlankZ = explorerTableHasCurrencyZAxis(state, tableId);
-  return state.rows.filter((row) => (
+  // Partial selections (notably the blank Z code of an "All currencies"
+  // total) used to scan the entire dataset once for *each* peer. Start from
+  // the existing table/institution index instead.
+  const candidates = state.dataIndexes
+    ? getIndexedRowsByTableJst(state, tableId, jstCode)
+    : state.rows;
+  return candidates.filter((row) => (
     row[indexes.jstCode] === jstCode
     && row[indexes.tableId] === tableId
     && matchesBenchmarkSelection(row, indexes, "x", selections.selectedXCode, tableId)

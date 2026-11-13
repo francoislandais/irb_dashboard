@@ -4507,6 +4507,28 @@ table {
   font-size: 0.72rem;
 }
 
+.metric-table.is-institution-view .description-column {
+  min-width: 260px;
+  max-width: 380px;
+  width: 320px;
+  text-align: left;
+}
+
+.metric-table.is-institution-view tbody tr {
+  cursor: pointer;
+}
+
+.metric-table.is-institution-view tbody tr.is-selected > th,
+.metric-table.is-institution-view tbody tr.is-selected > td {
+  background: #eaf3fb;
+  color: #075f96;
+}
+
+.explorer-institution-pagination .explorer-kri-pagination-button[aria-current="page"] {
+  background: #eaf3fb;
+  border-color: #a7cbe5;
+}
+
 .metric-table th,
 .metric-table td {
   border: 0;
@@ -5816,22 +5838,23 @@ table {
   position: absolute;
   top: 0;
   right: 0;
-  left: calc(var(--module-nav-width) + 326px);
+  left: calc(var(--module-nav-width) + 240px);
   height: 48px;
-  z-index: 39;
+  z-index: 41;
   pointer-events: none;
-  background: #f3f5f6;
+  background-color: #f3f5f6;
+  background-image: linear-gradient(90deg, var(--primary-dark) 0, transparent 150px);
 }
 .app-header {
   position: relative;
   grid-column: 1 / -1;
   grid-row: 1;
   width: calc(var(--module-nav-width) + 326px);
-  z-index: 40;
+  z-index: 42;
   grid-template-columns: minmax(0, 1fr);
   min-height: 48px;
   overflow: hidden;
-  background: var(--primary-dark);
+  background: linear-gradient(90deg, var(--primary-dark) 0, var(--primary-dark) calc(var(--module-nav-width) + 240px), transparent calc(var(--module-nav-width) + 240px));
 }
 .app-header .global-bar {
   display: none;
@@ -5930,8 +5953,8 @@ table {
   height: 48px;
   margin-left: 0;
   padding: 6px 2px;
-  background: #f3f5f6;
-  box-shadow: -18px 0 0 #f3f5f6;
+  background: transparent;
+  box-shadow: none;
   border: 0;
   z-index: 41;
 }
@@ -5978,4 +6001,33 @@ table {
 /* Other modules keep their own controls below the fixed title strip. */
 .main-view:not(:has(> .explorer-view.is-visible)) {
   padding-top: 50px;
+}
+
+/* The institution dimension uses the same time and XY headers as the
+   ordinary Explorer table, with a single frozen label column. */
+.metric-table.is-institution-view .description-column {
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  padding-left: 8px;
+}
+
+.metric-table.is-institution-view.is-xy-view thead th.description-column {
+  color: #334139;
+  text-align: left;
+}
+
+.metric-table.is-institution-view.is-xy-view
+  .explorer-xy-group.is-horizontally-merged > .explorer-xy-header-label {
+  left: 320px;
+}
+
+.metric-table.is-institution-view tbody tr.is-selected > th.description-column {
+  background: #eaf3fb !important;
+  color: #075f96 !important;
+}
+
+.metric-table.is-institution-view tbody tr.is-selected > td.is-selected-cell {
+  background: var(--primary-dark) !important;
+  color: #f4fbf8 !important;
 }

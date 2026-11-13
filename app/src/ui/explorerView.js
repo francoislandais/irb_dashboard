@@ -8,6 +8,7 @@ import { normalizeAxisCode } from "../data/core/axisCode.js?v=20260921-z-axis-pa
 import { GEOGRAPHIC_COUNTRY_TEMPLATES, normalizeGeographicCountryCode } from "../data/geographicCountryAxis.js";
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js?v=20260925-institution-id";
+import { getIndexedRowsByTableJst } from "../data/dataIndex.js?v=20260925-institution-id";
 import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260928-local-description";
@@ -96,6 +97,7 @@ const EXPLORER_GEOGRAPHY_PAGE_URL_PARAM = "explorer_geography_page";
 const EXPLORER_REFERENCE_URL_PARAM = "explorer_reference_date";
 const EXPLORER_ANCHOR_REFERENCE_URL_PARAM = "explorer_anchor_date";
 const EXPLORER_CONTEXT_URL_PARAM = "explorer_context";
+const EXPLORER_INSTITUTION_VIEW_URL_PARAM = "explorer_institutions";
 const EXPLORER_CONTEXT_TOPICS = new Set([
   "jst-code", "reference-date", "unit", "display-mode", "benchmark-mode",
   "kri-formula", "geography", "peer-selection", "description"
@@ -207,6 +209,12 @@ let shouldFocusOpenedExplorerPoint = false;
 let shouldRevealExplorerAxisSelection = false;
 let lastRenderedExplorerTableSeries = null;
 let lastRenderedExplorerSelectedUnit = null;
+let explorerInstitutionTableVisible = readUrlStateParams().get(EXPLORER_INSTITUTION_VIEW_URL_PARAM) === "1";
+let explorerInstitutionPageIndex = 0;
+let explorerInstitutionLastSelectedJst = "";
+let explorerInstitutionPageInitialized = false;
+const EXPLORER_INSTITUTION_PAGE_SIZE = 30;
+const explorerBenchmarkCacheByRows = new WeakMap();
 let lastRenderedExplorerParentPaths = new Set();
 // The exact state object last passed to renderExplorer - used only to tell
 // the store producing a new state with nothing but peerDisplayMode different
@@ -385,6 +393,7 @@ export function wireExplorerUi(actions, rerender) {
       hasInteractedWithExplorerSelection = true;
       saveExplorerScrollPosition();
       const requestedAxis = button.getAttribute("data-explorer-axis") || "y";
+      explorerInstitutionTableVisible = false;
       getActiveExplorerContext().activeAxis = requestedAxis;
       shouldRevealExplorerAxisSelection = true;
       if (requestedAxis === "x" && isExplorerXYView()) shouldCenterExplorerReferenceColumn = true;
@@ -393,10 +402,11 @@ export function wireExplorerUi(actions, rerender) {
   });
   elements.explorerXYAxisSummary?.addEventListener("click", () => {
     const context = getActiveExplorerContext();
-    if (context.selectedAxis !== "z") return;
+    if (!explorerInstitutionTableVisible && context.selectedAxis !== "z") return;
     hasInteractedWithExplorerSelection = true;
     saveExplorerScrollPosition();
-    context.activeAxis = "y";
+    if (context.selectedAxis === "z") context.activeAxis = "y";
+    explorerInstitutionTableVisible = false;
     shouldRevealExplorerAxisSelection = true;
     rerenderApp(actions.getState());
   });
@@ -652,6 +662,7 @@ function updateUrlExplorerSelectionParams() {
   setOrDeleteUrlParam(url, ROW_URL_PARAM, context.selectedYCode);
   setOrDeleteUrlParam(url, COLUMN_URL_PARAM, context.selectedXCode);
   setOrDeleteUrlParam(url, TAB_URL_PARAM, context.selectedZCode);
+  setOrDeleteUrlParam(url, EXPLORER_INSTITUTION_VIEW_URL_PARAM, explorerInstitutionTableVisible ? "1" : "");
   setOrDeleteUrlParam(url, EXPLORER_ANCHOR_REFERENCE_URL_PARAM, explorerAnchorReferenceLabel);
   if (explorerGlobalHistoryPeriods === DEFAULT_EXPLORER_HISTORY_PERIODS) {
     url.searchParams.delete(EXPLORER_HISTORY_PERIODS_URL_PARAM);
@@ -1594,6 +1605,13 @@ export function renderExplorer(state, { deferChromeUntilTable = false } = {}) {
   lastRenderedExplorerParentPaths = new Set();
   if (!deferChromeUntilTable) refreshExplorerSelectionChrome(state);
 
+  if (explorerInstitutionTableVisible) {
+    renderExplorerInstitutionTable(state, template);
+    if (deferChromeUntilTable) refreshExplorerSelectionChrome(state, { selectionOnly: true });
+    return;
+  }
+  elements.explorerTable.parentElement?.parentElement?.querySelector(".explorer-institution-pagination")?.remove();
+
   // Rendering only a page's worth of rows (see renderExplorerTable) doesn't
   // help if the expensive part - computing every KRI's full date-by-date
   // series - still runs for the whole list on every render. Work out
@@ -1820,6 +1838,25 @@ function exportVisibleExplorerTable() {
 }
 
 function buildVisibleExplorerExcelPayload(state, table) {
+  if (table.classList.contains("is-institution-view")) {
+    const template = getActiveExplorerTemplate();
+    return {
+      columns: [...table.tHead.querySelectorAll("th[data-explorer-export-column]")].map((cell, index) => ({
+        label: cell.dataset.explorerExportLabel || cell.textContent.trim(), width: index === 0 ? 54 : 20
+      })),
+      fileName: sanitizeExcelFileName(`Agora Explorer_${template?.id || "Template"}_Institution.xlsx`),
+      metadata: [
+        { label: "Template", value: template?.tableId || "-" },
+        { label: "Displayed dimension", value: "Institution" },
+        { label: "Display unit", value: getUnitFilterLabel(state.selectedUnit) }
+      ],
+      rows: [...table.tBodies[0].rows].map((row) => ({
+        cells: [...row.cells].map((cell, index) => buildExplorerExcelCell(cell, index === 0 ? 0 : index + 1, row, state))
+      })),
+      subtitle: `Visible institutions · ${getUnitFilterLabel(state.selectedUnit)}`,
+      title: `${template?.id || "Template"} — Institution dimension`
+    };
+  }
   const activeAxis = getActiveExplorerAxis();
   const axisLabels = { x: "Column", y: "Row", z: "Tab" };
   const displayedDimension = axisLabels[activeAxis] ?? activeAxis.toUpperCase();
@@ -2065,6 +2102,313 @@ function syncExplorerXYColumnSelection(series = lastRenderedExplorerTableSeries)
   if (!context.selectedReferenceLabel && series.reference) context.selectedReferenceLabel = series.reference.label;
 }
 
+function getExplorerInstitutionXYColumns(state, template) {
+  const tableId = template?.tableId ?? EXPLORER_TARGET.tableId;
+  const configured = getExplorerAxisPointsConfig(state, tableId, "x", template?.id ?? tableId);
+  const points = configured.length ? configured : getAvailableExplorerAxisCodes(state, tableId, "x")
+    .map((code) => ({ code, description: code, hierarchyPath: code }));
+  const seen = new Set();
+  return points.filter((point) => {
+    if (!point.code || seen.has(point.code)) return false;
+    seen.add(point.code);
+    return true;
+  }).map((point) => ({ ...point, label: point.description || point.code }));
+}
+
+function getExplorerInstitutionXYValues(state, template, institutions, columns, reference) {
+  const result = new Map();
+  const indexes = getCompleteAxisColumnIndexes(state.columns);
+  if (!indexes || !reference) return result;
+  const tableId = template?.tableId ?? EXPLORER_TARGET.tableId;
+  const context = getActiveExplorerContext();
+  const selectedY = normalizeAxisCode(context.selectedYCode, "y", tableId);
+  const selectedZ = context.selectedZCode === EXPLORER_ALL_CURRENCIES_CODE
+    ? "" : normalizeAxisCode(context.selectedZCode, "z");
+  const requireBlankZ = explorerTableHasCurrencyZAxis(state, tableId);
+  const contribution = getExplorerBenchmarkContributionContext(context, context.activeAxis);
+  const allowedX = new Set(columns.map((column) => column.code));
+  institutions.forEach((institutionId) => {
+    const sums = new Map();
+    const counts = new Set();
+    const sourceRows = state.dataIndexes
+      ? getIndexedRowsByTableJst(state, tableId, institutionId)
+      : state.rows.filter((row) => row[indexes.tableId] === tableId && row[indexes.jstCode] === institutionId);
+    sourceRows.forEach((row) => {
+      if (selectedY && normalizeAxisCode(row[indexes.yAxisRcCode], "y", tableId) !== selectedY) return;
+      const zCode = normalizeAxisCode(row[indexes.zAxisRcCode], "z");
+      if (selectedZ ? zCode !== selectedZ : requireBlankZ && zCode !== "") return;
+      const xCode = normalizeAxisCode(row[indexes.xAxisRcCode], "x");
+      if (!allowedX.has(xCode)) return;
+      const raw = String(row[reference.index] ?? "").trim();
+      const value = raw ? parseNumericValue(raw, NaN) : NaN;
+      if (!Number.isFinite(value)) return;
+      sums.set(xCode, (sums.get(xCode) ?? 0) + value);
+      counts.add(xCode);
+    });
+    const baseRows = contribution
+      ? getBenchmarkRows(state, indexes, contribution.tableId || tableId, contribution.selections, institutionId)
+      : [];
+    const baseValue = contribution
+      ? getBenchmarkPointValue(baseRows, [], reference.index, false)
+      : null;
+    const values = new Map();
+    columns.forEach((column) => {
+      let value = counts.has(column.code) ? sums.get(column.code) : null;
+      if (contribution && value !== null) {
+        value = baseRows.length && baseValue !== 0 ? value / baseValue : null;
+      }
+      values.set(column.code, value);
+    });
+    result.set(institutionId, values);
+  });
+  return result;
+}
+
+function selectExplorerInstitutionCell(institutionId, { referenceLabel = "", xCode = "" } = {}) {
+  const state = getLatestState();
+  if (!state) return;
+  hasInteractedWithExplorerSelection = true;
+  const context = getActiveExplorerContext();
+  if (referenceLabel) context.selectedReferenceLabel = referenceLabel;
+  if (xCode) context.selectedXCode = xCode;
+  if (institutionId !== state.selectedJst) updateSelectedJst(institutionId);
+  else {
+    saveExplorerScrollPosition();
+    rerenderApp(state);
+  }
+}
+
+function renderExplorerInstitutionTable(state, template) {
+  const table = elements.explorerTable;
+  const institutions = state?.institutionOptions ?? state?.jstOptions ?? [];
+  if (!explorerInstitutionPageInitialized || explorerInstitutionLastSelectedJst !== state.selectedJst) {
+    const selectedIndex = institutions.indexOf(state.selectedJst);
+    explorerInstitutionPageIndex = Math.floor(Math.max(0, selectedIndex) / EXPLORER_INSTITUTION_PAGE_SIZE);
+    explorerInstitutionPageInitialized = true;
+  }
+  explorerInstitutionLastSelectedJst = state.selectedJst;
+  const pageCount = Math.max(1, Math.ceil(institutions.length / EXPLORER_INSTITUTION_PAGE_SIZE));
+  explorerInstitutionPageIndex = Math.min(explorerInstitutionPageIndex, pageCount - 1);
+  const pageStart = explorerInstitutionPageIndex * EXPLORER_INSTITUTION_PAGE_SIZE;
+  const pageInstitutions = institutions.slice(pageStart, pageStart + EXPLORER_INSTITUTION_PAGE_SIZE);
+  const references = getExplorerTemplateReferenceDates(state, template?.tableId ?? EXPLORER_TARGET.tableId);
+  const selectedReference = getSelectedExplorerReference(state);
+  const isXY = isExplorerXYView();
+  const context = getActiveExplorerContext();
+  const visibleReferences = isXY ? [] : computeExplorerVisibleDateIndexes(references)
+    .map((index) => references[index]).reverse();
+  const xyColumns = isXY ? getExplorerInstitutionXYColumns(state, template) : [];
+  const benchmark = isXY ? null : buildExplorerBenchmark(pageInstitutions);
+  const seriesByInstitution = new Map((benchmark?.series ?? []).map((serie) => [serie.jstCode, serie]));
+  const xyValues = isXY ? getExplorerInstitutionXYValues(state, template, pageInstitutions, xyColumns, selectedReference) : null;
+  const xyContribution = isXY && Boolean(getExplorerBenchmarkContributionContext(context, context.activeAxis));
+  const xyFormats = isXY
+    ? new Map(xyColumns.map((column) => [
+        column.code, getBenchmarkValueFormat(state, template.tableId, { ...context, selectedXCode: column.code })
+      ]))
+    : null;
+
+  explorerXYHeaderObserver?.disconnect();
+  explorerXYHeaderObserver = null;
+  table.replaceChildren();
+  table.classList.toggle("is-xy-view", isXY);
+  table.classList.remove("has-taxonomy-timeline", "is-kri-row-axis");
+  table.classList.add("is-institution-view");
+  table.style.width = isXY ? `${320 + xyColumns.length * 150}px` : "";
+  table.setAttribute("aria-label", "Institutions for the selected data point");
+  elements.explorerEmpty.hidden = institutions.length > 0;
+  elements.explorerEmpty.textContent = institutions.length ? "" : "No institutions available.";
+  if (elements.explorerExcelExport) elements.explorerExcelExport.disabled = !institutions.length;
+  if (elements.explorerKriPagination) elements.explorerKriPagination.hidden = true;
+  if (elements.explorerGeographyPagination) elements.explorerGeographyPagination.hidden = true;
+
+  const thead = document.createElement("thead");
+  const institutionHeader = document.createElement("th");
+  institutionHeader.scope = "col";
+  institutionHeader.className = "description-column";
+  institutionHeader.textContent = "Institution";
+  institutionHeader.dataset.explorerExportColumn = "true";
+  if (isXY) {
+    const levels = buildExplorerXYHeaders(xyColumns);
+    institutionHeader.rowSpan = levels.length;
+    levels.forEach((headers, level) => {
+      const row = document.createElement("tr");
+      row.className = "explorer-xy-header-row";
+      if (level === 0) row.append(institutionHeader);
+      headers.forEach((header) => {
+        const cell = document.createElement("th");
+        cell.scope = header.leaf ? "col" : "colgroup";
+        cell.colSpan = header.colSpan;
+        cell.rowSpan = header.rowSpan;
+        cell.className = header.leaf ? "explorer-xy-leaf" : "explorer-xy-group";
+        cell.classList.toggle("is-horizontally-merged", header.colSpan > 1);
+        cell.classList.toggle("is-duplicate-label", Boolean(header.isDuplicateLabel));
+        cell.classList.toggle("opens-into-next-duplicate", Boolean(header.opensIntoNextDuplicate));
+        cell.title = header.fullLabel || xyColumns[header.columnIndex]?.description || header.label;
+        const label = document.createElement("span");
+        label.className = "explorer-xy-header-label";
+        label.textContent = header.label;
+        cell.append(label);
+        if (header.leaf) {
+          const code = document.createElement("span");
+          code.className = "explorer-xy-header-code";
+          code.textContent = header.code;
+          cell.append(code);
+          cell.dataset.explorerDateColumn = String(header.columnIndex);
+          cell.dataset.explorerExportColumn = "true";
+          cell.dataset.explorerExportLabel = `${xyColumns[header.columnIndex].label} (${header.code})`;
+          cell.classList.toggle("is-selected-date-header", header.code === context.selectedXCode);
+          cell.addEventListener("click", () => selectExplorerInstitutionCell(state.selectedJst, { xCode: header.code }));
+        }
+        row.append(cell);
+      });
+      thead.append(row);
+    });
+  } else {
+    const yearRow = document.createElement("tr");
+    yearRow.className = "explorer-year-header-row";
+    institutionHeader.rowSpan = 2;
+    yearRow.append(institutionHeader);
+    let columnOffset = 0;
+    buildExplorerYearGroups(visibleReferences).forEach(({ count, year }) => {
+      const cell = document.createElement("th");
+      cell.className = "explorer-year-header";
+      cell.colSpan = count;
+      cell.scope = "colgroup";
+      cell.textContent = year;
+      if (visibleReferences.slice(columnOffset, columnOffset + count)
+        .some((reference) => reference.label === selectedReference?.label)) {
+        cell.classList.add("is-selected-year-header");
+      }
+      yearRow.append(cell);
+      columnOffset += count;
+    });
+    const quarterRow = document.createElement("tr");
+    quarterRow.className = "explorer-quarter-header-row";
+    visibleReferences.forEach((reference, index) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.classList.toggle("latest-column", index === 0);
+      cell.classList.toggle("is-selected-date-header", reference.label === selectedReference?.label);
+      cell.textContent = getExplorerQuarterLabel(reference);
+      cell.dataset.explorerExportColumn = "true";
+      cell.dataset.explorerExportLabel = getExplorerFullDateColumnLabel(reference);
+      cell.addEventListener("click", () => selectExplorerInstitutionCell(state.selectedJst, { referenceLabel: reference.label }));
+      quarterRow.append(cell);
+    });
+    thead.append(yearRow, quarterRow);
+  }
+  const tbody = document.createElement("tbody");
+  pageInstitutions.forEach((institutionId) => {
+    const row = document.createElement("tr");
+    row.classList.toggle("is-selected", institutionId === state.selectedJst);
+    row.setAttribute("aria-selected", String(institutionId === state.selectedJst));
+    row.setAttribute("role", "button");
+    row.tabIndex = 0;
+    const identity = getInstitutionDisplayInfo(state.institutionDictionary, institutionId);
+    const label = document.createElement("th");
+    label.scope = "row";
+    label.className = "description-column";
+    label.textContent = identity?.institutionName || institutionId;
+    label.title = institutionId;
+    row.append(label);
+    const values = isXY
+      ? xyValues.get(institutionId) ?? new Map()
+      : new Map((seriesByInstitution.get(institutionId)?.values ?? []).map((point) => [point.label, point.value]));
+    const columns = isXY ? xyColumns : visibleReferences;
+    columns.forEach((column, index) => {
+      const cell = document.createElement("td");
+      const value = values.get(isXY ? column.code : column.label);
+      const format = isXY ? xyFormats.get(column.code) : benchmark.format;
+      const isContribution = isXY ? xyContribution : benchmark.isContribution;
+      cell.textContent = Number.isFinite(value)
+        ? isContribution ? formatContributionPercentValue(value) : formatMetricValue(value, state.selectedUnit, format)
+        : "–";
+      cell.dataset.explorerExportFormat = isContribution ? "percentage" : format;
+      cell.dataset.explorerCellKind = isContribution ? "ratio" : isUnitFormat(format) ? "unit" : "amount";
+      cell.dataset.explorerCellColumn = String(index);
+      if (Number.isFinite(value)) cell.dataset.explorerCellValue = String(value);
+      const selectedColumn = isXY ? column.code === context.selectedXCode : column.label === selectedReference?.label;
+      cell.classList.toggle("is-selected-date-column", selectedColumn);
+      cell.classList.toggle("is-selected-cell", institutionId === state.selectedJst && selectedColumn);
+      cell.addEventListener("click", (event) => {
+        event.stopPropagation();
+        selectExplorerInstitutionCell(institutionId, isXY ? { xCode: column.code } : { referenceLabel: column.label });
+      });
+      row.append(cell);
+    });
+    const select = () => {
+      if (institutionId !== getLatestState()?.selectedJst) updateSelectedJst(institutionId);
+    };
+    row.addEventListener("click", select);
+    row.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      select();
+    });
+    tbody.append(row);
+  });
+  if (isXY) {
+    const colgroup = document.createElement("colgroup");
+    [320, ...xyColumns.map(() => 150)].forEach((width) => {
+      const col = document.createElement("col");
+      col.style.width = `${width}px`;
+      colgroup.append(col);
+    });
+    table.append(colgroup);
+  }
+  table.append(thead, tbody);
+  if (isXY) {
+    const updateOffsets = () => {
+      let top = 0;
+      [...thead.rows].forEach((row) => {
+        [...row.cells].forEach((cell) => { cell.style.top = `${top}px`; });
+        top += row.getBoundingClientRect().height;
+      });
+    };
+    updateOffsets();
+    if (typeof ResizeObserver !== "undefined") {
+      explorerXYHeaderObserver = new ResizeObserver(updateOffsets);
+      explorerXYHeaderObserver.observe(thead);
+    }
+  }
+
+  let pagination = table.parentElement?.parentElement?.querySelector(".explorer-institution-pagination");
+  if (!pagination) {
+    pagination = document.createElement("nav");
+    pagination.className = "explorer-kri-pagination-bar explorer-institution-pagination";
+    pagination.setAttribute("aria-label", "Institution page navigation");
+    table.parentElement?.after(pagination);
+  }
+  pagination.replaceChildren();
+  pagination.hidden = pageCount <= 1;
+  if (pageCount > 1) {
+    const addButton = (label, page, disabled = false, current = false) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "explorer-kri-pagination-button";
+      button.textContent = label;
+      button.disabled = disabled;
+      if (current) button.setAttribute("aria-current", "page");
+      button.addEventListener("click", () => {
+        explorerInstitutionPageIndex = page;
+        table.parentElement.scrollTop = 0;
+        renderExplorerInstitutionTable(getLatestState(), getActiveExplorerTemplate());
+      });
+      pagination.append(button);
+    };
+    addButton("Previous", explorerInstitutionPageIndex - 1, explorerInstitutionPageIndex === 0);
+    const firstVisiblePage = Math.max(0, explorerInstitutionPageIndex - 2);
+    const lastVisiblePage = Math.min(pageCount - 1, explorerInstitutionPageIndex + 2);
+    if (firstVisiblePage > 0) addButton("1", 0);
+    for (let page = firstVisiblePage; page <= lastVisiblePage; page += 1) {
+      addButton(String(page + 1), page, false, page === explorerInstitutionPageIndex);
+    }
+    if (lastVisiblePage < pageCount - 1) addButton(String(pageCount), pageCount - 1);
+    addButton("Next", explorerInstitutionPageIndex + 1, explorerInstitutionPageIndex === pageCount - 1);
+  }
+}
+
 function renderExplorerTable(series, selectedUnit) {
   lastRenderedExplorerTableSeries = series;
   lastRenderedExplorerSelectedUnit = selectedUnit;
@@ -2073,6 +2417,7 @@ function renderExplorerTable(series, selectedUnit) {
   explorerXYHeaderObserver?.disconnect();
   explorerXYHeaderObserver = null;
   elements.explorerTable.classList.toggle("is-xy-view", isXY);
+  elements.explorerTable.classList.remove("is-institution-view");
   elements.explorerTable.classList.toggle("has-taxonomy-timeline", !isXY && Boolean(series.mainTaxonomyFramework));
   elements.explorerTable.style.width = isXY ? `${426 + series.dateColumns.length * 150}px` : "";
   elements.explorerTable.setAttribute("aria-label", isXY ? "XY matrix at selected reference date" : "Explorer time series");
@@ -3085,8 +3430,8 @@ function clearExplorerContributionBase(axis = getActiveExplorerContext().activeA
   if (getLatestState()) rerenderApp(getLatestState());
 }
 
-// The chart needs the full history; the institution picker needs only its
-// currently displayed reference date. Keep both on the same value path.
+// Reuse the underlying series across institution changes and context-panel
+// refreshes. The cache is scoped to the loaded rows and bounded by selection.
 function buildExplorerBenchmark(jstCodes = null, { onlyDateLabel = null } = {}) {
   const state = getLatestState();
   const tableId = getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId;
@@ -3113,22 +3458,36 @@ function buildExplorerBenchmark(jstCodes = null, { onlyDateLabel = null } = {}) 
   }
 
   const benchmarkJstCodes = jstCodes ?? getPeerBenchmarkJstCodes(state);
+  let cache = explorerBenchmarkCacheByRows.get(state.rows);
+  if (!cache || cache.columns !== state.columns) {
+    cache = { columns: state.columns, entries: new Map() };
+    explorerBenchmarkCacheByRows.set(state.rows, cache);
+  }
+  const cacheKey = JSON.stringify([tableId, selections, contribution?.tableId, contribution?.selections,
+    dates.map((date) => date.index)]);
+  let valuesByJst = cache.entries.get(cacheKey);
+  if (!valuesByJst) {
+    valuesByJst = new Map();
+    cache.entries.set(cacheKey, valuesByJst);
+    if (cache.entries.size > 8) cache.entries.delete(cache.entries.keys().next().value);
+  }
   const series = benchmarkJstCodes.map((jstCode) => {
+    let values = valuesByJst.get(jstCode);
+    if (!values) {
     const rows = getBenchmarkRows(state, indexes, tableId, selections, jstCode);
     const baseRows = contribution
       ? getBenchmarkRows(state, indexes, contribution.tableId || tableId, contribution.selections, jstCode)
       : [];
-
-    return {
-      jstCode,
-      values: requestedDates.map((dateColumn) => ({
+    values = dates.map((dateColumn) => ({
         date: dateColumn.date,
         label: dateColumn.label,
         value: rows.length === 0
           ? null
           : getBenchmarkPointValue(rows, baseRows, dateColumn.index, Boolean(contribution))
-      }))
-    };
+      }));
+    valuesByJst.set(jstCode, values);
+    }
+    return { jstCode, values: onlyDateLabel === null ? values : values.filter((point) => point.label === onlyDateLabel) };
   }).filter((item) => item.values.some((point) => point.value !== null));
 
   return {
@@ -3184,6 +3543,7 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
     menu.setAttribute("aria-label", `Choose ${choiceName}`);
   }
   const optionHost = isInstitution ? document.createElement("span") : menu;
+  let renderInstitutionMatches = () => {};
   if (isInstitution) {
     const search = document.createElement("input");
     search.type = "search";
@@ -3199,24 +3559,17 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
     empty.textContent = "No matching institution";
     empty.hidden = true;
     menu.append(search, optionHost, empty);
-    search.addEventListener("input", () => {
-      let visible = 0;
-      [...optionHost.children].forEach((item, index) => {
-        item.hidden = !matchesInstitutionSearch(search.value, options[index].searchText);
-        if (!item.hidden) visible += 1;
-      });
-      empty.hidden = visible > 0;
-    });
+    search.addEventListener("input", () => renderInstitutionMatches(search.value, empty));
     search.addEventListener("keydown", (event) => {
       if (event.key !== "ArrowDown" && event.key !== "Enter") return;
       event.preventDefault();
-      const first = [...optionHost.children].find((item) => !item.hidden);
+      const first = optionHost.querySelector("button");
       if (event.key === "Enter") first?.click();
       else first?.focus();
     });
   }
   let frequencyRow = null;
-  options.forEach((option) => {
+  const appendOption = (option) => {
     const item = document.createElement("button");
     item.type = "button";
     item.className = "explorer-filter-dropdown-option";
@@ -3263,7 +3616,25 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
     } else {
       optionHost.append(item);
     }
-  });
+  };
+  if (isInstitution) {
+    // A large panel can contain thousands of institutions. Search metadata
+    // stays available, while the DOM contains only a small visible window.
+    renderInstitutionMatches = (query, empty) => {
+      const matching = options.filter((option) => matchesInstitutionSearch(query, option.searchText));
+      optionHost.replaceChildren();
+      const displayed = matching.slice(0, 60);
+      if (!query) {
+        const selected = matching.find((option) => option.selected);
+        if (selected && !displayed.includes(selected)) displayed.push(selected);
+      }
+      displayed.forEach(appendOption);
+      empty.hidden = matching.length > 0;
+    };
+    renderInstitutionMatches("", menu.querySelector(".explorer-filter-institution-empty"));
+  } else {
+    options.forEach(appendOption);
+  }
   chip.append(menu);
 }
 
@@ -3273,12 +3644,13 @@ function renderExplorerActiveFilters(state) {
   const jstChip = document.createElement("span");
   jstChip.className = "cost-of-risk-filter-chip explorer-filter-chip-jst";
   jstChip.classList.toggle("is-open", explorerInlineFilterTopic === "jst-code");
+  jstChip.classList.toggle("is-active", explorerInstitutionTableVisible);
 
   const jstToggle = document.createElement("button");
   jstToggle.type = "button";
   jstToggle.className = "cost-of-risk-filter-chip-toggle";
-  jstToggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "jst-code"));
-  jstToggle.setAttribute("aria-controls", "explorer-filter-menu-jst-code");
+  jstToggle.setAttribute("aria-pressed", String(explorerInstitutionTableVisible));
+  jstToggle.setAttribute("aria-label", "Show institutions in the table");
 
   const jstValue = document.createElement("span");
   jstValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
@@ -3286,7 +3658,16 @@ function renderExplorerActiveFilters(state) {
   jstValue.textContent = getInstitutionDisplayInfo(state?.institutionDictionary, selectedInstitutionId)?.institutionName
     || selectedInstitutionId || "Institution";
   jstToggle.append(jstValue);
-  jstToggle.addEventListener("click", () => toggleExplorerInlineFilter("jst-code"));
+  jstToggle.addEventListener("click", () => {
+    if (explorerInstitutionTableVisible) return;
+    explorerInlineFilterTopic = "";
+    explorerInstitutionTableVisible = true;
+    const institutionIndex = (state?.institutionOptions ?? state?.jstOptions ?? []).indexOf(selectedInstitutionId);
+    explorerInstitutionPageIndex = Math.floor(Math.max(0, institutionIndex) / EXPLORER_INSTITUTION_PAGE_SIZE);
+    explorerInstitutionPageInitialized = true;
+    saveExplorerScrollPosition();
+    rerenderApp(getLatestState());
+  });
 
   jstChip.append(jstToggle);
 
@@ -3386,21 +3767,13 @@ function renderExplorerActiveFilters(state) {
   if (EXPLORER_SELECTION_DESCRIPTION_ENABLED) chips.push(descriptionChip);
 
   const institutionOptions = state?.institutionOptions ?? state?.jstOptions ?? [];
-  const selectedReference = getSelectedExplorerReference(state);
-  const institutionBenchmark = explorerInlineFilterTopic === "jst-code"
-    ? buildExplorerBenchmark(institutionOptions, { onlyDateLabel: selectedReference?.label ?? "" }) : null;
-  const valuesByInstitution = new Map((institutionBenchmark?.series ?? []).map((item) => [
-    item.jstCode, item.values[0]?.value ?? null
-  ]));
   const institutionChoices = explorerInlineFilterTopic === "jst-code"
     ? institutionOptions.map((institutionId) => {
       const entry = getInstitutionDisplayInfo(state?.institutionDictionary, institutionId);
-      const rawValue = valuesByInstitution.get(institutionId);
       return { value: institutionId, label: entry?.institutionName || institutionId,
         detail: entry ? [entry.consolidationLevel, entry.jstCode].filter(Boolean).join(" — ") : "",
         searchText: [institutionId, entry?.institutionId, entry?.institutionName,
           entry?.jstCode, entry?.consolidationLevel].filter(Boolean).join(" "),
-        metric: Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, institutionBenchmark) : "—",
         selected: institutionId === selectedInstitutionId };
     }) : [];
   addExplorerInlineFilterDropdown(jstChip, "jst-code", institutionChoices, (institutionId) => {
@@ -3930,7 +4303,7 @@ function renderExplorerAxisTabs() {
 
   elements.explorerAxisButtons.forEach((button) => {
     const axis = button.getAttribute("data-explorer-axis");
-    const isActive = axis === activeAxis;
+    const isActive = axis === activeAxis && !explorerInstitutionTableVisible;
     const isAvailable = Boolean(axisOptions[axis]?.isVisible);
     const isUnusedTabAxis = axis === "z" && (axisOptions.z?.codes?.length ?? 0) === 0;
     button.classList.toggle("is-active", isActive);
@@ -3964,8 +4337,8 @@ function renderExplorerAxisTabs() {
 
   if (elements.explorerXYAxisSummary) {
     elements.explorerXYAxisSummary.hidden = !isXYMode;
-    elements.explorerXYAxisSummary.classList.toggle("is-active", isXY);
-    elements.explorerXYAxisSummary.setAttribute("aria-selected", String(isXY));
+    elements.explorerXYAxisSummary.classList.toggle("is-active", isXY && !explorerInstitutionTableVisible);
+    elements.explorerXYAxisSummary.setAttribute("aria-selected", String(isXY && !explorerInstitutionTableVisible));
     if (isXYMode) for (const axis of ["y", "x"]) {
       const part = elements.explorerXYAxisCaptions?.[axis];
       if (!part) continue;
@@ -4342,9 +4715,6 @@ function refreshExplorerSelectionDependentContextPanel(state) {
   if (explorerContextTopic === "reference-date") {
     renderExplorerReferenceDatePanel(state);
   } else if (explorerContextTopic === "jst-code") {
-    // Each row shows the selected point's value for that JST (see
-    // buildExplorerBenchmark below) - it changes with the selection just
-    // like the reference-date panel above.
     renderExplorerJstSelectionPanel(state);
   } else if (explorerContextTopic === "kri-formula") {
     // The formula shown is the selected KRI's own - changes with the
@@ -4369,13 +4739,6 @@ function renderExplorerJstSelectionPanel(state) {
   title.className = "explorer-context-title";
   title.textContent = "Institution";
 
-  const selectedReference = getSelectedExplorerReference(state);
-  const benchmark = buildExplorerBenchmark(institutionOptions, {
-    onlyDateLabel: selectedReference?.label ?? ""
-  });
-  const valuesByJst = new Map(benchmark.series.map((item) => [
-    item.jstCode, item.values[0]?.value ?? null
-  ]));
   const list = document.createElement("div");
   list.className = "explorer-jst-selection-list";
   list.setAttribute("role", "listbox");
@@ -4408,13 +4771,7 @@ function renderExplorerJstSelectionPanel(state) {
       identity.append(details);
     }
     label.append(identity);
-    const metric = document.createElement("span");
-    metric.className = "explorer-institution-metric";
-    const value = document.createElement("span");
-    const rawValue = valuesByJst.get(institutionId);
-    value.textContent = Number.isFinite(rawValue) ? formatBenchmarkValue(rawValue, benchmark) : "—";
-    metric.append(value);
-    row.append(label, metric);
+    row.append(label);
     row.addEventListener("click", () => {
       const latestState = getLatestState();
       if (institutionId === (latestState?.selectedInstitutionId ?? latestState?.selectedJst)) return;
@@ -5391,6 +5748,16 @@ function createExplorerSelectionHeadline(metrics, selectedReference) {
 // read one row's values, on every single row/cell click.
 function getExplorerSelectedPointMetrics() {
   const state = getLatestState();
+  if (explorerInstitutionTableVisible && state?.selectedJst) {
+    const reference = getSelectedExplorerReference(state);
+    const benchmark = buildExplorerBenchmark([state.selectedJst], { onlyDateLabel: reference?.label ?? "" });
+    return {
+      currentValue: benchmark.series[0]?.values[0]?.value ?? null,
+      format: benchmark.isContribution ? "percentage" : benchmark.format,
+      changes: [], parentLabel: "", parentShare: null, parentValue: null,
+      selectedUnit: state.selectedUnit
+    };
+  }
   const selectedCode = getSelectedExplorerCodeForActiveAxis();
   if (!state || !selectedCode || !lastRenderedExplorerTableSeries) return null;
 

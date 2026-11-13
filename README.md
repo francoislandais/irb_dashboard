@@ -133,6 +133,8 @@ Sans argument `module_id`, aucun filtre n'est appliqué sur cette colonne.
 
 Le paramétrage recommandé est **un seul fichier TOML pour toutes les applications**. L'exemple complet se trouve dans `examples/global-update-combined.toml`. Chaque bloc `[[applications]]` définit le périmètre institutionnel, le niveau de consolidation et le nom d'un HTML. Ses blocs `[[applications.extractions]]` définissent les sélections de templates ou de KRI, leurs fréquences et leurs profondeurs d'historique. Il suffit d'ajouter un bloc `[[applications]]` pour produire une autre application :
 
+Pour désactiver une application isolée, ajouter `activate = false` (ou `activate = 0`) dans son bloc ; l'absence de ce champ, `true` et `1` l'activent. Pour désactiver une suite d'applications, placer la ligne exacte `# AGORA_TOGGLE` entre deux applications : le premier marqueur suspend la lecture, le suivant la rétablit. Un dernier marqueur sans paire ignore la fin du fichier. Le contenu ignoré est retiré avant l'analyse du TOML.
+
 ```toml
 [[applications]]
 name = "FINREP France"
