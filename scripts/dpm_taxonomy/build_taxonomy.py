@@ -266,6 +266,87 @@ def group_c07_42_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     return output
 
 
+def organize_c84_nsfr_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Use the reported C_84.00 totals as display parents, without ghost headings."""
+    target = "C_84.00"
+    axis = AXIS_COORDINATES["y"]
+    by_framework: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if row["table_id"] == target and row["coordinate"] == axis:
+            by_framework[row["framework"]].append(row)
+
+    replacements: dict[str, list[dict[str, str]]] = {}
+    for framework, members in by_framework.items():
+        real = {row["code"]: row for row in members if not row["code"].startswith("__PARENT__")}
+        if not {"10", "120", "220"}.issubset(real):
+            continue
+        ordered_codes = ["220", "10", *(str(code) for code in range(20, 120, 10)),
+                         "120", *(str(code) for code in range(130, 220, 10))]
+        organized = []
+        for code in ordered_codes:
+            if code not in real:
+                continue
+            parent = "10" if 20 <= int(code) <= 110 else "120" if 130 <= int(code) <= 210 else ""
+            organized.append({**real[code], "parent_coordinate_code": parent})
+        organized.extend(row for code, row in real.items() if code not in ordered_codes)
+        replacements[framework] = organized
+
+    output = []
+    emitted = set()
+    for row in rows:
+        framework = row["framework"]
+        if row["table_id"] == target and row["coordinate"] == axis and framework in replacements:
+            if framework not in emitted:
+                output.extend(replacements[framework])
+                emitted.add(framework)
+            continue
+        output.append(row)
+    return output
+
+
+def organize_c80_c81_nsfr_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Put the reported RSF/ASF total before its details in C_80/C_81."""
+    targets = {"C_80.00", "C_81.00"}
+    axis = AXIS_COORDINATES["y"]
+    groups: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if row["table_id"] in targets and row["coordinate"] == axis:
+            groups[(row["table_id"], row["framework"])].append(row)
+
+    replacements = {}
+    for key, members in groups.items():
+        if not any(row["code"] == "10" for row in members):
+            continue
+        ghost_codes = {
+            row["code"] for row in members
+            if row["code"].startswith("__PARENT__")
+            and row["description"].lstrip().startswith("0010 ")
+        }
+        organized = []
+        for row in members:
+            if row["code"] in ghost_codes:
+                continue
+            parent = row["parent_coordinate_code"]
+            if parent in ghost_codes or (key[0] == "C_80.00" and row["code"] == "920"):
+                parent = "10"
+            organized.append({**row, "parent_coordinate_code": parent})
+        organized.sort(key=lambda row: (0, int(row["code"])) if row["code"].isdigit()
+                       else (1, row["code"]))
+        replacements[key] = organized
+
+    output = []
+    emitted = set()
+    for row in rows:
+        key = (row["table_id"], row["framework"])
+        if row["coordinate"] == axis and key in replacements:
+            if key not in emitted:
+                output.extend(replacements[key])
+                emitted.add(key)
+            continue
+        output.append(row)
+    return output
+
+
 def group_c08_irb_z_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     """Use each real C_08 IRB total as the parent of its Z portfolios.
 
@@ -1386,9 +1467,9 @@ def extract_all() -> tuple[
     # resolver when the caller requests the former module family.
     sorted_templates = close_template_intervals(normalized_templates.values())
 
-    dimensions = fixed_geographic_country_axis(group_c07_42_z_rows(group_c08_irb_z_rows(
+    dimensions = fixed_geographic_country_axis(organize_c80_c81_nsfr_rows(organize_c84_nsfr_rows(group_c07_42_z_rows(group_c08_irb_z_rows(
         restore_alm_native_total_currency_rows(list(unique_layouts.values()))
-    )), sorted_templates)
+    )))), sorted_templates)
     return dimensions, sorted_templates, inventory, suffix_conflicts
 
 

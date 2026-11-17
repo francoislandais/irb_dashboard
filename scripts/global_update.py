@@ -26,12 +26,15 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Protocol
 from urllib.parse import parse_qs, urlsplit
+from zipfile import is_zipfile
 
 if __package__:
+    from .excel_configuration import read_excel_configuration
     from .compact_dataset_values import compact_dataset_rows
     from .export_all_standalone_apps import export_standalone_app
     from .output_directory import resolve_external_output_directory
     from .launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
+    from .local_source_client import LocalSourceClient
     from .hive_to_dataset import (
         _expand_template_expressions,
         _build_kri_filter,
@@ -42,10 +45,12 @@ if __package__:
         load_kri_dictionary,
     )
 else:
+    from excel_configuration import read_excel_configuration
     from compact_dataset_values import compact_dataset_rows
     from export_all_standalone_apps import export_standalone_app
     from output_directory import resolve_external_output_directory
     from launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
+    from local_source_client import LocalSourceClient
     from hive_to_dataset import (
         _expand_template_expressions,
         _build_kri_filter,
@@ -102,6 +107,8 @@ class Application:
     export_dataset: bool = False
     ssm_supervision_countries: tuple[str, ...] = ()
     ssm_significances: tuple[str, ...] = ()
+    jst_codes: tuple[str, ...] = ()
+    description: str = ""
 
 
 class QueryClient(Protocol):
@@ -229,43 +236,53 @@ def _configuration_blocks(entries: list[Path]):
 
 def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
     if path.is_file():
-        if path.suffix.lower() != ".toml":
-            raise ValueError(f"{path}: un fichier .toml est attendu.")
-        entries = [path]
+        if path.suffix.lower() == ".xlsx":
+            blocks = read_excel_configuration(path)
+        elif path.suffix.lower() == ".toml":
+            blocks = _configuration_blocks([path])
+        else:
+            raise ValueError(f"{path}: un fichier .toml ou .xlsx est attendu.")
     elif path.is_dir():
         entries = sorted(
             (item for item in path.iterdir() if not item.name.startswith(".") and not _is_temporary_file(item)),
             key=lambda item: item.name.casefold(),
         )
+        invalid = [item.name for item in entries if not item.is_file() or item.suffix.lower() != ".toml"]
+        if invalid:
+            raise ValueError(f"{path}: seuls des fichiers .toml sont attendus ; entrée(s) non reconnue(s) : {', '.join(invalid)}.")
+        if not entries:
+            raise ValueError(f"{path}: aucun fichier .toml à traiter.")
+        blocks = _configuration_blocks(entries)
     else:
         raise ValueError(f"Fichier ou dossier de paramétrage introuvable : {path}")
-    invalid = [item.name for item in entries if not item.is_file() or item.suffix.lower() != ".toml"]
-    if invalid:
-        raise ValueError(f"{path}: seuls des fichiers .toml sont attendus ; entrée(s) non reconnue(s) : {', '.join(invalid)}.")
-    if not entries:
-        raise ValueError(f"{path}: aucun fichier .toml à traiter.")
 
     applications: list[Application] = []
     lei_pattern = re.compile(r"^[A-Z0-9]{20}$")
-    names: set[str] = set()
+    identities: set[tuple[str, str]] = set()
     output_names: set[str] = set()
-    for config, context in _configuration_blocks(entries):
-        _check_keys(config, {"name", "leis", "cluster", "clusters", "ssm_supervision_country", "ssmsignificance", "consolidation", "export-dataset", "extractions", "activate"}, context)
+    for config, context in blocks:
+        _check_keys(config, {"name", "description", "leis", "jst_code", "cluster", "clusters", "ssm_supervision_country", "ssmsignificance", "consolidation", "export-dataset", "extractions", "activate"}, context)
         activate = config.get("activate", True)
         if type(activate) not in (bool, int) or activate not in (0, 1):
             raise ValueError(f"{context}: activate doit être true, false, 1 ou 0.")
         if not activate:
             continue
         name = _required_text(config.get("name"), "name", context)
+        description = config.get("description", "")
+        if description:
+            description = _required_text(description, "description", context)
+        elif not isinstance(description, str):
+            raise ValueError(f"{context}: description doit être un texte.")
         export_dataset = config.get("export-dataset", False)
         if type(export_dataset) is not bool:
             raise ValueError(f"{context}: export-dataset doit être true ou false.")
-        if name.casefold() in names:
-            raise ValueError(f"{context}: nom d'application déjà utilisé : {name}.")
-        output_name = _safe_name(name).casefold()
+        identity = (description.casefold(), name.casefold())
+        if identity in identities:
+            raise ValueError(f"{context}: combinaison description/name déjà utilisée : {description!r} / {name!r}.")
+        output_name = _application_output_stem(description, name).casefold()
         if output_name in output_names:
-            raise ValueError(f"{context}: le nom {name!r} entre en collision avec un autre nom de fichier de sortie.")
-        names.add(name.casefold())
+            raise ValueError(f"{context}: description/name {description!r} / {name!r} entre en collision avec un autre nom de fichier de sortie.")
+        identities.add(identity)
         output_names.add(output_name)
 
         if "cluster" in config and "clusters" in config:
@@ -275,6 +292,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             raise ValueError(f"{context}: chaque LEI doit contenir exactement 20 lettres ou chiffres.")
         if len(set(leis)) != len(leis):
             raise ValueError(f"{context}: leis contient des doublons.")
+        jst_codes = _optional_string_list(config.get("jst_code"), "jst_code", context)
         cluster_key = "cluster" if "cluster" in config else "clusters"
         clusters = _optional_string_list(config.get(cluster_key), cluster_key, context)
         countries = tuple(country.upper() for country in _optional_string_list(
@@ -285,8 +303,8 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         if len(set(countries)) != len(countries):
             raise ValueError(f"{context}: ssm_supervision_country contient des doublons.")
         significances = _optional_string_list(config.get("ssmsignificance"), "ssmsignificance", context)
-        if not leis and not clusters and not countries and not significances:
-            raise ValueError(f"{context}: renseigner au moins un LEI, un cluster, un pays de supervision ou ssmsignificance.")
+        if not leis and not jst_codes and not clusters and not countries and not significances:
+            raise ValueError(f"{context}: renseigner au moins un LEI, un JST code, un cluster, un pays de supervision ou ssmsignificance.")
         consolidation = _required_text(config.get("consolidation"), "consolidation", context).upper()
         if consolidation not in CONSOLIDATION_MODES:
             raise ValueError(f"{context}: consolidation doit être l'un de {', '.join(sorted(CONSOLIDATION_MODES))}.")
@@ -360,7 +378,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
             history_periods = history_years * PERIODS_PER_YEAR[frequency]
             dates = _reference_dates(frequency, history_periods, as_of)
             extractions.append(Extraction(module, selector, history_years, frequency, dates, kri_ids, selection_type, label, category, () if module in {"", "KRI"} else modules))
-        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset, countries, significances))
+        applications.append(Application(name, leis, consolidation, tuple(extractions), context, clusters, export_dataset, countries, significances, jst_codes, description))
     return tuple(applications)
 
 
@@ -371,10 +389,12 @@ def _sql_literal(value: str) -> str:
 def _selected_levels(mode: str, highest_level: str) -> tuple[str, ...]:
     if mode == "HIGHEST":
         return (highest_level,)
+    if mode == "CONSO":
+        return ("CONS",)
     if mode == "CONSO+SOLO":
-        return ("CONSO", "SOLO")
+        return ("CONS", "SOLO")
     if mode == "ALL":
-        return ("CONSO", "SOLO", "SUBLIQ")
+        return ("CONS", "SOLO", "CRDLIQSUBGRP")
     return (mode,)
 
 
@@ -387,8 +407,14 @@ def _consolidation_predicate(mode: str) -> str:
     return "cons_level IN (" + ", ".join(_sql_literal(item) for item in levels) + ")"
 
 
-def _institution_filter(application: Application, prefix: str = "", *, include_lei: bool = True) -> str:
-    if application.ssm_supervision_countries:
+def _institution_filter(application: Application, prefix: str = "", *, include_lei: bool = True, include_jst: bool = True) -> str:
+    if application.jst_codes:
+        column, values = (
+            (f"COALESCE(NULLIF(TRIM({prefix}jst_code_today), ''), "
+             f"NULLIF(TRIM({prefix}jst_code), ''))", application.jst_codes)
+            if include_jst else ("", ())
+        )
+    elif application.ssm_supervision_countries:
         column, values = "ssm_supervision_country", application.ssm_supervision_countries
     elif application.clusters:
         column, values = "cluster", application.clusters
@@ -398,7 +424,8 @@ def _institution_filter(application: Application, prefix: str = "", *, include_l
         column, values = "", ()
     filters = []
     if values:
-        filters.append(f"{prefix}{column} IN (\n        " + ",\n        ".join(_sql_literal(value) for value in values) + "\n    )")
+        expression = column if application.jst_codes else f"{prefix}{column}"
+        filters.append(f"{expression} IN (\n        " + ",\n        ".join(_sql_literal(value) for value in values) + "\n    )")
     if application.ssm_significances:
         filters.append(f"{prefix}ssmsignificance IN (\n        " + ",\n        ".join(
             _sql_literal(value) for value in application.ssm_significances
@@ -407,7 +434,9 @@ def _institution_filter(application: Application, prefix: str = "", *, include_l
 
 
 def _institution_selector_matches(row: dict[str, str], application: Application) -> bool:
-    if application.ssm_supervision_countries:
+    if application.jst_codes:
+        selected = row.get("jst_code", "") in application.jst_codes
+    elif application.ssm_supervision_countries:
         selected = row.get("ssm_supervision_country", "") in application.ssm_supervision_countries
     elif application.clusters:
         selected = row.get("cluster", "") in application.clusters
@@ -491,9 +520,8 @@ def _build_extraction_sql(
         kri_filter = _kri_selection_filter(extraction.kri_data_point_ids)
         kri_filter_sql = f"\n  AND {kri_filter}" if kri_filter else ""
         highest_filter_sql = "\n  AND kri.is_highest_cons = 'Y'" if application.consolidation == "HIGHEST" else ""
-        scope_filter_sql = (f"\n  AND {_institution_filter(application, 'kri.', include_lei=False)}"
-                            if application.clusters or application.ssm_supervision_countries
-                            or application.ssm_significances else "")
+        scope_filter = _institution_filter(application, 'kri.', include_lei=False, include_jst=False)
+        scope_filter_sql = f"\n  AND {scope_filter}" if scope_filter else ""
         if reporting_units is None:
             # Preview cannot know the KRI entity_id values until the separate
             # institution query has run. Keep the query inspectable without
@@ -635,9 +663,38 @@ ORDER BY
 """
 
 
+def _build_shared_institution_sql(applications: list[Application], table: str) -> str:
+    """Read the union of configured populations in one source scan."""
+    scopes = list(dict.fromkeys(_institution_filter(application) for application in applications))
+    scopes = [scope.replace("\n  AND ", "\n      AND ") for scope in scopes]
+    population_filter = ("\n  AND (\n      " + "\n      OR ".join(
+        f"({scope})" for scope in scopes
+    ) + "\n  )") if scopes and all(scopes) else ""
+    return f"""SELECT DISTINCT
+    entity_id,
+    CONCAT(lei, '_', cons_level) AS institution_id,
+    lei,
+    jst_code_today,
+    jst_code,
+    name AS institution_name,
+    cons_level AS consolidation_level,
+    cluster,
+    ssm_supervision_country,
+    ssmsignificance,
+    is_highest_cons
+FROM {table}
+WHERE 1 = 1
+  AND lei IS NOT NULL AND TRIM(lei) <> ''{population_filter}
+"""
+
+
 def _safe_name(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9_-]+", "_", value).strip("_")
     return cleaned or "application"
+
+
+def _application_output_stem(description: str, name: str) -> str:
+    return _safe_name(f"{description}__{name}" if description else name)
 
 
 def _write_query_index(output: Path, manifest: dict) -> None:
@@ -646,7 +703,9 @@ def _write_query_index(output: Path, manifest: dict) -> None:
     if manifest.get("compact_values"):
         lines.extend(["Stockage compact des valeurs : activé pour les datasets exportés (sans changement du SQL).", ""])
     for application in manifest["applications"]:
-        if application["ssm_supervision_country"]:
+        if application.get("jst_code"):
+            selector_label, selector_values = "JST code", application["jst_code"]
+        elif application["ssm_supervision_country"]:
             selector_label, selector_values = "Pays de supervision", application["ssm_supervision_country"]
         elif application["clusters"]:
             selector_label, selector_values = "Cluster", application["clusters"]
@@ -685,9 +744,12 @@ def _write_query_index(output: Path, manifest: dict) -> None:
         extraction["module"] == "KRI"
         for application in manifest["applications"] for extraction in application["extractions"]
     ):
-        lines.extend(["Les requêtes KRI en mode `preview` contiennent des marqueurs pour les `entity_id` : la requête des métadonnées doit être exécutée avant de pouvoir les finaliser. Les modes `test` et `hive` produisent des requêtes complètes.", ""])
-    elif manifest["mode"] == "hive":
-        lines.extend(["Les résultats du mode `hive` ont été extraits via `devo.read_sql`.", ""])
+        lines.extend(["Les requêtes KRI en mode `preview` contiennent des marqueurs pour les `entity_id` : la requête des métadonnées doit être exécutée avant de pouvoir les finaliser. Les modes `test`, `hive` et `local` produisent des requêtes complètes.", ""])
+    elif manifest["mode"] in {"hive", "local"}:
+        source_note = ("Les résultats du mode `local` proviennent des CSV source chargés dans SQLite."
+                       if manifest["mode"] == "local" else
+                       "Les résultats du mode `hive` ont été extraits via `devo.read_sql`.")
+        lines.extend([source_note, ""])
     output.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -816,7 +878,7 @@ def _build_dummy_dataset(application: Application, fixture: dict) -> tuple[list[
                     })
                     template_seed = sum(ord(character) for character in table_id + y_code)
                     entity_seed = sum(ord(character) for character in lei)
-                    seed = template_seed + entity_seed + (0 if level == "CONSO" else 50 if level == "SOLO" else 90)
+                    seed = template_seed + entity_seed + (0 if level == "CONS" else 50 if level == "SOLO" else 90)
                     record["ref_" + reference_date.replace("-", "_")] = str(seed + period_index)
     populated = [
         column for column in headers
@@ -970,8 +1032,16 @@ def _institution_rows(
     required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name",
                 "consolidation_level", "cluster", "ssm_supervision_country", "ssmsignificance")
     rows = _dataframe_rows(dataframe, required, query_label)
+    return _validate_institution_rows(rows, query_label, anomalies)
+
+
+def _validate_institution_rows(
+    rows: list[dict[str, str]], query_label: str, anomalies: list[dict[str, str]] | None = None,
+) -> list[dict[str, str]]:
     if not rows:
         raise ValueError(f"{query_label}: aucune institution trouvée pour le filtre configuré.")
+    required = ("entity_id", "institution_id", "lei", "jst_code", "institution_name",
+                "consolidation_level", "cluster", "ssm_supervision_country", "ssmsignificance")
     candidates: list[dict[str, str]] = []
     signatures: set[tuple[str, ...]] = set()
     by_id: dict[str, set[tuple[str, ...]]] = {}
@@ -1006,6 +1076,38 @@ def _institution_rows(
     return result
 
 
+def _aggregate_shared_institution_rows(
+    raw_rows: list[dict[str, str]], application: Application,
+) -> list[dict[str, str]]:
+    """Apply one application's raw filters before reproducing the former SQL MAXs."""
+    groups: dict[tuple[str, str, str], list[dict[str, str]]] = {}
+    for row in raw_rows:
+        effective_jst = row["jst_code_today"].strip() or row["jst_code"].strip()
+        if not _institution_selector_matches({**row, "jst_code": effective_jst}, application):
+            continue
+        if application.consolidation == "HIGHEST" and row["is_highest_cons"] != "Y":
+            continue
+        key = (row["entity_id"], row["lei"], row["consolidation_level"])
+        groups.setdefault(key, []).append(row)
+
+    result = []
+    for (entity_id, lei, level), members in sorted(groups.items(), key=lambda item: item[0][1:]):
+        today_codes = [row["jst_code_today"].strip() for row in members if row["jst_code_today"].strip()]
+        original_codes = [row["jst_code"].strip() for row in members if row["jst_code"].strip()]
+        result.append({
+            "entity_id": entity_id,
+            "institution_id": members[0]["institution_id"],
+            "lei": lei,
+            "jst_code": max(today_codes) if today_codes else max(original_codes, default=""),
+            "institution_name": max(row["institution_name"] for row in members),
+            "consolidation_level": level,
+            "cluster": max(row["cluster"] for row in members),
+            "ssm_supervision_country": max(row["ssm_supervision_country"] for row in members),
+            "ssmsignificance": max(row["ssmsignificance"] for row in members),
+        })
+    return result
+
+
 def _select_institution_rows(
     rows: list[dict[str, str]], application: Application,
     anomalies: list[dict[str, str]] | None = None,
@@ -1025,7 +1127,7 @@ def _select_institution_rows(
         ):
             return []
         raise ValueError(f"{application.name}: aucune unité de reporting ne correspond au niveau de consolidation demandé.")
-    if application.leis and not application.clusters and not application.ssm_supervision_countries:
+    if application.leis and not application.jst_codes and not application.clusters and not application.ssm_supervision_countries:
         excluded_leis = {row["lei"] for row in (anomalies or [])}
         missing_leis = set(application.leis) - {row["lei"] for row in selected} - excluded_leis
         if missing_leis:
@@ -1053,15 +1155,15 @@ def _fixture_reporting_units(application: Application, fixture: dict) -> list[di
     entities_by_lei = {entity["lei"]: (index, entity) for index, entity in enumerate(fixture["entities"], start=1)}
     candidates = (
         list(enumerate(fixture["entities"], start=1))
-        if application.clusters or application.ssm_supervision_countries or application.ssm_significances
+        if application.jst_codes or application.clusters or application.ssm_supervision_countries or application.ssm_significances
         else [entities_by_lei[lei] for lei in application.leis if lei in entities_by_lei]
     )
     rows = []
     for index, entity in candidates:
         lei = entity["lei"]
-        if not _institution_selector_matches(entity, application):
-            continue
         for level, jst_code in entity["jst_by_level"].items():
+            if not _institution_selector_matches({**entity, "jst_code": jst_code}, application):
+                continue
             if application.consolidation == "HIGHEST" and level != entity["highest_level"]:
                 continue
             rows.append({
@@ -1088,6 +1190,7 @@ def _write_application_outputs(
     dictionary_rows: list[dict[str, str]],
     *,
     compact_values: bool = False,
+    no_sidebar: bool = False,
 ) -> None:
     app_output_dir = output_root / "applications"
     safe_file_name = folder.lower()
@@ -1099,12 +1202,13 @@ def _write_application_outputs(
     _write_csv(dataset_path, fields, rows)
     dictionary_fields = ["Institution ID", "JST code", "Institution Name", "Consolidation Level"]
     _write_csv(dictionary_path, dictionary_fields, dictionary_rows)
-    html_path = app_output_dir / "html" / f"Agora Explorer_{folder}.html"
+    html_path = app_output_dir / "html" / f"{folder}.html"
     export_standalone_app(
         dataset_path,
         html_path,
         institution_dictionary_file_path=dictionary_path,
         app_name=application.name,
+        no_sidebar=no_sidebar,
     )
     application_manifest.update({
         "dataset": str(dataset_path.relative_to(output_root)),
@@ -1123,20 +1227,24 @@ def _write_application_outputs(
 def _write_hive_snapshot(output_root: Path, application: Application, folder: str,
                          application_manifest: dict, records: dict, all_dates: tuple[str, ...],
                          dictionary_rows: list[dict[str, str]], *, compact_values: bool,
-                         extraction_format: str, require_data: bool = False) -> bool:
+                         extraction_format: str,
+                         no_sidebar: bool = False) -> bool:
     populated_dates = [
         "ref_" + item.replace("-", "_") for item in all_dates
         if any(record["ref_" + item.replace("-", "_")] for record in records.values())
     ]
-    if not populated_dates:
-        if require_data:
-            raise ValueError(f"{application.name}: aucune donnée non vide remontée par les extractions Hive.")
-        return False
+    has_data = bool(populated_dates)
+    if not has_data:
+        populated_dates = ["ref_" + item.replace("-", "_") for item in all_dates]
+    application_manifest["empty_data"] = not has_data
+    if not has_data:
+        print(f"[Agora]   Aucune donnée exploitable pour {application.name} : HTML vide généré", flush=True)
     fields = OUTPUT_COLUMNS + populated_dates + ["extraction_timestamp"]
     rows = (sorted(records.values(), key=lambda row: tuple(row[column] for column in OUTPUT_COLUMNS))
             if extraction_format == "long" else list(records.values()))
     _write_application_outputs(output_root, application, folder, application_manifest,
-                               fields, rows, dictionary_rows, compact_values=compact_values)
+                               fields, rows, dictionary_rows, compact_values=compact_values,
+                               no_sidebar=no_sidebar)
     return True
 
 
@@ -1191,8 +1299,8 @@ def _darwin_folder_items(folder_id: int, client) -> list[tuple[int, str]]:
                 continue
             if properties.get("type") == 0:
                 raise ValueError(f"Dossier Darwin {folder_id}: sous-dossier inattendu : {name}.")
-            if Path(name).name != name or name in {".", ".."} or not name.lower().endswith(".toml"):
-                raise ValueError(f"Dossier Darwin {folder_id}: fichier non TOML ou nom invalide : {name}.")
+            if Path(name).name != name or name in {".", ".."} or Path(name).suffix.lower() not in {".toml", ".xlsx"}:
+                raise ValueError(f"Dossier Darwin {folder_id}: fichier non TOML/Excel ou nom invalide : {name}.")
             entries.append((node_id, name))
         total_pages = payload.get("page_total")
         if type(total_pages) is not int:
@@ -1203,10 +1311,12 @@ def _darwin_folder_items(folder_id: int, client) -> list[tuple[int, str]]:
             break
         page += 1
     if not entries:
-        raise ValueError(f"Dossier Darwin {folder_id}: aucun fichier TOML à traiter.")
+        raise ValueError(f"Dossier Darwin {folder_id}: aucun fichier TOML/Excel à traiter.")
     names = [name.casefold() for _, name in entries]
     if len(names) != len(set(names)):
-        raise ValueError(f"Dossier Darwin {folder_id}: noms de fichiers TOML en doublon.")
+        raise ValueError(f"Dossier Darwin {folder_id}: noms de fichiers en doublon.")
+    if any(name.lower().endswith(".xlsx") for _, name in entries) and len(entries) != 1:
+        raise ValueError(f"Dossier Darwin {folder_id}: un classeur Excel doit être le seul fichier de paramétrage du dossier.")
     return sorted(entries, key=lambda item: item[1].casefold())
 
 
@@ -1221,16 +1331,16 @@ def _download_darwin_folder_configurations(folder_id: int, as_of: date, client) 
             try:
                 client.get_file(local_file_path=str(destination), node_id=node_id)
             except Exception as error:
-                raise RuntimeError(f"Téléchargement du TOML Darwin {name} ({node_id}) échoué.") from error
+                raise RuntimeError(f"Téléchargement du paramétrage Darwin {name} ({node_id}) échoué.") from error
             if not destination.is_file():
-                raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier TOML {name} attendu.")
-        return _read_configuration(directory, as_of)
+                raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier {name} attendu.")
+        return _read_configuration(directory / items[0][1] if items[0][1].lower().endswith(".xlsx") else directory, as_of)
 
 
 def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, client) -> tuple[Application, ...]:
     for node_id in node_ids:
         if type(node_id) is not int or node_id <= 0:
-            raise ValueError("Chaque identifiant Darwin de TOML doit être un entier positif.")
+            raise ValueError("Chaque identifiant Darwin de paramétrage doit être un entier positif.")
     if len(set(node_ids)) != len(node_ids):
         raise ValueError("La liste des identifiants Darwin de TOML contient des doublons.")
     with tempfile.TemporaryDirectory(prefix="agora-config-") as temporary_directory:
@@ -1240,10 +1350,15 @@ def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, clie
             try:
                 client.get_file(local_file_path=str(destination), node_id=node_id)
             except Exception as error:
-                raise RuntimeError(f"Téléchargement du TOML Darwin {node_id} échoué.") from error
+                raise RuntimeError(f"Téléchargement du paramétrage Darwin {node_id} échoué.") from error
             if not destination.is_file():
-                raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier TOML attendu.")
-        return _read_configuration(directory, as_of)
+                raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier attendu.")
+            if is_zipfile(destination):
+                destination.rename(destination.with_suffix(".xlsx"))
+        files = list(directory.iterdir())
+        if len(files) > 1 and any(file.suffix == ".xlsx" for file in files):
+            raise ValueError("Un classeur Excel Darwin doit être le seul paramétrage du lancement.")
+        return _read_configuration(files[0] if files[0].suffix == ".xlsx" else directory, as_of)
 
 
 def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int, client=None, *, applications=None, extraction_index: int | None = None) -> int:
@@ -1298,19 +1413,28 @@ def global_update(
     as_of: date | None = None,
     devo_client: QueryClient | None = None,
     compact_values: bool = False,
+    no_sidebar: bool = False,
     extraction_format: str = "long",
     darwin_upload: int | None = None,
     darwin_config_ids: Iterable[int] | None = None,
     darwin_folder_id: int | None = None,
     darwin_client=None,
+    local_its_csv: str | Path | None = None,
+    local_kri_csv: str | Path | None = None,
 ) -> dict:
-    """Prépare, simule ou exécute toutes les applications du paramétrage TOML."""
+    """Prépare, simule ou exécute les applications du paramétrage TOML ou Excel."""
 
     mode = str(mode).strip().lower()
-    if mode not in {"preview", "test", "hive"}:
-        raise ValueError("mode doit être 'preview', 'test' ou 'hive'.")
+    if mode not in {"preview", "test", "hive", "local"}:
+        raise ValueError("mode doit être 'preview', 'test', 'hive' ou 'local'.")
+    if mode == "local" and local_its_csv is None:
+        raise ValueError("Le mode local exige --local-its-csv.")
+    if mode != "local" and (local_its_csv is not None or local_kri_csv is not None):
+        raise ValueError("Les fichiers --local-*-csv exigent le mode local.")
     if extraction_format not in {"long", "wide"}:
         raise ValueError("extraction_format doit être 'long' ou 'wide'.")
+    if mode == "local" and extraction_format != "long":
+        raise ValueError("Le mode local prend en charge uniquement --extraction-format long.")
     if darwin_upload is not None:
         if type(darwin_upload) is not int or darwin_upload <= 0:
             raise ValueError("darwin_upload doit être un identifiant de nœud entier positif.")
@@ -1335,14 +1459,17 @@ def global_update(
         raise ValueError("L'identifiant du dossier Darwin doit être un entier positif.")
     if darwin_folder_id is not None and (config_path is not None or node_ids):
         raise ValueError("Choisir soit un dossier Darwin, soit des fichiers Darwin, soit un fichier ou dossier local.")
-    if mode == "hive" and config_path is None and not node_ids and darwin_folder_id is None:
-        raise ValueError("Le mode hive exige --config : les fichiers d'exemple contiennent des LEI fictifs.")
+    if mode in {"hive", "local"} and config_path is None and not node_ids and darwin_folder_id is None:
+        raise ValueError("Les modes hive et local exigent --config : les fichiers d'exemple contiennent des LEI fictifs.")
     calculation_date = as_of or date.today()
     output_root = resolve_external_output_directory(output_directory)
     if PROJECT_DIRECTORY.is_relative_to(output_root):
         raise ValueError(f"Le dossier de sortie ne peut pas contenir le projet : {output_root}")
     if config_path is not None and Path(config_path).expanduser().resolve().is_relative_to(output_root):
-        raise ValueError(f"Le paramétrage TOML ne peut pas se trouver dans le dossier de sortie à remplacer : {output_root}")
+        raise ValueError(f"Le paramétrage ne peut pas se trouver dans le dossier de sortie à remplacer : {output_root}")
+    for source_path in (local_its_csv, local_kri_csv):
+        if source_path is not None and Path(source_path).expanduser().resolve().is_relative_to(output_root):
+            raise ValueError(f"Le CSV source local ne peut pas se trouver dans le dossier de sortie à remplacer : {output_root}")
     if darwin_folder_id is not None:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
         applications = _download_darwin_folder_configurations(darwin_folder_id, calculation_date, darwin_client)
@@ -1355,19 +1482,30 @@ def global_update(
         config_directory = Path(config_path) if config_path else EXAMPLE_CONFIG_DIRECTORY
         applications = _read_configuration(config_directory, calculation_date)
         config_source = str(config_directory.resolve())
-    if mode != "preview" and darwin_upload is None and any(app.export_dataset for app in applications):
+    if mode not in {"preview", "local"} and darwin_upload is None and any(app.export_dataset for app in applications):
         raise ValueError("export-dataset = true exige --darwin_upload pour envoyer le dataset compressé.")
+    if mode == "local" and local_kri_csv is None and any(
+        extraction.module == "KRI" for app in applications for extraction in app.extractions
+    ):
+        raise ValueError("Une extraction KRI dans le TOML exige --local-kri-csv en mode local.")
     fixture = _read_test_fixture(TEST_ENTITIES_PATH) if mode == "test" else None
     client = (devo_client if devo_client is not None else _load_default_devo_client()) if mode == "hive" else None
+    if mode == "local":
+        client = LocalSourceClient(local_its_csv, local_kri_csv)
     if darwin_upload is not None:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
     if output_root.exists():
         print(f"[Agora] Remplacement du dossier de sortie existant : {output_root}", flush=True)
         shutil.rmtree(output_root)
     query_root = output_root / "queries"
-    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "extraction_format": extraction_format, "applications": []}
+    manifest: dict = {"mode": mode, "as_of": calculation_date.isoformat(), "config_directory": config_source, "compact_values": compact_values, "no_sidebar": no_sidebar, "extraction_format": extraction_format, "applications": []}
+    if mode == "local":
+        manifest["local_sources"] = {
+            "its": str(Path(local_its_csv).expanduser().resolve()),
+            "kri": str(Path(local_kri_csv).expanduser().resolve()) if local_kri_csv is not None else None,
+        }
     if darwin_upload is not None:
-        planned_versions = sum(len(app.extractions) for app in applications) if mode == "hive" else len(applications)
+        planned_versions = sum(len(app.extractions) for app in applications) if mode in {"hive", "local"} else len(applications)
         manifest["darwin_upload"] = {"node_id": darwin_upload, "uploaded": 0, "total": planned_versions}
         if any(app.export_dataset for app in applications):
             manifest["darwin_upload"]["datasets_uploaded"] = 0
@@ -1375,21 +1513,37 @@ def global_update(
     manifest_path = output_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"[Agora] {len(applications)} application(s) à traiter · mode {mode} · extraction {extraction_format}", flush=True)
+    metadata_relative = (Path("queries") / "institution_metadata.sql").as_posix()
+    metadata_sql = _build_shared_institution_sql(applications, PRODUCTION_TABLES["ITS"])
+    (output_root / metadata_relative).parent.mkdir(parents=True, exist_ok=True)
+    (output_root / metadata_relative).write_text(metadata_sql, encoding="utf-8")
+    shared_institution_rows: list[dict[str, str]] = []
+    if mode in {"hive", "local"} and applications:
+        print(f"[Agora] Institutions : extraction commune pour {len(applications)} application(s) ({metadata_relative})", flush=True)
+        try:
+            shared_frame = client.read_sql(metadata_sql)
+        except Exception as error:
+            raise RuntimeError("Échec de la requête commune des institutions.") from error
+        shared_institution_rows = _dataframe_rows(
+            shared_frame,
+            ("entity_id", "institution_id", "lei", "jst_code_today", "jst_code", "institution_name",
+             "consolidation_level", "cluster", "ssm_supervision_country", "ssmsignificance", "is_highest_cons"),
+            "Institutions communes",
+        )
+        print(f"[Agora] Institutions : {len(shared_institution_rows)} combinaison(s) de métadonnées reçue(s), réutilisées par application", flush=True)
     for application_number, application in enumerate(applications, start=1):
         print(f"[Agora] Application {application_number}/{len(applications)} : {application.config_file or application.name} ({len(application.extractions)} extraction(s))", flush=True)
-        folder = _safe_name(application.name)
+        folder = _application_output_stem(application.description, application.name)
         app_query_dir = query_root / folder
         app_query_dir.mkdir(parents=True, exist_ok=True)
         query_table = PRODUCTION_TABLES
-        metadata_relative = (Path("queries") / folder / "institution_metadata.sql").as_posix()
-        metadata_sql = _build_institution_sql(application, query_table["ITS"])
-        (output_root / metadata_relative).parent.mkdir(parents=True, exist_ok=True)
-        (output_root / metadata_relative).write_text(metadata_sql, encoding="utf-8")
         application_manifest = {
             "name": application.name,
+            "description": application.description,
             "config_file": application.config_file,
             "leis": list(application.leis),
             "clusters": list(application.clusters),
+            "jst_code": list(application.jst_codes),
             "ssm_supervision_country": list(application.ssm_supervision_countries),
             "ssmsignificance": list(application.ssm_significances),
             "consolidation": application.consolidation,
@@ -1404,16 +1558,12 @@ def global_update(
         reporting_units = None
         all_dates = tuple(sorted({item for extraction in application.extractions for item in extraction.reference_dates}))
         records: dict[tuple[str, ...], dict[str, str]] = {}
-        if mode == "hive":
-            print(f"[Agora]   Institutions : exécution de {metadata_relative}", flush=True)
-            try:
-                dictionary_frame = client.read_sql(metadata_sql)
-            except Exception as error:
-                raise RuntimeError(f"{application.name}: échec de la requête des institutions.") from error
+        if mode in {"hive", "local"}:
+            print(f"[Agora]   Institutions : sélection dans la population commune", flush=True)
             anomalies: list[dict[str, str]] = []
-            institution_rows = _institution_rows(
-                dictionary_frame, f"{application.name} / institutions", anomalies,
-            )
+            application_candidates = _aggregate_shared_institution_rows(shared_institution_rows, application)
+            institution_rows = _validate_institution_rows(
+                application_candidates, f"{application.name} / institutions", anomalies)
             reporting_units = (_select_institution_rows(institution_rows, application, anomalies)
                                if institution_rows else [])
             if anomalies:
@@ -1437,12 +1587,12 @@ def global_update(
             } for unit in reporting_units]
         if reporting_units is not None and not reporting_units:
             application_manifest["status"] = "skipped"
-            reasons = sorted({item["reason"] for item in anomalies}) if mode == "hive" else ["JST code manquant"]
+            reasons = sorted({item["reason"] for item in anomalies}) if mode in {"hive", "local"} else ["JST code manquant"]
             application_manifest["skip_reason"] = (
                 "Aucune unité de reporting valide après exclusion : " + ", ".join(reasons) + "."
             )
             if darwin_upload is not None:
-                manifest["darwin_upload"]["total"] -= len(application.extractions) if mode == "hive" else 1
+                manifest["darwin_upload"]["total"] -= len(application.extractions) if mode in {"hive", "local"} else 1
             manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             print(f"[Agora] Application {application_number}/{len(applications)} ignorée : aucune unité de reporting valide", flush=True)
             continue
@@ -1470,7 +1620,7 @@ def global_update(
                 "source_table": source_table,
                 "result_format": extraction_format,
             }
-            if mode == "hive":
+            if mode in {"hive", "local"}:
                 query_label = f"{application.name} / extraction {index:02d}"
                 print(f"[Agora]   Extraction {index}/{len(application.extractions)} : exécution de {query_relative} ({extraction.selector})", flush=True)
                 try:
@@ -1485,10 +1635,10 @@ def global_update(
                 print(f"[Agora]   Extraction {index}/{len(application.extractions)} : {extraction_manifest['query_rows']} ligne(s) reçue(s)", flush=True)
             application_manifest["extractions"].append(extraction_manifest)
             manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            if mode == "hive" and darwin_upload is not None:
+            if mode in {"hive", "local"} and darwin_upload is not None:
                 if _write_hive_snapshot(output_root, application, folder, application_manifest, records,
                                         all_dates, dictionary_rows, compact_values=compact_values,
-                                        extraction_format=extraction_format):
+                                        extraction_format=extraction_format, no_sidebar=no_sidebar):
                     print(f"[Agora]   HTML créé : {application_manifest['html_app']} ({application_manifest['rows']} ligne(s))", flush=True)
                     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                     _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload,
@@ -1499,23 +1649,31 @@ def global_update(
         if mode == "test":
             fields, rows = _build_dummy_dataset(application, fixture)
             print(f"[Agora]   Construction du HTML à partir des données simulées", flush=True)
-            _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows, compact_values=compact_values)
+            _write_application_outputs(output_root, application, folder, application_manifest, fields, rows, dictionary_rows,
+                                       compact_values=compact_values, no_sidebar=no_sidebar)
             application_manifest["simulated_rows"] = len(rows)
-        elif mode == "hive":
+        elif mode in {"hive", "local"}:
             if darwin_upload is None:
                 print(f"[Agora]   Construction du HTML final", flush=True)
                 _write_hive_snapshot(output_root, application, folder, application_manifest, records,
                                      all_dates, dictionary_rows, compact_values=compact_values,
-                                     extraction_format=extraction_format, require_data=True)
+                                     extraction_format=extraction_format,
+                                     no_sidebar=no_sidebar)
             elif "html_app" not in application_manifest:
-                raise ValueError(f"{application.name}: aucune donnée non vide remontée par les extractions Hive.")
+                print(f"[Agora]   Aucune donnée : création d'une application vide", flush=True)
+                _write_hive_snapshot(output_root, application, folder, application_manifest, records,
+                                     all_dates, dictionary_rows, compact_values=compact_values,
+                                     extraction_format=extraction_format, no_sidebar=no_sidebar)
+                _upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload,
+                                                  darwin_client, applications=[application_manifest],
+                                                  extraction_index=len(application.extractions))
         application_manifest["status"] = "complete"
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"[Agora] Application {application_number}/{len(applications)} terminée : {application_manifest.get('html_app', 'requêtes seules')}", flush=True)
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_query_index(output_root / "query_index.md", manifest)
     uploaded = (_upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload, darwin_client)
-                if darwin_upload is not None and mode != "hive" else manifest.get("darwin_upload", {}).get("uploaded", 0))
+                if darwin_upload is not None and mode not in {"hive", "local"} else manifest.get("darwin_upload", {}).get("uploaded", 0))
     completed_apps = [app for app in manifest["applications"] if app.get("status") == "complete" and app.get("html_app")]
     if completed_apps:
         if darwin_upload is not None:
@@ -1555,18 +1713,21 @@ def global_update(
 
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Prépare, simule ou exécute les exports Agora Explorer.")
-    parser.add_argument("--config", "--config-dir", default=None, help="Fichier ou dossier TOML local, ou darwin:NODE_ID")
-    parser.add_argument("--config-darwin", type=int, action="append", default=None, metavar="NODE_ID", help="Nœud Darwin d'un TOML ; option répétable pour plusieurs applications")
-    parser.add_argument("--config-darwin-folder", type=int, default=None, metavar="FOLDER_ID", help="Lister les TOML du dossier Darwin et télécharger chaque fichier")
-    parser.add_argument("--mode", choices=("preview", "test", "hive"), default="preview")
+    parser.add_argument("--config", "--config-dir", default=None, help="Classeur Excel .xlsx, fichier ou dossier TOML local, ou darwin:NODE_ID")
+    parser.add_argument("--config-darwin", type=int, action="append", default=None, metavar="NODE_ID", help="Nœud Darwin d'un TOML ou classeur Excel ; option répétable pour les TOML")
+    parser.add_argument("--config-darwin-folder", type=int, default=None, metavar="FOLDER_ID", help="Lister les TOML ou le classeur Excel unique d'un dossier Darwin")
+    parser.add_argument("--mode", choices=("preview", "test", "hive", "local"), default="preview")
+    parser.add_argument("--local-its-csv", type=Path, default=None, help="Copie brute CSV, CSV.gz ou ZIP (un CSV) de la table ITS pour le mode local")
+    parser.add_argument("--local-kri-csv", type=Path, default=None, help="Copie brute CSV, CSV.gz ou ZIP (un CSV) de la table KRI pour les extractions KRI locales")
     parser.add_argument("--output", type=Path, required=True, help="Dossier de sortie hors du projet (obligatoire)")
     parser.add_argument("--as-of", type=date.fromisoformat, default=None, help="Date de calcul YYYY-MM-DD (utile aux essais reproductibles)")
     parser.add_argument("--compact-values", action="store_true", help="Stocker les montants en milliers entiers et les pourcentages sur quatre chiffres significatifs")
+    parser.add_argument("--no-sidebar", action="store_true", help="Générer les HTML sans navigation latérale ni bouton pour l'ouvrir")
     parser.add_argument("--extraction-format", choices=("long", "wide"), default="long", help="Résultat Hive : lignes date/valeur transposées en Python (défaut), ou ancien pivot SQL")
     parser.add_argument("--darwin_upload", "--darwin-upload", type=int, default=None, metavar="NODE_ID", help="Uploader chaque HTML autonome dans le nœud parent Darwin indiqué")
     args = parser.parse_args()
     try:
-        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, extraction_format=args.extraction_format, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin, darwin_folder_id=args.config_darwin_folder)
+        result = global_update(args.config, mode=args.mode, output_directory=args.output, as_of=args.as_of, compact_values=args.compact_values, no_sidebar=args.no_sidebar, extraction_format=args.extraction_format, darwin_upload=args.darwin_upload, darwin_config_ids=args.config_darwin, darwin_folder_id=args.config_darwin_folder, local_its_csv=args.local_its_csv, local_kri_csv=args.local_kri_csv)
     except Exception as error:
         parser.exit(2, f"global_update: {error}\n")
     print(f"{result['applications']} application(s) traitée(s) en mode {result['mode']}")

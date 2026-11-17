@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from datetime import date
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -31,6 +32,8 @@ from global_update import (  # noqa: E402
     _build_dummy_dataset,
     _build_extraction_sql,
     _build_institution_sql,
+    _build_shared_institution_sql,
+    _aggregate_shared_institution_rows,
     _consolidation_predicate,
     _merge_extraction_rows,
     _select_institution_rows,
@@ -46,9 +49,61 @@ from export_all_standalone_apps import (  # noqa: E402
     export_all_standalone_apps,
     export_consolidated_standalone_app,
 )
+from local_source_client import LocalSourceClient  # noqa: E402
+from launcher import render_launcher_html  # noqa: E402
 
 
 class OutputDirectoryTests(unittest.TestCase):
+    def test_same_display_name_uses_description_for_distinct_html_files(self):
+        config_text = '''[[applications]]
+name = "FINREP"
+description = "Cluster 1 banks"
+leis = ["5493001KJTIIGC8Y1R12"]
+consolidation = "HIGHEST"
+[[applications.extractions]]
+module = "FINREP"
+templates = ["F_12.01"]
+history_years = 1
+frequency = "QUARTERLY"
+[[applications]]
+name = "FINREP"
+description = "Cluster 2 banks"
+leis = ["969500Q2MA9Y1GQG8B61"]
+consolidation = "HIGHEST"
+[[applications.extractions]]
+module = "FINREP"
+templates = ["F_12.01"]
+history_years = 1
+frequency = "QUARTERLY"
+'''
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            config = root / "applications.toml"
+            config.write_text(config_text, encoding="utf-8")
+            output = root / "output"
+            global_update(config, mode="test", output_directory=output, as_of=date(2026, 9, 26))
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            html_paths = [output / app["html_app"] for app in manifest["applications"]]
+            self.assertEqual([path.name for path in html_paths], [
+                "Cluster_1_banks__FINREP.html",
+                "Cluster_2_banks__FINREP.html",
+            ])
+            self.assertTrue(all("<title>FINREP</title>" in path.read_text(encoding="utf-8") for path in html_paths))
+            launcher = (output / "Agora Explorer_launcher.html").read_text(encoding="utf-8")
+            self.assertTrue(all(path.name in launcher for path in html_paths))
+
+    def test_no_sidebar_is_baked_into_generated_html(self):
+        config = EXAMPLE_CONFIG_DIRECTORY / "02-corep.toml"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "output"
+            global_update(config, mode="test", output_directory=output,
+                          as_of=date(2026, 9, 26), no_sidebar=True)
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            self.assertTrue(manifest["no_sidebar"])
+            html = (output / manifest["applications"][0]["html_app"]).read_text(encoding="utf-8")
+            self.assertIn('data-standalone="true" data-no-sidebar="true"', html)
+            self.assertIn('html[data-no-sidebar="true"] .sidebar-toggle', html)
+
     def test_existing_output_is_replaced_on_rerun(self):
         config = EXAMPLE_CONFIG_DIRECTORY / "02-corep.toml"
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -60,7 +115,7 @@ class OutputDirectoryTests(unittest.TestCase):
             global_update(config, mode="test", output_directory=output, as_of=date(2026, 9, 26))
             self.assertFalse(stale.exists())
             self.assertTrue((output / "manifest.json").is_file())
-            self.assertTrue((output / "applications" / "html" / "Agora Explorer_COREP.html").is_file())
+            self.assertTrue((output / "applications" / "html" / "COREP.html").is_file())
 
     def test_invalid_configuration_keeps_existing_output(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -76,7 +131,7 @@ class OutputDirectoryTests(unittest.TestCase):
                 global_update(invalid_config, mode="preview", output_directory=output)
             self.assertEqual(marker.read_text(encoding="utf-8"), "à conserver")
 
-            with self.assertRaisesRegex(ValueError, "paramétrage TOML ne peut pas se trouver"):
+            with self.assertRaisesRegex(ValueError, "paramétrage ne peut pas se trouver"):
                 global_update(marker, mode="preview", output_directory=output)
             self.assertEqual(marker.read_text(encoding="utf-8"), "à conserver")
 
@@ -280,7 +335,11 @@ class DarwinUploadTests(unittest.TestCase):
             self.assertEqual(manifest["applications"][0]["darwin_upload"]["file_node_id"], 1000)
             self.assertEqual(manifest["launcher"]["darwin_upload"]["status"], "uploaded")
             launcher = (Path(temporary_directory) / manifest["launcher"]["html"]).read_text(encoding="utf-8")
-            self.assertIn("https://darwin.escb.eu/livelink/livelink/fetchcsui/1914437350/Agora%20Explorer_FINREP.html?nodeid=1000&amp;vernum=-2", launcher)
+            first_html = Path(manifest["applications"][0]["html_app"]).name
+            self.assertIn(
+                f"https://darwin.escb.eu/livelink/livelink/fetchcsui/1914437350/{first_html}?nodeid=1000&amp;vernum=-2",
+                launcher,
+            )
 
     def test_failed_upload_preserves_local_files_and_completed_status(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -368,7 +427,7 @@ class QueryPlanTests(unittest.TestCase):
         extraction = Extraction("COREP", "C_08.02%", 1, "QUARTERLY", ("2025-12-31", "2026-03-31"))
         long_sql = _build_extraction_sql(extraction, application)
         wide_sql = _build_extraction_sql(extraction, application, result_format="wide")
-        self.assertIn("cons_level IN ('CONSO')", long_sql)
+        self.assertIn("cons_level IN ('CONS')", long_sql)
         self.assertIn("module_id = 'COREP'", long_sql)
         self.assertIn("reference_period IN (\n        '2025-12-31',\n        '2026-03-31'", long_sql)
         self.assertIn("table_id LIKE 'C_08.02%'", long_sql)
@@ -381,7 +440,8 @@ class QueryPlanTests(unittest.TestCase):
 
     def test_consolidation_modes_use_source_column_and_values(self):
         self.assertEqual(_consolidation_predicate("HIGHEST"), "is_highest_cons = 'Y'")
-        self.assertEqual(_consolidation_predicate("CONSO+SOLO"), "cons_level IN ('CONSO', 'SOLO')")
+        self.assertEqual(_consolidation_predicate("CONSO"), "cons_level IN ('CONS')")
+        self.assertEqual(_consolidation_predicate("CONSO+SOLO"), "cons_level IN ('CONS', 'SOLO')")
         self.assertEqual(_consolidation_predicate("ALL"), "")
 
     def test_kri_preview_marks_identity_values_that_require_metadata(self):
@@ -472,7 +532,7 @@ class QueryPlanTests(unittest.TestCase):
         lei = "AAAABBBBCCCCDDDDEEEE"
         other_lei = "FFFFGGGGHHHHIIIIJJJJ"
         its_rows = [
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="CONSO", is_highest_cons="Y", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="CONS", is_highest_cons="Y", name="Bank A",
                  jst_code="OLD", jst_code_today="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=125.0),
@@ -480,46 +540,46 @@ class QueryPlanTests(unittest.TestCase):
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.b",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=75.0),
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="SUBLIQ", is_highest_cons="N", name="Bank A",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", ssm_supervision_country="FR", ssmsignificance="SI", cons_level="CRDLIQSUBGRP", is_highest_cons="N", name="Bank A",
                  jst_code="JST_A", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=50.0),
-            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", ssm_supervision_country="DE", ssmsignificance="LSI", cons_level="CONSO", is_highest_cons="Y", name="Bank B",
+            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", ssm_supervision_country="DE", ssmsignificance="LSI", cons_level="CONS", is_highest_cons="Y", name="Bank B",
                  jst_code="JST_B", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=900.0),
-            dict(entity_id="E_missing", lei=" ", cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y", name="Missing LEI",
+            dict(entity_id="E_missing", lei=" ", cluster="CLUSTER_A", cons_level="CONS", is_highest_cons="Y", name="Missing LEI",
                  jst_code="JST_MISSING", module_id="COREP", table_id="C_01.00.a",
                  reference_period="2026-03-31", x_axis_rc_code="0010", y_axis_rc_code="0020",
                  z_axis_rc_code="qx01", value_decimal=999.0),
         ]
         its_rows.extend([
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONS", is_highest_cons="Y",
                  module_id="COREP", table_id="C_08.02.a", reference_period=period,
                  x_axis_rc_code="0110", y_axis_rc_code=None, ogr="012", z_axis_rc_code="qx2023", value_decimal=value)
             for period, value in (("2025-12-31", 12.0), ("2026-03-31", 13.0))
         ])
         its_rows.extend([
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONS", is_highest_cons="Y",
                  module_id="COREP", table_id="C_08.02.b", reference_period="2026-03-31",
                  x_axis_rc_code="0110", y_axis_rc_code=None, ogr="099", z_axis_rc_code="qx2023", value_decimal=99.0),
-            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", cons_level="CONSO", is_highest_cons="Y",
+            dict(entity_id="E2", lei=other_lei, cluster="CLUSTER_B", cons_level="CONS", is_highest_cons="Y",
                  module_id="COREP", table_id="C_08.02.a", reference_period="2026-03-31",
                  x_axis_rc_code="0110", y_axis_rc_code=None, ogr="707", z_axis_rc_code="qx2023", value_decimal=707.0),
-            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+            dict(entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONS", is_highest_cons="Y",
                  module_id="COREP", table_id="C_08.01", reference_period="2026-03-31",
                  x_axis_rc_code="0110", y_axis_rc_code="0010", ogr="888", z_axis_rc_code="qx2023", value_decimal=8.0),
         ])
         for row in its_rows:
             insert("agora_its_bft_current", row)
-        for entity_id, level, value in (("E1", "CONSO", 0.2), ("E1", "SOLO", 0.3),
-                                        ("E1", "SUBLIQ", 0.4), ("E2", "CONSO", 0.9)):
+        for entity_id, level, value in (("E1", "CONS", 0.2), ("E1", "SOLO", 0.3),
+                                        ("E1", "CRDLIQSUBGRP", 0.4), ("E2", "CONS", 0.9)):
             insert("agora_dm_imas_kris_raw", dict(
                 entity_id=entity_id, cons_level=level, kri_data_point_id="KRI_1",
                 cluster="CLUSTER_A" if entity_id == "E1" else "CLUSTER_B",
                 ssm_supervision_country="FR" if entity_id == "E1" else "DE",
                 ssmsignificance="SI" if entity_id == "E1" else "LSI",
-                is_highest_cons="Y" if level == "CONSO" else "N",
+                is_highest_cons="Y" if level == "CONS" else "N",
                 reference_period="2026-03-31", value_decimal=value,
             ))
 
@@ -541,9 +601,22 @@ class QueryPlanTests(unittest.TestCase):
             "example", (), "CONSO", (its_extraction, kri_extraction),
             ssm_supervision_countries=("FR",), ssm_significances=("LSI",),
         )
+        populations = (highest, both, all_levels, clustered, cluster_overrides_lei,
+                       country_overrides_both, significance_only, lei_and_significance,
+                       incompatible_country_significance)
+        shared_cursor = connection.execute(_build_shared_institution_sql(populations, PRODUCTION_TABLES["ITS"]))
+        shared_columns = [column[0] for column in shared_cursor.description]
+        shared_rows = [{column: "" if value is None else str(value)
+                        for column, value in zip(shared_columns, values)} for values in shared_cursor]
+        for application in populations:
+            old_cursor = connection.execute(_build_institution_sql(application, PRODUCTION_TABLES["ITS"]))
+            old_columns = [column[0] for column in old_cursor.description]
+            expected = [dict(zip(old_columns, values)) for values in old_cursor]
+            actual = _aggregate_shared_institution_rows(shared_rows, application)
+            self.assertEqual(actual, expected, application)
         its_rows = connection.execute(_build_extraction_sql(its_extraction, highest, result_format="wide")).fetchall()
         self.assertEqual(len(its_rows), 1)
-        self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONSO"))
+        self.assertEqual(its_rows[0][0:2], ("C_01.00", f"{lei}_CONS"))
         self.assertEqual(its_rows[0][-2:], (None, 125.0))
         grade_extraction = Extraction("COREP", "C_08.02%", 1, "QUARTERLY", dates)
         grade_sql = _build_extraction_sql(grade_extraction, highest, result_format="wide")
@@ -563,17 +636,17 @@ class QueryPlanTests(unittest.TestCase):
         cluster_its_sql = _build_extraction_sql(its_extraction, clustered)
         self.assertIn("cluster IN (", cluster_its_sql)
         self.assertNotIn("lei IN (", cluster_its_sql)
-        self.assertEqual({row[1] for row in connection.execute(cluster_its_sql)}, {f"{lei}_CONSO"})
-        self.assertEqual({row[1] for row in connection.execute(_build_extraction_sql(its_extraction, cluster_overrides_lei))}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(cluster_its_sql)}, {f"{lei}_CONS"})
+        self.assertEqual({row[1] for row in connection.execute(_build_extraction_sql(its_extraction, cluster_overrides_lei))}, {f"{lei}_CONS"})
         country_its_sql = _build_extraction_sql(its_extraction, country_overrides_both)
         self.assertIn("ssm_supervision_country IN (", country_its_sql)
         self.assertNotIn("cluster IN (", country_its_sql)
         self.assertNotIn("lei IN (", country_its_sql)
-        self.assertEqual({row[1] for row in connection.execute(country_its_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(country_its_sql)}, {f"{lei}_CONS"})
         significance_its_sql = _build_extraction_sql(its_extraction, significance_only)
         self.assertIn("ssmsignificance IN (", significance_its_sql)
         self.assertNotIn("lei IN (", significance_its_sql)
-        self.assertEqual({row[1] for row in connection.execute(significance_its_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(significance_its_sql)}, {f"{lei}_CONS"})
         self.assertEqual(connection.execute(_build_extraction_sql(
             its_extraction, incompatible_country_significance,
         )).fetchall(), [])
@@ -593,22 +666,22 @@ class QueryPlanTests(unittest.TestCase):
         cluster_units = _select_institution_rows(
             [dict(zip(cluster_columns, row)) for row in cluster_metadata_cursor.fetchall()], clustered,
         )
-        self.assertEqual({row["institution_id"] for row in cluster_units}, {f"{lei}_CONSO"})
+        self.assertEqual({row["institution_id"] for row in cluster_units}, {f"{lei}_CONS"})
         country_metadata_sql = _build_institution_sql(country_overrides_both, PRODUCTION_TABLES["ITS"])
         country_cursor = connection.execute(country_metadata_sql)
         country_columns = [column[0] for column in country_cursor.description]
         country_units = _select_institution_rows(
             [dict(zip(country_columns, row)) for row in country_cursor.fetchall()], country_overrides_both,
         )
-        self.assertEqual({row["institution_id"] for row in country_units}, {f"{lei}_CONSO"})
+        self.assertEqual({row["institution_id"] for row in country_units}, {f"{lei}_CONS"})
         self.assertEqual(country_units[0]["ssm_supervision_country"], "FR")
         cluster_kri_sql = _build_extraction_sql(kri_extraction, clustered, reporting_units=cluster_units)
         self.assertIn("kri.cluster IN (", cluster_kri_sql)
         self.assertNotIn("lei IN (", cluster_kri_sql)
-        self.assertEqual({row[1] for row in connection.execute(cluster_kri_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(cluster_kri_sql)}, {f"{lei}_CONS"})
         country_kri_sql = _build_extraction_sql(kri_extraction, country_overrides_both, reporting_units=country_units)
         self.assertIn("kri.ssm_supervision_country IN (", country_kri_sql)
-        self.assertEqual({row[1] for row in connection.execute(country_kri_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(country_kri_sql)}, {f"{lei}_CONS"})
         significance_metadata = connection.execute(_build_institution_sql(
             significance_only, PRODUCTION_TABLES["ITS"],
         ))
@@ -616,49 +689,49 @@ class QueryPlanTests(unittest.TestCase):
         significance_units = _select_institution_rows([
             dict(zip(significance_columns, row)) for row in significance_metadata.fetchall()
         ], significance_only)
-        self.assertEqual({unit["institution_id"] for unit in significance_units}, {f"{lei}_CONSO"})
+        self.assertEqual({unit["institution_id"] for unit in significance_units}, {f"{lei}_CONS"})
         significance_kri_sql = _build_extraction_sql(
             kri_extraction, significance_only, reporting_units=significance_units,
         )
         self.assertIn("kri.ssmsignificance IN (", significance_kri_sql)
-        self.assertEqual({row[1] for row in connection.execute(significance_kri_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(significance_kri_sql)}, {f"{lei}_CONS"})
         lei_significance_kri_sql = _build_extraction_sql(
             kri_extraction, lei_and_significance, reporting_units=significance_units,
         )
         self.assertIn("kri.ssmsignificance IN (", lei_significance_kri_sql)
         self.assertNotIn("kri.lei", lei_significance_kri_sql)
-        self.assertEqual({row[1] for row in connection.execute(lei_significance_kri_sql)}, {f"{lei}_CONSO"})
+        self.assertEqual({row[1] for row in connection.execute(lei_significance_kri_sql)}, {f"{lei}_CONS"})
         kri_sql = _build_extraction_sql(kri_extraction, both, reporting_units=both_units)
         self.assertNotIn("WITH reporting_units", kri_sql)
         self.assertNotIn("JOIN", kri_sql)
         self.assertIn("kri.entity_id = 'E1'", kri_sql)
         self.assertIn("kri.cons_level = 'SOLO'", kri_sql)
         kri_rows = connection.execute(kri_sql).fetchall()
-        self.assertEqual({row[1]: row[-1] for row in kri_rows}, {f"{lei}_CONSO": 0.2, f"{lei}_SOLO": 0.3})
+        self.assertEqual({row[1]: row[-1] for row in kri_rows}, {f"{lei}_CONS": 0.2, f"{lei}_SOLO": 0.3})
         self.assertEqual(len(connection.execute(_build_extraction_sql(kri_extraction, all_levels, reporting_units=all_units)).fetchall()), 3)
         cross_unit_sql = _build_extraction_sql(kri_extraction, both, reporting_units=[
-            next(row for row in reporting_units if row["entity_id"] == "E1" and row["consolidation_level"] == "CONSO"),
+            next(row for row in reporting_units if row["entity_id"] == "E1" and row["consolidation_level"] == "CONS"),
             {"entity_id": "E2", "consolidation_level": "SOLO", "institution_id": f"{other_lei}_SOLO"},
         ])
         self.assertEqual(
             {row[1] for row in connection.execute(cross_unit_sql).fetchall()},
-            {f"{lei}_CONSO"},
+            {f"{lei}_CONS"},
         )
-        self.assertEqual({row[1] for row in metadata if row[2] == lei}, {f"{lei}_CONSO", f"{lei}_SOLO", f"{lei}_SUBLIQ"})
-        self.assertEqual(next(row for row in metadata if row[1].endswith("CONSO"))[3:5], ("JST_A", "Bank A"))
+        self.assertEqual({row[1] for row in metadata if row[2] == lei}, {f"{lei}_CONS", f"{lei}_SOLO", f"{lei}_CRDLIQSUBGRP"})
+        self.assertEqual(next(row for row in metadata if row[1].endswith("CONS"))[3:5], ("JST_A", "Bank A"))
         highest_cursor = connection.execute(_build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
         highest_columns = [column[0] for column in highest_cursor.description]
         highest_units = _select_institution_rows(
             [dict(zip(highest_columns, row)) for row in highest_cursor.fetchall()], highest,
         )
-        self.assertEqual([row["consolidation_level"] for row in highest_units], ["CONSO"])
+        self.assertEqual([row["consolidation_level"] for row in highest_units], ["CONS"])
         self.assertIn("AND is_highest_cons = 'Y'", _build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
         self.assertNotIn("MAX(is_highest_cons)", _build_institution_sql(highest, PRODUCTION_TABLES["ITS"]))
         highest_kri_sql = _build_extraction_sql(kri_extraction, highest, reporting_units=highest_units)
         self.assertIn("AND kri.is_highest_cons = 'Y'", highest_kri_sql)
         self.assertEqual(
             {row[1] for row in connection.execute(highest_kri_sql)},
-            {f"{lei}_CONSO"},
+            {f"{lei}_CONS"},
         )
         self.assertIn("AND is_highest_cons = 'Y'", _build_extraction_sql(its_extraction, highest))
 
@@ -678,13 +751,13 @@ class QueryPlanTests(unittest.TestCase):
         # The Python pivot must reproduce the former Hive MAX(CASE ...) even
         # with repeated cells, NULL values, C_08.02 OGR and KRI identities.
         insert("agora_its_bft_current", dict(
-            entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONSO", is_highest_cons="Y",
+            entity_id="E1", lei=lei, cluster="CLUSTER_A", cons_level="CONS", is_highest_cons="Y",
             module_id="COREP", table_id="C_08.02.a", reference_period="2026-03-31",
             x_axis_rc_code="0110", y_axis_rc_code=None, ogr="012", z_axis_rc_code="qx2023",
             value_decimal=14.0,
         ))
         insert("agora_dm_imas_kris_raw", dict(
-            entity_id="E1", cons_level="CONSO", kri_data_point_id="KRI_1", cluster="CLUSTER_A",
+            entity_id="E1", cons_level="CONS", kri_data_point_id="KRI_1", cluster="CLUSTER_A",
             is_highest_cons="Y", reference_period="2026-03-31", value_decimal=0.1,
         ))
 
@@ -725,7 +798,8 @@ class QueryPlanTests(unittest.TestCase):
             self.assertEqual(result["applications"], 4)
             output = Path(temporary_directory)
             self.assertTrue((output / "query_index.md").is_file())
-            self.assertEqual(len(list((output / "queries").glob("*/*.sql"))), 4 + 9)
+            self.assertEqual(len(list((output / "queries").glob("*/*.sql"))), 9)
+            self.assertTrue((output / "queries" / "institution_metadata.sql").is_file())
             html_files = list((output / "applications" / "html").glob("*.html"))
             dataset_files = list((output / "applications" / "datasets").glob("*.csv"))
             dictionary_files = list((output / "applications" / "institutions").glob("*.csv"))
@@ -765,6 +839,93 @@ class QueryPlanTests(unittest.TestCase):
 class ConfigurationValidationTests(unittest.TestCase):
     LEI = "AAAABBBBCCCCDDDDEEEE"
 
+    def test_local_csv_mode_uses_raw_ogr_and_builds_html(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            config = root / "applications.toml"
+            config.write_text('''[[applications]]
+name = "Local grades"
+leis = ["AAAABBBBCCCCDDDDEEEE"]
+consolidation = "CONSO"
+
+[[applications.extractions]]
+module = "COREP"
+templates = ["C_08.02"]
+history_years = 1
+frequency = "QUARTERLY"
+''', encoding="utf-8")
+            source = root / "its.csv"
+            columns = ["entity_id", "lei", "jst_code", "jst_code_today", "name", "cons_level",
+                       "is_highest_cons", "cluster", "ssm_supervision_country", "ssmsignificance",
+                       "module_id", "table_id", "reference_period", "x_axis_rc_code",
+                       "y_axis_rc_code", "z_axis_rc_code", "ogr", "value_decimal"]
+            with source.open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=columns)
+                writer.writeheader()
+                writer.writerow(dict(entity_id="E1", lei=self.LEI, jst_code="OLD", jst_code_today="JST_A",
+                                     name="Bank A", cons_level="CONS", is_highest_cons="Y", cluster="NULL",
+                                     ssm_supervision_country="FR", ssmsignificance="SI", module_id="COREP",
+                                     table_id="C_08.02", reference_period="2026-03-31", x_axis_rc_code="0110",
+                                     y_axis_rc_code="", z_axis_rc_code="qx2023", ogr="012", value_decimal="13"))
+            output = root / "output"
+            result = global_update(config, mode="local", output_directory=output,
+                                   local_its_csv=source, as_of=date(2026, 4, 1))
+            self.assertEqual(result["applications"], 1)
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["mode"], "local")
+            app = manifest["applications"][0]
+            self.assertEqual(app["extractions"][0]["query_rows"], 1)
+            self.assertTrue((output / app["html_app"]).is_file())
+            with (output / app["dataset"]).open(newline="", encoding="utf-8") as stream:
+                row = next(csv.DictReader(stream))
+            self.assertEqual(row["y_axis_rc_code"], "012")
+            self.assertEqual(row["ref_2026_03_31"], "13")
+
+            archive = root / "impala.zip"
+            with zipfile.ZipFile(archive, "w") as zip_stream:
+                zip_stream.write(source, arcname="impala.csv")
+            client = LocalSourceClient(archive)
+            try:
+                frame = client.read_sql("SELECT ogr, cluster FROM crp_agora.agora_its_bft_current")
+                self.assertEqual(frame.to_dict(orient="records"), [{"ogr": "012", "cluster": None}])
+            finally:
+                client.close()
+
+    def test_local_kri_requires_a_second_source_csv(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            config = root / "kri.toml"
+            config.write_text('''[[applications]]
+name = "Local KRI"
+leis = ["AAAABBBBCCCCDDDDEEEE"]
+consolidation = "HIGHEST"
+
+[[applications.extractions]]
+module = "KRI"
+kri_ids = ["LIQ55"]
+history_years = 1
+frequency = "QUARTERLY"
+''', encoding="utf-8")
+            source = root / "its.csv"
+            source.write_text(
+                "entity_id,lei,jst_code,jst_code_today,name,cons_level,is_highest_cons,cluster,ssm_supervision_country,ssmsignificance,module_id,table_id,reference_period,x_axis_rc_code,y_axis_rc_code,z_axis_rc_code,ogr,value_decimal\n"
+                f"E1,{self.LEI},OLD,JST_A,Bank A,CONS,Y,A,FR,SI,COREP,C_01.00,2026-03-31,0010,0010,, ,1\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "--local-kri-csv"):
+                global_update(config, mode="local", output_directory=root / "output",
+                              local_its_csv=source, as_of=date(2026, 4, 1))
+            kri = root / "kri.csv"
+            kri.write_text(
+                "entity_id,cons_level,is_highest_cons,cluster,ssm_supervision_country,ssmsignificance,kri_data_point_id,reference_period,value_decimal\n"
+                "E1,CONS,Y,A,FR,SI,LIQ55,2026-03-31,0.2\n",
+                encoding="utf-8",
+            )
+            result = global_update(config, mode="local", output_directory=root / "output",
+                                   local_its_csv=source, local_kri_csv=kri, as_of=date(2026, 4, 1))
+            manifest = json.loads(Path(result["manifest_path"]).read_text(encoding="utf-8"))
+            self.assertEqual(manifest["applications"][0]["extractions"][0]["query_rows"], 1)
+
     def test_single_toml_reproduces_legacy_applications_and_builds_html(self):
         combined_path = PROJECT_DIRECTORY / "examples" / "global-update-combined.toml"
         legacy = _read_configuration(EXAMPLE_CONFIG_DIRECTORY, date(2026, 9, 26))
@@ -797,7 +958,7 @@ class ConfigurationValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             config = Path(temporary_directory) / "applications.toml"
             config.write_text(original.replace('name = "COREP"', 'name = "FINREP"', 1), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, r"applications.toml, application 2: nom d'application déjà utilisé"):
+            with self.assertRaisesRegex(ValueError, r"applications.toml, application 2: combinaison description/name déjà utilisée"):
                 _read_configuration(config, date(2026, 9, 26))
             config.write_text(original.replace('templates = ["C_01.00"]', 'templates = []', 1), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, r"applications.toml, application 2, extraction 1"):
@@ -844,6 +1005,102 @@ class ConfigurationValidationTests(unittest.TestCase):
             )
             self.assertEqual(result["applications"], 4)
             self.assertEqual(downloaded, [123])
+
+    def test_excel_configuration_matches_business_blocks_and_darwin_node(self):
+        workbook = PROJECT_DIRECTORY / "examples" / "business-applications.xlsx"
+        apps = _read_configuration(workbook, date(2026, 9, 26))
+        self.assertEqual(len(apps), 37)
+        self.assertGreaterEqual(sum(len(app.extractions) for app in apps), len(apps))
+        self.assertEqual(apps[0].extractions[0].modules, ("COREP_OF", "COREP_FRTB", "COREP_LR"))
+        self.assertEqual(sum(app.name == "COREP_OF" for app in apps), 4)
+        self.assertEqual(apps[0].description, "Cluster 1 banks")
+
+        class Darwin:
+            def get_file(self, **kwargs):
+                Path(kwargs["local_file_path"]).write_bytes(workbook.read_bytes())
+
+        with tempfile.TemporaryDirectory() as directory:
+            result = global_update("darwin:123", mode="preview", output_directory=Path(directory) / "output",
+                                   darwin_client=Darwin(), as_of=date(2026, 9, 26))
+            self.assertEqual(result["applications"], len(apps))
+
+    def test_launcher_uses_application_description_for_peer_group(self):
+        app = {
+            "name": "FINREP", "description": "French significant institutions",
+            "html_app": "FINREP.html", "extractions": [],
+            "institutions": [
+                {"lei": "5493001KJTIIGC8Y1R12", "institution_name": "Northstar", "institution_id": "5493001KJTIIGC8Y1R12_CONS"},
+                {"lei": "969500Q2MA9Y1GQG8B61", "institution_name": "Riverside", "institution_id": "969500Q2MA9Y1GQG8B61_CONS"},
+            ],
+        }
+        launcher = render_launcher_html([app], {"FINREP.html": "https://example.test/FINREP.html"})
+        self.assertIn("French significant institutions (2 institutions)", launcher)
+        self.assertNotIn("Northstar · Riverside</h2>", launcher)
+
+
+    def test_excel_activation_skips_application_and_extraction(self):
+        source = PROJECT_DIRECTORY / "examples" / "business-applications.xlsx"
+        before = _read_configuration(source, date(2026, 9, 26))
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "settings.xlsx"
+            with zipfile.ZipFile(source) as original, zipfile.ZipFile(target, "w") as output:
+                for item in original.infolist():
+                    data = original.read(item.filename)
+                    if item.filename == "xl/worksheets/sheet1.xml":
+                        content = data.decode("utf-8")
+                        for cell in ("C2", "C15"):
+                            content, count = re.subn(
+                                rf'(<(?:x:)?c r="{cell}"[^>]*><(?:x:)?v>)1(</(?:x:)?v></(?:x:)?c>)',
+                                r'\g<1>0\g<2>', content, count=1,
+                            )
+                            self.assertEqual(count, 1)
+                        data = content.encode("utf-8")
+                    output.writestr(item, data)
+            apps = _read_configuration(target, date(2026, 9, 26))
+            self.assertEqual(len(apps), len(before) - 1)
+            self.assertEqual(sum(len(app.extractions) for app in apps),
+                             sum(len(app.extractions) for app in before) - len(before[0].extractions) - 1)
+
+    def test_excel_jst_code_filters_institutions_and_its_data(self):
+        source = PROJECT_DIRECTORY / "examples" / "business-applications.xlsx"
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "jst.xlsx"
+            with zipfile.ZipFile(source) as original, zipfile.ZipFile(target, "w") as output:
+                for item in original.infolist():
+                    data = original.read(item.filename)
+                    if item.filename == "xl/worksheets/sheet1.xml":
+                        content = data.decode("utf-8")
+                        content, count = re.subn(
+                            r'<(?P<namespace>x:)?c r="F2" s="(?P<style>[^"]+)"\s*/>',
+                            lambda match: (f'<{match.group("namespace") or ""}c r="F2" s="{match.group("style")}" t="str">'
+                                           f'<{match.group("namespace") or ""}v>DUM001</{match.group("namespace") or ""}v>'
+                                           f'</{match.group("namespace") or ""}c>'), content, count=1,
+                        )
+                        self.assertEqual(count, 1)
+                        data = content.encode("utf-8")
+                    output.writestr(item, data)
+            app = _read_configuration(target, date(2026, 9, 26))[0]
+            self.assertEqual(app.jst_codes, ("DUM001",))
+            for sql in (_build_institution_sql(app, PRODUCTION_TABLES["ITS"]),
+                        _build_extraction_sql(app.extractions[0], app)):
+                self.assertIn("jst_code_today", sql)
+                self.assertIn("'DUM001'", sql)
+                self.assertNotIn("cluster IN (", sql)
+
+    def test_jst_code_can_be_the_only_selector_and_kri_uses_selected_units(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = self._config(
+                Path(directory), leis='jst_code = ["DUM001"]',
+                extractions='[[extractions]]\nmodule = "KRI"\nkri_ids = ["%"]\nhistory_years = 1\nfrequency = "QUARTERLY"',
+            )
+            app = _read_configuration(folder, date(2026, 9, 26))[0]
+            sql = _build_institution_sql(app, PRODUCTION_TABLES["ITS"])
+            self.assertIn("'DUM001'", sql)
+            units = [{"entity_id": "ENTITY_1", "consolidation_level": "CONS",
+                      "institution_id": "5493001KJTIIGC8Y1R12_CONS"}]
+            kri_sql = _build_extraction_sql(app.extractions[0], app, reporting_units=units)
+            self.assertIn("kri.entity_id = 'ENTITY_1'", kri_sql)
+            self.assertNotIn("jst_code_today", kri_sql)
 
     def _config(self, root: Path, *, extractions: str = "", **changes) -> Path:
         folder = root / "configuration"
@@ -995,8 +1252,8 @@ frequency = "QUARTERLY"'''
 
     def test_cluster_validation_rejects_empty_selector_and_invalid_lists(self):
         cases = (
-            ('leis = []', "au moins un LEI, un cluster, un pays"),
-            ('leis = []\ncluster = []', "au moins un LEI, un cluster, un pays"),
+            ('leis = []', "au moins un LEI, un JST code, un cluster, un pays"),
+            ('leis = []\ncluster = []', "au moins un LEI, un JST code, un cluster, un pays"),
             ('leis = []\ncluster = [""]', "texte non vide"),
             ('leis = []\ncluster = ["A", "A"]', "doublons"),
             ('leis = []\ncluster = "A"', "liste TOML"),
@@ -1140,19 +1397,22 @@ frequency = "QUARTERLY"
                 if "AS institution_id" in sql:
                     conso = {
                         "ENTITY_ID": "E1",
-                        "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_CONSO",
+                        "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_CONS",
                         "LEI": HiveExecutionTests.LEI,
+                        "JST_CODE_TODAY": "",
                         "JST_CODE": "JST_A",
                         "INSTITUTION_NAME": "Bank A",
-                        "CONSOLIDATION_LEVEL": "CONSO",
+                        "CONSOLIDATION_LEVEL": "CONS",
                         "CLUSTER": "CLUSTER_A",
                         "SSM_SUPERVISION_COUNTRY": "FR",
                         "SSMSIGNIFICANCE": "SI",
+                        "IS_HIGHEST_CONS": "Y",
                     }
                     return Frame([conso, {
                         **conso,
                         "INSTITUTION_ID": f"{HiveExecutionTests.LEI}_SOLO",
                         "CONSOLIDATION_LEVEL": "SOLO",
+                        "IS_HIGHEST_CONS": "N",
                     }])
                 is_kri = "'KRI' AS table_id" in sql
                 if not is_kri:
@@ -1160,7 +1420,7 @@ frequency = "QUARTERLY"
                 date_columns = re.findall(r"AS (ref_\d{4}_\d{2}_\d{2})", sql)
                 row = {
                     "table_id": "KRI" if is_kri else "C_01.00",
-                    "reporting_unit_id": f"{HiveExecutionTests.LEI}_CONSO",
+                    "reporting_unit_id": f"{HiveExecutionTests.LEI}_CONS",
                     "x_axis_rc_code": "" if is_kri else "0010",
                     "y_axis_rc_code": "LIQ55" if is_kri else "0020",
                     "z_axis_rc_code": "",
@@ -1187,7 +1447,7 @@ frequency = "QUARTERLY"
             kri_sql = next(sql for sql in client.calls if "'KRI' AS table_id" in sql)
             self.assertNotIn("WITH reporting_units", kri_sql)
             self.assertNotIn("JOIN", kri_sql)
-            self.assertIn("kri.cons_level = 'CONSO'", kri_sql)
+            self.assertIn("kri.cons_level = 'CONS'", kri_sql)
             self.assertNotIn("kri.cons_level = 'SOLO'", kri_sql)
             output = Path(result["output_directory"])
             with next((output / "applications" / "datasets").glob("*.csv")).open(encoding="utf-8-sig", newline="") as stream:
@@ -1196,7 +1456,7 @@ frequency = "QUARTERLY"
                 self.assertEqual([column for column in reader.fieldnames if column.startswith("ref_")], ["ref_2026_06_30"])
             self.assertEqual(len(rows), 2)
             self.assertEqual({row["table_id"]: row["ref_2026_06_30"] for row in rows}, {"C_01.00": "10", "KRI": "20"})
-            self.assertTrue((output / "applications" / "html" / "Agora Explorer_COREP_and_KRI.html").is_file())
+            self.assertTrue((output / "applications" / "html" / "COREP_and_KRI.html").is_file())
             self.assertIn("devo.read_sql", (output / "query_index.md").read_text(encoding="utf-8"))
             self.assertTrue(all("MAX(CASE" not in sql for sql in client.calls[1:]))
             self.assertEqual(json.loads((output / "manifest.json").read_text(encoding="utf-8"))["extraction_format"], "long")
@@ -1235,7 +1495,7 @@ frequency = "QUARTERLY"
                     valid = frame.records[0]
                     frame.records.extend([
                         {**valid, "ENTITY_ID": "E_missing_null", "INSTITUTION_ID": None, "LEI": None},
-                        {**valid, "ENTITY_ID": "E_missing_blank", "INSTITUTION_ID": "_CONSO", "LEI": "   "},
+                        {**valid, "ENTITY_ID": "E_missing_blank", "INSTITUTION_ID": "_CONS", "LEI": "   "},
                     ])
                 return frame
 
@@ -1255,7 +1515,7 @@ frequency = "QUARTERLY"
             dictionary_path = root / "generated" / manifest["applications"][0]["institution_dictionary"]
             with dictionary_path.open(encoding="utf-8-sig", newline="") as stream:
                 institution_rows = list(csv.DictReader(stream))
-            self.assertEqual([row["Institution ID"] for row in institution_rows], [f"{self.LEI}_CONSO"])
+            self.assertEqual([row["Institution ID"] for row in institution_rows], [f"{self.LEI}_CONS"])
 
     def test_hive_mode_excludes_units_without_jst_from_dictionary_and_data(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -1269,7 +1529,7 @@ frequency = "QUARTERLY"
             client = self._client()
             original_read_sql = client.read_sql
             bad_lei = "FFFFGGGGHHHHIIIIJJJJ"
-            bad_id = f"{bad_lei}_CONSO"
+            bad_id = f"{bad_lei}_CONS"
 
             def read_sql_with_missing_jst(sql):
                 frame = original_read_sql(sql)
@@ -1289,9 +1549,9 @@ frequency = "QUARTERLY"
             entry = manifest["applications"][0]
             self.assertEqual(entry["ssm_supervision_country"], ["FR"])
             with (output / entry["institution_dictionary"]).open(encoding="utf-8-sig", newline="") as stream:
-                self.assertEqual([row["Institution ID"] for row in csv.DictReader(stream)], [f"{self.LEI}_CONSO"])
+                self.assertEqual([row["Institution ID"] for row in csv.DictReader(stream)], [f"{self.LEI}_CONS"])
             with (output / entry["dataset"]).open(encoding="utf-8-sig", newline="") as stream:
-                self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONSO"})
+                self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONS"})
 
     def test_hive_mode_reports_and_excludes_ambiguous_reporting_units(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -1304,8 +1564,8 @@ frequency = "QUARTERLY"
             ), encoding="utf-8")
             client = self._client()
             original_read_sql = client.read_sql
-            shared_id = "FFFFGGGGHHHHIIIIJJJJ_CONSO"
-            pair_ids = ("KKKKLLLLMMMMNNNNOOOO_CONSO", "PPPPQQQQRRRRSSSSTTTT_CONSO")
+            shared_id = "FFFFGGGGHHHHIIIIJJJJ_CONS"
+            pair_ids = ("KKKKLLLLMMMMNNNNOOOO_CONS", "PPPPQQQQRRRRSSSSTTTT_CONS")
 
             def read_sql_with_ambiguities(sql):
                 frame = original_read_sql(sql)
@@ -1336,9 +1596,9 @@ frequency = "QUARTERLY"
                                 for anomaly in entry["institution_anomalies"]))
             self.assertIn("4 anomalie(s) exclue(s)", log.getvalue())
             with (output / entry["institution_dictionary"]).open(encoding="utf-8-sig", newline="") as stream:
-                self.assertEqual([row["Institution ID"] for row in csv.DictReader(stream)], [f"{self.LEI}_CONSO"])
+                self.assertEqual([row["Institution ID"] for row in csv.DictReader(stream)], [f"{self.LEI}_CONS"])
             with (output / entry["dataset"]).open(encoding="utf-8-sig", newline="") as stream:
-                self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONSO"})
+                self.assertEqual({row["reporting_unit_id"] for row in csv.DictReader(stream)}, {f"{self.LEI}_CONS"})
             kri_sql = next(sql for sql in client.calls if "'KRI' AS table_id" in sql)
             self.assertNotIn("kri.entity_id = 'E2'", kri_sql)
             self.assertNotIn("kri.entity_id = 'E4'", kri_sql)
@@ -1351,21 +1611,26 @@ frequency = "QUARTERLY"
             first = configuration / "app.toml"
             first.rename(configuration / "01-app.toml")
             (configuration / "02-app.toml").write_text(
-                (configuration / "01-app.toml").read_text(encoding="utf-8").replace('name = "COREP and KRI"', 'name = "Next"'),
+                (configuration / "01-app.toml").read_text(encoding="utf-8")
+                .replace('name = "COREP and KRI"', 'name = "Next"')
+                .replace(self.LEI, "FFFFGGGGHHHHIIIIJJJJ"),
                 encoding="utf-8",
             )
             client = self._client()
             original_read_sql = client.read_sql
-            metadata_calls = 0
 
             def read_sql_with_first_jst_missing(sql):
-                nonlocal metadata_calls
                 frame = original_read_sql(sql)
                 if "AS institution_id" in sql:
-                    metadata_calls += 1
-                    if metadata_calls == 1:
-                        for record in frame.records:
-                            record["JST_CODE"] = ""
+                    first = frame.records[0]
+                    frame.records = [
+                        {**first, "JST_CODE": ""},
+                        {**first, "ENTITY_ID": "E2", "LEI": "FFFFGGGGHHHHIIIIJJJJ",
+                         "INSTITUTION_ID": "FFFFGGGGHHHHIIIIJJJJ_CONS", "JST_CODE": "JST_B"},
+                    ]
+                else:
+                    for record in frame.records:
+                        record["reporting_unit_id"] = "FFFFGGGGHHHHIIIIJJJJ_CONS"
                 return frame
 
             client.read_sql = read_sql_with_first_jst_missing
@@ -1374,6 +1639,7 @@ frequency = "QUARTERLY"
                           as_of=date(2026, 9, 26), devo_client=client)
             applications = json.loads((output / "manifest.json").read_text(encoding="utf-8"))["applications"]
             self.assertEqual([entry["status"] for entry in applications], ["skipped", "complete"])
+            self.assertEqual(sum("AS institution_id" in sql for sql in client.calls), 1)
             self.assertIn("JST", applications[0]["skip_reason"])
             self.assertTrue((output / applications[1]["html_app"]).is_file())
 
@@ -1386,20 +1652,23 @@ frequency = "QUARTERLY"
             (configuration / "02-app.toml").write_text(
                 (configuration / "01-app.toml").read_text(encoding="utf-8").replace(
                     'name = "COREP and KRI"', 'name = "Next"',
-                ), encoding="utf-8",
+                ).replace(self.LEI, "FFFFGGGGHHHHIIIIJJJJ"), encoding="utf-8",
             )
             client = self._client()
             original_read_sql = client.read_sql
-            metadata_calls = 0
 
             def read_sql_with_first_unit_ambiguous(sql):
-                nonlocal metadata_calls
                 frame = original_read_sql(sql)
                 if "AS institution_id" in sql:
-                    metadata_calls += 1
-                    if metadata_calls == 1:
-                        first = frame.records[0]
-                        frame.records = [first, {**first, "ENTITY_ID": "E_conflict"}]
+                    first = frame.records[0]
+                    frame.records = [
+                        first, {**first, "ENTITY_ID": "E_conflict"},
+                        {**first, "ENTITY_ID": "E2", "LEI": "FFFFGGGGHHHHIIIIJJJJ",
+                         "INSTITUTION_ID": "FFFFGGGGHHHHIIIIJJJJ_CONS", "JST_CODE": "JST_B"},
+                    ]
+                else:
+                    for record in frame.records:
+                        record["reporting_unit_id"] = "FFFFGGGGHHHHIIIIJJJJ_CONS"
                 return frame
 
             client.read_sql = read_sql_with_first_unit_ambiguous
@@ -1408,6 +1677,7 @@ frequency = "QUARTERLY"
                           as_of=date(2026, 9, 26), devo_client=client)
             applications = json.loads((output / "manifest.json").read_text(encoding="utf-8"))["applications"]
             self.assertEqual([entry["status"] for entry in applications], ["skipped", "complete"])
+            self.assertEqual(sum("AS institution_id" in sql for sql in client.calls), 1)
             self.assertEqual(len(applications[0]["institution_anomalies"]), 2)
             self.assertIn("ambiguë", applications[0]["skip_reason"])
             self.assertTrue((output / applications[1]["html_app"]).is_file())

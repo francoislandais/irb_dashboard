@@ -3,170 +3,191 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agora Explorer · Applications</title>
+  <title>Agora Explorer</title>
   <style>
     :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #243b43; background: #fff; }
     * { box-sizing: border-box; }
     body { margin: 0; }
-    button, select { font: inherit; }
-    .masthead { background: #08699f; color: #fff; }
-    .masthead-inner { max-width: 1120px; margin: auto; padding: 13px 28px; font-size: 17px; font-weight: 700; }
-    main { max-width: 1120px; margin: auto; padding: 42px 28px 70px; }
-    .heading { margin-bottom: 27px; }
-    h1 { margin: 0; color: #173848; font-size: 28px; font-weight: 650; letter-spacing: -.03em; }
-    .subtitle { margin: 7px 0 0; color: #687c7c; font-size: 13px; }
-    .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; padding: 20px 0 23px; border-top: 1px solid #dce5e5; border-bottom: 1px solid #dce5e5; }
-    .filter { display: grid; gap: 7px; min-width: 0; }
-    .filter-label { color: #173848; font-size: 13px; font-weight: 650; }
-    .filter-label small { margin-right: 7px; color: #78909a; font-size: 11px; font-weight: 650; }
-    .filter select { width: 100%; min-height: 42px; padding: 8px 36px 8px 11px; border: 1px solid #cad9dc; border-radius: 5px; background: #fff; color: #243b43; font-size: 14px; }
-    .filter select:focus-visible { outline: 2px solid #9ac6df; outline-offset: 1px; }
-    .filter-hint { margin: 0; color: #687c7c; font-size: 12px; line-height: 1.35; }
-    .result-summary { margin: 20px 0 0; color: #52666b; font-size: 12px; }
-    .scope-group { margin-top: 30px; }
+    button, input, select { font: inherit; }
+    main { max-width: 1050px; margin: auto; padding: 38px 28px 70px; }
+    .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding-bottom: 25px; border-bottom: 1px solid #dce5e5; }
+    .filter { position: relative; display: grid; align-content: start; gap: 9px; min-width: 0; }
+    .filter-label { color: #173848; font-size: 14px; font-weight: 650; }
+    .filter input, .filter select { width: 100%; height: 46px; padding: 10px 12px; border: 1px solid #cad9dc; border-radius: 8px; background: white; color: #243b43; font-size: 14px; }
+    .filter input:focus, .filter select:focus { outline: 2px solid #b7d9eb; border-color: #75afd1; }
+    .institution-options { position: absolute; top: calc(100% - 1px); left: 0; right: 0; z-index: 10; max-height: 330px; overflow-y: auto; padding: 5px; background: white; border: 1px solid #c7d8dd; border-radius: 8px; box-shadow: 0 12px 30px #17384822; }
+    .institution-options[hidden] { display: none; }
+    .institution-option { display: block; width: 100%; padding: 10px 11px; border: 0; border-radius: 5px; background: white; text-align: left; cursor: pointer; }
+    .institution-option:hover, .institution-option[aria-selected="true"] { background: #eaf3f9; }
+    .institution-name { display: block; color: #173848; font-size: 14px; font-weight: 630; line-height: 1.35; }
+    .institution-meta { display: block; margin-top: 3px; color: #72868d; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; }
+    .institution-no-match { padding: 12px; color: #72868d; font-size: 13px; }
+    .result-summary { margin: 19px 0 0; color: #687c7c; font-size: 12px; }
+    .scope-group { margin-top: 24px; }
     .scope-group[hidden] { display: none; }
-    .scope-group:first-child { margin-top: 0; }
-    .group-title { margin: 0; color: #173848; font-size: 18px; font-weight: 650; }
-    .group-levels { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 7px 0 14px; }
-    .group-member { display: inline-flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .group-member strong { color: #425b63; font-size: 12px; font-weight: 600; }
-    .group-member small { color: #8b9b9f; font-size: 11px; overflow-wrap: anywhere; }
-    .group-list { border-top: 1px solid #dce5e5; }
-    .application { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 28px; padding: 17px 0; border-bottom: 1px solid #e2e9e9; }
-    .application[hidden] { display: none; }
-    .app-title { margin: 0; color: #075f95; font-size: 17px; font-weight: 650; }
-    .app-description { margin: 5px 0 0; color: #5e7175; font-size: 13px; line-height: 1.5; }
-    .app-meta { display: flex; flex-wrap: wrap; gap: 7px 22px; margin-top: 8px; color: #52666b; font-size: 12px; line-height: 1.5; }
-    .app-meta strong { color: #314c54; font-weight: 650; }
-    .app-meta span { overflow-wrap: anywhere; }
-    .app-action { display: flex; align-items: center; }
-    .open-button { display: inline-flex; padding: 9px 13px; border: 1px solid #b9d3e4; border-radius: 5px; background: #eaf3f9; color: #075f95; font-size: 12px; font-weight: 650; text-decoration: none; white-space: nowrap; }
+    .group-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 10px 13px; border-left: 3px solid #92bbd0; background: #f3f8fa; }
+    .group-title { margin: 0; color: #173848; font-size: 17px; font-weight: 650; }
+    .group-count { color: #72868d; font-size: 12px; white-space: nowrap; }
+    .group-list { margin-left: 12px; }
+    .application { position: relative; margin: 2px 0; padding: 0 12px 0 20px; border-radius: 6px; }
+    .application[open] { background: #eaf3f9; }
+    .app-summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 39px; padding: 8px 0; list-style: none; cursor: pointer; }
+    .application[open] .app-summary { padding-right: 140px; }
+    .app-summary::-webkit-details-marker { display: none; }
+    .app-summary:hover .app-title, .app-summary:focus-visible .app-title { color: #034d79; }
+    .app-summary:focus-visible { outline: 2px solid #b7d9eb; outline-offset: 3px; border-radius: 3px; }
+    .app-disclosure-arrow { color: #7295a8; font-size: 18px; line-height: 1; transition: transform 150ms ease; }
+    .application[open] .app-disclosure-arrow { transform: rotate(180deg); }
+    .app-expanded { padding: 0 0 10px; }
+    .app-template-line { margin: 0; overflow-x: auto; color: #516971; font-size: 12px; line-height: 1.5; white-space: nowrap; scrollbar-width: thin; }
+    .app-template-line strong { color: #2e5367; font-weight: 600; }
+    .app-action { position: absolute; top: 5px; right: 12px; }
+    .app-title { margin: 0; color: #075f95; font-size: 14px; font-weight: 650; }
+    .open-button { display: inline-flex; padding: 7px 10px; border: 1px solid #b9d3e4; border-radius: 6px; background: #eaf3f9; color: #075f95; font-size: 11px; font-weight: 650; text-decoration: none; white-space: nowrap; }
     .open-button[href]:hover { background: #dcecf7; }
     .open-button:disabled { opacity: .6; cursor: not-allowed; }
     .preview-note { margin: 22px 0 0; color: #8a9a9e; font-size: 11px; }
     .empty-state { padding: 36px 0; color: #687c7c; font-size: 13px; }
     .empty-state[hidden] { display: none; }
-    @media (max-width: 620px) {
-      .masthead-inner { padding: 12px 18px; }
-      main { padding: 30px 18px 50px; }
-      .filters { grid-template-columns: 1fr; gap: 18px; }
-      .application { grid-template-columns: 1fr; gap: 14px; }
-    }
+    @media (max-width: 620px) { main { padding: 25px 18px 50px; } .filters { grid-template-columns: 1fr; gap: 19px; } .group-heading { align-items: flex-start; } .group-count { padding-top: 3px; } }
   </style>
 </head>
 <body>
-  <header class="masthead"><div class="masthead-inner">Agora Explorer</div></header>
   <main>
-    <div class="heading"><h1>Applications</h1><p class="subtitle">Choose the institution to analyse, then the group you want to compare it with.</p></div>
     <section class="filters" aria-label="Find an application">
-      <label class="filter" for="institution-filter">
-        <span class="filter-label"><small>01</small> Institution to analyse</span>
-        <select id="institution-filter"><option value="">All institutions</option></select>
-        <span class="filter-hint">Only institutions with at least one application appear here.</span>
-      </label>
-      <label class="filter" for="peer-group-filter">
-        <span class="filter-label"><small>02</small> Peer group</span>
+      <div class="filter">
+        <label class="filter-label" for="institution-filter">Institution to analyse</label>
+        <input id="institution-filter" type="search" placeholder="Search by name, JST or LEI" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="institution-options">
+        <div id="institution-options" class="institution-options" role="listbox" hidden></div>
+      </div>
+      <div class="filter">
+        <label class="filter-label" for="peer-group-filter">Peer group</label>
         <select id="peer-group-filter"><option value="">All compatible peer groups</option></select>
-        <span class="filter-hint">The institutions available for comparison in the application.</span>
-      </label>
+      </div>
     </section>
     <p class="result-summary" id="result-summary" aria-live="polite"></p>
     <div id="application-list">
       <!-- AGORA_GROUPS_START -->
-      <section class="scope-group" data-group-id="northstar-riverside" aria-labelledby="northstar-title">
-        <h2 class="group-title" id="northstar-title">Northstar Bank · Riverside Credit</h2>
-        <p class="group-levels"><span class="group-member" data-institution-lei="5493001KJTIIGC8Y1R12" data-institution-name="Northstar Bank" data-institution-jst="DUM001"><strong>Northstar Bank</strong><small>LEI 5493001KJTIIGC8Y1R12 · JST DUM001</small></span><span class="group-member" data-institution-lei="969500Q2MA9Y1GQG8B61" data-institution-name="Riverside Credit" data-institution-jst="DUM004"><strong>Riverside Credit</strong><small>LEI 969500Q2MA9Y1GQG8B61 · JST DUM004</small></span></p>
-        <div class="group-list">
-          <article class="application">
-            <div><h3 class="app-title">FINREP</h3><p class="app-description">Balance sheet and impairment reporting.</p>
-              <div class="app-meta"><span><strong>Scope:</strong> F_12.01 monthly; FINREP through F_47 quarterly</span></div></div>
-            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
-          </article>
-          <article class="application">
-            <div><h3 class="app-title">FINREP + COREP</h3><p class="app-description">Financial statements and credit risk in one application.</p>
-              <div class="app-meta"><span><strong>Scope:</strong> F_01.01, C_08.01, C_18.00</span></div></div>
-            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
-          </article>
-        </div>
-      </section>
-      <section class="scope-group" data-group-id="northstar-summit" aria-labelledby="northstar-summit-title">
-        <h2 class="group-title" id="northstar-summit-title">Northstar Bank · Summit Financial</h2>
-        <p class="group-levels"><span class="group-member" data-institution-lei="5493001KJTIIGC8Y1R12" data-institution-name="Northstar Bank" data-institution-jst="DUM001"><strong>Northstar Bank</strong><small>LEI 5493001KJTIIGC8Y1R12 · JST DUM001</small></span><span class="group-member" data-institution-lei="213800WAVVOPS85N2205" data-institution-name="Summit Financial" data-institution-jst="DUM007"><strong>Summit Financial</strong><small>LEI 213800WAVVOPS85N2205 · JST DUM007</small></span></p>
-        <div class="group-list">
-          <article class="application">
-            <div><h3 class="app-title">Credit risk</h3><p class="app-description">Capital requirements and IRB portfolios.</p>
-              <div class="app-meta"><span><strong>Scope:</strong> C_07.00, C_08.01, C_08.02</span></div></div>
-            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
-          </article>
-        </div>
-      </section>
-      <section class="scope-group" data-group-id="summit-harbor" aria-labelledby="summit-title">
-        <h2 class="group-title" id="summit-title">Summit Financial · Harbor Group</h2>
-        <p class="group-levels"><span class="group-member" data-institution-lei="213800WAVVOPS85N2205" data-institution-name="Summit Financial" data-institution-jst="DUM007"><strong>Summit Financial</strong><small>LEI 213800WAVVOPS85N2205 · JST DUM007</small></span><span class="group-member" data-institution-lei="5493006MHB84DD0ZWV18" data-institution-name="Harbor Group" data-institution-jst="DUM010"><strong>Harbor Group</strong><small>LEI 5493006MHB84DD0ZWV18 · JST DUM010</small></span></p>
-        <div class="group-list">
-          <article class="application">
-            <div><h3 class="app-title">COREP</h3><p class="app-description">Own funds and capital ratios.</p>
-              <div class="app-meta"><span><strong>Scope:</strong> C_01.00 quarterly; C_03.00 annually</span></div></div>
-            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
-          </article>
-          <article class="application">
-            <div><h3 class="app-title">KRI</h3><p class="app-description">Indicators linked to FINREP and COREP.</p>
-              <div class="app-meta"><span><strong>Scope:</strong> FINREP linked KRI monthly; COREP linked KRI quarterly</span></div></div>
-            <div class="app-action"><button class="open-button" type="button" disabled title="Darwin link to be connected">Open application ↗</button></div>
-          </article>
-        </div>
-      </section>
-      <!-- AGORA_GROUPS_END -->
+      <section class="scope-group" data-group-id="sample-a" data-institution-leis="5493001KJTIIGC8Y1R12|969500Q2MA9Y1GQG8B61"><div class="group-heading"><h2 class="group-title">Cluster 1 (2 institutions)</h2><span class="group-count">2 applications</span></div><div class="group-list"><details class="application" name="launcher-application"><summary class="app-summary"><h3 class="app-title">FINREP</h3><span class="app-disclosure-arrow" aria-hidden="true">⌄</span></summary><div class="app-action"><span class="open-button">Open application ↗</span></div><div class="app-expanded"><p class="app-template-line"><strong>Available templates:</strong> Includes F_01% to F_47%; excludes F_20.04% to F_20.07%, F_40%.</p></div></details><details class="application" name="launcher-application"><summary class="app-summary"><h3 class="app-title">FINREP + COREP</h3><span class="app-disclosure-arrow" aria-hidden="true">⌄</span></summary><div class="app-action"><span class="open-button">Open application ↗</span></div><div class="app-expanded"><p class="app-template-line"><strong>Available templates:</strong> FINREP: Includes F_01% to F_47%. · COREP: Includes C_07.00, C_08.01.</p></div></details></div></section>
+      <section class="scope-group" data-group-id="sample-b" data-institution-leis="5493001KJTIIGC8Y1R12|213800WAVVOPS85N2205"><div class="group-heading"><h2 class="group-title">Cluster 3 (2 institutions)</h2><span class="group-count">1 application</span></div><div class="group-list"><details class="application" name="launcher-application"><summary class="app-summary"><h3 class="app-title">Credit risk</h3><span class="app-disclosure-arrow" aria-hidden="true">⌄</span></summary><div class="app-action"><span class="open-button">Open application ↗</span></div><div class="app-expanded"><p class="app-template-line"><strong>Available templates:</strong> Includes C_07.00, C_08.01, C_08.02.</p></div></details></div></section>
+            <!-- AGORA_GROUPS_END -->
     </div>
     <p class="empty-state" id="empty-state" hidden>No application matches this selection.</p>
     <!-- AGORA_PREVIEW_NOTE_START -->
-    <p class="preview-note">Preview with example data. Application links will be connected to Darwin later.</p>
+    <p class="preview-note">Preview with example data.</p>
     <!-- AGORA_PREVIEW_NOTE_END -->
   </main>
+  <script type="application/json" id="institution-data"><!-- AGORA_INSTITUTIONS_START -->[{"lei":"5493001KJTIIGC8Y1R12","name":"Northstar Bank","jst":["DUM001"]},{"lei":"969500Q2MA9Y1GQG8B61","name":"Riverside Credit","jst":["DUM004"]},{"lei":"213800WAVVOPS85N2205","name":"Summit Financial","jst":["DUM007"]}]<!-- AGORA_INSTITUTIONS_END --></script>
   <script>
-    const institutionFilter = document.querySelector('#institution-filter');
-    const peerGroupFilter = document.querySelector('#peer-group-filter');
+    const input = document.querySelector('#institution-filter');
+    const options = document.querySelector('#institution-options');
+    const peerFilter = document.querySelector('#peer-group-filter');
     const groups = [...document.querySelectorAll('.scope-group')];
+    const applications = [...document.querySelectorAll('details.application')];
+    applications.forEach((application) => application.addEventListener('toggle', () => {
+      if (application.open) applications.forEach((other) => { if (other !== application) other.open = false; });
+    }));
     const empty = document.querySelector('#empty-state');
     const summary = document.querySelector('#result-summary');
-    const institutions = new Map();
-    groups.forEach((group) => group.querySelectorAll('[data-institution-lei]').forEach((entry) => {
-      institutions.set(entry.dataset.institutionLei, {
-        name: entry.dataset.institutionName,
-        jst: entry.dataset.institutionJst,
+    const institutions = JSON.parse(document.querySelector('#institution-data').textContent);
+    let selectedLei = '';
+    let matches = [];
+    let activeIndex = -1;
+    const fold = (text) => String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
+    function institutionFromUrl() {
+      const requested = new URL(location.href).searchParams.get('institution');
+      if (!requested) return null;
+      return institutions.find((item) => item.name === requested) ||
+        institutions.find((item) => item.lei === requested) || null;
+    }
+    function updateLauncherUrl() {
+      const url = new URL(location.href);
+      if (selectedLei) {
+        const institution = institutions.find((item) => item.lei === selectedLei);
+        url.searchParams.set('institution', institution.name);
+      } else {
+        url.searchParams.delete('institution');
+      }
+      history.replaceState(history.state, '', url.href);
+    }
+    function matchingInstitutions(query) {
+      const value = fold(query);
+      if (!value) return institutions.slice(0, 30);
+      const starts = (text) => fold(text).startsWith(value);
+      return institutions.filter((item) => starts(item.name) || starts(item.lei) || item.jst.some(starts) ||
+        fold(item.name).split(/[\s.,'’\-]+/).some(starts)).slice(0, 30);
+    }
+    function closeOptions() { options.hidden = true; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; }
+    function drawOptions() {
+      matches = matchingInstitutions(input.value);
+      options.replaceChildren();
+      matches.forEach((item, index) => {
+        const option = document.createElement('button');
+        option.type = 'button'; option.className = 'institution-option'; option.setAttribute('role', 'option');
+        option.setAttribute('aria-selected', String(index === activeIndex));
+        const name = document.createElement('span'); name.className = 'institution-name'; name.textContent = item.name;
+        const meta = document.createElement('span'); meta.className = 'institution-meta';
+        meta.textContent = `${item.jst.length ? `JST ${item.jst.join(', ')} · ` : ''}LEI ${item.lei}`;
+        option.append(name, meta);
+        option.addEventListener('mousedown', (event) => event.preventDefault());
+        option.addEventListener('click', () => chooseInstitution(item));
+        options.append(option);
       });
-    }));
-    [...institutions].sort((a, b) => a[1].name.localeCompare(b[1].name)).forEach(([lei, institution]) => {
-      institutionFilter.add(new Option(
-        `${institution.name} · LEI ${lei}${institution.jst ? ` · JST ${institution.jst}` : ''}`, lei,
-      ));
-    });
-    const includesInstitution = (group, lei) => !lei || [...group.querySelectorAll('[data-institution-lei]')]
-      .some((entry) => entry.dataset.institutionLei === lei);
+      if (!matches.length) { const message = document.createElement('div'); message.className = 'institution-no-match'; message.textContent = 'No matching institution'; options.append(message); }
+      options.hidden = false; input.setAttribute('aria-expanded', 'true');
+    }
+    function chooseInstitution(item) { selectedLei = item.lei; input.value = item.name; closeOptions(); updateLauncherUrl(); updatePeerGroups(); }
+    const includesInstitution = (group) => !selectedLei || group.dataset.institutionLeis.split('|').includes(selectedLei);
     function updatePeerGroups() {
-      const previous = peerGroupFilter.value;
-      const compatible = groups.filter((group) => includesInstitution(group, institutionFilter.value));
-      peerGroupFilter.replaceChildren(new Option('All compatible peer groups', ''));
-      compatible.forEach((group) => peerGroupFilter.add(new Option(group.querySelector('.group-title').textContent, group.dataset.groupId)));
-      peerGroupFilter.value = compatible.some((group) => group.dataset.groupId === previous) ? previous : '';
+      const previous = peerFilter.value;
+      const compatible = groups.filter(includesInstitution);
+      peerFilter.replaceChildren(new Option('All compatible peer groups', ''));
+      compatible.forEach((group) => peerFilter.add(new Option(group.querySelector('.group-title').textContent, group.dataset.groupId)));
+      peerFilter.value = compatible.some((group) => group.dataset.groupId === previous) ? previous : '';
       renderApplications();
     }
+    function applicationUrl(baseHref, institutionId) {
+      const url = new URL(baseHref, location.href);
+      if (url.protocol === 'file:') url.searchParams.delete('institution');
+      else if (institutionId) url.searchParams.set('institution', institutionId);
+      else url.searchParams.delete('institution');
+      const state = new URLSearchParams(url.hash.startsWith('#agora?') ? url.hash.slice(7) : '');
+      if (institutionId) state.set('institution', institutionId);
+      else state.delete('institution');
+      url.hash = state.size ? `agora?${state}` : '';
+      return url.href;
+    }
     function renderApplications() {
-      let visibleGroups = 0;
-      let visibleApplications = 0;
+      let visibleGroups = 0, visibleApplications = 0;
       for (const group of groups) {
-        const matchesInstitution = includesInstitution(group, institutionFilter.value);
-        group.hidden = !matchesInstitution || Boolean(peerGroupFilter.value && group.dataset.groupId !== peerGroupFilter.value);
-        if (!group.hidden) {
-          visibleGroups += 1;
-          visibleApplications += group.querySelectorAll('.application').length;
+        group.hidden = !includesInstitution(group) || Boolean(peerFilter.value && group.dataset.groupId !== peerFilter.value);
+        if (group.hidden) continue;
+        visibleGroups += 1; visibleApplications += group.querySelectorAll('.application').length;
+        for (const link of group.querySelectorAll('a.open-button[data-base-href]')) {
+          const map = JSON.parse(link.dataset.institutionMap || '{}');
+          link.href = applicationUrl(link.dataset.baseHref, selectedLei ? map[selectedLei] : '');
         }
       }
       empty.hidden = visibleGroups !== 0;
       summary.textContent = `${visibleApplications} application${visibleApplications === 1 ? '' : 's'} in ${visibleGroups} peer group${visibleGroups === 1 ? '' : 's'}`;
     }
-    institutionFilter.addEventListener('change', updatePeerGroups);
-    peerGroupFilter.addEventListener('change', renderApplications);
+    input.addEventListener('focus', drawOptions);
+    input.addEventListener('input', () => { selectedLei = ''; updateLauncherUrl(); updatePeerGroups(); drawOptions(); });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') { closeOptions(); return; }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault(); if (options.hidden) drawOptions();
+        if (!matches.length) return;
+        activeIndex = (activeIndex + (event.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length;
+        [...options.querySelectorAll('[role="option"]')].forEach((option, index) => option.setAttribute('aria-selected', String(index === activeIndex)));
+        options.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+      }
+      if (event.key === 'Enter' && !options.hidden && matches.length) { event.preventDefault(); chooseInstitution(matches[Math.max(0, activeIndex)]); }
+    });
+    document.addEventListener('click', (event) => { if (!event.target.closest('.filter:has(#institution-filter)')) closeOptions(); });
+    peerFilter.addEventListener('change', renderApplications);
+    const initialInstitution = institutionFromUrl();
+    if (initialInstitution) { selectedLei = initialInstitution.lei; input.value = initialInstitution.name; }
     updatePeerGroups();
   </script>
 </body>

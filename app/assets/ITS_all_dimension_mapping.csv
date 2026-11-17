@@ -14408,6 +14408,10 @@ C_80.00;y_axis_rc_code;880;850;eligible covered bonds;;;;3.0
 C_80.00;y_axis_rc_code;890;850;derivatives client clearing activities;;;;3.0
 C_80.00;y_axis_rc_code;900;850;others;;;;3.0
 C_80.00;y_axis_rc_code;910;10;RSF from assets within a group or an IPS if subject to preferential treatment;;;;3.0
+C_80.00;y_axis_rc_code;920;10;RSF from derivatives;;;;3.0
+C_80.00;y_axis_rc_code;930;920;required stable funding for derivative liabilities;;;;3.0
+C_80.00;y_axis_rc_code;940;920;NSFR derivative assets;;;;3.0
+C_80.00;y_axis_rc_code;950;920;initial margin posted;;;;3.0
 C_80.00;y_axis_rc_code;960;10;RSF from contributions to CCP default fund;;;;3.0
 C_80.00;y_axis_rc_code;970;10;RSF from other assets;;;;3.0
 C_80.00;y_axis_rc_code;980;970;physically traded commodities;;;;3.0
@@ -14422,10 +14426,6 @@ C_80.00;y_axis_rc_code;1060;1040;committed facilities;;;;3.0
 C_80.00;y_axis_rc_code;1070;1040;trade finance off-balance sheet items;;;;3.0
 C_80.00;y_axis_rc_code;1080;1040;non-performing off-balance sheet items;;;;3.0
 C_80.00;y_axis_rc_code;1090;1040;other off-balance sheet exposures for which the competent authority has determined RSF factors;;;;3.0
-C_80.00;y_axis_rc_code;920;10;RSF from derivatives;;;;3.0
-C_80.00;y_axis_rc_code;930;920;required stable funding for derivative liabilities;;;;3.0
-C_80.00;y_axis_rc_code;940;920;NSFR derivative assets;;;;3.0
-C_80.00;y_axis_rc_code;950;920;initial margin posted;;;;3.0
 C_81.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.0
 C_81.00;x_axis_rc_code;__PARENT__e672faa71c26;;Applicable ASF factor;;Y;;3.0
 C_81.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;< 6 months;;;;3.0
@@ -14466,6 +14466,7 @@ C_81.00;y_axis_rc_code;280;270;Operational deposits;;;;3.0
 C_81.00;y_axis_rc_code;290;270;Excess operational deposits;;;;3.0
 C_81.00;y_axis_rc_code;300;270;Other liabilities;;;;3.0
 C_81.00;y_axis_rc_code;310;10;ASF from liabilities provided where the counterparty cannot be determined;;;;3.0
+C_81.00;y_axis_rc_code;320;10;ASF from net derivatives liabilities;;;;3.0
 C_81.00;y_axis_rc_code;330;10;ASF from interdependent liabilities;;;;3.0
 C_81.00;y_axis_rc_code;340;330;Centralised regulated savings;;;;3.0
 C_81.00;y_axis_rc_code;350;330;Promotional loans and relevant credit and liquidity facilities;;;;3.0
@@ -14477,8 +14478,6 @@ C_81.00;y_axis_rc_code;400;390;Trade date payables;;;;3.0
 C_81.00;y_axis_rc_code;410;390;Deferred tax liabilities;;;;3.0
 C_81.00;y_axis_rc_code;420;390;Minority interests;;;;3.0
 C_81.00;y_axis_rc_code;430;390;Other liabilities;;;;3.0
-C_81.00;y_axis_rc_code;__PARENT__8f741a5a7546;;0010 Available stable funding;;Y;;3.0
-C_81.00;y_axis_rc_code;320;__PARENT__8f741a5a7546;ASF from net derivatives liabilities;;;;3.0
 C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.0
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;3.0
 C_82.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;3.0
@@ -14559,6 +14558,7 @@ C_84.00;x_axis_rc_code;10;;Amount;;;;3.0
 C_84.00;x_axis_rc_code;20;;Required stable funding;;;;3.0
 C_84.00;x_axis_rc_code;30;;Available stable funding;;;;3.0
 C_84.00;x_axis_rc_code;40;;Ratio;;;%;3.0
+C_84.00;y_axis_rc_code;220;;NSFR;;;;3.0
 C_84.00;y_axis_rc_code;10;;Required stable funding;;;;3.0
 C_84.00;y_axis_rc_code;20;10;RSF from central bank assets;;;;3.0
 C_84.00;y_axis_rc_code;30;10;RSF from liquid assets;;;;3.0
@@ -14566,22 +14566,20 @@ C_84.00;y_axis_rc_code;40;10;RSF from securities other than liquid assets;;;;3.0
 C_84.00;y_axis_rc_code;50;10;RSF from loans;;;;3.0
 C_84.00;y_axis_rc_code;60;10;RSF from interdependent assets;;;;3.0
 C_84.00;y_axis_rc_code;70;10;RSF from assets within a group or an IPS if subject to preferential treatment;;;;3.0
+C_84.00;y_axis_rc_code;80;10;RSF from derivatives;;;;3.0
 C_84.00;y_axis_rc_code;90;10;RSF from contributions to CCP default fund;;;;3.0
 C_84.00;y_axis_rc_code;100;10;RSF from other assets;;;;3.0
 C_84.00;y_axis_rc_code;110;10;RSF from OBS items;;;;3.0
 C_84.00;y_axis_rc_code;120;;Available stable funding;;;;3.0
-C_84.00;y_axis_rc_code;220;;NSFR;;;;3.0
-C_84.00;y_axis_rc_code;130;220;ASF from capital items and instruments;;;;3.0
-C_84.00;y_axis_rc_code;140;220;ASF from retail deposits;;;;3.0
-C_84.00;y_axis_rc_code;150;220;ASF from other non-financial customers (except central banks);;;;3.0
-C_84.00;y_axis_rc_code;160;220;ASF from operational deposits;;;;3.0
-C_84.00;y_axis_rc_code;170;220;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;3.0
-C_84.00;y_axis_rc_code;180;220;ASF from financial customers and central banks;;;;3.0
-C_84.00;y_axis_rc_code;190;220;ASF from liabilities provided where the counterparty cannot be determined;;;;3.0
-C_84.00;y_axis_rc_code;200;220;ASF from interdependent liabilities;;;;3.0
-C_84.00;y_axis_rc_code;210;220;ASF from other liabilities;;;;3.0
-C_84.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;3.0
-C_84.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from derivatives;;;;3.0
+C_84.00;y_axis_rc_code;130;120;ASF from capital items and instruments;;;;3.0
+C_84.00;y_axis_rc_code;140;120;ASF from retail deposits;;;;3.0
+C_84.00;y_axis_rc_code;150;120;ASF from other non-financial customers (except central banks);;;;3.0
+C_84.00;y_axis_rc_code;160;120;ASF from operational deposits;;;;3.0
+C_84.00;y_axis_rc_code;170;120;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;3.0
+C_84.00;y_axis_rc_code;180;120;ASF from financial customers and central banks;;;;3.0
+C_84.00;y_axis_rc_code;190;120;ASF from liabilities provided where the counterparty cannot be determined;;;;3.0
+C_84.00;y_axis_rc_code;200;120;ASF from interdependent liabilities;;;;3.0
+C_84.00;y_axis_rc_code;210;120;ASF from other liabilities;;;;3.0
 C_90.00;x_axis_rc_code;__PARENT__3f77084ad852;10;Breakdown by regulatory book;;Y;;3.0
 C_90.00;x_axis_rc_code;__PARENT__be833851843d;__PARENT__3f77084ad852;Non-trading book;;Y;;3.0
 C_90.00;x_axis_rc_code;__PARENT__9cd906dad697;20;Of which: Trading book business for the purposes of Article 94 CRR;;Y;;3.0
@@ -24693,14 +24691,14 @@ C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;%;3.
 C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;%;3.2
 C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;%;3.2
 C_80.00;x_axis_rc_code;130;;Required stable funding;;;;3.2
-C_80.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;3.2
-C_80.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;3.2
+C_80.00;y_axis_rc_code;10;;Required stable funding;;;;3.2
+C_80.00;y_axis_rc_code;20;10;RSF from central bank assets;;;;3.2
 C_80.00;y_axis_rc_code;30;20;cash, reserves and HQLA exposures to central banks;;;;3.2
 C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
 C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
 C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;70;20;other non-HQLA central bank exposures;;;;3.2
-C_80.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from liquid assets;;;;3.2
+C_80.00;y_axis_rc_code;80;10;RSF from liquid assets;;;;3.2
 C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;;3.2
 C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;;3.2
 C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;;3.2
@@ -24748,13 +24746,13 @@ C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;;3.
 C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
 C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;;3.2
-C_80.00;y_axis_rc_code;560;__PARENT__772f51ec440b;RSF from securities other than liquid assets;;;;3.2
+C_80.00;y_axis_rc_code;560;10;RSF from securities other than liquid assets;;;;3.2
 C_80.00;y_axis_rc_code;570;560;non- HQLA securities and exchange traded equities;;;;3.2
 C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
 C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;600;560;non-HQLA non-exchange traded equities;;;;3.2
 C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;;3.2
-C_80.00;y_axis_rc_code;620;__PARENT__772f51ec440b;RSF from loans;;;;3.2
+C_80.00;y_axis_rc_code;620;10;RSF from loans;;;;3.2
 C_80.00;y_axis_rc_code;630;620;operational deposits;;;;3.2
 C_80.00;y_axis_rc_code;640;620;securities financing transactions with financial customers;;;;3.2
 C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;;3.2
@@ -24777,32 +24775,31 @@ C_80.00;y_axis_rc_code;810;800;of which, residential mortgages;;;;3.2
 C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
 C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;840;620;trade finance on-balance sheet products;;;;3.2
-C_80.00;y_axis_rc_code;850;__PARENT__772f51ec440b;RSF from interdependent assets;;;;3.2
+C_80.00;y_axis_rc_code;850;10;RSF from interdependent assets;;;;3.2
 C_80.00;y_axis_rc_code;860;850;centralised regulated savings;;;;3.2
 C_80.00;y_axis_rc_code;870;850;promotional loans and credit and liquidity facilities;;;;3.2
 C_80.00;y_axis_rc_code;880;850;eligible covered bonds;;;;3.2
 C_80.00;y_axis_rc_code;890;850;derivatives client clearing activities;;;;3.2
 C_80.00;y_axis_rc_code;900;850;others;;;;3.2
-C_80.00;y_axis_rc_code;910;__PARENT__772f51ec440b;RSF from assets within a group or an IPS if subject to preferential treatment;;;;3.2
-C_80.00;y_axis_rc_code;960;__PARENT__772f51ec440b;RSF from contributions to CCP default fund;;;;3.2
-C_80.00;y_axis_rc_code;970;__PARENT__772f51ec440b;RSF from other assets;;;;3.2
+C_80.00;y_axis_rc_code;910;10;RSF from assets within a group or an IPS if subject to preferential treatment;;;;3.2
+C_80.00;y_axis_rc_code;920;10;RSF from derivatives;;;;3.2
+C_80.00;y_axis_rc_code;930;920;required stable funding for derivative liabilities;;;;3.2
+C_80.00;y_axis_rc_code;940;920;NSFR derivative assets;;;;3.2
+C_80.00;y_axis_rc_code;950;920;initial margin posted;;;;3.2
+C_80.00;y_axis_rc_code;960;10;RSF from contributions to CCP default fund;;;;3.2
+C_80.00;y_axis_rc_code;970;10;RSF from other assets;;;;3.2
 C_80.00;y_axis_rc_code;980;970;physically traded commodities;;;;3.2
 C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;;3.2
 C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;;3.2
 C_80.00;y_axis_rc_code;1010;970;trade date receivables;;;;3.2
 C_80.00;y_axis_rc_code;1020;970;non-performing assets;;;;3.2
 C_80.00;y_axis_rc_code;1030;970;other assets;;;;3.2
-C_80.00;y_axis_rc_code;1040;__PARENT__772f51ec440b;RSF from OBS items;;;;3.2
+C_80.00;y_axis_rc_code;1040;10;RSF from OBS items;;;;3.2
 C_80.00;y_axis_rc_code;1050;1040;committed facilities within a group or an IPS if subject to preferential treatment;;;;3.2
 C_80.00;y_axis_rc_code;1060;1040;committed facilities;;;;3.2
 C_80.00;y_axis_rc_code;1070;1040;trade finance off-balance sheet items;;;;3.2
 C_80.00;y_axis_rc_code;1080;1040;non-performing off-balance sheet items;;;;3.2
 C_80.00;y_axis_rc_code;1090;1040;other off-balance sheet exposures for which the competent authority has determined RSF factors;;;;3.2
-C_80.00;y_axis_rc_code;10;;Required stable funding;;;;3.2
-C_80.00;y_axis_rc_code;920;10;RSF from derivatives;;;;3.2
-C_80.00;y_axis_rc_code;930;920;required stable funding for derivative liabilities;;;;3.2
-C_80.00;y_axis_rc_code;940;920;NSFR derivative assets;;;;3.2
-C_80.00;y_axis_rc_code;950;920;initial margin posted;;;;3.2
 C_81.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.2
 C_81.00;x_axis_rc_code;__PARENT__e672faa71c26;;Applicable ASF factor;;Y;;3.2
 C_81.00;x_axis_rc_code;10;__PARENT__43dc8532f7e5;< 6 months;;;;3.2
@@ -24812,19 +24809,19 @@ C_81.00;x_axis_rc_code;70;__PARENT__e672faa71c26;< 6 months;;;;3.2
 C_81.00;x_axis_rc_code;80;__PARENT__e672faa71c26;>= 6 months to < 1 year;;;;3.2
 C_81.00;x_axis_rc_code;90;__PARENT__e672faa71c26;>= 1 year;;;;3.2
 C_81.00;x_axis_rc_code;100;;Available stable funding;;;;3.2
-C_81.00;y_axis_rc_code;__PARENT__8f741a5a7546;;0010 Available stable funding;;Y;;3.2
-C_81.00;y_axis_rc_code;20;__PARENT__8f741a5a7546;ASF from capital items and instruments;;;;3.2
+C_81.00;y_axis_rc_code;10;;Available stable funding;;;;3.2
+C_81.00;y_axis_rc_code;20;10;ASF from capital items and instruments;;;;3.2
 C_81.00;y_axis_rc_code;30;20;Common Equity Tier 1;;;;3.2
 C_81.00;y_axis_rc_code;40;20;Additional Tier 1;;;;3.2
 C_81.00;y_axis_rc_code;50;20;Tier 2;;;;3.2
 C_81.00;y_axis_rc_code;60;20;Other capital instruments;;;;3.2
-C_81.00;y_axis_rc_code;70;__PARENT__8f741a5a7546;ASF from retail deposits;;;;3.2
+C_81.00;y_axis_rc_code;70;10;ASF from retail deposits;;;;3.2
 C_81.00;y_axis_rc_code;80;70;of which, retail bonds;;;;3.2
 C_81.00;y_axis_rc_code;90;70;Stable retail deposits;;;;3.2
 C_81.00;y_axis_rc_code;100;90;of which with a material early withdrawable penalty;;;;3.2
 C_81.00;y_axis_rc_code;110;70;Other retail deposits;;;;3.2
 C_81.00;y_axis_rc_code;120;110;of which with a material early withdrawable penalty;;;;3.2
-C_81.00;y_axis_rc_code;130;__PARENT__8f741a5a7546;ASF from other non-financial customers (except central banks);;;;3.2
+C_81.00;y_axis_rc_code;130;10;ASF from other non-financial customers (except central banks);;;;3.2
 C_81.00;y_axis_rc_code;140;130;of which, securities financing transactions;;;;3.2
 C_81.00;y_axis_rc_code;150;130;of which, operational deposits;;;;3.2
 C_81.00;y_axis_rc_code;160;130;Liabilities provided by the central government of a Member State or a third country;;;;3.2
@@ -24833,8 +24830,8 @@ C_81.00;y_axis_rc_code;180;130;Liabilities provided by public sector entities of
 C_81.00;y_axis_rc_code;190;130;Liabilities provided by multilateral development banks and international organisations;;;;3.2
 C_81.00;y_axis_rc_code;200;130;Liabilities provided by non-financial corporate customers;;;;3.2
 C_81.00;y_axis_rc_code;210;130;Liabilities provided by credit unions, personal investment companies and deposit brokers;;;;3.2
-C_81.00;y_axis_rc_code;220;__PARENT__8f741a5a7546;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;3.2
-C_81.00;y_axis_rc_code;230;__PARENT__8f741a5a7546;ASF from financial customers and central banks;;;;3.2
+C_81.00;y_axis_rc_code;220;10;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;3.2
+C_81.00;y_axis_rc_code;230;10;ASF from financial customers and central banks;;;;3.2
 C_81.00;y_axis_rc_code;240;230;of which, sight deposits provided by network member to central institution;;;;3.2
 C_81.00;y_axis_rc_code;250;230;Liabilities provided by the ECB or the central bank of a Member State;;;;3.2
 C_81.00;y_axis_rc_code;260;230;Liabilities provided by the central bank of a third country;;;;3.2
@@ -24842,20 +24839,19 @@ C_81.00;y_axis_rc_code;270;230;Liabilities provided by financial customers;;;;3.
 C_81.00;y_axis_rc_code;280;270;Operational deposits;;;;3.2
 C_81.00;y_axis_rc_code;290;270;Excess operational deposits;;;;3.2
 C_81.00;y_axis_rc_code;300;270;Other liabilities;;;;3.2
-C_81.00;y_axis_rc_code;310;__PARENT__8f741a5a7546;ASF from liabilities provided where the counterparty cannot be determined;;;;3.2
-C_81.00;y_axis_rc_code;330;__PARENT__8f741a5a7546;ASF from interdependent liabilities;;;;3.2
+C_81.00;y_axis_rc_code;310;10;ASF from liabilities provided where the counterparty cannot be determined;;;;3.2
+C_81.00;y_axis_rc_code;320;10;ASF from net derivatives liabilities;;;;3.2
+C_81.00;y_axis_rc_code;330;10;ASF from interdependent liabilities;;;;3.2
 C_81.00;y_axis_rc_code;340;330;Centralised regulated savings;;;;3.2
 C_81.00;y_axis_rc_code;350;330;Promotional loans and relevant credit and liquidity facilities;;;;3.2
 C_81.00;y_axis_rc_code;360;330;Eligible covered bonds;;;;3.2
 C_81.00;y_axis_rc_code;370;330;Derivatives client clearing activities;;;;3.2
 C_81.00;y_axis_rc_code;380;330;Others;;;;3.2
-C_81.00;y_axis_rc_code;390;__PARENT__8f741a5a7546;ASF from other liabilities;;;;3.2
+C_81.00;y_axis_rc_code;390;10;ASF from other liabilities;;;;3.2
 C_81.00;y_axis_rc_code;400;390;Trade date payables;;;;3.2
 C_81.00;y_axis_rc_code;410;390;Deferred tax liabilities;;;;3.2
 C_81.00;y_axis_rc_code;420;390;Minority interests;;;;3.2
 C_81.00;y_axis_rc_code;430;390;Other liabilities;;;;3.2
-C_81.00;y_axis_rc_code;320;__PARENT__8f741a5a7546;ASF from net derivatives liabilities;;;;3.2
-C_81.00;y_axis_rc_code;10;;Available stable funding;;;;3.2
 C_82.00;x_axis_rc_code;__PARENT__43dc8532f7e5;;Amount;;Y;;3.2
 C_82.00;x_axis_rc_code;__PARENT__3bec4b8b94a0;;Applicable RSF factor;;Y;;3.2
 C_82.00;x_axis_rc_code;__PARENT__9b6deddf7d13;__PARENT__43dc8532f7e5;Non-HQLA by maturity;;Y;;3.2
@@ -24936,31 +24932,29 @@ C_83.00;y_axis_rc_code;10;;Available stable funding;;;;3.2
 C_84.00;x_axis_rc_code;10;;Amount;;;;3.2
 C_84.00;x_axis_rc_code;20;;Required stable funding;;;;3.2
 C_84.00;x_axis_rc_code;40;;Ratio;;;%;3.2
-C_84.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;3.2
-C_84.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;3.2
-C_84.00;y_axis_rc_code;30;__PARENT__772f51ec440b;RSF from liquid assets;;;;3.2
-C_84.00;y_axis_rc_code;40;__PARENT__772f51ec440b;RSF from securities other than liquid assets;;;;3.2
-C_84.00;y_axis_rc_code;50;__PARENT__772f51ec440b;RSF from loans;;;;3.2
-C_84.00;y_axis_rc_code;60;__PARENT__772f51ec440b;RSF from interdependent assets;;;;3.2
-C_84.00;y_axis_rc_code;70;__PARENT__772f51ec440b;RSF from assets within a group or an IPS if subject to preferential treatment;;;;3.2
-C_84.00;y_axis_rc_code;90;__PARENT__772f51ec440b;RSF from contributions to CCP default fund;;;;3.2
-C_84.00;y_axis_rc_code;100;__PARENT__772f51ec440b;RSF from other assets;;;;3.2
-C_84.00;y_axis_rc_code;110;__PARENT__772f51ec440b;RSF from OBS items;;;;3.2
 C_84.00;y_axis_rc_code;220;;NSFR;;;;3.2
-C_84.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from derivatives;;;;3.2
 C_84.00;y_axis_rc_code;10;;Required stable funding;;;;3.2
-C_84.00;x_axis_rc_code;30;;Available stable funding;;;;3.2
+C_84.00;y_axis_rc_code;20;10;RSF from central bank assets;;;;3.2
+C_84.00;y_axis_rc_code;30;10;RSF from liquid assets;;;;3.2
+C_84.00;y_axis_rc_code;40;10;RSF from securities other than liquid assets;;;;3.2
+C_84.00;y_axis_rc_code;50;10;RSF from loans;;;;3.2
+C_84.00;y_axis_rc_code;60;10;RSF from interdependent assets;;;;3.2
+C_84.00;y_axis_rc_code;70;10;RSF from assets within a group or an IPS if subject to preferential treatment;;;;3.2
+C_84.00;y_axis_rc_code;80;10;RSF from derivatives;;;;3.2
+C_84.00;y_axis_rc_code;90;10;RSF from contributions to CCP default fund;;;;3.2
+C_84.00;y_axis_rc_code;100;10;RSF from other assets;;;;3.2
+C_84.00;y_axis_rc_code;110;10;RSF from OBS items;;;;3.2
 C_84.00;y_axis_rc_code;120;;Available stable funding;;;;3.2
+C_84.00;y_axis_rc_code;130;120;ASF from capital items and instruments;;;;3.2
+C_84.00;y_axis_rc_code;140;120;ASF from retail deposits;;;;3.2
+C_84.00;y_axis_rc_code;150;120;ASF from other non-financial customers (except central banks);;;;3.2
+C_84.00;y_axis_rc_code;160;120;ASF from operational deposits;;;;3.2
+C_84.00;y_axis_rc_code;170;120;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;3.2
+C_84.00;y_axis_rc_code;180;120;ASF from financial customers and central banks;;;;3.2
+C_84.00;y_axis_rc_code;190;120;ASF from liabilities provided where the counterparty cannot be determined;;;;3.2
+C_84.00;y_axis_rc_code;200;120;ASF from interdependent liabilities;;;;3.2
 C_84.00;y_axis_rc_code;210;120;ASF from other liabilities;;;;3.2
-C_84.00;y_axis_rc_code;__PARENT__2c1514d605b6;;0120 Available stable funding;;Y;;3.2
-C_84.00;y_axis_rc_code;130;__PARENT__2c1514d605b6;ASF from capital items and instruments;;;;3.2
-C_84.00;y_axis_rc_code;140;__PARENT__2c1514d605b6;ASF from retail deposits;;;;3.2
-C_84.00;y_axis_rc_code;150;__PARENT__2c1514d605b6;ASF from other non-financial customers (except central banks);;;;3.2
-C_84.00;y_axis_rc_code;160;__PARENT__2c1514d605b6;ASF from operational deposits;;;;3.2
-C_84.00;y_axis_rc_code;170;__PARENT__2c1514d605b6;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;3.2
-C_84.00;y_axis_rc_code;180;__PARENT__2c1514d605b6;ASF from financial customers and central banks;;;;3.2
-C_84.00;y_axis_rc_code;190;__PARENT__2c1514d605b6;ASF from liabilities provided where the counterparty cannot be determined;;;;3.2
-C_84.00;y_axis_rc_code;200;__PARENT__2c1514d605b6;ASF from interdependent liabilities;;;;3.2
+C_84.00;x_axis_rc_code;30;;Available stable funding;;;;3.2
 C_90.00;x_axis_rc_code;__PARENT__3f77084ad852;10;Breakdown by regulatory book;;Y;;3.2
 C_90.00;x_axis_rc_code;__PARENT__be833851843d;__PARENT__3f77084ad852;Non-trading book;;Y;;3.2
 C_90.00;x_axis_rc_code;__PARENT__9cd906dad697;20;Of which: Trading book business for the purposes of Article 94 CRR;;Y;;3.2
@@ -47129,14 +47123,14 @@ C_80.00;x_axis_rc_code;100;__PARENT__cffac3962595;>= 6 months to < 1 year;;;%;4.
 C_80.00;x_axis_rc_code;110;__PARENT__cffac3962595;>= 1 year;;;%;4.2
 C_80.00;x_axis_rc_code;120;__PARENT__3bec4b8b94a0;HQLA;;;%;4.2
 C_80.00;x_axis_rc_code;130;;Required stable funding;;;;4.2
-C_80.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;4.2
-C_80.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;4.2
+C_80.00;y_axis_rc_code;10;;Required stable funding;;;;4.2
+C_80.00;y_axis_rc_code;20;10;RSF from central bank assets;;;;4.2
 C_80.00;y_axis_rc_code;30;20;cash, reserves and HQLA exposures to central banks;;;;4.2
 C_80.00;y_axis_rc_code;40;30;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
 C_80.00;y_axis_rc_code;50;30;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
 C_80.00;y_axis_rc_code;60;30;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;70;20;other non-HQLA central bank exposures;;;;4.2
-C_80.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from liquid assets;;;;4.2
+C_80.00;y_axis_rc_code;80;10;RSF from liquid assets;;;;4.2
 C_80.00;y_axis_rc_code;90;80;level 1 assets eligible for 0% LCR haircut;;;;4.2
 C_80.00;y_axis_rc_code;100;90;unencumbered or encumbered for a residual maturity of less than six months;;;;4.2
 C_80.00;y_axis_rc_code;110;90;encumbered for a residual maturity of at least six months but less than one year;;;;4.2
@@ -47184,13 +47178,13 @@ C_80.00;y_axis_rc_code;520;80;level 2B assets eligible for 55% LCR haircut;;;;4.
 C_80.00;y_axis_rc_code;530;520;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
 C_80.00;y_axis_rc_code;540;520;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;550;80;HQLAs encumbered for a residual maturity of one year or more in a cover pool;;;;4.2
-C_80.00;y_axis_rc_code;560;__PARENT__772f51ec440b;RSF from securities other than liquid assets;;;;4.2
+C_80.00;y_axis_rc_code;560;10;RSF from securities other than liquid assets;;;;4.2
 C_80.00;y_axis_rc_code;570;560;non- HQLA securities and exchange traded equities;;;;4.2
 C_80.00;y_axis_rc_code;580;570;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
 C_80.00;y_axis_rc_code;590;570;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;600;560;non-HQLA non-exchange traded equities;;;;4.2
 C_80.00;y_axis_rc_code;610;560;non-HQLA securities encumbered for a residual maturity of one year or more in a cover pool;;;;4.2
-C_80.00;y_axis_rc_code;620;__PARENT__772f51ec440b;RSF from loans;;;;4.2
+C_80.00;y_axis_rc_code;620;10;RSF from loans;;;;4.2
 C_80.00;y_axis_rc_code;630;620;operational deposits;;;;4.2
 C_80.00;y_axis_rc_code;640;620;securities financing transactions with financial customers;;;;4.2
 C_80.00;y_axis_rc_code;650;620;collateralized by level 1 assets eligible for 0% LCR haircut;;;;4.2
@@ -47213,32 +47207,31 @@ C_80.00;y_axis_rc_code;810;800;of which, residential mortgages;;;;4.2
 C_80.00;y_axis_rc_code;820;800;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
 C_80.00;y_axis_rc_code;830;800;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;840;620;trade finance on-balance sheet products;;;;4.2
-C_80.00;y_axis_rc_code;850;__PARENT__772f51ec440b;RSF from interdependent assets;;;;4.2
+C_80.00;y_axis_rc_code;850;10;RSF from interdependent assets;;;;4.2
 C_80.00;y_axis_rc_code;860;850;centralised regulated savings;;;;4.2
 C_80.00;y_axis_rc_code;870;850;promotional loans and credit and liquidity facilities;;;;4.2
 C_80.00;y_axis_rc_code;880;850;eligible covered bonds;;;;4.2
 C_80.00;y_axis_rc_code;890;850;derivatives client clearing activities;;;;4.2
 C_80.00;y_axis_rc_code;900;850;others;;;;4.2
-C_80.00;y_axis_rc_code;910;__PARENT__772f51ec440b;RSF from assets within a group or an IPS if subject to preferential treatment;;;;4.2
-C_80.00;y_axis_rc_code;960;__PARENT__772f51ec440b;RSF from contributions to CCP default fund;;;;4.2
-C_80.00;y_axis_rc_code;970;__PARENT__772f51ec440b;RSF from other assets;;;;4.2
+C_80.00;y_axis_rc_code;910;10;RSF from assets within a group or an IPS if subject to preferential treatment;;;;4.2
+C_80.00;y_axis_rc_code;920;10;RSF from derivatives;;;;4.2
+C_80.00;y_axis_rc_code;930;920;required stable funding for derivative liabilities;;;;4.2
+C_80.00;y_axis_rc_code;940;920;NSFR derivative assets;;;;4.2
+C_80.00;y_axis_rc_code;950;920;initial margin posted;;;;4.2
+C_80.00;y_axis_rc_code;960;10;RSF from contributions to CCP default fund;;;;4.2
+C_80.00;y_axis_rc_code;970;10;RSF from other assets;;;;4.2
 C_80.00;y_axis_rc_code;980;970;physically traded commodities;;;;4.2
 C_80.00;y_axis_rc_code;990;980;unencumbered or encumbered for a residual maturity of less than one year;;;;4.2
 C_80.00;y_axis_rc_code;1000;980;encumbered for a residual maturity of one year or more;;;;4.2
 C_80.00;y_axis_rc_code;1010;970;trade date receivables;;;;4.2
 C_80.00;y_axis_rc_code;1020;970;non-performing assets;;;;4.2
 C_80.00;y_axis_rc_code;1030;970;other assets;;;;4.2
-C_80.00;y_axis_rc_code;1040;__PARENT__772f51ec440b;RSF from OBS items;;;;4.2
+C_80.00;y_axis_rc_code;1040;10;RSF from OBS items;;;;4.2
 C_80.00;y_axis_rc_code;1050;1040;committed facilities within a group or an IPS if subject to preferential treatment;;;;4.2
 C_80.00;y_axis_rc_code;1060;1040;committed facilities;;;;4.2
 C_80.00;y_axis_rc_code;1070;1040;trade finance off-balance sheet items;;;;4.2
 C_80.00;y_axis_rc_code;1080;1040;non-performing off-balance sheet items;;;;4.2
 C_80.00;y_axis_rc_code;1090;1040;other off-balance sheet exposures for which the competent authority has determined RSF factors;;;;4.2
-C_80.00;y_axis_rc_code;10;;Required stable funding;;;;4.2
-C_80.00;y_axis_rc_code;920;;RSF from derivatives;;;;4.2
-C_80.00;y_axis_rc_code;930;920;required stable funding for derivative liabilities;;;;4.2
-C_80.00;y_axis_rc_code;940;920;NSFR derivative assets;;;;4.2
-C_80.00;y_axis_rc_code;950;920;initial margin posted;;;;4.2
 C_80.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_80.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_80.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -47270,19 +47263,19 @@ C_81.00;x_axis_rc_code;70;__PARENT__e672faa71c26;< 6 months;;;;4.2
 C_81.00;x_axis_rc_code;80;__PARENT__e672faa71c26;>= 6 months to < 1 year;;;;4.2
 C_81.00;x_axis_rc_code;90;__PARENT__e672faa71c26;>= 1 year;;;;4.2
 C_81.00;x_axis_rc_code;100;;Available stable funding;;;;4.2
-C_81.00;y_axis_rc_code;__PARENT__8f741a5a7546;;0010 Available stable funding;;Y;;4.2
-C_81.00;y_axis_rc_code;20;__PARENT__8f741a5a7546;ASF from capital items and instruments;;;;4.2
+C_81.00;y_axis_rc_code;10;;Available stable funding;;;;4.2
+C_81.00;y_axis_rc_code;20;10;ASF from capital items and instruments;;;;4.2
 C_81.00;y_axis_rc_code;30;20;Common Equity Tier 1;;;;4.2
 C_81.00;y_axis_rc_code;40;20;Additional Tier 1;;;;4.2
 C_81.00;y_axis_rc_code;50;20;Tier 2;;;;4.2
 C_81.00;y_axis_rc_code;60;20;Other capital instruments;;;;4.2
-C_81.00;y_axis_rc_code;70;__PARENT__8f741a5a7546;ASF from retail deposits;;;;4.2
+C_81.00;y_axis_rc_code;70;10;ASF from retail deposits;;;;4.2
 C_81.00;y_axis_rc_code;80;70;of which, retail bonds;;;;4.2
 C_81.00;y_axis_rc_code;90;70;Stable retail deposits;;;;4.2
 C_81.00;y_axis_rc_code;100;90;of which with a material early withdrawable penalty;;;;4.2
 C_81.00;y_axis_rc_code;110;70;Other retail deposits;;;;4.2
 C_81.00;y_axis_rc_code;120;110;of which with a material early withdrawable penalty;;;;4.2
-C_81.00;y_axis_rc_code;130;__PARENT__8f741a5a7546;ASF from other non-financial customers (except central banks);;;;4.2
+C_81.00;y_axis_rc_code;130;10;ASF from other non-financial customers (except central banks);;;;4.2
 C_81.00;y_axis_rc_code;140;130;of which, securities financing transactions;;;;4.2
 C_81.00;y_axis_rc_code;150;130;of which, operational deposits;;;;4.2
 C_81.00;y_axis_rc_code;160;130;Liabilities provided by the central government of a Member State or a third country;;;;4.2
@@ -47291,8 +47284,8 @@ C_81.00;y_axis_rc_code;180;130;Liabilities provided by public sector entities of
 C_81.00;y_axis_rc_code;190;130;Liabilities provided by multilateral development banks and international organisations;;;;4.2
 C_81.00;y_axis_rc_code;200;130;Liabilities provided by non-financial corporate customers;;;;4.2
 C_81.00;y_axis_rc_code;210;130;Liabilities provided by credit unions, personal investment companies and deposit brokers;;;;4.2
-C_81.00;y_axis_rc_code;220;__PARENT__8f741a5a7546;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;4.2
-C_81.00;y_axis_rc_code;230;__PARENT__8f741a5a7546;ASF from financial customers and central banks;;;;4.2
+C_81.00;y_axis_rc_code;220;10;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;4.2
+C_81.00;y_axis_rc_code;230;10;ASF from financial customers and central banks;;;;4.2
 C_81.00;y_axis_rc_code;240;230;of which, sight deposits provided by network member to central institution;;;;4.2
 C_81.00;y_axis_rc_code;250;230;Liabilities provided by the ECB or the central bank of a Member State;;;;4.2
 C_81.00;y_axis_rc_code;260;230;Liabilities provided by the central bank of a third country;;;;4.2
@@ -47300,20 +47293,19 @@ C_81.00;y_axis_rc_code;270;230;Liabilities provided by financial customers;;;;4.
 C_81.00;y_axis_rc_code;280;270;Operational deposits;;;;4.2
 C_81.00;y_axis_rc_code;290;270;Excess operational deposits;;;;4.2
 C_81.00;y_axis_rc_code;300;270;Other liabilities;;;;4.2
-C_81.00;y_axis_rc_code;310;__PARENT__8f741a5a7546;ASF from liabilities provided where the counterparty cannot be determined;;;;4.2
-C_81.00;y_axis_rc_code;330;__PARENT__8f741a5a7546;ASF from interdependent liabilities;;;;4.2
+C_81.00;y_axis_rc_code;310;10;ASF from liabilities provided where the counterparty cannot be determined;;;;4.2
+C_81.00;y_axis_rc_code;320;10;ASF from net derivatives liabilities;;;;4.2
+C_81.00;y_axis_rc_code;330;10;ASF from interdependent liabilities;;;;4.2
 C_81.00;y_axis_rc_code;340;330;Centralised regulated savings;;;;4.2
 C_81.00;y_axis_rc_code;350;330;Promotional loans and relevant credit and liquidity facilities;;;;4.2
 C_81.00;y_axis_rc_code;360;330;Eligible covered bonds;;;;4.2
 C_81.00;y_axis_rc_code;370;330;Derivatives client clearing activities;;;;4.2
 C_81.00;y_axis_rc_code;380;330;Others;;;;4.2
-C_81.00;y_axis_rc_code;390;__PARENT__8f741a5a7546;ASF from other liabilities;;;;4.2
+C_81.00;y_axis_rc_code;390;10;ASF from other liabilities;;;;4.2
 C_81.00;y_axis_rc_code;400;390;Trade date payables;;;;4.2
 C_81.00;y_axis_rc_code;410;390;Deferred tax liabilities;;;;4.2
 C_81.00;y_axis_rc_code;420;390;Minority interests;;;;4.2
 C_81.00;y_axis_rc_code;430;390;Other liabilities;;;;4.2
-C_81.00;y_axis_rc_code;320;__PARENT__8f741a5a7546;ASF from net derivatives liabilities;;;;4.2
-C_81.00;y_axis_rc_code;10;;Available stable funding;;;;4.2
 C_81.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_81.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_81.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -47460,31 +47452,29 @@ C_83.00;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
 C_84.00;x_axis_rc_code;10;;Amount;;;;4.2
 C_84.00;x_axis_rc_code;20;;Required stable funding;;;;4.2
 C_84.00;x_axis_rc_code;40;;Ratio;;;%;4.2
-C_84.00;y_axis_rc_code;__PARENT__772f51ec440b;;0010 Required stable funding;;Y;;4.2
-C_84.00;y_axis_rc_code;20;__PARENT__772f51ec440b;RSF from central bank assets;;;;4.2
-C_84.00;y_axis_rc_code;30;__PARENT__772f51ec440b;RSF from liquid assets;;;;4.2
-C_84.00;y_axis_rc_code;40;__PARENT__772f51ec440b;RSF from securities other than liquid assets;;;;4.2
-C_84.00;y_axis_rc_code;50;__PARENT__772f51ec440b;RSF from loans;;;;4.2
-C_84.00;y_axis_rc_code;60;__PARENT__772f51ec440b;RSF from interdependent assets;;;;4.2
-C_84.00;y_axis_rc_code;70;__PARENT__772f51ec440b;RSF from assets within a group or an IPS if subject to preferential treatment;;;;4.2
-C_84.00;y_axis_rc_code;90;__PARENT__772f51ec440b;RSF from contributions to CCP default fund;;;;4.2
-C_84.00;y_axis_rc_code;100;__PARENT__772f51ec440b;RSF from other assets;;;;4.2
-C_84.00;y_axis_rc_code;110;__PARENT__772f51ec440b;RSF from OBS items;;;;4.2
 C_84.00;y_axis_rc_code;220;;NSFR;;;;4.2
-C_84.00;y_axis_rc_code;80;__PARENT__772f51ec440b;RSF from derivatives;;;;4.2
 C_84.00;y_axis_rc_code;10;;Required stable funding;;;;4.2
-C_84.00;x_axis_rc_code;30;;Available stable funding;;;;4.2
+C_84.00;y_axis_rc_code;20;10;RSF from central bank assets;;;;4.2
+C_84.00;y_axis_rc_code;30;10;RSF from liquid assets;;;;4.2
+C_84.00;y_axis_rc_code;40;10;RSF from securities other than liquid assets;;;;4.2
+C_84.00;y_axis_rc_code;50;10;RSF from loans;;;;4.2
+C_84.00;y_axis_rc_code;60;10;RSF from interdependent assets;;;;4.2
+C_84.00;y_axis_rc_code;70;10;RSF from assets within a group or an IPS if subject to preferential treatment;;;;4.2
+C_84.00;y_axis_rc_code;80;10;RSF from derivatives;;;;4.2
+C_84.00;y_axis_rc_code;90;10;RSF from contributions to CCP default fund;;;;4.2
+C_84.00;y_axis_rc_code;100;10;RSF from other assets;;;;4.2
+C_84.00;y_axis_rc_code;110;10;RSF from OBS items;;;;4.2
 C_84.00;y_axis_rc_code;120;;Available stable funding;;;;4.2
+C_84.00;y_axis_rc_code;130;120;ASF from capital items and instruments;;;;4.2
+C_84.00;y_axis_rc_code;140;120;ASF from retail deposits;;;;4.2
+C_84.00;y_axis_rc_code;150;120;ASF from other non-financial customers (except central banks);;;;4.2
+C_84.00;y_axis_rc_code;160;120;ASF from operational deposits;;;;4.2
+C_84.00;y_axis_rc_code;170;120;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;4.2
+C_84.00;y_axis_rc_code;180;120;ASF from financial customers and central banks;;;;4.2
+C_84.00;y_axis_rc_code;190;120;ASF from liabilities provided where the counterparty cannot be determined;;;;4.2
+C_84.00;y_axis_rc_code;200;120;ASF from interdependent liabilities;;;;4.2
 C_84.00;y_axis_rc_code;210;120;ASF from other liabilities;;;;4.2
-C_84.00;y_axis_rc_code;__PARENT__2c1514d605b6;;0120 Available stable funding;;Y;;4.2
-C_84.00;y_axis_rc_code;130;__PARENT__2c1514d605b6;ASF from capital items and instruments;;;;4.2
-C_84.00;y_axis_rc_code;140;__PARENT__2c1514d605b6;ASF from retail deposits;;;;4.2
-C_84.00;y_axis_rc_code;150;__PARENT__2c1514d605b6;ASF from other non-financial customers (except central banks);;;;4.2
-C_84.00;y_axis_rc_code;160;__PARENT__2c1514d605b6;ASF from operational deposits;;;;4.2
-C_84.00;y_axis_rc_code;170;__PARENT__2c1514d605b6;ASF from liabilities and committed facilities within a group or an IPS if subject to preferential treatment;;;;4.2
-C_84.00;y_axis_rc_code;180;__PARENT__2c1514d605b6;ASF from financial customers and central banks;;;;4.2
-C_84.00;y_axis_rc_code;190;__PARENT__2c1514d605b6;ASF from liabilities provided where the counterparty cannot be determined;;;;4.2
-C_84.00;y_axis_rc_code;200;__PARENT__2c1514d605b6;ASF from interdependent liabilities;;;;4.2
+C_84.00;x_axis_rc_code;30;;Available stable funding;;;;4.2
 C_84.00;z_axis_rc_code;EUR;;Euro;;;;4.2
 C_84.00;z_axis_rc_code;USD;;US Dollar;;;;4.2
 C_84.00;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2

@@ -8,11 +8,11 @@
       "ssm_supervision_country": "FR",
       "ssmsignificance": "SI",
       "institution_name": "Northstar Bank",
-      "highest_level": "CONSO",
+      "highest_level": "CONS",
       "jst_by_level": {
-        "CONSO": "DUM001",
+        "CONS": "DUM001",
         "SOLO": "DUM002",
-        "SUBLIQ": "DUM003"
+        "CRDLIQSUBGRP": "DUM003"
       }
     },
     {
@@ -23,9 +23,9 @@
       "institution_name": "Riverside Credit",
       "highest_level": "SOLO",
       "jst_by_level": {
-        "CONSO": "DUM004",
+        "CONS": "DUM004",
         "SOLO": "DUM005",
-        "SUBLIQ": "DUM006"
+        "CRDLIQSUBGRP": "DUM006"
       }
     },
     {
@@ -34,11 +34,11 @@
       "ssm_supervision_country": "DE",
       "ssmsignificance": "SI",
       "institution_name": "Summit Financial",
-      "highest_level": "CONSO",
+      "highest_level": "CONS",
       "jst_by_level": {
-        "CONSO": "DUM007",
+        "CONS": "DUM007",
         "SOLO": "DUM008",
-        "SUBLIQ": "DUM009"
+        "CRDLIQSUBGRP": "DUM009"
       }
     },
     {
@@ -49,9 +49,9 @@
       "institution_name": "Harbor Group",
       "highest_level": "SOLO",
       "jst_by_level": {
-        "CONSO": "DUM010",
+        "CONS": "DUM010",
         "SOLO": "DUM011",
-        "SUBLIQ": "DUM012"
+        "CRDLIQSUBGRP": "DUM012"
       }
     }
   ],

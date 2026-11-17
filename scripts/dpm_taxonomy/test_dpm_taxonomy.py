@@ -19,6 +19,47 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_c80_c81_reported_totals_replace_empty_display_parents(self):
+        for table_id, label, late_code in (
+            ("C_80.00", "Required stable funding", "920"),
+            ("C_81.00", "Available stable funding", "320"),
+        ):
+            with self.subTest(table_id=table_id):
+                rows = [
+                    {"table_id": table_id, "coordinate": "y_axis_rc_code", "framework": "4.2",
+                     "code": code, "parent_coordinate_code": parent, "description": description}
+                    for code, parent, description in (
+                        ("__PARENT__total", "", "0010 " + label),
+                        ("20", "__PARENT__total", "First detail"),
+                        ("40", "20", "Subdetail"),
+                        (late_code, "__PARENT__total", "Derivative detail"),
+                        ("10", "", label),
+                    )
+                ]
+                result = builder.organize_c80_c81_nsfr_rows(rows)
+                self.assertEqual([row["code"] for row in result], ["10", "20", "40", late_code])
+                self.assertEqual([row["parent_coordinate_code"] for row in result], ["", "10", "20", "10"])
+
+    def test_c84_nsfr_uses_reported_totals_as_parents(self):
+        rows = [
+            {"table_id": "C_84.00", "coordinate": "y_axis_rc_code", "framework": "4.2",
+             "code": code, "parent_coordinate_code": parent, "description": label}
+            for code, parent, label in (
+                ("__PARENT__rsf", "", "0010 Required stable funding"),
+                ("20", "__PARENT__rsf", "RSF from central bank assets"),
+                ("220", "", "NSFR"),
+                ("80", "__PARENT__rsf", "RSF from derivatives"),
+                ("10", "", "Required stable funding"),
+                ("120", "", "Available stable funding"),
+                ("210", "120", "ASF from other liabilities"),
+                ("__PARENT__asf", "", "0120 Available stable funding"),
+                ("130", "__PARENT__asf", "ASF from capital items and instruments"),
+            )
+        ]
+        result = builder.organize_c84_nsfr_rows(rows)
+        self.assertEqual([row["code"] for row in result], ["220", "10", "20", "80", "120", "130", "210"])
+        self.assertEqual([row["parent_coordinate_code"] for row in result], ["", "", "10", "10", "", "120", "120"])
+
     def test_geographic_country_axis_is_fixed_across_templates_and_taxonomies(self):
         templates = [
             {

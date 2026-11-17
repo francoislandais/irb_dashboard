@@ -85,7 +85,10 @@ export const EXPLORER_ALL_CURRENCIES_LABEL = "All currencies";
 // list of table_ids - any newly-added currency table picks this up for
 // free.
 export function explorerTableHasCurrencyZAxis(state, tableId) {
-  return getConfiguredExplorerAxisCodes(state, tableId, "z").includes("EUR");
+  return getConfiguredExplorerAxisCodes(state, tableId, "z").includes("EUR")
+    // The older C_84.00 dictionaries omit the Z axis although the extracted
+    // rows contain both currency codes and a separately reported blank-Z total.
+    || (tableId === "C_84.00" && getAvailableExplorerAxisCodes(state, tableId, "z").includes("EUR"));
 }
 
 // Some tables (e.g. C_66.01) already have their own native z-axis point

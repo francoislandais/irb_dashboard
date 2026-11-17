@@ -3,7 +3,10 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from scripts.launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
+from scripts.launcher import (
+    _extraction_template_description, connect_darwin_listing_client,
+    render_launcher_html, resolve_darwin_app_links,
+)
 
 
 class LauncherTests(unittest.TestCase):
@@ -53,11 +56,15 @@ class LauncherTests(unittest.TestCase):
         html = render_launcher_html(self.apps, {
             "Agora Explorer_FINREP_COREP.html": "https://darwin.escb.eu/livelink/livelink/fetchcsui/1914437350/Agora%20Explorer_FINREP_COREP.html?nodeid=456&vernum=-2",
         })
-        self.assertIn('data-institution-lei="5493001KJTIIGC8Y1R12"', html)
-        self.assertIn('data-institution-name="Northstar &amp; Bank"', html)
-        self.assertIn('LEI 5493001KJTIIGC8Y1R12 · JST JST_A', html)
+        self.assertIn('"lei": "5493001KJTIIGC8Y1R12"', html)
+        self.assertIn('"name": "Northstar & Bank"', html)
+        self.assertIn('"jst": ["JST_A"]', html)
         self.assertIn('href="https://darwin.escb.eu/livelink/livelink/fetchcsui/1914437350/Agora%20Explorer_FINREP_COREP.html?nodeid=456&amp;vernum=-2"', html)
         self.assertIn("FINREP &amp; COREP", html)
+        self.assertIn('<details class="application" name="launcher-application"><summary class="app-summary">', html)
+        self.assertIn('<div class="app-expanded">', html)
+        self.assertIn('Open application ↗</a></div><div class="app-expanded">', html)
+        self.assertIn('<p class="app-template-line"><strong>Available templates:</strong>', html)
         self.assertNotIn("Consolidation:", html)
         self.assertNotIn("Preview with example data", html)
         self.assertNotIn("AGORA_GROUPS_START", html)
@@ -80,10 +87,22 @@ class LauncherTests(unittest.TestCase):
             "other.html": "second.html",
         })
         self.assertEqual(html.count('class="scope-group"'), 1)
-        self.assertEqual(html.count('class="group-member"'), 1)
-        self.assertIn("JST JST_A, JST_B", html)
-        self.assertNotIn("_CONSO", html)
-        self.assertNotIn("_SOLO", html)
+        self.assertIn('"jst": ["JST_A", "JST_B"]', html)
+        self.assertNotIn("_CONSO</h", html)
+        self.assertNotIn("_SOLO</h", html)
+
+    def test_template_scope_uses_extraction_range_and_exclusions(self):
+        description = _extraction_template_description({
+            "selector": "F_xx% xx<48, !F_20.04%, !F_20.05%, !F_20.06%, !F_20.07%, !F_40%",
+            "selection_type": "templates",
+        })
+        self.assertEqual(description,
+                         "Includes F_01% to F_47%; excludes F_20.04% to F_20.07%, F_40%.")
+        app = {**self.apps[0], "extractions": [{"label": "FINREP", "selector": "F_xx% xx<48, !F_40%",
+                                                   "selection_type": "templates"}]}
+        html = render_launcher_html([app], {"Agora Explorer_FINREP_COREP.html": "app.html"})
+        self.assertIn("Includes F_01% to F_47%; excludes F_40%.", html)
+        self.assertNotIn("F_02%, F_03%", html)
 
     def test_darwin_rests_fallback_uses_the_supplied_connection_pattern(self):
         calls = []

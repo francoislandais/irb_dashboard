@@ -80,10 +80,11 @@ export function getExplorerAxisPointsConfig(state, tableId, axis, yConfigTableId
 // time series for every country. Scan the selected institution's rows once
 // at the latest reference date; full series are built only for the page that
 // the caller subsequently requests.
-export function getExplorerGeographyLatestValues(state, { tableId, selectedXCode = "", selectedYCode = "" } = {}) {
+export function getExplorerGeographyLatestValues(state, { tableId, selectedXCode = "", selectedYCode = "", referenceLabel = "" } = {}) {
   const values = new Map();
   const indexes = getCompleteAxisColumnIndexes(state?.columns ?? []);
-  const latestReference = getExplorerTemplateReferenceDates(state, tableId).at(-1);
+  const references = getExplorerTemplateReferenceDates(state, tableId);
+  const latestReference = references.find((reference) => reference.label === referenceLabel) ?? references.at(-1);
   if (!indexes || !latestReference || !state?.selectedJst || !tableId) return values;
 
   const xCode = normalizeAxisCode(selectedXCode, "x");
@@ -102,7 +103,10 @@ export function getExplorerGeographyLatestValues(state, { tableId, selectedXCode
     if (yCode && normalizeAxisCode(row[indexes.yAxisRcCode], "y") !== yCode) continue;
     const zCode = normalizeAxisCode(row[indexes.zAxisRcCode], "z");
     if (!zCode) continue;
-    values.set(zCode, (values.get(zCode) ?? 0) + parseNumericValue(row[latestReference.index]));
+    const rawValue = String(row[latestReference.index] ?? "").trim();
+    const value = rawValue ? parseNumericValue(rawValue, NaN) : NaN;
+    if (!Number.isFinite(value)) continue;
+    values.set(zCode, (values.get(zCode) ?? 0) + value);
   }
   cache.set(cacheKey, values);
   if (cache.size > 64) cache.delete(cache.keys().next().value);
@@ -261,10 +265,15 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
         .map((row) => normalizeAxisCode(row[indexes[axisIndexKey]], axis, tableId))
         .filter(Boolean))]
       .sort((left, right) => left.localeCompare(right, "fr"));
-  const rowsToGroup = getRowsForPartialSelection(state, indexes, tableId, {
-    ...selections,
-    [`selected${axis.toUpperCase()}Code`]: ""
-  });
+  const rowsToGroup = axis === "z" && explorerTableOffersAllCurrencies(state, tableId)
+    ? getRowsForTableJst(state, indexes, tableId).filter((row) => (
+      matchesSelectedAxis(row, indexes, "x", selections.selectedXCode, "z", tableId)
+      && matchesSelectedAxis(row, indexes, "y", selections.selectedYCode, "z", tableId)
+    ))
+    : getRowsForPartialSelection(state, indexes, tableId, {
+      ...selections,
+      [`selected${axis.toUpperCase()}Code`]: ""
+    });
 
   rowsToGroup.forEach((row) => {
     const code = normalizeAxisCode(row[indexes[axisIndexKey]], axis, tableId);
@@ -279,7 +288,7 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
     legacySlashPaths: !state.dimensionMapping?.hasParentCoordinateCode
   });
 
-  return codes
+  const dataDerivedRows = codes
     .map((code) => {
       const matchedRows = matchedRowsByCode.get(code) ?? [];
       const mapping = state.dimensionMapping?.find(tableId, coordinate, code);
@@ -305,6 +314,19 @@ function buildDataDerivedAxisSeriesRows(state, indexes, dateColumns, tableId, ax
         values: buildValues(dateColumns, matchedRows, tableId)
       };
     });
+  if (axis !== "z" || !explorerTableOffersAllCurrencies(state, tableId)) return dataDerivedRows;
+
+  // C_84.00 before framework 4.2 has no configured Z members. Its blank-Z
+  // total is still a reported point and must be selectable alongside the
+  // currency codes, without summing those currency rows into it.
+  const totalRows = getRowsForPartialSelection(state, indexes, tableId, {
+    ...selections, selectedZCode: ""
+  });
+  return [{
+    ...createAllCurrenciesPoint(),
+    matchCount: totalRows.length,
+    values: buildValues(dateColumns, totalRows, tableId)
+  }, ...dataDerivedRows];
 }
 
 function buildTemplateSeriesRows(state, indexes, dateColumns, templates, templateSelections) {

@@ -34,6 +34,7 @@ import {
   getExplorerRowsForTemplate,
   getExplorerTemplates,
   explorerTableHasCurrencyZAxis,
+  explorerTableOffersAllCurrencies,
   getHierarchyAncestorPaths,
   getParentPaths,
   getSelectedExplorerCodeForAxis,
@@ -173,6 +174,7 @@ const pendingUrlTab = getUrlTabParam();
 const pendingUrlHistoryPeriods = getUrlHistoryPeriodsParam();
 const pendingUrlAnchorReference = readUrlStateParams().get(EXPLORER_ANCHOR_REFERENCE_URL_PARAM) ?? "";
 let explorerAnchorReferenceLabel = pendingUrlAnchorReference;
+let explorerDateColumnSort = null;
 let explorerGlobalReferenceLabel = readUrlStateParams().get(EXPLORER_REFERENCE_URL_PARAM) || pendingUrlAnchorReference;
 // Evolution frequency and history depth are shared across every template
 // (not stored per-template context like the axis selections) - switching
@@ -1331,7 +1333,9 @@ function ensureExplorerSelectionUsesExistingRow(state, tableId, context, axisOpt
     context.selectedYCode = normalizeAxisCode(firstRow[indexes.yAxisRcCode], "y", tableId);
   }
   if (axisOptions.z.codes.length > 0 && !EXPLORER_GEOGRAPHIC_TEMPLATES.has(tableId)) {
-    context.selectedZCode = normalizeAxisCode(firstRow[indexes.zAxisRcCode], "z");
+    const rowZCode = normalizeAxisCode(firstRow[indexes.zAxisRcCode], "z");
+    context.selectedZCode = !rowZCode && explorerTableOffersAllCurrencies(state, tableId)
+      ? EXPLORER_ALL_CURRENCIES_CODE : rowZCode;
   }
 }
 
@@ -2180,7 +2184,20 @@ function selectExplorerInstitutionCell(institutionId, { referenceLabel = "", xCo
 
 function renderExplorerInstitutionTable(state, template) {
   const table = elements.explorerTable;
-  const institutions = state?.institutionOptions ?? state?.jstOptions ?? [];
+  let institutions = state?.institutionOptions ?? state?.jstOptions ?? [];
+  const institutionSort = explorerDateColumnSort?.key.startsWith(`${getExplorerDateSortScope("institutions")}:`)
+    ? explorerDateColumnSort : null;
+  if (institutionSort && !isExplorerXYView()) {
+    const benchmark = buildExplorerBenchmark(institutions, { onlyDateLabel: institutionSort.dateLabel });
+    const values = new Map(benchmark.series.map((item) => [item.jstCode, item.values[0]?.value]));
+    institutions = [...institutions].sort((left, right) => {
+      const a = values.get(left);
+      const b = values.get(right);
+      if (!Number.isFinite(a)) return Number.isFinite(b) ? 1 : left.localeCompare(right);
+      if (!Number.isFinite(b)) return -1;
+      return (institutionSort.direction === "ascending" ? a - b : b - a) || left.localeCompare(right);
+    });
+  }
   if (!explorerInstitutionPageInitialized || explorerInstitutionLastSelectedJst !== state.selectedJst) {
     const selectedIndex = institutions.indexOf(state.selectedJst);
     explorerInstitutionPageIndex = Math.floor(Math.max(0, selectedIndex) / EXPLORER_INSTITUTION_PAGE_SIZE);
@@ -2223,6 +2240,7 @@ function renderExplorerInstitutionTable(state, template) {
   if (elements.explorerGeographyPagination) elements.explorerGeographyPagination.hidden = true;
 
   const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
   const institutionHeader = document.createElement("th");
   institutionHeader.scope = "col";
   institutionHeader.className = "description-column";
@@ -2294,11 +2312,18 @@ function renderExplorerInstitutionTable(state, template) {
       cell.dataset.explorerExportColumn = "true";
       cell.dataset.explorerExportLabel = getExplorerFullDateColumnLabel(reference);
       cell.addEventListener("click", () => selectExplorerInstitutionCell(state.selectedJst, { referenceLabel: reference.label }));
+      addExplorerDateSortControl(cell, {
+        scope: getExplorerDateSortScope("institutions"), dateLabel: reference.label,
+        onSort: () => {
+          explorerInstitutionPageInitialized = false;
+          saveExplorerScrollPosition();
+          rerenderApp(getLatestState());
+        }
+      });
       quarterRow.append(cell);
     });
     thead.append(yearRow, quarterRow);
   }
-  const tbody = document.createElement("tbody");
   pageInstitutions.forEach((institutionId) => {
     const row = document.createElement("tr");
     row.classList.toggle("is-selected", institutionId === state.selectedJst);
@@ -2409,6 +2434,29 @@ function renderExplorerInstitutionTable(state, template) {
   }
 }
 
+function getExplorerDateSortScope(kind) {
+  return `${kind}:${getLatestState()?.activeDatasetId ?? ""}:${getActiveExplorerTemplate()?.tableId ?? ""}`;
+}
+
+function addExplorerDateSortControl(header, { scope, dateLabel, onSort }) {
+  const key = `${scope}:${dateLabel}`;
+  const active = explorerDateColumnSort?.key === key;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "explorer-date-sort-button";
+  button.textContent = active && explorerDateColumnSort.direction === "ascending" ? "↑" : "↓";
+  button.setAttribute("aria-label", `Sort ${dateLabel} ${active && explorerDateColumnSort.direction === "descending" ? "ascending" : "descending"}`);
+  header.setAttribute("aria-sort", active ? explorerDateColumnSort.direction : "none");
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const direction = explorerDateColumnSort?.key === key && explorerDateColumnSort.direction === "descending"
+      ? "ascending" : "descending";
+    explorerDateColumnSort = { key, direction, dateLabel };
+    onSort();
+  });
+  header.append(button);
+}
+
 function renderExplorerTable(series, selectedUnit) {
   lastRenderedExplorerTableSeries = series;
   lastRenderedExplorerSelectedUnit = selectedUnit;
@@ -2424,6 +2472,7 @@ function renderExplorerTable(series, selectedUnit) {
   syncExplorerXYColumnSelection(series);
   const activeAxis = getActiveExplorerAxis();
   const isDateFocus = explorerGlobalDisplayMode === "focus";
+  const isSortableCountryView = !isXY && !isDateFocus && activeAxis === getActiveExplorerGeographyAxis();
   const focusSelection = isDateFocus ? getExplorerDateFocusSelection(series) : null;
   const orderedDates = isXY ? series.dateColumns : isDateFocus
     ? [
@@ -2531,6 +2580,15 @@ function renderExplorerTable(series, selectedUnit) {
     th.dataset.explorerExportLabel = isDateFocus ? dateColumn.label : getExplorerFullDateColumnLabel(dateColumn);
     th.dataset.explorerDateColumn = String(index);
     th.textContent = isDateFocus ? dateColumn.label : getExplorerQuarterLabel(dateColumn);
+    if (isSortableCountryView) addExplorerDateSortControl(th, {
+      scope: getExplorerDateSortScope("countries"), dateLabel: dateColumn.label,
+      onSort: () => {
+        explorerGeographyPageIndex = 0;
+        shouldRevealExplorerAxisSelection = true;
+        saveExplorerScrollPosition();
+        rerenderApp(getLatestState());
+      }
+    });
     headerRow.append(th);
   });
 
@@ -3510,7 +3568,7 @@ function toggleExplorerInlineFilter(topic) {
     ?? elements.explorerActiveFilters?.querySelector(`[data-explorer-filter-dropdown="${topic}"]`))?.focus();
 }
 
-function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOptions = options.length > 0) {
+function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOptions = options.length > 0, onArrowClick = null) {
   const choiceName = ({
     "jst-code": "institution",
     "reference-date": "reference date",
@@ -3521,15 +3579,20 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
   arrow.type = "button";
   arrow.className = "explorer-filter-dropdown-toggle";
   arrow.dataset.explorerFilterDropdown = topic;
-  arrow.setAttribute("aria-label", `Choose ${choiceName}`);
-  arrow.title = `Choose ${choiceName}`;
-  arrow.setAttribute("aria-expanded", String(explorerInlineFilterTopic === topic));
-  arrow.setAttribute("aria-controls", `explorer-filter-menu-${topic}`);
+  arrow.setAttribute("aria-label", onArrowClick ? "Show institutions in the table" : `Choose ${choiceName}`);
+  arrow.title = onArrowClick ? "Show institutions in the table" : `Choose ${choiceName}`;
+  if (onArrowClick) {
+    arrow.setAttribute("aria-pressed", String(explorerInstitutionTableVisible));
+  } else {
+    arrow.setAttribute("aria-expanded", String(explorerInlineFilterTopic === topic));
+    arrow.setAttribute("aria-controls", `explorer-filter-menu-${topic}`);
+  }
   arrow.disabled = !hasOptions;
   arrow.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2.5 4.5 3.5 3 3.5-3"/></svg>';
   arrow.addEventListener("click", (event) => {
     event.stopPropagation();
-    toggleExplorerInlineFilter(topic);
+    if (onArrowClick) onArrowClick();
+    else toggleExplorerInlineFilter(topic);
   });
   chip.append(arrow);
 
@@ -3538,11 +3601,18 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
   menu.id = `explorer-filter-menu-${topic}`;
   menu.className = "explorer-filter-dropdown";
   const isInstitution = topic === "jst-code";
-  if (!isInstitution) {
+  if (!isInstitution && topic !== "reference-date") {
     menu.setAttribute("role", "listbox");
     menu.setAttribute("aria-label", `Choose ${choiceName}`);
   }
-  const optionHost = isInstitution ? document.createElement("span") : menu;
+  const optionHost = isInstitution || topic === "reference-date" ? document.createElement("span") : menu;
+  if (topic === "reference-date") {
+    menu.classList.add("explorer-filter-dropdown-dates");
+    optionHost.className = "explorer-filter-date-options";
+    optionHost.setAttribute("role", "listbox");
+    optionHost.setAttribute("aria-label", `Choose ${choiceName}`);
+    menu.append(optionHost);
+  }
   let renderInstitutionMatches = () => {};
   if (isInstitution) {
     const search = document.createElement("input");
@@ -3636,6 +3706,7 @@ function addExplorerInlineFilterDropdown(chip, topic, options, onSelect, hasOpti
     options.forEach(appendOption);
   }
   chip.append(menu);
+  return menu;
 }
 
 function renderExplorerActiveFilters(state) {
@@ -3649,8 +3720,9 @@ function renderExplorerActiveFilters(state) {
   const jstToggle = document.createElement("button");
   jstToggle.type = "button";
   jstToggle.className = "cost-of-risk-filter-chip-toggle";
-  jstToggle.setAttribute("aria-pressed", String(explorerInstitutionTableVisible));
-  jstToggle.setAttribute("aria-label", "Show institutions in the table");
+  jstToggle.setAttribute("aria-expanded", String(explorerInlineFilterTopic === "jst-code"));
+  jstToggle.setAttribute("aria-controls", "explorer-filter-menu-jst-code");
+  jstToggle.setAttribute("aria-label", "Choose institution");
 
   const jstValue = document.createElement("span");
   jstValue.className = "cost-of-risk-filter-chip-label cost-of-risk-filter-chip-value";
@@ -3658,7 +3730,9 @@ function renderExplorerActiveFilters(state) {
   jstValue.textContent = getInstitutionDisplayInfo(state?.institutionDictionary, selectedInstitutionId)?.institutionName
     || selectedInstitutionId || "Institution";
   jstToggle.append(jstValue);
-  jstToggle.addEventListener("click", () => {
+  jstToggle.addEventListener("click", () => toggleExplorerInlineFilter("jst-code"));
+
+  const showInstitutionsInTable = () => {
     if (explorerInstitutionTableVisible) return;
     explorerInlineFilterTopic = "";
     explorerInstitutionTableVisible = true;
@@ -3667,7 +3741,7 @@ function renderExplorerActiveFilters(state) {
     explorerInstitutionPageInitialized = true;
     saveExplorerScrollPosition();
     rerenderApp(getLatestState());
-  });
+  };
 
   jstChip.append(jstToggle);
 
@@ -3778,7 +3852,7 @@ function renderExplorerActiveFilters(state) {
     }) : [];
   addExplorerInlineFilterDropdown(jstChip, "jst-code", institutionChoices, (institutionId) => {
     if (institutionId !== selectedInstitutionId) updateSelectedJst(institutionId);
-  }, institutionOptions.length > 0);
+  }, institutionOptions.length > 0, showInstitutionsInTable);
   const unavailableDates = explorerInlineFilterTopic === "reference-date"
     ? getExplorerTaxonomyUnavailableReferenceLabels(
       lastRenderedExplorerTableSeries, getSelectedExplorerCodeForActiveAxis()
@@ -3788,10 +3862,11 @@ function renderExplorerActiveFilters(state) {
   const valuesByReference = new Map((dateBenchmark?.series[0]?.values ?? []).map((point) => [
     point.label, point.value
   ]));
+  const allTemplateDates = explorerInlineFilterTopic === "reference-date"
+    ? getExplorerTemplateReferenceDates(state, getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId)
+    : [];
   const dateChoices = explorerInlineFilterTopic === "reference-date"
-    ? getExplorerReferencePanelDates(getExplorerTemplateReferenceDates(
-      state, getActiveExplorerTemplate()?.tableId ?? EXPLORER_TARGET.tableId
-    )).map((date) => ({
+    ? getExplorerReferencePanelDates(allTemplateDates).map((date) => ({
       value: date.label,
       label: getExplorerFullDateColumnLabel(date),
       metric: unavailableDates.has(date.label) ? "" : Number.isFinite(valuesByReference.get(date.label))
@@ -3799,8 +3874,30 @@ function renderExplorerActiveFilters(state) {
       selected: date.label === reference?.label,
       disabled: unavailableDates.has(date.label)
     })) : [];
-  addExplorerInlineFilterDropdown(dateChip, "reference-date", dateChoices,
+  const dateMenu = addExplorerInlineFilterDropdown(dateChip, "reference-date", dateChoices,
     selectExplorerReferenceDate, Boolean(reference));
+  if (dateMenu && dateChoices.length) {
+    const footer = document.createElement("label");
+    footer.className = "explorer-reference-display-start";
+    footer.textContent = "First reference date to display";
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", "First reference date to display");
+    const latestLabel = allTemplateDates.at(-1).label;
+    [...allTemplateDates].reverse().forEach((date) => {
+      select.add(new Option(getExplorerFullDateColumnLabel(date), date.label, false,
+        date.label === (explorerAnchorReferenceLabel || latestLabel)));
+    });
+    select.addEventListener("click", (event) => event.stopPropagation());
+    select.addEventListener("change", (event) => {
+      event.stopPropagation();
+      explorerAnchorReferenceLabel = select.value === latestLabel ? "" : select.value;
+      updateUrlExplorerSelectionParams();
+      saveExplorerScrollPosition();
+      if (getLatestState()) rerenderApp(getLatestState());
+    });
+    footer.append(select);
+    dateMenu.append(footer);
+  }
   addExplorerInlineFilterDropdown(unitChip, "unit", UNIT_FILTER_OPTIONS.map((option) => ({
     ...option, selected: option.value === (state?.selectedUnit || "millions")
   })), (unit) => {
@@ -5153,6 +5250,29 @@ function sortExplorerGeographyCountriesByCodeOrder(countries, orderedCodes = [])
     (positionByCode.get(left.code) ?? Infinity) - (positionByCode.get(right.code) ?? Infinity));
 }
 
+function compareExplorerNamedValues(left, right, values, direction) {
+  const a = values.get(left.code);
+  const b = values.get(right.code);
+  if (!Number.isFinite(a)) return Number.isFinite(b) ? 1 : left.name.localeCompare(right.name, "en");
+  if (!Number.isFinite(b)) return -1;
+  return (direction === "ascending" ? a - b : b - a) || left.name.localeCompare(right.name, "en");
+}
+
+function getExplorerCountryDateSort(state) {
+  if (!state || !explorerDateColumnSort?.dateLabel ||
+    !explorerDateColumnSort.key.startsWith(`${getExplorerDateSortScope("countries")}:`)) return null;
+  const context = getActiveExplorerContext();
+  return {
+    direction: explorerDateColumnSort.direction,
+    values: getExplorerGeographyLatestValues(state, {
+      tableId: getActiveExplorerTemplate()?.tableId,
+      selectedXCode: context.selectedXCode,
+      selectedYCode: context.selectedYCode,
+      referenceLabel: explorerDateColumnSort.dateLabel
+    })
+  };
+}
+
 function getExplorerGeographyMatchingCodesInOrder(state, template, context) {
   let countries = getExplorerGeographyCountries(state);
 
@@ -5163,6 +5283,14 @@ function getExplorerGeographyMatchingCodesInOrder(state, template, context) {
     if (templateResult.restrictedAxis === "z") {
       countries = countries.filter((country) => templateResult.matchesByAxis.z.has(country.code));
     }
+  }
+  const dateSort = getExplorerCountryDateSort(state);
+  if (dateSort) {
+    if (explorerGeographyLayout === "relevance") {
+      return [...countries].sort((left, right) => compareExplorerNamedValues(
+        left, right, dateSort.values, dateSort.direction)).map((country) => country.code);
+    }
+    return groupExplorerCountries(countries).flatMap((group) => group.countries.map((country) => country.code));
   }
   if (explorerGeographyLayout === "relevance") {
     const latestValues = getExplorerGeographyLatestValues(state, {
@@ -5209,7 +5337,10 @@ function getExplorerGeographyCountries(state) {
 }
 
 function groupExplorerCountries(countries) {
-  const alphabetic = (values) => [...values].sort((left, right) => left.name.localeCompare(right.name, "en", { sensitivity: "base" }));
+  const dateSort = getExplorerCountryDateSort(getLatestState());
+  const alphabetic = (values) => [...values].sort((left, right) => dateSort
+    ? compareExplorerNamedValues(left, right, dateSort.values, dateSort.direction)
+    : left.name.localeCompare(right.name, "en", { sensitivity: "base" }));
   if (explorerGeographyLayout === "alphabetical") {
     return [{ label: "", countries: alphabetic(countries) }];
   }

@@ -1,0 +1,14 @@
+# Smoke test for query-impala-3168782.zip (raw Impala ITS sample).
+# Run with --as-of 2025-12-31 to include the available C_08.02 grade rows.
+[[applications]]
+name = "Mini C08.02"
+leis = ["9695003KLVYC6WLE4F19"]
+consolidation = "CONSO"
+
+[[applications.extractions]]
+category = "Credit risk"
+label = "IRB obligor grades"
+module = "COREP_OF"
+templates = ["C_08.02"]
+history_years = 2
+frequency = "QUARTERLY"

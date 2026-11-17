@@ -9,6 +9,7 @@ const REQUIRED_AXIS_COLUMN_LABELS = {
 };
 
 export function removeEmptyReferenceColumns(columns, rows) {
+  if (rows.length === 0) return { columns, rows };
   const indexesToRemove = new Set(columns
     .map((column, index) => ({ column, index }))
     .filter(({ column, index }) => (
@@ -35,9 +36,6 @@ export function validateCsvDataset(columns, rows) {
     throw new Error("CSV invalide : aucune colonne de date de référence au format ref_YYYY_MM_DD n'a été trouvée.");
   }
 
-  if (rows.length === 0) {
-    throw new Error("CSV invalide : aucune ligne de données exploitable n'a été trouvée.");
-  }
 }
 
 function getMissingAxisColumns(columns) {

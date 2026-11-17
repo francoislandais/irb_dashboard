@@ -1,7 +1,7 @@
 import { setLatestState } from "./appState.js";
 import { getInstitutionDisplayInfo, matchesInstitutionSearch } from "../data/institutionDictionary.js?v=20261113-compact-shell-v2";
 import { renderCreditRisk, syncCreditRiskUrlParams, wireCreditRiskUi } from "./creditRiskView.js?v=20261021-cons-conso";
-import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261113-compact-shell-v3";
+import { renderExplorer, renderExplorerHeaderReferenceControl, saveExplorerScrollPosition, scheduleExplorerStickyParentsUpdate, wireExplorerUi } from "./explorerView.js?v=20261115-institution-filter-actions";
 import { renderIrb, wireIrbUi } from "./irbView.js?v=20260917-kri-unit-fix";
 import { renderApproachBenchmark, wireApproachBenchmarkUi } from "./approachBenchmarkView.js?v=20261017-provisions-on-ead";
 import { renderIrbMechanics, wireIrbMechanicsUi } from "./irbMechanicsView.js?v=20261021-pd-endpoints";
@@ -216,6 +216,7 @@ function renderServerInstitutionNames(state) {
 
 function toggleSidebar() {
   if (!elements.appShell || !elements.sidebarToggle) return;
+  if (document.documentElement.dataset.noSidebar === "true") return;
   if (readUrlStateParams().get(SIDEBAR_URL_PARAM) === SIDEBAR_LOCKED_VALUE) return;
 
   const isCollapsed = elements.appShell.classList.toggle("is-sidebar-collapsed");
@@ -232,12 +233,34 @@ function toggleSidebar() {
 // "sidebar" URL param so it can be enabled per-link (e.g. an exported app).
 function applyUrlSidebarVisibility() {
   if (!elements.appShell || !elements.sidebarToggle) return;
+  if (document.documentElement.dataset.noSidebar === "true") {
+    elements.appShell.classList.add("is-sidebar-collapsed", "is-sidebar-locked");
+    updateSidebarToggleAccessibility(true);
+    return;
+  }
   const sidebarParam = readUrlStateParams().get(SIDEBAR_URL_PARAM);
   const isLocked = sidebarParam === SIDEBAR_LOCKED_VALUE;
   const isCollapsed = sidebarParam === null || isLocked || sidebarParam === SIDEBAR_COLLAPSED_VALUE;
   elements.appShell.classList.toggle("is-sidebar-collapsed", isCollapsed);
   elements.appShell.classList.toggle("is-sidebar-locked", isLocked);
   updateSidebarToggleAccessibility(isCollapsed);
+}
+
+function syncSidebarForAvailableModules(availableModules = []) {
+  if (document.documentElement.dataset.noSidebar === "true") {
+    elements.appShell?.classList.add("is-sidebar-collapsed", "is-sidebar-locked");
+    if (elements.sidebarToggle) updateSidebarToggleAccessibility(true);
+    return;
+  }
+  const explorerOnlyExport = document.documentElement.dataset.standalone === "true"
+    && availableModules.length === 1
+    && availableModules[0] === "explorer";
+  if (!explorerOnlyExport) {
+    applyUrlSidebarVisibility();
+    return;
+  }
+  elements.appShell?.classList.add("is-sidebar-collapsed", "is-sidebar-locked");
+  if (elements.sidebarToggle) updateSidebarToggleAccessibility(true);
 }
 
 function updateSidebarToggleAccessibility(isCollapsed) {
@@ -271,6 +294,7 @@ export function renderAppState(state) {
   renderServerInstitutionNames(state);
   renderExplorerHeaderReferenceControl(state);
   renderActiveModule(state.activeModule, state.availableModules);
+  syncSidebarForAvailableModules(state.availableModules);
 
   if (elements.fileStatus) {
     if (state.isRestoring) {

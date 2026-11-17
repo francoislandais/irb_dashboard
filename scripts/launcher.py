@@ -4,8 +4,15 @@ from __future__ import annotations
 
 from collections import defaultdict
 from html import escape
+import json
 from pathlib import Path
+import re
 from urllib.parse import quote
+
+if __package__:
+    from .hive_to_dataset import _expand_template_expressions
+else:
+    from hive_to_dataset import _expand_template_expressions
 
 
 DARWIN_FILE_URL = "https://darwin.escb.eu/livelink/livelink/fetchcsui/{folder_id}/{filename}?nodeid={node_id}&vernum=-2"
@@ -147,9 +154,14 @@ def _collect_institutions(applications: list[dict]) -> dict[str, dict]:
 
 
 def _peer_group_title(app: dict, members: list[dict]) -> str:
+    description = str(app.get("description") or "").strip()
+    if description:
+        return f"{description} ({len(members)} institution{'s' if len(members) != 1 else ''})"
     if len(members) <= 3:
         return " · ".join(member["institution_name"] for member in members)
-    if app.get("ssm_supervision_country"):
+    if app.get("jst_code"):
+        scope = "JST code: " + ", ".join(app["jst_code"])
+    elif app.get("ssm_supervision_country"):
         scope = "Supervision country: " + ", ".join(app["ssm_supervision_country"])
     elif app.get("clusters"):
         scope = "Cluster: " + ", ".join(app["clusters"])
@@ -160,17 +172,43 @@ def _peer_group_title(app: dict, members: list[dict]) -> str:
     return f"{scope} ({len(members)} institutions)"
 
 
-def _member_markup(member: dict) -> str:
-    jst_codes = ", ".join(sorted(member["jst_codes"]))
-    metadata = f'LEI {member["lei"]}' + (f" · JST {jst_codes}" if jst_codes else "")
-    return (
-        '<span class="group-member" '
-        f'data-institution-lei="{escape(member["lei"], quote=True)}" '
-        f'data-institution-name="{escape(member["institution_name"], quote=True)}" '
-        f'data-institution-jst="{escape(jst_codes, quote=True)}">'
-        f'<strong>{escape(member["institution_name"])}</strong>'
-        f'<small>{escape(metadata)}</small></span>'
-    )
+def _compact_template_patterns(patterns: list[str]) -> str:
+    """Shorten consecutive family prefixes without changing their meaning."""
+
+    compact = []
+    index = 0
+    while index < len(patterns):
+        match = re.fullmatch(r"(.*?)(\d+)%", patterns[index])
+        end = index + 1
+        if match:
+            prefix, digits = match.groups()
+            while end < len(patterns):
+                following = re.fullmatch(r"(.*?)(\d+)%", patterns[end])
+                if not following or following.group(1) != prefix or len(following.group(2)) != len(digits):
+                    break
+                if int(following.group(2)) != int(digits) + end - index:
+                    break
+                end += 1
+        if end - index >= 3:
+            compact.append(f"{patterns[index]} to {patterns[end - 1]}")
+        else:
+            compact.extend(patterns[index:end])
+        index = end
+    return ", ".join(compact)
+
+
+def _extraction_template_description(extraction: dict) -> str:
+    selector = str(extraction.get("selector") or "").strip()
+    if not selector:
+        return "Template scope not specified."
+    if extraction.get("selection_type") == "kri_ids":
+        return f"KRI data points: {selector}."
+    included, excluded = _expand_template_expressions([selector])
+    included_text = "all templates" if included == ["%"] else _compact_template_patterns(included)
+    description = f"Includes {included_text}"
+    if excluded:
+        description += f"; excludes {_compact_template_patterns(excluded)}"
+    return description + "."
 
 
 def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str:
@@ -193,33 +231,56 @@ def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str
             item["institution_name"].casefold(), item["lei"]
         ))
         title = _peer_group_title(apps[0], members)
-        member_labels = "".join(_member_markup(member) for member in members)
         articles = []
         for app in apps:
             filename = Path(app["html_app"]).name
             link = links.get(filename)
             if not link:
                 raise ValueError(f"Lien introuvable pour l'application {filename}.")
-            labels = list(dict.fromkeys(item.get("label") or item.get("category") or item.get("module") or ""
-                                        for item in app.get("extractions", [])))
-            labels = [label for label in labels if label]
-            description = "; ".join(labels[:3]) + (f"; +{len(labels) - 3} more" if len(labels) > 3 else "")
+            template_lines = list(dict.fromkeys(
+                (str(item.get("label") or item.get("category") or item.get("module") or "Extraction"),
+                 _extraction_template_description(item))
+                for item in app.get("extractions", [])
+            ))
+            template_summary = " · ".join(
+                f"{escape(label)}: {escape(scope)}" if len(template_lines) > 1 else escape(scope)
+                for label, scope in template_lines
+            ) or "Template scope not specified."
+            institution_map = {}
+            for member in app.get("institutions") or []:
+                lei = _institution_lei(member)
+                institution_id = str(member.get("institution_id") or "").strip()
+                if lei and institution_id:
+                    # Prefer the consolidated unit when both levels share the same LEI.
+                    previous = institution_map.get(lei, "")
+                    if not previous or (institution_id.endswith(("_CONS", "_CONSO")) and
+                                        not previous.endswith(("_CONS", "_CONSO"))):
+                        institution_map[lei] = institution_id
             articles.append(
-                '<article class="application">'
-                f'<div><h3 class="app-title">{escape(app["name"])}</h3>'
-                f'<p class="app-description">{escape(description or "Reporting data")}</p>'
-                f'<div class="app-meta"><span><strong>Institutions:</strong> {len(members)}</span></div></div>'
+                '<details class="application" name="launcher-application"><summary class="app-summary">'
+                f'<h3 class="app-title">{escape(app["name"])}</h3>'
+                '<span class="app-disclosure-arrow" aria-hidden="true">⌄</span></summary>'
                 f'<div class="app-action"><a class="open-button" href="{escape(link, quote=True)}" '
-                'target="_blank" rel="noopener noreferrer">Open application ↗</a></div></article>'
+                f'data-base-href="{escape(link, quote=True)}" '
+                f'data-institution-map="{escape(json.dumps(institution_map), quote=True)}" '
+                'target="_blank" rel="noopener noreferrer">Open application ↗</a></div>'
+                f'<div class="app-expanded"><p class="app-template-line"><strong>Available templates:</strong> {template_summary}</p></div>'
+                '</details>'
             )
         sections.append(
-            f'<section class="scope-group" data-group-id="scope-{number}" aria-labelledby="scope-{number}-title">'
-            f'<h2 class="group-title" id="scope-{number}-title">{escape(title)}</h2>'
-            f'<p class="group-levels">{member_labels}</p>'
+            f'<section class="scope-group" data-group-id="scope-{number}" '
+            f'data-institution-leis="{escape("|".join(leis), quote=True)}" aria-labelledby="scope-{number}-title">'
+            f'<div class="group-heading"><h2 class="group-title" id="scope-{number}-title">{escape(title)}</h2>'
+            f'<span class="group-count">{len(apps)} application{"s" if len(apps) != 1 else ""}</span></div>'
             f'<div class="group-list">{"".join(articles)}</div></section>'
         )
     template = _replace_between(template, "AGORA_GROUPS", "\n".join(sections))
     template = _replace_between(template, "AGORA_PREVIEW_NOTE", "")
+    institution_data = [
+        {"lei": item["lei"], "name": item["institution_name"], "jst": sorted(item["jst_codes"])}
+        for item in sorted(institutions.values(), key=lambda item: (item["institution_name"].casefold(), item["lei"]))
+    ]
+    template = _replace_between(template, "AGORA_INSTITUTIONS", json.dumps(institution_data).replace("<", "\\u003c"))
     return template
 
 

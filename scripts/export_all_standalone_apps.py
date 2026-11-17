@@ -75,6 +75,7 @@ def export_standalone_app(
     bundle: dict | None = None,
     app_name: str | None = None,
     institution_dictionary_file_path: str | Path | None = None,
+    no_sidebar: bool = False,
 ) -> Path:
     """Génère une version portable à partir d'un CSV unique.
 
@@ -102,6 +103,7 @@ def export_standalone_app(
         file_name=data_path.name,
         app_name=app_name,
         institution_dictionary_csv_text=institution_dictionary_csv_text,
+        no_sidebar=no_sidebar,
     )
     destination = (
         Path(output_path).expanduser().resolve()
@@ -300,6 +302,7 @@ def _build_standalone_html(
     file_name: str,
     app_name: str | None = None,
     institution_dictionary_csv_text: str = "",
+    no_sidebar: bool = False,
 ) -> str:
     page_title = html.escape((app_name or "").strip() or DEFAULT_STANDALONE_APP_NAME)
     csv_bytes = csv_text.encode("utf-8")
@@ -335,7 +338,7 @@ def _build_standalone_html(
             brand_marker, f'<strong id="app-brand-title">{page_title}</strong>', 1,
         )
     return f'''<!doctype html>
-<html lang="fr" data-standalone="true">
+<html lang="fr" data-standalone="true"{' data-no-sidebar="true"' if no_sidebar else ''}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

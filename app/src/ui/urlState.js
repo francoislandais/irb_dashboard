@@ -2,10 +2,13 @@ const FILE_URL_STATE_PREFIX = "agora?";
 
 export function readUrlStateParams() {
   const hashState = window.location.hash.slice(1);
-  if (window.location.protocol === "file:" && hashState.startsWith(FILE_URL_STATE_PREFIX)) {
-    return new URLSearchParams(hashState.slice(FILE_URL_STATE_PREFIX.length));
+  const params = new URLSearchParams(window.location.protocol === "file:" ? "" : window.location.search);
+  if (hashState.startsWith(FILE_URL_STATE_PREFIX)) {
+    for (const [key, value] of new URLSearchParams(hashState.slice(FILE_URL_STATE_PREFIX.length))) {
+      params.set(key, value);
+    }
   }
-  return new URLSearchParams(window.location.search);
+  return params;
 }
 
 export function createUrlState() {

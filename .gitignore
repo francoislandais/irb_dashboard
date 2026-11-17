@@ -2,6 +2,7 @@
 *.csv
 *.tsv
 *.xlsx
+!examples/business-applications.xlsx
 *.xls
 
 # Fichiers systeme locaux.
