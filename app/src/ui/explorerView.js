@@ -244,6 +244,7 @@ const explorerSharedGeography = {
   treeViewMode: null,
   defaultExpandedPathsInitialized: false
 };
+const explorerSharedIrrbbCurrency = { selectedZCode: "" };
 let explorerRatioPopover = null;
 let explorerRatioPopoverHideTimer = 0;
 let explorerRatioPopoverBadge = null;
@@ -1167,6 +1168,14 @@ function getExplorerContextForTemplate(tableId) {
       Object.defineProperty(context.defaultExpandedPathsInitializedByAxis, "z", {
         get: () => explorerSharedGeography.defaultExpandedPathsInitialized,
         set: (initialized) => { explorerSharedGeography.defaultExpandedPathsInitialized = initialized; },
+        enumerable: true
+      });
+    } else if (contextKey.startsWith("J_") && contextKey !== "J_01.00") {
+      // J_01 has its own reported all-currency point; the other J templates
+      // share the selected reporting currency while keeping X/Y local.
+      Object.defineProperty(context, "selectedZCode", {
+        get: () => explorerSharedIrrbbCurrency.selectedZCode,
+        set: (code) => { explorerSharedIrrbbCurrency.selectedZCode = code; },
         enumerable: true
       });
     }

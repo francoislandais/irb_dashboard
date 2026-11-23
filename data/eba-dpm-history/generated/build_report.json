@@ -1,10 +1,10 @@
 {
-  "layout_rows": 78214,
+  "layout_rows": 87540,
   "inferred_display_formats": {
-    "%": 1673,
+    "%": 1727,
     "Unit": 1024
   },
-  "template_release_rows": 2263,
+  "template_release_rows": 2278,
   "workbooks": 115,
   "workbooks_with_errors": 0,
   "modules_without_effective_date_rule": [],

@@ -72,7 +72,7 @@ PRODUCTION_TABLES = {
     "ITS": "crp_agora.agora_its_bft_current",
     "KRI": "crp_agora.agora_dm_imas_kris_raw",
 }
-NORMALIZED_TABLE_ID = "regexp_replace(table_id, '([.][A-Za-z]+|_dp)+$', '')"
+NORMALIZED_TABLE_ID = "CASE WHEN table_id LIKE 'J_%' AND (table_id LIKE '%.a' OR table_id LIKE '%.b' OR table_id LIKE '%.A' OR table_id LIKE '%.B') THEN table_id ELSE regexp_replace(table_id, '([.][A-Za-z]+|_dp)+$', '') END"
 OUTPUT_COLUMNS = [
     "table_id",
     "reporting_unit_id",
@@ -792,6 +792,8 @@ def _selected_fixture_templates(selector: str, available: Iterable[str]) -> list
 
 def _normalize_source_table_id(table_id: str) -> str:
     """Mirror the legacy SQL normalization after fetching long-form rows."""
+    if re.fullmatch(r"J_\d+[.]\d+[.][aAbB]", table_id):
+        return table_id
     return re.sub(r"([.][A-Za-z]+|_dp)+$", "", table_id)
 
 

@@ -91,3 +91,22 @@ const totalLabelState = {
 assert.equal(explorerTableOffersAllCurrencies(totalLabelState, "C_66.01"), false);
 
 console.log("PASS: native ALM currency totals and synthetic open-currency totals stay distinct.");
+
+const irrbbState = {
+  ...state,
+  explorerPoints: [
+    point("J_01.00", "z", "x1", "All currencies"),
+    point("J_01.00", "z", "EUR", "Euro"),
+    point("J_02.00", "z", "EUR", "Euro"),
+    point("J_02.00", "z", "USD", "US dollar")
+  ],
+  rows: [
+    ["JST", "J_01.00", "0010", "0010", "x1", "30"],
+    ["JST", "J_02.00", "0010", "0010", "EUR", "10"],
+    ["JST", "J_02.00", "0010", "0010", "USD", "20"]
+  ]
+};
+irrbbState.dataIndexes = buildDataIndexes(columns, irrbbState.rows);
+assert.deepEqual(getExplorerAxisOptions(irrbbState, "J_01.00").z.codes, ["x1", "EUR"]);
+assert.deepEqual(getExplorerAxisOptions(irrbbState, "J_02.00").z.codes, ["EUR", "USD"]);
+assert.equal(explorerTableOffersAllCurrencies(irrbbState, "J_02.00"), false);

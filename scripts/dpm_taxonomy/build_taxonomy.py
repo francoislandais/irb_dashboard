@@ -1465,14 +1465,14 @@ def extract_all() -> tuple[
     # reused axis code ambiguous.
     for row in layout_rows:
         split = split_template_suffix(row["table_id"])
-        if split and (row["module_code"], split[0]) not in discriminating:
+        if split and not (row["module_code"] == "IRRBB" and split[0].startswith("J_")) and (row["module_code"], split[0]) not in discriminating:
             row["table_id"] = split[0]
 
     normalized_templates: dict[tuple[str, str, str], dict[str, str]] = {}
     for row in template_rows.values():
         split = split_template_suffix(row["template_id"])
         normalized_id = row["template_id"]
-        if split and (row["module_code"], split[0]) not in discriminating:
+        if split and not (row["module_code"] == "IRRBB" and split[0].startswith("J_")) and (row["module_code"], split[0]) not in discriminating:
             normalized_id = split[0]
         normalized = {**row, "template_id": normalized_id}
         normalized_templates.setdefault((row["module_code"], normalized_id, row["framework"]), normalized)

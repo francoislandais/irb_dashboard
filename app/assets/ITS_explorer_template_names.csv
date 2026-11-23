@@ -375,11 +375,16 @@ J_01.00;Evaluation of the IRRBB: EVE/NII SOT and MV changes;4.2;4.2_layouts.zip;
 J_02.00;Breakdown of sensitivity estimates;4.2;4.2_layouts.zip;IRRBB;J_02.00;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_02.00
 J_03.00;Breakdown of sensitivity estimates (simplified for 'other' institutions);4.2;4.2_layouts.zip;IRRBB;J_03.00;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_03.00
 J_04.00;Breakdown of sensitivity estimates (simplified for SNCIS);4.2;4.2_layouts.zip;IRRBB;J_04.00;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_04.00
-J_05.00;Repricing cash flows;4.2;4.2_layouts.zip;IRRBB;J_05.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_05.00.a
-J_06.00;Repricing cash flows (simplified for 'other' institutions);4.2;4.2_layouts.zip;IRRBB;J_06.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_06.00.a
-J_07.00;Repricing cash flows (simplified for SNCIS);4.2;4.2_layouts.zip;IRRBB;J_07.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_07.00.a
-J_08.00;Relevant parameters;4.2;4.2_layouts.zip;IRRBB;J_08.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_08.00.a
-J_09.00;Relevant parameters (simplified for SNCIS and 'other' institutions);4.2;4.2_layouts.zip;IRRBB;J_09.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_09.00.a
+J_05.00.a;Repricing cash flows (I);4.2;4.2_layouts.zip;IRRBB;J_05.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_05.00.a
+J_05.00.b;Repricing cash flows (II);4.2;4.2_layouts.zip;IRRBB;J_05.00.b;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_05.00.b
+J_06.00.a;Repricing cash flows (simplified for 'other' institutions) (I);4.2;4.2_layouts.zip;IRRBB;J_06.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_06.00.a
+J_06.00.b;Repricing cash flows (simplified for 'other' institutions) (II);4.2;4.2_layouts.zip;IRRBB;J_06.00.b;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_06.00.b
+J_07.00.a;Repricing cash flows (simplified for SNCIS) (I);4.2;4.2_layouts.zip;IRRBB;J_07.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_07.00.a
+J_07.00.b;Repricing cash flows (simplified for SNCIS) (II);4.2;4.2_layouts.zip;IRRBB;J_07.00.b;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_07.00.b
+J_08.00.a;Relevant parameters (I);4.2;4.2_layouts.zip;IRRBB;J_08.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_08.00.a
+J_08.00.b;Relevant parameters (II);4.2;4.2_layouts.zip;IRRBB;J_08.00.b;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_08.00.b
+J_09.00.a;Relevant parameters (simplified for SNCIS and 'other' institutions) (I);4.2;4.2_layouts.zip;IRRBB;J_09.00.a;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_09.00.a
+J_09.00.b;Relevant parameters (simplified for SNCIS and 'other' institutions) (II);4.2;4.2_layouts.zip;IRRBB;J_09.00.b;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_09.00.b
 J_10.01;General qualitative information;4.2;4.2_layouts.zip;IRRBB;J_10.01;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_10.01
 J_10.02;"Qualitative information ""currency by currency""";4.2;4.2_layouts.zip;IRRBB;J_10.02;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_10.02
 J_11.01;General qualitative information (simplified for SNCIS and 'other' institutions);4.2;4.2_layouts.zip;IRRBB;J_11.01;260106 Annotated templates/IRRBB/20260106 Annotated Table Layout  IRRBB 4.2 IRRBBIRRBB 4.2.xlsx;J_11.01

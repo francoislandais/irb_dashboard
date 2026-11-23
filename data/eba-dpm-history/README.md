@@ -28,6 +28,7 @@ associé au nom de son framework le plus récent disponible; la provenance du no
 (framework, module, classeur et feuille) reste consultable dans le CSV.
 
 Le champ `format` est recalculé à chaque reconstruction par `build_taxonomy.py`.
+Pour les états IRRBB `J_05.00` à `J_09.00`, les variantes `.a` et `.b` sont des templates distincts dans les classeurs EBA. Leur suffixe est conservé dans le mapping, l'historique, les noms affichés et l'extraction des données. Les suffixes d'annexe des autres familles suivent la règle de normalisation habituelle.
 Une mention de pourcentage dans un libellé ne suffit pas à classer la valeur en `%` :
 « exposures with a PD estimate », « exposures with a 90% risk weight », les
 tranches de poids de risque, les seuils LTV et les décotes qualifient des montants.

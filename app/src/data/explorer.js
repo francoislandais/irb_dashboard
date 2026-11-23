@@ -73,8 +73,9 @@ export function getExplorerTableIds(state) {
 }
 
 // Sentinel z-code standing for "ignore the z-axis filter, aggregate across
-// every value" - offered first on any table whose z-axis is a currency
-// breakdown (see explorerTableHasCurrencyZAxis). Not a real point, so it's
+// every value" - offered on currency breakdowns that allow an aggregate.
+// IRRBB J templates use only their reported currency points (J_01 has its
+// own native x1 total). Not a real point, so it's
 // injected here and in buildExplorerAxisSeries rather than added to the
 // CSV reference.
 export const EXPLORER_ALL_CURRENCIES_CODE = "__ALL__";
@@ -104,11 +105,12 @@ function explorerTableHasNativeAllCurrencyPoint(state, tableId) {
   ));
 }
 
-// Funding Plan currency tables are reported and reviewed currency by
+// Funding Plan and IRRBB J currency tables are reported and reviewed currency by
 // currency. Other regulatory families keep their synthetic aggregate,
 // unless the table already has a native "all currencies" point of its own.
 export function explorerTableOffersAllCurrencies(state, tableId) {
   return !String(tableId ?? "").startsWith("P_")
+    && !String(tableId ?? "").startsWith("J_")
     && explorerTableHasCurrencyZAxis(state, tableId)
     && !explorerTableHasNativeAllCurrencyPoint(state, tableId);
 }
@@ -135,7 +137,9 @@ export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId)
   // IRRBB uses an open currency dimension. Preserve the full glossary order,
   // then append any currency actually reported but absent from that release.
   const preferredZCodes = tableId.startsWith("J_")
-    ? [...new Set([...configuredZCodes, ...availableZCodes])]
+    ? [...new Set([...configuredZCodes, ...availableZCodes])].filter((code) => (
+        tableId === "J_01.00" || !["x1", "qx1", EXPLORER_ALL_CURRENCIES_CODE].includes(code)
+      ))
     : getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
   const zCodes = preferredZCodes.length > 0 && explorerTableOffersAllCurrencies(state, tableId)
     ? [EXPLORER_ALL_CURRENCIES_CODE, ...preferredZCodes]

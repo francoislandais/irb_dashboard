@@ -106,7 +106,8 @@ def build_hive_query(
 {date_columns}
 FROM (
     SELECT
-        regexp_replace(table_id, '\\\\.[A-Za-z]+$', '') AS table_id,
+        CASE WHEN table_id LIKE 'J_%' AND (table_id LIKE '%.a' OR table_id LIKE '%.b' OR table_id LIKE '%.A' OR table_id LIKE '%.B') THEN table_id
+             ELSE regexp_replace(table_id, '\\\\.[A-Za-z]+$', '') END AS table_id,
         jst_code,
         x_axis_rc_code,
         {ITS_Y_AXIS_EXPRESSION} AS y_axis_rc_code,
@@ -263,6 +264,8 @@ def _normalize_template_id(template_id: str) -> str:
     """
 
     normalized = template_id.strip()
+    if re.fullmatch(r"J_\d+[.]\d+[.][aAbB]", normalized):
+        return normalized
     while True:
         stripped = _TEMPLATE_ANNEX_SEGMENT_PATTERN.sub("", normalized)
         if stripped == normalized:
@@ -566,7 +569,7 @@ def _build_template_filter(
 ) -> str:
     """Construit le filtre SQL pour inclusions, plages et exclusions."""
 
-    table_id = table_id_expression or "regexp_replace(table_id, '\\\\.[A-Za-z]+$', '')"
+    table_id = table_id_expression or "CASE WHEN table_id LIKE 'J_%' AND (table_id LIKE '%.a' OR table_id LIKE '%.b' OR table_id LIKE '%.A' OR table_id LIKE '%.B') THEN table_id ELSE regexp_replace(table_id, '\\\\.[A-Za-z]+$', '') END"
     included, excluded = _expand_template_expressions(templates)
 
     def clause(pattern: str) -> str:

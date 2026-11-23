@@ -39,6 +39,7 @@ from global_update import (  # noqa: E402
     _select_institution_rows,
     _module_matches,
     _read_configuration,
+    _normalize_source_table_id,
     _read_test_fixture,
     _reference_dates,
     _selected_fixture_templates,
@@ -433,6 +434,19 @@ class ReferenceDateTests(unittest.TestCase):
 
 
 class QueryPlanTests(unittest.TestCase):
+    def test_irrbb_subtemplate_suffix_is_discriminating(self):
+        from hive_to_dataset import _normalize_template_id, _build_template_filter
+
+        self.assertEqual(_normalize_source_table_id("J_05.00.a"), "J_05.00.a")
+        self.assertEqual(_normalize_source_table_id("J_05.00.b"), "J_05.00.b")
+        self.assertEqual(_normalize_source_table_id("C_01.00.a"), "C_01.00")
+        self.assertEqual(_normalize_template_id("J_08.00.b"), "J_08.00.b")
+        self.assertEqual(_normalize_template_id("F_18.00.a"), "F_18.00")
+        self.assertIn("THEN table_id", _build_template_filter(["J_08.00.b"]))
+        with (PROJECT_DIRECTORY / "app/assets/ITS_template_taxonomy_history.csv").open(encoding="utf-8-sig") as stream:
+            ids = {row["table_id"] for row in csv.DictReader(stream, delimiter=";")}
+        self.assertTrue({"J_05.00.a", "J_05.00.b", "J_09.00.a", "J_09.00.b"} <= ids)
+
     @classmethod
     def setUpClass(cls):
         cls.applications = _read_configuration(EXAMPLE_CONFIG_DIRECTORY, date(2026, 9, 26))
