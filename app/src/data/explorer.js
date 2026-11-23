@@ -132,7 +132,11 @@ export function getExplorerAxisOptions(state, tableId, yConfigTableId = tableId)
         ...availableYCodes.filter((code) => !configuredYCodeSet.has(code))
       ]
     : getPreferredExplorerAxisCodes(configuredYCodes, availableYCodes);
-  const preferredZCodes = getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
+  // IRRBB uses an open currency dimension. Preserve the full glossary order,
+  // then append any currency actually reported but absent from that release.
+  const preferredZCodes = tableId.startsWith("J_")
+    ? [...new Set([...configuredZCodes, ...availableZCodes])]
+    : getPreferredExplorerAxisCodes(configuredZCodes, availableZCodes);
   const zCodes = preferredZCodes.length > 0 && explorerTableOffersAllCurrencies(state, tableId)
     ? [EXPLORER_ALL_CURRENCIES_CODE, ...preferredZCodes]
     : preferredZCodes;

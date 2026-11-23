@@ -329,6 +329,21 @@ class DpmTaxonomyTests(unittest.TestCase):
             ["qx1", "EUR", "USD", "GBP", "JPY", "ALL", "qx46"],
         )
 
+    def test_irrbb_currency_axis_keeps_full_domain_and_uses_x1_total(self):
+        rows = [
+            ("qx1", "All currencies"), ("qx46", "Other Currency"),
+            ("ZAR", "Rand"), ("EUR", "Euro"), ("USD", "US Dollar"),
+            ("AUD", "Australian Dollar"),
+        ]
+        self.assertEqual(
+            [code for code, _ in builder.irrbb_currency_z_rows(rows, "J_01.00")],
+            ["x1", "EUR", "USD", "AUD", "ZAR"],
+        )
+        self.assertEqual(
+            [code for code, _ in builder.irrbb_currency_z_rows(rows, "J_02.00")],
+            ["EUR", "USD", "AUD", "ZAR", "qx46"],
+        )
+
     def test_taxonomy_label_sentence_casing_preserves_regulatory_acronyms(self):
         cases = {
             "DEBT INSTRUMENTS AT COST OR AT AMORTISED COST": "Debt instruments at cost or at amortised cost",

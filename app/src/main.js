@@ -4,6 +4,7 @@ import { removeEmptyReferenceColumns, validateCsvDataset } from "./data/csvSchem
 import { expandScaledReferenceValues } from "./data/core/valueScale.js";
 import { buildDataIndexes, getIndexedInstitutionIds } from "./data/dataIndex.js?v=20260925-institution-id";
 import { normalizeGeographicCountryAxisCodes } from "./data/geographicCountryAxis.js";
+import { normalizeIrrbbCurrencyAxisCodes } from "./data/irrbbCurrencyAxis.js";
 import { loadTaxonomyDimensionData } from "./data/taxonomyDimensionData.js?v=20261003-startup-progress";
 import { loadExplorerDefaultExpandDepth } from "./data/explorerDefaultExpandDepth.js?v=20260917-kri-formula";
 import { loadExplorerTemplateGroups } from "./data/explorerTemplateGroups.js?v=20260917-funding-plan-last";
@@ -219,6 +220,7 @@ async function loadCsvText(text, fileName, handle, loadedAt, options = {}) {
   const rawParsed = parseCsv(text);
   const expanded = expandScaledReferenceValues(rawParsed);
   normalizeGeographicCountryAxisCodes(expanded.columns, expanded.rows);
+  normalizeIrrbbCurrencyAxisCodes(expanded.columns, expanded.rows);
   const parsed = removeEmptyReferenceColumns(expanded.columns, expanded.rows);
   validateCsvDataset(parsed.columns, parsed.rows);
   const dataIndexes = buildDataIndexes(parsed.columns, parsed.rows);

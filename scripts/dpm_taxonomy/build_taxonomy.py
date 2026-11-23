@@ -159,6 +159,24 @@ def limit_currency_z_rows(rows: list[tuple[str, str]]) -> list[tuple[str, str]]:
     return aggregate + selected + other
 
 
+def irrbb_currency_z_rows(rows: list[tuple[str, str]], table_id: str) -> list[tuple[str, str]]:
+    """Keep the full open currency domain used by IRRBB J templates.
+
+    The DPM 3.x layouts declare a key-value currency axis, not a numbered
+    worksheet per currency. The glossary exposes its members under CU; the
+    DPM 4.x glossary uses narrower CU subdomains. In both cases a reported
+    ISO currency must remain selectable even if few institutions use it.
+    """
+    currencies = {code: label for code, label in rows if re.fullmatch(r"[A-Z]{3}", code)}
+    ordered = [(code, currencies.pop(code)) for code in CURRENCY_Z_DISPLAY_ORDER if code in currencies]
+    ordered.extend(sorted(currencies.items()))
+    if table_id == "J_01.00":
+        aggregate = next((label for code, label in rows if code in {"qx1", "x1"}), "All currencies")
+        return [("x1", aggregate), *ordered]
+    other = [(code, label) for code, label in rows if code == "qx46"]
+    return [*ordered, *other]
+
+
 def restore_alm_native_total_currency_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     """Restore the reported ALM total excluded from the EBA currency domain.
 
@@ -1371,7 +1389,11 @@ def extract_all() -> tuple[
                         # DPM 1.0 uses one numbered worksheet per tab/Z member;
                         # DPM 2.0 declares enumerated tab dimensions in the
                         # glossary via a Key value reference.
-                        if version.startswith("4."):
+                        if module == "IRRBB" and table_id.startswith("J_"):
+                            zs = [(code, desc, 0) for code, desc in irrbb_currency_z_rows(
+                                dictionary_z_rows(dictionary, sheet), table_id
+                            )]
+                        elif version.startswith("4."):
                             zs = [(code, desc, 0) for code, desc in limit_currency_z_rows(dictionary_z_rows(dictionary, sheet))]
                         else:
                             zs = [(code, desc, int(code)) for code, desc in legacy_sheet_z_rows(sheet)]

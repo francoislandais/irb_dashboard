@@ -4210,6 +4210,9 @@ function buildExplorerTemporalTaxonomySeries(series, state, options) {
     if (tableId === "C_08.02" && coordinate === "y_axis_rc_code") return Boolean(code);
     if (coordinate === "z_axis_rc_code") {
       if (code === EXPLORER_ALL_CURRENCIES_CODE) return true;
+      // J templates have an open currency axis in both the DPM 3.x and 4.x
+      // releases. A missing glossary member must not hide a reported value.
+      if (tableId.startsWith("J_") && (/^[A-Z]{3}$/.test(code) || (tableId === "J_01.00" && code === "x1"))) return true;
       if (hasOpenCurrencyAxis && mainZCodes.has(code)) return true;
     }
     return codeSets.get(coordinate)?.has(code) ?? false;
