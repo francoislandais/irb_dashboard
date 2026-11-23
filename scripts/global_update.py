@@ -33,7 +33,7 @@ if __package__:
     from .compact_dataset_values import compact_dataset_rows
     from .export_all_standalone_apps import export_standalone_app
     from .output_directory import resolve_external_output_directory
-    from .launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
+    from .launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links, read_launcher_catalog, _darwin_direct_children
     from .local_source_client import LocalSourceClient
     from .hive_to_dataset import (
         _expand_template_expressions,
@@ -49,7 +49,7 @@ else:
     from compact_dataset_values import compact_dataset_rows
     from export_all_standalone_apps import export_standalone_app
     from output_directory import resolve_external_output_directory
-    from launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links
+    from launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links, read_launcher_catalog, _darwin_direct_children
     from local_source_client import LocalSourceClient
     from hive_to_dataset import (
         _expand_template_expressions,
@@ -1676,6 +1676,9 @@ def global_update(
                 if darwin_upload is not None and mode not in {"hive", "local"} else manifest.get("darwin_upload", {}).get("uploaded", 0))
     completed_apps = [app for app in manifest["applications"] if app.get("status") == "complete" and app.get("html_app")]
     if completed_apps:
+        launcher_apps = completed_apps
+        previous_launcher_html = None
+        preserve_legacy_launcher = False
         if darwin_upload is not None:
             print(f"[Agora] Lanceur : listing des HTML du dossier Darwin {darwin_upload}", flush=True)
             listing_client = darwin_client
@@ -1684,19 +1687,44 @@ def global_update(
                 for field in ("rest", "session")
             ):
                 listing_client = connect_darwin_listing_client()
-            links = resolve_darwin_app_links(completed_apps, darwin_upload, listing_client)
+            children = _darwin_direct_children(darwin_upload, listing_client)
+            launcher_nodes = [node_id for node_id, name in children if name == "Agora Explorer_launcher.html"]
+            if len(launcher_nodes) > 1:
+                raise ValueError("Plusieurs lanceurs Agora Explorer existent dans le dossier Darwin.")
+            if launcher_nodes:
+                with tempfile.TemporaryDirectory(prefix="agora-launcher-") as temporary:
+                    previous_path = Path(temporary) / "previous_launcher.html"
+                    darwin_client.get_file(local_file_path=str(previous_path), node_id=launcher_nodes[0])
+                    previous_launcher_html = previous_path.read_text(encoding="utf-8")
+                previous_apps = read_launcher_catalog(previous_launcher_html)
+                if previous_apps is None:
+                    old_count = previous_launcher_html.count('data-institution-map=')
+                    preserve_legacy_launcher = old_count > len(completed_apps)
+                    if preserve_legacy_launcher:
+                        print(f"[Agora] Lanceur ancien format conservé ({old_count} applications) : relancer une fois le catalogue complet pour activer les mises à jour ciblées.", flush=True)
+                else:
+                    current_names = {Path(app["html_app"]).name for app in completed_apps}
+                    available_names = {name for _, name in children}
+                    retained = [app for app in previous_apps if Path(app["html_app"]).name not in current_names
+                                and Path(app["html_app"]).name in available_names]
+                    launcher_apps = retained + completed_apps
+                    print(f"[Agora] Lanceur : {len(retained)} application(s) conservée(s), {len(completed_apps)} actualisée(s)", flush=True)
+            if not preserve_legacy_launcher:
+                links = resolve_darwin_app_links(launcher_apps, darwin_upload, listing_client)
         else:
-            links = {Path(app["html_app"]).name: app["html_app"] for app in completed_apps}
-        for app in completed_apps:
-            link = links[Path(app["html_app"]).name]
-            app["launcher_link"] = link
-            if darwin_upload is not None:
-                app["darwin_upload"]["file_node_id"] = int(parse_qs(urlsplit(link).query)["nodeid"][0])
+            links = {Path(app["html_app"]).name: app["html_app"] for app in launcher_apps}
+        if not preserve_legacy_launcher:
+            for app in completed_apps:
+                link = links[Path(app["html_app"]).name]
+                app["launcher_link"] = link
+                if darwin_upload is not None:
+                    app["darwin_upload"]["file_node_id"] = int(parse_qs(urlsplit(link).query)["nodeid"][0])
         launcher_path = output_root / "Agora Explorer_launcher.html"
-        launcher_path.write_text(render_launcher_html(completed_apps, links), encoding="utf-8")
-        manifest["launcher"] = {"html": launcher_path.name, "applications": len(completed_apps)}
-        print(f"[Agora] Lanceur créé : {launcher_path.name} ({len(completed_apps)} application(s))", flush=True)
-        if darwin_upload is not None:
+        launcher_path.write_text(previous_launcher_html if preserve_legacy_launcher else render_launcher_html(launcher_apps, links), encoding="utf-8")
+        manifest["launcher"] = {"html": launcher_path.name, "applications": len(launcher_apps),
+                                "status": "preserved_remote" if preserve_legacy_launcher else "generated"}
+        print(f"[Agora] Lanceur créé : {launcher_path.name} ({len(launcher_apps)} application(s))", flush=True)
+        if darwin_upload is not None and not preserve_legacy_launcher:
             try:
                 darwin_client.upload_file(
                     local_file_path=str(launcher_path), node_id=darwin_upload,

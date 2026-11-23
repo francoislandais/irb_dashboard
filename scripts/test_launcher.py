@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from scripts.launcher import (
     _extraction_template_description, connect_darwin_listing_client,
-    render_launcher_html, resolve_darwin_app_links,
+    render_launcher_html, resolve_darwin_app_links, read_launcher_catalog,
 )
 
 
@@ -68,6 +68,11 @@ class LauncherTests(unittest.TestCase):
         self.assertNotIn("Consolidation:", html)
         self.assertNotIn("Preview with example data", html)
         self.assertNotIn("AGORA_GROUPS_START", html)
+        catalog = read_launcher_catalog(html)
+        self.assertEqual(len(catalog), 1)
+        self.assertEqual(catalog[0]["name"], "FINREP & COREP")
+        self.assertEqual(catalog[0]["institutions"], self.apps[0]["institutions"])
+        self.assertIsNone(read_launcher_catalog("<html>ancien lanceur</html>"))
 
     def test_levels_of_same_lei_share_one_institution_and_peer_group(self):
         second = {

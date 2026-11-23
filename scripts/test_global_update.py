@@ -341,6 +341,44 @@ class DarwinUploadTests(unittest.TestCase):
                 launcher,
             )
 
+    def test_targeted_run_keeps_other_published_launcher_applications(self):
+        from launcher import read_launcher_catalog
+
+        class Darwin:
+            def __init__(self):
+                self.files = {}
+                self.ids = {}
+                self.downloads = []
+
+            def upload_file(self, **kwargs):
+                name = kwargs["filename"]
+                self.ids.setdefault(name, 1000 + len(self.ids))
+                self.files[name] = Path(kwargs["local_file_path"]).read_bytes()
+
+            def get_file(self, **kwargs):
+                node_id = kwargs["node_id"]
+                self.downloads.append(node_id)
+                name = next(name for name, value in self.ids.items() if value == node_id)
+                Path(kwargs["local_file_path"]).write_bytes(self.files[name])
+
+            def listdir(self, **kwargs):
+                return [SimpleNamespace(id=node_id, properties=SimpleNamespace(
+                    id=node_id, name=name, parent_id=kwargs["node_id"],
+                )) for name, node_id in self.ids.items()]
+
+        darwin = Darwin()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            global_update(EXAMPLE_CONFIG_DIRECTORY, mode="test", output_directory=root / "all",
+                          as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
+            first_catalog = read_launcher_catalog(darwin.files["Agora Explorer_launcher.html"].decode())
+            self.assertEqual(len(first_catalog), 4)
+            global_update(EXAMPLE_CONFIG_DIRECTORY / "01-finrep.toml", mode="test", output_directory=root / "one",
+                          as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
+            second_catalog = read_launcher_catalog(darwin.files["Agora Explorer_launcher.html"].decode())
+            self.assertEqual({app["name"] for app in second_catalog}, {app["name"] for app in first_catalog})
+            self.assertIn(darwin.ids["Agora Explorer_launcher.html"], darwin.downloads)
+
     def test_failed_upload_preserves_local_files_and_completed_status(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             output = Path(temporary_directory)

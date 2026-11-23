@@ -281,7 +281,36 @@ def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str
         for item in sorted(institutions.values(), key=lambda item: (item["institution_name"].casefold(), item["lei"]))
     ]
     template = _replace_between(template, "AGORA_INSTITUTIONS", json.dumps(institution_data).replace("<", "\\u003c"))
+    catalog = {"version": 1, "applications": [launcher_catalog_entry(app) for app in applications]}
+    start, end = "<!-- AGORA_CATALOG_START -->", "<!-- AGORA_CATALOG_END -->"
+    template = _replace_between(template, "AGORA_CATALOG", start + json.dumps(catalog, ensure_ascii=False).replace("<", "\\u003c") + end)
     return template
+
+
+def launcher_catalog_entry(app: dict) -> dict:
+    """Keep only the fields needed to recreate an entry on a later run."""
+    fields = (
+        "name", "description", "html_app", "institutions", "extractions",
+        "clusters", "jst_code", "ssm_supervision_country", "ssmsignificance",
+    )
+    return {field: app.get(field, [] if field in {"institutions", "extractions"} else "") for field in fields}
+
+
+def read_launcher_catalog(html: str) -> list[dict] | None:
+    """Return the embedded catalog, or None for an older launcher."""
+    start, end = "<!-- AGORA_CATALOG_START -->", "<!-- AGORA_CATALOG_END -->"
+    if html.count(start) != 1 or html.count(end) != 1:
+        return None
+    try:
+        payload = json.loads(html.split(start, 1)[1].split(end, 1)[0])
+    except json.JSONDecodeError as error:
+        raise ValueError("Le catalogue du lanceur Darwin est illisible.") from error
+    if not isinstance(payload, dict) or payload.get("version") != 1 or not isinstance(payload.get("applications"), list):
+        raise ValueError("Le catalogue du lanceur Darwin a un format inattendu.")
+    applications = payload["applications"]
+    if any(not isinstance(app, dict) or not app.get("html_app") or not app.get("name") for app in applications):
+        raise ValueError("Le catalogue du lanceur Darwin contient une application invalide.")
+    return applications
 
 
 def _replace_between(source: str, marker: str, content: str) -> str:
