@@ -33831,8 +33831,8 @@ J_05.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.3
 J_05.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.3
 J_05.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.3
 J_05.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.3
-J_05.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.3
-J_05.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.3
+J_05.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.3
+J_05.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.3
 J_05.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.3
 J_05.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.3
 J_05.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.3
@@ -33856,8 +33856,8 @@ J_05.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.3
 J_05.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.3
 J_05.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.3
 J_05.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.3
-J_05.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.3
-J_05.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.3
+J_05.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.3
+J_05.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.3
 J_05.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.3
 J_05.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.3
 J_05.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.3
@@ -34112,8 +34112,8 @@ J_05.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.3
 J_05.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.3
 J_05.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.3
 J_05.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.3
-J_05.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.3
-J_05.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.3
+J_05.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.3
+J_05.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.3
 J_05.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.3
 J_05.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.3
 J_05.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.3
@@ -34137,8 +34137,8 @@ J_05.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.3
 J_05.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.3
 J_05.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.3
 J_05.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.3
-J_05.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.3
-J_05.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.3
+J_05.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.3
+J_05.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.3
 J_05.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.3
 J_05.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.3
 J_05.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.3
@@ -34393,8 +34393,8 @@ J_06.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.3
 J_06.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.3
 J_06.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.3
 J_06.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.3
-J_06.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.3
-J_06.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.3
+J_06.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.3
+J_06.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.3
 J_06.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.3
 J_06.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.3
 J_06.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.3
@@ -34418,8 +34418,8 @@ J_06.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.3
 J_06.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.3
 J_06.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.3
 J_06.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.3
-J_06.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.3
-J_06.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.3
+J_06.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.3
+J_06.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.3
 J_06.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.3
 J_06.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.3
 J_06.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.3
@@ -34669,8 +34669,8 @@ J_06.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.3
 J_06.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.3
 J_06.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.3
 J_06.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.3
-J_06.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.3
-J_06.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.3
+J_06.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.3
+J_06.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.3
 J_06.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.3
 J_06.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.3
 J_06.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.3
@@ -34694,8 +34694,8 @@ J_06.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.3
 J_06.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.3
 J_06.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.3
 J_06.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.3
-J_06.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.3
-J_06.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.3
+J_06.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.3
+J_06.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.3
 J_06.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.3
 J_06.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.3
 J_06.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.3
@@ -34945,8 +34945,8 @@ J_07.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.3
 J_07.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.3
 J_07.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.3
 J_07.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.3
-J_07.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.3
-J_07.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.3
+J_07.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.3
+J_07.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.3
 J_07.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.3
 J_07.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.3
 J_07.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.3
@@ -34970,8 +34970,8 @@ J_07.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.3
 J_07.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.3
 J_07.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.3
 J_07.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.3
-J_07.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.3
-J_07.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.3
+J_07.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.3
+J_07.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.3
 J_07.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.3
 J_07.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.3
 J_07.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.3
@@ -35216,8 +35216,8 @@ J_07.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.3
 J_07.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.3
 J_07.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.3
 J_07.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.3
-J_07.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.3
-J_07.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.3
+J_07.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.3
+J_07.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.3
 J_07.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.3
 J_07.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.3
 J_07.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.3
@@ -35241,8 +35241,8 @@ J_07.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.3
 J_07.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.3
 J_07.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.3
 J_07.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.3
-J_07.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.3
-J_07.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.3
+J_07.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.3
+J_07.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.3
 J_07.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.3
 J_07.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.3
 J_07.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.3
@@ -35693,14 +35693,14 @@ J_08.00.a;z_axis_rc_code;ZMK;;Zambian Kwacha (replaced January 1, 2013);;;;3.3
 J_08.00.a;z_axis_rc_code;ZMW;;Zambian Kwacha;;;;3.3
 J_08.00.a;z_axis_rc_code;ZWL;;Zimbabwe Dollar;;;;3.3
 J_08.00.a;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;3.3
-J_08.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;;3.3
-J_08.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;3.3
-J_08.00.b;x_axis_rc_code;50;;Parallel shock up;;;;3.3
-J_08.00.b;x_axis_rc_code;60;;Parallel shock down;;;;3.3
-J_08.00.b;x_axis_rc_code;70;;Steepener shock;;;;3.3
-J_08.00.b;x_axis_rc_code;80;;Flattener shock;;;;3.3
-J_08.00.b;x_axis_rc_code;90;;Short rates shock up;;;;3.3
-J_08.00.b;x_axis_rc_code;100;;Short rates shock down;;;;3.3
+J_08.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;50;;Parallel shock up;;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;60;;Parallel shock down;;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;70;;Steepener shock;;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;80;;Flattener shock;;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;90;;Short rates shock up;;;Unit2;3.3
+J_08.00.b;x_axis_rc_code;100;;Short rates shock down;;;Unit2;3.3
 J_08.00.b;y_axis_rc_code;__PARENT__7ae04e8bda8b;;0005 NMDs - Behavioural modelling;;Y;;3.3
 J_08.00.b;y_axis_rc_code;__PARENT__73ad24054aaa;;0155 Fixed Rate - Prepayment risk;;Y;;3.3
 J_08.00.b;y_axis_rc_code;__PARENT__4926950445ca;;0295 Fixed Rate - early redemption;;Y;;3.3
@@ -35710,43 +35710,43 @@ J_08.00.b;y_axis_rc_code;__PARENT__ea053de10db7;__PARENT__73ad24054aaa;0156 Aver
 J_08.00.b;y_axis_rc_code;__PARENT__9eef570c53ee;__PARENT__73ad24054aaa;0225 Conditional prepayment rates (annualised average);;Y;;3.3
 J_08.00.b;y_axis_rc_code;__PARENT__f487deae1b39;__PARENT__4926950445ca;0296 Average repricing dates before and after modelling;;Y;;3.3
 J_08.00.b;y_axis_rc_code;__PARENT__ebe44a7bb4b9;__PARENT__4926950445ca;0335 Early redemption rates (cumulative average);;Y;;3.3
-J_08.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;;3.3
-J_08.00.b;y_axis_rc_code;20;10;Of which: core component;;;;3.3
-J_08.00.b;y_axis_rc_code;30;10;Of which: exempted from 5Y cap;;;;3.3
-J_08.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;;3.3
-J_08.00.b;y_axis_rc_code;50;40;Of which: core component;;;;3.3
-J_08.00.b;y_axis_rc_code;60;40;Of which: exempted from 5Y cap;;;;3.3
-J_08.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;;3.3
-J_08.00.b;y_axis_rc_code;80;70;Of which: core component;;;;3.3
-J_08.00.b;y_axis_rc_code;90;70;Of which: exempted from 5Y cap;;;;3.3
-J_08.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;;3.3
-J_08.00.b;y_axis_rc_code;110;100;Of which: operational deposits;;;;3.3
-J_08.00.b;y_axis_rc_code;120;__PARENT__c0098c2bda1a;NMDs: Retail transactional;;;;3.3
-J_08.00.b;y_axis_rc_code;130;__PARENT__c0098c2bda1a;NMDs: Retail non-transactional;;;;3.3
-J_08.00.b;y_axis_rc_code;140;__PARENT__c0098c2bda1a;NMDs: Wholesale non-financial;;;;3.3
-J_08.00.b;y_axis_rc_code;150;__PARENT__c0098c2bda1a;NMDs: Wholesale financial;;;;3.3
-J_08.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;;3.3
-J_08.00.b;y_axis_rc_code;170;160;Of which: non-performing;;;;3.3
-J_08.00.b;y_axis_rc_code;180;160;Retail;;;;3.3
-J_08.00.b;y_axis_rc_code;190;180;Of which: secured by residential real estate;;;;3.3
-J_08.00.b;y_axis_rc_code;200;160;Wholesale non-financial;;;;3.3
-J_08.00.b;y_axis_rc_code;210;160;Wholesale financial;;;;3.3
-J_08.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;;3.3
-J_08.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;;3.3
-J_08.00.b;y_axis_rc_code;240;230;Of which: non-performing;;;;3.3
-J_08.00.b;y_axis_rc_code;250;230;Retail;;;;3.3
-J_08.00.b;y_axis_rc_code;260;250;Of which: secured by residential real estate;;;;3.3
-J_08.00.b;y_axis_rc_code;270;230;Wholesale non-financial;;;;3.3
-J_08.00.b;y_axis_rc_code;280;230;Wholesale financial;;;;3.3
-J_08.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;;3.3
-J_08.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;;3.3
-J_08.00.b;y_axis_rc_code;310;300;Retail;;;;3.3
-J_08.00.b;y_axis_rc_code;320;300;Wholesale non-financial;;;;3.3
-J_08.00.b;y_axis_rc_code;330;300;Wholesale financial;;;;3.3
-J_08.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;;3.3
-J_08.00.b;y_axis_rc_code;350;340;Retail;;;;3.3
-J_08.00.b;y_axis_rc_code;360;340;Wholesale non-financial;;;;3.3
-J_08.00.b;y_axis_rc_code;370;340;Wholesale financial;;;;3.3
+J_08.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;20;10;Of which: core component;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;30;10;Of which: exempted from 5Y cap;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;50;40;Of which: core component;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;60;40;Of which: exempted from 5Y cap;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;80;70;Of which: core component;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;90;70;Of which: exempted from 5Y cap;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;110;100;Of which: operational deposits;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;120;__PARENT__c0098c2bda1a;NMDs: Retail transactional;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;130;__PARENT__c0098c2bda1a;NMDs: Retail non-transactional;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;140;__PARENT__c0098c2bda1a;NMDs: Wholesale non-financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;150;__PARENT__c0098c2bda1a;NMDs: Wholesale financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;170;160;Of which: non-performing;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;180;160;Retail;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;190;180;Of which: secured by residential real estate;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;200;160;Wholesale non-financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;210;160;Wholesale financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;240;230;Of which: non-performing;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;250;230;Retail;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;260;250;Of which: secured by residential real estate;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;270;230;Wholesale non-financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;280;230;Wholesale financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;310;300;Retail;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;320;300;Wholesale non-financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;330;300;Wholesale financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;350;340;Retail;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;360;340;Wholesale non-financial;;;Unit2;3.3
+J_08.00.b;y_axis_rc_code;370;340;Wholesale financial;;;Unit2;3.3
 J_08.00.b;z_axis_rc_code;EUR;;Euro;;;;3.3
 J_08.00.b;z_axis_rc_code;USD;;US Dollar;;;;3.3
 J_08.00.b;z_axis_rc_code;GBP;;Pound Sterling;;;;3.3
@@ -36141,14 +36141,14 @@ J_09.00.a;z_axis_rc_code;ZMK;;Zambian Kwacha (replaced January 1, 2013);;;;3.3
 J_09.00.a;z_axis_rc_code;ZMW;;Zambian Kwacha;;;;3.3
 J_09.00.a;z_axis_rc_code;ZWL;;Zimbabwe Dollar;;;;3.3
 J_09.00.a;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;3.3
-J_09.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;;3.3
-J_09.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;3.3
-J_09.00.b;x_axis_rc_code;50;;Parallel shock up;;;;3.3
-J_09.00.b;x_axis_rc_code;60;;Parallel shock down;;;;3.3
-J_09.00.b;x_axis_rc_code;70;;Steepener shock;;;;3.3
-J_09.00.b;x_axis_rc_code;80;;Flattener shock;;;;3.3
-J_09.00.b;x_axis_rc_code;90;;Short rates shock up;;;;3.3
-J_09.00.b;x_axis_rc_code;100;;Short rates shock down;;;;3.3
+J_09.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;50;;Parallel shock up;;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;60;;Parallel shock down;;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;70;;Steepener shock;;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;80;;Flattener shock;;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;90;;Short rates shock up;;;Unit2;3.3
+J_09.00.b;x_axis_rc_code;100;;Short rates shock down;;;Unit2;3.3
 J_09.00.b;y_axis_rc_code;__PARENT__7ae04e8bda8b;;0005 NMDs - Behavioural modelling;;Y;;3.3
 J_09.00.b;y_axis_rc_code;__PARENT__73ad24054aaa;;0155 Fixed Rate - Prepayment risk;;Y;;3.3
 J_09.00.b;y_axis_rc_code;__PARENT__4926950445ca;;0295 Fixed Rate - early redemption;;Y;;3.3
@@ -36157,23 +36157,23 @@ J_09.00.b;y_axis_rc_code;__PARENT__ea053de10db7;__PARENT__73ad24054aaa;0156 Aver
 J_09.00.b;y_axis_rc_code;__PARENT__9eef570c53ee;__PARENT__73ad24054aaa;0225 Conditional prepayment rates (annualised average);;Y;;3.3
 J_09.00.b;y_axis_rc_code;__PARENT__f487deae1b39;__PARENT__4926950445ca;0296 Average repricing dates before and after modelling;;Y;;3.3
 J_09.00.b;y_axis_rc_code;__PARENT__ebe44a7bb4b9;__PARENT__4926950445ca;0335 Early redemption rates (cumulative average);;Y;;3.3
-J_09.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;;3.3
-J_09.00.b;y_axis_rc_code;20;10;of which: core component;;;;3.3
-J_09.00.b;y_axis_rc_code;30;10;of which: exempted from 5Y cap;;;;3.3
-J_09.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;;3.3
-J_09.00.b;y_axis_rc_code;50;40;of which: core component;;;;3.3
-J_09.00.b;y_axis_rc_code;60;40;of which: exempted from 5Y cap;;;;3.3
-J_09.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;;3.3
-J_09.00.b;y_axis_rc_code;80;70;of which: core component;;;;3.3
-J_09.00.b;y_axis_rc_code;90;70;of which: exempted from 5Y cap;;;;3.3
-J_09.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;;3.3
-J_09.00.b;y_axis_rc_code;110;100;of which: operational deposits;;;;3.3
-J_09.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;;3.3
-J_09.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;;3.3
-J_09.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;;3.3
-J_09.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;;3.3
-J_09.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;;3.3
-J_09.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;;3.3
+J_09.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;20;10;of which: core component;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;30;10;of which: exempted from 5Y cap;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;50;40;of which: core component;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;60;40;of which: exempted from 5Y cap;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;80;70;of which: core component;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;90;70;of which: exempted from 5Y cap;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;110;100;of which: operational deposits;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;Unit2;3.3
+J_09.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;Unit2;3.3
 J_09.00.b;z_axis_rc_code;EUR;;Euro;;;;3.3
 J_09.00.b;z_axis_rc_code;USD;;US Dollar;;;;3.3
 J_09.00.b;z_axis_rc_code;GBP;;Pound Sterling;;;;3.3
@@ -36370,8 +36370,8 @@ J_05.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.4
 J_05.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.4
 J_05.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.4
 J_05.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.4
-J_05.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.4
-J_05.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.4
+J_05.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.4
+J_05.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.4
 J_05.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.4
 J_05.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.4
 J_05.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.4
@@ -36395,8 +36395,8 @@ J_05.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.4
 J_05.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.4
 J_05.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.4
 J_05.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.4
-J_05.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.4
-J_05.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.4
+J_05.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.4
+J_05.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.4
 J_05.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.4
 J_05.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.4
 J_05.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.4
@@ -36651,8 +36651,8 @@ J_05.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.4
 J_05.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.4
 J_05.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.4
 J_05.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.4
-J_05.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.4
-J_05.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.4
+J_05.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.4
+J_05.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.4
 J_05.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.4
 J_05.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.4
 J_05.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.4
@@ -36676,8 +36676,8 @@ J_05.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.4
 J_05.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.4
 J_05.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.4
 J_05.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.4
-J_05.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.4
-J_05.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.4
+J_05.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.4
+J_05.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.4
 J_05.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.4
 J_05.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.4
 J_05.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.4
@@ -36932,8 +36932,8 @@ J_06.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.4
 J_06.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.4
 J_06.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.4
 J_06.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.4
-J_06.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.4
-J_06.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.4
+J_06.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.4
+J_06.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.4
 J_06.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.4
 J_06.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.4
 J_06.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.4
@@ -36957,8 +36957,8 @@ J_06.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.4
 J_06.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.4
 J_06.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.4
 J_06.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.4
-J_06.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.4
-J_06.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.4
+J_06.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.4
+J_06.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.4
 J_06.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.4
 J_06.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.4
 J_06.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.4
@@ -37208,8 +37208,8 @@ J_06.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.4
 J_06.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.4
 J_06.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.4
 J_06.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.4
-J_06.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.4
-J_06.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.4
+J_06.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.4
+J_06.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.4
 J_06.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.4
 J_06.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.4
 J_06.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.4
@@ -37233,8 +37233,8 @@ J_06.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.4
 J_06.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.4
 J_06.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.4
 J_06.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.4
-J_06.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.4
-J_06.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.4
+J_06.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.4
+J_06.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.4
 J_06.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.4
 J_06.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.4
 J_06.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.4
@@ -37484,8 +37484,8 @@ J_07.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.4
 J_07.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.4
 J_07.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.4
 J_07.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.4
-J_07.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.4
-J_07.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.4
+J_07.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.4
+J_07.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.4
 J_07.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.4
 J_07.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.4
 J_07.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.4
@@ -37509,8 +37509,8 @@ J_07.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.4
 J_07.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.4
 J_07.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.4
 J_07.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.4
-J_07.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.4
-J_07.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.4
+J_07.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.4
+J_07.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.4
 J_07.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.4
 J_07.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.4
 J_07.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.4
@@ -37755,8 +37755,8 @@ J_07.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;3.4
 J_07.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;3.4
 J_07.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;3.4
 J_07.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;3.4
-J_07.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;3.4
-J_07.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;3.4
+J_07.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;3.4
+J_07.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;3.4
 J_07.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;3.4
 J_07.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;3.4
 J_07.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;3.4
@@ -37780,8 +37780,8 @@ J_07.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;3.4
 J_07.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;3.4
 J_07.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;3.4
 J_07.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;3.4
-J_07.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;3.4
-J_07.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;3.4
+J_07.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;3.4
+J_07.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;3.4
 J_07.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;3.4
 J_07.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;3.4
 J_07.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;3.4
@@ -38232,14 +38232,14 @@ J_08.00.a;z_axis_rc_code;ZMK;;Zambian Kwacha (replaced January 1, 2013);;;;3.4
 J_08.00.a;z_axis_rc_code;ZMW;;Zambian Kwacha;;;;3.4
 J_08.00.a;z_axis_rc_code;ZWL;;Zimbabwe Dollar;;;;3.4
 J_08.00.a;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;3.4
-J_08.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;;3.4
-J_08.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;3.4
-J_08.00.b;x_axis_rc_code;50;;Parallel shock up;;;;3.4
-J_08.00.b;x_axis_rc_code;60;;Parallel shock down;;;;3.4
-J_08.00.b;x_axis_rc_code;70;;Steepener shock;;;;3.4
-J_08.00.b;x_axis_rc_code;80;;Flattener shock;;;;3.4
-J_08.00.b;x_axis_rc_code;90;;Short rates shock up;;;;3.4
-J_08.00.b;x_axis_rc_code;100;;Short rates shock down;;;;3.4
+J_08.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;50;;Parallel shock up;;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;60;;Parallel shock down;;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;70;;Steepener shock;;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;80;;Flattener shock;;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;90;;Short rates shock up;;;Unit2;3.4
+J_08.00.b;x_axis_rc_code;100;;Short rates shock down;;;Unit2;3.4
 J_08.00.b;y_axis_rc_code;__PARENT__7ae04e8bda8b;;0005 NMDs - Behavioural modelling;;Y;;3.4
 J_08.00.b;y_axis_rc_code;__PARENT__73ad24054aaa;;0155 Fixed Rate - Prepayment risk;;Y;;3.4
 J_08.00.b;y_axis_rc_code;__PARENT__4926950445ca;;0295 Fixed Rate - early redemption;;Y;;3.4
@@ -38249,43 +38249,43 @@ J_08.00.b;y_axis_rc_code;__PARENT__ea053de10db7;__PARENT__73ad24054aaa;0156 Aver
 J_08.00.b;y_axis_rc_code;__PARENT__9eef570c53ee;__PARENT__73ad24054aaa;0225 Conditional prepayment rates (annualised average);;Y;;3.4
 J_08.00.b;y_axis_rc_code;__PARENT__f487deae1b39;__PARENT__4926950445ca;0296 Average repricing dates before and after modelling;;Y;;3.4
 J_08.00.b;y_axis_rc_code;__PARENT__ebe44a7bb4b9;__PARENT__4926950445ca;0335 Early redemption rates (cumulative average);;Y;;3.4
-J_08.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;;3.4
-J_08.00.b;y_axis_rc_code;20;10;Of which: core component;;;;3.4
-J_08.00.b;y_axis_rc_code;30;10;Of which: exempted from 5Y cap;;;;3.4
-J_08.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;;3.4
-J_08.00.b;y_axis_rc_code;50;40;Of which: core component;;;;3.4
-J_08.00.b;y_axis_rc_code;60;40;Of which: exempted from 5Y cap;;;;3.4
-J_08.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;;3.4
-J_08.00.b;y_axis_rc_code;80;70;Of which: core component;;;;3.4
-J_08.00.b;y_axis_rc_code;90;70;Of which: exempted from 5Y cap;;;;3.4
-J_08.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;;3.4
-J_08.00.b;y_axis_rc_code;110;100;Of which: operational deposits;;;;3.4
-J_08.00.b;y_axis_rc_code;120;__PARENT__c0098c2bda1a;NMDs: Retail transactional;;;;3.4
-J_08.00.b;y_axis_rc_code;130;__PARENT__c0098c2bda1a;NMDs: Retail non-transactional;;;;3.4
-J_08.00.b;y_axis_rc_code;140;__PARENT__c0098c2bda1a;NMDs: Wholesale non-financial;;;;3.4
-J_08.00.b;y_axis_rc_code;150;__PARENT__c0098c2bda1a;NMDs: Wholesale financial;;;;3.4
-J_08.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;;3.4
-J_08.00.b;y_axis_rc_code;170;160;Of which: non-performing;;;;3.4
-J_08.00.b;y_axis_rc_code;180;160;Retail;;;;3.4
-J_08.00.b;y_axis_rc_code;190;180;Of which: secured by residential real estate;;;;3.4
-J_08.00.b;y_axis_rc_code;200;160;Wholesale non-financial;;;;3.4
-J_08.00.b;y_axis_rc_code;210;160;Wholesale financial;;;;3.4
-J_08.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;;3.4
-J_08.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;;3.4
-J_08.00.b;y_axis_rc_code;240;230;Of which: non-performing;;;;3.4
-J_08.00.b;y_axis_rc_code;250;230;Retail;;;;3.4
-J_08.00.b;y_axis_rc_code;260;250;Of which: secured by residential real estate;;;;3.4
-J_08.00.b;y_axis_rc_code;270;230;Wholesale non-financial;;;;3.4
-J_08.00.b;y_axis_rc_code;280;230;Wholesale financial;;;;3.4
-J_08.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;;3.4
-J_08.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;;3.4
-J_08.00.b;y_axis_rc_code;310;300;Retail;;;;3.4
-J_08.00.b;y_axis_rc_code;320;300;Wholesale non-financial;;;;3.4
-J_08.00.b;y_axis_rc_code;330;300;Wholesale financial;;;;3.4
-J_08.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;;3.4
-J_08.00.b;y_axis_rc_code;350;340;Retail;;;;3.4
-J_08.00.b;y_axis_rc_code;360;340;Wholesale non-financial;;;;3.4
-J_08.00.b;y_axis_rc_code;370;340;Wholesale financial;;;;3.4
+J_08.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;20;10;Of which: core component;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;30;10;Of which: exempted from 5Y cap;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;50;40;Of which: core component;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;60;40;Of which: exempted from 5Y cap;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;80;70;Of which: core component;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;90;70;Of which: exempted from 5Y cap;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;110;100;Of which: operational deposits;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;120;__PARENT__c0098c2bda1a;NMDs: Retail transactional;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;130;__PARENT__c0098c2bda1a;NMDs: Retail non-transactional;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;140;__PARENT__c0098c2bda1a;NMDs: Wholesale non-financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;150;__PARENT__c0098c2bda1a;NMDs: Wholesale financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;170;160;Of which: non-performing;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;180;160;Retail;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;190;180;Of which: secured by residential real estate;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;200;160;Wholesale non-financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;210;160;Wholesale financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;240;230;Of which: non-performing;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;250;230;Retail;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;260;250;Of which: secured by residential real estate;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;270;230;Wholesale non-financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;280;230;Wholesale financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;310;300;Retail;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;320;300;Wholesale non-financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;330;300;Wholesale financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;350;340;Retail;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;360;340;Wholesale non-financial;;;Unit2;3.4
+J_08.00.b;y_axis_rc_code;370;340;Wholesale financial;;;Unit2;3.4
 J_08.00.b;z_axis_rc_code;EUR;;Euro;;;;3.4
 J_08.00.b;z_axis_rc_code;USD;;US Dollar;;;;3.4
 J_08.00.b;z_axis_rc_code;GBP;;Pound Sterling;;;;3.4
@@ -38680,14 +38680,14 @@ J_09.00.a;z_axis_rc_code;ZMK;;Zambian Kwacha (replaced January 1, 2013);;;;3.4
 J_09.00.a;z_axis_rc_code;ZMW;;Zambian Kwacha;;;;3.4
 J_09.00.a;z_axis_rc_code;ZWL;;Zimbabwe Dollar;;;;3.4
 J_09.00.a;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;3.4
-J_09.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;;3.4
-J_09.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;3.4
-J_09.00.b;x_axis_rc_code;50;;Parallel shock up;;;;3.4
-J_09.00.b;x_axis_rc_code;60;;Parallel shock down;;;;3.4
-J_09.00.b;x_axis_rc_code;70;;Steepener shock;;;;3.4
-J_09.00.b;x_axis_rc_code;80;;Flattener shock;;;;3.4
-J_09.00.b;x_axis_rc_code;90;;Short rates shock up;;;;3.4
-J_09.00.b;x_axis_rc_code;100;;Short rates shock down;;;;3.4
+J_09.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;50;;Parallel shock up;;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;60;;Parallel shock down;;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;70;;Steepener shock;;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;80;;Flattener shock;;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;90;;Short rates shock up;;;Unit2;3.4
+J_09.00.b;x_axis_rc_code;100;;Short rates shock down;;;Unit2;3.4
 J_09.00.b;y_axis_rc_code;__PARENT__7ae04e8bda8b;;0005 NMDs - Behavioural modelling;;Y;;3.4
 J_09.00.b;y_axis_rc_code;__PARENT__73ad24054aaa;;0155 Fixed Rate - Prepayment risk;;Y;;3.4
 J_09.00.b;y_axis_rc_code;__PARENT__4926950445ca;;0295 Fixed Rate - early redemption;;Y;;3.4
@@ -38696,23 +38696,23 @@ J_09.00.b;y_axis_rc_code;__PARENT__ea053de10db7;__PARENT__73ad24054aaa;0156 Aver
 J_09.00.b;y_axis_rc_code;__PARENT__9eef570c53ee;__PARENT__73ad24054aaa;0225 Conditional prepayment rates (annualised average);;Y;;3.4
 J_09.00.b;y_axis_rc_code;__PARENT__f487deae1b39;__PARENT__4926950445ca;0296 Average repricing dates before and after modelling;;Y;;3.4
 J_09.00.b;y_axis_rc_code;__PARENT__ebe44a7bb4b9;__PARENT__4926950445ca;0335 Early redemption rates (cumulative average);;Y;;3.4
-J_09.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;;3.4
-J_09.00.b;y_axis_rc_code;20;10;of which: core component;;;;3.4
-J_09.00.b;y_axis_rc_code;30;10;of which: exempted from 5Y cap;;;;3.4
-J_09.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;;3.4
-J_09.00.b;y_axis_rc_code;50;40;of which: core component;;;;3.4
-J_09.00.b;y_axis_rc_code;60;40;of which: exempted from 5Y cap;;;;3.4
-J_09.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;;3.4
-J_09.00.b;y_axis_rc_code;80;70;of which: core component;;;;3.4
-J_09.00.b;y_axis_rc_code;90;70;of which: exempted from 5Y cap;;;;3.4
-J_09.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;;3.4
-J_09.00.b;y_axis_rc_code;110;100;of which: operational deposits;;;;3.4
-J_09.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;;3.4
-J_09.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;;3.4
-J_09.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;;3.4
-J_09.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;;3.4
-J_09.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;;3.4
-J_09.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;;3.4
+J_09.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;20;10;of which: core component;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;30;10;of which: exempted from 5Y cap;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;50;40;of which: core component;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;60;40;of which: exempted from 5Y cap;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;80;70;of which: core component;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;90;70;of which: exempted from 5Y cap;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;110;100;of which: operational deposits;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;Unit2;3.4
+J_09.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;Unit2;3.4
 J_09.00.b;z_axis_rc_code;EUR;;Euro;;;;3.4
 J_09.00.b;z_axis_rc_code;USD;;US Dollar;;;;3.4
 J_09.00.b;z_axis_rc_code;GBP;;Pound Sterling;;;;3.4
@@ -38909,8 +38909,8 @@ J_05.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;4.2
 J_05.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;4.2
 J_05.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;4.2
 J_05.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;4.2
-J_05.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;4.2
-J_05.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;4.2
+J_05.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;4.2
+J_05.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;4.2
 J_05.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;4.2
 J_05.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;4.2
 J_05.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;4.2
@@ -38934,8 +38934,8 @@ J_05.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;4.2
 J_05.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;4.2
 J_05.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;4.2
 J_05.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;4.2
-J_05.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;4.2
-J_05.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;4.2
+J_05.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;4.2
+J_05.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;4.2
 J_05.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;4.2
 J_05.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;4.2
 J_05.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;4.2
@@ -39170,8 +39170,8 @@ J_05.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;4.2
 J_05.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;4.2
 J_05.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;4.2
 J_05.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;4.2
-J_05.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;4.2
-J_05.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;4.2
+J_05.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;4.2
+J_05.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;4.2
 J_05.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;4.2
 J_05.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;4.2
 J_05.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;4.2
@@ -39195,8 +39195,8 @@ J_05.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;4.2
 J_05.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;4.2
 J_05.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;4.2
 J_05.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;4.2
-J_05.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;4.2
-J_05.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;4.2
+J_05.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;4.2
+J_05.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;4.2
 J_05.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;4.2
 J_05.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;4.2
 J_05.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;4.2
@@ -39431,8 +39431,8 @@ J_06.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;4.2
 J_06.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;4.2
 J_06.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;4.2
 J_06.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;4.2
-J_06.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;4.2
-J_06.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;4.2
+J_06.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;4.2
+J_06.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;4.2
 J_06.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;4.2
 J_06.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;4.2
 J_06.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;4.2
@@ -39456,8 +39456,8 @@ J_06.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;4.2
 J_06.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;4.2
 J_06.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;4.2
 J_06.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;4.2
-J_06.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;4.2
-J_06.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;4.2
+J_06.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;4.2
+J_06.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;4.2
 J_06.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;4.2
 J_06.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;4.2
 J_06.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;4.2
@@ -39687,8 +39687,8 @@ J_06.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;4.2
 J_06.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;4.2
 J_06.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;4.2
 J_06.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;4.2
-J_06.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;4.2
-J_06.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;4.2
+J_06.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;4.2
+J_06.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;4.2
 J_06.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;4.2
 J_06.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;4.2
 J_06.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;4.2
@@ -39712,8 +39712,8 @@ J_06.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;4.2
 J_06.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;4.2
 J_06.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;4.2
 J_06.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;4.2
-J_06.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;4.2
-J_06.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;4.2
+J_06.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;4.2
+J_06.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;4.2
 J_06.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;4.2
 J_06.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;4.2
 J_06.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;4.2
@@ -39943,8 +39943,8 @@ J_07.00.a;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;4.2
 J_07.00.a;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;4.2
 J_07.00.a;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;4.2
 J_07.00.a;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;4.2
-J_07.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;4.2
-J_07.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;4.2
+J_07.00.a;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;4.2
+J_07.00.a;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;4.2
 J_07.00.a;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;4.2
 J_07.00.a;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;4.2
 J_07.00.a;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;4.2
@@ -39968,8 +39968,8 @@ J_07.00.a;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;4.2
 J_07.00.a;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;4.2
 J_07.00.a;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;4.2
 J_07.00.a;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;4.2
-J_07.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;4.2
-J_07.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;4.2
+J_07.00.a;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;4.2
+J_07.00.a;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;4.2
 J_07.00.a;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;4.2
 J_07.00.a;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;4.2
 J_07.00.a;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;4.2
@@ -40194,8 +40194,8 @@ J_07.00.b;x_axis_rc_code;10;__PARENT__4869d00dd9ab;Notional amount;;;;4.2
 J_07.00.b;x_axis_rc_code;20;__PARENT__dcc3907cb442;Bought;;;%;4.2
 J_07.00.b;x_axis_rc_code;30;__PARENT__dcc3907cb442;Sold;;;%;4.2
 J_07.00.b;x_axis_rc_code;40;10;% Subject to behavioural modelling;;;%;4.2
-J_07.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;;4.2
-J_07.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;;4.2
+J_07.00.b;x_axis_rc_code;50;__PARENT__4869d00dd9ab;Weighted average yield;;;%;4.2
+J_07.00.b;x_axis_rc_code;60;__PARENT__4869d00dd9ab;Weighted average maturity (contractual);;;%;4.2
 J_07.00.b;x_axis_rc_code;70;__PARENT__f5206d45f54a;Overnight;;;;4.2
 J_07.00.b;x_axis_rc_code;80;__PARENT__f5206d45f54a;Greater than overnight up to 1 month;;;;4.2
 J_07.00.b;x_axis_rc_code;90;__PARENT__f5206d45f54a;Greater than 1 month up to 3 months;;;;4.2
@@ -40219,8 +40219,8 @@ J_07.00.b;x_axis_rc_code;260;__PARENT__442975a4d442;Notional amount;;;;4.2
 J_07.00.b;x_axis_rc_code;270;__PARENT__bbccf03e4b2c;Bought;;;%;4.2
 J_07.00.b;x_axis_rc_code;280;__PARENT__bbccf03e4b2c;Sold;;;%;4.2
 J_07.00.b;x_axis_rc_code;290;260;% Subject to behavioural modelling;;;%;4.2
-J_07.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;;4.2
-J_07.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;;4.2
+J_07.00.b;x_axis_rc_code;300;__PARENT__442975a4d442;Weighted average yield;;;%;4.2
+J_07.00.b;x_axis_rc_code;310;__PARENT__442975a4d442;Weighted average maturity (contractual);;;%;4.2
 J_07.00.b;x_axis_rc_code;320;__PARENT__f9e6f5eaf0be;Overnight;;;;4.2
 J_07.00.b;x_axis_rc_code;330;__PARENT__f9e6f5eaf0be;Greater than overnight up to 1 month;;;;4.2
 J_07.00.b;x_axis_rc_code;340;__PARENT__f9e6f5eaf0be;Greater than 1 month up to 3 months;;;;4.2
@@ -40631,14 +40631,14 @@ J_08.00.a;z_axis_rc_code;ZMK;;Zambian Kwacha (replaced January 1, 2013);;;;4.2
 J_08.00.a;z_axis_rc_code;ZMW;;Zambian Kwacha;;;;4.2
 J_08.00.a;z_axis_rc_code;ZWL;;Zimbabwe Dollar;;;;4.2
 J_08.00.a;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
-J_08.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;;4.2
-J_08.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;4.2
-J_08.00.b;x_axis_rc_code;50;;Parallel shock up;;;;4.2
-J_08.00.b;x_axis_rc_code;60;;Parallel shock down;;;;4.2
-J_08.00.b;x_axis_rc_code;70;;Steepener shock;;;;4.2
-J_08.00.b;x_axis_rc_code;80;;Flattener shock;;;;4.2
-J_08.00.b;x_axis_rc_code;90;;Short rates shock up;;;;4.2
-J_08.00.b;x_axis_rc_code;100;;Short rates shock down;;;;4.2
+J_08.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;50;;Parallel shock up;;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;60;;Parallel shock down;;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;70;;Steepener shock;;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;80;;Flattener shock;;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;90;;Short rates shock up;;;Unit2;4.2
+J_08.00.b;x_axis_rc_code;100;;Short rates shock down;;;Unit2;4.2
 J_08.00.b;y_axis_rc_code;__PARENT__7ae04e8bda8b;;0005 NMDs - Behavioural modelling;;Y;;4.2
 J_08.00.b;y_axis_rc_code;__PARENT__73ad24054aaa;;0155 Fixed Rate - Prepayment risk;;Y;;4.2
 J_08.00.b;y_axis_rc_code;__PARENT__4926950445ca;;0295 Fixed Rate - early redemption;;Y;;4.2
@@ -40648,43 +40648,43 @@ J_08.00.b;y_axis_rc_code;__PARENT__ea053de10db7;__PARENT__73ad24054aaa;0156 Aver
 J_08.00.b;y_axis_rc_code;__PARENT__9eef570c53ee;__PARENT__73ad24054aaa;0225 Conditional prepayment rates (annualised average);;Y;;4.2
 J_08.00.b;y_axis_rc_code;__PARENT__f487deae1b39;__PARENT__4926950445ca;0296 Average repricing dates before and after modelling;;Y;;4.2
 J_08.00.b;y_axis_rc_code;__PARENT__ebe44a7bb4b9;__PARENT__4926950445ca;0335 Early redemption rates (cumulative average);;Y;;4.2
-J_08.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;;4.2
-J_08.00.b;y_axis_rc_code;20;10;Of which: core component;;;;4.2
-J_08.00.b;y_axis_rc_code;30;10;Of which: exempted from 5Y cap;;;;4.2
-J_08.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;;4.2
-J_08.00.b;y_axis_rc_code;50;40;Of which: core component;;;;4.2
-J_08.00.b;y_axis_rc_code;60;40;Of which: exempted from 5Y cap;;;;4.2
-J_08.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;;4.2
-J_08.00.b;y_axis_rc_code;80;70;Of which: core component;;;;4.2
-J_08.00.b;y_axis_rc_code;90;70;Of which: exempted from 5Y cap;;;;4.2
-J_08.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;;4.2
-J_08.00.b;y_axis_rc_code;110;100;Of which: operational deposits;;;;4.2
-J_08.00.b;y_axis_rc_code;120;__PARENT__c0098c2bda1a;NMDs: Retail transactional;;;;4.2
-J_08.00.b;y_axis_rc_code;130;__PARENT__c0098c2bda1a;NMDs: Retail non-transactional;;;;4.2
-J_08.00.b;y_axis_rc_code;140;__PARENT__c0098c2bda1a;NMDs: Wholesale non-financial;;;;4.2
-J_08.00.b;y_axis_rc_code;150;__PARENT__c0098c2bda1a;NMDs: Wholesale financial;;;;4.2
-J_08.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;;4.2
-J_08.00.b;y_axis_rc_code;170;160;Of which: non-performing;;;;4.2
-J_08.00.b;y_axis_rc_code;180;160;Retail;;;;4.2
-J_08.00.b;y_axis_rc_code;190;180;Of which: secured by residential real estate;;;;4.2
-J_08.00.b;y_axis_rc_code;200;160;Wholesale non-financial;;;;4.2
-J_08.00.b;y_axis_rc_code;210;160;Wholesale financial;;;;4.2
-J_08.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;;4.2
-J_08.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;;4.2
-J_08.00.b;y_axis_rc_code;240;230;Of which: non-performing;;;;4.2
-J_08.00.b;y_axis_rc_code;250;230;Retail;;;;4.2
-J_08.00.b;y_axis_rc_code;260;250;Of which: secured by residential real estate;;;;4.2
-J_08.00.b;y_axis_rc_code;270;230;Wholesale non-financial;;;;4.2
-J_08.00.b;y_axis_rc_code;280;230;Wholesale financial;;;;4.2
-J_08.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;;4.2
-J_08.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;;4.2
-J_08.00.b;y_axis_rc_code;310;300;Retail;;;;4.2
-J_08.00.b;y_axis_rc_code;320;300;Wholesale non-financial;;;;4.2
-J_08.00.b;y_axis_rc_code;330;300;Wholesale financial;;;;4.2
-J_08.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;;4.2
-J_08.00.b;y_axis_rc_code;350;340;Retail;;;;4.2
-J_08.00.b;y_axis_rc_code;360;340;Wholesale non-financial;;;;4.2
-J_08.00.b;y_axis_rc_code;370;340;Wholesale financial;;;;4.2
+J_08.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;20;10;Of which: core component;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;30;10;Of which: exempted from 5Y cap;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;50;40;Of which: core component;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;60;40;Of which: exempted from 5Y cap;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;80;70;Of which: core component;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;90;70;Of which: exempted from 5Y cap;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;110;100;Of which: operational deposits;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;120;__PARENT__c0098c2bda1a;NMDs: Retail transactional;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;130;__PARENT__c0098c2bda1a;NMDs: Retail non-transactional;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;140;__PARENT__c0098c2bda1a;NMDs: Wholesale non-financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;150;__PARENT__c0098c2bda1a;NMDs: Wholesale financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;170;160;Of which: non-performing;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;180;160;Retail;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;190;180;Of which: secured by residential real estate;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;200;160;Wholesale non-financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;210;160;Wholesale financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;240;230;Of which: non-performing;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;250;230;Retail;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;260;250;Of which: secured by residential real estate;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;270;230;Wholesale non-financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;280;230;Wholesale financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;310;300;Retail;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;320;300;Wholesale non-financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;330;300;Wholesale financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;350;340;Retail;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;360;340;Wholesale non-financial;;;Unit2;4.2
+J_08.00.b;y_axis_rc_code;370;340;Wholesale financial;;;Unit2;4.2
 J_08.00.b;z_axis_rc_code;EUR;;Euro;;;;4.2
 J_08.00.b;z_axis_rc_code;USD;;US Dollar;;;;4.2
 J_08.00.b;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2
@@ -41039,14 +41039,14 @@ J_09.00.a;z_axis_rc_code;ZMK;;Zambian Kwacha (replaced January 1, 2013);;;;4.2
 J_09.00.a;z_axis_rc_code;ZMW;;Zambian Kwacha;;;;4.2
 J_09.00.a;z_axis_rc_code;ZWL;;Zimbabwe Dollar;;;;4.2
 J_09.00.a;z_axis_rc_code;qx46;;Other Currency (open axis tables);;;;4.2
-J_09.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;;4.2
-J_09.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;;4.2
-J_09.00.b;x_axis_rc_code;50;;Parallel shock up;;;;4.2
-J_09.00.b;x_axis_rc_code;60;;Parallel shock down;;;;4.2
-J_09.00.b;x_axis_rc_code;70;;Steepener shock;;;;4.2
-J_09.00.b;x_axis_rc_code;80;;Flattener shock;;;;4.2
-J_09.00.b;x_axis_rc_code;90;;Short rates shock up;;;;4.2
-J_09.00.b;x_axis_rc_code;100;;Short rates shock down;;;;4.2
+J_09.00.b;x_axis_rc_code;30;;Baseline scenario (contractual);;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;40;;Baseline scenario (behavioural);;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;50;;Parallel shock up;;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;60;;Parallel shock down;;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;70;;Steepener shock;;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;80;;Flattener shock;;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;90;;Short rates shock up;;;Unit2;4.2
+J_09.00.b;x_axis_rc_code;100;;Short rates shock down;;;Unit2;4.2
 J_09.00.b;y_axis_rc_code;__PARENT__7ae04e8bda8b;;0005 NMDs - Behavioural modelling;;Y;;4.2
 J_09.00.b;y_axis_rc_code;__PARENT__73ad24054aaa;;0155 Fixed Rate - Prepayment risk;;Y;;4.2
 J_09.00.b;y_axis_rc_code;__PARENT__4926950445ca;;0295 Fixed Rate - early redemption;;Y;;4.2
@@ -41055,23 +41055,23 @@ J_09.00.b;y_axis_rc_code;__PARENT__ea053de10db7;__PARENT__73ad24054aaa;0156 Aver
 J_09.00.b;y_axis_rc_code;__PARENT__9eef570c53ee;__PARENT__73ad24054aaa;0225 Conditional prepayment rates (annualised average);;Y;;4.2
 J_09.00.b;y_axis_rc_code;__PARENT__f487deae1b39;__PARENT__4926950445ca;0296 Average repricing dates before and after modelling;;Y;;4.2
 J_09.00.b;y_axis_rc_code;__PARENT__ebe44a7bb4b9;__PARENT__4926950445ca;0335 Early redemption rates (cumulative average);;Y;;4.2
-J_09.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;;4.2
-J_09.00.b;y_axis_rc_code;20;10;of which: core component;;;;4.2
-J_09.00.b;y_axis_rc_code;30;10;of which: exempted from 5Y cap;;;;4.2
-J_09.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;;4.2
-J_09.00.b;y_axis_rc_code;50;40;of which: core component;;;;4.2
-J_09.00.b;y_axis_rc_code;60;40;of which: exempted from 5Y cap;;;;4.2
-J_09.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;;4.2
-J_09.00.b;y_axis_rc_code;80;70;of which: core component;;;;4.2
-J_09.00.b;y_axis_rc_code;90;70;of which: exempted from 5Y cap;;;;4.2
-J_09.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;;4.2
-J_09.00.b;y_axis_rc_code;110;100;of which: operational deposits;;;;4.2
-J_09.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;;4.2
-J_09.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;;4.2
-J_09.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;;4.2
-J_09.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;;4.2
-J_09.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;;4.2
-J_09.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;;4.2
+J_09.00.b;y_axis_rc_code;10;__PARENT__677fab0bc6cd;NMDs: Retail transactional;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;20;10;of which: core component;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;30;10;of which: exempted from 5Y cap;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;40;__PARENT__677fab0bc6cd;NMDs: Retail non-transactional;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;50;40;of which: core component;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;60;40;of which: exempted from 5Y cap;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;70;__PARENT__677fab0bc6cd;NMDs: Wholesale non-financial;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;80;70;of which: core component;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;90;70;of which: exempted from 5Y cap;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;100;__PARENT__677fab0bc6cd;NMDs: Wholesale financial;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;110;100;of which: operational deposits;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;160;__PARENT__ea053de10db7;Loans and advances;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;220;__PARENT__ea053de10db7;Debt securities;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;230;__PARENT__9eef570c53ee;Loans and advances;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;290;__PARENT__9eef570c53ee;Debt securities;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;300;__PARENT__f487deae1b39;Term deposits;;;Unit2;4.2
+J_09.00.b;y_axis_rc_code;340;__PARENT__ebe44a7bb4b9;Term deposits;;;Unit2;4.2
 J_09.00.b;z_axis_rc_code;EUR;;Euro;;;;4.2
 J_09.00.b;z_axis_rc_code;USD;;US Dollar;;;;4.2
 J_09.00.b;z_axis_rc_code;GBP;;Pound Sterling;;;;4.2

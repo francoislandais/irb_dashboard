@@ -9,7 +9,7 @@ import { GEOGRAPHIC_COUNTRY_TEMPLATES, normalizeGeographicCountryCode } from "..
 import { createUrlState, readUrlStateParams, replaceUrlState } from "./urlState.js";
 import { getCompleteAxisColumnIndexes } from "../data/core/axisColumns.js?v=20260925-institution-id";
 import { getIndexedRowsByTableJst } from "../data/dataIndex.js?v=20260925-institution-id";
-import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
+import { formatContributionPercentValue, formatMetricValue, formatSignedMetricValue, getUnitDefinition, isPercentFormat, isUnitFormat, isTwoDecimalUnitFormat } from "../data/core/formatting.js?v=20260925-percent-scale";
 import { getReferenceColumns, parseNumericValue } from "../data/core/referenceColumns.js";
 import { clampCostOfRiskSmoothingWindow, formatReferenceQuarterLabel } from "../data/costOfRisk.js?v=20260928-local-description";
 import {
@@ -1939,7 +1939,7 @@ function buildExplorerExcelCell(cell, index, row, state) {
     : isUnitFormat(valueFormat) ? rawValue : rawValue / getUnitDefinition(state.selectedUnit).divisor;
   const opacity = Number(cell.style.getPropertyValue("--date-focus-value-opacity")) || 0;
   const emphasis = opacity >= 0.115 ? 3 : opacity >= 0.075 ? 2 : opacity > 0 ? 1 : 0;
-  return { type: "number", value, numberFormat: isRatio ? "percent" : isUnitFormat(valueFormat) ? "unit" : "amount", emphasis };
+  return { type: "number", value, numberFormat: isRatio ? "percent" : isTwoDecimalUnitFormat(valueFormat) ? "unit2" : isUnitFormat(valueFormat) ? "unit" : "amount", emphasis };
 }
 
 function sanitizeExcelFileName(fileName) {

@@ -1,4 +1,8 @@
 export function formatMetricValue(value, selectedUnit, valueFormat = "") {
+  if (isTwoDecimalUnitFormat(valueFormat)) return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
   if (isUnitFormat(valueFormat)) return String(value);
   if (isPercentFormat(valueFormat)) return formatFractionAsPercentValue(value);
 
@@ -10,6 +14,10 @@ export function formatMetricValue(value, selectedUnit, valueFormat = "") {
 }
 
 export function formatSignedMetricValue(value, selectedUnit, valueFormat = "") {
+  if (isTwoDecimalUnitFormat(valueFormat)) return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
   if (isUnitFormat(valueFormat)) return String(value);
   const unit = getUnitDefinition(selectedUnit);
   return new Intl.NumberFormat("fr-FR", {
@@ -20,7 +28,11 @@ export function formatSignedMetricValue(value, selectedUnit, valueFormat = "") {
 }
 
 export function isUnitFormat(valueFormat) {
-  return String(valueFormat ?? "").trim().toLowerCase() === "unit";
+  return ["unit", "unit2"].includes(String(valueFormat ?? "").trim().toLowerCase());
+}
+
+export function isTwoDecimalUnitFormat(valueFormat) {
+  return String(valueFormat ?? "").trim().toLowerCase() === "unit2";
 }
 
 export function isPercentFormat(valueFormat) {

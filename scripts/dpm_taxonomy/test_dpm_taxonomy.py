@@ -19,6 +19,24 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 
 class DpmTaxonomyTests(unittest.TestCase):
+    def test_irrbb_targeted_display_formats(self):
+        for number in (5, 6, 7):
+            for suffix in ("a", "b"):
+                for code in ("50", "60", "300", "310"):
+                    with self.subTest(number=number, suffix=suffix, code=code):
+                        self.assertEqual(builder.dimension_display_format(
+                            f"J_{number:02d}.00.{suffix}", "x_axis_rc_code", code,
+                            "Weighted average yield",
+                        ), "%")
+        for number in (8, 9):
+            for axis in ("x_axis_rc_code", "y_axis_rc_code"):
+                self.assertEqual(builder.dimension_display_format(
+                    f"J_{number:02d}.00.b", axis, "50", "Parallel shock up",
+                ), "Unit2")
+            self.assertNotEqual(builder.dimension_display_format(
+                f"J_{number:02d}.00.a", "x_axis_rc_code", "50", "Parallel shock up",
+            ), "Unit2")
+
     def test_c80_c81_reported_totals_replace_empty_display_parents(self):
         for table_id, label, late_code in (
             ("C_80.00", "Required stable funding", "920"),
