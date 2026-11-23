@@ -20,6 +20,10 @@ SOURCES = ROOT / "data" / "eba-dpm-history" / "sources"
 
 class DpmTaxonomyTests(unittest.TestCase):
     def test_irrbb_targeted_display_formats(self):
+        for number in (2, 3, 4):
+            self.assertEqual(builder.dimension_display_format(
+                f"J_{number:02d}.00", "x_axis_rc_code", "20", "Duration",
+            ), "Unit")
         for number in (5, 6, 7):
             for suffix in ("a", "b"):
                 for code in ("50", "60", "300", "310"):

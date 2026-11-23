@@ -651,6 +651,8 @@ def dimension_display_format(table_id: str, coordinate: str, code: str, descript
     protection columns 170–210 likewise report monetary amounts.
     """
     template = re.sub(r"\.[A-Za-z]$", "", table_id).upper()
+    if template in {"J_02.00", "J_03.00", "J_04.00"} and coordinate == AXIS_COORDINATES["x"] and code_text(code) == "20":
+        return "Unit"  # Duration is reported directly; never apply the selected monetary scale.
     if table_id.upper() in {"J_08.00.B", "J_09.00.B"} and coordinate in {AXIS_COORDINATES["x"], AXIS_COORDINATES["y"]}:
         return "Unit2"  # Reported values are unscaled numbers with two display decimals.
     if template in {"J_05.00", "J_06.00", "J_07.00"} and coordinate == AXIS_COORDINATES["x"] and code_text(code) in {"50", "60", "300", "310"}:

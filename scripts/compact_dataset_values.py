@@ -80,7 +80,7 @@ def _value_kind(row: dict[str, str], reference_date: str, points: dict, history:
             return "unknown"
         formats.append(points[key])
     first_explicit = next((item for item in formats if item), "")
-    if first_explicit.lower() == "unit":
+    if first_explicit.lower() in {"unit", "unit2"}:
         return "unit"
     if any(keyword in first_explicit.lower() for keyword in PERCENT_FORMATS):
         return "percent"

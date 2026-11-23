@@ -33096,7 +33096,7 @@ J_02.00;x_axis_rc_code;__PARENT__da6dc0235196;;Market value;;Y;;3.3
 J_02.00;x_axis_rc_code;__PARENT__ec7f0f051f83;;Net interest income;;Y;;3.3
 J_02.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic value of equity;;Y;;3.3
 J_02.00;x_axis_rc_code;10;;Carrying amount;;;;3.3
-J_02.00;x_axis_rc_code;20;;Duration;;;;3.3
+J_02.00;x_axis_rc_code;20;;Duration;;;Unit;3.3
 J_02.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;3.3
 J_02.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;3.3
 J_02.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;3.3
@@ -33366,7 +33366,7 @@ J_03.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic va
 J_03.00;x_axis_rc_code;__PARENT__dd54e2abb76d;__PARENT__9102228cabdf;Market value;;Y;;3.3
 J_03.00;x_axis_rc_code;__PARENT__11936e96becd;__PARENT__9102228cabdf;Net interest income;;Y;;3.3
 J_03.00;x_axis_rc_code;10;;Carrying amount;;;;3.3
-J_03.00;x_axis_rc_code;20;;Duration;;;;3.3
+J_03.00;x_axis_rc_code;20;;Duration;;;Unit;3.3
 J_03.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;3.3
 J_03.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;3.3
 J_03.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;3.3
@@ -33608,7 +33608,7 @@ J_04.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic va
 J_04.00;x_axis_rc_code;__PARENT__dd54e2abb76d;__PARENT__9102228cabdf;Market value;;Y;;3.3
 J_04.00;x_axis_rc_code;__PARENT__11936e96becd;__PARENT__9102228cabdf;Net interest income;;Y;;3.3
 J_04.00;x_axis_rc_code;10;;Carrying amount;;;;3.3
-J_04.00;x_axis_rc_code;20;;Duration;;;;3.3
+J_04.00;x_axis_rc_code;20;;Duration;;;Unit;3.3
 J_04.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;3.3
 J_04.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;3.3
 J_04.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;3.3
@@ -41912,7 +41912,7 @@ J_02.00;x_axis_rc_code;__PARENT__da6dc0235196;;Market value;;Y;;3.4
 J_02.00;x_axis_rc_code;__PARENT__ec7f0f051f83;;Net interest income;;Y;;3.4
 J_02.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic value of equity;;Y;;3.4
 J_02.00;x_axis_rc_code;10;;Carrying amount;;;;3.4
-J_02.00;x_axis_rc_code;20;;Duration;;;;3.4
+J_02.00;x_axis_rc_code;20;;Duration;;;Unit;3.4
 J_02.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;3.4
 J_02.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;3.4
 J_02.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;3.4
@@ -42182,7 +42182,7 @@ J_03.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic va
 J_03.00;x_axis_rc_code;__PARENT__dd54e2abb76d;__PARENT__9102228cabdf;Market value;;Y;;3.4
 J_03.00;x_axis_rc_code;__PARENT__11936e96becd;__PARENT__9102228cabdf;Net interest income;;Y;;3.4
 J_03.00;x_axis_rc_code;10;;Carrying amount;;;;3.4
-J_03.00;x_axis_rc_code;20;;Duration;;;;3.4
+J_03.00;x_axis_rc_code;20;;Duration;;;Unit;3.4
 J_03.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;3.4
 J_03.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;3.4
 J_03.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;3.4
@@ -42424,7 +42424,7 @@ J_04.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic va
 J_04.00;x_axis_rc_code;__PARENT__dd54e2abb76d;__PARENT__9102228cabdf;Market value;;Y;;3.4
 J_04.00;x_axis_rc_code;__PARENT__11936e96becd;__PARENT__9102228cabdf;Net interest income;;Y;;3.4
 J_04.00;x_axis_rc_code;10;;Carrying amount;;;;3.4
-J_04.00;x_axis_rc_code;20;;Duration;;;;3.4
+J_04.00;x_axis_rc_code;20;;Duration;;;Unit;3.4
 J_04.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;3.4
 J_04.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;3.4
 J_04.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;3.4
@@ -67453,7 +67453,7 @@ J_02.00;x_axis_rc_code;__PARENT__da6dc0235196;;Market value;;Y;;4.2
 J_02.00;x_axis_rc_code;__PARENT__ec7f0f051f83;;Net interest income;;Y;;4.2
 J_02.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic value of equity;;Y;;4.2
 J_02.00;x_axis_rc_code;10;;Carrying amount;;;;4.2
-J_02.00;x_axis_rc_code;20;;Duration;;;;4.2
+J_02.00;x_axis_rc_code;20;;Duration;;;Unit;4.2
 J_02.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;4.2
 J_02.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;4.2
 J_02.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;4.2
@@ -67703,7 +67703,7 @@ J_03.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic va
 J_03.00;x_axis_rc_code;__PARENT__dd54e2abb76d;__PARENT__9102228cabdf;Market value;;Y;;4.2
 J_03.00;x_axis_rc_code;__PARENT__11936e96becd;__PARENT__9102228cabdf;Net interest income;;Y;;4.2
 J_03.00;x_axis_rc_code;10;;Carrying amount;;;;4.2
-J_03.00;x_axis_rc_code;20;;Duration;;;;4.2
+J_03.00;x_axis_rc_code;20;;Duration;;;Unit;4.2
 J_03.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;4.2
 J_03.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;4.2
 J_03.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;4.2
@@ -67925,7 +67925,7 @@ J_04.00;x_axis_rc_code;__PARENT__53cbc1f15a83;__PARENT__9102228cabdf;Economic va
 J_04.00;x_axis_rc_code;__PARENT__dd54e2abb76d;__PARENT__9102228cabdf;Market value;;Y;;4.2
 J_04.00;x_axis_rc_code;__PARENT__11936e96becd;__PARENT__9102228cabdf;Net interest income;;Y;;4.2
 J_04.00;x_axis_rc_code;10;;Carrying amount;;;;4.2
-J_04.00;x_axis_rc_code;20;;Duration;;;;4.2
+J_04.00;x_axis_rc_code;20;;Duration;;;Unit;4.2
 J_04.00;x_axis_rc_code;30;__PARENT__53cbc1f15a83;Level of EVE - Baseline scenario;;;;4.2
 J_04.00;x_axis_rc_code;40;__PARENT__53cbc1f15a83;EVE - Parallel shock up;;;;4.2
 J_04.00;x_axis_rc_code;50;__PARENT__53cbc1f15a83;EVE - Parallel shock down;;;;4.2
