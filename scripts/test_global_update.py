@@ -343,7 +343,7 @@ class DarwinUploadTests(unittest.TestCase):
             )
 
     def test_targeted_run_keeps_other_published_launcher_applications(self):
-        from launcher import read_launcher_catalog
+        from launcher import read_launcher_catalog, read_standalone_app_details
 
         class Darwin:
             def __init__(self):
@@ -370,15 +370,54 @@ class DarwinUploadTests(unittest.TestCase):
         darwin = Darwin()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            global_update(EXAMPLE_CONFIG_DIRECTORY, mode="test", output_directory=root / "all",
+            combined = PROJECT_DIRECTORY / "examples/global-update-combined.toml"
+            global_update(combined, mode="test", output_directory=root / "all",
                           as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
             first_catalog = read_launcher_catalog(darwin.files["Agora Explorer_launcher.html"].decode())
             self.assertEqual(len(first_catalog), 4)
-            global_update(EXAMPLE_CONFIG_DIRECTORY / "01-finrep.toml", mode="test", output_directory=root / "one",
+            remote_institutions, remote_updated_at = read_standalone_app_details(darwin.files["COREP.html"].decode())
+            self.assertTrue(remote_institutions)
+            self.assertTrue(remote_updated_at)
+            targeted = root / "targeted.toml"
+            source = combined.read_text(encoding="utf-8")
+            for name in ("COREP", "FINREP + COREP", "KRI"):
+                source = source.replace(f'name = "{name}"', f'name = "{name}"\nactivate = false', 1)
+            source += '''\n[[applications]]
+name = "Never generated"
+activate = false
+leis = ["5493001KJTIIGC8Y1R12"]
+consolidation = "HIGHEST"
+[[applications.extractions]]
+module = "FINREP"
+templates = ["F_01.01"]
+history_years = 1
+frequency = "QUARTERLY"
+'''
+            targeted.write_text(source, encoding="utf-8")
+            global_update(targeted, mode="test", output_directory=root / "one",
                           as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
             second_catalog = read_launcher_catalog(darwin.files["Agora Explorer_launcher.html"].decode())
             self.assertEqual({app["name"] for app in second_catalog}, {app["name"] for app in first_catalog})
+            self.assertTrue(all(app["updated_at"] for app in second_catalog))
+            first_dates = {app["name"]: app["updated_at"] for app in first_catalog}
+            self.assertTrue(all(app["updated_at"] == first_dates[app["name"]]
+                                for app in second_catalog if app["name"] != "FINREP"))
+            self.assertNotIn("Never generated", darwin.files["Agora Explorer_launcher.html"].decode())
+            self.assertIn("Updated:", darwin.files["Agora Explorer_launcher.html"].decode())
             self.assertIn(darwin.ids["Agora Explorer_launcher.html"], darwin.downloads)
+            targeted.write_text(source.replace('name = "FINREP"', 'name = "FINREP"\nactivate = false', 1), encoding="utf-8")
+            result = global_update(targeted, mode="test", output_directory=root / "none",
+                                   as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
+            self.assertEqual(result["applications"], 0)
+            self.assertEqual(len(read_launcher_catalog(darwin.files["Agora Explorer_launcher.html"].decode())), 4)
+            darwin.files["Agora Explorer_launcher.html"] = b"<html>legacy launcher without catalog</html>"
+            global_update(targeted, mode="test", output_directory=root / "legacy",
+                          as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
+            self.assertEqual(len(read_launcher_catalog(darwin.files["Agora Explorer_launcher.html"].decode())), 4)
+            global_update(EXAMPLE_CONFIG_DIRECTORY / "01-finrep.toml", mode="test", output_directory=root / "reduced",
+                          as_of=date(2026, 9, 26), darwin_upload=999, darwin_client=darwin)
+            self.assertEqual([app["name"] for app in read_launcher_catalog(
+                darwin.files["Agora Explorer_launcher.html"].decode())], ["FINREP"])
 
     def test_failed_upload_preserves_local_files_and_completed_status(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -1093,6 +1132,7 @@ frequency = "QUARTERLY"
     def test_excel_activation_skips_application_and_extraction(self):
         source = PROJECT_DIRECTORY / "examples" / "business-applications.xlsx"
         before = _read_configuration(source, date(2026, 9, 26))
+        full_before = _read_configuration(source, date(2026, 9, 26), include_inactive=True)
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "settings.xlsx"
             with zipfile.ZipFile(source) as original, zipfile.ZipFile(target, "w") as output:
@@ -1112,6 +1152,10 @@ frequency = "QUARTERLY"
             self.assertEqual(len(apps), len(before) - 1)
             self.assertEqual(sum(len(app.extractions) for app in apps),
                              sum(len(app.extractions) for app in before) - len(before[0].extractions) - 1)
+            catalog = _read_configuration(target, date(2026, 9, 26), include_inactive=True)
+            self.assertEqual(len(catalog), len(full_before))
+            self.assertEqual(sum(len(app.extractions) for app in catalog),
+                             sum(len(app.extractions) for app in full_before))
 
     def test_excel_jst_code_filters_institutions_and_its_data(self):
         source = PROJECT_DIRECTORY / "examples" / "business-applications.xlsx"

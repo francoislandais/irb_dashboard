@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import base64
+import csv
+import gzip
 from html import escape
+import io
 import json
 from pathlib import Path
 import re
@@ -211,6 +215,11 @@ def _extraction_template_description(extraction: dict) -> str:
     return description + "."
 
 
+def _updated_date_label(value: str) -> str:
+    match = re.match(r"^(\d{4})-(\d{2})-(\d{2})", value)
+    return f"{match.group(3)}/{match.group(2)}/{match.group(1)}" if match else "Date unavailable"
+
+
 def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str:
     """Populate the reviewed launcher layout with real institutions and links."""
 
@@ -264,7 +273,8 @@ def render_launcher_html(applications: list[dict], links: dict[str, str]) -> str
                 f'data-base-href="{escape(link, quote=True)}" '
                 f'data-institution-map="{escape(json.dumps(institution_map), quote=True)}" '
                 'target="_blank" rel="noopener noreferrer">Open application ↗</a></div>'
-                f'<div class="app-expanded"><p class="app-template-line"><strong>Available templates:</strong> {template_summary}</p></div>'
+                f'<div class="app-expanded"><p class="app-template-line"><strong>Available templates:</strong> {template_summary}</p>'
+                f'<p class="app-updated-at">Updated: {escape(_updated_date_label(str(app.get("updated_at") or "")))}</p></div>'
                 '</details>'
             )
         sections.append(
@@ -291,7 +301,7 @@ def launcher_catalog_entry(app: dict) -> dict:
     """Keep only the fields needed to recreate an entry on a later run."""
     fields = (
         "name", "description", "html_app", "institutions", "extractions",
-        "clusters", "jst_code", "ssm_supervision_country", "ssmsignificance",
+        "clusters", "jst_code", "ssm_supervision_country", "ssmsignificance", "updated_at",
     )
     return {field: app.get(field, [] if field in {"institutions", "extractions"} else "") for field in fields}
 
@@ -311,6 +321,30 @@ def read_launcher_catalog(html: str) -> list[dict] | None:
     if any(not isinstance(app, dict) or not app.get("html_app") or not app.get("name") for app in applications):
         raise ValueError("Le catalogue du lanceur Darwin contient une application invalide.")
     return applications
+
+
+def read_standalone_app_details(html: str) -> tuple[list[dict], str]:
+    """Recover the institution list and generation date from an existing HTML."""
+    match = re.search(r"window\.__AGORA_STANDALONE_DATA__ = (\{[^\n]+\});", html)
+    if not match:
+        return [], ""
+    payload = json.loads(match.group(1))
+    institutions = []
+    encoded = payload.get("institutionDictionaryBase64")
+    if encoded:
+        content = gzip.decompress(base64.b64decode(encoded)).decode("utf-8-sig")
+        for row in csv.DictReader(io.StringIO(content)):
+            institution_id = (row.get("Institution ID") or "").strip()
+            if "_" not in institution_id:
+                continue
+            lei, level = institution_id.rsplit("_", 1)
+            institutions.append({
+                "institution_id": institution_id, "lei": lei,
+                "institution_name": (row.get("Institution Name") or lei).strip(),
+                "consolidation_level": (row.get("Consolidation Level") or level).strip(),
+                "jst_code": (row.get("JST code") or "").strip(),
+            })
+    return institutions, str(payload.get("loadedAt") or "")
 
 
 def _replace_between(source: str, marker: str, content: str) -> str:

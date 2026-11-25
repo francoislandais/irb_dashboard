@@ -74,6 +74,13 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(catalog[0]["institutions"], self.apps[0]["institutions"])
         self.assertIsNone(read_launcher_catalog("<html>ancien lanceur</html>"))
 
+    def test_update_date_is_shown_only_in_expanded_application_details(self):
+        app = {**self.apps[0], "updated_at": "2026-11-25T14:32:00Z"}
+        html = render_launcher_html([app], {"Agora Explorer_FINREP_COREP.html": "first.html"})
+        self.assertIn('<div class="app-expanded"><p class="app-template-line">', html)
+        self.assertIn('<p class="app-updated-at">Updated: 25/11/2026</p>', html)
+        self.assertEqual(read_launcher_catalog(html)[0]["updated_at"], app["updated_at"])
+
     def test_levels_of_same_lei_share_one_institution_and_peer_group(self):
         second = {
             **self.apps[0],

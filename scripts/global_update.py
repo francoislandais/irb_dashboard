@@ -20,7 +20,7 @@ try:
 except ModuleNotFoundError:  # Python 3.10
     import tomli as tomllib
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
@@ -33,7 +33,7 @@ if __package__:
     from .compact_dataset_values import compact_dataset_rows
     from .export_all_standalone_apps import export_standalone_app
     from .output_directory import resolve_external_output_directory
-    from .launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links, read_launcher_catalog, _darwin_direct_children
+    from .launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links, read_launcher_catalog, read_standalone_app_details, _darwin_direct_children
     from .local_source_client import LocalSourceClient
     from .hive_to_dataset import (
         _expand_template_expressions,
@@ -49,7 +49,7 @@ else:
     from compact_dataset_values import compact_dataset_rows
     from export_all_standalone_apps import export_standalone_app
     from output_directory import resolve_external_output_directory
-    from launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links, read_launcher_catalog, _darwin_direct_children
+    from launcher import connect_darwin_listing_client, render_launcher_html, resolve_darwin_app_links, read_launcher_catalog, read_standalone_app_details, _darwin_direct_children
     from local_source_client import LocalSourceClient
     from hive_to_dataset import (
         _expand_template_expressions,
@@ -234,10 +234,10 @@ def _configuration_blocks(entries: list[Path]):
             yield block, f"{file.name}, application {index}"
 
 
-def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
+def _read_configuration(path: Path, as_of: date, *, include_inactive: bool = False) -> tuple[Application, ...]:
     if path.is_file():
         if path.suffix.lower() == ".xlsx":
-            blocks = read_excel_configuration(path)
+            blocks = read_excel_configuration(path, include_inactive=include_inactive)
         elif path.suffix.lower() == ".toml":
             blocks = _configuration_blocks([path])
         else:
@@ -265,7 +265,7 @@ def _read_configuration(path: Path, as_of: date) -> tuple[Application, ...]:
         activate = config.get("activate", True)
         if type(activate) not in (bool, int) or activate not in (0, 1):
             raise ValueError(f"{context}: activate doit être true, false, 1 ou 0.")
-        if not activate:
+        if not activate and not include_inactive:
             continue
         name = _required_text(config.get("name"), "name", context)
         description = config.get("description", "")
@@ -1322,7 +1322,33 @@ def _darwin_folder_items(folder_id: int, client) -> list[tuple[int, str]]:
     return sorted(entries, key=lambda item: item[1].casefold())
 
 
-def _download_darwin_folder_configurations(folder_id: int, as_of: date, client) -> tuple[Application, ...]:
+def _configuration_views(path: Path, as_of: date, *, include_catalog: bool):
+    active = _read_configuration(path, as_of)
+    return (active, _read_configuration(path, as_of, include_inactive=True)) if include_catalog else active
+
+
+def _launcher_definition(application: Application) -> dict:
+    """Describe every configured application, regardless of its update switch."""
+    stem = _application_output_stem(application.description, application.name)
+    return {
+        "name": application.name,
+        "description": application.description,
+        "html_app": f"applications/html/{stem}.html",
+        "clusters": list(application.clusters),
+        "jst_code": list(application.jst_codes),
+        "ssm_supervision_country": list(application.ssm_supervision_countries),
+        "ssmsignificance": list(application.ssm_significances),
+        "extractions": [{
+            "label": extraction.label,
+            "category": extraction.category,
+            "module": extraction.module,
+            "selector": extraction.selector,
+            "selection_type": extraction.selection_type,
+        } for extraction in application.extractions],
+    }
+
+
+def _download_darwin_folder_configurations(folder_id: int, as_of: date, client, *, include_catalog: bool = False):
     if type(folder_id) is not int or folder_id <= 0:
         raise ValueError("L'identifiant du dossier Darwin doit être un entier positif.")
     items = _darwin_folder_items(folder_id, client)
@@ -1336,10 +1362,10 @@ def _download_darwin_folder_configurations(folder_id: int, as_of: date, client) 
                 raise RuntimeError(f"Téléchargement du paramétrage Darwin {name} ({node_id}) échoué.") from error
             if not destination.is_file():
                 raise RuntimeError(f"Le nœud Darwin {node_id} n'a pas créé le fichier {name} attendu.")
-        return _read_configuration(directory / items[0][1] if items[0][1].lower().endswith(".xlsx") else directory, as_of)
+        return _configuration_views(directory / items[0][1] if items[0][1].lower().endswith(".xlsx") else directory, as_of, include_catalog=include_catalog)
 
 
-def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, client) -> tuple[Application, ...]:
+def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, client, *, include_catalog: bool = False):
     for node_id in node_ids:
         if type(node_id) is not int or node_id <= 0:
             raise ValueError("Chaque identifiant Darwin de paramétrage doit être un entier positif.")
@@ -1360,7 +1386,7 @@ def _download_darwin_configurations(node_ids: tuple[int, ...], as_of: date, clie
         files = list(directory.iterdir())
         if len(files) > 1 and any(file.suffix == ".xlsx" for file in files):
             raise ValueError("Un classeur Excel Darwin doit être le seul paramétrage du lancement.")
-        return _read_configuration(files[0] if files[0].suffix == ".xlsx" else directory, as_of)
+        return _configuration_views(files[0] if files[0].suffix == ".xlsx" else directory, as_of, include_catalog=include_catalog)
 
 
 def _upload_standalone_apps_to_darwin(output_root: Path, manifest: dict, manifest_path: Path, node_id: int, client=None, *, applications=None, extraction_index: int | None = None) -> int:
@@ -1474,15 +1500,15 @@ def global_update(
             raise ValueError(f"Le CSV source local ne peut pas se trouver dans le dossier de sortie à remplacer : {output_root}")
     if darwin_folder_id is not None:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
-        applications = _download_darwin_folder_configurations(darwin_folder_id, calculation_date, darwin_client)
+        applications, catalog_applications = _download_darwin_folder_configurations(darwin_folder_id, calculation_date, darwin_client, include_catalog=True)
         config_source = f"darwin-folder:{darwin_folder_id}"
     elif node_ids:
         darwin_client = darwin_client if darwin_client is not None else _connect_darwin()
-        applications = _download_darwin_configurations(node_ids, calculation_date, darwin_client)
+        applications, catalog_applications = _download_darwin_configurations(node_ids, calculation_date, darwin_client, include_catalog=True)
         config_source = ",".join(f"darwin:{node_id}" for node_id in node_ids)
     else:
         config_directory = Path(config_path) if config_path else EXAMPLE_CONFIG_DIRECTORY
-        applications = _read_configuration(config_directory, calculation_date)
+        applications, catalog_applications = _configuration_views(config_directory, calculation_date, include_catalog=True)
         config_source = str(config_directory.resolve())
     if mode not in {"preview", "local"} and darwin_upload is None and any(app.export_dataset for app in applications):
         raise ValueError("export-dataset = true exige --darwin_upload pour envoyer le dataset compressé.")
@@ -1677,10 +1703,12 @@ def global_update(
     uploaded = (_upload_standalone_apps_to_darwin(output_root, manifest, manifest_path, darwin_upload, darwin_client)
                 if darwin_upload is not None and mode not in {"hive", "local"} else manifest.get("darwin_upload", {}).get("uploaded", 0))
     completed_apps = [app for app in manifest["applications"] if app.get("status") == "complete" and app.get("html_app")]
-    if completed_apps:
-        launcher_apps = completed_apps
-        previous_launcher_html = None
-        preserve_legacy_launcher = False
+    if catalog_applications and (darwin_upload is not None or completed_apps):
+        completed_by_name = {Path(app["html_app"]).name: app for app in completed_apps}
+        configured_apps = [_launcher_definition(app) for app in catalog_applications]
+        launcher_apps = []
+        links = {}
+        generated_at = datetime.now(timezone.utc).isoformat()
         if darwin_upload is not None:
             print(f"[Agora] Lanceur : listing des HTML du dossier Darwin {darwin_upload}", flush=True)
             listing_client = darwin_client
@@ -1690,43 +1718,62 @@ def global_update(
             ):
                 listing_client = connect_darwin_listing_client()
             children = _darwin_direct_children(darwin_upload, listing_client)
+            available = {name: node_id for node_id, name in children}
             launcher_nodes = [node_id for node_id, name in children if name == "Agora Explorer_launcher.html"]
             if len(launcher_nodes) > 1:
                 raise ValueError("Plusieurs lanceurs Agora Explorer existent dans le dossier Darwin.")
+            previous_apps = []
             if launcher_nodes:
                 with tempfile.TemporaryDirectory(prefix="agora-launcher-") as temporary:
                     previous_path = Path(temporary) / "previous_launcher.html"
                     darwin_client.get_file(local_file_path=str(previous_path), node_id=launcher_nodes[0])
-                    previous_launcher_html = previous_path.read_text(encoding="utf-8")
-                previous_apps = read_launcher_catalog(previous_launcher_html)
-                if previous_apps is None:
-                    old_count = previous_launcher_html.count('data-institution-map=')
-                    preserve_legacy_launcher = old_count > len(completed_apps)
-                    if preserve_legacy_launcher:
-                        print(f"[Agora] Lanceur ancien format conservé ({old_count} applications) : relancer une fois le catalogue complet pour activer les mises à jour ciblées.", flush=True)
-                else:
-                    current_names = {Path(app["html_app"]).name for app in completed_apps}
-                    available_names = {name for _, name in children}
-                    retained = [app for app in previous_apps if Path(app["html_app"]).name not in current_names
-                                and Path(app["html_app"]).name in available_names]
-                    launcher_apps = retained + completed_apps
-                    print(f"[Agora] Lanceur : {len(retained)} application(s) conservée(s), {len(completed_apps)} actualisée(s)", flush=True)
-            if not preserve_legacy_launcher:
+                    previous_apps = read_launcher_catalog(previous_path.read_text(encoding="utf-8")) or []
+            previous_by_name = {Path(app["html_app"]).name: app for app in previous_apps}
+            with tempfile.TemporaryDirectory(prefix="agora-app-catalog-") as temporary:
+                for app in configured_apps:
+                    name = Path(app["html_app"]).name
+                    if name not in available:
+                        print(f"[Agora] Lanceur : {name} absent de Darwin, entrée ignorée", flush=True)
+                        continue
+                    current = completed_by_name.get(name)
+                    previous = previous_by_name.get(name, {})
+                    app["institutions"] = (current or previous).get("institutions") or []
+                    app["updated_at"] = generated_at if current else previous.get("updated_at", "")
+                    if not app["institutions"] or not app["updated_at"]:
+                        remote_path = Path(temporary) / name
+                        darwin_client.get_file(local_file_path=str(remote_path), node_id=available[name])
+                        remote_institutions, remote_date = read_standalone_app_details(remote_path.read_text(encoding="utf-8"))
+                        app["institutions"] = app["institutions"] or remote_institutions
+                        app["updated_at"] = app["updated_at"] or remote_date
+                    if not app["institutions"]:
+                        print(f"[Agora] Lanceur : {name} sans établissement récupérable, entrée ignorée", flush=True)
+                        continue
+                    launcher_apps.append(app)
+            print(f"[Agora] Lanceur : {len(launcher_apps)} application(s) du paramétrage présentes dans Darwin", flush=True)
+            if launcher_apps:
                 links = resolve_darwin_app_links(launcher_apps, darwin_upload, listing_client)
         else:
+            for app in configured_apps:
+                name = Path(app["html_app"]).name
+                current = completed_by_name.get(name)
+                if current and current.get("institutions"):
+                    app["institutions"] = current["institutions"]
+                    app["updated_at"] = generated_at
+                    launcher_apps.append(app)
             links = {Path(app["html_app"]).name: app["html_app"] for app in launcher_apps}
-        if not preserve_legacy_launcher:
-            for app in completed_apps:
-                link = links[Path(app["html_app"]).name]
-                app["launcher_link"] = link
-                if darwin_upload is not None:
-                    app["darwin_upload"]["file_node_id"] = int(parse_qs(urlsplit(link).query)["nodeid"][0])
+        for app in completed_apps:
+            name = Path(app["html_app"]).name
+            if name not in links:
+                continue
+            link = links[name]
+            app["launcher_link"] = link
+            if darwin_upload is not None:
+                app["darwin_upload"]["file_node_id"] = int(parse_qs(urlsplit(link).query)["nodeid"][0])
         launcher_path = output_root / "Agora Explorer_launcher.html"
-        launcher_path.write_text(previous_launcher_html if preserve_legacy_launcher else render_launcher_html(launcher_apps, links), encoding="utf-8")
-        manifest["launcher"] = {"html": launcher_path.name, "applications": len(launcher_apps),
-                                "status": "preserved_remote" if preserve_legacy_launcher else "generated"}
+        launcher_path.write_text(render_launcher_html(launcher_apps, links), encoding="utf-8")
+        manifest["launcher"] = {"html": launcher_path.name, "applications": len(launcher_apps), "status": "generated"}
         print(f"[Agora] Lanceur créé : {launcher_path.name} ({len(launcher_apps)} application(s))", flush=True)
-        if darwin_upload is not None and not preserve_legacy_launcher:
+        if darwin_upload is not None:
             try:
                 darwin_client.upload_file(
                     local_file_path=str(launcher_path), node_id=darwin_upload,

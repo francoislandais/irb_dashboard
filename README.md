@@ -195,6 +195,8 @@ python3 scripts/global_update.py --mode hive --config /chemin/vers/applications.
 
 Les fichiers et dossiers TOML restent acceptés. Le classeur peut également être fourni via `--config darwin:NODE_ID`, `--config-darwin NODE_ID` ou comme **seul fichier** d'un dossier `--config-darwin-folder FOLDER_ID`. Dans ce dernier cas, le programme le liste et le télécharge avant de lancer les requêtes.
 
+Avec `--darwin-upload`, `activate` choisit seulement les applications et extractions à régénérer. Le lanceur est reconstruit à partir de **toutes** les applications du classeur, y compris celles dont `activate` vaut `0`, puis limité aux fichiers HTML effectivement présents dans le dossier Darwin. Une application jamais publiée n'apparaît donc pas. Les métadonnées des applications non régénérées sont reprises du lanceur précédent ou, si nécessaire, du HTML publié ; la date affichée dans leur détail correspond à la génération de ce HTML. Une exécution où tout vaut `0` peut ainsi actualiser le lanceur sans requête de données. Si une application est retirée du classeur, elle disparaît du lanceur au lancement suivant.
+
 Le fichier unique peut aussi provenir de Darwin, en TOML ou en Excel. Le programme le récupère avec `darwin.connect().get_file(local_file_path=..., node_id=...)` dans un dossier temporaire, valide toutes ses applications, puis efface cette copie. Un nœud Darwin désigne **un seul fichier de paramétrage**. Les deux formes suivantes sont équivalentes :
 
 ```sh

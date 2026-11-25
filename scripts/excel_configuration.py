@@ -115,7 +115,7 @@ def _toggle(value, field: str, context: str, default: bool):
     raise ValueError(f"{context}: {field} doit valoir 1/0 ou true/false.")
 
 
-def read_excel_configuration(path: Path):
+def read_excel_configuration(path: Path, *, include_inactive: bool = False):
     """Return TOML-shaped application blocks and row-aware contexts."""
     rows = iter(_rows(path))
     try:
@@ -149,7 +149,7 @@ def read_excel_configuration(path: Path):
             if any(record[field] not in (None, "") for field in ("category", "module", "label", "templates", "kri_ids", "history_years", "frequency")):
                 raise ValueError(f"{context}: les colonnes d'extraction doivent rester vides sur une ligne APPLICATION.")
             current = None
-            if not active:
+            if not active and not include_inactive:
                 continue
             config = {field: _text(record[field], field, context) for field in ("name", "description", "consolidation") if record[field] not in (None, "")}
             for field in ("leis", "jst_code", "cluster", "ssm_supervision_country", "ssmsignificance"):
@@ -167,7 +167,7 @@ def read_excel_configuration(path: Path):
                 if not seen_parent:
                     raise ValueError(f"{context}: extraction sans application active précédente.")
                 continue  # Child of a disabled application.
-            if not active:
+            if not active and not include_inactive:
                 continue
             extraction = {field: _text(record[field], field, context) for field in ("category", "label", "frequency") if record[field] not in (None, "")}
             if record["module"] not in (None, ""):
@@ -181,6 +181,8 @@ def read_excel_configuration(path: Path):
             if years not in (None, ""):
                 extraction["history_years"] = years
             current[0]["extractions"].append(extraction)
-    if not applications:
-        raise ValueError(f"{path}: aucune application active à traiter.")
+    if not include_inactive:
+        applications = [item for item in applications if item[0]["extractions"]]
+    if not applications and include_inactive:
+        raise ValueError(f"{path}: aucune application définie.")
     return applications
